@@ -242,3 +242,15 @@
 2025-08-29 13:52:20,647 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://talent-engine:8001/api/talent-engine/requisitions/
 2025-08-29 13:53:20,469 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://job-applications:8002/api/applications-engine/schedules/
 2025-08-29 13:53:21,049 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://talent-engine:8001/api/talent-engine/requisitions/
+2025-08-29 13:54:21,048 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://job-applications:8002/api/applications-engine/schedules/
+2025-08-29 13:54:21,379 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://talent-engine:8001/api/talent-engine/requisitions/
+2025-08-29 13:55:21,801 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://job-applications:8002/api/applications-engine/schedules/
+2025-08-29 13:55:22,197 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://talent-engine:8001/api/talent-engine/requisitions/
+2025-08-29 13:56:19,086 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://job-applications:8002/api/applications-engine/schedules/
+2025-08-29 13:56:19,584 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://talent-engine:8001/api/talent-engine/requisitions/
+2025-08-29 13:57:19,832 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://job-applications:8002/api/applications-engine/schedules/
+2025-08-29 13:57:20,477 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://talent-engine:8001/api/talent-engine/requisitions/
+2025-08-29 13:58:20,400 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://job-applications:8002/api/applications-engine/schedules/
+2025-08-29 13:58:20,740 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://talent-engine:8001/api/talent-engine/requisitions/
+2025-08-29 13:59:21,146 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://job-applications:8002/api/applications-engine/schedules/
+2025-08-29 13:59:23,178 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://talent-engine:8001/api/talent-engine/requisitions/
