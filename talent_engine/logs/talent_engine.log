@@ -439,3 +439,11 @@ rest_framework.exceptions.AuthenticationFailed: Invalid JWT token
 2025-08-29 13:49:41,327 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
 2025-08-29 13:49:41,341 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
 2025-08-29 13:49:41,346 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-08-29 14:08:48,872 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-08-29 14:08:48,885 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-08-29 14:08:48,888 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-08-29 14:08:48,890 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-08-29 14:08:48,917 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-08-29 14:08:48,923 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-08-29 14:08:48,926 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-08-29 14:08:48,928 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
