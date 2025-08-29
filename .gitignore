@@ -7,13 +7,14 @@ db.sqlite3
 .env
 # Ignore all venv and .env in subdirectories
 talent_engine/venv/
-
+talent_engine/.env
 job_applications/venv/
-
+job_applications/.env
 auth_service/venv/
-
+auth_service/.env
 api_gateway/venv/
-
+api_gateway/.env
+notifications_app/.env
 notifications_app/.gitignore
 
 # Ignore notifications_app patterns
