@@ -1,0 +1,18 @@
+
+services:
+  api_gateway:
+    build: .
+    ports:
+      - "9090:9090"
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+    networks:
+      - auth_service_default
+
+networks:
+  auth_service_default:
+    external: true
+
+
