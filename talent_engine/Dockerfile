@@ -32,5 +32,7 @@ EXPOSE 8001
 # Make entrypoint script executable
 RUN chmod +x entrypoint.sh
 
+
+
 # Use entrypoint script to run migrations and start server
 ENTRYPOINT ["/app/entrypoint.sh"]

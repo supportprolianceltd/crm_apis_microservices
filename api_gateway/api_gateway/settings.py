@@ -180,18 +180,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 MICROSERVICE_URLS = {
-    "auth_service": env.str("AUTH_SERVICE_URL", default="http://auth-service:8000"),
-    "applications-engine": env.str("JOB_APPLICATIONS_URL", default="http://job-applications:8002"),
-    "talent-engine": env.str("TALENT_ENGINE_URL", default="http://talent-engine:8001"),
-    "token": env.str("AUTH_SERVICE_URL", default="http://auth-service:8000"),
-    "token/refresh": env.str("AUTH_SERVICE_URL", default="http://auth-service:8000"),
-    "token/validate": env.str("AUTH_SERVICE_URL", default="http://auth-service:8000"),
-    "login": env.str("AUTH_SERVICE_URL", default="http://auth-service:8000"),
-    "verify-2fa": env.str("AUTH_SERVICE_URL", default="http://auth-service:8000"),
-    "docs": env.str("AUTH_SERVICE_URL", default="http://auth-service:8000"),
-    "doc": env.str("AUTH_SERVICE_URL", default="http://auth-service:8000"),
-    "user": env.str("AUTH_SERVICE_URL", default="http://auth-service:8000"),
-    "tenant": env.str("AUTH_SERVICE_URL", default="http://auth-service:8000"),  # <--- Add this line
+    "auth_service": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
+    "applications-engine": env.str("JOB_APPLICATIONS_URL", default="http://job-applications:8003"),
+    "talent-engine": env.str("TALENT_ENGINE_URL", default="http://talent-engine:8002"),
+    "token": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
+    "token/refresh": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
+    "token/validate": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
+    "login": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
+    "verify-2fa": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
+    "docs": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
+    "doc": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
+    "user": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
+    "tenant": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),  # <--- Add this line
 }
 
 

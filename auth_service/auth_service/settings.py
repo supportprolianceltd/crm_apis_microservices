@@ -245,6 +245,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Environment-Specific Settings
 WEB_PAGE_URL = env('WEB_PAGE_URL', default='https://crm-frontend-react.vercel.app')
 
-AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8000')
+AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
 NOTIFICATIONS_EVENT_URL = env('NOTIFICATIONS_EVENT_URL', default='http://app:3000/events/')
 print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
+
+
+
+#  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
+#ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158

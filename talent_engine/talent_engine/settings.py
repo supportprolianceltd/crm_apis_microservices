@@ -129,8 +129,8 @@ SIMPLE_JWT = {
 
 
 # ======================== External Services ========================
-AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth_service:8000')
-JOB_APPLICATIONS_URL = env('JOB_APPLICATIONS_URL', default='http://job_applications:8000')
+AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth_service:8001')
+JOB_APPLICATIONS_URL = env('JOB_APPLICATIONS_URL', default='http://job_applications:8003')
 
 SUPABASE_URL = env('SUPABASE_URL', default='')
 SUPABASE_KEY = env('SUPABASE_KEY', default='')
