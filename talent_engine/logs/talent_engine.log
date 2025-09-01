@@ -1,82 +1,4 @@
-2025-08-29 05:15:33,811 [INFO] talent_engine: Job requisition created: Data Scientist & NLP Engineer for tenant 2 by user 3
-2025-08-29 05:35:44,265 [WARNING] django.request: Not Found: /api/talent-engine/requisitions-per-user//
-2025-08-29 06:54:17,259 [INFO] talent_engine: Job requisition created: Data Scientist & NLP Engineer for tenant 2 by user 3
-2025-08-29 06:57:04,905 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & NLP Engineer for tenant 2
-2025-08-29 06:57:04,927 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 06:57:04,929 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 06:57:04,931 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 06:57:05,080 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & NLP Engineer for tenant 2
-2025-08-29 06:57:05,096 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 06:57:05,099 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 06:57:05,108 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 06:57:06,868 [ERROR] talent_engine: Error retrieving job requisition: No JobRequisition matches the given query.
-2025-08-29 06:57:06,887 [ERROR] django.request: Internal Server Error: /api/talent-engine/requisitions/by-link/proliance-data-scientist-nlp-engineer-783aba45/
-2025-08-29 06:57:06,931 [ERROR] talent_engine: Error retrieving job requisition: No JobRequisition matches the given query.
-2025-08-29 06:57:06,934 [ERROR] django.request: Internal Server Error: /api/talent-engine/requisitions/by-link/proliance-data-scientist-nlp-engineer-783aba45/
-2025-08-29 06:57:40,157 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & NLP Engineer for tenant 2
-2025-08-29 06:57:40,171 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 06:57:40,173 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 06:57:40,174 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 06:57:40,198 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & NLP Engineer for tenant 2
-2025-08-29 06:57:40,207 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 06:57:40,209 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 06:57:40,211 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 06:57:55,910 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & NLP Engineer for tenant 2
-2025-08-29 06:57:55,919 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 06:57:55,921 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 06:57:55,943 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & NLP Engineer for tenant 2
-2025-08-29 06:57:55,949 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 06:57:55,950 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 06:59:28,306 [INFO] talent_engine: Job requisition created: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 06:59:51,620 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 07:00:34,192 [WARNING] django.request: Bad Request: /api/talent-engine/requisitions/PRO-0009/
-2025-08-29 07:00:39,851 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 07:01:18,798 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 07:01:38,266 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 07:01:38,272 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 07:01:38,273 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 07:01:38,275 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 07:01:38,297 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 07:01:38,304 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 07:01:38,305 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 07:01:38,307 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 07:03:57,778 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 07:03:57,788 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 07:03:57,790 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 07:03:57,793 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 07:03:57,871 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 07:03:57,914 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 07:03:57,916 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 07:03:57,919 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 07:05:06,207 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 07:05:06,216 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 07:05:06,217 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 07:05:06,219 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 07:05:06,243 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 07:05:06,250 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 07:05:06,252 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 07:05:06,253 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 07:06:25,992 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 07:07:30,113 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 07:13:59,348 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 07:14:35,568 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 07:14:53,729 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 07:14:53,735 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 07:14:53,737 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 07:14:53,739 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 07:14:53,762 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 07:14:53,770 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 07:14:53,772 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 07:14:53,773 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 07:15:04,842 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 07:15:04,849 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 07:15:04,852 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 07:15:04,853 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 07:15:04,876 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 07:15:04,883 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 07:15:04,885 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 07:15:04,886 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 07:16:14,165 [ERROR] django.request: Internal Server Error: /api/talent-engine/requisitions/PRO-0009/
+2025-09-01 10:00:51,293 [ERROR] django.request: Internal Server Error: /api/talent-engine/requisitions/
 Traceback (most recent call last):
   File "/app/talent_engine/middleware.py", line 25, in process_request
     payload = jwt.decode(token, settings.SIMPLE_JWT['SIGNING_KEY'], algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
@@ -104,346 +26,642 @@ Traceback (most recent call last):
   File "/app/talent_engine/middleware.py", line 27, in process_request
     raise AuthenticationFailed('Invalid JWT token')
 rest_framework.exceptions.AuthenticationFailed: Invalid JWT token
-2025-08-29 07:18:20,027 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 07:18:40,999 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 07:58:01,584 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
-2025-08-29 07:58:01,604 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
-2025-08-29 07:58:01,621 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
-2025-08-29 08:33:25,125 [WARNING] django.request: Not Found: /api/talent-engine/applications/
-2025-08-29 10:28:13,141 [INFO] talent_engine: JobRequisition update request data: <QueryDict: {}>
-2025-08-29 10:28:13,155 [INFO] talent_engine: advert_banner in request.FILES: None
-2025-08-29 10:28:13,157 [INFO] talent_engine: advert_banner in validated_data: None
-2025-08-29 10:28:13,182 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 10:28:18,637 [INFO] talent_engine: JobRequisition update request data: <QueryDict: {}>
-2025-08-29 10:28:18,638 [INFO] talent_engine: advert_banner in request.FILES: None
-2025-08-29 10:28:18,640 [INFO] talent_engine: advert_banner in validated_data: None
-2025-08-29 10:28:18,647 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 10:29:52,996 [INFO] talent_engine: JobRequisition update request data: <QueryDict: {}>
-2025-08-29 10:29:52,997 [INFO] talent_engine: advert_banner in request.FILES: None
-2025-08-29 10:29:52,998 [INFO] talent_engine: advert_banner in validated_data: None
-2025-08-29 10:29:53,006 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 10:32:36,534 [INFO] talent_engine: JobRequisition update request data: {'title': 'Data Scientist & AI Engineer', 'unique_link': '2-PRO-data-scientist-ai-engineer-1e2d5368', 'status': 'open', 'role': 'staff', 'updated_by_id': '3', 'approved_by': None, 'approved_by_id': None, 'company_name': None, 'company_address': None, 'job_type': 'full_time', 'position_type': 'permanent', 'location_type': 'on_site', 'job_location': None, 'interview_location': '', 'salary_range': None, 'salary_range_min': None, 'salary_range_max': None, 'job_description': None, 'requirements': [], 'qualification_requirement': 'Data Scientist & NLP Engineer with 4+ years of experience building and deploying robustNatural Language Processing solutions. Proven expertise in leveraging machine learning,deep learning, and language models to solve real-world problems', 'experience_requirement': 'Data Scientist & NLP Engineer with 4+ years of experience building and deploying robustNatural Language Processing solutions. Proven expertise in leveraging machine learning,deep learning, and language models to solve real-world problems', 'knowledge_requirement': 'Data Scientist & NLP Engineer with 4+ years of experience building and deploying robustNatural Language Processing solutions. Proven expertise in leveraging machine learning,deep learning, and language models to solve real-world problems', 'number_of_candidates': None, 'urgency_level': 'medium', 'reason': 'Data Scientist & NLP Engineer with 4+ years of experience building and deploying robustNatural Language Processing solutions. Proven expertise in leveraging machine learning,deep learning, and language models to solve real-world problems', 'comment': 'Nothing to comment', 'deadline_date': None, 'start_date': None, 'responsibilities': [], 'documents_required': [], 'compliance_checklist': [], 'last_compliance_check': None, 'checked_by': None, 'advert_banner': None, 'requested_date': '2025-08-29', 'publish_status': True, 'is_deleted': False, 'created_at': '2025-08-29T06:59:28.303723Z', 'updated_at': '2025-08-29T10:29:53.000552Z', 'approval_workflow': {}, 'current_approval_stage': 0, 'approval_date': None, 'time_to_fill_days': None}
-2025-08-29 10:32:36,535 [INFO] talent_engine: advert_banner in request.FILES: None
-2025-08-29 10:32:36,536 [INFO] talent_engine: advert_banner in validated_data: None
-2025-08-29 10:32:36,543 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 10:45:43,269 [INFO] talent_engine: Job requisition soft-deleted: Data Scientist & AI Engineer for tenant 2
-2025-08-29 10:46:00,537 [WARNING] django.request: Method Not Allowed: /api/talent-engine/requisitions/PRO-0009/
-2025-08-29 10:46:04,233 [INFO] talent_engine: Job requisition created: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 10:48:07,890 [WARNING] django.request: Bad Request: /api/talent-engine/requisitions/PRO-0010/
-2025-08-29 10:48:13,326 [INFO] talent_engine: JobRequisition update request data: {'status': 'open'}
-2025-08-29 10:48:13,327 [INFO] talent_engine: advert_banner in request.FILES: None
-2025-08-29 10:48:13,328 [INFO] talent_engine: advert_banner in validated_data: None
-2025-08-29 10:48:13,339 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 10:48:27,647 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 10:48:27,653 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 10:48:27,655 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 10:48:27,657 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 10:48:27,676 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 10:48:27,681 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 10:48:27,684 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 10:48:27,686 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 10:51:05,316 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 10:51:05,321 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 10:51:05,323 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 10:51:05,324 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 10:51:05,400 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 10:51:05,404 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 10:51:05,405 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 10:51:05,407 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 10:51:21,676 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 10:51:21,680 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 10:51:21,682 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 10:51:21,683 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 10:51:21,722 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 10:51:21,725 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 10:51:21,727 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 10:51:21,728 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 10:53:21,173 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 10:53:21,180 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 10:53:21,183 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 10:53:21,184 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 10:53:21,216 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 10:53:21,222 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 10:53:21,224 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 10:53:21,227 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:06:05,084 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:06:05,093 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:06:05,095 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:06:05,096 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:06:05,118 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:06:05,124 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:06:05,127 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:06:05,128 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:06:16,085 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:06:16,090 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:06:16,092 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:06:16,093 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:06:16,107 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:06:16,112 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:06:16,113 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:06:16,115 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:07:27,974 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:07:27,978 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:07:27,980 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:07:27,981 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:07:28,044 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:07:28,050 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:07:28,054 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:07:28,060 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:10:47,166 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:10:47,190 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:10:47,194 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:10:47,199 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:10:47,233 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:10:47,238 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:10:47,240 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:10:47,242 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:21:13,667 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:21:13,672 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:21:13,673 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:21:13,674 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:21:13,693 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:21:13,698 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:21:13,699 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:21:13,701 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:25:04,244 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:25:04,251 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:25:04,253 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:25:04,254 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:25:04,277 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:25:04,283 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:25:04,285 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:25:04,286 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:27:18,914 [INFO] talent_engine: JobRequisition update request data: {'status': 'open'}
-2025-08-29 11:27:18,916 [INFO] talent_engine: advert_banner in request.FILES: None
-2025-08-29 11:27:18,917 [INFO] talent_engine: advert_banner in validated_data: None
-2025-08-29 11:27:18,937 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 11:27:29,134 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:27:29,139 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:27:29,141 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:27:29,142 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:27:29,164 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:27:29,172 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:27:29,174 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:27:29,176 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:42:19,956 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:42:19,962 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:42:19,963 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:42:19,965 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:42:20,004 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:42:20,009 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:42:20,011 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:42:20,013 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:45:00,136 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:45:01,787 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:45:01,791 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:45:01,793 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:45:01,855 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:45:01,869 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:45:01,882 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:45:01,885 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:45:23,814 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:45:23,819 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:45:23,822 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:45:23,829 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:45:23,848 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:45:23,853 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:45:23,855 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:45:23,857 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:50:38,657 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:50:38,661 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:50:38,663 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:50:38,664 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:50:38,682 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:50:38,686 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:50:38,688 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:50:38,689 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:53:50,706 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:53:50,715 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:53:50,717 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:53:50,719 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:53:50,748 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:53:50,753 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:53:50,755 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:53:50,756 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:54:18,078 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:54:18,083 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:54:18,084 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:54:18,086 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:54:18,101 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:54:18,104 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:54:18,105 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:54:18,106 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:54:26,853 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:54:26,859 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:54:26,861 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:54:26,863 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:54:26,891 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:54:26,897 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:54:26,899 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:54:26,902 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:58:45,277 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:58:45,286 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:58:45,289 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:58:45,292 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 11:58:45,354 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 11:58:45,374 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 11:58:45,381 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 11:58:45,383 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:01:15,242 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:01:15,247 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:01:15,249 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:01:15,250 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:01:15,269 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:01:15,274 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:01:15,276 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:01:15,278 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:02:05,536 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:02:05,542 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:02:05,545 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:02:05,547 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:02:05,577 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:02:05,590 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:02:05,593 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:02:05,595 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:04:53,628 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:04:53,636 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:04:53,647 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:04:53,653 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:04:54,077 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:04:54,087 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:04:54,089 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:04:54,091 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:05:11,690 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:05:11,697 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:05:11,699 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:05:11,701 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:05:11,730 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:05:11,734 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:05:11,737 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:05:11,739 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:05:46,074 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:05:46,079 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:05:46,081 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:05:46,082 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:05:46,102 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:05:46,107 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:05:46,109 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:05:46,111 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:05:54,225 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:05:54,238 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:05:54,240 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:05:54,243 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:05:54,271 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:05:54,279 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:05:54,281 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:05:54,283 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:09:29,965 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:09:29,968 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:09:29,969 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:09:29,969 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:09:29,987 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:09:29,990 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:09:29,992 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:09:29,993 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:16:44,063 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:16:44,074 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:16:44,076 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:16:44,079 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:16:44,114 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 12:16:44,124 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 12:16:44,126 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 12:16:44,128 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 12:50:29,448 [INFO] talent_engine: JobRequisition update request data: {'status': 'open'}
-2025-08-29 12:50:29,449 [INFO] talent_engine: advert_banner in request.FILES: None
-2025-08-29 12:50:29,450 [INFO] talent_engine: advert_banner in validated_data: None
-2025-08-29 12:50:29,460 [INFO] talent_engine: Job requisition updated: Data Scientist & AI Engineer for tenant 2 by user 3
-2025-08-29 13:07:50,242 [INFO] talent_engine: Job requisition created: Senior Software Engineer for tenant 2 by user 3
-2025-08-29 13:08:09,622 [INFO] talent_engine: Job requisition created: Digital Marketing Intern for tenant 2 by user 3
-2025-08-29 13:08:22,721 [INFO] talent_engine: Job requisition created: Contract Accountant for tenant 2 by user 3
-2025-08-29 13:12:43,388 [INFO] talent_engine: JobRequisition update request data: {'publish_status': True}
-2025-08-29 13:12:43,390 [INFO] talent_engine: advert_banner in request.FILES: None
-2025-08-29 13:12:43,391 [INFO] talent_engine: advert_banner in validated_data: None
-2025-08-29 13:12:43,397 [INFO] talent_engine: Job requisition updated: Contract Accountant for tenant 2 by user 3
-2025-08-29 13:12:46,573 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/PRO-0014/
-2025-08-29 13:12:56,070 [WARNING] django.request: Method Not Allowed: /api/talent-engine/requisitions/
-2025-08-29 13:13:06,320 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:13:06,325 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:13:06,327 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:13:06,328 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:13:06,348 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:13:06,354 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:13:06,356 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:13:06,357 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:13:51,507 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:13:51,511 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:13:51,512 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:13:51,514 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:13:51,530 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:13:51,535 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:13:51,536 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:13:51,538 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:19:28,522 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:19:28,530 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:19:28,532 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:19:28,534 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:19:28,564 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:19:28,576 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:19:28,580 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:19:28,583 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:23:52,243 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:23:52,249 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:23:52,250 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:23:52,252 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:23:52,278 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:23:52,284 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:23:52,286 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:23:52,288 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:24:40,112 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:24:40,123 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:24:40,125 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:24:40,126 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:24:40,153 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:24:40,161 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:24:40,163 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:24:40,165 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:33:58,902 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:33:58,908 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:33:58,910 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:33:58,911 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:33:58,935 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:33:58,939 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:33:58,941 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:33:58,943 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:40:24,893 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:40:24,931 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:40:24,934 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:40:24,937 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:40:25,011 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:40:25,024 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:40:25,027 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:40:25,030 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:49:23,446 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:49:23,474 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:49:23,477 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:49:23,479 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:49:23,512 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:49:23,527 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:49:23,530 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:49:23,532 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:49:41,181 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:49:41,201 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:49:41,204 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:49:41,213 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 13:49:41,308 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 13:49:41,327 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 13:49:41,341 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 13:49:41,346 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 14:08:48,872 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 14:08:48,885 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 14:08:48,888 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 14:08:48,890 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-08-29 14:08:48,917 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
-2025-08-29 14:08:48,923 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-08-29 14:08:48,926 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-08-29 14:08:48,928 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 10:02:39,563 [ERROR] django.request: Internal Server Error: /api/talent-engine/requisitions/
+Traceback (most recent call last):
+  File "/app/talent_engine/middleware.py", line 25, in process_request
+    payload = jwt.decode(token, settings.SIMPLE_JWT['SIGNING_KEY'], algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py", line 222, in decode
+    decoded = self.decode_complete(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py", line 167, in decode_complete
+    self._validate_claims(
+  File "/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py", line 262, in _validate_claims
+    self._validate_exp(payload, now, leeway)
+  File "/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py", line 363, in _validate_exp
+    raise ExpiredSignatureError("Signature has expired")
+jwt.exceptions.ExpiredSignatureError: Signature has expired
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/talent_engine/middleware.py", line 27, in process_request
+    raise AuthenticationFailed('Invalid JWT token')
+rest_framework.exceptions.AuthenticationFailed: Invalid JWT token
+2025-09-01 10:07:44,495 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/PRO-JR-0010/
+2025-09-01 10:08:46,845 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 10:08:46,863 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 10:08:46,866 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 10:08:46,869 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 10:08:46,921 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 10:08:46,934 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 10:08:46,943 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 10:08:46,946 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 10:18:41,660 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 10:18:41,666 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 10:18:41,668 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 10:18:41,669 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 10:29:16,475 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 10:29:16,481 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 10:29:16,488 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 10:29:16,490 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 10:29:16,513 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 10:29:16,519 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 10:29:16,520 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 10:29:16,521 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 10:34:58,162 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:34:58,173 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:34:58,186 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:34:58,197 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:34:58,207 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:34:58,217 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:34:58,228 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:34:58,238 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:34:58,249 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:34:58,260 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:35:58,625 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:35:58,638 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:35:58,650 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:35:58,663 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:35:58,676 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:35:58,689 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:35:58,702 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:35:58,715 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:35:58,730 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:35:58,746 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:36:59,073 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:36:59,085 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:36:59,099 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:36:59,114 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:36:59,124 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:36:59,134 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:36:59,143 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:36:59,155 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:36:59,166 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:36:59,177 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:37:45,119 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:37:45,130 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:37:45,140 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:37:56,780 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:37:56,791 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:37:56,801 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:37:56,811 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:37:56,821 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:37:56,831 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:37:56,841 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:37:56,850 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:37:56,861 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:37:56,871 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:38:57,205 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:38:57,218 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:38:57,230 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:38:57,242 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:38:57,254 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:38:57,267 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:38:57,281 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:38:57,292 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:38:57,306 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 10:38:57,329 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 10:51:10,532 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 10:51:10,750 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 10:51:10,801 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 10:51:10,851 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 10:51:11,509 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 10:51:11,524 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 10:51:11,535 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 10:51:11,543 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 11:25:34,675 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 11:25:34,681 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 11:25:34,683 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 11:25:34,684 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 11:25:34,704 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 11:25:34,712 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 11:25:34,713 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 11:25:34,715 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 11:25:44,653 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 11:26:48,428 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 11:26:48,439 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 11:26:48,441 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 11:26:48,443 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 11:26:48,480 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 11:26:48,488 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 11:26:48,490 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 11:26:48,492 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 11:33:26,002 [INFO] talent_engine: Job requisition created: qwety for tenant 2 by user 3
+2025-09-01 11:33:54,989 [INFO] talent_engine: JobRequisition update request data: <QueryDict: {'status': ['open'], 'comment': ['ok']}>
+2025-09-01 11:33:54,991 [INFO] talent_engine: advert_banner in request.FILES: None
+2025-09-01 11:33:54,992 [INFO] talent_engine: advert_banner in validated_data: None
+2025-09-01 11:33:55,002 [INFO] talent_engine: Job requisition updated: qwety for tenant 2 by user 3
+2025-09-01 11:34:00,062 [INFO] talent_engine: JobRequisition update request data: <QueryDict: {'status': ['open'], 'comment': ['ok']}>
+2025-09-01 11:34:00,064 [INFO] talent_engine: advert_banner in request.FILES: None
+2025-09-01 11:34:00,065 [INFO] talent_engine: advert_banner in validated_data: None
+2025-09-01 11:34:00,071 [INFO] talent_engine: Job requisition updated: qwety for tenant 2 by user 3
+2025-09-01 11:34:44,354 [INFO] talent_engine: JobRequisition update request data: <QueryDict: {'title': ['Legal Advisor'], 'job_type': ['full_time'], 'location_type': ['on_site'], 'company_name': ['Harvoxx Tech Hub Port-Harcourt, Rivers State'], 'company_address': ['No 10 station road Portsmouth'], 'job_location': ['Remote – Candidates must have stable internet and backup power'], 'salary_range': ['50000-70000'], 'job_description': ["Excellent — you’ve moved from a monolithic to a microservices architecture with Docker and an API Gateway, and now you're ready to deploy it on your VPS (AlmaLinux) under the domain:"], 'number_of_candidates': ['2'], 'deadline_date': ['2025-09-23'], 'start_date': ['2025-10-03'], 'responsibilities': ['["Excellent — you’ve moved from a monolithic to a microservices architecture with Docker and an API Gateway, and now you\'re ready to deploy it on your VPS (AlmaLinux) under the domain:"]'], 'documents_required': ['["Curriculum Vitae (CV)"]'], 'compliance_checklist': ['["Passport / ID"]'], 'publish_status': ['true'], 'advert_banner': [<InMemoryUploadedFile: customer service.jpg (image/jpeg)>]}>
+2025-09-01 11:34:44,355 [INFO] talent_engine: advert_banner in request.FILES: customer service.jpg
+2025-09-01 11:34:44,356 [INFO] talent_engine: advert_banner in validated_data: customer service.jpg
+2025-09-01 11:34:44,390 [INFO] talent_engine: Job requisition updated: Legal Advisor for tenant 2 by user 3
+2025-09-01 11:34:56,800 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 11:34:56,827 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 11:34:56,832 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 11:34:56,835 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 11:34:56,932 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 11:34:56,958 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 11:34:56,963 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 11:34:56,967 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 11:36:44,398 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 11:36:44,406 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 11:36:44,408 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 11:36:44,409 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 11:36:44,429 [INFO] talent_engine: Job requisition accessed via link: Data Scientist & AI Engineer for tenant 2
+2025-09-01 11:36:44,441 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 11:36:44,443 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 11:36:44,445 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 11:39:49,598 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:39:49,613 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:39:49,634 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:39:49,652 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:39:49,668 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:39:49,686 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:39:49,699 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:39:49,714 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:39:49,734 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:39:49,755 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:39:49,770 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:39:49,787 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:39:49,801 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:40:58,205 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:40:58,216 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:40:58,225 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:40:58,238 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:40:58,248 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:40:58,259 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:40:58,273 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:40:58,289 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:40:58,301 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:40:58,312 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:40:58,321 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:40:58,330 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:40:58,348 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:41:58,677 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:41:58,690 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:41:58,703 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:41:58,717 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:41:58,727 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:41:58,737 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:41:58,747 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:41:58,758 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:41:58,770 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:41:58,780 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:41:58,790 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:41:58,803 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:41:58,813 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:42:59,121 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:42:59,135 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:42:59,152 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:42:59,168 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:42:59,181 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:42:59,193 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:42:59,208 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:42:59,224 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:42:59,239 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:42:59,253 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:42:59,266 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:42:59,278 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:42:59,291 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:43:56,885 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:43:56,913 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:43:56,965 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:43:57,013 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:43:57,040 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:43:57,064 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:43:57,084 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:43:57,113 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:43:57,141 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:43:57,171 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:43:57,212 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:43:57,289 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:43:57,336 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:44:57,411 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:44:57,420 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:44:57,429 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:44:57,437 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:44:57,447 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:44:57,456 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:44:57,465 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:44:57,475 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:44:57,485 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:44:57,495 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:44:57,504 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:44:57,514 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:44:57,522 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:45:57,739 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:45:57,753 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:45:57,766 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:45:57,774 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:45:57,783 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:45:57,791 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:45:57,799 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:45:57,807 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:45:57,816 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:45:57,824 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:45:57,835 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:45:57,845 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:45:57,855 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:46:58,366 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:46:58,385 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:46:58,401 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:46:58,421 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:46:58,444 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:46:58,466 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:46:58,486 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:46:58,508 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:46:58,531 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:46:58,551 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:46:58,569 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:46:58,586 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:46:58,603 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:47:58,711 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:47:58,739 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:47:58,756 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:47:58,776 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:47:58,796 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:47:58,815 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:47:58,833 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:47:58,853 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:47:58,887 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:47:58,925 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:47:58,963 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:47:58,986 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:47:59,006 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:48:59,192 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:48:59,211 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:48:59,228 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:48:59,247 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:48:59,264 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:48:59,284 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:48:59,309 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:48:59,355 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:48:59,376 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:48:59,395 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:48:59,412 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:48:59,434 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:48:59,459 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:49:56,898 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:49:56,910 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:49:56,921 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:49:56,932 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:49:56,944 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:49:56,957 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:49:56,970 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:49:56,981 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:49:56,994 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:49:57,010 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:49:57,049 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:49:57,079 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:49:57,095 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:50:57,289 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:50:57,301 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:50:57,314 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:50:57,327 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:50:57,340 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:50:57,353 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:50:57,376 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:50:57,403 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:50:57,425 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:50:57,442 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:50:57,457 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:50:57,473 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:50:57,489 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:51:57,743 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:51:57,758 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:51:57,773 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:51:57,787 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:51:57,801 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:51:57,814 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:51:57,829 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:51:57,842 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:51:57,858 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:51:57,871 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:51:57,884 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:51:57,898 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:51:57,911 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:52:58,618 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:52:58,683 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:52:58,793 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:52:58,856 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:52:58,905 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:52:58,940 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:52:58,971 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:52:59,001 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:52:59,041 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:52:59,080 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:52:59,116 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:52:59,150 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:52:59,180 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:53:59,583 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:53:59,627 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:53:59,681 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:53:59,721 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:53:59,752 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:53:59,781 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:53:59,811 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:53:59,837 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:53:59,862 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:53:59,886 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:53:59,904 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:53:59,924 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:53:59,944 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:54:59,139 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:54:59,154 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:54:59,168 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:54:59,181 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:54:59,195 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:54:59,207 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:54:59,220 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:54:59,232 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:54:59,245 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:54:59,257 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:54:59,270 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:54:59,283 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:54:59,295 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:55:56,940 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:55:56,951 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:55:56,963 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:55:56,975 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:55:56,986 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:55:56,997 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:55:57,009 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:55:57,019 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:55:57,038 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:55:57,055 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:55:57,066 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:55:57,076 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:55:57,086 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:56:57,348 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:56:57,368 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:56:57,388 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:56:57,411 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:56:57,430 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:56:57,456 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:56:57,478 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:56:57,496 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:56:57,517 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:56:57,535 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:56:57,552 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:56:57,570 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:56:57,586 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:57:57,787 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:57:57,795 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:57:57,805 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:57:57,814 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:57:57,823 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:57:57,832 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:57:57,844 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:57:57,854 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:57:57,864 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:57:57,874 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:57:57,885 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:57:57,896 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:57:57,905 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:58:58,273 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:58:58,281 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:58:58,289 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:58:58,297 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:58:58,305 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:58:58,313 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:58:58,322 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:58:58,331 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:58:58,341 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:58:58,349 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:58:58,362 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:58:58,371 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:58:58,380 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:59:58,624 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:59:58,636 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:59:58,647 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:59:58,658 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:59:58,669 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:59:58,681 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:59:58,692 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:59:58,703 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:59:58,714 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:59:58,726 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:59:58,737 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 11:59:58,749 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 11:59:58,761 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 12:00:56,323 [ERROR] talent_engine: Error fetching tenant domain for 2: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/tenant/tenants/2/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fd26d0>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,139 [ERROR] talent_engine: Error fetching requested_by 3: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/user/users/3/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fed150>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,142 [ERROR] talent_engine: Error fetching updated_by 3: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/user/users/3/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fee410>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,145 [ERROR] talent_engine: Error fetching tenant domain for 2: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/tenant/tenants/2/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fd3a10>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,148 [ERROR] talent_engine: Error fetching requested_by 3: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/user/users/3/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fe5690>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,152 [ERROR] talent_engine: Error fetching updated_by 3: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/user/users/3/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fe7e90>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,155 [ERROR] talent_engine: Error fetching tenant domain for 2: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/tenant/tenants/2/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fd9cd0>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,159 [ERROR] talent_engine: Error fetching requested_by 3: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/user/users/3/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fd8750>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,163 [ERROR] talent_engine: Error fetching tenant domain for 2: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/tenant/tenants/2/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fd90d0>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,166 [ERROR] talent_engine: Error fetching requested_by 3: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/user/users/3/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fda310>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,169 [ERROR] talent_engine: Error fetching updated_by 3: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/user/users/3/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fd0090>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,172 [ERROR] talent_engine: Error fetching tenant domain for 2: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/tenant/tenants/2/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fe7f90>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:00:59,176 [ERROR] talent_engine: Error fetching requested_by 3: HTTPConnectionPool(host='auth-service', port=8000): Max retries exceeded with url: /api/user/users/3/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x73f4e4fe65d0>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-01 12:11:32,415 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:12:07,380 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:12:49,460 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:12:52,039 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:19:42,614 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:27:51,335 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:27:53,760 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:33:35,104 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:37:18,018 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:40:54,692 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:44:58,077 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:46:43,175 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:49:27,882 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 12:58:55,744 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 13:00:14,501 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/PRO-0014/
+2025-09-01 13:03:27,357 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 13:05:05,915 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/None/
+2025-09-01 13:05:16,742 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/2-PRO-qwety-485b20fc/
+2025-09-01 13:05:21,595 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/2-PRO-qwety-485b20fc/
+2025-09-01 13:12:20,951 [WARNING] django.request: Not Found: /api/job-requisitions/by-link/2-PRO-qwety-485b20fc/
+2025-09-01 13:13:59,512 [WARNING] django.request: Not Found: /api/job-requisitions/by-link/2-PRO-qwety-485b20fc/
+2025-09-01 13:19:22,640 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:19:24,808 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:19:24,809 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 13:19:24,811 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:21:51,746 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:21:51,751 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:21:51,753 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 13:21:51,755 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:27:56,743 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:27:56,750 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:27:56,752 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 13:27:56,753 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:27:56,774 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:27:56,780 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:27:56,782 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 13:27:56,783 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:28:06,163 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:28:06,167 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:28:06,169 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 13:28:06,170 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:28:08,995 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:28:08,998 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:28:08,999 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 13:28:09,000 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:29:58,357 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:29:58,363 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:29:58,365 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 13:29:58,368 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:29:58,391 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:29:58,398 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:29:58,399 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 13:29:58,401 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:35:43,339 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:35:43,344 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:35:43,346 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 13:35:43,348 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:37:39,773 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:37:39,777 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:37:39,778 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 13:37:39,780 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:45:00,216 [ERROR] django.request: Internal Server Error: /api/talent-engine/requisitions/PRO-0014/
+Traceback (most recent call last):
+  File "/app/talent_engine/middleware.py", line 25, in process_request
+    payload = jwt.decode(token, settings.SIMPLE_JWT['SIGNING_KEY'], algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py", line 222, in decode
+    decoded = self.decode_complete(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py", line 167, in decode_complete
+    self._validate_claims(
+  File "/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py", line 262, in _validate_claims
+    self._validate_exp(payload, now, leeway)
+  File "/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py", line 363, in _validate_exp
+    raise ExpiredSignatureError("Signature has expired")
+jwt.exceptions.ExpiredSignatureError: Signature has expired
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/talent_engine/middleware.py", line 27, in process_request
+    raise AuthenticationFailed('Invalid JWT token')
+rest_framework.exceptions.AuthenticationFailed: Invalid JWT token
+2025-09-01 13:45:55,455 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:45:55,465 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 13:45:55,496 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 13:45:55,497 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 13:50:25,177 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 13:50:25,215 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 13:50:25,224 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 13:50:25,233 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:03:17,492 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:03:17,518 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:03:17,543 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:03:17,575 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:03:17,603 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:03:17,634 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:03:17,661 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:03:17,691 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:03:17,720 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:03:17,741 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:03:17,761 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:03:17,782 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:03:17,802 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:03:28,327 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:03:28,339 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 14:03:28,341 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 14:03:28,343 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 14:03:28,390 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:03:28,398 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 14:03:28,402 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 14:03:28,404 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 14:03:52,299 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:09:50,760 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:09:50,768 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 14:09:50,770 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 14:09:50,772 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 14:09:50,808 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:09:50,821 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 14:09:50,823 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 14:09:50,825 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 14:10:04,734 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:10:04,740 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 14:10:04,742 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 14:10:04,744 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 14:10:04,772 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:10:04,787 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 14:10:04,789 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 14:10:04,791 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 14:10:39,986 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:10:39,993 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 14:10:39,994 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 14:10:39,995 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 14:10:40,021 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:10:40,027 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 14:10:40,029 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 14:10:40,031 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 14:11:14,525 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:13:38,371 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:15:23,770 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:15:23,785 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:15:23,799 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:15:23,812 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:15:23,827 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:15:23,841 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:15:23,855 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:15:23,868 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:15:23,882 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:15:23,896 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:15:23,910 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:15:23,926 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:15:23,940 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:15:34,366 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:15:59,073 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:16:00,281 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:16:11,486 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:16:12,313 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:21:48,135 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:21:48,150 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:21:48,165 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:21:48,179 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:21:48,194 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:21:48,208 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:21:48,222 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:21:48,236 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:21:48,251 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:21:48,265 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:21:48,278 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:21:48,292 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-01 14:21:48,306 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-01 14:24:10,877 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:29:40,065 [WARNING] django.request: Not Found: /api/talent-engine/requisitions/PRO-JR-0010/
+2025-09-01 14:32:35,135 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:35:23,010 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:39:53,572 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:43:41,930 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 14:47:44,557 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 15:01:52,282 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 15:05:01,116 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 15:06:40,089 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 15:06:43,384 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 15:10:39,884 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 15:14:26,080 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 15:14:32,640 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 15:14:32,653 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 15:14:32,655 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 15:14:32,658 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-01 15:14:32,750 [INFO] talent_engine: Job requisition accessed via link: Legal Advisor for tenant 2
+2025-09-01 15:14:32,763 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
+2025-09-01 15:14:32,765 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
+2025-09-01 15:14:32,767 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range

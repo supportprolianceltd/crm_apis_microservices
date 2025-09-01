@@ -14,6 +14,7 @@ class JobApplication(models.Model):
         ('in_review', 'In Review'),
         ('shortlisted', 'Shortlisted'),
         ('interviewing', 'Interviewing'),
+        ('interviewed', 'Interviewed'),
         ('offer_pending', 'Offer Pending'),
         ('hired', 'Hired'),
         ('rejected', 'Rejected'),
@@ -47,8 +48,8 @@ class JobApplication(models.Model):
     branch_id = models.CharField(max_length=36, null=True, blank=True)
 
     # Candidate info
-    first_name = models.CharField(max_length=100, blank=False, null=False)
-    last_name = models.CharField(max_length=100, blank=False, null=False)
+    # first_name = models.CharField(max_length=100, blank=True, null=True)
+    # last_name = models.CharField(max_length=100, blank=True, null=True)
     full_name = models.CharField(max_length=255, blank=True, null=True)  # Optional, can be auto-filled
     email = models.EmailField(max_length=255, blank=False, null=False)
     phone = models.CharField(max_length=50, blank=True, null=True)

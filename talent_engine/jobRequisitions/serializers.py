@@ -392,6 +392,8 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
                 instance.advert_banner = public_url
                 instance.save(update_fields=["advert_banner"])
 
+
+
 class ParticipantSerializer(serializers.ModelSerializer):
     user_id = serializers.CharField(max_length=36, read_only=True)
     candidate_email = serializers.EmailField(read_only=True)
@@ -600,3 +602,22 @@ class RequestSerializer(serializers.ModelSerializer):
             if branch_data['tenant_id'] != tenant_id:
                 raise serializers.ValidationError({"branch_id": "Branch does not belong to this tenant."})
         return data
+
+
+
+# talent_engine/serializers.py
+class PublicJobRequisitionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobRequisition
+        fields = [
+            'id', 'requisition_number', 'job_requisition_code', 'job_application_code',
+            'title', 'unique_link', 'status', 'job_type', 'position_type', 'location_type',
+            'job_description', 'requirements', 'qualification_requirement', 'experience_requirement',
+            'knowledge_requirement', 'urgency_level', 'reason', 'deadline_date',
+            'start_date', 'responsibilities',  'advert_banner', 'publish_status',
+            'approval_workflow', 'current_approval_stage', 'approval_date', 'time_to_fill_days'
+        ]
+        read_only_fields = [
+            'id', 'requisition_number', 'job_requisition_code', 'job_application_code',
+             'is_deleted', 
+        ]

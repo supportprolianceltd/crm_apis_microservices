@@ -18,21 +18,48 @@ from rest_framework.views import APIView
 
 from .models import JobApplication, Schedule
 from .serializers import (
-    JobApplicationSerializer, ScheduleSerializer, ComplianceStatusSerializer, SimpleMessageSerializer
+    JobApplicationSerializer, ScheduleSerializer, ComplianceStatusSerializer, SimpleMessageSerializer, PublicJobApplicationSerializer
 )
 from utils.screen import parse_resume, screen_resume, extract_resume_fields
 from .tenant_utils import resolve_tenant_from_unique_link
 
 logger = logging.getLogger('job_applications')
 
+# def get_job_requisition_by_id(job_requisition_id, request):
+#     resp = requests.get(
+#         f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/{job_requisition_id}/",
+#         headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
+#     )
+#     if resp.status_code == 200:
+#         return resp.json()
+#     return None
+
 def get_job_requisition_by_id(job_requisition_id, request):
-    resp = requests.get(
-        f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/{job_requisition_id}/",
-        headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
-    )
-    if resp.status_code == 200:
-        return resp.json()
-    return None
+    """
+    Fetch job requisition by ID from the talent-engine service
+    """
+    try:
+        # Make request to talent-engine service
+        logger.info(f"Fetching job requisition with this ID: {job_requisition_id} failed")
+        response = requests.get(
+            f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/{job_requisition_id}/",
+            headers={'Authorization': request.headers.get('Authorization', '')},
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.warning(f"Failed to fetch job requisition {job_requisition_id}: {response.status_code}")
+            return None
+            
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching job requisition {job_requisition_id}: {str(e)}")
+        return None
+    except Exception as e:
+        logger.error(f"Unexpected error fetching job requisition {job_requisition_id}: {str(e)}")
+        return None
+    
 
 def get_branch_by_id(branch_id, request):
     resp = requests.get(
@@ -52,7 +79,6 @@ def get_tenant_by_id(tenant_id, request):
         return resp.json()
     return None
 
-
 class ResumeParseView(APIView):
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [AllowAny]
@@ -68,17 +94,39 @@ class ResumeParseView(APIView):
             if not resume_file:
                 logger.error(f"No resume file found. Available files: {list(request.FILES.keys())}")
                 return Response({"detail": "Resume file is required."}, status=status.HTTP_400_BAD_REQUEST)
-            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            
+            logger.info(f"Processing resume file: {resume_file.name}, size: {resume_file.size}")
+            
+            # Preserve the file extension
+            file_extension = os.path.splitext(resume_file.name)[1]
+            with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
                 for chunk in resume_file.chunks():
                     temp_file.write(chunk)
                 temp_file_path = temp_file.name
+                
             logger.info(f"Temporary resume file saved at: {temp_file_path}")
-            resume_text = parse_resume(temp_file_path)
+            
+            # Parse resume with timeout
+            try:
+                resume_text = parse_resume(temp_file_path)
+                logger.info(f"Extracted text length: {len(resume_text) if resume_text else 0}")
+            except Exception as e:
+                logger.error(f"Resume parsing failed: {str(e)}")
+                resume_text = ""
+            
             os.unlink(temp_file_path)
+            
             if not resume_text:
                 logger.error(f"Could not extract text from resume. File: {resume_file.name}")
                 return Response({"detail": "Could not extract text from resume."}, status=status.HTTP_400_BAD_REQUEST)
-            extracted_data = extract_resume_fields(resume_text)
+                
+            # Extract fields with timeout
+            try:
+                extracted_data = extract_resume_fields(resume_text)
+            except Exception as e:
+                logger.error(f"Field extraction failed: {str(e)}")
+                return Response({"detail": "Failed to extract fields from resume."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
             logger.info(f"Resume parsed successfully for file: {resume_file.name}")
             return Response({
                 "detail": "Resume parsed successfully",
@@ -87,8 +135,6 @@ class ResumeParseView(APIView):
         except Exception as e:
             logger.exception(f"Error parsing resume: {str(e)} | Request data: {request.data}, FILES: {request.FILES}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 
 class ResumeScreeningView(APIView):
@@ -281,10 +327,116 @@ class ResumeScreeningView(APIView):
                 "error_type": type(e).__name__
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+
+# class JobApplicationCreatePublicView(generics.ListCreateAPIView):
+#     serializer_class = JobApplicationSerializer
+#     parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+#     def get_permissions(self):
+#         if self.request.method == 'POST':
+#             return [AllowAny()]
+#         return [IsMicroserviceAuthenticated()]
+
+#     def get_queryset(self):
+#         logger.info(f"request.user: {self.request.user}, is_authenticated: {getattr(self.request.user, 'is_authenticated', None)}")
+#         tenant_id = self.request.query_params.get('tenant_id')
+#         branch_id = self.request.query_params.get('branch_id')
+#         queryset = JobApplication.active_objects.all()
+#         if tenant_id:
+#             queryset = queryset.filter(tenant_id=tenant_id)
+#         if branch_id:
+#             queryset = queryset.filter(branch_id=branch_id)
+#         if hasattr(self.request.user, 'branch') and self.request.user.branch:
+#             queryset = queryset.filter(branch=self.request.user.branch)
+#         return queryset.order_by('-created_at')
+    
+#     def check_permissions(self, request):
+#         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
+#         return super().check_permissions(request)
+
+#     def create(self, request, *args, **kwargs):
+#         unique_link = request.data.get('unique_link') or request.data.get('job_requisition_unique_link')
+#         if not unique_link:
+#             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/unique_link/{unique_link}/"
+#         # Do NOT send Authorization header for public endpoint
+#         resp = requests.get(requisition_url)
+#         logger.info(f"Requisition unique_link: {unique_link}, API status: {resp.status_code}")
+#         if resp.status_code != 200:
+#             try:
+#                 error_detail = resp.json().get('detail', 'Invalid job requisition.')
+#             except Exception:
+#                 error_detail = 'Invalid job requisition.'
+#             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+#         job_requisition = resp.json()
+
+#         serializer = self.get_serializer(data=request.data, context={'request': request, 'job_requisition': job_requisition})
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_create(serializer)
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+class JobApplicationCreatePublicView(generics.ListCreateAPIView):
+    serializer_class = PublicJobApplicationSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def create(self, request, *args, **kwargs):
+        unique_link = request.data.get('unique_link') or request.data.get('job_requisition_unique_link')
+        if not unique_link:
+            return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Extract tenant_id from unique_link (first segment before '-')
+        tenant_id = unique_link.split('-')[0]
+
+        requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/unique_link/{unique_link}/"
+        resp = requests.get(requisition_url)
+        logger.info(f"Requisition unique_link: {unique_link}, API status: {resp.status_code}")
+        if resp.status_code != 200:
+            try:
+                error_detail = resp.json().get('detail', 'Invalid job requisition.')
+            except Exception:
+                error_detail = 'Invalid job requisition.'
+            return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+        job_requisition = resp.json()
+
+        # Build a plain dict for serializer
+        payload = dict(request.data.items())
+        payload['job_requisition_id'] = job_requisition['id']
+        payload['tenant_id'] = tenant_id  # Set tenant_id from unique_link
+
+        # Transform documents from flat keys to a list of dicts
+        documents = []
+        i = 0
+        while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
+            documents.append({
+                'document_type': request.data.get(f'documents[{i}][document_type]'),
+                'file': request.FILES.get(f'documents[{i}][file]')
+            })
+            i += 1
+        if documents:
+            payload['documents'] = documents
+
+        logger.info(f"Full POST request payload (dict): {payload}")
+
+        serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
+        if not serializer.is_valid():
+            logger.error(f"Validation errors: {serializer.errors}")
+            return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 class JobApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = JobApplicationSerializer
-    permission_classes = [IsMicroserviceAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [AllowAny()]
+        return [IsMicroserviceAuthenticated()]
 
     def get_queryset(self):
         logger.info(f"request.user: {self.request.user}, is_authenticated: {getattr(self.request.user, 'is_authenticated', None)}")
@@ -299,14 +451,16 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(branch=self.request.user.branch)
         return queryset.order_by('-created_at')
     
-
     def check_permissions(self, request):
         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
         return super().check_permissions(request)
 
     def create(self, request, *args, **kwargs):
         job_requisition_id = request.data.get('job_requisition_id')
+        logger.info(f"These are the request data: {request.data}")  # <-- Use logger, not logging
         job_requisition = get_job_requisition_by_id(job_requisition_id, request)
+        
+        logger.info(f"Creating Application for this Job requisition: {job_requisition_id}")  # <-- Use logger, not logging
         if not job_requisition:
             return Response({"detail": "Invalid job requisition."}, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(data=request.data, context={'request': request, 'job_requisition': job_requisition})
@@ -331,6 +485,7 @@ class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
             queryset = queryset.filter(branch=self.request.user.branch)
         return queryset
 
+
 class JobApplicationBulkDeleteView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = SimpleMessageSerializer  # <-- Add this line
@@ -350,6 +505,7 @@ class JobApplicationBulkDeleteView(APIView):
                 application.soft_delete()
         return Response({"detail": f"Soft-deleted {count} application(s)."}, status=status.HTTP_200_OK)
 
+
 class SoftDeletedJobApplicationsView(generics.ListAPIView):
     serializer_class = JobApplicationSerializer
     permission_classes = [IsAuthenticated]
@@ -359,6 +515,7 @@ class SoftDeletedJobApplicationsView(generics.ListAPIView):
         if self.request.user.is_authenticated and self.request.user.branch:
             queryset = queryset.filter(branch=self.request.user.branch)
         return queryset.order_by('-created_at')
+
 
 class RecoverSoftDeletedJobApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer 
@@ -377,6 +534,7 @@ class RecoverSoftDeletedJobApplicationsView(APIView):
             for application in applications:
                 application.restore()
         return Response({"detail": f"Successfully recovered {applications.count()} application(s)."}, status=status.HTTP_200_OK)
+
 
 class PermanentDeleteJobApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer 
@@ -419,6 +577,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
 class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ScheduleSerializer
     permission_classes = [IsAuthenticated]
@@ -435,6 +594,7 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.user.is_authenticated and self.request.user.branch:
             queryset = queryset.filter(branch=self.request.user.branch)
         return queryset
+
 
 class ScheduleBulkDeleteView(APIView):
     serializer_class = SimpleMessageSerializer 

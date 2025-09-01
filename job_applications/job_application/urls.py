@@ -1,10 +1,10 @@
-from asyncio.log import logger
+
 from django.urls import path
-from .permissions import IsMicroserviceAuthenticated
-from rest_framework.views import APIView
-from rest_framework.response import Response
 
 from .views import (
+    
+    JobApplicationCreatePublicView,
+                    
     JobApplicationListCreateView,JobApplicationDetailView,JobApplicationBulkDeleteView,SoftDeletedJobApplicationsView,
     RecoverSoftDeletedJobApplicationsView,PermanentDeleteJobApplicationsView,ComplianceStatusUpdateView,
     ScheduleListCreateView, ScheduleDetailView, ScheduleBulkDeleteView, SoftDeletedSchedulesView,
@@ -17,20 +17,12 @@ app_name = 'job_applications'
 
 
 
-class DebugView(APIView):
-    permission_classes = [IsMicroserviceAuthenticated]
-    
-    def get(self, request):
-        logger.info(f"DebugView: request.user={request.user}, is_authenticated={getattr(request.user, 'is_authenticated', False)}")
-        return Response({
-            "user_id": getattr(request.user, 'id', None),
-            "tenant_id": getattr(request.user, 'tenant_id', None),
-            "is_authenticated": getattr(request.user, 'is_authenticated', None)
-        })
-
- # Job Application Endpoints
 urlpatterns = [
    
+    path('apply-jobs/', JobApplicationCreatePublicView.as_view(), name='application-create'),
+    #path('applications/', JobApplicationListView.as_view(), name='application-list'),
+
+
     path('applications/', JobApplicationListCreateView.as_view(), name='application-list-create'),
     path('applications/<str:id>/', JobApplicationDetailView.as_view(), name='application-detail'),
     path('applications/bulk-delete/applications/', JobApplicationBulkDeleteView.as_view(), name='application-bulk-delete'),
@@ -79,7 +71,6 @@ urlpatterns = [
     # Published Requisitions with Shortlisted Applications
     path('published-requisitions-with-shortlisted/', PublishedJobRequisitionsWithShortlistedApplicationsView.as_view(), name='published-requisitions-with-shortlisted'),
 
-    path('api/debug-auth/', DebugView.as_view()),
 ]
 
 

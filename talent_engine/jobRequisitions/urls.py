@@ -4,7 +4,7 @@ from .views import (
     JobRequisitionListCreateView,MyJobRequisitionListView, JobRequisitionDetailView,
     JobRequisitionBulkDeleteView,SoftDeletedJobRequisitionsView, RecoverSoftDeletedJobRequisitionsView,
     PermanentDeleteJobRequisitionsView,JobRequisitionByLinkView,ComplianceItemView,VideoSessionViewSet,
-    RequestListCreateView, RequestDetailView, UserRequestsListView,
+    RequestListCreateView, RequestDetailView, UserRequestsListView, CustomJobRequisitionByLinkView
 )
 from . import websocket
 
@@ -25,6 +25,7 @@ urlpatterns = [
     path('requisitions/recover/requisition/', RecoverSoftDeletedJobRequisitionsView.as_view(), name='recover-requisitions'),
     path('requisitions/permanent-delete/requisition/', PermanentDeleteJobRequisitionsView.as_view(), name='permanent-delete-requisitions'),
     path('requisitions/by-link/<str:unique_link>/', JobRequisitionByLinkView.as_view(), name='requisition-by-link'),
+    path('requisitions/unique_link/<str:unique_link>/', CustomJobRequisitionByLinkView.as_view(), name='custom-requisition-by-link'),
     path('requisitions/<str:job_requisition_id>/compliance-items/', ComplianceItemView.as_view(), name='compliance-item-create'),
     path('requisitions/<str:job_requisition_id>/compliance-items/<str:item_id>/', ComplianceItemView.as_view(), name='compliance-item-detail'),
     # Requests CRUD endpoints

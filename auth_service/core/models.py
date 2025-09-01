@@ -1,6 +1,8 @@
 from django_tenants.models import TenantMixin, DomainMixin
 from django.db import models
 import logging
+from django.db import models
+import uuid
 
 logger = logging.getLogger('core')
 
@@ -80,3 +82,17 @@ class TenantConfig(models.Model):
     logo = models.URLField(null=True, blank=True)  # Store Supabase public URL
     custom_fields = models.JSONField(default=dict)
     email_templates = models.JSONField(default=dict)
+
+
+
+
+
+class TenantKey(models.Model):
+    tenant = models.OneToOneField(Tenant, on_delete=models.CASCADE, related_name='rsa_keys')
+    key_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    public_key = models.TextField()
+    private_key = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"RSA Key for {self.tenant.schema_name}"

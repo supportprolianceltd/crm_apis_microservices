@@ -55,19 +55,76 @@ class TokenValidateView(APIView):
 
 
 
+# class CustomTokenSerializer(TokenObtainPairSerializer):
+#     @classmethod
+#     def get_token(cls, user):
+#         token = super().get_token(user)
+#         token['tenant_id'] = user.tenant.id
+#         token['tenant_schema'] = user.tenant.schema_name
+#         token['has_accepted_terms'] = user.has_accepted_terms  # Add to token
+#         return token
+
+#     def validate(self, attrs):
+#         data = super().validate(attrs)
+#         user = self.user
+#         # Check if token was issued before last password reset
+#         refresh = RefreshToken(data['refresh'])
+#         decoded_token = jwt.decode(data['access'], settings.SECRET_KEY, algorithms=["HS256"])
+#         token_iat = decoded_token.get('iat')
+#         if user.last_password_reset and token_iat < user.last_password_reset.timestamp():
+#             raise serializers.ValidationError("Token is invalid due to recent password reset.")
+#         data['tenant_id'] = user.tenant.id
+#         data['tenant_schema'] = user.tenant.schema_name
+#         data['user'] = CustomUserSerializer(user, context=self.context).data
+#         data['has_accepted_terms'] = user.has_accepted_terms  # Include in response
+
+#         # --- Send notification event ---
+#         try:
+#             event_payload = {
+#                 "metadata": {
+#                     "tenant_id": "test-tenant-1",
+#                     "event_type": "user.login.succeeded",
+#                     "event_id": f"evt-{uuid.uuid4()}",
+#                     "created_at": datetime.utcnow().isoformat() + "Z",
+#                     "source": "auth-service"
+#                 },
+#                 "data": {
+#                     "user_email": user.email,
+#                     "ip_address": self.context['request'].META.get('REMOTE_ADDR', ''),
+#                     "timestamp": datetime.utcnow().isoformat() + "Z",
+#                     "user_id": f"user-{user.id}",
+#                     "user_agent": self.context['request'].META.get('HTTP_USER_AGENT', '')
+#                 }
+#             }
+#             requests.post(settings.NOTIFICATIONS_EVENT_URL, json=event_payload, timeout=3)
+#             # print("Login event notification sent.")
+#             # logger.info(f"Failed to send login event notification: {event_payload}")
+#         except Exception as e:
+#             logger.error(f"Failed to send login event notification: {e}")
+
+#         return data
+
 class CustomTokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
+        # Add tenant info
         token['tenant_id'] = user.tenant.id
         token['tenant_schema'] = user.tenant.schema_name
-        token['has_accepted_terms'] = user.has_accepted_terms  # Add to token
+        token['has_accepted_terms'] = user.has_accepted_terms
+
+        # Add all user fields as a nested user object (excluding password)
+        user_data = CustomUserSerializer(user).data
+        user_data.pop("password", None)  # Remove password if present
+        token['user'] = user_data
+        # Add user email directly to the token
+        token['email'] = user.email
+
         return token
 
     def validate(self, attrs):
         data = super().validate(attrs)
         user = self.user
-        # Check if token was issued before last password reset
         refresh = RefreshToken(data['refresh'])
         decoded_token = jwt.decode(data['access'], settings.SECRET_KEY, algorithms=["HS256"])
         token_iat = decoded_token.get('iat')
@@ -76,7 +133,7 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
         data['tenant_id'] = user.tenant.id
         data['tenant_schema'] = user.tenant.schema_name
         data['user'] = CustomUserSerializer(user, context=self.context).data
-        data['has_accepted_terms'] = user.has_accepted_terms  # Include in response
+        data['has_accepted_terms'] = user.has_accepted_terms
 
         # --- Send notification event ---
         try:
@@ -97,14 +154,10 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
                 }
             }
             requests.post(settings.NOTIFICATIONS_EVENT_URL, json=event_payload, timeout=3)
-            # print("Login event notification sent.")
-            # logger.info(f"Failed to send login event notification: {event_payload}")
         except Exception as e:
             logger.error(f"Failed to send login event notification: {e}")
 
         return data
-
-
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

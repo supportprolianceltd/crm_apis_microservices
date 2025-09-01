@@ -6,12 +6,20 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
+    tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir --disable-pip-version-check -r requirements.txt
+RUN pip install pytesseract pillow
+
+# Pre-download ML models during build
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+RUN python -c "from transformers import AutoTokenizer, AutoModelForTokenClassification; AutoTokenizer.from_pretrained('dslim/bert-base-NER'); AutoModelForTokenClassification.from_pretrained('dslim/bert-base-NER')"
 
 # Copy project files
 COPY . .

@@ -22,8 +22,9 @@ class StorageService:
 class LocalStorageService(StorageService):
     def upload_file(self, file_obj, file_name, content_type=None):
         media_root = getattr(settings, "MEDIA_ROOT", "media")
-        os.makedirs(media_root, exist_ok=True)
         file_path = os.path.join(media_root, file_name)
+        # Ensure parent directories exist
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "wb") as f:
             f.write(file_obj.read())
         return True

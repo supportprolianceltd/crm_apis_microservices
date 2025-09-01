@@ -73,6 +73,7 @@ class JobRequisition(models.Model):
     last_compliance_check = models.DateTimeField(null=True, blank=True)
     checked_by = models.CharField(max_length=255, null=True, blank=True)
 
+
     tenant_id = models.CharField(max_length=36, blank=False, null=False)  # Store Tenant ID
     branch_id = models.CharField(max_length=36, blank=True, null=True)  # Store Branch ID
     department_id = models.CharField(max_length=36, blank=True, null=True)  # Store Department ID
@@ -322,6 +323,9 @@ class Participant(models.Model):
             })
             producer.flush()
             logger.info(f"Participant created for session {self.session.id}")
+
+
+
 
 class Request(models.Model):
     REQUEST_TYPE_CHOICES = [

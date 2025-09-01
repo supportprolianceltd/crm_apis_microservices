@@ -186,7 +186,7 @@ TEMPLATES = [
 # ======================== Logging ========================
 LOG_DIR = os.path.join(BASE_DIR, 'job_applications', 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
-
+timeout = 120 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

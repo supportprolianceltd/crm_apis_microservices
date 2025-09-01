@@ -1,3 +1,5 @@
+#utils/screen.py
+# 
 import logging
 import os
 import re
@@ -12,6 +14,10 @@ from docx import Document
 from sentence_transformers import SentenceTransformer, util
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 import torch
+import mimetypes
+import signal
+import threading
+import functools
 from .job_titles import JOB_TITLE_KEYWORDS
 
 logger = logging.getLogger('job_applications')
@@ -24,41 +30,81 @@ _resume_ner_tokenizer = None
 _resume_ner_model = None
 _resume_ner_pipeline = None
 
+# Global variables for model caching
+_model = None
+_resume_ner_tokenizer = None
+_resume_ner_model = None
+_resume_ner_pipeline = None
+_model_lock = threading.Lock()
+
 def get_sentence_transformer_model():
     """Lazily load the SentenceTransformer model."""
     global _model
     if _model is None:
         try:
-            _model = SentenceTransformer('all-MiniLM-L6-v2')
-            device = torch.device('cpu')
-            if _model.device.type == 'meta':
-                _model.to_empty(device=device)
-            else:
-                _model.to(device)
-            logger.info("Loaded SentenceTransformer model on CPU")
+            with _model_lock:
+                if _model is None:  # Double-check locking
+                    _model = SentenceTransformer('all-MiniLM-L6-v2')
+                    device = torch.device('cpu')
+                    if _model.device.type == 'meta':
+                        _model.to_empty(device=device)
+                    else:
+                        _model.to(device)
+                    logger.info("Loaded SentenceTransformer model on CPU")
         except Exception as e:
             logger.exception(f"Failed to load SentenceTransformer model: {str(e)}")
             raise RuntimeError("Unable to initialize sentence transformer model")
     return _model
 
 def get_resume_ner_pipeline():
+    """Lazily load the NER pipeline with proper caching."""
     global _resume_ner_tokenizer, _resume_ner_model, _resume_ner_pipeline
+    
     if _resume_ner_pipeline is None:
         try:
-            model_name = "dslim/bert-base-NER"
-            _resume_ner_tokenizer = AutoTokenizer.from_pretrained(model_name)
-            _resume_ner_model = AutoModelForTokenClassification.from_pretrained(model_name)
-            _resume_ner_pipeline = pipeline(
-                "ner",
-                model=_resume_ner_model,
-                tokenizer=_resume_ner_tokenizer,
-                aggregation_strategy="simple"
-            )
-            logger.info("Loaded HuggingFace NER pipeline")
+            with _model_lock:
+                if _resume_ner_pipeline is None:  # Double-check locking
+                    logger.info("Loading NER model...")
+                    model_name = "dslim/bert-base-NER"
+                    _resume_ner_tokenizer = AutoTokenizer.from_pretrained(model_name)
+                    _resume_ner_model = AutoModelForTokenClassification.from_pretrained(model_name)
+                    _resume_ner_pipeline = pipeline(
+                        "ner",
+                        model=_resume_ner_model,
+                        tokenizer=_resume_ner_tokenizer,
+                        aggregation_strategy="simple",
+                        device=-1  # Use CPU
+                    )
+                    logger.info("Loaded HuggingFace NER pipeline")
         except Exception as e:
             logger.exception(f"Failed to load NER model: {str(e)}")
-            raise RuntimeError("Unable to initialize NER model")
+            # Create a simple fallback pipeline
+            _resume_ner_pipeline = lambda x: []
+    
     return _resume_ner_pipeline
+
+def simple_ner_fallback(text):
+    """Simple fallback NER implementation when the full model fails to load."""
+    # Extract names using simple regex patterns
+    name_pattern = r'^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+$'
+    names = []
+    for line in text.split('\n'):
+        line = line.strip()
+        if re.match(name_pattern, line) and len(line.split()) <= 4:
+            names.append(line)
+    
+    # Extract emails and phones with regex
+    email_match = re.search(r'[\w\.-]+@[\w\.-]+', text)
+    phone_match = re.search(r'(\+?\d{1,3}[\s-]?)?(\(?\d{3}\)?[\s-]?)?\d{3}[\s-]?\d{4}', text)
+    
+    return [
+        {'entity_group': 'PER', 'word': name} for name in names[:1]
+    ] + (
+        [{'entity_group': 'EMAIL', 'word': email_match.group(0)}] if email_match else []
+    ) + (
+        [{'entity_group': 'PHONE', 'word': phone_match.group(0)}] if phone_match else []
+    )
+
 
 def screen_resume(resume_text, job_description):
     """Compute similarity score between resume and job description."""
@@ -102,59 +148,140 @@ def clean_resume_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
-def parse_resume(file_path):
-    """Parse resume from a remote URL or local file and extract text."""
+
+
+
+
+class TimeoutError(Exception):
+    pass
+
+def timeout(seconds=30, error_message="Function call timed out"):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            def handle_timeout(signum, frame):
+                raise TimeoutError(error_message)
+            
+            # Set the signal handler and a alarm
+            signal.signal(signal.SIGALRM, handle_timeout)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                # Cancel the alarm
+                signal.alarm(0)
+            return result
+        return wrapper
+    return decorator
+
+@timeout(30, "PDF parsing timed out after 30 seconds")
+def safe_parse_pdf(full_path):
+    """Safely parse PDF with timeout"""
     try:
-        logger.debug(f"Processing file_path: {file_path}")
-        temp_file_path = None
+        with pdfplumber.open(full_path) as pdf:
+            return '\n'.join([page.extract_text() or '' for page in pdf.pages])
+    except Exception as e:
+        logger.error(f"pdfplumber failed: {str(e)}. Falling back to pdfminer.")
+        return extract_text(full_path)
+
+import pytesseract
+from PIL import Image
+import io
+
+def parse_resume(file_path):
+    """Parse resume from a local file and extract text with OCR fallback."""
+    try:
+        logger.info(f"Processing file: {file_path}")
         text = ""
 
-        is_url = file_path.startswith(('http://', 'https://'))
-        if is_url:
-            logger.info(f"Downloading remote resume: {file_path}")
-            headers = {"Authorization": f"Bearer {settings.SUPABASE_KEY}"}
-            response = requests.get(file_path, headers=headers)
-            if response.status_code != 200:
-                logger.error(f"Failed to download file: {file_path}, status code: {response.status_code}")
-                return ""
-            file_content = response.content
-            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
-            temp_file.write(file_content)
-            temp_file.close()
-            temp_file_path = temp_file.name
-            full_path = temp_file_path
-        else:
-            logger.info(f"Processing local resume file: {file_path}")
-            full_path = file_path
-
-        ext = os.path.splitext(full_path)[1].lower()
+        # Get file extension
+        _, ext = os.path.splitext(file_path)
+        ext = ext.lower()
+        
         if ext == '.pdf':
+            # Try text extraction first
             try:
-                with pdfplumber.open(full_path) as pdf:
-                    text = '\n'.join([page.extract_text() or '' for page in pdf.pages])
+                # Try pdfplumber first
+                try:
+                    with pdfplumber.open(file_path) as pdf:
+                        text = '\n'.join([page.extract_text() or '' for page in pdf.pages])
+                    logger.info(f"pdfplumber extracted {len(text)} characters")
+                except Exception as e:
+                    logger.error(f"pdfplumber failed: {str(e)}")
+                    text = ""
+                
+                # If pdfplumber failed or extracted little text, try pdfminer
+                if not text or len(text.strip()) < 100:
+                    logger.info("Trying pdfminer as fallback")
+                    try:
+                        text = extract_text(file_path)
+                        logger.info(f"pdfminer extracted {len(text)} characters")
+                    except Exception as e:
+                        logger.error(f"pdfminer also failed: {str(e)}")
+                        text = ""
+                
+                # If still no text, try OCR
+                if not text or len(text.strip()) < 100:
+                    logger.info("Text extraction failed, trying OCR")
+                    text = extract_text_with_ocr(file_path)
+                
             except Exception as e:
-                logger.error(f"pdfplumber failed: {str(e)}. Falling back to pdfminer.")
-                text = extract_text(full_path)
-            text = clean_resume_text(text)
-            logger.debug(f"Extracted resume text (first 1000 chars): {text[:1000]}")
+                logger.error(f"PDF parsing failed: {str(e)}")
+                text = ""
         elif ext in ['.docx', '.doc']:
-            doc = Document(full_path)
-            text = '\n'.join([para.text for para in doc.paragraphs])
-            text = clean_resume_text(text)
-            logger.debug(f"Extracted resume text (first 1000 chars): {text[:1000]}")
+            try:
+                doc = Document(file_path)
+                text = '\n'.join([para.text for para in doc.paragraphs])
+                logger.info(f"Word document extracted {len(text)} characters")
+            except Exception as e:
+                logger.error(f"Failed to parse Word document: {str(e)}")
+                text = ""
         else:
             logger.error(f"Unsupported file type: {ext}")
             text = ""
 
-        if temp_file_path and os.path.exists(temp_file_path):
-            os.unlink(temp_file_path)
-            logger.debug(f"Cleaned up temporary file: {temp_file_path}")
+        text = clean_resume_text(text)
+        logger.info(f"Final cleaned text length: {len(text)}")
+        
+        if text:
+            logger.debug(f"Sample of extracted text: {text[:500]}")
+        else:
+            logger.warning("No text could be extracted from the resume")
+            
         return text
     except Exception as e:
         logger.exception(f"Error parsing resume {file_path}: {str(e)}")
-        if temp_file_path and os.path.exists(temp_file_path):
-            os.unlink(temp_file_path)
         return ""
+
+def extract_text_with_ocr(file_path):
+    """Extract text from PDF using OCR for image-based documents."""
+    try:
+        text = ""
+        with pdfplumber.open(file_path) as pdf:
+            for page_num, page in enumerate(pdf.pages):
+                # Extract images from the page
+                if page.images:
+                    for img in page.images:
+                        # Extract and OCR each image
+                        try:
+                            img_data = page.to_image().original
+                            pil_image = Image.open(io.BytesIO(img_data))
+                            ocr_text = pytesseract.image_to_string(pil_image)
+                            text += ocr_text + "\n"
+                        except Exception as e:
+                            logger.error(f"OCR failed for image on page {page_num}: {str(e)}")
+                
+                # Also try to extract any text that might be there
+                page_text = page.extract_text() or ""
+                text += page_text + "\n"
+        
+        logger.info(f"OCR extracted {len(text)} characters")
+        return text
+    except Exception as e:
+        logger.error(f"OCR extraction failed: {str(e)}")
+        return ""
+    
+    
 
 def parse_job_date(date_str):
     """Parse job dates with robust handling of formatting variations."""
@@ -304,9 +431,10 @@ def extract_experience_entries(resume_text):
 def extract_resume_fields(resume_text):
     """
     Extracts structured fields from resume text using NER, regex, and heuristics.
-    Fields: full_name, email, phone, qualification, experience, knowledge_skill, employment_gaps
     """
     try:
+        logger.info(f"Extracting fields from resume text of length: {len(resume_text)}")
+        
         extracted_data = {
             "full_name": "",
             "email": "",
@@ -317,93 +445,80 @@ def extract_resume_fields(resume_text):
             "employment_gaps": []
         }
 
-        ner = get_resume_ner_pipeline()
-        entities = ner(resume_text)
+        if not resume_text or len(resume_text.strip()) < 50:
+            logger.warning("Resume text is too short or empty, skipping extraction")
+            return extracted_data
 
-        # Group entities by label
-        grouped = {}
-        for ent in entities:
-            label = ent['entity_group']
-            grouped.setdefault(label, []).append(ent['word'])
-
-        # --- FULL NAME EXTRACTION ---
-        full_name = ""
-        if "PER" in grouped and grouped["PER"]:
-            candidate = grouped["PER"][0].strip()
-            if (2 <= len(candidate.split()) <= 4 and
-                not any(char.isdigit() for char in candidate) and
-                not candidate.isupper()):
-                full_name = candidate
-        if not full_name:
-            for line in resume_text.split('\n'):
-                line = line.strip()
-                if (line and 2 <= len(line.split()) <= 4 and
-                    not any(char.isdigit() for char in line) and
-                    not line.isupper() and
-                    not re.search(r'[@\-]', line)):
-                    full_name = line
-                    break
-        if not full_name and "PER" in grouped and grouped["PER"]:
-            full_name = grouped["PER"][0].strip()
-        extracted_data["full_name"] = full_name
-
-        # Regex for email, phone, degree, skills
-        email_match = re.search(r'[\w\.-]+@[\w\.-]+', resume_text)
-        phone_match = re.search(r'(\+?\d{1,3}[\s-]?)?(\(?\d{3}\)?[\s-]?)?\d{3}[\s-]?\d{4}', resume_text)
-        degree_match = re.findall(r'(Bachelor|Master|B\.Sc|M\.Sc|Ph\.D|Bachelors?|Masters?|Doctorate|Diploma|Certificate)', resume_text, re.IGNORECASE)
-        skill_match = re.findall(r'(?:Tools\s*&\s*Technologies|skills?|technologies|proficiencies|expertise)[:\-]?\s*(.*)', resume_text, re.IGNORECASE)
-
+        # More robust email pattern
+        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        email_match = re.search(email_pattern, resume_text)
+        
+        # More robust phone pattern
+        phone_pattern = r'(\+?(\d{1,3})?[\s-]?)?(\(?\d{3}\)?[\s-]?)?\d{3}[\s-]?\d{4}'
+        phone_match = re.search(phone_pattern, resume_text)
+        
+        # More robust name extraction
+        name_pattern = r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)'
+        name_match = re.search(name_pattern, resume_text, re.MULTILINE)
+        
         if email_match:
             extracted_data["email"] = email_match.group(0)
+            logger.info(f"Found email: {email_match.group(0)}")
+        
         if phone_match:
             extracted_data["phone"] = phone_match.group(0)
-        if degree_match:
-            extracted_data["qualification"] = ", ".join(set(degree_match))
-        if skill_match:
-            extracted_data["knowledge_skill"] = ", ".join([match[1].strip() for match in skill_match])
-
-        # Extract experience and gaps
-        experience = extract_experience_entries(resume_text)
-
-        # Format experience entries for output
-        extracted_data["experience"] = [
-            f"{e['title']} at {e['company']} ({e['start']} - {e['end']})"
-            for e in experience if not e["is_gap"]
-        ]
-
-        # Enhanced gap calculation
-        job_entries = sorted(
-            [e for e in experience if not e["is_gap"] and parse_job_date(e["start"])],
-            key=lambda x: parse_job_date(x["start"])
-        )
+            logger.info(f"Found phone: {phone_match.group(0)}")
         
-        gaps = []
-        for i in range(1, len(job_entries)):
-            prev_end = parse_job_date(job_entries[i-1]["end"])
-            curr_start = parse_job_date(job_entries[i]["start"])
-            
-            if not prev_end or not curr_start:
-                continue
-                
-            # Handle "Present" in previous job
-            if job_entries[i-1]["end"].lower() == "present":
-                prev_end = datetime.now()
-                
-            gap_months = (curr_start.year - prev_end.year) * 12 + (curr_start.month - prev_end.month)
-            
-            if gap_months > 1:  # Only consider gaps >1 month
-                gaps.append({
-                    "gap_start": prev_end.strftime("%Y-%m"),
-                    "gap_end": curr_start.strftime("%Y-%m"),
-                    "duration_months": gap_months
-                })
+        if name_match:
+            extracted_data["full_name"] = name_match.group(1)
+            logger.info(f"Found name: {name_match.group(1)}")
+        
+        # Try to extract qualifications using multiple patterns
+        qualification_patterns = [
+            r'(Bachelor|B\.?Sc|B\.?Eng|B\.?Tech|B\.?Com)',
+            r'(Master|M\.?Sc|M\.?Eng|M\.?Tech|M\.?Com)',
+            r'(Ph\.?D|Doctorate)',
+            r'(Diploma|Certificate|Associate)',
+            r'(High School|Secondary School)'
+        ]
+        
+        qualifications = []
+        for pattern in qualification_patterns:
+            matches = re.findall(pattern, resume_text, re.IGNORECASE)
+            qualifications.extend(matches)
+        
+        if qualifications:
+            extracted_data["qualification"] = ", ".join(set(qualifications))
+            logger.info(f"Found qualifications: {extracted_data['qualification']}")
+        
+        # Extract skills using common section headers
+        skill_patterns = [
+            r'(?:Skills|Technologies|Proficiencies|Expertise)[:\s]*(.*?)(?:\n\n|\n[A-Z]|$)',
+            r'(?:Programming Languages|Frameworks|Tools)[:\s]*(.*?)(?:\n\n|\n[A-Z]|$)'
+        ]
+        
+        skills = []
+        for pattern in skill_patterns:
+            match = re.search(pattern, resume_text, re.IGNORECASE | re.DOTALL)
+            if match:
+                skills_text = match.group(1)
+                # Extract individual skills
+                skill_items = re.findall(r'[A-Za-z+.#]+', skills_text)
+                skills.extend(skill_items)
+        
+        if skills:
+            extracted_data["knowledge_skill"] = ", ".join(set(skills))
+            logger.info(f"Found skills: {extracted_data['knowledge_skill']}")
+        
+        # Simple experience extraction (just look for years)
+        experience_pattern = r'(\d+)\s*(?:years?|yrs?)\s*(?:of|experience)'
+        experience_match = re.search(experience_pattern, resume_text, re.IGNORECASE)
+        
+        if experience_match:
+            extracted_data["experience"] = [f"{experience_match.group(1)} years of experience"]
+            logger.info(f"Found experience: {extracted_data['experience']}")
 
-        extracted_data["employment_gaps"] = sorted(
-            gaps,
-            key=lambda x: parse_job_date(x["gap_start"] + "-01") or datetime(2000, 1, 1)
-        )
-
-        logger.debug(f"Extracted resume data: {extracted_data}")
+        logger.info(f"Final extracted data: {extracted_data}")
         return extracted_data
     except Exception as e:
         logger.exception(f"Error extracting fields from resume: {str(e)}")

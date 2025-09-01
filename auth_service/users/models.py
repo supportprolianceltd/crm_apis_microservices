@@ -89,6 +89,9 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.email
 
+
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
     work_phone = models.CharField(max_length=20, blank=True, null=True)

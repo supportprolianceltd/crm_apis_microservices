@@ -70,10 +70,12 @@ class CustomTenantMiddleware:
         public_paths = [
             '/api/docs/', '/api/schema/', '/api/health/',
             '/api/applications-engine/applications/parse-resume/autofill/',  # <-- Add this line
+            '/api/applications-engine/apply-jobs/',  # <-- Add this line
         ]
         if any(request.path.startswith(path) for path in public_paths):
             request.tenant = None
             request.tenant_id = None
+            request.user = AnonymousUser()  # <-- Add this line
             return self.get_response(request)
 
         if not auth_header.startswith("Bearer "):
