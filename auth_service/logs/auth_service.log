@@ -5,3 +5,4 @@
 2025-09-02 15:00:20,059 [WARNING] django.request: Bad Request: /api/user/users/
 2025-09-02 15:01:39,687 [WARNING] django.request: Unauthorized: /api/user/users/
 2025-09-02 15:02:03,725 [WARNING] django.request: Bad Request: /api/user/users/
+2025-09-02 15:03:50,770 [WARNING] django.request: Unauthorized: /api/user/users/

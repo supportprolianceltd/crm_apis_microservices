@@ -2170,3 +2170,6 @@
 2025-09-02 15:01:39,690 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 401 | IP: 172.19.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
 2025-09-02 15:01:50,894 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
 2025-09-02 15:02:03,728 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 400 | IP: 172.19.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-02 15:03:50,772 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 401 | IP: 172.19.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-02 15:03:57,489 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.19.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-02 15:04:07,522 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 201 | IP: 172.19.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
