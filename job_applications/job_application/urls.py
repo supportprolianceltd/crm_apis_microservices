@@ -20,8 +20,6 @@ app_name = 'job_applications'
 urlpatterns = [
    
     path('apply-jobs/', JobApplicationCreatePublicView.as_view(), name='application-create'),
-    #path('applications/', JobApplicationListView.as_view(), name='application-list'),
-
 
     path('applications/', JobApplicationListCreateView.as_view(), name='application-list-create'),
     path('applications/<str:id>/', JobApplicationDetailView.as_view(), name='application-detail'),

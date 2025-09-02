@@ -249,7 +249,12 @@ AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
 NOTIFICATIONS_EVENT_URL = env('NOTIFICATIONS_EVENT_URL', default='http://app:3000/events/')
 print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 
+# sudo nano /etc/nginx/nginx.conf
+# sudo nano /etc/nginx/conf.d/crm_api.conf
 
+# sudo hostnamectl set-hostname server1.prolianceltd.com
+
+# docker exec -it auth-service python manage.py shell
 
 #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 #ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158

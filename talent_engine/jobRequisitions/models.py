@@ -23,7 +23,9 @@ class ActiveRequisitionsManager(models.Manager):
         return super().get_queryset().filter(is_deleted=False)
 
 class JobRequisition(models.Model):
-    tenant_name = models.CharField(max_length=100, blank=True, null=True, help_text="Tenant name for code generation")
+ 
+    tenant_name = models.CharField(max_length=255, blank=True, null=True, help_text="Tenant name for code generation")
+
 
     STATUS_CHOICES = [
         ('open', 'Open'),
@@ -98,7 +100,9 @@ class JobRequisition(models.Model):
 
     job_location = models.TextField(blank=True, null=True)
     interview_location = models.CharField(max_length=255, blank=True)
-    salary_range = models.CharField(max_length=100, blank=True, null=True)
+
+    salary_range = models.CharField(max_length=255, blank=True, null=True)
+
     salary_range_min = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     salary_range_max = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
@@ -109,7 +113,9 @@ class JobRequisition(models.Model):
     knowledge_requirement = models.TextField(blank=True, null=True)
 
     number_of_candidates = models.IntegerField(blank=True, null=True)
-    #num_of_applications = models.IntegerField(blank=True, null=True)
+   
+    num_of_applications = models.IntegerField(default=0, blank=True, null=True)
+   
     urgency_level = models.CharField(max_length=20, choices=URGENCY_LEVEL_CHOICES, default='medium')
 
     reason = models.TextField(blank=True, null=True)
@@ -123,7 +129,10 @@ class JobRequisition(models.Model):
     approval_date = models.DateTimeField(null=True, blank=True)
     time_to_fill_days = models.IntegerField(null=True, blank=True)
 
-    advert_banner = models.ImageField(upload_to='advert_banners/', blank=True, null=True)
+
+    advert_banner = models.ImageField(upload_to='advert_banners/', blank=True, null=True, max_length=512)
+    advert_banner_url = models.CharField(max_length=1024, blank=True, null=True)
+
     requested_date = models.DateField(auto_now_add=True)
     publish_status = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
@@ -244,6 +253,9 @@ class JobRequisition(models.Model):
         self.approved_by_id = approver_id
         self.save(update_fields=["status", "approval_date", "approved_by_id", "updated_at"])
         logger.info(f"JobRequisition {self.id} approved by user {approver_id} for tenant {self.tenant_id}")
+
+
+
 
 
 class VideoSession(models.Model):

@@ -33,7 +33,7 @@ ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=job_applications.settings
 
 # Expose port
-EXPOSE 8002
+EXPOSE 8003
 
 # Make entrypoint script executable
 RUN chmod +x entrypoint.sh

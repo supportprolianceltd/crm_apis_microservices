@@ -37,8 +37,7 @@ from .serializers import JobRequisitionSerializer, ComplianceItemSerializer,Vide
 logger = logging.getLogger('talent_engine')
 
 class JobRequisitionBulkDeleteView(generics.GenericAPIView):
-    serializer_class = JobRequisitionSerializer  # Added serializer_class
-    # permission_classes removed; rely on custom JWT middleware
+    serializer_class = JobRequisitionSerializer
 
     def post(self, request):
         ids = request.data.get('ids', [])
@@ -48,7 +47,6 @@ class JobRequisitionBulkDeleteView(generics.GenericAPIView):
         try:
             jwt_payload = getattr(request, 'jwt_payload', {})
             tenant_id = jwt_payload.get('tenant_id')
-            user_id = jwt_payload.get('user_id')
             role = jwt_payload.get('role')
             branch = jwt_payload.get('branch')
             if not tenant_id:
@@ -56,12 +54,14 @@ class JobRequisitionBulkDeleteView(generics.GenericAPIView):
             queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id, id__in=ids)
             if role == 'recruiter' and branch:
                 queryset = queryset.filter(branch=branch)
-            count = queryset.count()
+            # Evaluate queryset before transaction block
+            requisitions = list(queryset)
+            count = len(requisitions)
             if count == 0:
                 logger.warning("No active requisitions found for provided IDs")
                 return Response({"detail": "No requisitions found."}, status=status.HTTP_404_NOT_FOUND)
             with transaction.atomic():
-                for requisition in queryset:
+                for requisition in requisitions:
                     requisition.soft_delete()
             return Response({"detail": f"Soft-deleted {count} requisition(s)."}, status=status.HTTP_200_OK)
         except Exception as e:

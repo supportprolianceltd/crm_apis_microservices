@@ -328,41 +328,19 @@ class ResumeScreeningView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
-
 # class JobApplicationCreatePublicView(generics.ListCreateAPIView):
-#     serializer_class = JobApplicationSerializer
+#     serializer_class = PublicJobApplicationSerializer
 #     parser_classes = (MultiPartParser, FormParser, JSONParser)
-
-#     def get_permissions(self):
-#         if self.request.method == 'POST':
-#             return [AllowAny()]
-#         return [IsMicroserviceAuthenticated()]
-
-#     def get_queryset(self):
-#         logger.info(f"request.user: {self.request.user}, is_authenticated: {getattr(self.request.user, 'is_authenticated', None)}")
-#         tenant_id = self.request.query_params.get('tenant_id')
-#         branch_id = self.request.query_params.get('branch_id')
-#         queryset = JobApplication.active_objects.all()
-#         if tenant_id:
-#             queryset = queryset.filter(tenant_id=tenant_id)
-#         if branch_id:
-#             queryset = queryset.filter(branch_id=branch_id)
-#         if hasattr(self.request.user, 'branch') and self.request.user.branch:
-#             queryset = queryset.filter(branch=self.request.user.branch)
-#         return queryset.order_by('-created_at')
-    
-#     def check_permissions(self, request):
-#         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
-#         return super().check_permissions(request)
 
 #     def create(self, request, *args, **kwargs):
 #         unique_link = request.data.get('unique_link') or request.data.get('job_requisition_unique_link')
 #         if not unique_link:
 #             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
 
+#         # Extract tenant_id from unique_link (first segment before '-')
+#         tenant_id = unique_link.split('-')[0]
+
 #         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/unique_link/{unique_link}/"
-#         # Do NOT send Authorization header for public endpoint
 #         resp = requests.get(requisition_url)
 #         logger.info(f"Requisition unique_link: {unique_link}, API status: {resp.status_code}")
 #         if resp.status_code != 200:
@@ -373,8 +351,29 @@ class ResumeScreeningView(APIView):
 #             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
 #         job_requisition = resp.json()
 
-#         serializer = self.get_serializer(data=request.data, context={'request': request, 'job_requisition': job_requisition})
-#         serializer.is_valid(raise_exception=True)
+#         # Build a plain dict for serializer
+#         payload = dict(request.data.items())
+#         payload['job_requisition_id'] = job_requisition['id']
+#         payload['tenant_id'] = tenant_id  # Set tenant_id from unique_link
+
+#         # Transform documents from flat keys to a list of dicts
+#         documents = []
+#         i = 0
+#         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
+#             documents.append({
+#                 'document_type': request.data.get(f'documents[{i}][document_type]'),
+#                 'file': request.FILES.get(f'documents[{i}][file]')
+#             })
+#             i += 1
+#         if documents:
+#             payload['documents'] = documents
+
+#         logger.info(f"Full POST request payload (dict): {payload}")
+
+#         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
+#         if not serializer.is_valid():
+#             logger.error(f"Validation errors: {serializer.errors}")
+#             return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 #         self.perform_create(serializer)
 #         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -389,9 +388,7 @@ class JobApplicationCreatePublicView(generics.ListCreateAPIView):
         if not unique_link:
             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Extract tenant_id from unique_link (first segment before '-')
         tenant_id = unique_link.split('-')[0]
-
         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/unique_link/{unique_link}/"
         resp = requests.get(requisition_url)
         logger.info(f"Requisition unique_link: {unique_link}, API status: {resp.status_code}")
@@ -403,12 +400,10 @@ class JobApplicationCreatePublicView(generics.ListCreateAPIView):
             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
         job_requisition = resp.json()
 
-        # Build a plain dict for serializer
         payload = dict(request.data.items())
         payload['job_requisition_id'] = job_requisition['id']
-        payload['tenant_id'] = tenant_id  # Set tenant_id from unique_link
+        payload['tenant_id'] = tenant_id
 
-        # Transform documents from flat keys to a list of dicts
         documents = []
         i = 0
         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
@@ -427,7 +422,23 @@ class JobApplicationCreatePublicView(generics.ListCreateAPIView):
             logger.error(f"Validation errors: {serializer.errors}")
             return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         self.perform_create(serializer)
+
+        # PATCH num_of_applications in JobRequisition
+        try:
+            patch_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/{job_requisition['id']}/"
+            patch_resp = requests.patch(
+                patch_url,
+                json={"num_of_applications": (job_requisition.get("num_of_applications", 0) + 1)},
+                headers={'Authorization': request.headers.get('Authorization', '')}
+            )
+            logger.info(f"PATCH num_of_applications response: {patch_resp.status_code}")
+        except Exception as e:
+            logger.error(f"Failed to PATCH num_of_applications: {str(e)}")
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
 
 class JobApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = JobApplicationSerializer

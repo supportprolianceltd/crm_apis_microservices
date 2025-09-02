@@ -103,7 +103,7 @@ class UserProfile(models.Model):
     state = models.CharField(max_length=100, blank=True, null=True)
     zip_code = models.CharField(max_length=20, blank=True, null=True)
     department = models.CharField(max_length=100, blank=True, null=True)
-    modules = models.ManyToManyField(Module, blank=True)
+    # modules = models.ManyToManyField(Module, blank=True)
 
     # ID and Documents
     employee_id = models.CharField(max_length=15, null=True, blank=True)
@@ -113,21 +113,28 @@ class UserProfile(models.Model):
     # id_number = models.CharField(max_length=20, blank=True)
     # document_number = models.CharField(max_length=20, blank=True)
     # document_expiry_date = models.DateField(null=True, blank=True)
-    profile_image= models.ImageField(upload_to='profile_image/', blank=True, null=True)  # No default, optional
-
+  
+    # Image fields and their corresponding URL fields
+    profile_image = models.ImageField(upload_to='profile_image/', blank=True, null=True)
+    profile_image_url = models.CharField(max_length=1024, blank=True, null=True)
 
 
     # Driving Risk Assessment (B)
     is_driver = models.BooleanField(default=False)
     type_of_vehicle = models.CharField(max_length=50, blank=True)
+
     drivers_licence_image1 = models.ImageField(upload_to='driver_licences/', blank=True, null=True)
+    drivers_licence_image1_url = models.CharField(max_length=1024, blank=True, null=True)
+
     drivers_licence_image2 = models.ImageField(upload_to='driver_licences/', blank=True, null=True)
+    drivers_licence_image2_url = models.CharField(max_length=1024, blank=True, null=True)
+
     drivers_licence_country_of_issue = models.CharField(max_length=100, blank=True)
     drivers_licence_date_issue = models.DateField(null=True, blank=True)
     drivers_licence_expiry_date = models.DateField(null=True, blank=True)
     drivers_license_insurance_provider = models.CharField(max_length=100, blank=True)
     drivers_licence_insurance_expiry_date = models.DateField(null=True, blank=True)
-    drivers_licence_issuing_authority = models.CharField(max_length=20, blank=True)
+    drivers_licence_issuing_authority = models.CharField(max_length=100, blank=True)
     drivers_licence_policy_number = models.CharField(max_length=100, blank=True)
 
     # Care Worker Risk Assessment
@@ -154,17 +161,28 @@ class UserProfile(models.Model):
     Right_to_Work_document_number = models.CharField(max_length=100, blank=True)
     Right_to_Work_document_expiry_date = models.DateField(null=True, blank=True)
     Right_to_Work_country_of_issue = models.CharField(max_length=100, blank=True)
+
     Right_to_Work_file = models.ImageField(upload_to='right_to_work/', blank=True, null=True)
+    Right_to_Work_file_url = models.CharField(max_length=1024, blank=True, null=True)
+
+
     Right_to_Work_country_of_issue = models.CharField(max_length=100, blank=True)
     Right_to_Work_restrictions = models.CharField(max_length=255, blank=True)
 
     #DBS CHECK
     dbs_type = models.CharField(max_length=100,  blank=True)
+
     dbs_certificate = models.ImageField(upload_to='dbs_certificates/', blank=True, null=True)
+    dbs_certificate_url = models.CharField(max_length=1024, blank=True, null=True)
+
+
     dbs_certificate_number = models.CharField(max_length=100, blank=True)
     dbs_issue_date = models.DateField(null=True, blank=True)
 
     dbs_update_file = models.ImageField(upload_to='dbs_update_service/', blank=True, null=True)
+    dbs_update_file_url = models.CharField(max_length=1024, blank=True, null=True)
+
+
     dbs_update_certificate_number = models.CharField(max_length=100, blank=True)
     dbs_update_issue_date = models.DateField(null=True, blank=True)
 
@@ -222,6 +240,9 @@ class UserProfile(models.Model):
             self.employee_id = f"{tenant_code}-{next_number:04d}"
 
         super().save(*args, **kwargs)
+
+
+
 
 class ProfessionalQualification(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='professional_qualifications')

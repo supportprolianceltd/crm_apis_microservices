@@ -53,7 +53,7 @@ class ComplianceItemSerializer(serializers.Serializer):
 
 # talent_engine/serializers.py
 class JobRequisitionSerializer(serializers.ModelSerializer):
-
+    advert_banner_url = serializers.SerializerMethodField()
 
     tenant_id = serializers.CharField(max_length=36, read_only=True)
     branch_id = serializers.CharField(max_length=36, allow_null=True, required=False)
@@ -73,7 +73,7 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobRequisition
         fields = [
-            'id', 'requisition_number', 'job_requisition_code', 'job_application_code', 'tenant_id', 'tenant_domain',
+            'id', 'requisition_number', 'num_of_applications', 'job_requisition_code', 'job_application_code', 'tenant_id', 'tenant_domain',
             'branch_id', 'branch_name', 'department_id', 'title', 'unique_link', 'status', 'role', 'requested_by',
             'requested_by_id', 'created_by', 'created_by_id', 'updated_by', 'updated_by_id', 'approved_by',
             'approved_by_id', 'company_name', 'company_address', 'job_type', 'position_type', 'location_type',
@@ -81,7 +81,7 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             'job_description', 'requirements', 'qualification_requirement', 'experience_requirement',
             'knowledge_requirement', 'number_of_candidates', 'urgency_level', 'reason', 'comment', 'deadline_date',
             'start_date', 'responsibilities', 'documents_required', 'compliance_checklist', 'last_compliance_check',
-            'checked_by', 'advert_banner', 'requested_date', 'publish_status', 'is_deleted', 'created_at', 'updated_at',
+            'checked_by', 'advert_banner', 'advert_banner_url', 'requested_date', 'publish_status', 'is_deleted', 'created_at', 'updated_at',
             'approval_workflow', 'current_approval_stage', 'approval_date', 'time_to_fill_days'
         ]
         read_only_fields = [
@@ -89,6 +89,18 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             'requested_by_id', 'created_by_id', 'updated_by_id', 'approved_by_id', 'requested_date', 'is_deleted',
             'created_at', 'updated_at', 'branch_name', 'last_compliance_check', 'checked_by'
         ]
+
+
+
+    def get_advert_banner_url(self, obj):
+        storage_type = getattr(settings, 'STORAGE_TYPE', 'local').lower()
+        if storage_type == 'local':
+            if obj.advert_banner:
+                return obj.advert_banner.url
+            return None
+        else:
+            # For remote storage, use the public URL field
+            return obj.advert_banner_url
 
     @extend_schema_field({
         'type': 'object',
@@ -381,7 +393,6 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             content_type = getattr(advert_banner_file, 'content_type', 'application/octet-stream')
             storage_type = getattr(settings, 'STORAGE_TYPE', 'local').lower()
             if storage_type == 'local':
-                # Use Django's default file handling for local storage
                 instance.advert_banner.save(file_name, advert_banner_file, save=True)
             else:
                 storage = get_storage_service(storage_type)
@@ -389,8 +400,9 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
                 if not upload_success:
                     raise serializers.ValidationError({"advert_banner": "Failed to upload advert banner."})
                 public_url = storage.get_public_url(file_name)
-                instance.advert_banner = public_url
-                instance.save(update_fields=["advert_banner"])
+                instance.advert_banner_url = public_url  # <-- Save to advert_banner_url
+                instance.advert_banner = None            # <-- Clear advert_banner field
+                instance.save(update_fields=["advert_banner_url", "advert_banner"])
 
 
 
@@ -613,7 +625,7 @@ class PublicJobRequisitionSerializer(serializers.ModelSerializer):
             'id', 'requisition_number', 'job_requisition_code', 'job_application_code',
             'title', 'unique_link', 'status', 'job_type', 'position_type', 'location_type',
             'job_description', 'requirements', 'qualification_requirement', 'experience_requirement',
-            'knowledge_requirement', 'urgency_level', 'reason', 'deadline_date',
+            'knowledge_requirement', 'urgency_level', 'reason', 'deadline_date', 'num_of_applications',
             'start_date', 'responsibilities',  'advert_banner', 'publish_status',
             'approval_workflow', 'current_approval_stage', 'approval_date', 'time_to_fill_days'
         ]

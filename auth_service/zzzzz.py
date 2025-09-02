@@ -15,15 +15,17 @@ if not Tenant.objects.filter(schema_name='public').exists():
     Domain.objects.create(tenant=tenant, domain='127.0.0.1', is_primary=True)
     Domain.objects.create(tenant=tenant, domain='localhost', is_primary=False)
 
+   
+
 from core.models import Tenant, Domain
-if not Tenant.objects.filter(schema_name='proliance').exists():
+if not Tenant.objects.filter(schema_name='auth-service').exists():
     tenant = Tenant.objects.create(
-        name='proliance',
-        schema_name='proliance',
+        name='auth-service',
+        schema_name='auth-service',
     )
     tenant.auto_create_schema = False
     tenant.save()
-    Domain.objects.create(tenant=tenant, domain='prolianceltd.com', is_primary=True)
+    Domain.objects.create(tenant=tenant, domain='auth-service', is_primary=True)
 
 
 from core.models import Tenant, Domain
@@ -79,13 +81,13 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='support1',
-        email='support@prolianceltd.com',
+        username='david_dappa',
+        email='david.dappa@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='Chris',
-        last_name='Andrew',
-        job_role='Tester 2',
+        first_name='David',
+        last_name='Dappa',
+        job_role='Frontend Engineer',
         tenant=tenant
     )
 
@@ -114,6 +116,7 @@ for t in tenant:
 #sudo systemctl restart gunicorn
 
 
-#docker exec -it auth_service sh
+#docker exec auth_service python manage.py shell
 
 
+# https://server1.prolianceltd.com/

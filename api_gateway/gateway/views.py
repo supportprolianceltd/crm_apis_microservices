@@ -15,7 +15,7 @@ PUBLIC_PATHS = [
     # Add other public paths as needed
 ]
 
-@ratelimit(key='ip', rate='5/m', method='POST', block=True)
+@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 @csrf_exempt
 def api_gateway_view(request, path):
     try:

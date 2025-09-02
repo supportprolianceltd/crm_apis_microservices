@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: job-applications
     ports:
-      - "8002:8002"
+      - "8003:8003"
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DEBUG: "True"
@@ -18,8 +18,8 @@ services:
       DJANGO_SETTINGS_MODULE: job_applications.settings
       PYTHONPATH: /app
       ALLOWED_HOSTS: localhost,127.0.0.1,*
-      AUTH_SERVICE_URL: http://auth-service:8000
-      TALENT_ENGINE_URL: http://talent-engine:8001
+      AUTH_SERVICE_URL: http://auth-service:8001
+      TALENT_ENGINE_URL: http://talent-engine:8002
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       CORS_ALLOWED_ORIGINS: http://localhost:5173,https://crm-frontend-react.vercel.app,http://localhost:8000
     volumes:
@@ -30,7 +30,7 @@ services:
     command: >
       sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
-             gunicorn job_applications.wsgi:application --bind 0.0.0.0:8002"
+             gunicorn job_applications.wsgi:application --bind 0.0.0.0:8003"
     depends_on:
       job_app_postgres:
         condition: service_healthy

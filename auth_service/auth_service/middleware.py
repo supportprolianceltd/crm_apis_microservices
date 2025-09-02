@@ -17,14 +17,13 @@ class CustomTenantMiddleware(TenantMainMiddleware):
             host = request.get_host()
         except Exception as e:
             host = f"Invalid host: {e}"
-        #logger.info(f"Processing request: {request.method} {request.path}, Host: {host}")
+        logger.info(f"Processing request: {request.method} {request.path}, Host: {host}")
 
         # Public paths (excluding /api/token/)
         public_paths = [
             '/api/docs/', '/api/schema/', '/api/token/refresh/',
             '/api/social/callback/', '/api/admin/create/',
             '/api/user/password/reset/', '/api/user/password/reset/confirm/',
-            '/api/applications-engine/apply-jobs/',  # <-- Make this endpoint public
             '/api/applications-engine/applications/parse-resume/application/autofil/',  # <-- Make this endpoint public
         ]
 

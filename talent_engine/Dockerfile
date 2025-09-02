@@ -27,7 +27,7 @@ ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=talent_engine.settings
 
 # Expose port
-EXPOSE 8001
+EXPOSE 8002
 
 # Make entrypoint script executable
 RUN chmod +x entrypoint.sh

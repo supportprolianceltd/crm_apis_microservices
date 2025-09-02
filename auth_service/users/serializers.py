@@ -188,12 +188,12 @@ class OtherUserDocumentsSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    modules = serializers.SlugRelatedField(
-        many=True,
-        required=False,
-        slug_field='name',
-        queryset=Module.objects.all()
-    )
+    # modules = serializers.SlugRelatedField(
+    #     many=True,
+    #     required=False,
+    #     slug_field='name',
+    #     queryset=Module.objects.all()
+    # )
     professional_qualifications = ProfessionalQualificationSerializer(many=True, required=False)
     employment_details = EmploymentDetailSerializer(many=True, required=False)
     education_details = EducationDetailSerializer(many=True, required=False)
@@ -219,7 +219,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'id', 'user',
             'work_phone', 'personal_phone',
               'gender', 'dob', 'street', 'city', 'state', 'zip_code', 'department',
-            'modules','employee_id',  'marital_status',  'profile_image',
+            'employee_id',  'marital_status',  'profile_image',
             'is_driver', 'type_of_vehicle', 'drivers_licence_image1', 'drivers_licence_image2', 'drivers_licence_country_of_issue',
             'drivers_licence_date_issue', 'drivers_licence_expiry_date', 'drivers_license_insurance_provider',
             'drivers_licence_insurance_expiry_date', 'drivers_licence_issuing_authority', 'drivers_licence_policy_number',
@@ -251,15 +251,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'dbs_certificate',
             'dbs_update_file'
         ]
-        modules = validated_data.pop('modules', [])
+        # modules = validated_data.pop('modules', [])
         for field in image_fields:
             file = validated_data.pop(field, None)
             if file:
                 url = upload_file_dynamic(file, file.name, content_type=getattr(file, 'content_type', 'application/octet-stream'))
                 validated_data[field] = url
         profile = super().create(validated_data)
-        if modules:
-            profile.modules.set(modules)
+        # if modules:
+        #     profile.modules.set(modules)
         return profile
 
     def update(self, instance, validated_data):
@@ -271,20 +271,20 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'dbs_certificate',
             'dbs_update_file'
         ]
-        modules = validated_data.pop('modules', None)
+        # modules = validated_data.pop('modules', None)
         for field in image_fields:
             file = validated_data.pop(field, None)
             if file:
                 url = upload_file_dynamic(file, file.name, content_type=getattr(file, 'content_type', 'application/octet-stream'))
                 validated_data[field] = url
         profile = super().update(instance, validated_data)
-        if modules is not None:
-            profile.modules.set(modules)
+        # if modules is not None:
+        #     profile.modules.set(modules)
         return profile
 
 class UserCreateSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=True)
-    modules = serializers.PrimaryKeyRelatedField(queryset=Module.objects.all(), many=True, required=False)
+    #modules = serializers.PrimaryKeyRelatedField(queryset=Module.objects.all(), many=True, required=False)
     documents = OtherUserDocumentsSerializer(many=True, required=False)
     professional_qualifications = ProfessionalQualificationSerializer(many=True, required=False)
     employment_details = EmploymentDetailSerializer(many=True, required=False)
@@ -303,7 +303,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'password', 'first_name', 'last_name', 'role', 'job_role',
              'is_superuser', 'last_password_reset','profile','has_accepted_terms',
-            'permission_levels', 'modules', 'documents', 'professional_qualifications',
+            'permission_levels', 'documents', 'professional_qualifications',
             'employment_details', 'education_details', 'reference_checks', 'proof_of_address',
             'insurance_verifications', 'driving_risk_assessments', 'legal_work_eligibilities', 'branch'
         ]
@@ -326,8 +326,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
                      'proof_of_address', 'insurance_verifications', 'driving_risk_assessments', 'legal_work_eligibilities']:
             mutable_data[field] = [dict(item) for item in mutable_data.get(field, [])]
 
-        modules_data = [data.get(f'modules[{i}]') for i in range(len(data.keys())) if f'modules[{i}]' in data]
-        mutable_data['modules'] = [m for m in modules_data if m]
+        # modules_data = [data.get(f'modules[{i}]') for i in range(len(data.keys())) if f'modules[{i}]' in data]
+        # mutable_data['modules'] = [m for m in modules_data if m]
 
         return super().to_internal_value(mutable_data)
 
@@ -339,7 +339,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         profile_data = validated_data.pop('profile')
 
         # Remove all reverse-related fields from profile_data if present
-        modules = profile_data.pop('modules', [])
+        # modules = profile_data.pop('modules', [])
         professional_qualifications = profile_data.pop('professional_qualifications', [])
         employment_details = profile_data.pop('employment_details', [])
         education_details = profile_data.pop('education_details', [])
@@ -350,7 +350,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         legal_work_eligibilities = profile_data.pop('legal_work_eligibilities', [])
 
         # Remove reverse-related fields from validated_data if present (important!)
-        validated_data.pop('modules', None)
+        # validated_data.pop('modules', None)
         validated_data.pop('professional_qualifications', None)
         validated_data.pop('employment_details', None)
         validated_data.pop('education_details', None)
@@ -378,7 +378,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             )
 
             profile = UserProfile.objects.create(user=user, **profile_data)
-            profile.modules.set(modules)
+            # profile.modules.set(modules)
 
             # Now create related objects
             for qual_data in professional_qualifications:
@@ -421,7 +421,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 nested_val = profile_data.pop(field, None) if profile_data else None
                 return nested_val if nested_val is not None else root_val
 
-            modules = get_related('modules')
+            # modules = get_related('modules')
             professional_qualifications = get_related('professional_qualifications')
             employment_details = get_related('employment_details')
             education_details = get_related('education_details')
@@ -458,8 +458,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 profile.save()
 
             # Update many-to-many
-            if modules is not None:
-                profile.modules.set(modules)
+            # if modules is not None:
+            #     profile.modules.set(modules)
 
             # Update one-to-many (clear and recreate)
             if professional_qualifications is not None:
@@ -536,7 +536,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 class CustomUserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
-    modules = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', source='profile.modules')
+   # modules = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', source='profile.modules')
     tenant = serializers.SlugRelatedField(read_only=True, slug_field='name')
     branch = serializers.SlugRelatedField(read_only=True, slug_field='name', allow_null=True)
     permission_levels = serializers.ListField(child=serializers.CharField(), required=False)

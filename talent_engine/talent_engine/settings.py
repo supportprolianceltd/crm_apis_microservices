@@ -136,7 +136,7 @@ SUPABASE_URL = env('SUPABASE_URL', default='')
 SUPABASE_KEY = env('SUPABASE_KEY', default='')
 SUPABASE_BUCKET = env('SUPABASE_BUCKET', default='')
 
-STORAGE_TYPE = env('STORAGE_TYPE', default='local')  # or 's3', 'azure', 'local', 'supabase'
+STORAGE_TYPE = env('STORAGE_TYPE', default='supabase')  # or 's3', 'azure', 'local', 'supabase'
 
 
 KAFKA_BOOTSTRAP_SERVERS = env('KAFKA_BOOTSTRAP_SERVERS', default='localhost:9092')
