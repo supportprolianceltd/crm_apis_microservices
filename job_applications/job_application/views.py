@@ -4,7 +4,8 @@ import uuid
 import requests
 import tempfile
 import mimetypes
-
+from kafka import KafkaProducer
+import json
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
@@ -328,57 +329,6 @@ class ResumeScreeningView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# class JobApplicationCreatePublicView(generics.ListCreateAPIView):
-#     serializer_class = PublicJobApplicationSerializer
-#     parser_classes = (MultiPartParser, FormParser, JSONParser)
-
-#     def create(self, request, *args, **kwargs):
-#         unique_link = request.data.get('unique_link') or request.data.get('job_requisition_unique_link')
-#         if not unique_link:
-#             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # Extract tenant_id from unique_link (first segment before '-')
-#         tenant_id = unique_link.split('-')[0]
-
-#         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/unique_link/{unique_link}/"
-#         resp = requests.get(requisition_url)
-#         logger.info(f"Requisition unique_link: {unique_link}, API status: {resp.status_code}")
-#         if resp.status_code != 200:
-#             try:
-#                 error_detail = resp.json().get('detail', 'Invalid job requisition.')
-#             except Exception:
-#                 error_detail = 'Invalid job requisition.'
-#             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
-#         job_requisition = resp.json()
-
-#         # Build a plain dict for serializer
-#         payload = dict(request.data.items())
-#         payload['job_requisition_id'] = job_requisition['id']
-#         payload['tenant_id'] = tenant_id  # Set tenant_id from unique_link
-
-#         # Transform documents from flat keys to a list of dicts
-#         documents = []
-#         i = 0
-#         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
-#             documents.append({
-#                 'document_type': request.data.get(f'documents[{i}][document_type]'),
-#                 'file': request.FILES.get(f'documents[{i}][file]')
-#             })
-#             i += 1
-#         if documents:
-#             payload['documents'] = documents
-
-#         logger.info(f"Full POST request payload (dict): {payload}")
-
-#         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
-#         if not serializer.is_valid():
-#             logger.error(f"Validation errors: {serializer.errors}")
-#             return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-#         self.perform_create(serializer)
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-
 class JobApplicationCreatePublicView(generics.ListCreateAPIView):
     serializer_class = PublicJobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -423,19 +373,84 @@ class JobApplicationCreatePublicView(generics.ListCreateAPIView):
             return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         self.perform_create(serializer)
 
-        # PATCH num_of_applications in JobRequisition
+        # Publish to Kafka
         try:
-            patch_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/{job_requisition['id']}/"
-            patch_resp = requests.patch(
-                patch_url,
-                json={"num_of_applications": (job_requisition.get("num_of_applications", 0) + 1)},
-                headers={'Authorization': request.headers.get('Authorization', '')}
+            producer = KafkaProducer(
+                bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+                value_serializer=lambda v: json.dumps(v).encode('utf-8')
             )
-            logger.info(f"PATCH num_of_applications response: {patch_resp.status_code}")
+            kafka_data = {
+                "tenant_id": tenant_id,
+                "job_requisition_id": job_requisition['id'],
+                "event": "job_application_created"
+            }
+            producer.send('job_application_events', kafka_data)
+            producer.flush()
+            logger.info(f"Published job application event to Kafka for requisition {job_requisition['id']}")
         except Exception as e:
-            logger.error(f"Failed to PATCH num_of_applications: {str(e)}")
+            logger.error(f"Failed to publish Kafka event: {str(e)}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+# class JobApplicationCreatePublicView(generics.ListCreateAPIView):
+#     serializer_class = PublicJobApplicationSerializer
+#     parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+#     def create(self, request, *args, **kwargs):
+#         unique_link = request.data.get('unique_link') or request.data.get('job_requisition_unique_link')
+#         if not unique_link:
+#             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         tenant_id = unique_link.split('-')[0]
+#         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/unique_link/{unique_link}/"
+#         resp = requests.get(requisition_url)
+#         logger.info(f"Requisition unique_link: {unique_link}, API status: {resp.status_code}")
+#         if resp.status_code != 200:
+#             try:
+#                 error_detail = resp.json().get('detail', 'Invalid job requisition.')
+#             except Exception:
+#                 error_detail = 'Invalid job requisition.'
+#             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+#         job_requisition = resp.json()
+
+#         payload = dict(request.data.items())
+#         payload['job_requisition_id'] = job_requisition['id']
+#         payload['tenant_id'] = tenant_id
+
+#         documents = []
+#         i = 0
+#         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
+#             documents.append({
+#                 'document_type': request.data.get(f'documents[{i}][document_type]'),
+#                 'file': request.FILES.get(f'documents[{i}][file]')
+#             })
+#             i += 1
+#         if documents:
+#             payload['documents'] = documents
+
+#         logger.info(f"Full POST request payload (dict): {payload}")
+
+#         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
+#         if not serializer.is_valid():
+#             logger.error(f"Validation errors: {serializer.errors}")
+#             return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+#         self.perform_create(serializer)
+
+#         # PATCH num_of_applications in JobRequisition
+#         try:
+#             patch_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/{job_requisition['id']}/"
+#             patch_resp = requests.patch(
+#                 patch_url,
+#                 json={"num_of_applications": (job_requisition.get("num_of_applications", 0) + 1)},
+#                 headers={'Authorization': request.headers.get('Authorization', '')}
+#             )
+#             logger.info(f"PATCH num_of_applications response: {patch_resp.status_code}")
+#         except Exception as e:
+#             logger.error(f"Failed to PATCH num_of_applications: {str(e)}")
+
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 

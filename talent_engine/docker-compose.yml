@@ -35,29 +35,6 @@ services:
         condition: service_healthy
     networks:
       - auth_service_default
-    command: >
-      sh -c "python manage.py check &&
-             python manage.py migrate &&
-             gunicorn --bind 0.0.0.0:8002 talent_engine.wsgi:application"
-
-  talent_postgres:
-    image: postgres:15
-    container_name: talent_postgres
-    environment:
-      POSTGRES_DB: talent_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    volumes:
-      - talent_postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
-    networks:
-      - auth_service_default
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d talent_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   kafka-consumer:
     build:
@@ -83,6 +60,25 @@ services:
     networks:
       - auth_service_default
     command: python consumer.py
+
+  talent_postgres:
+    image: postgres:15
+    container_name: talent_postgres
+    environment:
+      POSTGRES_DB: talent_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - talent_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - auth_service_default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d talent_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   talent_postgres_data:

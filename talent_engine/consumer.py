@@ -1,51 +1,54 @@
 # talent_engine/talent_engine/consumer.py
 import os
 import json
-
-# Set DJANGO_SETTINGS_MODULE early
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "talent_engine.settings")
-
-# Initialize Django before any Django-related imports
 import django
+import logging
+from kafka import KafkaConsumer
+
+# Setup Django environment
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'talent_engine.settings')
 django.setup()
 
-# Now safe to import Django modules
-from kafka import KafkaConsumer
-from django.conf import settings
-from django.db import connection
+from jobRequisitions.models import JobRequisition
 
-def create_or_update_tenant(data):
-    tenant_id = data.get("id")
-    name = data.get("name")
-    schema_name = data.get("schema_name")
-    
-    with connection.cursor() as cursor:
-        cursor.execute(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
-    
-    tenant, created = TenantRef.objects.get_or_create(
-        id=tenant_id,
-        defaults={"name": name, "schema_name": schema_name}
-    )
-    if not created:
-        tenant.name = name
-        tenant.schema_name = schema_name
-        tenant.save()
+# Configure logging to output to console
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('talent_engine')
 
-def consume_kafka_messages():
-    consumer = KafkaConsumer(
-        settings.KAFKA_TOPICS["tenant"],
-        bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
-        auto_offset_reset="latest",
-        enable_auto_commit=True,
-        group_id="talent_engine_tenant_group",
-        value_deserializer=lambda x: json.loads(x.decode("utf-8"))
-    )
-    
-    for message in consumer:
-        data = message.value
-        if message.topic == settings.KAFKA_TOPICS["tenant"]:
-            create_or_update_tenant(data)
-        print(f"Processed message from {message.topic}: {data}")
+KAFKA_BOOTSTRAP_SERVERS = os.environ.get('KAFKA_BOOTSTRAP_SERVERS', 'kafka:9092')
 
-if __name__ == "__main__":
-    consume_kafka_messages()
+consumer = KafkaConsumer(
+    'job_application_events',
+    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+    value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+    group_id='talent_engine_group'
+)
+
+logger.info("Kafka consumer started and listening on topic 'job_application_events'...")
+
+for message in consumer:
+    logger.info(f"Received Kafka message: {message.value}")
+    data = message.value
+    tenant_id = data.get('tenant_id')
+    job_requisition_id = data.get('job_requisition_id')
+    event = data.get('event')
+    if tenant_id and job_requisition_id and event == "job_application_created":
+        try:
+            job_requisition = JobRequisition.active_objects.get(id=job_requisition_id, tenant_id=tenant_id)
+            job_requisition.num_of_applications = (job_requisition.num_of_applications or 0) + 1
+            job_requisition.save(update_fields=['num_of_applications'])
+            logger.info(
+                f"SUCCESS: num_of_applications updated for requisition {job_requisition_id} (tenant {tenant_id}) to {job_requisition.num_of_applications}"
+            )
+        except JobRequisition.DoesNotExist:
+            logger.error(
+                f"FAILED: JobRequisition {job_requisition_id} not found for tenant {tenant_id}"
+            )
+        except Exception as e:
+            logger.error(
+                f"FAILED: Error updating num_of_applications for requisition {job_requisition_id} (tenant {tenant_id}): {str(e)}"
+            )
+    else:
+        logger.warning(
+            f"IGNORED: Message missing tenant_id, job_requisition_id, or event type. Data: {data}"
+        )
