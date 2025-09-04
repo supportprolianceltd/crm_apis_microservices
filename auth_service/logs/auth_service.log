@@ -491,3 +491,305 @@ LINE 1: ...id", "users_customuser"."has_accepted_terms" FROM "users_cus...
 2025-09-02 16:57:36,864 [INFO] core: Retrieving tenant: 2 for tenant proliance
 2025-09-02 16:58:36,456 [INFO] core: Retrieving tenant: 2 for tenant proliance
 2025-09-02 16:59:34,223 [INFO] core: Retrieving tenant: 2 for tenant proliance
+2025-09-02 17:00:34,803 [INFO] core: Retrieving tenant: 2 for tenant proliance
+2025-09-02 19:10:30,087 [WARNING] django.request: Unauthorized: /api/user/protected/
+2025-09-02 19:46:37,241 [ERROR] django.request: Internal Server Error: /api/token/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 46, in post
+    serializer.is_valid(raise_exception=True)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 85, in validate
+    data = super().validate(attrs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 75, in validate
+    refresh = self.get_token(self.user)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 75, in get_token
+    token = issue_rsa_jwt(payload, user.tenant)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/utils/jwt_rsa.py", line 46, in issue_rsa_jwt
+    raise RuntimeError("No active RSA keypair available for tenant")
+RuntimeError: No active RSA keypair available for tenant
+2025-09-02 19:52:25,000 [ERROR] django.request: Internal Server Error: /api/token/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 46, in post
+    serializer.is_valid(raise_exception=True)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 85, in validate
+    data = super().validate(attrs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 75, in validate
+    refresh = self.get_token(self.user)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 75, in get_token
+    token = issue_rsa_jwt(payload, user.tenant)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/utils/jwt_rsa.py", line 46, in issue_rsa_jwt
+    raise RuntimeError("No active RSA keypair available for tenant")
+RuntimeError: No active RSA keypair available for tenant
+2025-09-03 07:03:02,310 [ERROR] django.request: Internal Server Error: /api/token/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 46, in post
+    serializer.is_valid(raise_exception=True)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 85, in validate
+    data = super().validate(attrs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 75, in validate
+    refresh = self.get_token(self.user)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 75, in get_token
+    token = issue_rsa_jwt(payload, user.tenant)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/utils/jwt_rsa.py", line 46, in issue_rsa_jwt
+    raise RuntimeError("No active RSA keypair available for tenant")
+RuntimeError: No active RSA keypair available for tenant
+2025-09-03 09:57:30,727 [ERROR] django.request: Internal Server Error: /api/token/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 46, in post
+    serializer.is_valid(raise_exception=True)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 85, in validate
+    data = super().validate(attrs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 75, in validate
+    refresh = self.get_token(self.user)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 75, in get_token
+    token = issue_rsa_jwt(payload, user.tenant)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/utils/jwt_rsa.py", line 46, in issue_rsa_jwt
+    raise RuntimeError("No active RSA keypair available for tenant")
+RuntimeError: No active RSA keypair available for tenant
+2025-09-03 10:28:20,275 [ERROR] django.request: Internal Server Error: /api/token/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 46, in post
+    serializer.is_valid(raise_exception=True)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 85, in validate
+    data = super().validate(attrs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 78, in validate
+    data["access"] = str(refresh.access_token)
+                         ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DummyToken' object has no attribute 'access_token'
+2025-09-03 11:21:14,521 [WARNING] django.request: Unauthorized: /api/user/users/
+2025-09-03 11:21:31,138 [WARNING] django.request: Unauthorized: /api/user/users/
+2025-09-03 11:52:38,024 [WARNING] django.request: Unauthorized: /api/user/users/
+2025-09-03 13:21:49,825 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:22:19,045 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8
+2025-09-03 13:22:34,105 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:22:37,824 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8
+2025-09-03 13:31:55,335 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:31:58,678 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:32:05,414 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:32:07,999 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8
+2025-09-03 13:32:19,621 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:33:16,100 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:38:42,511 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:38:47,664 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:42:15,598 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:42:43,830 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:42:57,176 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:48:08,696 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:48:28,841 [WARNING] django.request: Unauthorized: /api/user/users/
+2025-09-03 13:48:54,639 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:53:28,775 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:58:09,051 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:58:25,600 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 13:58:28,018 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:07:16,955 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:08:04,334 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:08:16,117 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:08:32,018 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:10:25,136 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:16:49,442 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:22:21,508 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:26:16,477 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:26:23,327 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:32:02,448 [WARNING] django.request: Unauthorized: /api/user/users/
+2025-09-03 14:32:49,106 [WARNING] django.request: Not Found: /api/public-key/7e849fe8-d5d0-45d4-a0cc-745a37ef186f/
+2025-09-03 14:32:52,858 [WARNING] django.request: Not Found: /api/public-key/7e849fe8-d5d0-45d4-a0cc-745a37ef186f/
+2025-09-03 14:32:55,263 [WARNING] django.request: Not Found: /api/public-key/7e849fe8-d5d0-45d4-a0cc-745a37ef186f/
+2025-09-03 14:33:05,253 [WARNING] django.request: Not Found: /api/public-key/7e849fe8-d5d0-45d4-a0cc-745a37ef186f/
+2025-09-03 14:33:32,604 [WARNING] django.request: Not Found: /api/public-key/7e849fe8-d5d0-45d4-a0cc-745a37ef186f/
+2025-09-03 14:33:50,154 [WARNING] django.request: Not Found: /api/public-key/15a6b914-ea21-4a18-b1cd-1e8b10284e9c/
+2025-09-03 14:34:48,917 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:35:25,598 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:35:44,387 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:36:21,973 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:36:48,674 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:36:58,868 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:37:55,663 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:38:10,068 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:38:10,854 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:38:11,291 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:38:35,443 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:38:56,944 [WARNING] django.request: Unauthorized: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:39:34,842 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:41:35,089 [WARNING] django.request: Unauthorized: /api/public-key/6d23e996-e873-467c-a1af-26daf0bfc034/
+2025-09-03 14:42:35,361 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 14:59:35,487 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 15:09:10,235 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 15:18:02,640 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 15:26:05,268 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 15:51:28,365 [WARNING] django.request: Forbidden: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 15:51:36,427 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 15:52:01,932 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 15:52:02,540 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 15:52:03,020 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 15:57:05,801 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 16:05:08,448 [WARNING] django.request: Unauthorized: /api/tenant/tenants/2/
+2025-09-03 16:05:08,461 [WARNING] django.request: Unauthorized: /api/user/users/3/
+2025-09-03 16:05:08,475 [WARNING] django.request: Unauthorized: /api/user/users/3/
+2025-09-03 16:05:40,103 [WARNING] django.request: Unauthorized: /api/tenant/tenants/2/
+2025-09-03 16:05:40,112 [WARNING] django.request: Unauthorized: /api/user/users/3/
+2025-09-03 16:05:40,122 [WARNING] django.request: Unauthorized: /api/user/users/3/
+2025-09-03 17:07:48,751 [WARNING] django.request: Unauthorized: /api/tenant/tenants/2/
+2025-09-03 17:07:48,773 [WARNING] django.request: Unauthorized: /api/user/users/3/
+2025-09-03 17:07:48,788 [WARNING] django.request: Unauthorized: /api/user/users/3/
+2025-09-03 18:22:35,884 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 18:23:17,139 [WARNING] django.request: Not Found: /api/public-key/e6a40286-9ae6-4475-bafd-223221b951d8/
+2025-09-03 18:41:49,331 [WARNING] django.request: Unauthorized: /api/user/users/
+2025-09-03 18:41:53,540 [WARNING] django.request: Unauthorized: /api/user/users/
+2025-09-03 18:42:08,380 [WARNING] django.request: Unauthorized: /api/tenant/tenants/2/
+2025-09-03 18:42:08,393 [WARNING] django.request: Unauthorized: /api/user/users/3/
+2025-09-03 18:42:08,401 [WARNING] django.request: Unauthorized: /api/user/users/3/
+2025-09-03 19:15:26,052 [WARNING] django.request: Unauthorized: /api/tenant/tenants/2/
+2025-09-03 19:15:26,069 [WARNING] django.request: Unauthorized: /api/user/users/3/
+2025-09-03 19:15:26,077 [WARNING] django.request: Unauthorized: /api/user/users/3/

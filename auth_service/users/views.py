@@ -1,16 +1,21 @@
 import logging
-from multiprocessing.connection import Client
-import jwt
 import uuid
 import secrets
 import string
+import json
 from datetime import timedelta
+from multiprocessing.connection import Client
+
+import jwt
 
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db import transaction, ProgrammingError
 from django.urls import reverse
 from django.utils import timezone
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate
 
 from rest_framework import viewsets, status, serializers, generics
 from rest_framework.views import APIView
@@ -22,8 +27,19 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from django_tenants.utils import tenant_context
 
+from auth_service.utils.jwt_rsa  import validate_rsa_jwt, issue_rsa_jwt
+from .utils import get_daily_usage
+from django.http import JsonResponse
+from .models import RSAKeyPair
+from core.models import Tenant
+from cryptography.hazmat.primitives import serialization
+import base64
+
+from core.models import Tenant, Branch, TenantConfig
+from users.models import CustomUser
+
 from .models import (
-    CustomUser,ClientProfile,
+    ClientProfile,
     PasswordResetToken,
     ProofOfAddress,
     InsuranceVerification,
@@ -31,14 +47,19 @@ from .models import (
     LegalWorkEligibility,
     UserSession,
 )
-from .serializers import (
-    CustomUserSerializer,ClientCreateSerializer, ClientProfileSerializer,ClientDetailSerializer,
-    UserCreateSerializer,PasswordResetConfirmSerializer, AdminUserCreateSerializer,
-    UserBranchUpdateSerializer, PasswordResetRequestSerializer, UserSessionSerializer,
-)
-from .utils import get_daily_usage
 
-from core.models import Tenant, Branch, TenantConfig
+from .serializers import (
+    CustomUserSerializer,
+    ClientCreateSerializer,
+    ClientProfileSerializer,
+    ClientDetailSerializer,
+    UserCreateSerializer,
+    PasswordResetConfirmSerializer,
+    AdminUserCreateSerializer,
+    UserBranchUpdateSerializer,
+    PasswordResetRequestSerializer,
+    UserSessionSerializer,
+)
 
 logger = logging.getLogger('users')
 
@@ -789,3 +810,72 @@ class ClientViewSet(viewsets.ModelViewSet):
                 raise PermissionDenied("You do not have permission to delete clients.")
             self.perform_destroy(instance)
             return Response(status=status.HTTP_204_NO_CONTENT)
+        
+
+
+@csrf_exempt
+def token_view(request):
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    try:
+        body = json.loads(request.body.decode() or "{}")
+        email = body.get("email")
+        password = body.get("password")
+        if not email or not password:
+            return JsonResponse({"error": "Email and password required"}, status=400)
+        user = authenticate(email=email, password=password)
+        if not user or not user.tenant:
+            return JsonResponse({"error": "Invalid credentials or tenant"}, status=401)
+        payload = {
+            "sub": user.email,
+            "role": user.role,
+            "tenant_id": user.tenant.id,
+        }
+        token = issue_rsa_jwt(payload, user.tenant)
+        return JsonResponse({"access_token": token})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    
+
+
+@csrf_exempt
+def protected_view(request):
+    auth = request.META.get("HTTP_AUTHORIZATION", "")
+    if not auth.startswith("Bearer "):
+        return JsonResponse({"error": "Missing token"}, status=401)
+    token = auth.split(" ", 1)[1].strip()
+    try:
+        claims = validate_rsa_jwt(token)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=401)
+    return JsonResponse({"hello": claims.get("sub"), "claims": claims})
+
+
+
+def pem_to_jwk(public_pem, kid):
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    import json
+
+    pubkey = serialization.load_pem_public_key(public_pem.encode(), backend=default_backend())
+    numbers = pubkey.public_numbers()
+    n = base64.urlsafe_b64encode(numbers.n.to_bytes((numbers.n.bit_length() + 7) // 8, 'big')).rstrip(b'=').decode('utf-8')
+    e = base64.urlsafe_b64encode(numbers.e.to_bytes((numbers.e.bit_length() + 7) // 8, 'big')).rstrip(b'=').decode('utf-8')
+    return {
+        "kty": "RSA",
+        "use": "sig",
+        "kid": kid,
+        "alg": "RS256",
+        "n": n,
+        "e": e,
+    }
+
+def jwks_view(request, tenant_id):
+    try:
+        tenant = Tenant.objects.get(id=tenant_id)
+    except Tenant.DoesNotExist:
+        return JsonResponse({"error": "Tenant not found"}, status=404)
+    keys = RSAKeyPair.objects.filter(tenant=tenant, active=True)
+    jwks = {"keys": [pem_to_jwk(k.public_key_pem, k.kid) for k in keys]}
+    return JsonResponse(jwks)

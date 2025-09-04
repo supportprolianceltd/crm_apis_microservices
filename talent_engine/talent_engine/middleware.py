@@ -1,17 +1,12 @@
 # MicroserviceJWTMiddleware: Decodes JWT from Authorization header and attaches payload to request
 import jwt
+import requests
+import logging
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework.exceptions import AuthenticationFailed
-
-import logging
-from django_tenants.utils import get_tenant_model, get_public_schema_name
-from django.db import connection
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.exceptions import InvalidToken
 from django.http import JsonResponse
-import requests
-from django.conf import settings
+from django.db import connection
 
 logger = logging.getLogger('talent_engine')
 
@@ -146,4 +141,88 @@ class CustomTenantMiddleware:
         # -------------------------------
         # Step 4: Continue request processing
         # -------------------------------
+        return self.get_response(request)
+
+class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
+    """
+    Middleware to decode RS256 JWTs using the public key fetched from the Auth Service by 'kid'.
+    """
+    def process_request(self, request):
+        auth = request.headers.get('Authorization', '')
+        if not auth.startswith('Bearer '):
+            return
+        token = auth.split(' ')[1]
+        try:
+            unverified_header = jwt.get_unverified_header(token)
+            kid = unverified_header.get("kid")
+            if not kid:
+                raise AuthenticationFailed("No 'kid' in token header.")
+
+            # Decode token without verifying to get tenant_id and tenant_schema
+            unverified_payload = jwt.decode(token, options={"verify_signature": False})
+            tenant_id = unverified_payload.get("tenant_id")
+            tenant_schema = unverified_payload.get("tenant_schema")
+
+            # Fetch public key from Auth Service
+            resp = requests.get(
+                f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/?tenant_id={tenant_id}",
+                timeout=5
+            )
+            if resp.status_code != 200:
+                logger.error(f"Public key fetch failed: {resp.status_code} {resp.text}")
+                raise AuthenticationFailed("Could not fetch public key for token.")
+
+            public_key = resp.json().get("public_key")
+            if not public_key:
+                raise AuthenticationFailed("Public key not found.")
+
+            payload = jwt.decode(token, public_key, algorithms=["RS256"])
+            request.jwt_payload = payload
+            request.user = None
+
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'error': 'Token has expired'}, status=401)
+        except jwt.InvalidTokenError as e:
+            return JsonResponse({'error': f'Invalid token: {str(e)}'}, status=401)
+        except Exception as e:
+            return JsonResponse({'error': f'JWT error: {str(e)}'}, status=401)
+
+class CustomTenantSchemaMiddleware:
+    """
+    Middleware to switch DB schema based on tenant_schema in JWT or request data.
+    No local tenant model required!
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        logger.info(f"Incoming request path: {request.path}")
+        logger.info(f"Authorization header: {request.META.get('HTTP_AUTHORIZATION')}")
+
+        # Step 1: Handle public endpoints
+        public_paths = ['/api/docs/', '/api/schema/', '/api/health/']
+        if any(request.path.startswith(path) for path in public_paths):
+            connection.set_schema_to_public()
+            logger.info("Set public schema for public endpoint")
+            return self.get_response(request)
+
+        # Step 2: Extract tenant_schema from JWT payload (set by JWT middleware)
+        jwt_payload = getattr(request, 'jwt_payload', None)
+        tenant_schema = None
+        if jwt_payload:
+            tenant_schema = jwt_payload.get('tenant_schema')
+        # Optionally, fallback to request.data or query params if needed
+
+        if not tenant_schema:
+            logger.error("Tenant schema missing in JWT or request.")
+            return JsonResponse({'error': 'Tenant schema missing from token'}, status=403)
+
+        # Step 3: Switch schema
+        try:
+            connection.set_schema(tenant_schema)
+            logger.info(f"Set schema to: {tenant_schema}")
+        except Exception as e:
+            logger.error(f"Schema switch failed: {str(e)}")
+            return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
+
         return self.get_response(request)

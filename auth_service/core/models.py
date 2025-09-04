@@ -87,12 +87,3 @@ class TenantConfig(models.Model):
 
 
 
-class TenantKey(models.Model):
-    tenant = models.OneToOneField(Tenant, on_delete=models.CASCADE, related_name='rsa_keys')
-    key_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    public_key = models.TextField()
-    private_key = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"RSA Key for {self.tenant.schema_name}"

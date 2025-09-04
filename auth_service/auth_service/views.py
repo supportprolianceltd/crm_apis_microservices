@@ -18,16 +18,60 @@ import json
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
-import jwt
+from datetime import datetime
 import requests
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.core.cache import cache
 import random
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model, authenticate
+from auth_service.utils.jwt_rsa import issue_rsa_jwt, decode_rsa_jwt, blacklist_refresh_token
+from users.models import BlacklistedToken, RSAKeyPair
 
 logger = logging.getLogger(__name__)
+
+from rest_framework import serializers
+from users.models import CustomUser, UserProfile
+
+class UserProfileMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = [
+            "id",
+            "user",
+            "employee_id",
+            "access_duration",
+            "system_access_rostering",
+            "system_access_hr",
+            "system_access_recruitment",
+            "system_access_training",
+            "system_access_finance",
+            "system_access_compliance",
+            "system_access_co_superadmin",
+            "system_access_asset_management"
+        ]
+
+class CustomUserMinimalSerializer(serializers.ModelSerializer):
+    profile = UserProfileMinimalSerializer(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "id",
+            "email",
+            "username",
+            "first_name",
+            "last_name",
+            "role",
+            "job_role",
+            "tenant",
+            "branch",
+            "has_accepted_terms",
+            "profile"
+        ]
+
+
 
 class TokenValidateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -55,108 +99,55 @@ class TokenValidateView(APIView):
 
 
 
-# class CustomTokenSerializer(TokenObtainPairSerializer):
-#     @classmethod
-#     def get_token(cls, user):
-#         token = super().get_token(user)
-#         token['tenant_id'] = user.tenant.id
-#         token['tenant_schema'] = user.tenant.schema_name
-#         token['has_accepted_terms'] = user.has_accepted_terms  # Add to token
-#         return token
 
-#     def validate(self, attrs):
-#         data = super().validate(attrs)
-#         user = self.user
-#         # Check if token was issued before last password reset
-#         refresh = RefreshToken(data['refresh'])
-#         decoded_token = jwt.decode(data['access'], settings.SECRET_KEY, algorithms=["HS256"])
-#         token_iat = decoded_token.get('iat')
-#         if user.last_password_reset and token_iat < user.last_password_reset.timestamp():
-#             raise serializers.ValidationError("Token is invalid due to recent password reset.")
-#         data['tenant_id'] = user.tenant.id
-#         data['tenant_schema'] = user.tenant.schema_name
-#         data['user'] = CustomUserSerializer(user, context=self.context).data
-#         data['has_accepted_terms'] = user.has_accepted_terms  # Include in response
-
-#         # --- Send notification event ---
-#         try:
-#             event_payload = {
-#                 "metadata": {
-#                     "tenant_id": "test-tenant-1",
-#                     "event_type": "user.login.succeeded",
-#                     "event_id": f"evt-{uuid.uuid4()}",
-#                     "created_at": datetime.utcnow().isoformat() + "Z",
-#                     "source": "auth-service"
-#                 },
-#                 "data": {
-#                     "user_email": user.email,
-#                     "ip_address": self.context['request'].META.get('REMOTE_ADDR', ''),
-#                     "timestamp": datetime.utcnow().isoformat() + "Z",
-#                     "user_id": f"user-{user.id}",
-#                     "user_agent": self.context['request'].META.get('HTTP_USER_AGENT', '')
-#                 }
-#             }
-#             requests.post(settings.NOTIFICATIONS_EVENT_URL, json=event_payload, timeout=3)
-#             # print("Login event notification sent.")
-#             # logger.info(f"Failed to send login event notification: {event_payload}")
-#         except Exception as e:
-#             logger.error(f"Failed to send login event notification: {e}")
-
-#         return data
 
 class CustomTokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
-        token = super().get_token(user)
-        # Add tenant info
-        token['tenant_id'] = user.tenant.id
-        token['tenant_schema'] = user.tenant.schema_name
-        token['has_accepted_terms'] = user.has_accepted_terms
-
-        # Add all user fields as a nested user object (excluding password)
-        user_data = CustomUserSerializer(user).data
-        user_data.pop("password", None)  # Remove password if present
-        token['user'] = user_data
-        # Add user email directly to the token
-        token['email'] = user.email
-
-        return token
+        return super().get_token(user)
 
     def validate(self, attrs):
-        data = super().validate(attrs)
-        user = self.user
-        refresh = RefreshToken(data['refresh'])
-        decoded_token = jwt.decode(data['access'], settings.SECRET_KEY, algorithms=["HS256"])
-        token_iat = decoded_token.get('iat')
-        if user.last_password_reset and token_iat < user.last_password_reset.timestamp():
-            raise serializers.ValidationError("Token is invalid due to recent password reset.")
-        data['tenant_id'] = user.tenant.id
-        data['tenant_schema'] = user.tenant.schema_name
-        data['user'] = CustomUserSerializer(user, context=self.context).data
-        data['has_accepted_terms'] = user.has_accepted_terms
+        user = authenticate(
+            email=attrs.get("email"),
+            password=attrs.get("password")
+        )
+        if not user:
+            raise serializers.ValidationError("Invalid credentials")
 
-        # --- Send notification event ---
-        try:
-            event_payload = {
-                "metadata": {
-                    "tenant_id": "test-tenant-1",
-                    "event_type": "user.login.succeeded",
-                    "event_id": f"evt-{uuid.uuid4()}",
-                    "created_at": datetime.utcnow().isoformat() + "Z",
-                    "source": "auth-service"
-                },
-                "data": {
-                    "user_email": user.email,
-                    "ip_address": self.context['request'].META.get('REMOTE_ADDR', ''),
-                    "timestamp": datetime.utcnow().isoformat() + "Z",
-                    "user_id": f"user-{user.id}",
-                    "user_agent": self.context['request'].META.get('HTTP_USER_AGENT', '')
-                }
-            }
-            requests.post(settings.NOTIFICATIONS_EVENT_URL, json=event_payload, timeout=3)
-        except Exception as e:
-            logger.error(f"Failed to send login event notification: {e}")
+        # Access token payload
+        access_payload = {
+            "jti": str(uuid.uuid4()),  # Unique JWT ID
+            "sub": user.email,
+            "role": user.role,
+            "tenant_id": user.tenant.id,
+            "tenant_schema": user.tenant.schema_name,
+            "has_accepted_terms": user.has_accepted_terms,
+            "user": CustomUserMinimalSerializer(user).data,
+            "email": user.email,
+            "type": "access",
+            "exp": (timezone.now() + timedelta(minutes=15)).timestamp(),
+        }
+        access_token = issue_rsa_jwt(access_payload, user.tenant)
 
+        # Refresh token payload
+        refresh_jti = str(uuid.uuid4())
+        refresh_payload = {
+            "jti": refresh_jti,
+            "sub": user.email,
+            "tenant_id": user.tenant.id,
+            "type": "refresh",
+            "exp": (timezone.now() + timedelta(days=7)).timestamp(),
+        }
+        refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
+
+        data = {
+            "access": access_token,
+            "refresh": refresh_token,
+            "tenant_id": user.tenant.id,
+            "tenant_schema": user.tenant.schema_name,
+            "user": CustomUserMinimalSerializer(user).data,
+            "has_accepted_terms": user.has_accepted_terms,
+        }
         return data
 
 
@@ -187,9 +178,58 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
 
 
 
-class CustomTokenRefreshView(TokenRefreshView):
-    serializer_class = CustomTokenRefreshSerializer
+class CustomTokenRefreshView(APIView):
+    permission_classes = [AllowAny]
 
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            payload = decode_rsa_jwt(refresh_token)
+            if payload.get("type") != "refresh":
+                return Response({"detail": "Invalid token type."}, status=status.HTTP_400_BAD_REQUEST)
+            jti = payload.get("jti")
+            if BlacklistedToken.objects.filter(jti=jti).exists():
+                return Response({"detail": "Token blacklisted."}, status=status.HTTP_401_UNAUTHORIZED)
+
+            # Blacklist the old refresh token (rotation)
+            exp = datetime.fromtimestamp(payload["exp"])
+            BlacklistedToken.objects.create(jti=jti, expires_at=exp)
+
+            # Issue new refresh token
+            user = get_user_model().objects.get(email=payload["sub"])
+            new_refresh_jti = str(uuid.uuid4())
+            refresh_payload = {
+                "jti": new_refresh_jti,
+                "sub": user.email,
+                "tenant_id": user.tenant.id,
+                "type": "refresh",
+                "exp": (timezone.now() + timedelta(days=7)).timestamp(),
+            }
+            new_refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
+
+            # Issue new access token
+            access_payload = {
+                "jti": str(uuid.uuid4()),
+                "sub": user.email,
+                "role": user.role,
+                "tenant_id": user.tenant.id,
+                "tenant_schema": user.tenant.schema_name,
+                "has_accepted_terms": user.has_accepted_terms,
+                "user": CustomUserMinimalSerializer(user).data,
+                "email": user.email,
+                "type": "access",
+                "exp": (timezone.now() + timedelta(minutes=15)).timestamp(),
+            }
+            access_token = issue_rsa_jwt(access_payload, user.tenant)
+
+            return Response({
+                "access": access_token,
+                "refresh": new_refresh_token
+            })
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
 class LoginWith2FAView(TokenObtainPairView):
     serializer_class = CustomTokenSerializer
@@ -258,10 +298,56 @@ class Verify2FAView(APIView):
                 "access": str(access),
                 "tenant_id": user.tenant.id,
                 "tenant_schema": user.tenant.schema_name,
-                "user": CustomUserSerializer(user).data,
+                "user": CustomUserMinimalSerializer(user).data,
                 "has_accepted_terms": user.has_accepted_terms
             }
             cache.delete(f"2fa_{user.id}")
             return Response(data, status=200)
 
 
+
+class LogoutView(APIView):
+    permission_classes = [AllowAny]  # Or IsAuthenticated if you require auth
+
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            # Blacklist the refresh token
+            blacklist_refresh_token(refresh_token)
+            return Response({"detail": "Logged out successfully."})
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+# class PublicKeyView(APIView):
+#     permission_classes = []
+
+#     def get(self, request, kid):
+#         keypair = RSAKeyPair.objects.filter(kid=kid, active=True).first()
+#         if not keypair:
+#             return Response({"error": "Key not found"}, status=404)
+#         return Response({"public_key": keypair.public_key_pem})
+
+
+from django_tenants.utils import tenant_context
+from core.models import Tenant
+
+class PublicKeyView(APIView):
+    permission_classes = []
+
+    def get(self, request, kid):
+        tenant_id = request.GET.get("tenant_id")
+        if tenant_id:
+            try:
+                tenant = Tenant.objects.get(id=tenant_id)
+                with tenant_context(tenant):
+                    keypair = RSAKeyPair.objects.filter(kid=kid, active=True).first()
+            except Tenant.DoesNotExist:
+                keypair = None
+        else:
+            keypair = RSAKeyPair.objects.filter(kid=kid, active=True).first()
+
+        if not keypair:
+            return Response({"error": "Key not found"}, status=404)
+        return Response({"public_key": keypair.public_key_pem})

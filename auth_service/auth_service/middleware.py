@@ -2,12 +2,13 @@
 from django_tenants.middleware import TenantMainMiddleware
 from django_tenants.utils import get_public_schema_name
 from core.models import Domain, Tenant
-from users.models import PasswordResetToken
+from users.models import PasswordResetToken, RSAKeyPair
 from django.http import JsonResponse
 from django.db import connection
 import logging
 import json
-from rest_framework_simplejwt.authentication import JWTAuthentication
+import jwt
+
 
 logger = logging.getLogger(__name__)
 
@@ -92,16 +93,21 @@ class CustomTenantMiddleware(TenantMainMiddleware):
 
         # Try JWT authentication
         try:
-            auth = JWTAuthentication().authenticate(request)
-            if auth:
-                user, token = auth
-                tenant_id = token.get('tenant_id')
-                if tenant_id:
-                    tenant = Tenant.objects.get(id=tenant_id)
-                    request.tenant = tenant
-                    connection.set_schema(tenant.schema_name)
-                    logger.info(f"Set tenant schema from JWT: {tenant.schema_name}")
-                    return
+            auth_header = request.headers.get('Authorization', '')
+            if auth_header.startswith('Bearer '):
+                token = auth_header.split(' ')[1]
+                # Extract kid from JWT header
+                unverified_header = jwt.get_unverified_header(token)
+                kid = unverified_header.get("kid")
+                keypair = RSAKeyPair.objects.filter(kid=kid, active=True).first()
+                if not keypair:
+                    logger.error("No RSAKeyPair found for kid")
+                    return JsonResponse({'error': 'Invalid token key'}, status=401)
+                tenant = keypair.tenant
+                request.tenant = tenant
+                connection.set_schema(tenant.schema_name)
+                logger.info(f"Set tenant schema from JWT kid: {tenant.schema_name}")
+                return
         except Exception as e:
             logger.debug(f"JWT authentication failed: {str(e)}")
 

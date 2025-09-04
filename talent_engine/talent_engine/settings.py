@@ -85,7 +85,8 @@ INSTALLED_APPS = [
 
 # ======================== Middleware ========================
 MIDDLEWARE = [
-    'talent_engine.middleware.MicroserviceJWTMiddleware',
+    'talent_engine.middleware.MicroserviceRS256JWTMiddleware',
+    'talent_engine.middleware.CustomTenantSchemaMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # must be first for CORS
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -115,22 +116,22 @@ REST_FRAMEWORK = {
 }
 
 # ======================== Simple JWT ========================
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': env('DJANGO_SECRET_KEY'),
-    'VERIFYING_KEY': env('DJANGO_SECRET_KEY'),
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-}
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+#     'ROTATE_REFRESH_TOKENS': False,
+#     'BLACKLIST_AFTER_ROTATION': True,
+#     'ALGORITHM': 'HS256',
+#     'SIGNING_KEY': env('DJANGO_SECRET_KEY'),
+#     'VERIFYING_KEY': env('DJANGO_SECRET_KEY'),
+#     'AUTH_HEADER_TYPES': ('Bearer',),
+#     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+# }
 
 
 # ======================== External Services ========================
-AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth_service:8001')
-JOB_APPLICATIONS_URL = env('JOB_APPLICATIONS_URL', default='http://job_applications:8003')
+AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
+JOB_APPLICATIONS_URL = env('JOB_APPLICATIONS_URL', default='http://job-applications:8003')
 
 SUPABASE_URL = env('SUPABASE_URL', default='')
 SUPABASE_KEY = env('SUPABASE_KEY', default='')

@@ -1,11 +1,58 @@
-2025-09-02 16:49:28,432 [INFO] talent_engine: Job requisition accessed via link: Registered and Resident Doctor for tenant 2
-2025-09-02 16:49:28,642 [INFO] talent_engine: Received Kafka message: {'tenant_id': '2', 'job_requisition_id': 'PRO-0018', 'event': 'job_application_created'}
-2025-09-02 16:49:28,664 [INFO] talent_engine: SUCCESS: num_of_applications updated for requisition PRO-0018 (tenant 2) to 2
-2025-09-02 16:49:33,124 [INFO] talent_engine: Job requisition accessed via link: Registered and Resident Doctor for tenant 2
-2025-09-02 16:49:33,129 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-09-02 16:49:33,131 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-09-02 16:49:33,132 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
-2025-09-02 16:49:33,153 [INFO] talent_engine: Job requisition accessed via link: Registered and Resident Doctor for tenant 2
-2025-09-02 16:49:33,157 [ERROR] talent_engine: Error fetching tenant domain for 2: list index out of range
-2025-09-02 16:49:33,159 [ERROR] talent_engine: Error fetching requested_by 3: list index out of range
-2025-09-02 16:49:33,161 [ERROR] talent_engine: Error fetching updated_by 3: list index out of range
+2025-09-03 14:35:25,603 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 14:35:25,605 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 14:35:44,390 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 14:35:44,392 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 14:36:21,977 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 14:36:21,979 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 14:37:55,666 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 14:37:55,668 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 14:38:10,071 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 14:38:10,073 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 14:38:10,857 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 14:38:10,860 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 14:38:11,294 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 14:38:11,295 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 14:39:34,845 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 14:39:34,846 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 14:42:35,365 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 14:42:35,367 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 14:57:37,193 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 14:59:35,495 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 14:59:35,501 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 15:09:10,238 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 15:09:10,240 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 15:17:19,102 [INFO] talent_engine: Kafka consumer started and listening on topic 'job_application_events'...
+2025-09-03 15:18:02,644 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 15:18:02,650 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 15:26:05,272 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 15:26:05,278 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 15:51:36,434 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 15:51:36,439 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 15:52:01,935 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 15:52:01,936 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 15:52:02,542 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 15:52:02,543 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 15:52:03,023 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 15:52:03,025 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 15:56:26,335 [INFO] talent_engine: Kafka consumer started and listening on topic 'job_application_events'...
+2025-09-03 15:57:05,809 [ERROR] talent_engine: Public key fetch failed: 404 {"error":"Key not found"}
+2025-09-03 15:57:05,826 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 16:04:50,595 [INFO] talent_engine: Kafka consumer started and listening on topic 'job_application_events'...
+2025-09-03 16:05:08,452 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-03 16:05:08,465 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-03 16:05:08,478 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-03 16:05:40,106 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-03 16:05:40,115 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-03 16:05:40,124 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-03 17:07:30,379 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions
+2025-09-03 17:07:48,762 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-03 17:07:48,777 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-03 17:07:48,791 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-03 17:11:44,540 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 17:40:46,114 [WARNING] django.request: Unauthorized: /api/talent-engine/requisitions/
+2025-09-03 18:42:08,384 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-03 18:42:08,395 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-03 18:42:08,403 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-03 19:15:26,059 [ERROR] talent_engine: Failed to fetch tenant 2 from auth_service
+2025-09-03 19:15:26,071 [ERROR] talent_engine: Failed to fetch user 3 from auth_service
+2025-09-03 19:15:26,079 [ERROR] talent_engine: Failed to fetch user 3 from auth_service

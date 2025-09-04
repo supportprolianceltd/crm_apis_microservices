@@ -12,7 +12,7 @@ from .views import (
     UserBranchUpdateView,
     TenantUsersListView,
     BranchUsersListView,
-    UserSessionViewSet,
+    UserSessionViewSet, jwks_view, protected_view,
 )
 
 router = DefaultRouter()
@@ -23,7 +23,9 @@ router.register(r'user-sessions', UserSessionViewSet, basename='user-session')
 urlpatterns = [
     # Dynamic routes from router (should come first)
     path('', include(router.urls)),
-
+    path('protected/', protected_view, name='protected_token'),
+    path('api/jwks/<int:tenant_id>/', jwks_view, name='jwks'),
+    
     # User management endpoints
     path('users/create/', UserCreateView.as_view(), name='users_user_create'),
     path('users/admin/create/', AdminUserCreateView.as_view(), name='users_admin_create'),

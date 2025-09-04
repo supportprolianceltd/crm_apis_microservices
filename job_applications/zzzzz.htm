@@ -3,8 +3,8 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="robots" content="NONE,NOARCHIVE">
-    <title>AuthenticationFailed
-      at /api/talent-engine/requisitions/</title>
+    <title>AttributeError
+      at /api/applications-engine/applications/</title>
     <style>
     html * { padding:0; margin:0; }
     body * { padding:10px 20px; }
@@ -100,9 +100,10 @@
   </head>
   <body>
     <header id="summary">
-      <h1>AuthenticationFailed
-        at /api/talent-engine/requisitions/</h1>
-      <pre class="exception_value">Invalid JWT token</pre>
+      <h1>AttributeError
+        at /api/applications-engine/applications/</h1>
+      <pre
+        class="exception_value">&#x27;Settings&#x27; object has no attribute &#x27;TENANT_MODEL&#x27;</pre>
       <table class="meta">
 
         <tr>
@@ -111,7 +112,7 @@
         </tr>
         <tr>
           <th scope="row">Request URL:</th>
-          <td>http://0.0.0.0:8001/api/talent-engine/requisitions/</td>
+          <td>http://job-applications/api/applications-engine/applications/</td>
         </tr>
 
         <tr>
@@ -121,23 +122,24 @@
 
         <tr>
           <th scope="row">Exception Type:</th>
-          <td>AuthenticationFailed</td>
+          <td>AttributeError</td>
         </tr>
 
         <tr>
           <th scope="row">Exception Value:</th>
-          <td><pre>Invalid JWT token</pre></td>
+          <td><pre>&#x27;Settings&#x27; object has no attribute &#x27;TENANT_MODEL&#x27;</pre></td>
         </tr>
 
         <tr>
           <th scope="row">Exception Location:</th>
-          <td><span class="fname">/app/talent_engine/middleware.py</span>, line
-            27, in process_request</td>
+          <td><span
+              class="fname">/usr/local/lib/python3.11/site-packages/django/conf/__init__.py</span>,
+            line 83, in __getattr__</td>
         </tr>
 
         <tr>
           <th scope="row">Raised during:</th>
-          <td>jobRequisitions.views.JobRequisitionListCreateView</td>
+          <td>job_application.views.JobApplicationListCreateView</td>
         </tr>
 
         <tr>
@@ -155,11 +157,12 @@
  &#x27;/usr/local/lib/python311.zip&#x27;,
  &#x27;/usr/local/lib/python3.11&#x27;,
  &#x27;/usr/local/lib/python3.11/lib-dynload&#x27;,
- &#x27;/usr/local/lib/python3.11/site-packages&#x27;]</code></pre></td>
+ &#x27;/usr/local/lib/python3.11/site-packages&#x27;,
+ &#x27;/tmp/tmpjyjh05ov&#x27;]</code></pre></td>
         </tr>
         <tr>
           <th scope="row">Server time:</th>
-          <td>Wed, 27 Aug 2025 16:17:23 +0000</td>
+          <td>Wed, 03 Sep 2025 17:23:48 +0000</td>
         </tr>
       </table>
     </header>
@@ -176,62 +179,61 @@
 
             <li class="frame user">
 
-              <code
-                class="fname">/usr/local/lib/python3.11/site-packages/jwt/api_jws.py</code>,
-              line 280, in _load
+              <code class="fname">/app/job_applications/middleware.py</code>,
+              line 103, in __call__
 
-              <div class="context" id="c126858831190208">
+              <div class="context" id="c138061916566080">
 
-                <ol start="273" class="pre-context" id="pre126858831190208">
-
-                  <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre></pre></li>
+                <ol start="96" class="pre-context" id="pre138061916566080">
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre>        try:</pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre>            header_data = base64url_decode(header_segment)</pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>        if not tenant_id:</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre>        except (TypeError, binascii.Error) as err:</pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>            logger.error(&quot;Tenant ID missing in JWT token.&quot;)</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre>            raise DecodeError(&quot;Invalid header padding&quot;) from err</pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>            return JsonResponse({&#x27;error&#x27;: &#x27;Tenant ID missing from token&#x27;}, status=403)</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre></pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre>        try:</pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>        # Step 3: Lookup tenant in DB</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>        try:</pre></li>
 
                 </ol>
 
-                <ol start="280" class="context-line">
+                <ol start="103" class="context-line">
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre>            header = json.loads(header_data)
-                          ^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>            tenant = get_tenant_model().objects.get(id=tenant_id)
+                          ^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='281' class="post-context" id="post126858831190208">
+                <ol start='104' class="post-context" id="post138061916566080">
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre>        except ValueError as e:</pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>            request.tenant = tenant</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre>            raise DecodeError(f&quot;Invalid header string: {e}&quot;) from e</pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>            request.tenant_id = tenant_id</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre></pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>            connection.set_schema(tenant.schema_name)</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre>        if not isinstance(header, dict):</pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>            logger.info(f&quot;Tenant set from token: {tenant.schema_name} (ID: {tenant_id})&quot;)</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre>            raise DecodeError(&quot;Invalid header string: must be a json object&quot;)</pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>        except get_tenant_model().DoesNotExist:</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831190208', 'post126858831190208')"><pre></pre></li>
+                    onclick="toggle('pre138061916566080', 'post138061916566080')"><pre>            # Optional: fetch tenant from AUTH_SERVICE if not found locally</pre></li>
 
                 </ol>
 
@@ -240,7 +242,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v126858831190208">
+                <table class="vars" id="v138061916566080">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -250,293 +252,71 @@
                   <tbody>
 
                     <tr>
-                      <td>crypto_segment</td>
+                      <td>jwt_payload</td>
                       <td
-                        class="code"><pre>b&#x27;s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5ChRE6tGvgAQ&#x27;</pre></td>
+                        class="code"><pre>{&#x27;email&#x27;: &#x27;support@prolianceltd.com&#x27;,
+ &#x27;exp&#x27;: 1756920409.914365,
+ &#x27;has_accepted_terms&#x27;: True,
+ &#x27;iat&#x27;: 1756919509,
+ &#x27;jti&#x27;: &#x27;1114adac-e485-4518-82e7-6ff298106d1e&#x27;,
+ &#x27;role&#x27;: &#x27;admin&#x27;,
+ &#x27;sub&#x27;: &#x27;support@prolianceltd.com&#x27;,
+ &#x27;tenant_id&#x27;: 2,
+ &#x27;tenant_schema&#x27;: &#x27;proliance&#x27;,
+ &#x27;type&#x27;: &#x27;access&#x27;,
+ &#x27;user&#x27;: {&#x27;branch&#x27;: None,
+          &#x27;email&#x27;: &#x27;support@prolianceltd.com&#x27;,
+          &#x27;first_name&#x27;: &#x27;Chris&#x27;,
+          &#x27;has_accepted_terms&#x27;: True,
+          &#x27;id&#x27;: 3,
+          &#x27;job_role&#x27;: &#x27;Tester 2&#x27;,
+          &#x27;last_name&#x27;: &#x27;Andrew&#x27;,
+          &#x27;profile&#x27;: {&#x27;access_duration&#x27;: &#x27;2025-08-29&#x27;,
+                      &#x27;employee_id&#x27;: &#x27;PRO-0001&#x27;,
+                      &#x27;id&#x27;: 1,
+                      &#x27;system_access_asset_management&#x27;: True,
+                      &#x27;system_access_co_superadmin&#x27;: True,
+                      &#x27;system_access_compliance&#x27;: True,
+                      &#x27;system_access_finance&#x27;: True,
+                      &#x27;system_access_hr&#x27;: True,
+                      &#x27;system_access_recruitment&#x27;: True,
+                      &#x27;system_access_rostering&#x27;: True,
+                      &#x27;system_access_training&#x27;: True,
+                      &#x27;user&#x27;: 3},
+          &#x27;role&#x27;: &#x27;admin&#x27;,
+          &#x27;tenant&#x27;: 2,
+          &#x27;username&#x27;: &#x27;support1&#x27;}}</pre></td>
                     </tr>
 
                     <tr>
-                      <td>header_data</td>
-                      <td
-                        class="code"><pre>(b&#x27;\xc8\x98[\x19\xc8\x8e\x88\x92\x14\xcc\x8dM\x88\x8b\x08\x9d\x1e\\\x08\x8e&#x27;
- b&#x27;\x88\x92\x95\xd5\x08\x9f&#x27;)</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>header_segment</td>
-                      <td
-                        class="code"><pre>b&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>jwt</td>
-                      <td
-                        class="code"><pre>(b&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjox&#x27;
- b&#x27;NzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVl&#x27;
- b&#x27;NzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJh&#x27;
- b&#x27;cnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0.s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5&#x27;
- b&#x27;ChRE6tGvgAQ&#x27;)</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>payload_segment</td>
-                      <td
-                        class="code"><pre>(b&#x27;eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIs&#x27;
- b&#x27;Imp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVlNzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0&#x27;
- b&#x27;ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJhcnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpm&#x27;
- b&#x27;YWxzZX0&#x27;)</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>self</td>
-                      <td
-                        class="code"><pre>&lt;jwt.api_jws.PyJWS object at 0x7360a1bdf6d0&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>signing_input</td>
-                      <td
-                        class="code"><pre>(b&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjox&#x27;
- b&#x27;NzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVl&#x27;
- b&#x27;NzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJh&#x27;
- b&#x27;cnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0&#x27;)</pre></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </details>
-
-            </li>
-
-            <li class="frame user">
-
-              <code
-                class="fname">/usr/local/lib/python3.11/json/__init__.py</code>,
-              line 341, in loads
-
-              <div class="context" id="c126858831189952">
-
-                <ol start="334" class="pre-context" id="pre126858831189952">
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>        if s.startswith(&#x27;\ufeff&#x27;):</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>            raise JSONDecodeError(&quot;Unexpected UTF-8 BOM (decode using utf-8-sig)&quot;,</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>                                  s, 0)</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>    else:</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>        if not isinstance(s, (bytes, bytearray)):</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>            raise TypeError(f&#x27;the JSON object must be str, bytes or bytearray, &#x27;</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>                            f&#x27;not {s.__class__.__name__}&#x27;)</pre></li>
-
-                </ol>
-
-                <ol start="341" class="context-line">
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>        s = s.decode(detect_encoding(s), &#x27;surrogatepass&#x27;)
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
-                    <span>…</span></li>
-                </ol>
-
-                <ol start='342' class="post-context" id="post126858831189952">
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>    if (cls is None and object_hook is None and</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>            parse_int is None and parse_float is None and</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>            parse_constant is None and object_pairs_hook is None and not kw):</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>        return _default_decoder.decode(s)</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189952', 'post126858831189952')"><pre>    if cls is None:</pre></li>
-
-                </ol>
-
-              </div>
-
-              <details>
-                <summary class="commands">Local vars</summary>
-
-                <table class="vars" id="v126858831189952">
-                  <thead>
-                    <tr>
-                      <th scope="col">Variable</th>
-                      <th scope="col">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>cls</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>kw</td>
-                      <td class="code"><pre>{}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>object_hook</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>object_pairs_hook</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>parse_constant</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>parse_float</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>parse_int</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>s</td>
-                      <td
-                        class="code"><pre>(b&#x27;\xc8\x98[\x19\xc8\x8e\x88\x92\x14\xcc\x8dM\x88\x8b\x08\x9d\x1e\\\x08\x8e&#x27;
- b&#x27;\x88\x92\x95\xd5\x08\x9f&#x27;)</pre></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </details>
-
-            </li>
-
-            <li class="cause"><h3>
-
-                The above exception (&#x27;utf-8&#x27; codec can&#x27;t decode
-                byte 0x88 in position 6: invalid start byte) was the direct
-                cause of the following exception:
-
-              </h3></li>
-
-            <li class="frame user">
-
-              <code class="fname">/app/talent_engine/middleware.py</code>, line
-              25, in process_request
-
-              <div class="context" id="c126858831192576">
-
-                <ol start="18" class="pre-context" id="pre126858831192576">
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>class MicroserviceJWTMiddleware(MiddlewareMixin):</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>    def process_request(self, request):</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>        auth = request.headers.get(&#x27;Authorization&#x27;, &#x27;&#x27;)</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>        if not auth.startswith(&#x27;Bearer &#x27;):</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>            return</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>        token = auth.split(&#x27; &#x27;)[1]</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>        try:</pre></li>
-
-                </ol>
-
-                <ol start="25" class="context-line">
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>            payload = jwt.decode(token, settings.SIMPLE_JWT[&#x27;SIGNING_KEY&#x27;], algorithms=[settings.SIMPLE_JWT[&#x27;ALGORITHM&#x27;]])
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
-                    <span>…</span></li>
-                </ol>
-
-                <ol start='26' class="post-context" id="post126858831192576">
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>        except Exception:</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>            raise AuthenticationFailed(&#x27;Invalid JWT token&#x27;)</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>        request.jwt_payload = payload</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre>        request.user = None</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192576', 'post126858831192576')"><pre></pre></li>
-
-                </ol>
-
-              </div>
-
-              <details>
-                <summary class="commands">Local vars</summary>
-
-                <table class="vars" id="v126858831192576">
-                  <thead>
-                    <tr>
-                      <th scope="col">Variable</th>
-                      <th scope="col">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>auth</td>
-                      <td class="code"><pre>(&#x27;Bearer &#x27;
- &#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVlNzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJhcnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0.s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5ChRE6tGvgAQ&#x27;)</pre></td>
+                      <td>public_paths</td>
+                      <td class="code"><pre>[&#x27;/api/docs/&#x27;,
+ &#x27;/api/schema/&#x27;,
+ &#x27;/api/health/&#x27;,
+ &#x27;/api/applications-engine/applications/parse-resume/autofill/&#x27;,
+ &#x27;/api/applications-engine/apply-jobs/&#x27;]</pre></td>
                     </tr>
 
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/applications-engine/applications/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;MicroserviceJWTMiddleware get_response=convert_exception_to_response.&lt;locals&gt;.inner&gt;</pre></td>
+                        class="code"><pre>&lt;job_applications.middleware.CustomTenantMiddleware object at 0x7d910b726a90&gt;</pre></td>
                     </tr>
 
                     <tr>
-                      <td>token</td>
-                      <td
-                        class="code"><pre>&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVlNzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJhcnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0.s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5ChRE6tGvgAQ&#x27;</pre></td>
+                      <td>tenant_id</td>
+                      <td class="code"><pre>2</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>tenant_schema</td>
+                      <td class="code"><pre>&#x27;proliance&#x27;</pre></td>
                     </tr>
 
                   </tbody>
@@ -548,205 +328,126 @@
             <li class="frame user">
 
               <code
-                class="fname">/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py</code>,
-              line 222, in decode
+                class="fname">/usr/local/lib/python3.11/site-packages/django_tenants/utils.py</code>,
+              line 21, in get_tenant_model
 
-              <div class="context" id="c126858831192512">
+              <div class="context" id="c138061915701824">
 
-                <ol start="215" class="pre-context" id="pre126858831192512">
-
-                  <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>            warnings.warn(</pre></li>
+                <ol start="14" class="pre-context" id="pre138061915701824">
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>                &quot;passing additional kwargs to decode() is deprecated &quot;</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre>except ImportError:</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>                &quot;and will be removed in pyjwt version 3. &quot;</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre>    from django.db.models.loading import get_model</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>                f&quot;Unsupported kwargs: {tuple(kwargs.keys())}&quot;,</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>                RemovedInPyjwt3Warning,</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre>from django.core import mail</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>                stacklevel=2,</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>            )</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre>def get_tenant_model():</pre></li>
 
                 </ol>
 
-                <ol start="222" class="context-line">
+                <ol start="21" class="context-line">
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>        decoded = self.decode_complete(
-                       </pre> <span>…</span></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre>    return get_model(settings.TENANT_MODEL)
+                         ^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='223' class="post-context" id="post126858831192512">
+                <ol start='22' class="post-context" id="post138061915701824">
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>            jwt,</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>            key,</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>            algorithms,</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre>def get_tenant_domain_model():</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>            options,</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre>    return get_model(settings.TENANT_DOMAIN_MODEL)</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>            verify=verify,</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192512', 'post126858831192512')"><pre>            detached_payload=detached_payload,</pre></li>
+                    onclick="toggle('pre138061915701824', 'post138061915701824')"><pre></pre></li>
 
                 </ol>
 
               </div>
-
-              <details>
-                <summary class="commands">Local vars</summary>
-
-                <table class="vars" id="v126858831192512">
-                  <thead>
-                    <tr>
-                      <th scope="col">Variable</th>
-                      <th scope="col">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>algorithms</td>
-                      <td class="code"><pre>[&#x27;HS256&#x27;]</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>audience</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>detached_payload</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>issuer</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>jwt</td>
-                      <td
-                        class="code"><pre>&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVlNzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJhcnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0.s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5ChRE6tGvgAQ&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>key</td>
-                      <td
-                        class="code"><pre>&#x27;django-insecure-va=ok0r=3)*b@ekd_c^+zkz&amp;d)@*sd3sm(1o-n)zwfked&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>kwargs</td>
-                      <td class="code"><pre>{}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>leeway</td>
-                      <td class="code"><pre>0</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>options</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>self</td>
-                      <td
-                        class="code"><pre>&lt;jwt.api_jwt.PyJWT object at 0x7360a0ff8e50&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>subject</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>verify</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </details>
 
             </li>
 
-            <li class="frame user">
+            <li class="frame django">
 
               <code
-                class="fname">/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py</code>,
-              line 156, in decode_complete
+                class="fname">/usr/local/lib/python3.11/site-packages/django/conf/__init__.py</code>,
+              line 83, in __getattr__
 
-              <div class="context" id="c126858831192320">
+              <div class="context" id="c138061907709504">
 
-                <ol start="149" class="pre-context" id="pre126858831192320">
-
-                  <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            options.setdefault(&quot;verify_nbf&quot;, False)</pre></li>
+                <ol start="76" class="pre-context" id="pre138061907709504">
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            options.setdefault(&quot;verify_iat&quot;, False)</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>        }</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            options.setdefault(&quot;verify_aud&quot;, False)</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            options.setdefault(&quot;verify_iss&quot;, False)</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>    def __getattr__(self, name):</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            options.setdefault(&quot;verify_sub&quot;, False)</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>        &quot;&quot;&quot;Return the value of a setting and cache it in self.__dict__.&quot;&quot;&quot;</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            options.setdefault(&quot;verify_jti&quot;, False)</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>        if (_wrapped := self._wrapped) is empty:</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre></pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>            self._setup(name)</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>            _wrapped = self._wrapped</pre></li>
 
                 </ol>
 
-                <ol start="156" class="context-line">
+                <ol start="83" class="context-line">
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>        decoded = api_jws.decode_complete(
-                       </pre> <span>…</span></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>        val = getattr(_wrapped, name)
+                  ^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='157' class="post-context" id="post126858831192320">
+                <ol start='84' class="post-context" id="post138061907709504">
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            jwt,</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            key=key,</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>        # Special case some settings which require further modification.</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            algorithms=algorithms,</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>        # This is done here for performance reasons so the modified value is cached.</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            options=options,</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>        if name in {&quot;MEDIA_URL&quot;, &quot;STATIC_URL&quot;} and val is not None:</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>            detached_payload=detached_payload,</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>            val = self._add_script_prefix(val)</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192320', 'post126858831192320')"><pre>        )</pre></li>
+                    onclick="toggle('pre138061907709504', 'post138061907709504')"><pre>        elif name == &quot;SECRET_KEY&quot; and not val:</pre></li>
 
                 </ol>
 
@@ -755,7 +456,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v126858831192320">
+                <table class="vars" id="v138061907709504">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -765,334 +466,20 @@
                   <tbody>
 
                     <tr>
-                      <td>algorithms</td>
-                      <td class="code"><pre>[&#x27;HS256&#x27;]</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>audience</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>detached_payload</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>issuer</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>jwt</td>
+                      <td>_wrapped</td>
                       <td
-                        class="code"><pre>&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVlNzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJhcnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0.s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5ChRE6tGvgAQ&#x27;</pre></td>
+                        class="code"><pre>&lt;Settings &quot;job_applications.settings&quot;&gt;</pre></td>
                     </tr>
 
                     <tr>
-                      <td>key</td>
-                      <td
-                        class="code"><pre>&#x27;django-insecure-va=ok0r=3)*b@ekd_c^+zkz&amp;d)@*sd3sm(1o-n)zwfked&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>kwargs</td>
-                      <td class="code"><pre>{}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>leeway</td>
-                      <td class="code"><pre>0</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>options</td>
-                      <td
-                        class="code"><pre>{&#x27;verify_signature&#x27;: True}</pre></td>
+                      <td>name</td>
+                      <td class="code"><pre>&#x27;TENANT_MODEL&#x27;</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;jwt.api_jwt.PyJWT object at 0x7360a0ff8e50&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>subject</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>verify</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </details>
-
-            </li>
-
-            <li class="frame user">
-
-              <code
-                class="fname">/usr/local/lib/python3.11/site-packages/jwt/api_jws.py</code>,
-              line 209, in decode_complete
-
-              <div class="context" id="c126858831189184">
-
-                <ol start="202" class="pre-context" id="pre126858831189184">
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>        verify_signature = merged_options[&quot;verify_signature&quot;]</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>        if verify_signature and not algorithms and not isinstance(key, PyJWK):</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>            raise DecodeError(</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>                &#x27;It is required that you pass in a value for the &quot;algorithms&quot; argument when calling decode().&#x27;</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>            )</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre></pre></li>
-
-                </ol>
-
-                <ol start="209" class="context-line">
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>        payload, signing_input, header, signature = self._load(jwt)
-                                                         ^^^^^^^^^^^^^^^</pre>
-                    <span>…</span></li>
-                </ol>
-
-                <ol start='210' class="post-context" id="post126858831189184">
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>        if header.get(&quot;b64&quot;, True) is False:</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>            if detached_payload is None:</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>                raise DecodeError(</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>                    &#x27;It is required that you pass in a value for the &quot;detached_payload&quot; argument to decode a message having the b64 header set to false.&#x27;</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831189184', 'post126858831189184')"><pre>                )</pre></li>
-
-                </ol>
-
-              </div>
-
-              <details>
-                <summary class="commands">Local vars</summary>
-
-                <table class="vars" id="v126858831189184">
-                  <thead>
-                    <tr>
-                      <th scope="col">Variable</th>
-                      <th scope="col">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>algorithms</td>
-                      <td class="code"><pre>[&#x27;HS256&#x27;]</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>detached_payload</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>jwt</td>
-                      <td
-                        class="code"><pre>&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVlNzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJhcnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0.s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5ChRE6tGvgAQ&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>key</td>
-                      <td
-                        class="code"><pre>&#x27;django-insecure-va=ok0r=3)*b@ekd_c^+zkz&amp;d)@*sd3sm(1o-n)zwfked&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>kwargs</td>
-                      <td class="code"><pre>{}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>merged_options</td>
-                      <td
-                        class="code"><pre>{&#x27;verify_signature&#x27;: True}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>options</td>
-                      <td
-                        class="code"><pre>{&#x27;verify_signature&#x27;: True}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>self</td>
-                      <td
-                        class="code"><pre>&lt;jwt.api_jws.PyJWS object at 0x7360a1bdf6d0&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>verify_signature</td>
-                      <td class="code"><pre>True</pre></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </details>
-
-            </li>
-
-            <li class="frame user">
-
-              <code
-                class="fname">/usr/local/lib/python3.11/site-packages/jwt/api_jws.py</code>,
-              line 282, in _load
-
-              <div class="context" id="c126858831190336">
-
-                <ol start="275" class="pre-context" id="pre126858831190336">
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>            header_data = base64url_decode(header_segment)</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>        except (TypeError, binascii.Error) as err:</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>            raise DecodeError(&quot;Invalid header padding&quot;) from err</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>        try:</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>            header = json.loads(header_data)</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>        except ValueError as e:</pre></li>
-
-                </ol>
-
-                <ol start="282" class="context-line">
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>            raise DecodeError(f&quot;Invalid header string: {e}&quot;) from e
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
-                    <span>…</span></li>
-                </ol>
-
-                <ol start='283' class="post-context" id="post126858831190336">
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>        if not isinstance(header, dict):</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>            raise DecodeError(&quot;Invalid header string: must be a json object&quot;)</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>        try:</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831190336', 'post126858831190336')"><pre>            payload = base64url_decode(payload_segment)</pre></li>
-
-                </ol>
-
-              </div>
-
-              <details>
-                <summary class="commands">Local vars</summary>
-
-                <table class="vars" id="v126858831190336">
-                  <thead>
-                    <tr>
-                      <th scope="col">Variable</th>
-                      <th scope="col">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>crypto_segment</td>
-                      <td
-                        class="code"><pre>b&#x27;s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5ChRE6tGvgAQ&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>header_data</td>
-                      <td
-                        class="code"><pre>(b&#x27;\xc8\x98[\x19\xc8\x8e\x88\x92\x14\xcc\x8dM\x88\x8b\x08\x9d\x1e\\\x08\x8e&#x27;
- b&#x27;\x88\x92\x95\xd5\x08\x9f&#x27;)</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>header_segment</td>
-                      <td
-                        class="code"><pre>b&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>jwt</td>
-                      <td
-                        class="code"><pre>(b&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjox&#x27;
- b&#x27;NzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVl&#x27;
- b&#x27;NzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJh&#x27;
- b&#x27;cnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0.s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5&#x27;
- b&#x27;ChRE6tGvgAQ&#x27;)</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>payload_segment</td>
-                      <td
-                        class="code"><pre>(b&#x27;eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIs&#x27;
- b&#x27;Imp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVlNzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0&#x27;
- b&#x27;ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJhcnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpm&#x27;
- b&#x27;YWxzZX0&#x27;)</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>self</td>
-                      <td
-                        class="code"><pre>&lt;jwt.api_jws.PyJWS object at 0x7360a1bdf6d0&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>signing_input</td>
-                      <td
-                        class="code"><pre>(b&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjox&#x27;
- b&#x27;NzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVl&#x27;
- b&#x27;NzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJh&#x27;
- b&#x27;cnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0&#x27;)</pre></td>
+                        class="code"><pre>&lt;LazySettings &quot;job_applications.settings&quot;&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -1103,9 +490,9 @@
 
             <li class="cause"><h3>
 
-                During handling of the above exception (Invalid header string:
-                &#x27;utf-8&#x27; codec can&#x27;t decode byte 0x88 in position
-                6: invalid start byte), another exception occurred:
+                During handling of the above exception (&#x27;Settings&#x27;
+                object has no attribute &#x27;TENANT_MODEL&#x27;), another
+                exception occurred:
 
               </h3></li>
 
@@ -1115,58 +502,58 @@
                 class="fname">/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py</code>,
               line 55, in inner
 
-              <div class="context" id="c126858831192768">
+              <div class="context" id="c138061903451456">
 
-                <ol start="48" class="pre-context" id="pre126858831192768">
-
-                  <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre></pre></li>
+                <ol start="48" class="pre-context" id="pre138061903451456">
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre>        return inner</pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre>    else:</pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre>        return inner</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre></pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre>    else:</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre>        @wraps(get_response)</pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre>        def inner(request):</pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre>        @wraps(get_response)</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre>            try:</pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre>        def inner(request):</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre>            try:</pre></li>
 
                 </ol>
 
                 <ol start="55" class="context-line">
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre>                response = get_response(request)
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre>                response = get_response(request)
                                ^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='56' class="post-context" id="post126858831192768">
+                <ol start='56' class="post-context" id="post138061903451456">
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre>            except Exception as exc:</pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre>            except Exception as exc:</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre>                response = response_for_exception(request, exc)</pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre>                response = response_for_exception(request, exc)</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre>            return response</pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre>            return response</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre></pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre>        return inner</pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre>        return inner</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192768', 'post126858831192768')"><pre></pre></li>
+                    onclick="toggle('pre138061903451456', 'post138061903451456')"><pre></pre></li>
 
                 </ol>
 
@@ -1175,7 +562,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v126858831192768">
+                <table class="vars" id="v138061903451456">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -1187,118 +574,19 @@
                     <tr>
                       <td>exc</td>
                       <td
-                        class="code"><pre>AuthenticationFailed(&#x27;Invalid JWT token&#x27;)</pre></td>
+                        class="code"><pre>AttributeError(&quot;&#x27;Settings&#x27; object has no attribute &#x27;TENANT_MODEL&#x27;&quot;)</pre></td>
                     </tr>
 
                     <tr>
                       <td>get_response</td>
                       <td
-                        class="code"><pre>&lt;MicroserviceJWTMiddleware get_response=convert_exception_to_response.&lt;locals&gt;.inner&gt;</pre></td>
+                        class="code"><pre>&lt;job_applications.middleware.CustomTenantMiddleware object at 0x7d910b726a90&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </details>
-
-            </li>
-
-            <li class="frame django">
-
-              <code
-                class="fname">/usr/local/lib/python3.11/site-packages/django/utils/deprecation.py</code>,
-              line 119, in __call__
-
-              <div class="context" id="c126858831192704">
-
-                <ol start="112" class="pre-context" id="pre126858831192704">
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>    def __call__(self, request):</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>        # Exit out to async mode, if needed</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>        if self.async_mode:</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>            return self.__acall__(request)</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>        response = None</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>        if hasattr(self, &quot;process_request&quot;):</pre></li>
-
-                </ol>
-
-                <ol start="119" class="context-line">
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>            response = self.process_request(request)
-                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
-                    <span>…</span></li>
-                </ol>
-
-                <ol start='120' class="post-context" id="post126858831192704">
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>        response = response or self.get_response(request)</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>        if hasattr(self, &quot;process_response&quot;):</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>            response = self.process_response(request, response)</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>        return response</pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre126858831192704', 'post126858831192704')"><pre>    async def __acall__(self, request):</pre></li>
-
-                </ol>
-
-              </div>
-
-              <details>
-                <summary class="commands">Local vars</summary>
-
-                <table class="vars" id="v126858831192704">
-                  <thead>
-                    <tr>
-                      <th scope="col">Variable</th>
-                      <th scope="col">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>request</td>
-                      <td
-                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>response</td>
-                      <td class="code"><pre>None</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>self</td>
-                      <td
-                        class="code"><pre>&lt;MicroserviceJWTMiddleware get_response=convert_exception_to_response.&lt;locals&gt;.inner&gt;</pre></td>
+                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/applications-engine/applications/&#x27;&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -1309,62 +597,61 @@
 
             <li class="frame user">
 
-              <code class="fname">/app/talent_engine/middleware.py</code>, line
-              27, in process_request
+              <code class="fname">/app/job_applications/middleware.py</code>,
+              line 108, in __call__
 
-              <div class="context" id="c126858831192640">
+              <div class="context" id="c138061903454016">
 
-                <ol start="20" class="pre-context" id="pre126858831192640">
-
-                  <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>        auth = request.headers.get(&#x27;Authorization&#x27;, &#x27;&#x27;)</pre></li>
+                <ol start="101" class="pre-context" id="pre138061903454016">
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>        if not auth.startswith(&#x27;Bearer &#x27;):</pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>        # Step 3: Lookup tenant in DB</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>            return</pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>        try:</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>        token = auth.split(&#x27; &#x27;)[1]</pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>            tenant = get_tenant_model().objects.get(id=tenant_id)</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>        try:</pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>            request.tenant = tenant</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>            payload = jwt.decode(token, settings.SIMPLE_JWT[&#x27;SIGNING_KEY&#x27;], algorithms=[settings.SIMPLE_JWT[&#x27;ALGORITHM&#x27;]])</pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>            request.tenant_id = tenant_id</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>        except Exception:</pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>            connection.set_schema(tenant.schema_name)</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>            logger.info(f&quot;Tenant set from token: {tenant.schema_name} (ID: {tenant_id})&quot;)</pre></li>
 
                 </ol>
 
-                <ol start="27" class="context-line">
+                <ol start="108" class="context-line">
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>            raise AuthenticationFailed(&#x27;Invalid JWT token&#x27;)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
-                    <span>…</span></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>        except get_tenant_model().DoesNotExist:
+                    ^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='28' class="post-context" id="post126858831192640">
+                <ol start='109' class="post-context" id="post138061903454016">
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>        request.jwt_payload = payload</pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>            # Optional: fetch tenant from AUTH_SERVICE if not found locally</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>        request.user = None</pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>            try:</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre></pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>                response = requests.get(</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre></pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>                    f&quot;{settings.AUTH_SERVICE_URL}/api/tenants/{tenant_id}/&quot;,</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre></pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>                    headers={&#x27;Authorization&#x27;: request.META.get(&#x27;HTTP_AUTHORIZATION&#x27;, &#x27;&#x27;)},</pre></li>
 
                   <li
-                    onclick="toggle('pre126858831192640', 'post126858831192640')"><pre>class CustomTenantMiddleware:</pre></li>
+                    onclick="toggle('pre138061903454016', 'post138061903454016')"><pre>                    timeout=5</pre></li>
 
                 </ol>
 
@@ -1373,7 +660,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v126858831192640">
+                <table class="vars" id="v138061903454016">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -1383,27 +670,234 @@
                   <tbody>
 
                     <tr>
-                      <td>auth</td>
-                      <td class="code"><pre>(&#x27;Bearer &#x27;
- &#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVlNzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJhcnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0.s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5ChRE6tGvgAQ&#x27;)</pre></td>
+                      <td>jwt_payload</td>
+                      <td
+                        class="code"><pre>{&#x27;email&#x27;: &#x27;support@prolianceltd.com&#x27;,
+ &#x27;exp&#x27;: 1756920409.914365,
+ &#x27;has_accepted_terms&#x27;: True,
+ &#x27;iat&#x27;: 1756919509,
+ &#x27;jti&#x27;: &#x27;1114adac-e485-4518-82e7-6ff298106d1e&#x27;,
+ &#x27;role&#x27;: &#x27;admin&#x27;,
+ &#x27;sub&#x27;: &#x27;support@prolianceltd.com&#x27;,
+ &#x27;tenant_id&#x27;: 2,
+ &#x27;tenant_schema&#x27;: &#x27;proliance&#x27;,
+ &#x27;type&#x27;: &#x27;access&#x27;,
+ &#x27;user&#x27;: {&#x27;branch&#x27;: None,
+          &#x27;email&#x27;: &#x27;support@prolianceltd.com&#x27;,
+          &#x27;first_name&#x27;: &#x27;Chris&#x27;,
+          &#x27;has_accepted_terms&#x27;: True,
+          &#x27;id&#x27;: 3,
+          &#x27;job_role&#x27;: &#x27;Tester 2&#x27;,
+          &#x27;last_name&#x27;: &#x27;Andrew&#x27;,
+          &#x27;profile&#x27;: {&#x27;access_duration&#x27;: &#x27;2025-08-29&#x27;,
+                      &#x27;employee_id&#x27;: &#x27;PRO-0001&#x27;,
+                      &#x27;id&#x27;: 1,
+                      &#x27;system_access_asset_management&#x27;: True,
+                      &#x27;system_access_co_superadmin&#x27;: True,
+                      &#x27;system_access_compliance&#x27;: True,
+                      &#x27;system_access_finance&#x27;: True,
+                      &#x27;system_access_hr&#x27;: True,
+                      &#x27;system_access_recruitment&#x27;: True,
+                      &#x27;system_access_rostering&#x27;: True,
+                      &#x27;system_access_training&#x27;: True,
+                      &#x27;user&#x27;: 3},
+          &#x27;role&#x27;: &#x27;admin&#x27;,
+          &#x27;tenant&#x27;: 2,
+          &#x27;username&#x27;: &#x27;support1&#x27;}}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>public_paths</td>
+                      <td class="code"><pre>[&#x27;/api/docs/&#x27;,
+ &#x27;/api/schema/&#x27;,
+ &#x27;/api/health/&#x27;,
+ &#x27;/api/applications-engine/applications/parse-resume/autofill/&#x27;,
+ &#x27;/api/applications-engine/apply-jobs/&#x27;]</pre></td>
                     </tr>
 
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/applications-engine/applications/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;MicroserviceJWTMiddleware get_response=convert_exception_to_response.&lt;locals&gt;.inner&gt;</pre></td>
+                        class="code"><pre>&lt;job_applications.middleware.CustomTenantMiddleware object at 0x7d910b726a90&gt;</pre></td>
                     </tr>
 
                     <tr>
-                      <td>token</td>
+                      <td>tenant_id</td>
+                      <td class="code"><pre>2</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>tenant_schema</td>
+                      <td class="code"><pre>&#x27;proliance&#x27;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame user">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/django_tenants/utils.py</code>,
+              line 21, in get_tenant_model
+
+              <div class="context" id="c138061911506176">
+
+                <ol start="14" class="pre-context" id="pre138061911506176">
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre>except ImportError:</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre>    from django.db.models.loading import get_model</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre>from django.core import mail</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre>def get_tenant_model():</pre></li>
+
+                </ol>
+
+                <ol start="21" class="context-line">
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre>    return get_model(settings.TENANT_MODEL)
+                         ^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='22' class="post-context" id="post138061911506176">
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre>def get_tenant_domain_model():</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre>    return get_model(settings.TENANT_DOMAIN_MODEL)</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre138061911506176', 'post138061911506176')"><pre></pre></li>
+
+                </ol>
+
+              </div>
+
+            </li>
+
+            <li class="frame django">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/django/conf/__init__.py</code>,
+              line 83, in __getattr__
+
+              <div class="context" id="c138061903458880">
+
+                <ol start="76" class="pre-context" id="pre138061903458880">
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>        }</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>    def __getattr__(self, name):</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>        &quot;&quot;&quot;Return the value of a setting and cache it in self.__dict__.&quot;&quot;&quot;</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>        if (_wrapped := self._wrapped) is empty:</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>            self._setup(name)</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>            _wrapped = self._wrapped</pre></li>
+
+                </ol>
+
+                <ol start="83" class="context-line">
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>        val = getattr(_wrapped, name)
+                  ^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='84' class="post-context" id="post138061903458880">
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>        # Special case some settings which require further modification.</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>        # This is done here for performance reasons so the modified value is cached.</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>        if name in {&quot;MEDIA_URL&quot;, &quot;STATIC_URL&quot;} and val is not None:</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>            val = self._add_script_prefix(val)</pre></li>
+
+                  <li
+                    onclick="toggle('pre138061903458880', 'post138061903458880')"><pre>        elif name == &quot;SECRET_KEY&quot; and not val:</pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v138061903458880">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>_wrapped</td>
                       <td
-                        class="code"><pre>&#x27;yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU2MzE4NjMyLCJpYXQiOjE3NTYzMTE0MzIsImp0aSI6IjZiZDczNjZmYmU4YjQwY2E4NDdlZWVlNzQyZjc4MDhiIiwidXNlcl9pZCI6IjIiLCJ0ZW5hbnRfaWQiOjMsInRlbmFudF9zY2hlbWEiOiJhcnRzIiwiaGFzX2FjY2VwdGVkX3Rlcm1zIjpmYWxzZX0.s95oMZK-pzbKh0Ha44hwSzPMBFHWImQ5ChRE6tGvgAQ&#x27;</pre></td>
+                        class="code"><pre>&lt;Settings &quot;job_applications.settings&quot;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>name</td>
+                      <td class="code"><pre>&#x27;TENANT_MODEL&#x27;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;LazySettings &quot;job_applications.settings&quot;&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -1420,7 +914,7 @@
           <div id="pastebinTraceback" class="pastebin">
             <input type="hidden" name="language" value="PythonConsole">
             <input type="hidden" name="title"
-              value="AuthenticationFailed at /api/talent-engine/requisitions/">
+              value="AttributeError at /api/applications-engine/applications/">
             <input type="hidden" name="source" value="Django Dpaste Agent">
             <input type="hidden" name="poster" value="Django">
             <textarea name="content" id="traceback_area" cols="140" rows="25">
@@ -1428,7 +922,7 @@ Environment:
 
 
 Request Method: GET
-Request URL: http://0.0.0.0:8001/api/talent-engine/requisitions/
+Request URL: http://job-applications/api/applications-engine/applications/
 
 Django Version: 5.2.5
 Python Version: 3.11.13
@@ -1443,58 +937,48 @@ Installed Applications:
  &#x27;drf_spectacular&#x27;,
  &#x27;drf_yasg&#x27;,
  &#x27;django_filters&#x27;,
- &#x27;jobRequisitions&#x27;]
+ &#x27;job_application&#x27;,
+ &#x27;django_extensions&#x27;]
 Installed Middleware:
-[&#x27;talent_engine.middleware.MicroserviceJWTMiddleware&#x27;,
- &#x27;corsheaders.middleware.CorsMiddleware&#x27;,
- &#x27;django.middleware.security.SecurityMiddleware&#x27;,
+[&#x27;job_applications.middleware.MicroserviceRS256JWTMiddleware&#x27;,
+ &#x27;job_applications.middleware.CustomTenantMiddleware&#x27;,
  &#x27;django.contrib.sessions.middleware.SessionMiddleware&#x27;,
+ &#x27;corsheaders.middleware.CorsMiddleware&#x27;,
  &#x27;django.middleware.common.CommonMiddleware&#x27;,
  &#x27;django.middleware.csrf.CsrfViewMiddleware&#x27;,
- &#x27;django.contrib.auth.middleware.AuthenticationMiddleware&#x27;,
+ &#x27;django.middleware.security.SecurityMiddleware&#x27;,
  &#x27;django.contrib.messages.middleware.MessageMiddleware&#x27;,
  &#x27;django.middleware.clickjacking.XFrameOptionsMiddleware&#x27;]
 
 
 
 Traceback (most recent call last):
-  File "/usr/local/lib/python3.11/site-packages/jwt/api_jws.py", line 280, in _load
-    header = json.loads(header_data)
-             ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/json/__init__.py", line 341, in loads
-    s = s.decode(detect_encoding(s), &#x27;surrogatepass&#x27;)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/job_applications/middleware.py", line 103, in __call__
+    tenant = get_tenant_model().objects.get(id=tenant_id)
+             ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django_tenants/utils.py", line 21, in get_tenant_model
+    return get_model(settings.TENANT_MODEL)
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/conf/__init__.py", line 83, in __getattr__
+    val = getattr(_wrapped, name)
+          ^^^^^^^^^^^^^^^^^^^^^^^
 
-The above exception (&#x27;utf-8&#x27; codec can&#x27;t decode byte 0x88 in position 6: invalid start byte) was the direct cause of the following exception:
-  File "/app/talent_engine/middleware.py", line 25, in process_request
-    payload = jwt.decode(token, settings.SIMPLE_JWT[&#x27;SIGNING_KEY&#x27;], algorithms=[settings.SIMPLE_JWT[&#x27;ALGORITHM&#x27;]])
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py", line 222, in decode
-    decoded = self.decode_complete(
-              
-  File "/usr/local/lib/python3.11/site-packages/jwt/api_jwt.py", line 156, in decode_complete
-    decoded = api_jws.decode_complete(
-              
-  File "/usr/local/lib/python3.11/site-packages/jwt/api_jws.py", line 209, in decode_complete
-    payload, signing_input, header, signature = self._load(jwt)
-                                                ^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/jwt/api_jws.py", line 282, in _load
-    raise DecodeError(f&quot;Invalid header string: {e}&quot;) from e
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-During handling of the above exception (Invalid header string: &#x27;utf-8&#x27; codec can&#x27;t decode byte 0x88 in position 6: invalid start byte), another exception occurred:
+During handling of the above exception (&#x27;Settings&#x27; object has no attribute &#x27;TENANT_MODEL&#x27;), another exception occurred:
   File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
     response = get_response(request)
                ^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/django/utils/deprecation.py", line 119, in __call__
-    response = self.process_request(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/talent_engine/middleware.py", line 27, in process_request
-    raise AuthenticationFailed(&#x27;Invalid JWT token&#x27;)
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/job_applications/middleware.py", line 108, in __call__
+    except get_tenant_model().DoesNotExist:
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django_tenants/utils.py", line 21, in get_tenant_model
+    return get_model(settings.TENANT_MODEL)
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/conf/__init__.py", line 83, in __getattr__
+    val = getattr(_wrapped, name)
+          ^^^^^^^^^^^^^^^^^^^^^^^
 
-Exception Type: AuthenticationFailed at /api/talent-engine/requisitions/
-Exception Value: Invalid JWT token
+Exception Type: AttributeError at /api/applications-engine/applications/
+Exception Value: &#x27;Settings&#x27; object has no attribute &#x27;TENANT_MODEL&#x27;
 </textarea>
             <br><br>
             <input type="submit"
@@ -1508,7 +992,7 @@ Exception Value: Invalid JWT token
         <h2>Request information</h2>
 
         <h3 id="user-info">USER</h3>
-        <p>[unable to retrieve the current user]</p>
+        <p>None</p>
 
         <h3 id="get-info">GET</h3>
 
@@ -1538,7 +1022,7 @@ Exception Value: Invalid JWT token
 
             <tr>
               <td>CONTENT_LENGTH</td>
-              <td class="code"><pre>&#x27;1885&#x27;</pre></td>
+              <td class="code"><pre>&#x27;1945&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -1568,7 +1052,7 @@ Exception Value: Invalid JWT token
 
             <tr>
               <td>HTTP_HOST</td>
-              <td class="code"><pre>&#x27;0.0.0.0:8001&#x27;</pre></td>
+              <td class="code"><pre>&#x27;job-applications&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -1580,7 +1064,7 @@ Exception Value: Invalid JWT token
             <tr>
               <td>PATH_INFO</td>
               <td
-                class="code"><pre>&#x27;/api/talent-engine/requisitions/&#x27;</pre></td>
+                class="code"><pre>&#x27;/api/applications-engine/applications/&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -1591,17 +1075,17 @@ Exception Value: Invalid JWT token
             <tr>
               <td>RAW_URI</td>
               <td
-                class="code"><pre>&#x27;/api/talent-engine/requisitions/&#x27;</pre></td>
+                class="code"><pre>&#x27;/api/applications-engine/applications/&#x27;</pre></td>
             </tr>
 
             <tr>
               <td>REMOTE_ADDR</td>
-              <td class="code"><pre>&#x27;172.19.0.1&#x27;</pre></td>
+              <td class="code"><pre>&#x27;172.19.0.5&#x27;</pre></td>
             </tr>
 
             <tr>
               <td>REMOTE_PORT</td>
-              <td class="code"><pre>&#x27;60810&#x27;</pre></td>
+              <td class="code"><pre>&#x27;45208&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -1621,7 +1105,7 @@ Exception Value: Invalid JWT token
 
             <tr>
               <td>SERVER_PORT</td>
-              <td class="code"><pre>&#x27;8001&#x27;</pre></td>
+              <td class="code"><pre>&#x27;8003&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -1637,13 +1121,13 @@ Exception Value: Invalid JWT token
             <tr>
               <td>gunicorn.socket</td>
               <td
-                class="code"><pre>&lt;socket.socket fd=10, family=2, type=1, proto=0, laddr=(&#x27;172.19.0.7&#x27;, 8001), raddr=(&#x27;172.19.0.1&#x27;, 60810)&gt;</pre></td>
+                class="code"><pre>&lt;socket.socket fd=10, family=2, type=1, proto=0, laddr=(&#x27;172.19.0.12&#x27;, 8003), raddr=(&#x27;172.19.0.5&#x27;, 45208)&gt;</pre></td>
             </tr>
 
             <tr>
               <td>wsgi.errors</td>
               <td
-                class="code"><pre>&lt;gunicorn.http.wsgi.WSGIErrorsWrapper object at 0x73609fa6b310&gt;</pre></td>
+                class="code"><pre>&lt;gunicorn.http.wsgi.WSGIErrorsWrapper object at 0x7d910ab1f700&gt;</pre></td>
             </tr>
 
             <tr>
@@ -1655,7 +1139,7 @@ Exception Value: Invalid JWT token
             <tr>
               <td>wsgi.input</td>
               <td
-                class="code"><pre>&lt;gunicorn.http.body.Body object at 0x73609f91c150&gt;</pre></td>
+                class="code"><pre>&lt;gunicorn.http.body.Body object at 0x7d910ab53690&gt;</pre></td>
             </tr>
 
             <tr>
@@ -1692,7 +1176,7 @@ Exception Value: Invalid JWT token
         </table>
 
         <h3 id="settings-info">Settings</h3>
-        <h4>Using settings module <code>talent_engine.settings</code></h4>
+        <h4>Using settings module <code>job_applications.settings</code></h4>
         <table class="req">
           <thead>
             <tr>
@@ -1860,13 +1344,12 @@ Exception Value: Invalid JWT token
              &#x27;AUTOCOMMIT&#x27;: True,
              &#x27;CONN_HEALTH_CHECKS&#x27;: False,
              &#x27;CONN_MAX_AGE&#x27;: 60,
-             &#x27;ENGINE&#x27;: &#x27;django_tenants.postgresql_backend&#x27;,
-             &#x27;HOST&#x27;: &#x27;talent_postgres&#x27;,
-             &#x27;NAME&#x27;: &#x27;talent_db&#x27;,
+             &#x27;ENGINE&#x27;: &#x27;django.db.backends.postgresql&#x27;,
+             &#x27;HOST&#x27;: &#x27;job_app_postgres&#x27;,
+             &#x27;NAME&#x27;: &#x27;job_app_db&#x27;,
              &#x27;OPTIONS&#x27;: {},
              &#x27;PASSWORD&#x27;: &#x27;********************&#x27;,
              &#x27;PORT&#x27;: &#x27;5432&#x27;,
-             &#x27;SCHEMA&#x27;: &#x27;public&#x27;,
              &#x27;TEST&#x27;: {&#x27;CHARSET&#x27;: None,
                       &#x27;COLLATION&#x27;: None,
                       &#x27;MIGRATE&#x27;: True,
@@ -2128,7 +1611,8 @@ Exception Value: Invalid JWT token
  &#x27;drf_spectacular&#x27;,
  &#x27;drf_yasg&#x27;,
  &#x27;django_filters&#x27;,
- &#x27;jobRequisitions&#x27;]</pre></td>
+ &#x27;job_application&#x27;,
+ &#x27;django_extensions&#x27;]</pre></td>
             </tr>
 
             <tr>
@@ -2139,7 +1623,7 @@ Exception Value: Invalid JWT token
             <tr>
               <td>JOB_APPLICATIONS_URL</td>
               <td
-                class="code"><pre>&#x27;http://job_applications:8002&#x27;</pre></td>
+                class="code"><pre>&#x27;http://job-applications:8003&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -2317,24 +1801,18 @@ Exception Value: Invalid JWT token
               <td>LOGGING</td>
               <td
                 class="code"><pre>{&#x27;disable_existing_loggers&#x27;: False,
- &#x27;formatters&#x27;: {&#x27;simple&#x27;: {&#x27;format&#x27;: &#x27;[{levelname}] {message}&#x27;, &#x27;style&#x27;: &#x27;{&#x27;},
-                &#x27;verbose&#x27;: {&#x27;format&#x27;: &#x27;{asctime} [{levelname}] {name}: &#x27;
+ &#x27;formatters&#x27;: {&#x27;verbose&#x27;: {&#x27;format&#x27;: &#x27;[{asctime}] {levelname} {name} &#x27;
                                       &#x27;{message}&#x27;,
                             &#x27;style&#x27;: &#x27;{&#x27;}},
- &#x27;handlers&#x27;: {&#x27;console&#x27;: {&#x27;class&#x27;: &#x27;logging.StreamHandler&#x27;,
-                          &#x27;formatter&#x27;: &#x27;simple&#x27;},
-              &#x27;file&#x27;: {&#x27;backupCount&#x27;: 5,
-                       &#x27;class&#x27;: &#x27;logging.handlers.RotatingFileHandler&#x27;,
-                       &#x27;filename&#x27;: &#x27;/app/logs/talent_engine.log&#x27;,
+ &#x27;handlers&#x27;: {&#x27;console&#x27;: {&#x27;class&#x27;: &#x27;logging.StreamHandler&#x27;},
+              &#x27;file&#x27;: {&#x27;class&#x27;: &#x27;logging.FileHandler&#x27;,
+                       &#x27;filename&#x27;: &#x27;/app/job_applications/logs/app.log&#x27;,
                        &#x27;formatter&#x27;: &#x27;verbose&#x27;,
-                       &#x27;level&#x27;: &#x27;INFO&#x27;,
-                       &#x27;maxBytes&#x27;: 5242880}},
- &#x27;loggers&#x27;: {&#x27;django&#x27;: {&#x27;handlers&#x27;: [&#x27;file&#x27;, &#x27;console&#x27;],
-                        &#x27;level&#x27;: &#x27;INFO&#x27;,
-                        &#x27;propagate&#x27;: True},
-             &#x27;talent_engine&#x27;: {&#x27;handlers&#x27;: [&#x27;file&#x27;, &#x27;console&#x27;],
-                               &#x27;level&#x27;: &#x27;INFO&#x27;,
-                               &#x27;propagate&#x27;: False}},
+                       &#x27;level&#x27;: &#x27;INFO&#x27;}},
+ &#x27;loggers&#x27;: {&#x27;job_applications&#x27;: {&#x27;handlers&#x27;: [&#x27;console&#x27;, &#x27;file&#x27;],
+                                  &#x27;level&#x27;: &#x27;INFO&#x27;,
+                                  &#x27;propagate&#x27;: True}},
+ &#x27;root&#x27;: {&#x27;handlers&#x27;: [&#x27;console&#x27;, &#x27;file&#x27;], &#x27;level&#x27;: &#x27;INFO&#x27;},
  &#x27;version&#x27;: 1}</pre></td>
             </tr>
 
@@ -2361,7 +1839,8 @@ Exception Value: Invalid JWT token
 
             <tr>
               <td>LOG_DIR</td>
-              <td class="code"><pre>&#x27;/app/logs&#x27;</pre></td>
+              <td
+                class="code"><pre>&#x27;/app/job_applications/logs&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -2388,13 +1867,13 @@ Exception Value: Invalid JWT token
             <tr>
               <td>MIDDLEWARE</td>
               <td
-                class="code"><pre>[&#x27;talent_engine.middleware.MicroserviceJWTMiddleware&#x27;,
- &#x27;corsheaders.middleware.CorsMiddleware&#x27;,
- &#x27;django.middleware.security.SecurityMiddleware&#x27;,
+                class="code"><pre>[&#x27;job_applications.middleware.MicroserviceRS256JWTMiddleware&#x27;,
+ &#x27;job_applications.middleware.CustomTenantMiddleware&#x27;,
  &#x27;django.contrib.sessions.middleware.SessionMiddleware&#x27;,
+ &#x27;corsheaders.middleware.CorsMiddleware&#x27;,
  &#x27;django.middleware.common.CommonMiddleware&#x27;,
  &#x27;django.middleware.csrf.CsrfViewMiddleware&#x27;,
- &#x27;django.contrib.auth.middleware.AuthenticationMiddleware&#x27;,
+ &#x27;django.middleware.security.SecurityMiddleware&#x27;,
  &#x27;django.contrib.messages.middleware.MessageMiddleware&#x27;,
  &#x27;django.middleware.clickjacking.XFrameOptionsMiddleware&#x27;]</pre></td>
             </tr>
@@ -2442,7 +1921,7 @@ Exception Value: Invalid JWT token
 
             <tr>
               <td>ROOT_URLCONF</td>
-              <td class="code"><pre>&#x27;talent_engine.urls&#x27;</pre></td>
+              <td class="code"><pre>&#x27;job_applications.urls&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -2580,7 +2059,7 @@ Exception Value: Invalid JWT token
             <tr>
               <td>SETTINGS_MODULE</td>
               <td
-                class="code"><pre>&#x27;talent_engine.settings&#x27;</pre></td>
+                class="code"><pre>&#x27;job_applications.settings&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -2605,28 +2084,14 @@ Exception Value: Invalid JWT token
             </tr>
 
             <tr>
-              <td>SIMPLE_JWT</td>
-              <td
-                class="code"><pre>{&#x27;ACCESS_TOKEN_LIFETIME&#x27;: &#x27;********************&#x27;,
- &#x27;ALGORITHM&#x27;: &#x27;HS256&#x27;,
- &#x27;AUTH_HEADER_TYPES&#x27;: &#x27;********************&#x27;,
- &#x27;AUTH_TOKEN_CLASSES&#x27;: &#x27;********************&#x27;,
- &#x27;BLACKLIST_AFTER_ROTATION&#x27;: True,
- &#x27;REFRESH_TOKEN_LIFETIME&#x27;: &#x27;********************&#x27;,
- &#x27;ROTATE_REFRESH_TOKENS&#x27;: &#x27;********************&#x27;,
- &#x27;SIGNING_KEY&#x27;: &#x27;********************&#x27;,
- &#x27;VERIFYING_KEY&#x27;: &#x27;********************&#x27;}</pre></td>
-            </tr>
-
-            <tr>
               <td>SPECTACULAR_SETTINGS</td>
               <td class="code"><pre>{&#x27;COMPONENT_SPLIT_REQUEST&#x27;: True,
- &#x27;DESCRIPTION&#x27;: &#x27;API documentation for Talent Engine microservice&#x27;,
+ &#x27;DESCRIPTION&#x27;: &#x27;API documentation for Job Applications Microservice&#x27;,
  &#x27;SECURITY&#x27;: [{&#x27;BearerAuth&#x27;: &#x27;********************&#x27;}],
  &#x27;SECURITY_SCHEMES&#x27;: {&#x27;BearerAuth&#x27;: &#x27;********************&#x27;},
  &#x27;SERVE_INCLUDE_SCHEMA&#x27;: False,
  &#x27;SWAGGER_UI_SETTINGS&#x27;: {&#x27;persistAuthorization&#x27;: &#x27;********************&#x27;},
- &#x27;TITLE&#x27;: &#x27;Talent Engine API&#x27;,
+ &#x27;TITLE&#x27;: &#x27;Job Applications Engine API&#x27;,
  &#x27;VERSION&#x27;: &#x27;1.0.0&#x27;}</pre></td>
             </tr>
 
@@ -2661,7 +2126,7 @@ Exception Value: Invalid JWT token
 
             <tr>
               <td>STORAGE_TYPE</td>
-              <td class="code"><pre>&#x27;local&#x27;</pre></td>
+              <td class="code"><pre>&#x27;supabase&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -2678,6 +2143,12 @@ Exception Value: Invalid JWT token
               <td>SUPABASE_URL</td>
               <td
                 class="code"><pre>&#x27;https://gkvgqvosnetifsonhxuo.supabase.co&#x27;</pre></td>
+            </tr>
+
+            <tr>
+              <td>TALENT_ENGINE_URL</td>
+              <td
+                class="code"><pre>&#x27;http://talent-engine:8002&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -2751,7 +2222,7 @@ Exception Value: Invalid JWT token
             <tr>
               <td>WSGI_APPLICATION</td>
               <td
-                class="code"><pre>&#x27;talent_engine.wsgi.application&#x27;</pre></td>
+                class="code"><pre>&#x27;job_applications.wsgi.application&#x27;</pre></td>
             </tr>
 
             <tr>
