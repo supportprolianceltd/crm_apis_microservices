@@ -400,3 +400,6 @@ class Request(models.Model):
             })
             producer.flush()
             logger.info(f"Request {self.id} created for tenant {self.tenant_id}")
+
+
+

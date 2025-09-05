@@ -63,7 +63,3 @@ networks:
 volumes:
   job_app_pgdata:
 
-
-
-
-

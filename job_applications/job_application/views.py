@@ -505,6 +505,9 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
+
+
 class JobApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = JobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser)
