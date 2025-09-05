@@ -31,11 +31,7 @@ def send_screening_notification(applicant, tenant_id, event_type, source="job-ap
         }
     }
     try:
-        resp = requests.get(
-            tenant_url,
-            headers={'Authorization': request.headers.get('Authorization', '')},
-            timeout=5
-        )
+        resp = requests.post(f"{settings.NOTIFICATIONS_EVENT_URL}/events/", json=payload, timeout=5)
         logger.info(f"Notification sent for {event_type} to {applicant.get('email')}: {resp.status_code}")
     except Exception as e:
         logger.error(f"Failed to send notification for {applicant.get('email')}: {str(e)}")

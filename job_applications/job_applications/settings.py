@@ -19,7 +19,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 import django.http.request
-
+from celery.schedules import crontab
 def patched_split_domain_port(host):
     # Accept underscores in hostnames
     if host and host.count(':') == 1 and host.rfind(']') < host.find(':'):
@@ -247,8 +247,23 @@ USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CELERY_BROKER_URL = 'redis://job_app_redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://job_app_redis:6379/0'
+
+CELERY_BEAT_SCHEDULE = {
+    'auto-screen-all-applications-every-10-minutes': {
+        'task': 'job_application.tasks.auto_screen_all_applications',
+        'schedule': 150.0,  # every 10 minutes
+    },
+}
 
 
 
+# CELERY_BEAT_SCHEDULE = {
+#     'auto-screen-all-applications-at-midnight': {
+#         'task': 'job_application.tasks.auto_screen_all_applications',
+#         'schedule': crontab(hour=0, minute=0),  # Runs daily at 00:00 (midnight)
+#     },
+# }
 # docker compose exec job-applications python manage.py makemigrations job_application
 # docker compose exec job-applications python manage.py migrate

@@ -13,6 +13,8 @@ PUBLIC_PATHS = [
     "applications-engine/applications/parse-resume/autofill/",
     '/api/talent-engine/requisitions/by-link/',
     '/api/talent-engine/requisitions/unique_link/',
+    '/api/talent-engine/requisitions/public/published/',
+    '/api/talent-engine/requisitions/public/close/',
     '/api/applications-engine/apply-jobs/',
     
 ]

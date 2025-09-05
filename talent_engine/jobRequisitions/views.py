@@ -1,16 +1,8 @@
 import logging
 import jwt
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-def get_tenant_id_from_jwt(request):
-    auth_header = request.headers.get('Authorization', '')
-    if not auth_header.startswith('Bearer '):
-        raise ValidationError('No valid Bearer token provided.')
-    token = auth_header.split(' ')[1]
-    try:
-        payload = jwt.decode(token, options={"verify_signature": False})
-        return payload.get('tenant_id')
-    except Exception:
-        raise ValidationError('Invalid JWT token.')
+
 import uuid
 from django.conf import settings
 from django.db import connection, models, transaction
@@ -37,6 +29,74 @@ from .permissions import IsMicroserviceAuthenticated
 logger = logging.getLogger('talent_engine')
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils import timezone
+from .models import JobRequisition
+from .serializers import PublicJobRequisitionSerializer
+import logging
+
+logger = logging.getLogger('talent_engine')
+
+def get_tenant_id_from_jwt(request):
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        raise ValidationError('No valid Bearer token provided.')
+    token = auth_header.split(' ')[1]
+    try:
+        payload = jwt.decode(token, options={"verify_signature": False})
+        return payload.get('tenant_id')
+    except Exception:
+        raise ValidationError('Invalid JWT token.')
+
+class PublicPublishedJobRequisitionsView(APIView):
+    permission_classes = []  # No authentication required
+
+    def get(self, request):
+        today = timezone.now().date()
+        queryset = JobRequisition.active_objects.filter(
+            publish_status=True,
+            is_deleted=False,
+            deadline_date=today
+        )
+        serializer = PublicJobRequisitionSerializer(queryset, many=True)
+        logger.info(f"Public requisitions fetched: {queryset.count()}")
+        return Response({
+            "count": queryset.count(),
+            "results": serializer.data
+        }, status=status.HTTP_200_OK)  
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import JobRequisition
+import logging
+
+logger = logging.getLogger('talent_engine')
+
+class PublicCloseJobRequisitionView(APIView):
+    permission_classes = []  # No authentication required
+
+    def post(self, request, job_requisition_id):
+        try:
+            job_req = JobRequisition.active_objects.get(id=job_requisition_id)
+            job_req.status = 'closed'
+            job_req.save(update_fields=['status', 'updated_at'])
+            logger.info(f"JobRequisition {job_requisition_id} status changed to closed (public endpoint)")
+            return Response({
+                "detail": f"Job requisition {job_requisition_id} status changed to closed.",
+                "id": job_requisition_id,
+                "status": job_req.status
+            }, status=status.HTTP_200_OK)
+        except JobRequisition.DoesNotExist:
+            logger.warning(f"JobRequisition {job_requisition_id} not found for public close")
+            return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error closing job requisition {job_requisition_id}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+                 
 
 class JobRequisitionBulkDeleteView(generics.GenericAPIView):
     serializer_class = JobRequisitionSerializer
@@ -818,3 +878,6 @@ class UserRequestsListView(generics.ListAPIView):
         if role == 'recruiter' and branch:
             queryset = queryset.filter(branch=branch)
         return queryset
+
+
+

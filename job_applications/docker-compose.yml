@@ -22,6 +22,8 @@ services:
       TALENT_ENGINE_URL: http://talent-engine:8002
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       CORS_ALLOWED_ORIGINS: http://localhost:5173,https://crm-frontend-react.vercel.app,http://localhost:8000
+      CELERY_BROKER_URL: redis://job_app_redis:6379/0
+      CELERY_RESULT_BACKEND: redis://job_app_redis:6379/0
     volumes:
       - .:/app
       - ./logs:/app/logs
@@ -34,6 +36,56 @@ services:
     depends_on:
       job_app_postgres:
         condition: service_healthy
+      job_app_redis:
+        condition: service_started
+    networks:
+      - auth_service_default
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: job-applications-celery
+    command: celery -A job_applications worker --loglevel=info
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_SETTINGS_MODULE: job_applications.settings
+      CELERY_BROKER_URL: redis://job_app_redis:6379/0
+      CELERY_RESULT_BACKEND: redis://job_app_redis:6379/0
+    volumes:
+      - .:/app
+    depends_on:
+      - job-applications
+      - job_app_postgres
+      - job_app_redis
+    networks:
+      - auth_service_default
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: job-applications-celery-beat
+    command: celery -A job_applications beat --loglevel=info
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_SETTINGS_MODULE: job_applications.settings
+      CELERY_BROKER_URL: redis://job_app_redis:6379/0
+      CELERY_RESULT_BACKEND: redis://job_app_redis:6379/0
+    volumes:
+      - .:/app
+    depends_on:
+      - job-applications
+      - job_app_postgres
+      - job_app_redis
+    networks:
+      - auth_service_default
+
+  job_app_redis:
+    image: redis:7
+    container_name: job_app_redis
+    ports:
+      - "6381:6379"  # Expose on 6381 to avoid conflict
     networks:
       - auth_service_default
 

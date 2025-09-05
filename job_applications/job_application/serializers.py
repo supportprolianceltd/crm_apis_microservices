@@ -273,12 +273,15 @@ class JobApplicationSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context['request']
         tenant_id = get_tenant_id_from_jwt(request)
-        job_app = JobApplication.objects.filter(id=data['job_application_id']).first()
-        logger.info(f"Validating job_application_id={data['job_application_id']}, found={job_app}, job_app.tenant_id={getattr(job_app, 'tenant_id', None)}, jwt_tenant_id={tenant_id}")
-        if not job_app:
-            raise serializers.ValidationError({"job_application_id": "Invalid job application ID."})
-        if str(job_app.tenant_id) != str(tenant_id):
-            raise serializers.ValidationError({"job_application_id": "Job application does not belong to this tenant."})
+
+        # Only validate job_application_id on create
+        if self.instance is None and 'job_application_id' in data:
+            job_app = JobApplication.objects.filter(id=data['job_application_id']).first()
+            logger.info(f"Validating job_application_id={data['job_application_id']}, found={job_app}, job_app.tenant_id={getattr(job_app, 'tenant_id', None)}, jwt_tenant_id={tenant_id}")
+            if not job_app:
+                raise serializers.ValidationError({"job_application_id": "Invalid job application ID."})
+            if str(job_app.tenant_id) != str(tenant_id):
+                raise serializers.ValidationError({"job_application_id": "Job application does not belong to this tenant."})
 
         # Validate branch_id if provided
         if data.get('branch_id'):

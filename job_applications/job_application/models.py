@@ -137,7 +137,12 @@ class JobApplication(models.Model):
             logger.info(f"JobApplication {self.id} restored for tenant {self.tenant_id}")
 
 
-
+    def get_resume_url(self):
+        # Find resume document in self.documents
+        for doc in self.documents:
+            if doc.get('document_type', '').lower() in ['resume', 'curriculum vitae (cv)']:
+                return doc.get('file_url')
+        return None
 
 class Schedule(models.Model):
     STATUS_CHOICES = [
