@@ -4323,3 +4323,5 @@
 2025-09-05 07:52:40,359 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 403 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
 2025-09-05 07:52:44,715 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
 2025-09-05 07:52:59,787 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 400 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-05 07:56:45,445 ERROR gateway Error forwarding request to /api/user/users/ from 172.18.0.1: HTTPConnectionPool(host='auth-service', port=8001): Max retries exceeded with url: /api/user/users/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7abb504dcc50>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-05 07:57:04,279 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
