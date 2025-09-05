@@ -248,40 +248,11 @@ AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
 NOTIFICATIONS_EVENT_URL = env('NOTIFICATIONS_EVENT_URL', default='http://app:3000/events/')
 print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 
+SUPABASE_URL = env('SUPABASE_URL', default='')
+SUPABASE_KEY = env('SUPABASE_KEY', default='')
+SUPABASE_BUCKET = env('SUPABASE_BUCKET', default='')
 
-
-
-# >>> from django_tenants.utils import tenant_context, get_tenant_model
-# >>> from django.db import connection
-# >>>
-# >>> Tenant = get_tenant_model()
-# >>> for tenant in Tenant.objects.all():
-# ...     with tenant_context(tenant):
-# ...         cursor = connection.cursor()
-# ...         try:
-# ...             cursor.execute("""
-# ...                 CREATE TABLE IF NOT EXISTS users_rsakeypair (
-# ...                     id SERIAL PRIMARY KEY,
-# ...                     tenant_id INTEGER NOT NULL,
-# ...                     kid VARCHAR(255) NOT NULL,
-# ...                     private_key_pem TEXT NOT NULL,
-# ...                     public_key_pem TEXT NOT NULL,
-# ...                     active BOOLEAN NOT NULL DEFAULT true,
-# ...                     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-# ...                     updated_at TIMESTAMP WITH TIME ZONE NOT NULL
-# ...                 )
-# ...             """)
-# ...             print(f"Table created for tenant: {tenant.schema_name}")
-# ...         except Exception as e:
-# ...             print(f"Error creating table for {tenant.schema_name}: {e}")
-# ... 
-# Table created for tenant: public
-# Table created for tenant: proliance
-# Table created for tenant: arts
-# Table created for tenant: auth-service
-# >>>
-
-
+STORAGE_TYPE = env('STORAGE_TYPE', default='supabase')  # or 's3', 'azure', 'local', 'supabase'
 
 # sudo nano /etc/nginx/nginx.conf
 # sudo nano /etc/nginx/conf.d/crm_api.conf

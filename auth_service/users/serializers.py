@@ -43,7 +43,7 @@ class EducationDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EducationDetail
-        fields = '__all__'
+        exclude = ['user_profile']  # <-- Change from fields='__all__'
 
     def create(self, validated_data):
         certificate = validated_data.pop('certificate', None)

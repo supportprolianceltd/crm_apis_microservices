@@ -633,3 +633,4 @@ class PublicJobRequisitionSerializer(serializers.ModelSerializer):
             'id', 'requisition_number', 'job_requisition_code', 'job_application_code',
              'is_deleted', 
         ]
+

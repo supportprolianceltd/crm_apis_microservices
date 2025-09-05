@@ -122,3 +122,5 @@ def blacklist_refresh_token(refresh_token):
     jti = payload.get("jti")
     exp = datetime.fromtimestamp(payload["exp"])
     BlacklistedToken.objects.create(jti=jti, expires_at=exp)
+
+

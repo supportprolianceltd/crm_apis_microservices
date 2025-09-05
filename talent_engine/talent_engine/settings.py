@@ -84,15 +84,27 @@ INSTALLED_APPS = [
 ]
 
 # ======================== Middleware ========================
+# MIDDLEWARE = [
+#     'talent_engine.middleware.MicroserviceRS256JWTMiddleware',
+#     'talent_engine.middleware.CustomTenantSchemaMiddleware',
+#     'corsheaders.middleware.CorsMiddleware',  # must be first for CORS
+#     'django.middleware.security.SecurityMiddleware',
+#     'django.contrib.sessions.middleware.SessionMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+#     'django.middleware.csrf.CsrfViewMiddleware',
+#     'django.contrib.auth.middleware.AuthenticationMiddleware',
+#     'django.contrib.messages.middleware.MessageMiddleware',
+#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+# ]
 MIDDLEWARE = [
     'talent_engine.middleware.MicroserviceRS256JWTMiddleware',
     'talent_engine.middleware.CustomTenantSchemaMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # must be first for CORS
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Remove 'django.contrib.auth.middleware.AuthenticationMiddleware'
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

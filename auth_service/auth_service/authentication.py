@@ -47,3 +47,4 @@ class RS256TenantJWTAuthentication(BaseAuthentication):
             raise exceptions.AuthenticationFailed("Token has expired.")
         except jwt.InvalidTokenError as e:
             raise exceptions.AuthenticationFailed(f"Invalid token: {str(e)}")
+

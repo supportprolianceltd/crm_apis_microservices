@@ -10,6 +10,9 @@ from django.db import models
 from core.models import Tenant
 import uuid
 
+def generate_kid():
+    return uuid.uuid4().hex
+
 def today():
     return timezone.now().date()
 
@@ -562,8 +565,7 @@ class ClientProfile(models.Model):
 
 
 
-def generate_kid():
-    return uuid.uuid4().hex
+
 
 class RSAKeyPair(models.Model):
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='rsa_keys')
@@ -571,6 +573,7 @@ class RSAKeyPair(models.Model):
     private_key_pem = models.TextField()  # PEM encoded private key
     public_key_pem = models.TextField()   # PEM encoded public key
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  # <-- Add this
     active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -582,41 +585,3 @@ class BlacklistedToken(models.Model):
     jti = models.CharField(max_length=255, unique=True)  # JWT ID
     blacklisted_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-
-# from django_tenants.utils import get_tenant_model
-# from django.core.management import call_command
-
-# for tenant in get_tenant_model().objects.all():
-#     print(f"Running migrations for tenant: {tenant.schema_name}")
-#     call_command('migrate_schemas', schema_name=tenant.schema_name)
-
-
-# from django_tenants.utils import tenant_context, get_tenant_model
-# from users.models import RSAKeyPair
-# from cryptography.hazmat.primitives.asymmetric import rsa
-# from cryptography.hazmat.primitives import serialization
-
-# def generate_rsa_keypair():
-#     private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-#     private_pem = private_key.private_bytes(
-#         encoding=serialization.Encoding.PEM,
-#         format=serialization.PrivateFormat.PKCS8,
-#         encryption_algorithm=serialization.NoEncryption()
-#     ).decode('utf-8')
-#     public_pem = private_key.public_key().public_bytes(
-#         encoding=serialization.Encoding.PEM,
-#         format=serialization.PublicFormat.SubjectPublicKeyInfo
-#     ).decode('utf-8')
-#     return private_pem, public_pem
-
-# Tenant = get_tenant_model()
-# for tenant in Tenant.objects.all():
-#     with tenant_context(tenant):
-#         priv, pub = generate_rsa_keypair()
-#         RSAKeyPair.objects.create(tenant=tenant, private_key_pem=priv, public_key_pem=pub, active=True)
-#         print(f"RSAKeyPair created for tenant: {tenant.schema_name}")from django_tenants.utils import tenant_context, get_tenant_model
-# Tenant = get_tenant_model()
-# tenant = Tenant.objects.get(schema_name='proliance')
-# with tenant_context(tenant):
-#     from django.db import connection
-#     print('users_rsakeypair' in connection.introspection.table_names())

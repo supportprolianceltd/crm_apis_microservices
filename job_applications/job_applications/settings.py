@@ -283,7 +283,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
 
 DATABASES = {
     'default': {
-        'ENGINE': env('DB_ENGINE', default='django.db.backends.postgresql'),
+        'ENGINE': 'django_tenants.postgresql_backend',
         'NAME': env('DB_NAME', default=''),
         'USER': env('DB_USER', default=''),
         'PASSWORD': env('DB_PASSWORD', default=''),
@@ -292,6 +292,8 @@ DATABASES = {
         'CONN_MAX_AGE': 60,
     }
 }
+
+
 
 if not DATABASES['default']['ENGINE']:
     raise ImproperlyConfigured("DATABASES['default']['ENGINE'] must be set.")
@@ -313,17 +315,29 @@ INSTALLED_APPS = [
 ]
 
 # ======================== Middleware ========================
+# MIDDLEWARE = [
+#     'corsheaders.middleware.CorsMiddleware',
+#     'django.middleware.security.SecurityMiddleware',
+#     'django.contrib.sessions.middleware.SessionMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+#     'django.middleware.csrf.CsrfViewMiddleware',
+#     'django.contrib.auth.middleware.AuthenticationMiddleware',      # <-- must come BEFORE your JWT middleware
+#     'job_applications.middleware.MicroserviceRS256JWTMiddleware',   # <-- your JWT middleware
+#     'django.contrib.messages.middleware.MessageMiddleware',
+#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+# ]
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',      # <-- must come BEFORE your JWT middleware
-    'job_applications.middleware.MicroserviceRS256JWTMiddleware',   # <-- your JWT middleware
+    'job_applications.middleware.MicroserviceRS256JWTMiddleware',
+    'job_applications.middleware.CustomTenantSchemaMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
 
@@ -331,19 +345,23 @@ ROOT_URLCONF = 'job_applications.urls'
 WSGI_APPLICATION = 'job_applications.wsgi.application'
 
 # ======================== REST Framework ========================
+# REST_FRAMEWORK = {
+#     # Use only custom JWT middleware, not DRF JWTAuthentication
+#     'DEFAULT_AUTHENTICATION_CLASSES': (),
+#     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
+#     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+#     'DEFAULT_PARSER_CLASSES': [
+#         'rest_framework.parsers.JSONParser',
+#         'rest_framework.parsers.FormParser',
+#         'rest_framework.parsers.MultiPartParser',
+#     ],
+# }
+
 REST_FRAMEWORK = {
-    # Use only custom JWT middleware, not DRF JWTAuthentication
-    'DEFAULT_AUTHENTICATION_CLASSES': (),
+    'DEFAULT_AUTHENTICATION_CLASSES': (),  # Empty tuple - handled by middleware
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_PARSER_CLASSES': [
-        'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser',
-    ],
+    # ... other settings
 }
-
-
 
 
 # ======================== External Services ========================

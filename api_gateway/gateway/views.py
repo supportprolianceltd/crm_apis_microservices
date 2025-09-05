@@ -11,8 +11,10 @@ logger = logging.getLogger('gateway')
 AUTH_PREFIXES = {"token", "user", "tenant"}
 PUBLIC_PATHS = [
     "applications-engine/applications/parse-resume/autofill/",
-    "applications-engine/apply-jobs/",
-    # Add other public paths as needed
+    '/api/talent-engine/requisitions/by-link/',
+    '/api/talent-engine/requisitions/unique_link/',
+    '/api/applications-engine/apply-jobs/',
+    
 ]
 
 @ratelimit(key='ip', rate='10/m', method='POST', block=True)

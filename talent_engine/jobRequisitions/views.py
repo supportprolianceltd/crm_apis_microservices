@@ -33,8 +33,10 @@ from .models import (
     Participant,
 )
 from .serializers import JobRequisitionSerializer, ComplianceItemSerializer,VideoSessionSerializer, ParticipantSerializer, RequestSerializer, PublicJobRequisitionSerializer
-
+from .permissions import IsMicroserviceAuthenticated
 logger = logging.getLogger('talent_engine')
+
+
 
 class JobRequisitionBulkDeleteView(generics.GenericAPIView):
     serializer_class = JobRequisitionSerializer
@@ -69,9 +71,33 @@ class JobRequisitionBulkDeleteView(generics.GenericAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class MyJobRequisitionListView(generics.ListAPIView):
+
+class MyJobRequisitionListView(generics.ListCreateAPIView):
     serializer_class = JobRequisitionSerializer
-    # permission_classes removed; rely on custom JWT middleware
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['status', 'role']
+    search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return JobRequisition.objects.none()
+        jwt_payload = getattr(self.request, 'jwt_payload', {})
+        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        user_id = str(jwt_payload.get('user', {}).get('id')) if jwt_payload.get('user', {}).get('id') is not None else None
+        role = jwt_payload.get('role')
+        branch = jwt_payload.get('user', {}).get('branch')
+        queryset = JobRequisition.active_objects.filter(
+            tenant_id=tenant_id,
+            requested_by_id=user_id
+        )
+        if role == 'recruiter' and branch:
+            queryset = queryset.filter(branch=branch)
+        return queryset
+    
+
+
+class PublishedJobRequisitionListView(generics.ListAPIView):
+    serializer_class = JobRequisitionSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['status', 'role']
     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
@@ -81,14 +107,16 @@ class MyJobRequisitionListView(generics.ListAPIView):
             return JobRequisition.objects.none()
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_id')
-        user_id = jwt_payload.get('user_id')
-        if not tenant_id or not user_id:
-            logger.error("Missing tenant_id or user_id in JWT payload")
-            raise serializers.ValidationError("Missing tenant_id or user_id in token.")
-        queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id, requested_by_id=user_id)
-     
+        role = jwt_payload.get('role')
+        branch = jwt_payload.get('branch')
+        queryset = JobRequisition.active_objects.filter(
+            tenant_id=tenant_id,
+            publish_status=True
+        )
+        if role == 'recruiter' and branch:
+            queryset = queryset.filter(branch=branch)
         return queryset
-
+    
 
 class JobRequisitionListCreateView(generics.ListCreateAPIView):
     serializer_class = JobRequisitionSerializer
@@ -111,10 +139,10 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
     
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = jwt_payload.get('tenant_id')
-        user_id = jwt_payload.get('user_id')
+        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        user_id = str(jwt_payload.get('user', {}).get('id')) if jwt_payload.get('user', {}).get('id') is not None else None
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
+        branch = jwt_payload.get('user', {}).get('branch')
         if not tenant_id or not user_id:
             logger.error("Missing tenant_id or user_id in JWT payload")
             raise serializers.ValidationError("Missing tenant_id or user_id in token.")
@@ -124,6 +152,8 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
             branch=branch if role == 'recruiter' and branch else None
         )
         logger.info(f"Job requisition created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
+
+
 
 
 class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -257,9 +287,9 @@ class SoftDeletedJobRequisitionsView(generics.ListAPIView):
             logger.exception(f"Error listing soft-deleted job requisitions: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class RecoverSoftDeletedJobRequisitionsView(generics.GenericAPIView):
     serializer_class = JobRequisitionSerializer  # Added serializer_class
-    # permission_classes removed; rely on custom JWT middleware
 
     def post(self, request, *args, **kwargs):
         try:
@@ -267,19 +297,16 @@ class RecoverSoftDeletedJobRequisitionsView(generics.GenericAPIView):
             if not ids:
                 logger.warning("No requisition IDs provided for recovery")
                 return Response({"detail": "No requisition IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
-            auth_header = request.headers.get('Authorization', '')
-            if not auth_header.startswith('Bearer '):
-                logger.error("No valid Bearer token provided")
-                return Response({"detail": "No valid Bearer token provided."}, status=status.HTTP_401_UNAUTHORIZED)
-            token = auth_header.split(' ')[1]
-            tenants = fetch_tenants(token)
-            if not tenants:
-                logger.error("No tenants found for user")
-                return Response({"detail": "No tenants found."}, status=status.HTTP_404_NOT_FOUND)
-            tenant_id = tenants[0]['id']
+            jwt_payload = getattr(request, 'jwt_payload', {})
+            tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+            role = jwt_payload.get('role')
+            branch = jwt_payload.get('user', {}).get('branch')
+            if not tenant_id:
+                logger.error("No tenant_id in token")
+                return Response({"detail": "No tenant_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
             queryset = JobRequisition.objects.filter(id__in=ids, tenant_id=tenant_id, is_deleted=True)
-            if request.user.role == 'recruiter' and request.user.branch:
-                queryset = queryset.filter(branch=request.user.branch)
+            if role == 'recruiter' and branch:
+                queryset = queryset.filter(branch=branch)
             if not queryset.exists():
                 logger.warning(f"No soft-deleted requisitions found for IDs {ids} in tenant {tenant_id}")
                 return Response({"detail": "No soft-deleted requisitions found."}, status=status.HTTP_404_NOT_FOUND)
@@ -296,9 +323,48 @@ class RecoverSoftDeletedJobRequisitionsView(generics.GenericAPIView):
             logger.exception(f"Error during recovery of requisitions: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+# class RecoverSoftDeletedJobRequisitionsView(generics.GenericAPIView):
+#     serializer_class = JobRequisitionSerializer  # Added serializer_class
+#     # permission_classes removed; rely on custom JWT middleware
+
+#     def post(self, request, *args, **kwargs):
+#         try:
+#             ids = request.data.get('ids', [])
+#             if not ids:
+#                 logger.warning("No requisition IDs provided for recovery")
+#                 return Response({"detail": "No requisition IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+#             auth_header = request.headers.get('Authorization', '')
+#             if not auth_header.startswith('Bearer '):
+#                 logger.error("No valid Bearer token provided")
+#                 return Response({"detail": "No valid Bearer token provided."}, status=status.HTTP_401_UNAUTHORIZED)
+#             token = auth_header.split(' ')[1]
+#             tenants = fetch_tenants(token)
+#             if not tenants:
+#                 logger.error("No tenants found for user")
+#                 return Response({"detail": "No tenants found."}, status=status.HTTP_404_NOT_FOUND)
+#             tenant_id = tenants[0]['id']
+#             queryset = JobRequisition.objects.filter(id__in=ids, tenant_id=tenant_id, is_deleted=True)
+#             if request.user.role == 'recruiter' and request.user.branch:
+#                 queryset = queryset.filter(branch=request.user.branch)
+#             if not queryset.exists():
+#                 logger.warning(f"No soft-deleted requisitions found for IDs {ids} in tenant {tenant_id}")
+#                 return Response({"detail": "No soft-deleted requisitions found."}, status=status.HTTP_404_NOT_FOUND)
+#             recovered_count = 0
+#             with transaction.atomic():
+#                 for requisition in queryset:
+#                     requisition.restore()
+#                     recovered_count += 1
+#             logger.info(f"Successfully recovered {recovered_count} requisitions for tenant {tenant_id}")
+#             return Response({
+#                 "detail": f"Successfully recovered {recovered_count} requisition(s)."
+#             }, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             logger.exception(f"Error during recovery of requisitions: {str(e)}")
+#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 class PermanentDeleteJobRequisitionsView(generics.GenericAPIView):
     serializer_class = JobRequisitionSerializer  # Added serializer_class
-    # permission_classes removed; rely on custom JWT middleware
 
     def post(self, request, *args, **kwargs):
         try:
@@ -306,19 +372,16 @@ class PermanentDeleteJobRequisitionsView(generics.GenericAPIView):
             if not ids:
                 logger.warning("No requisition IDs provided for permanent deletion")
                 return Response({"detail": "No requisition IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
-            auth_header = request.headers.get('Authorization', '')
-            if not auth_header.startswith('Bearer '):
-                logger.error("No valid Bearer token provided")
-                return Response({"detail": "No valid Bearer token provided."}, status=status.HTTP_401_UNAUTHORIZED)
-            token = auth_header.split(' ')[1]
-            tenants = fetch_tenants(token)
-            if not tenants:
-                logger.error("No tenants found for user")
-                return Response({"detail": "No tenants found."}, status=status.HTTP_404_NOT_FOUND)
-            tenant_id = tenants[0]['id']
+            jwt_payload = getattr(request, 'jwt_payload', {})
+            tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+            role = jwt_payload.get('role')
+            branch = jwt_payload.get('user', {}).get('branch')
+            if not tenant_id:
+                logger.error("No tenant_id in token")
+                return Response({"detail": "No tenant_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
             queryset = JobRequisition.objects.filter(id__in=ids, tenant_id=tenant_id, is_deleted=True)
-            if request.user.role == 'recruiter' and request.user.branch:
-                queryset = queryset.filter(branch=request.user.branch)
+            if role == 'recruiter' and branch:
+                queryset = queryset.filter(branch=branch)
             if not queryset.exists():
                 logger.warning(f"No soft-deleted requisitions found for IDs {ids} in tenant {tenant_id}")
                 return Response({"detail": "No soft-deleted requisitions found."}, status=status.HTTP_404_NOT_FOUND)
@@ -330,6 +393,8 @@ class PermanentDeleteJobRequisitionsView(generics.GenericAPIView):
         except Exception as e:
             logger.exception(f"Error during permanent deletion of requisitions: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+ 
 
 class ComplianceItemView(APIView):
     serializer_class = ComplianceItemSerializer  # Added serializer_class

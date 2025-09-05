@@ -533,3 +533,5 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
 class SimpleMessageSerializer(serializers.Serializer):
     detail = serializers.CharField()
+
+
