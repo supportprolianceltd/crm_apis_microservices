@@ -11,25 +11,20 @@ from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
 import concurrent.futures
-
-from .permissions import IsMicroserviceAuthenticated
 from rest_framework import generics, status
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import  AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-import aiohttp
-import asyncio
 from .models import JobApplication, Schedule
 from .serializers import (
     JobApplicationSerializer, ScheduleSerializer, ComplianceStatusSerializer, SimpleMessageSerializer, PublicJobApplicationSerializer
 )
 from utils.screen import parse_resume, screen_resume, extract_resume_fields
+from utils.email_utils import send_screening_notification
 from .tenant_utils import resolve_tenant_from_unique_link
 
 logger = logging.getLogger('job_applications')
-
-
 
 def get_job_requisition_by_id(job_requisition_id, request):
     try:
@@ -126,8 +121,6 @@ class ResumeParseView(APIView):
         except Exception as e:
             logger.exception(f"Error parsing resume: {str(e)} | Request data: {request.data}, FILES: {request.FILES}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 class ResumeScreeningView(APIView):
     serializer_class = SimpleMessageSerializer
@@ -360,11 +353,34 @@ class ResumeScreeningView(APIView):
             shortlisted_ids = {item['application_id'] for item in final_shortlisted}
 
             for app in applications:
-                if str(app.id) in shortlisted_ids:
+                app_id_str = str(app.id)
+                if app_id_str in shortlisted_ids:
                     app.status = 'shortlisted'
+                    app.save()
+                    shortlisted_app = next((item for item in final_shortlisted if item['application_id'] == app_id_str), None)
+                    if shortlisted_app:
+                        shortlisted_app['job_requisition_id'] = job_requisition['id']
+                        shortlisted_app['status'] = 'shortlisted'
+                        employment_gaps = shortlisted_app.get('employment_gaps', [])
+                        event_type = "job.application.shortlisted.gaps" if employment_gaps else "job.application.shortlisted"
+                        send_screening_notification(
+                            shortlisted_app,
+                            tenant_id,
+                            event_type=event_type,
+                            employment_gaps=employment_gaps
+                        )
                 else:
                     app.status = 'rejected'
-                app.save()
+                    app.save()
+                    rejected_app = {
+                        "application_id": app_id_str,
+                        "full_name": app.full_name,
+                        "email": app.email,
+                        "job_requisition_id": job_requisition['id'],
+                        "status": "rejected",
+                        "score": getattr(app, "screening_score", None)
+                    }
+                    send_screening_notification(rejected_app, tenant_id, event_type="job.application.rejected")
 
             return Response({
                 "detail": f"Screened {len(shortlisted)} applications using '{document_type}', shortlisted {len(final_shortlisted)} candidates.",
@@ -382,66 +398,7 @@ class ResumeScreeningView(APIView):
                 "error_type": type(e).__name__
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-#   class ResumeParseView(APIView):
-#     parser_classes = [MultiPartParser, FormParser]
-#     permission_classes = [AllowAny]
-#     serializer_class = SimpleMessageSerializer
-
-#     def post(self, request):
-#         logger.info(f"Incoming request content-type: {request.content_type}")
-#         logger.info(f"Request FILES keys: {list(request.FILES.keys())}")
-#         logger.info(f"Request DATA keys: {list(request.data.keys())}")
-
-#         try:
-#             resume_file = request.FILES.get('resume')
-#             if not resume_file:
-#                 logger.error(f"No resume file found. Available files: {list(request.FILES.keys())}")
-#                 return Response({"detail": "Resume file is required."}, status=status.HTTP_400_BAD_REQUEST)
-        
-#             logger.info(f"Processing resume file: {resume_file.name}, size: {resume_file.size}")
-        
-#             # Preserve the file extension
-#             file_extension = os.path.splitext(resume_file.name)[1]
-#             with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
-#                 for chunk in resume_file.chunks():
-#                     temp_file.write(chunk)
-#                 temp_file_path = temp_file.name
-            
-#             logger.info(f"Temporary resume file saved at: {temp_file_path}")
-        
-#             # Parse resume with timeout
-#             try:
-#                 resume_text = parse_resume(temp_file_path)
-#                 logger.info(f"Extracted text length: {len(resume_text) if resume_text else 0}")
-#             except Exception as e:
-#                 logger.error(f"Resume parsing failed: {str(e)}")
-#                 resume_text = ""
-        
-#             os.unlink(temp_file_path)
-        
-#             if not resume_text:
-#                 logger.error(f"Could not extract text from resume. File: {resume_file.name}")
-#                 return Response({"detail": "Could not extract text from resume."}, status=status.HTTP_400_BAD_REQUEST)
-            
-#             # Extract fields with timeout
-#             try:
-#                 extracted_data = extract_resume_fields(resume_text)
-#             except Exception as e:
-#                 logger.error(f"Field extraction failed: {str(e)}")
-#                 return Response({"detail": "Failed to extract fields from resume."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-#             logger.info(f"Resume parsed successfully for file: {resume_file.name}")
-#             return Response({
-#                 "detail": "Resume parsed successfully",
-#                 "data": extracted_data
-#             }, status=status.HTTP_200_OK)
-#         except Exception as e:
-#             logger.exception(f"Error parsing resume: {str(e)} | Request data: {request.data}, FILES: {request.FILES}")
-#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-        
+ 
 class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -506,8 +463,6 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-
-
 class JobApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = JobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser)
@@ -534,7 +489,6 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
         return super().check_permissions(request)
 
-  
 
 class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = JobApplicationSerializer
@@ -617,6 +571,7 @@ class JobApplicationBulkDeleteView(APIView):
             logger.error(f"Bulk soft delete failed: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class JobApplicationWithSchedulesView(APIView):
     serializer_class = SimpleMessageSerializer 
     permission_classes = [AllowAny]
@@ -698,12 +653,9 @@ class JobApplicationsByRequisitionView(generics.ListAPIView):
         return queryset.order_by('-created_at')
 
 
-
-
-
 class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer 
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         jwt_payload = getattr(request, 'jwt_payload', {})
@@ -777,7 +729,7 @@ class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
 
 class PublishedPublicJobRequisitionsWithShortlistedApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer 
-    permission_classes = [AllowAny]
+    # permission_classes = [AllowAny]
 
     def get(self, request):
         jwt_payload = getattr(request, 'jwt_payload', {})
@@ -833,17 +785,17 @@ class PublishedPublicJobRequisitionsWithShortlistedApplicationsView(APIView):
             })
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
 class TimezoneChoicesView(APIView):
     serializer_class = SimpleMessageSerializer 
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         timezone_choices = [
             {"value": value, "label": label} for value, label in Schedule.TIMEZONE_CHOICES
         ]
         return Response(timezone_choices, status=status.HTTP_200_OK)
-
-
 
 
 class SoftDeletedJobApplicationsView(generics.ListAPIView):
@@ -904,12 +856,11 @@ class PermanentDeleteJobApplicationsView(APIView):
         deleted_count = applications.delete()[0]
         return Response({"detail": f"Successfully permanently deleted {deleted_count} application(s)."}, status=status.HTTP_200_OK)
 
+
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
-    # permission_classes = [IsAuthenticated]
-    def get_permissions(self):
-        return [AllowAny()]  # Temporary for testing
-
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    # permission_classes = [AllowAny]  # Allow unauthenticated requests
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
@@ -931,10 +882,21 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         return queryset.order_by('-created_at')
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data, context={'request': request})
+        jwt_payload = getattr(request, 'jwt_payload', {})
+        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        role = jwt_payload.get('role')
+        branch = jwt_payload.get('user', {}).get('branch')
+
+        if not tenant_id:
+            logger.error("Tenant schema or ID missing from token")
+            return Response({"error": "Tenant schema or ID missing from token"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        data = request.data.copy()
+        serializer = self.get_serializer(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ScheduleSerializer
@@ -989,8 +951,6 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
             logger.exception(f"Error deleting schedule: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-
 class ScheduleBulkDeleteView(APIView):
     serializer_class = SimpleMessageSerializer 
     # permission_classes = [IsAuthenticated]
@@ -1020,7 +980,6 @@ class ScheduleBulkDeleteView(APIView):
             for schedule in schedules:
                 schedule.soft_delete()
         return Response({"detail": f"Successfully soft-deleted {schedules.count()} schedule(s)."}, status=status.HTTP_200_OK)
-
 
 
 class SoftDeletedSchedulesView(generics.ListAPIView):

@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 import logging
+import uuid
+
 
 logger = logging.getLogger('job_applications')
 
@@ -111,7 +113,7 @@ class JobApplication(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} - {self.job_requisition_id} ({self.tenant_id})"
+        return f"{self.email} {self.full_name} - {self.job_requisition_id} ({self.tenant_id})"
 
     def save(self, *args, **kwargs):
         is_new = not self.pk
@@ -152,11 +154,11 @@ class Schedule(models.Model):
         ('Asia/Tokyo', 'Tokyo'),
     ]
 
-    id = models.CharField(primary_key=True, max_length=20, editable=False, unique=True)
-    tenant_id = models.CharField(max_length=36, blank=False, null=False)  # Store Tenant ID
-    branch_id = models.CharField(max_length=36, null=True, blank=True)    # Store Branch ID
-    job_application_id = models.CharField(max_length=20, blank=False, null=False)  # Store JobApplication ID
-
+    id = models.CharField(primary_key=True, max_length=36, editable=False, unique=True)  # <-- UUID
+    tenant_id = models.CharField(max_length=36, blank=False, null=False)
+    branch_id = models.CharField(max_length=36, null=True, blank=True)
+    job_application_id = models.CharField(max_length=36, blank=False, null=False)
+    scheduled_by_id = models.CharField(max_length=36, blank=True, null=True)
     interview_start_date_time = models.DateTimeField()
     interview_end_date_time = models.DateTimeField(null=True, blank=True)
     meeting_mode = models.CharField(max_length=20, choices=[('Virtual', 'Virtual'), ('Physical', 'Physical')])
@@ -192,12 +194,12 @@ class Schedule(models.Model):
     def __str__(self):
         return f"Schedule for {self.job_application_id} ({self.interview_start_date_time})"
 
+
+
+
     def save(self, *args, **kwargs):
         if not self.id:
-            prefix = (self.tenant_id[:3].upper() if self.tenant_id else 'SCH')
-            latest = Schedule.objects.filter(id__startswith=prefix).aggregate(models.Max('id'))['id__max']
-            number = int(latest.split('-')[1]) + 1 if latest else 1
-            self.id = f"{prefix}-{number:04d}"
+            self.id = str(uuid.uuid4())  # Always generate a UUID
         super().save(*args, **kwargs)
 
     def soft_delete(self):

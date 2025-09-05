@@ -227,7 +227,8 @@ class CustomTenantSchemaMiddleware(MiddlewareMixin):
     def __call__(self, request):
         logger.info("Entering CustomTenantSchemaMiddleware")  # <-- Added logging
         logger.info(f"Incoming request path: {request.path}")
-        logger.info(f"Authorization header: {request.META.get('HTTP_AUTHORIZATION')}")
+        logger.info(f"Authorization header: {request.headers.get('HTTP_AUTHORIZATION')}")
+        
 
         # Handle public endpoints
       
@@ -254,7 +255,8 @@ class CustomTenantSchemaMiddleware(MiddlewareMixin):
             logger.info(f"Validating tenant at: {tenant_url}")
             resp = requests.get(
                 tenant_url,
-                headers={'Authorization': request.META.get('HTTP_AUTHORIZATION', '')},
+                # headers={'Authorization': request.META.get('HTTP_AUTHORIZATION', '')},
+                headers={'Authorization': request.headers.get('Authorization', '')},
                 timeout=5
             )
             # logger.info(f"Tenant validation response: {resp.status_code} {resp.text}")

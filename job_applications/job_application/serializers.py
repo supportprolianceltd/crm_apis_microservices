@@ -11,13 +11,24 @@ from .models import JobApplication, Schedule
 import logging
 import requests
 from utils.supabase import upload_file_dynamic
+from django.db import IntegrityError
+import pytz
+import logging
+import requests
+from django.conf import settings
+from django.utils import timezone
+from django.core.validators import URLValidator
+from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
+from .models import JobApplication, Schedule
+from rest_framework.exceptions import ValidationError
+import uuid
+import jwt
 
 logger = logging.getLogger('job_applications')
 
 def get_tenant_id_from_jwt(request):
-    from rest_framework.exceptions import ValidationError
-    import jwt
-    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+    auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
         raise ValidationError("No valid Bearer token provided.")
     token = auth_header.split(" ")[1]
@@ -26,6 +37,7 @@ def get_tenant_id_from_jwt(request):
         return payload.get("tenant_id")
     except Exception:
         raise ValidationError("Invalid JWT token.")
+    
 
 class DocumentSerializer(serializers.Serializer):
     document_type = serializers.CharField(max_length=50)
@@ -261,21 +273,12 @@ class JobApplicationSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context['request']
         tenant_id = get_tenant_id_from_jwt(request)
-        if data.get('tenant_id', tenant_id) != tenant_id:
-            raise serializers.ValidationError({"tenant_id": "Tenant ID mismatch."})
-
-        # Validate job_requisition_id exists and belongs to tenant
-        if data.get('job_requisition_id'):
-            resp = requests.get(
-                f"{settings.TALENT_ENGINE_URL}/api/job-requisitions/{data['job_requisition_id']}/",
-                headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
-            )
-            if resp.status_code != 200:
-                raise serializers.ValidationError({"job_requisition_id": "Invalid job requisition ID."})
-            req_data = resp.json()
-            if req_data['tenant_id'] != tenant_id:
-                raise serializers.ValidationError({"job_requisition_id": "Job requisition does not belong to this tenant."})
-
+        job_app = JobApplication.objects.filter(id=data['job_application_id']).first()
+        logger.info(f"Validating job_application_id={data['job_application_id']}, found={job_app}, job_app.tenant_id={getattr(job_app, 'tenant_id', None)}, jwt_tenant_id={tenant_id}")
+        if not job_app:
+            raise serializers.ValidationError({"job_application_id": "Invalid job application ID."})
+        if str(job_app.tenant_id) != str(tenant_id):
+            raise serializers.ValidationError({"job_application_id": "Job application does not belong to this tenant."})
 
         # Validate branch_id if provided
         if data.get('branch_id'):
@@ -401,62 +404,65 @@ class JobApplicationSerializer(serializers.ModelSerializer):
             ]
         return data
 
+
+
 class ScheduleSerializer(serializers.ModelSerializer):
     job_application_id = serializers.CharField()
     branch_id = serializers.CharField(allow_null=True, required=False)
     tenant_id = serializers.CharField(read_only=True)
     candidate_name = serializers.SerializerMethodField()
-    job_requisition_title = serializers.SerializerMethodField()
+    scheduled_by = serializers.SerializerMethodField()
 
     class Meta:
         model = Schedule
         fields = [
-            'id', 'tenant_id', 'branch_id', 'job_application_id', 'candidate_name', 'job_requisition_title',
+            'id', 'tenant_id', 'branch_id', 'job_application_id', 'candidate_name',
             'interview_start_date_time', 'interview_end_date_time', 'meeting_mode', 'meeting_link', 'interview_address',
-            'message', 'timezone', 'status', 'cancellation_reason', 'is_deleted', 'created_at', 'updated_at'
+            'message', 'timezone', 'status', 'cancellation_reason', 'is_deleted', 'created_at', 'updated_at',
+            'scheduled_by_id', 'scheduled_by',
         ]
         read_only_fields = [
-            'id', 'tenant_id', 'candidate_name', 'job_requisition_title', 'is_deleted', 'created_at', 'updated_at'
+            'id', 'tenant_id', 'candidate_name', 'is_deleted', 'created_at', 'updated_at',
+            'scheduled_by',
         ]
 
-    @extend_schema_field(str)
     def get_candidate_name(self, obj):
-        # Fetch candidate name from job application microservice
-        if obj.job_application_id:
-            try:
-                resp = requests.get(
-                    f"{settings.JOB_APPLICATIONS_URL}/api/applications/{obj.job_application_id}/",
-                    headers={'Authorization': self.context["request"].META.get("HTTP_AUTHORIZATION", "")}
-                )
-                if resp.status_code == 200:
-                    return resp.json().get('full_name', '')
-                logger.error(f"Failed to fetch job application {obj.job_application_id}")
-            except Exception as e:
-                logger.error(f"Error fetching candidate name for {obj.job_application_id}: {str(e)}")
+        try:
+            job_app = JobApplication.objects.filter(id=obj.job_application_id).first()
+            if job_app:
+                return job_app.full_name
+        except Exception as e:
+            logger.error(f"Error fetching candidate name for {obj.job_application_id}: {str(e)}")
         return None
 
-    @extend_schema_field(str)
-    def get_job_requisition_title(self, obj):
-        # Fetch job requisition title from talent_engine
-        if obj.job_application_id:
+    @extend_schema_field({
+        'type': 'object',
+        'properties': {
+            'id': {'type': 'string'},
+            'email': {'type': 'string'},
+            'first_name': {'type': 'string'},
+            'last_name': {'type': 'string'}
+        }
+    })
+    def get_scheduled_by(self, obj):
+        if obj.scheduled_by_id:
             try:
-                resp = requests.get(
-                    f"{settings.JOB_APPLICATIONS_URL}/api/applications/{obj.job_application_id}/",
-                    headers={'Authorization': self.context["request"].META.get("HTTP_AUTHORIZATION", "")}
+                auth_header = self.context["request"].headers.get("Authorization", "")
+                user_response = requests.get(
+                    f'{settings.AUTH_SERVICE_URL}/api/user/users/{obj.scheduled_by_id}/',
+                    headers={'Authorization': auth_header}
                 )
-                if resp.status_code == 200:
-                    job_app = resp.json()
-                    job_requisition_id = job_app.get('job_requisition_id')
-                    if job_requisition_id:
-                        req_resp = requests.get(
-                            f"{settings.TALENT_ENGINE_URL}/api/job-requisitions/{job_requisition_id}/",
-                            headers={'Authorization': self.context["request"].META.get("HTTP_AUTHORIZATION", "")}
-                        )
-                        if req_resp.status_code == 200:
-                            return req_resp.json().get('title', '')
-                logger.error(f"Failed to fetch job requisition title for application {obj.job_application_id}")
+                if user_response.status_code == 200:
+                    user_data = user_response.json()
+                    return {
+                        'id': user_data.get('id', ''),
+                        'email': user_data.get('email', ''),
+                        'first_name': user_data.get('first_name', ''),
+                        'last_name': user_data.get('last_name', '')
+                    }
+                logger.error(f"Failed to fetch user {obj.scheduled_by_id} from auth_service")
             except Exception as e:
-                logger.error(f"Error fetching job requisition title: {str(e)}")
+                logger.error(f"Error fetching scheduled_by {obj.scheduled_by_id}: {str(e)}")
         return None
 
     def validate_timezone(self, value):
@@ -467,31 +473,29 @@ class ScheduleSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context['request']
         tenant_id = get_tenant_id_from_jwt(request)
-        if data.get('tenant_id', tenant_id) != tenant_id:
+        if str(data.get('tenant_id', tenant_id)) != str(tenant_id):
             raise serializers.ValidationError({"tenant_id": "Tenant ID mismatch."})
 
         # Validate job_application_id exists and belongs to tenant
         if data.get('job_application_id'):
-            resp = requests.get(
-                f"{settings.JOB_APPLICATIONS_URL}/api/applications/{data['job_application_id']}/",
-                headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
-            )
-            if resp.status_code != 200:
+            job_app = JobApplication.objects.filter(id=data['job_application_id']).first()
+            logger.info(f"Validating job_application_id={data['job_application_id']}, found={job_app}, job_app.tenant_id={getattr(job_app, 'tenant_id', None)}, jwt_tenant_id={tenant_id}")
+            if not job_app:
                 raise serializers.ValidationError({"job_application_id": "Invalid job application ID."})
-            job_app_data = resp.json()
-            if job_app_data['tenant_id'] != tenant_id:
+            if str(job_app.tenant_id) != str(tenant_id):
                 raise serializers.ValidationError({"job_application_id": "Job application does not belong to this tenant."})
 
         # Validate branch_id if provided
         if data.get('branch_id'):
+            auth_header = request.headers.get("Authorization", "")
             resp = requests.get(
                 f"{settings.AUTH_SERVICE_URL}/api/tenant/branches/{data['branch_id']}/",
-                headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
+                headers={'Authorization': auth_header}
             )
             if resp.status_code != 200:
                 raise serializers.ValidationError({"branch_id": "Invalid branch ID."})
             branch_data = resp.json()
-            if branch_data['tenant_id'] != tenant_id:
+            if str(branch_data['tenant_id']) != str(tenant_id):
                 raise serializers.ValidationError({"branch_id": "Branch does not belong to this tenant."})
 
         # Additional schedule validations
@@ -516,10 +520,16 @@ class ScheduleSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        validated_data['tenant_id'] = get_tenant_id_from_jwt(self.context['request'])
-        schedule = Schedule.objects.create(**validated_data)
-        logger.info(f"Schedule created: {schedule.id} for job_application_id: {schedule.job_application_id}")
-        return schedule
+        validated_data['tenant_id'] = str(get_tenant_id_from_jwt(self.context['request']))
+        try:
+            schedule = Schedule.objects.create(**validated_data)
+            logger.info(f"Schedule created: {schedule.id} for job_application_id: {schedule.job_application_id}")
+            return schedule
+        except IntegrityError as e:
+            logger.error(f"IntegrityError on schedule create: {str(e)}")
+            raise serializers.ValidationError({
+                "job_application_id": "An active schedule already exists for this job application."
+            })
 
     def update(self, instance, validated_data):
         if validated_data.get('status') == 'cancelled' and instance.status != 'cancelled' and not validated_data.get('cancellation_reason'):
@@ -527,9 +537,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
         if validated_data.get('status') != 'cancelled':
             validated_data['cancellation_reason'] = None
         return super().update(instance, validated_data)
-
-
-
+    
 
 class SimpleMessageSerializer(serializers.Serializer):
     detail = serializers.CharField()

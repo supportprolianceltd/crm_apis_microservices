@@ -527,6 +527,37 @@ class ClientProfile(models.Model):
     compliance = models.CharField(max_length=50, default='Passed', blank=True, null=True)  # e.g., 'Passed'
     last_visit = models.DateField(blank=True, null=True)
     
+
+    # Company Info
+    company_name = models.CharField(max_length=255, null=True, blank=True, help_text="Official name of the client company")
+    contact_person_name = models.CharField(max_length=255, null=True, blank=True, help_text="Primary contact person's full name")
+    contact_person_title = models.CharField(max_length=100, null=True, blank=True, help_text="Contact person's job title")
+    contact_person_department = models.CharField(max_length=100, null=True, blank=True, help_text="Contact person's department")
+    contact_email = models.EmailField(null=True, blank=True, help_text="Contact person's email address")
+    contact_phone = models.CharField(max_length=20, null=True, blank=True, help_text="Contact person's phone number")
+    company_address = models.TextField(null=True, blank=True, help_text="Client company's physical address")
+
+    # Client Profile
+    industry = models.CharField(max_length=100, null=True, blank=True, help_text="Client's industry or sector")
+    business_type = models.CharField(max_length=100, null=True, blank=True, help_text="Client's business type (e.g., supplier, customer, partner)")
+    client_type = models.CharField(max_length=100, null=True, blank=True, help_text="Client's relationship with the company (e.g., direct customer)")
+
+    # Order and Payment Information
+    order_history = models.JSONField(null=True, blank=True, help_text="Record of past orders including dates, quantities, and values")
+    payment_terms = models.TextField(null=True, blank=True, help_text="Client's payment terms, methods, and schedules")
+    credit_limit = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, help_text="Client's credit limit")
+    credit_utilization = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, help_text="Client's current credit usage")
+    payment_history = models.JSONField(null=True, blank=True, help_text="Record of past payments including dates and amounts")
+
+    # Communication and Feedback
+    communication_preferences = models.CharField(max_length=255, null=True, blank=True, help_text="Client's preferred communication channels (e.g., email, phone)")
+    feedback = models.JSONField(null=True, blank=True, help_text="Client feedback and satisfaction ratings")
+    complaints = models.JSONField(null=True, blank=True, help_text="Record of client complaints and resolutions")
+
+    # Additional Information
+    special_requirements = models.TextField(null=True, blank=True, help_text="Client's special requirements or requests (e.g., custom packaging)")
+    notes = models.TextField(null=True, blank=True, help_text="Additional notes or comments about the client")
+
     class Meta:
         verbose_name = "Client Profile"
         verbose_name_plural = "Client Profiles"
@@ -585,3 +616,7 @@ class BlacklistedToken(models.Model):
     jti = models.CharField(max_length=255, unique=True)  # JWT ID
     blacklisted_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
+
+
+# docker compose exec auth-service python manage.py makemigrations users
+# docker compose exec auth-service python manage.py migrate
