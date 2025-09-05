@@ -3263,3 +3263,5 @@ Write an explicit `.create()` method for serializer `users.serializers.ClientCre
 2025-09-05 18:18:31,131 [INFO] core: Retrieving tenant: 3 for tenant proliance
 2025-09-05 18:19:31,146 [INFO] core: Retrieving tenant: 3 for tenant proliance
 2025-09-05 18:20:27,131 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-05 18:20:32,069 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-05 18:20:42,172 [INFO] core: Retrieving tenant: 3 for tenant proliance
