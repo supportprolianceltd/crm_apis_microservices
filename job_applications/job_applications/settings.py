@@ -253,7 +253,7 @@ CELERY_RESULT_BACKEND = 'redis://job_app_redis:6379/0'
 CELERY_BEAT_SCHEDULE = {
     'auto-screen-all-applications-every-10-minutes': {
         'task': 'job_application.tasks.auto_screen_all_applications',
-        'schedule': 150.0,  # every 10 minutes
+        'schedule': 600.0,  # every 10 minutes
     },
 }
 

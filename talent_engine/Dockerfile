@@ -18,9 +18,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 COPY .env .env
+COPY wait-for-it.sh /app/wait-for-it.sh
 
 # Create directories for logs and media
 RUN mkdir -p /app/logs /app/media /app/staticfiles
+RUN chmod +x /app/wait-for-it.sh
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
@@ -34,3 +36,6 @@ RUN chmod +x entrypoint.sh
 
 # Use entrypoint script to run migrations and start server
 CMD ["/app/entrypoint.sh"]
+
+
+

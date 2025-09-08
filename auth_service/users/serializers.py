@@ -315,23 +315,24 @@ class UserCreateSerializer(serializers.ModelSerializer):
         }
 
     def to_internal_value(self, data):
-        mutable_data = data.copy() if hasattr(data, 'copy') else dict(data)
-        request = self.context.get('request')
+        # Avoid deepcopy issues with file objects in QueryDict
+        if hasattr(data, 'getlist'):
+            mutable_data = {}
+            for key in data.keys():
+                values = data.getlist(key)
+                mutable_data[key] = values if len(values) > 1 else values[0]
+        else:
+            mutable_data = dict(data)
 
+        request = self.context.get('request')
         profile_data = mutable_data.pop('profile', {})
-        # Make all profile fields optional: do NOT enforce required fields
         mutable_data['profile'] = profile_data
 
         for field in ['professional_qualifications', 'employment_details', 'education_details', 'reference_checks',
                      'proof_of_address', 'insurance_verifications', 'driving_risk_assessments', 'legal_work_eligibilities']:
             mutable_data[field] = [dict(item) for item in mutable_data.get(field, [])]
 
-        # modules_data = [data.get(f'modules[{i}]') for i in range(len(data.keys())) if f'modules[{i}]' in data]
-        # mutable_data['modules'] = [m for m in modules_data if m]
-
         return super().to_internal_value(mutable_data)
-
-
 
     def create(self, validated_data):
         if not validated_data.get('username'):
@@ -581,7 +582,8 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
         validated_data['is_superuser'] = True
         validated_data['is_staff'] = True
         validated_data['role'] = validated_data.get('role', 'admin')
-        validated_data['status'] = validated_data.get('status', 'active')
+        # Remove status from validated_data before creating user
+        status = validated_data.pop('status', None)
 
         from django_tenants.utils import tenant_context
         with tenant_context(tenant):
@@ -591,6 +593,9 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
                 is_active=True
             )
             user.set_password(password)
+            # Set status after user creation if needed
+            if status is not None:
+                user.status = status
             user.save()
             return user
 

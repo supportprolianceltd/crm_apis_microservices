@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from .views import (
-    CustomTokenObtainPairView, CustomTokenRefreshView, TokenValidateView,
+    CustomTokenObtainPairView, CustomTokenRefreshView, JWKSView, JitsiTokenView, TokenValidateView,
     LoginWith2FAView, Verify2FAView, LogoutView, PublicKeyView
 )
 from django.conf import settings
@@ -41,6 +41,10 @@ urlpatterns = [
 
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+
+
+    path('api/jitsi/well-known/jwks.json/', JWKSView.as_view(), name='jwks'),
+    path('api/jitsi/token/', JitsiTokenView.as_view(), name='jitsi_token'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

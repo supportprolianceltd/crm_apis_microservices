@@ -1,3 +1,5 @@
+#celery_task.py
+
 from celery import shared_task
 from django.conf import settings
 from job_application.models import JobApplication

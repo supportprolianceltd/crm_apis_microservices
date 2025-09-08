@@ -65,19 +65,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: job_applications-celery-beat
     container_name: job-applications-celery-beat
     command: celery -A job_applications beat --loglevel=info
+    depends_on:
+      - job_app_redis
+      - job-applications
     environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      DJANGO_SETTINGS_MODULE: job_applications.settings
-      CELERY_BROKER_URL: redis://job_app_redis:6379/0
-      CELERY_RESULT_BACKEND: redis://job_app_redis:6379/0
+      - DJANGO_SETTINGS_MODULE=job_applications.settings
     volumes:
       - .:/app
-    depends_on:
-      - job-applications
-      - job_app_postgres
-      - job_app_redis
     networks:
       - auth_service_default
 

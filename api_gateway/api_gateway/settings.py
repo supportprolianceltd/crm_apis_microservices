@@ -193,7 +193,9 @@ MICROSERVICE_URLS = {
     "docs": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
     "doc": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
     "user": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "tenant": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),  # <--- Add this line
+    "tenant": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+
+    "jitsi": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
 }
 
 

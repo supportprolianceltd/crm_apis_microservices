@@ -1,8 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import (
-    UserViewSet,TermsAndConditionsView,
+from .views import (UserViewSet,TermsAndConditionsView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
     UserPasswordRegenerateView,
@@ -38,4 +37,7 @@ urlpatterns = [
     path('password/reset/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password/reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('terms-and-conditions/', TermsAndConditionsView.as_view(), name='terms_and_conditions'),
+
+
+
 ]

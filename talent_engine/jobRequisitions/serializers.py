@@ -67,7 +67,8 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
     updated_by = serializers.SerializerMethodField()
     approved_by = serializers.SerializerMethodField()
     tenant_domain = serializers.SerializerMethodField()
-    compliance_checklist = serializers.SerializerMethodField()
+    # compliance_checklist = serializers.SerializerMethodField()
+    compliance_checklist = ComplianceItemSerializer(many=True, required=False)
     branch_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -357,30 +358,25 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        # Log the incoming request data, especially advert_banner
         request = self.context.get('request')
         logger.info(f"JobRequisition update request data: {getattr(request, 'data', {})}")
         logger.info(f"advert_banner in request.FILES: {getattr(request, 'FILES', {}).get('advert_banner')}")
         logger.info(f"advert_banner in validated_data: {validated_data.get('advert_banner')}")
 
-        # Map 'branch' to 'branch_id' if present
         if 'branch' in validated_data:
             validated_data['branch_id'] = validated_data.pop('branch')
-        # Ensure tenant_id is always a string
         if 'tenant_id' in validated_data:
             validated_data['tenant_id'] = str(validated_data['tenant_id'])
+
         compliance_checklist = validated_data.pop('compliance_checklist', None)
         advert_banner_file = validated_data.pop('advert_banner', None)
         instance = super().update(instance, validated_data)
+
         if compliance_checklist is not None:
-            instance.compliance_checklist = []
-            for item in compliance_checklist:
-                instance.add_compliance_item(
-                    name=item["name"],
-                    description=item.get("description", ""),
-                    required=item.get("required", True)
-                )
-        # Handle advert_banner upload if a new file is provided
+            # Directly assign the validated list
+            instance.compliance_checklist = compliance_checklist
+            instance.save(update_fields=['compliance_checklist'])
+
         self._handle_advert_banner_upload(instance, advert_banner_file)
         return instance
     

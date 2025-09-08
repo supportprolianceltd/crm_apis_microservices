@@ -470,3 +470,63 @@ class PublicKeyView(APIView):
         except RSAKeyPair.DoesNotExist:
             logger.error(f"No RSAKeyPair found for kid={kid} in schema={tenant.schema_name}")
             return Response({"error": "Keypair not found"}, status=404)
+
+
+
+from jose import jwk as jose_jwk
+from django_tenants.utils import tenant_context
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
+class JWKSView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        jwks = {"keys": []}
+        tenants = Tenant.objects.all()
+        for tenant in tenants:
+            with tenant_context(tenant):
+                for keypair in RSAKeyPair.objects.filter(active=True):
+                    rsa_key = jose_jwk.RSAKey(key=keypair.public_key_pem, algorithm='RS256')
+                    pub_jwk = rsa_key.to_dict()
+                    pub_jwk['kid'] = keypair.kid
+                    pub_jwk['use'] = 'sig'
+                    pub_jwk['alg'] = 'RS256'
+                    jwks["keys"].append(pub_jwk)
+        return Response(jwks)
+    
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.utils import timezone
+from datetime import timedelta
+
+class JitsiTokenView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        room = request.data.get('room')
+        moderator = request.data.get('moderator', True)
+        if not room:
+            return Response({"error": "Room name required"}, status=400)
+        user = request.user
+        tenant = request.tenant
+        payload = {
+            "context": {
+                "user": {
+                    "name": f"{user.first_name} {user.last_name}",
+                    "email": user.email,
+                    "moderator": moderator,
+                },
+            },
+            "room": room,
+            "sub": "server1.prolianceltd.com",
+            "iss": "crm-app",
+            "aud": "jitsi",
+            "exp": int((timezone.now() + timedelta(hours=1)).timestamp()),
+            "iat": int(timezone.now().timestamp()),
+        }
+        token = issue_rsa_jwt(payload, tenant)
+        return Response({"token": token})

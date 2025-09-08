@@ -620,3 +620,5 @@ class BlacklistedToken(models.Model):
 
 # docker compose exec auth-service python manage.py makemigrations users
 # docker compose exec auth-service python manage.py migrate
+
+

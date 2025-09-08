@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
     tesseract-ocr \
+    libffi-dev \
+    libssl-dev \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -37,3 +40,5 @@ RUN chmod +x entrypoint.sh
 
 # Use entrypoint script to run migrations and start server
 ENTRYPOINT ["/app/entrypoint.sh"]
+
+
