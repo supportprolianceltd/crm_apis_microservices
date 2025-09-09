@@ -92,9 +92,33 @@ def api_gateway_view(request, path):
             status=response.status_code,
             content_type=response.headers.get("Content-Type", "application/json")
         )
-
+    except requests.exceptions.Timeout as e:
+        logger.error(f"Gateway timeout for /api/{path}: {str(e)}")
+        return JsonResponse({
+            "error": "Gateway timeout",
+            "details": str(e),
+            "suggestion": "The downstream service took too long to respond. Please try again later."
+        }, status=504)
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"Gateway connection error for /api/{path}: {str(e)}")
+        return JsonResponse({
+            "error": "Gateway connection error",
+            "details": str(e),
+            "suggestion": "Could not connect to the downstream service. Please check service availability."
+        }, status=502)
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Gateway request error for /api/{path}: {str(e)}")
+        return JsonResponse({
+            "error": "Gateway request error",
+            "details": str(e),
+            "suggestion": "An error occurred while forwarding the request. Please try again."
+        }, status=502)
     except Exception as e:
         logger.error(f"Error forwarding request to /api/{path} from {request.META.get('REMOTE_ADDR')}: {str(e)}")
-        return JsonResponse({"error": "Internal gateway error", "details": str(e)}, status=500)
+        return JsonResponse({
+            "error": "Internal gateway error",
+            "details": str(e),
+            "suggestion": "An unexpected error occurred in the gateway. Please contact support."
+        }, status=500)
 
 

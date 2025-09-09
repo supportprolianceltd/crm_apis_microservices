@@ -250,6 +250,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CELERY_BROKER_URL = 'redis://job_app_redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://job_app_redis:6379/0'
 
+
 CELERY_BEAT_SCHEDULE = {
     'auto-screen-all-applications-every-10-minutes': {
         'task': 'job_application.tasks.auto_screen_all_applications',
@@ -265,5 +266,17 @@ CELERY_BEAT_SCHEDULE = {
 #         'schedule': crontab(hour=0, minute=0),  # Runs daily at 00:00 (midnight)
 #     },
 # }
+
+
+
+
+# CELERY_BEAT_SCHEDULE = {
+#     'auto-screen-all-applications-every-morning': {
+#         'task': 'job_application.tasks.auto_screen_all_applications',
+#         'schedule': crontab(hour=8, minute=25),  # ✅ Runs daily at 8:15 AM
+#     },
+# }
+
+
 # docker compose exec job-applications python manage.py makemigrations job_application
 # docker compose exec job-applications python manage.py migrate

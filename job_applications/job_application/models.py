@@ -144,6 +144,8 @@ class JobApplication(models.Model):
                 return doc.get('file_url')
         return None
 
+
+
 class Schedule(models.Model):
     STATUS_CHOICES = [
         ('scheduled', 'Scheduled'),

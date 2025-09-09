@@ -1,5 +1,3 @@
-#celery_task.py
-
 from celery import shared_task
 from django.conf import settings
 from job_application.models import JobApplication
@@ -9,26 +7,13 @@ import requests
 import mimetypes
 import tempfile
 import os
-import time
 import logging
 
 logger = logging.getLogger('job_applications')
 
-def get_job_requisition_by_id(job_requisition_id, auth_header):
-    url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/{job_requisition_id}/"
-    response = requests.get(url, headers={'Authorization': auth_header}, timeout=10)
-    if response.status_code == 200:
-        return response.json()
-    logger.warning(f"Failed to fetch job requisition {job_requisition_id}: {response.status_code}")
-    return None
-
 @shared_task
-def screen_resumes_task(job_requisition_id, tenant_id, document_type, num_candidates, applications_data, auth_header):
-    job_requisition = get_job_requisition_by_id(job_requisition_id, auth_header)
-    if not job_requisition:
-        logger.error("Job requisition not found.")
-        return
-
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    logger.info(f"Starting screen_resumes_task for job_requisition_id: {job_requisition_id}")
     document_type_lower = document_type.lower()
     allowed_docs = [doc.lower() for doc in (job_requisition.get('documents_required') or [])]
     if document_type_lower not in allowed_docs and document_type_lower not in ['resume', 'curriculum vitae (cv)']:
@@ -38,19 +23,17 @@ def screen_resumes_task(job_requisition_id, tenant_id, document_type, num_candid
     if not applications_data:
         applications = JobApplication.active_objects.filter(
             job_requisition_id=job_requisition_id,
-            tenant_id=tenant_id,
             resume_status=True
         )
     else:
         application_ids = [app['application_id'] for app in applications_data]
         applications = JobApplication.active_objects.filter(
             job_requisition_id=job_requisition_id,
-            tenant_id=tenant_id,
             id__in=application_ids,
             resume_status=True
         )
 
-    logger.info(f"Screening {applications.count()} applications")
+    logger.info(f"Screening {applications.count()} applications for job_requisition_id: {job_requisition_id}")
     if not applications.exists():
         logger.warning("No applications with resume_status=True found.")
         return
@@ -188,7 +171,6 @@ def screen_resumes_task(job_requisition_id, tenant_id, document_type, num_candid
                 event_type = "job.application.shortlisted.gaps" if employment_gaps else "job.application.shortlisted"
                 send_screening_notification(
                     shortlisted_app,
-                    tenant_id,
                     event_type=event_type,
                     employment_gaps=employment_gaps
                 )
@@ -203,7 +185,7 @@ def screen_resumes_task(job_requisition_id, tenant_id, document_type, num_candid
                 "status": "rejected",
                 "score": getattr(app, "screening_score", None)
             }
-            send_screening_notification(rejected_app, tenant_id, event_type="job.application.rejected")
+            send_screening_notification(rejected_app, event_type="job.application.rejected")
 
     logger.info(f"Screening complete for job requisition {job_requisition_id}")
 
@@ -217,7 +199,3 @@ def screen_resumes_task(job_requisition_id, tenant_id, document_type, num_candid
             logger.warning(f"Failed to close job requisition {job_requisition_id}: {close_resp.text}")
     except Exception as e:
         logger.error(f"Error closing job requisition {job_requisition_id} via public endpoint: {str(e)}")
-
-
-
-
