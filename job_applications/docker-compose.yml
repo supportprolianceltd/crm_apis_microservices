@@ -38,11 +38,7 @@ services:
       - ./job_applications_logs:/app/job_applications_logs
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
-    command: >
-      sh -c "mkdir -p /app/logs && chmod 777 /app/logs &&
-             python manage.py makemigrations &&
-             python manage.py migrate &&
-             gunicorn job_applications.wsgi:application --bind 0.0.0.0:8003 --workers 3 --timeout 120"
+    command: gunicorn job_applications.wsgi:application --bind 0.0.0.0:8003 --workers=1 --timeout 120
     depends_on:
       job_app_postgres:
         condition: service_healthy
@@ -51,6 +47,7 @@ services:
     networks:
       - auth_service_default
     restart: unless-stopped
+    mem_limit: 2g
 
   celery-worker:
     build:
@@ -86,6 +83,7 @@ services:
     networks:
       - auth_service_default
     restart: unless-stopped
+    mem_limit: 2g
 
   celery-beat:
     build:
@@ -119,6 +117,7 @@ services:
     networks:
       - auth_service_default
     restart: unless-stopped
+    mem_limit: 2g
 
   job_app_redis:
     image: redis:7-alpine
