@@ -20,6 +20,7 @@ SPECTACULAR_SETTINGS = {
 
 import django.http.request
 from celery.schedules import crontab
+
 def patched_split_domain_port(host):
     # Accept underscores in hostnames
     if host and host.count(':') == 1 and host.rfind(']') < host.find(':'):
@@ -49,7 +50,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
-    "localhost", "127.0.0.1", "job_applications", "0.0.0.0", "*", "job_applications:8001"
+    "localhost", "127.0.0.1", "job_applications", "0.0.0.0", "http://localhost:9090","*", "job_applications:8001"
 ])
 # ======================== Database ========================
 
@@ -196,7 +197,7 @@ TEMPLATES = [
 ]
 
 # ======================== Logging ========================
-LOG_DIR = os.path.join(BASE_DIR, 'job_applications_logs')
+LOG_DIR = os.path.join('/tmp', 'job_applications_logs')
 os.makedirs(LOG_DIR, exist_ok=True)
 
 LOGGING = {
@@ -240,6 +241,8 @@ LOGGING = {
     },
 }
 
+
+
 # ======================== Defaults ========================
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -247,36 +250,19 @@ USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Celery Configuration
 CELERY_BROKER_URL = 'redis://job_app_redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://job_app_redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
 
-
+# Celery Beat Schedule
 CELERY_BEAT_SCHEDULE = {
-    'auto-screen-all-applications-every-10-minutes': {
+    'auto-screen-all-applications-at-midnight': {
         'task': 'job_application.tasks.auto_screen_all_applications',
-        'schedule': 600.0,  # every 10 minutes
+        'schedule': crontab(hour=22, minute=00),  # Runs daily at 22:00 UTC
     },
 }
-
-
-
-# CELERY_BEAT_SCHEDULE = {
-#     'auto-screen-all-applications-at-midnight': {
-#         'task': 'job_application.tasks.auto_screen_all_applications',
-#         'schedule': crontab(hour=0, minute=0),  # Runs daily at 00:00 (midnight)
-#     },
-# }
-
-
-
-
-# CELERY_BEAT_SCHEDULE = {
-#     'auto-screen-all-applications-every-morning': {
-#         'task': 'job_application.tasks.auto_screen_all_applications',
-#         'schedule': crontab(hour=8, minute=25),  # ✅ Runs daily at 8:15 AM
-#     },
-# }
-
-
-# docker compose exec job-applications python manage.py makemigrations job_application
-# docker compose exec job-applications python manage.py migrate

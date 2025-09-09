@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   job-applications:
     build:
@@ -7,32 +9,40 @@ services:
     ports:
       - "8003:8003"
     environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      DEBUG: "True"
-      DB_ENGINE: django.db.backends.postgresql
-      DB_NAME: job_app_db
-      DB_USER: postgres
-      DB_PASSWORD: password
-      DB_HOST: job_app_postgres
-      DB_PORT: 5432
-      DJANGO_SETTINGS_MODULE: job_applications.settings
-      PYTHONPATH: /app
-      ALLOWED_HOSTS: localhost,127.0.0.1,*
-      AUTH_SERVICE_URL: http://auth-service:8001
-      TALENT_ENGINE_URL: http://talent-engine:8002
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      CORS_ALLOWED_ORIGINS: http://localhost:5173,https://crm-frontend-react.vercel.app,http://localhost:8000
-      CELERY_BROKER_URL: redis://job_app_redis:6379/0
-      CELERY_RESULT_BACKEND: redis://job_app_redis:6379/0
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=True
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=job_app_db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_HOST=job_app_postgres
+      - DB_PORT=5432
+      - DJANGO_SETTINGS_MODULE=job_applications.settings
+      - PYTHONPATH=/app
+      - ALLOWED_HOSTS=localhost,127.0.0.1,*
+      - AUTH_SERVICE_URL=http://auth-service:8001
+      - TALENT_ENGINE_URL=http://talent-engine:8002
+      - JOB_APPLICATIONS_URL=http://job-applications:8003
+      - NOTIFICATIONS_EVENT_URL=http://app:3000/events/
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SUPABASE_BUCKET=${SUPABASE_BUCKET}
+      - STORAGE_TYPE=supabase
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - CORS_ALLOWED_ORIGINS=http://localhost:5173,https://crm-frontend-react.vercel.app,http://localhost:8000
+      - CELERY_BROKER_URL=redis://job_app_redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://job_app_redis:6379/0
+      - TZ=UTC
     volumes:
       - .:/app
-      - ./logs:/app/logs
+      - ./job_applications_logs:/app/job_applications_logs
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
     command: >
-      sh -c "python manage.py makemigrations &&
+      sh -c "mkdir -p /app/logs && chmod 777 /app/logs &&
+             python manage.py makemigrations &&
              python manage.py migrate &&
-             gunicorn job_applications.wsgi:application --bind 0.0.0.0:8003"
+             gunicorn job_applications.wsgi:application --bind 0.0.0.0:8003 --workers 3 --timeout 120"
     depends_on:
       job_app_postgres:
         condition: service_healthy
@@ -40,75 +50,117 @@ services:
         condition: service_started
     networks:
       - auth_service_default
+    restart: unless-stopped
 
   celery-worker:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: job-applications-celery
-    command: celery -A job_applications worker --loglevel=info
+    command: >
+      sh -c "mkdir -p /tmp/job_applications_logs && chmod 777 /tmp/job_applications_logs &&
+             celery -A job_applications worker --loglevel=info"
     environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      DJANGO_SETTINGS_MODULE: job_applications.settings
-      CELERY_BROKER_URL: redis://job_app_redis:6379/0
-      CELERY_RESULT_BACKEND: redis://job_app_redis:6379/0
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_SETTINGS_MODULE=job_applications.settings
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=job_app_db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_HOST=job_app_postgres
+      - DB_PORT=5432
+      - AUTH_SERVICE_URL=http://auth-service:8001
+      - TALENT_ENGINE_URL=http://talent-engine:8002
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - CELERY_BROKER_URL=redis://job_app_redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://job_app_redis:6379/0
+      - TZ=UTC
     volumes:
       - .:/app
+      - ./logs:/app/logs
     depends_on:
       - job-applications
       - job_app_postgres
       - job_app_redis
     networks:
       - auth_service_default
+    restart: unless-stopped
 
   celery-beat:
     build:
       context: .
       dockerfile: Dockerfile
-    image: job_applications-celery-beat
     container_name: job-applications-celery-beat
-    command: celery -A job_applications beat --loglevel=info
+    command: >
+      sh -c "mkdir -p /tmp/job_applications_logs && chmod 777 /tmp/job_applications_logs &&
+             celery -A job_applications beat --loglevel=info"
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_SETTINGS_MODULE=job_applications.settings
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=job_app_db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_HOST=job_app_postgres
+      - DB_PORT=5432
+      - AUTH_SERVICE_URL=http://auth-service:8001
+      - TALENT_ENGINE_URL=http://talent-engine:8002
+      - CELERY_BROKER_URL=redis://job_app_redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://job_app_redis:6379/0
+      - TZ=UTC
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
     depends_on:
       - job_app_redis
       - job-applications
-    environment:
-      - DJANGO_SETTINGS_MODULE=job_applications.settings
-    volumes:
-      - .:/app
+      - job_app_postgres
     networks:
       - auth_service_default
+    restart: unless-stopped
 
   job_app_redis:
-    image: redis:7
+    image: redis:7-alpine
     container_name: job_app_redis
     ports:
-      - "6381:6379"  # Expose on 6381 to avoid conflict
+      - "6381:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
     networks:
       - auth_service_default
+    restart: unless-stopped
 
   job_app_postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: job_app_postgres
     environment:
-      POSTGRES_DB: job_app_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      - POSTGRES_DB=job_app_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - TZ=UTC
     ports:
       - "5434:5432"
     volumes:
-      - job_app_pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d job_app_db"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
       - auth_service_default
+    restart: unless-stopped
 
 networks:
   auth_service_default:
     external: true
+    name: auth_service_default
 
 volumes:
-  job_app_pgdata:
-
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

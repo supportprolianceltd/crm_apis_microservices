@@ -49,7 +49,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
-    "localhost", "127.0.0.1", "talent-engine", "0.0.0.0", "*", "talent-engine:8001"
+    "localhost", "127.0.0.1", "talent-engine", "0.0.0.0", "*", "talent-engine:8001", "http://localhost:9090"
 ])
 # ======================== Database ========================
 

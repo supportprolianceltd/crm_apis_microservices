@@ -8,6 +8,7 @@ from .views import (
     LoginWith2FAView, Verify2FAView, LogoutView, PublicKeyView
 )
 from django.conf import settings
+from django.views.generic import TemplateView
 from django.conf.urls.static import static
 
 def root_view(request):
@@ -21,6 +22,18 @@ def root_view(request):
             'token': '/api/token/'
         }
     })
+
+
+
+
+class CustomSwaggerUIView(TemplateView):
+    template_name = 'swagger-ui.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Use absolute URL to schema (adjust for your deployment)
+        context['schema_url'] = 'http://auth-service:8001/api/schema/'
+        return context
 
 urlpatterns = [
     path('', root_view, name='root'),

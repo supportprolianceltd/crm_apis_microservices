@@ -618,7 +618,7 @@ class PublicJobRequisitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobRequisition
         fields = [
-            'id', 'requisition_number', 'job_requisition_code', 'job_application_code',
+            'id', 'requisition_number', 'tenant_id', 'job_requisition_code', 'job_application_code',
             'title', 'unique_link', 'status', 'job_type', 'position_type', 'location_type',
             'job_description', 'requirements', 'qualification_requirement', 'experience_requirement',
             'knowledge_requirement', 'urgency_level', 'reason', 'deadline_date', 'num_of_applications',

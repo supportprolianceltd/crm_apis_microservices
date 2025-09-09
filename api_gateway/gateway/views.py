@@ -5,7 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django_ratelimit.decorators import ratelimit
 from django_ratelimit.core import is_ratelimited
-
+from django.conf import settings
+from django.shortcuts import render
 logger = logging.getLogger('gateway')
 
 AUTH_PREFIXES = {"token", "user", "tenant"}
@@ -122,3 +123,12 @@ def api_gateway_view(request, path):
         }, status=500)
 
 
+
+
+
+def multi_docs_view(request):
+    return render(request, 'docs.html', {
+        'auth_docs_url': f"{settings.MICROSERVICE_URLS['auth_service']}/api/docs/",
+        'applications_docs_url': f"{settings.MICROSERVICE_URLS['applications-engine']}/api/docs/",
+        'talent_docs_url': f"{settings.MICROSERVICE_URLS['talent-engine']}/api/docs/",
+    })

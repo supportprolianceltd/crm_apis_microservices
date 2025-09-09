@@ -2,7 +2,13 @@ import logging
 import jwt
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import JobRequisition
+import logging
 
+logger = logging.getLogger('talent_engine')
 import uuid
 from django.conf import settings
 from django.db import connection, models, transaction
@@ -67,13 +73,7 @@ class PublicPublishedJobRequisitionsView(APIView):
             "results": serializer.data
         }, status=status.HTTP_200_OK)  
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import JobRequisition
-import logging
 
-logger = logging.getLogger('talent_engine')
 
 class PublicCloseJobRequisitionView(APIView):
     permission_classes = []  # No authentication required
