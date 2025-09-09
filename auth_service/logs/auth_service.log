@@ -3348,3 +3348,32 @@ LINE 1: ...r"."updated_at", "users_rsakeypair"."active" FROM "users_rsa...
 2025-09-09 18:23:08,371 [INFO] core: Retrieving tenant: 3 for tenant proliance
 2025-09-09 18:23:18,374 [INFO] core: Retrieving tenant: 3 for tenant proliance
 2025-09-09 18:24:25,431 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:25:25,490 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:35:47,078 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:35:52,130 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:51:45,271 [WARNING] django.request: Forbidden: /api/public-key/7db5d75b1b424112aa868b95bbbfd4ad/
+2025-09-09 18:51:45,449 [WARNING] django.request: Unauthorized: /api/token/refresh/
+2025-09-09 18:52:14,217 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:33,106 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:33,243 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:33,384 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:33,517 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:33,620 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:33,699 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:33,774 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:33,911 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:34,479 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:44,543 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:52:54,400 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:53:04,513 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:53:14,431 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:53:24,391 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:54:25,485 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 18:55:25,582 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-09 19:09:18,076 [WARNING] django.request: Forbidden: /api/public-key/7db5d75b1b424112aa868b95bbbfd4ad/
+2025-09-09 19:09:18,886 [WARNING] django.request: Forbidden: /api/public-key/7db5d75b1b424112aa868b95bbbfd4ad/
+2025-09-09 19:09:19,042 [WARNING] django.request: Forbidden: /api/tenant/config/
+2025-09-09 19:09:19,131 [WARNING] django.request: Unauthorized: /api/token/refresh/
+2025-09-09 19:09:19,206 [WARNING] django.request: Forbidden: /api/tenant/config/
+2025-09-09 19:09:21,058 [WARNING] django.request: Forbidden: /api/public-key/7db5d75b1b424112aa868b95bbbfd4ad/
+2025-09-09 19:09:21,217 [WARNING] django.request: Unauthorized: /api/token/refresh/

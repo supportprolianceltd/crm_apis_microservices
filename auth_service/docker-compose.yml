@@ -41,6 +41,7 @@ services:
       - .:/app
     networks:
       - auth_service_default
+    mem_limit: 2g
 
   kafka:
     image: confluentinc/cp-kafka:7.0.1

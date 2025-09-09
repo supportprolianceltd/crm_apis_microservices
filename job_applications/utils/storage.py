@@ -44,7 +44,9 @@ class LocalStorageService(StorageService):
 class SupabaseStorageService(StorageService):
     def __init__(self):
         self.client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
-        self.bucket = settings.SUPABASE_BUCKET
+        # ...existing code...
+        self.bucket = os.environ.get("SUPABASE_BUCKET", "luminacaremedia")
+        # ...existing code...
 
     def upload_file(self, file_obj, file_name, content_type):
         try:
