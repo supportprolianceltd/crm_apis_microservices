@@ -3911,3 +3911,118 @@ AssertionError: The field 'domain' was declared on serializer TenantSerializer, 
 2025-09-10 11:24:16,155 [ERROR] core: Tenant creation failed: Can't create tenant outside the public schema. Current schema is proliance.
 2025-09-10 11:24:16,157 [ERROR] core: Failed to create tenant: [ErrorDetail(string="Tenant creation failed: Can't create tenant outside the public schema. Current schema is proliance.", code='invalid')]
 2025-09-10 11:24:16,164 [WARNING] django.request: Bad Request: /api/tenant/tenants/
+2025-09-10 12:11:21,214 [INFO] core: Creating tenant: Acme | Schema: acme | Domain: acmehealth.example.com
+2025-09-10 12:11:21,218 [INFO] core: Saving tenant with schema_name: acme
+2025-09-10 12:11:21,247 [WARNING] users: users_rsakeypair table does not exist in schema acme. Skipping RSA keypair creation.
+2025-09-10 12:11:30,772 [INFO] core: Created modules for tenant 4
+2025-09-10 12:11:31,889 [INFO] core: Sent tenant_created event for tenant 4
+2025-09-10 12:11:31,893 [INFO] core: Tenant created: Acme (schema: acme)
+2025-09-10 12:11:58,103 [INFO] core: Creating tenant: Acme Health Inc. | Schema: acme_health_inc. | Domain: acmehealth.exampleasd.com
+2025-09-10 12:11:58,106 [INFO] core: Saving tenant with schema_name: acme_health_inc.
+2025-09-10 12:11:58,121 [WARNING] users: users_rsakeypair table does not exist in schema acme_health_inc.. Skipping RSA keypair creation.
+2025-09-10 12:12:11,164 [INFO] core: Created modules for tenant 5
+2025-09-10 12:12:11,305 [INFO] core: Sent tenant_created event for tenant 5
+2025-09-10 12:12:11,309 [INFO] core: Tenant created: Acme Health Inc. (schema: acme_health_inc.)
+2025-09-10 12:22:49,228 [INFO] core: Creating tenant: Test 1 | Schema: test_1 | Domain: qwerty.exampleasd.com
+2025-09-10 12:22:49,245 [INFO] core: Saving tenant with schema_name: test_1
+2025-09-10 12:22:49,304 [WARNING] users: users_rsakeypair table does not exist in schema test_1. Skipping RSA keypair creation.
+2025-09-10 12:23:08,493 [INFO] core: Created modules for tenant 6
+2025-09-10 12:23:08,796 [INFO] core: Sent tenant_created event for tenant 6
+2025-09-10 12:23:08,823 [INFO] core: Tenant created: Test 1 (schema: test_1)
+2025-09-10 12:25:12,686 [WARNING] django.request: Bad Request: /api/tenant/tenants/
+2025-09-10 12:25:22,389 [INFO] core: Creating tenant: Test 2 | Schema: test_2 | Domain: qwertyqwer.exampleasd.com
+2025-09-10 12:25:22,393 [INFO] core: Saving tenant with schema_name: test_2
+2025-09-10 12:25:22,432 [WARNING] users: users_rsakeypair table does not exist in schema test_2. Skipping RSA keypair creation.
+2025-09-10 12:25:41,480 [INFO] core: Created modules for tenant 7
+2025-09-10 12:25:41,661 [INFO] core: Sent tenant_created event for tenant 7
+2025-09-10 12:25:41,693 [INFO] core: Tenant created: Test 2 (schema: test_2)
+2025-09-10 12:25:50,806 [INFO] core: Listing tenants: [3] for tenant proliance
+2025-09-10 12:28:19,389 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:38,173 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:38,438 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:38,589 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:38,914 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:39,043 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:39,154 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:39,247 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:39,401 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:39,513 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:41,382 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:42,180 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:42,264 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:42,581 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:42,662 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:42,754 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:28:49,356 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:03,442 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:03,739 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:04,065 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:04,335 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:04,588 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:04,822 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:04,971 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:05,099 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:14,189 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:23,777 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:33,366 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:43,234 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:54,350 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:58,266 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:58,812 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:29:59,155 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:30:03,928 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:30:13,522 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:30:24,408 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:30:32,329 [WARNING] django.request: Forbidden: /api/public-key/7db5d75b1b424112aa868b95bbbfd4ad/
+2025-09-10 12:30:34,034 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:30:43,592 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:30:43,679 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:30:43,762 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:30:43,858 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:31:08,264 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:31:12,739 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:31:23,805 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:31:23,872 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:31:23,945 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:31:34,133 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:31:34,213 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:31:34,301 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:31:36,107 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:31:59,384 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:32:12,861 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:32:24,688 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:32:24,794 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:32:24,884 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:33:12,997 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:33:13,946 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:33:14,103 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:33:14,250 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:05,950 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:06,173 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:06,380 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:11,921 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:13,599 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:22,824 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:23,152 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:23,331 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:23,536 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:23,787 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:23,916 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:24,025 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:24,141 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:33,698 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:43,257 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:34:52,802 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:35:04,562 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:35:14,037 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:35:14,174 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:35:14,260 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:35:14,357 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:35:23,708 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:35:34,564 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:35:44,113 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:35:53,711 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:36:05,609 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:36:07,055 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:36:07,364 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 12:36:07,511 [INFO] core: Retrieving tenant: 3 for tenant proliance
