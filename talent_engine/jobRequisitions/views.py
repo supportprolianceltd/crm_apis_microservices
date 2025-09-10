@@ -24,7 +24,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from utils.fetch_auth_data import fetch_tenants, fetch_branches
 from utils.supabase import upload_file_dynamic
-
+from rest_framework.pagination import PageNumberPagination
 from .models import (
     JobRequisition,Request,
     VideoSession,
@@ -56,8 +56,13 @@ def get_tenant_id_from_jwt(request):
     except Exception:
         raise ValidationError('Invalid JWT token.')
 
+
+class CustomPagination(PageNumberPagination):
+    page_size = 20
+
 class PublicPublishedJobRequisitionsView(APIView):
     permission_classes = []  # No authentication required
+    pagination_class = CustomPagination
 
     def get(self, request):
         today = timezone.now().date()
@@ -135,6 +140,7 @@ class JobRequisitionBulkDeleteView(generics.GenericAPIView):
 class MyJobRequisitionListView(generics.ListCreateAPIView):
     serializer_class = JobRequisitionSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
+    pagination_class = CustomPagination
     filterset_fields = ['status', 'role']
     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
 
@@ -180,6 +186,7 @@ class PublishedJobRequisitionListView(generics.ListAPIView):
 
 class JobRequisitionListCreateView(generics.ListCreateAPIView):
     serializer_class = JobRequisitionSerializer
+    pagination_class = CustomPagination
     # permission_classes removed; rely on custom JWT middleware
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['status', 'role']

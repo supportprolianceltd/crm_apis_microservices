@@ -16,6 +16,16 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework.permissions import  AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+import requests
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from job_application.models import JobApplication, Schedule
+from job_application.serializers import JobApplicationSerializer, ScheduleSerializer, SimpleMessageSerializer
+
+
 from .models import JobApplication, Schedule
 from .serializers import (
     JobApplicationSerializer, ScheduleSerializer, ComplianceStatusSerializer, SimpleMessageSerializer, PublicJobApplicationSerializer
@@ -24,7 +34,7 @@ from utils.screen import parse_resume, screen_resume, extract_resume_fields
 from utils.email_utils import send_screening_notification
 from .tenant_utils import resolve_tenant_from_unique_link
 from job_applications.celery_task import screen_resumes_task
-
+from rest_framework.pagination import PageNumberPagination
 logger = logging.getLogger('job_applications')
 
 def get_job_requisition_by_id(job_requisition_id, request):
@@ -65,6 +75,11 @@ def get_tenant_by_id(tenant_id, request):
 def chunk_list(lst, chunk_size):
     for i in range(0, len(lst), chunk_size):
         yield lst[i:i + chunk_size]
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 20
+
 
 class ResumeParseView(APIView):
     parser_classes = [MultiPartParser, FormParser]
@@ -514,6 +529,7 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
 
 class JobApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = JobApplicationSerializer
+    pagination_class = CustomPagination
     parser_classes = (MultiPartParser, FormParser)
 
     def get_permissions(self):
@@ -679,6 +695,7 @@ class JobApplicationWithSchedulesView(APIView):
 
 class JobApplicationsByRequisitionView(generics.ListAPIView):
     serializer_class = JobApplicationSerializer
+    pagination_class = CustomPagination
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     # permission_classes = [IsAuthenticated]
     def get_permissions(self):
@@ -702,8 +719,83 @@ class JobApplicationsByRequisitionView(generics.ListAPIView):
         return queryset.order_by('-created_at')
 
 
+# class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
+#     serializer_class = SimpleMessageSerializer 
+#     # permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         jwt_payload = getattr(request, 'jwt_payload', {})
+#         tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')
+#         if not tenant_id:
+#             return Response({"detail": "tenant_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Fetch published job requisitions via API
+#         resp = requests.get(
+#             f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/",
+#             params={'tenant_id': tenant_id, 'publish_status': True},
+#             headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
+#         )
+#         if resp.status_code != 200:
+#             return Response({"detail": "Failed to fetch job requisitions."}, status=resp.status_code)
+#         job_requisitions = resp.json()
+
+#         response_data = []
+#         for job_requisition in job_requisitions:
+#             job_requisition_id = job_requisition['id']
+#             applications = JobApplication.active_objects.filter(
+#                 tenant_id=tenant_id,
+#                 job_requisition_id=job_requisition_id,
+#                 status='shortlisted'
+#             )
+#             if role == 'recruiter' and branch:
+#                 applications = applications.filter(branch=branch)
+#             elif branch:
+#                 applications = applications.filter(branch=branch)
+#             application_serializer = JobApplicationSerializer(applications, many=True)
+
+#             # Add schedule info for each application
+#             enhanced_applications = []
+#             for app_data in application_serializer.data:
+#                 application_id = app_data['id']
+#                 schedules = Schedule.active_objects.filter(
+#                     tenant_id=tenant_id,
+#                     job_application_id=application_id
+#                 )
+#                 if role == 'recruiter' and branch:
+#                     schedules = schedules.filter(branch=branch)
+#                 elif branch:
+#                     schedules = schedules.filter(branch=branch)
+#                 schedule_serializer = ScheduleSerializer(schedules, many=True)
+#                 app_data['scheduled'] = schedules.exists()
+#                 app_data['schedules'] = schedule_serializer.data
+#                 enhanced_applications.append(app_data)
+
+#             total_applications = JobApplication.active_objects.filter(
+#                 tenant_id=tenant_id,
+#                 job_requisition_id=job_requisition_id
+#             )
+#             if role == 'recruiter' and branch:
+#                 total_applications = total_applications.filter(branch=branch)
+#             elif branch:
+#                 total_applications = total_applications.filter(branch=branch)
+#             total_applications = total_applications.count()
+
+#             response_data.append({
+#                 'job_requisition': job_requisition,
+#                 'shortlisted_applications': enhanced_applications,
+#                 'shortlisted_count': applications.count(),
+#                 'total_applications': total_applications
+#             })
+
+#         # Sort by created_at descending if present
+#         response_data.sort(key=lambda x: x['job_requisition'].get('created_at', ''), reverse=True)
+#         return Response(response_data, status=status.HTTP_200_OK)
+
+
 class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
-    serializer_class = SimpleMessageSerializer 
+    serializer_class = SimpleMessageSerializer
     # permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -711,34 +803,60 @@ class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
         tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
+
         if not tenant_id:
             return Response({"detail": "tenant_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Fetch published job requisitions via API
-        resp = requests.get(
-            f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/",
-            params={'tenant_id': tenant_id, 'publish_status': True},
-            headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
-        )
-        if resp.status_code != 200:
-            return Response({"detail": "Failed to fetch job requisitions."}, status=resp.status_code)
-        job_requisitions = resp.json()
+        # ---------- Fetch paginated results ----------
+        all_job_requisitions = []
+        next_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/"
+        headers = {'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
+        params = {'tenant_id': tenant_id, 'publish_status': True}
 
+        while next_url:
+            try:
+                resp = requests.get(next_url, headers=headers, params=params if next_url.endswith('/requisitions/') else {})
+                data = resp.json()
+            except requests.RequestException as e:
+                print(f"Request failed: {e}")
+                return Response({"detail": "Error fetching job requisitions."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            except ValueError:
+                print("Invalid JSON response from requisition service.")
+                return Response({"detail": "Invalid response format."}, status=500)
+
+            if resp.status_code != 200:
+                print(f"Failed to fetch job requisitions: {resp.status_code} - {resp.text}")
+                return Response({"detail": "Failed to fetch job requisitions."}, status=resp.status_code)
+
+            results = data.get('results', [])
+            all_job_requisitions.extend(results)
+            next_url = data.get('next')
+
+        # ---------- Process requisitions ----------
         response_data = []
-        for job_requisition in job_requisitions:
-            job_requisition_id = job_requisition['id']
+
+        for job_requisition in all_job_requisitions:
+            if not isinstance(job_requisition, dict):
+                print(f"Invalid job requisition: {job_requisition}")
+                continue
+
+            job_requisition_id = job_requisition.get('id')
+            if not job_requisition_id:
+                print(f"Missing job requisition ID: {job_requisition}")
+                continue
+
+            # Fetch shortlisted applications
             applications = JobApplication.active_objects.filter(
                 tenant_id=tenant_id,
                 job_requisition_id=job_requisition_id,
                 status='shortlisted'
             )
-            if role == 'recruiter' and branch:
+            if branch:
                 applications = applications.filter(branch=branch)
-            elif branch:
-                applications = applications.filter(branch=branch)
+
             application_serializer = JobApplicationSerializer(applications, many=True)
 
-            # Add schedule info for each application
+            # Add schedules to each application
             enhanced_applications = []
             for app_data in application_serializer.data:
                 application_id = app_data['id']
@@ -746,35 +864,33 @@ class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
                     tenant_id=tenant_id,
                     job_application_id=application_id
                 )
-                if role == 'recruiter' and branch:
+                if branch:
                     schedules = schedules.filter(branch=branch)
-                elif branch:
-                    schedules = schedules.filter(branch=branch)
+
                 schedule_serializer = ScheduleSerializer(schedules, many=True)
                 app_data['scheduled'] = schedules.exists()
                 app_data['schedules'] = schedule_serializer.data
                 enhanced_applications.append(app_data)
 
+            # Total applications
             total_applications = JobApplication.active_objects.filter(
                 tenant_id=tenant_id,
                 job_requisition_id=job_requisition_id
             )
-            if role == 'recruiter' and branch:
+            if branch:
                 total_applications = total_applications.filter(branch=branch)
-            elif branch:
-                total_applications = total_applications.filter(branch=branch)
-            total_applications = total_applications.count()
 
             response_data.append({
                 'job_requisition': job_requisition,
                 'shortlisted_applications': enhanced_applications,
                 'shortlisted_count': applications.count(),
-                'total_applications': total_applications
+                'total_applications': total_applications.count()
             })
 
-        # Sort by created_at descending if present
+        # Sort by created_at descending
         response_data.sort(key=lambda x: x['job_requisition'].get('created_at', ''), reverse=True)
         return Response(response_data, status=status.HTTP_200_OK)
+
 
 class PublishedPublicJobRequisitionsWithShortlistedApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer 
@@ -906,8 +1022,10 @@ class PermanentDeleteJobApplicationsView(APIView):
         return Response({"detail": f"Successfully permanently deleted {deleted_count} application(s)."}, status=status.HTTP_200_OK)
 
 
+
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
+    pagination_class = CustomPagination
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     # permission_classes = [AllowAny]  # Allow unauthenticated requests
 

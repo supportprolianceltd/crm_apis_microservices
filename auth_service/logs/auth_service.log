@@ -3377,3 +3377,15 @@ LINE 1: ...r"."updated_at", "users_rsakeypair"."active" FROM "users_rsa...
 2025-09-09 19:09:19,206 [WARNING] django.request: Forbidden: /api/tenant/config/
 2025-09-09 19:09:21,058 [WARNING] django.request: Forbidden: /api/public-key/7db5d75b1b424112aa868b95bbbfd4ad/
 2025-09-09 19:09:21,217 [WARNING] django.request: Unauthorized: /api/token/refresh/
+2025-09-10 07:04:48,686 [WARNING] django.request: Bad Request: /api/user/users/
+2025-09-10 07:06:11,309 [WARNING] django.request: Method Not Allowed: /api/user/users/18/
+2025-09-10 07:06:15,689 [WARNING] django.request: Not Found: /api/user/users/18/
+2025-09-10 07:15:04,607 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 07:15:04,997 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 07:15:05,393 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 07:15:19,453 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 07:15:23,691 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 07:15:24,005 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 07:15:24,304 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 07:20:41,645 [WARNING] django.request: Forbidden: /api/user/users/4/
+2025-09-10 07:20:50,728 [WARNING] django.request: Forbidden: /api/user/users/
