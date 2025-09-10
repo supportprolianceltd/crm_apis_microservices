@@ -1,1 +1,59 @@
-# messaging/docker-compose.yml
+version: '3.8'
+
+services:
+  messaging-db:
+    image: postgres:15-alpine
+    container_name: messaging_postgres
+    environment:
+      POSTGRES_DB: messaging_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5435:5432"
+    volumes:
+      - messaging_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - auth_service_default
+
+  redis:
+    image: redis:7-alpine
+    container_name: messaging_redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - auth_service_default
+
+  messaging-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: messaging-service
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      messaging-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - auth_service_default
+
+volumes:
+  messaging_postgres_data:
+  redis_data:
+
+networks:
+  auth_service_default:
+    external: true
