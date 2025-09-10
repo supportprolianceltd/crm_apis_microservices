@@ -35,8 +35,6 @@ class CustomUserManager(UserManager):
         extra_fields.setdefault('is_active', True)
         return self.create_user(email, password, **extra_fields)
 
-
-
 class CustomUser(AbstractUser):
     ROLES = (
         ('admin', 'Admin'),
@@ -89,23 +87,6 @@ class CustomUser(AbstractUser):
   
     has_accepted_terms = models.BooleanField(default=False, help_text="Indicates if the user has accepted the terms and conditions.")
 
-    # New fields as requested
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(null=True, blank=True)
-    is_locked = models.BooleanField(default=False)
-    status = models.CharField(max_length=20, default='pending')
-    is_deleted = models.BooleanField(default=False)
-    login_attempts = models.PositiveIntegerField(default=0)
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    title = models.CharField(max_length=100, blank=True)
-    bio = models.TextField(blank=True)
-    facebook_link = models.URLField(blank=True)
-    twitter_link = models.URLField(blank=True)
-    linkedin_link = models.URLField(blank=True)
-    profile_picture = models.CharField(max_length=255, blank=True, null=True)
-    student_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -114,145 +95,6 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
-        # In your CustomUser model:
-    def get_full_name(self):
-        return f"{self.first_name} {self.last_name}".strip()
-
-    @property
-    def is_anonymous(self):
-        return False  # Or implement your logic
-
-    @property
-    def is_authenticated(self):
-        return True   # Or implement your logic
-
-    class Meta:
-        verbose_name = _('User')
-        verbose_name_plural = _('Users')
-
-    # Account management methods
-    def lock_account(self, reason):
-        self.is_locked = True
-        self.save()
-        UserActivity.objects.create(
-            user=self,
-            activity_type='account_locked',
-            details=reason,
-            status='success'
-        )
-
-    def unlock_account(self, reason):
-        self.is_locked = False
-        self.save()
-        UserActivity.objects.create(
-            user=self,
-            activity_type='account_unlocked',
-            details=reason,
-            status='success'
-        )
-
-    def suspend_account(self, reason):
-        self.status = 'suspended'
-        self.save()
-        UserActivity.objects.create(
-            user=self,
-            activity_type='account_suspended',
-            details=reason,
-            status='success'
-        )
-
-    def activate_account(self):
-        self.status = 'active'
-        self.save()
-        UserActivity.objects.create(
-            user=self,
-            activity_type='account_activated',
-            details='Account activated',
-            status='success'
-        )
-
-    def reset_login_attempts(self):
-        self.login_attempts = 0
-        self.last_login = timezone.now()
-        self.save()
-        UserActivity.objects.create(
-            user=self,
-            activity_type='login_attempts_reset',
-            details='Login attempts reset by admin',
-            status='success'
-        )
-
-    def increment_login_attempts(self):
-        self.login_attempts += 1
-        if self.login_attempts >= 5:
-            self.is_locked = True
-            UserActivity.objects.create(
-                user=self,
-                activity_type='account_locked',
-                details='Account locked due to excessive login attempts',
-                status='system'
-            )
-        self.save()
-
-    def delete_account(self, reason):
-        self.is_deleted = True
-        self.is_active = False
-        self.save()
-        UserActivity.objects.create(
-            user=self,
-            activity_type='account_deleted',
-            details=reason,
-            status='success'
-        )
-
-
-
-class UserActivity(models.Model):
-    STATUS_CHOICES = (
-        ('success', 'Success'),
-        ('failed', 'Failed'),
-        ('pending', 'Pending'),
-        ('in-progress', 'In Progress'),
-        ('system', 'System'),
-    )
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='activities',
-        blank=True,
-        null=True
-    )
-    activity_type = models.CharField(max_length=50)
-    details = models.TextField()
-    ip_address = models.GenericIPAddressField(blank=True, null=True)
-    device_info = models.CharField(max_length=200, blank=True, null=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='success'
-    )
-
-    class Meta:
-        verbose_name = _('Activity Log')
-        verbose_name_plural = _('Activity Logs')
-        ordering = ['-timestamp']
-        indexes = [
-            models.Index(fields=['-timestamp']),
-            models.Index(fields=['user', 'activity_type']),
-            models.Index(fields=['activity_type', 'status']),
-        ]
-
-    def __str__(self):
-        user_info = self.user.email if self.user else 'System'
-        return f"{user_info} - {self.activity_type} ({self.timestamp})"
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.timestamp = timezone.now()
-        super().save(*args, **kwargs)
-
-
 
 
 
@@ -572,64 +414,6 @@ class UserSession(models.Model):
     
 
 
-
-class FailedLogin(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
-    ip_address = models.GenericIPAddressField()
-    username = models.CharField(max_length=150)
-    timestamp = models.DateTimeField(default=timezone.now)
-    attempts = models.PositiveIntegerField(default=1)
-    status = models.CharField(max_length=20, choices=(('active', 'Active'), ('blocked', 'Blocked')))
-
-    class Meta:
-        indexes = [models.Index(fields=['ip_address', 'timestamp'])]
-
-    def __str__(self):
-        return f"Failed login: {self.username} from {self.ip_address} at {self.timestamp}"
-
-class BlockedIP(models.Model):
-    ip_address = models.GenericIPAddressField(unique=True)
-    reason = models.TextField()
-    timestamp = models.DateTimeField(default=timezone.now)
-    action = models.CharField(max_length=50, choices=(('auto-blocked', 'Auto-blocked'), ('manual-block', 'Manual Block')))
-
-    class Meta:
-        indexes = [models.Index(fields=['ip_address', 'timestamp'])]
-
-    def __str__(self):
-        return f"Blocked IP: {self.ip_address} at {self.timestamp}"
-
-class VulnerabilityAlert(models.Model):
-    SEVERITY_CHOICES = (
-        ('high', 'High'),
-        ('medium', 'Medium'),
-        ('low', 'Low'),
-    )
-    title = models.CharField(max_length=255)
-    component = models.CharField(max_length=100)
-    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES)
-    detected = models.DateTimeField(default=timezone.now)
-    status = models.CharField(max_length=20, choices=(('pending', 'Pending'), ('in-progress', 'In Progress'), ('resolved', 'Resolved')))
-
-    class Meta:
-        indexes = [models.Index(fields=['severity', 'detected'])]
-
-    def __str__(self):
-        return f"{self.severity} - {self.title} ({self.status})"
-
-class ComplianceReport(models.Model):
-    type = models.CharField(max_length=50, choices=(('GDPR', 'GDPR'), ('CCPA', 'CCPA'), ('PCI DSS', 'PCI DSS')))
-    status = models.CharField(max_length=20, choices=(('compliant', 'Compliant'), ('pending-review', 'Pending Review')))
-    last_audit = models.DateField()
-    next_audit = models.DateField()
-    tenant = models.ForeignKey('core.Tenant', on_delete=models.CASCADE)
-
-    class Meta:
-        indexes = [models.Index(fields=['type', 'status'])]
-
-    def __str__(self):
-        return f"{self.type} - {self.status}"
-    
 
 
 

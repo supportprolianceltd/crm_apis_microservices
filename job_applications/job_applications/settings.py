@@ -250,13 +250,13 @@ CELERY_RESULT_BACKEND = 'redis://job_app_redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = 'UTC' #GMT = Lagos/Africa Time - 1
 CELERY_ENABLE_UTC = True
 
 # Celery Beat Schedule
 CELERY_BEAT_SCHEDULE = {
     'auto-screen-all-applications-at-midnight': {
         'task': 'job_application.tasks.auto_screen_all_applications',
-        'schedule': crontab(hour=22, minute=00),  # Runs daily at 22:00 UTC
+        'schedule': crontab(hour=16, minute=20),  # Runs daily at 16:17 UTC
     },
 }

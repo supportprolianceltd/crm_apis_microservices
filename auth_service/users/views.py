@@ -1,45 +1,44 @@
-import base64
-import json
-import jwt
 import logging
+import uuid
 import secrets
 import string
-import uuid
+import json
+from datetime import timedelta
+from multiprocessing.connection import Client
 
-from datetime import datetime, timedelta, timezone
-from cryptography.hazmat.primitives import serialization
+import jwt
 
 from django.conf import settings
-from django.contrib.auth import authenticate
-from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
-from django.db import transaction, connection, ProgrammingError
-from django.db.models import Count, Q
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import get_object_or_404
+from django.db import transaction, ProgrammingError
 from django.urls import reverse
 from django.utils import timezone
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate
 
-from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework import serializers, viewsets, generics, status
-from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied, NotFound, APIException
-from rest_framework.filters import SearchFilter
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework import viewsets, status, serializers, generics
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.exceptions import PermissionDenied, NotFound, APIException
+from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from django_tenants.utils import tenant_context
 
-from auth_service.utils.jwt_rsa import validate_rsa_jwt, issue_rsa_jwt
+from auth_service.utils.jwt_rsa  import validate_rsa_jwt, issue_rsa_jwt
 from .utils import get_daily_usage
+from django.http import JsonResponse
+from .models import RSAKeyPair
+from core.models import Tenant
+from cryptography.hazmat.primitives import serialization
+import base64
+
+from core.models import Tenant, Branch, TenantConfig
+from users.models import CustomUser
+
 from .models import (
-    RSAKeyPair,
     ClientProfile,
     PasswordResetToken,
     ProofOfAddress,
@@ -47,48 +46,22 @@ from .models import (
     DrivingRiskAssessment,
     LegalWorkEligibility,
     UserSession,
-    FailedLogin,
-    BlockedIP,
-    VulnerabilityAlert,
-    ComplianceReport,
-    CustomUser,
-    UserActivity,
 )
 
 from .serializers import (
-    FailedLoginSerializer,
-    BlockedIPSerializer,
-    VulnerabilityAlertSerializer,
-    ComplianceReportSerializer,
-    AdminUserCreateSerializer,
-    UserActivitySerializer,
     CustomUserSerializer,
     ClientCreateSerializer,
     ClientProfileSerializer,
     ClientDetailSerializer,
     UserCreateSerializer,
     PasswordResetConfirmSerializer,
+    AdminUserCreateSerializer,
     UserBranchUpdateSerializer,
     PasswordResetRequestSerializer,
     UserSessionSerializer,
 )
 
-from core.models import Tenant, Branch, TenantConfig
-from users.models import CustomUser
-
-logger = logging.getLogger('auth_service')
-
-
-
-class CustomPagination(PageNumberPagination):
-    page_size = 20
-
-class TenantBaseView:
-    """Base view to extract tenant from request."""
-    @property
-    def tenant(self):
-        return getattr(self.request, 'tenant', getattr(self.request.user, 'tenant', None))
-
+logger = logging.getLogger('users')
 
 
 class TermsAndConditionsView(APIView):
@@ -142,6 +115,19 @@ class UserPasswordRegenerateView(APIView):
         }, status=status.HTTP_200_OK)
     
 
+def configure_email_backend(tenant):
+    """
+    Configure email backend using tenant settings.
+    """
+    from django.core.mail.backends.smtp import EmailBackend
+    return EmailBackend(
+        host=tenant.email_host,
+        port=tenant.email_port,
+        username=tenant.email_host_user,
+        password=tenant.email_host_password,
+        use_ssl=tenant.email_use_ssl,
+        fail_silently=False
+    )
 
 class PasswordResetRequestView(generics.GenericAPIView):
     serializer_class = PasswordResetRequestSerializer
@@ -320,408 +306,271 @@ class PasswordResetConfirmView(generics.GenericAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-# UserViewSet with advanced filtering/statistics
-class UserViewSet(TenantBaseView, viewsets.ModelViewSet):
-    serializer_class = CustomUserSerializer  # Use your serializer
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser, JSONParser]
-    pagination_class = CustomPagination
-    filter_backends = []  # Add DjangoFilterBackend, SearchFilter if installed
-    filterset_fields = ['role', 'status', 'is_locked']
-    search_fields = ['first_name', 'last_name', 'email']
 
     def get_queryset(self):
-        tenant = self.request.tenant
+        tenant = self.request.user.tenant
+        user = self.request.user
         with tenant_context(tenant):
-            queryset = CustomUser.objects.filter(tenant=tenant, is_deleted=False).select_related('tenant')
-            role = self.request.query_params.get('role')
-            status = self.request.query_params.get('status')
-            is_locked = self.request.query_params.get('is_locked')
-            search = self.request.query_params.get('search')
-            date_from = self.request.query_params.get('date_from')
-            date_to = self.request.query_params.get('date_to')
-            if role and role != 'all':
-                queryset = queryset.filter(role=role)
-            if status and status != 'all':
-                queryset = queryset.filter(status=status)
-            if is_locked is not None:
-                queryset = queryset.filter(is_locked=is_locked.lower() == 'true')
-            if search:
-                queryset = queryset.filter(
-                    Q(first_name__icontains=search) |
-                    Q(last_name__icontains=search) |
-                    Q(email__icontains=search)
+            if user.is_superuser or user.role == 'admin':
+                return CustomUser.objects.filter(tenant=tenant).prefetch_related(
+                    'profile__professional_qualifications',
+                    'profile__employment_details',
+                    'profile__education_details',
+                    'profile__reference_checks',
+                    'profile__proof_of_address',
+                    'profile__insurance_verifications',
+                    'profile__driving_risk_assessments',
+                    'profile__legal_work_eligibilities',
+                    'profile__other_user_documents',
                 )
-            if date_from:
-                try:
-                    queryset = queryset.filter(date_joined__gte=datetime.fromisoformat(date_from))
-                except ValueError:
-                    logger.warning(f"[{tenant.schema_name}] Invalid date_from format: {date_from}")
-                    raise serializers.ValidationError("Invalid date_from format")
-            if date_to:
-                try:
-                    queryset = queryset.filter(date_joined__lte=datetime.fromisoformat(date_to))
-                except ValueError:
-                    logger.warning(f"[{tenant.schema_name}] Invalid date_to format: {date_to}")
-                    raise serializers.ValidationError("Invalid date_to format")
-            logger.debug(f"[{tenant.schema_name}] User query: {queryset.query}")
-            return queryset.order_by('-date_joined')
+            elif user.role == 'team_manager':
+                return CustomUser.objects.filter(tenant=tenant).prefetch_related(
+                    'profile__professional_qualifications',
+                    'profile__employment_details',
+                    'profile__education_details',
+                    'profile__reference_checks',
+                    'profile__proof_of_address',
+                    'profile__insurance_verifications',
+                    'profile__driving_risk_assessments',
+                    'profile__legal_work_eligibilities',
+                    'profile__other_user_documents',
+                )
+            elif user.role == 'recruiter' and user.branch:
+                return CustomUser.objects.filter(tenant=tenant, branch=user.branch).prefetch_related(
+                    'profile__professional_qualifications',
+                    'profile__employment_details',
+                    'profile__education_details',
+                    'profile__reference_checks',
+                    'profile__proof_of_address',
+                    'profile__insurance_verifications',
+                    'profile__driving_risk_assessments',
+                    'profile__legal_work_eligibilities',
+                    'profile__other_user_documents',
+                )
+            else:
+                return CustomUser.objects.filter(tenant=tenant, id=user.id).prefetch_related(
+                    'profile__professional_qualifications',
+                    'profile__employment_details',
+                    'profile__education_details',
+                    'profile__reference_checks',
+                    'profile__proof_of_address',
+                    'profile__insurance_verifications',
+                    'profile__driving_risk_assessments',
+                    'profile__legal_work_eligibilities',
+                    'profile__other_user_documents',
+                )
 
-    def create(self, request, *args, **kwargs):
-        tenant = request.tenant
-        if request.user.role != 'admin' and not request.user.is_superuser:
-            logger.warning(f"[{tenant.schema_name}] Non-admin user {request.user.email} attempted to create user")
-            return Response({"detail": "Only admins or superusers can create users"}, status=status.HTTP_403_FORBIDDEN)
-        serializer = self.get_serializer(data=request.data)
-        try:
-            serializer.is_valid(raise_exception=True)
-        except serializers.ValidationError as e:
-            logger.error(f"[{tenant.schema_name}] User creation validation failed: {str(e)}")
-            raise
-        with tenant_context(tenant), transaction.atomic():
-            user = serializer.save()
-            UserActivity.objects.create(
-                user=user,
-                activity_type='user_created',
-                details=f'User "{user.email}" created by {request.user.email}',
-                status='success'
-            )
-            logger.info(f"[{tenant.schema_name}] User created: {user.email}")
-            return Response({
-                'detail': 'User created successfully',
-                'data': serializer.data
-            }, status=status.HTTP_201_CREATED)
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return UserCreateSerializer
+        return CustomUserSerializer
+
+    def perform_create(self, serializer):
+        tenant = self.request.user.tenant
+        if self.request.user.role != 'admin' and not self.request.user.is_superuser:
+            raise serializers.ValidationError("Only admins or superusers can create users.")
+        with tenant_context(tenant):
+            serializer.save()
 
     def update(self, request, *args, **kwargs):
-        tenant = request.tenant
-        user = self.get_object()
-        serializer = self.get_serializer(user, data=request.data, partial=kwargs.get('partial', False))
-        try:
-            serializer.is_valid(raise_exception=True)
-        except serializers.ValidationError as e:
-            logger.error(f"[{tenant.schema_name}] User update validation failed for {user.email}: {serializer.errors}")
-            return Response({"detail": "Validation failed", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        with tenant_context(tenant), transaction.atomic():
-            serializer.save()
-            UserActivity.objects.create(
-                user=user,
-                activity_type='user_updated',
-                details=f'User "{user.email}" updated by {request.user.email}',
-                status='success'
-            )
-            logger.info(f"[{tenant.schema_name}] User updated: {user.email}")
+        tenant = request.user.tenant
+        user = request.user
+        with tenant_context(tenant):
+            instance = self.get_object()
+            if not (user.is_superuser or user.role == 'admin' or user.id == instance.id):
+                raise PermissionDenied("You do not have permission to update this user.")
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            logger.info(f"Using serializer: {serializer.__class__.__name__}")
+            # print(f"Using serializer: {serializer.__class__.__name__}")
+            try:
+                serializer.is_valid(raise_exception=True)
+            except serializers.ValidationError as e:
+                logger.error(f"Serializer errors: {serializer.errors}")
+                print(f"Serializer errors: {serializer.errors}")
+                # Optionally, re-raise or return a custom response
+                raise
+            self.perform_update(serializer)
             return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
-        tenant = request.tenant
-        user = self.get_object()
-        if request.user.role != 'admin' and not request.user.is_superuser:
-            logger.warning(f"[{tenant.schema_name}] Non-admin user {request.user.email} attempted to delete user {user.email}")
-            return Response({"detail": "Only admins or superusers can delete users"}, status=status.HTTP_403_FORBIDDEN)
-        with tenant_context(tenant), transaction.atomic():
-            user.delete_account(reason="Deleted via API")
-            UserActivity.objects.create(
-                user=user,
-                activity_type='user_deleted',
-                details=f'User "{user.email}" soft-deleted by {request.user.email}',
-                status='success'
-            )
-            logger.info(f"[{tenant.schema_name}] User soft-deleted: {user.email}")
-            return Response({"detail": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=True, methods=['post'])
-    def lock(self, request, pk=None):
-        tenant = request.tenant
-        if not (request.user.is_superuser or request.user.role == 'admin'):
-            logger.warning(f"[{tenant.schema_name}] Non-admin user {request.user.email} attempted to lock user")
-            return Response({"detail": "Only admins or superusers can lock accounts"}, status=status.HTTP_403_FORBIDDEN)
+        tenant = request.user.tenant
+        user = request.user
         with tenant_context(tenant):
-            user = get_object_or_404(CustomUser, pk=pk, tenant=tenant, is_deleted=False)
-            if user.is_locked:
-                logger.warning(f"[{tenant.schema_name}] User {user.email} already locked")
-                return Response({"detail": "User is already locked"}, status=status.HTTP_400_BAD_REQUEST)
-            user.lock_account(reason=f"Account locked by {request.user.email}")
-            logger.info(f"[{tenant.schema_name}] User {user.email} locked by {request.user.email}")
-            return Response({"detail": f"User {user.email} locked successfully"})
-
-    @action(detail=True, methods=['post'])
-    def unlock(self, request, pk=None):
-        tenant = request.tenant
-        if not (request.user.is_superuser or request.user.role == 'admin'):
-            logger.warning(f"[{tenant.schema_name}] Non-admin user {request.user.email} attempted to unlock user")
-            return Response({"detail": "Only admins or superusers can unlock accounts"}, status=status.HTTP_403_FORBIDDEN)
-        with tenant_context(tenant):
-            user = get_object_or_404(CustomUser, pk=pk, tenant=tenant, is_deleted=False)
-            if not user.is_locked:
-                logger.warning(f"[{tenant.schema_name}] User {user.email} already unlocked")
-                return Response({"detail": "User is already unlocked"}, status=status.HTTP_400_BAD_REQUEST)
-            user.unlock_account(reason=f"Account unlocked by {request.user.email}")
-            logger.info(f"[{tenant.schema_name}] User {user.email} unlocked by {request.user.email}")
-            return Response({"detail": f"User {user.email} unlocked successfully"})
-
-    @action(detail=True, methods=['post'])
-    def reset_password(self, request, pk=None):
-        tenant = request.tenant
-        if not (request.user.is_superuser or request.user.role == 'admin'):
-            logger.warning(f"[{tenant.schema_name}] Non-admin user {request.user.email} attempted to reset password")
-            return Response({"detail": "Only admins or superusers can reset passwords"}, status=status.HTTP_403_FORBIDDEN)
-        with tenant_context(tenant):
-            user = get_object_or_404(CustomUser, pk=pk, tenant=tenant, is_deleted=False)
-            from django.contrib.auth.tokens import default_token_generator
-            from django.utils.http import urlsafe_base64_encode
-            from django.utils.encoding import force_bytes
-            from django.core.mail import send_mail
-            token = default_token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            reset_link = f"{request.scheme}://{request.get_host()}/reset-password/{uid}/{token}/"
-            send_mail(
-                subject='Password Reset Request',
-                message=f'Click the following link to reset your password: {reset_link}',
-                from_email='no-reply@yourdomain.com',
-                recipient_list=[user.email],
-                fail_silently=False,
-            )
-            UserActivity.objects.create(
-                user=user,
-                activity_type='password_reset_initiated',
-                details=f'Password reset initiated by {request.user.email}',
-                status='success'
-            )
-            logger.info(f"[{tenant.schema_name}] Password reset initiated for user {user.email} by {request.user.email}")
-            return Response({"detail": f"Password reset email sent to {user.email}"})
-
-    @action(detail=False, methods=['get'])
-    def stats(self, request):
-        tenant = request.tenant
-        with tenant_context(tenant):
-            seven_days_ago = timezone.now() - timedelta(days=7)
-            one_day_ago = timezone.now() - timedelta(days=1)
-            stats = {
-                'total_users': CustomUser.objects.count(),
-                'active_users': CustomUser.objects.filter(status='active').count(),
-                'new_signups': CustomUser.objects.filter(date_joined__gte=seven_days_ago).count(),
-                'suspicious_activity': UserActivity.objects.filter(
-                    activity_type__in=['login', 'account_suspended'],
-                    status='failed',
-                    timestamp__gte=seven_days_ago
-                ).count(),
-                'locked_accounts': CustomUser.objects.filter(is_locked=True).count(),
-                'failed_logins': FailedLogin.objects.filter(
-                    timestamp__gte=one_day_ago
-                ).count(),
-                'blocked_ips': BlockedIP.objects.count(),
-                'active_alerts': VulnerabilityAlert.objects.filter(status='pending').count(),
-                'audit_events': UserActivity.objects.filter(timestamp__gte=seven_days_ago).count(),
-                'compliance_status': f"{ComplianceReport.objects.filter(status='compliant').count()}/{ComplianceReport.objects.count()}",
-                'data_requests': 0,
-            }
-            logger.info(f"[{tenant.schema_name}] Dashboard stats retrieved")
-            return Response(stats)
+            instance = self.get_object()
+            if not (user.is_superuser or user.role == 'admin'):
+                raise PermissionDenied("You do not have permission to delete users.")
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class UserCreateView(APIView):
+    permission_classes = [IsAdminUser]
 
-
- 
-
-    @action(detail=True, methods=['post'])
-    def impersonate(self, request, pk=None):
-        tenant = request.tenant
-        if not request.user.is_superuser:
-            logger.warning(f"[{tenant.schema_name}] Non-superuser {request.user.email} attempted to impersonate")
-            return Response({"detail": "Only superusers can impersonate"}, status=status.HTTP_403_FORBIDDEN)
-        with tenant_context(tenant):
-            user = get_object_or_404(CustomUser, pk=pk, tenant=tenant, is_deleted=False)
-            token = RefreshToken.for_user(user)
-            UserActivity.objects.create(
-                user=user,
-                activity_type='user_impersonated',
-                details=f'User "{user.email}" impersonated by {request.user.email}',
-                status='success'
-            )
-            logger.info(f"[{tenant.schema_name}] Superuser {request.user.email} impersonated user {user.email}")
-            return Response({'token': str(token.access_token)})
-
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-    def change_password(self, request, pk=None):
-        class ChangePasswordSerializer(serializers.Serializer):
-            old_password = serializers.CharField(required=True)
-            new_password = serializers.CharField(required=True, min_length=8)
-
-            def validate_new_password(self, value):
-                if not any(c.isupper() for c in value) or not any(c.isdigit() for c in value):
-                    raise serializers.ValidationError("Password must contain at least one uppercase letter and one number.")
-                return value
-
-        tenant = request.tenant
-        user = self.get_object()
-        if request.user != user and not request.user.is_superuser and request.user.role != 'admin':
-            logger.warning(f"[{tenant.schema_name}] User {request.user.email} attempted to change password for {user.email}")
-            return Response({"detail": "You do not have permission to change this user's password"}, status=status.HTTP_403_FORBIDDEN)
-        serializer = ChangePasswordSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response({"detail": "Validation failed", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        old_password = serializer.validated_data['old_password']
-        new_password = serializer.validated_data['new_password']
-        if not user.check_password(old_password):
-            return Response({"detail": "Old password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            user.set_password(new_password)
-            user.save()
-            UserActivity.objects.create(
-                user=user,
-                activity_type='password_changed',
-                details=f'User "{user.email}" changed password',
-                status='success'
-            )
-            logger.info(f"[{tenant.schema_name}] User {user.email} changed password")
-            return Response({"detail": "Password changed successfully."}, status=status.HTTP_200_OK)
-        except Exception as e:
-            logger.error(f"[{tenant.schema_name}] Error changing password for user {user.email}: {str(e)}", exc_info=True)
-            return Response({"detail": "Failed to change password.", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-
-class FailedLoginViewSet(TenantBaseView, viewsets.ReadOnlyModelViewSet):
-    serializer_class = FailedLoginSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
-    pagination_class = CustomPagination
-    filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['status']
-    search_fields = ['ip_address', 'username']
-
-    def get_queryset(self):
-        tenant = self.request.tenant
-        with tenant_context(tenant):
-            return FailedLogin.objects.all().order_by('-timestamp')
-
-class BlockedIPViewSet(TenantBaseView, viewsets.ModelViewSet):
-    serializer_class = BlockedIPSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
-    pagination_class = CustomPagination
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['action']
-
-    def get_queryset(self):
-        tenant = self.request.tenant
-        with tenant_context(tenant):
-            return BlockedIP.objects.all().order_by('-timestamp')
-
-    def perform_create(self, serializer):
-        tenant = self.request.tenant
-        with tenant_context(tenant):
-            if BlockedIP.objects.filter(ip_address=serializer.validated_data['ip_address']).exists():
-                raise serializers.ValidationError("This IP is already blocked")
-            serializer.save()
-            UserActivity.objects.create(
-                user=self.request.user,
-                activity_type='blocked_ip_added',
-                details=f"IP {serializer.validated_data['ip_address']} blocked by {self.request.user.email}",
-                status='success'
-            )
-
-    @action(detail=False, methods=['post'], url_path='unblock')
-    def unblock(self, request):
-        tenant = request.tenant
-        ip_address = request.data.get('ip_address')
-        if not ip_address:
-            logger.warning(f"[{tenant.schema_name}] No IP address provided for unblock")
-            return Response({"detail": "IP address is required"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            with tenant_context(tenant):
-                blocked_ip = get_object_or_404(BlockedIP, ip_address=ip_address)
-                blocked_ip.delete()
-                UserActivity.objects.create(
-                    user=self.request.user,
-                    activity_type='blocked_ip_removed',
-                    details=f"IP {ip_address} unblocked by {self.request.user.email}",
-                    status='success'
-                )
-                logger.info(f"[{tenant.schema_name}] IP {ip_address} unblocked by {self.request.user.email}")
-                return Response({"detail": f"IP {ip_address} unblocked successfully"})
-        except Exception as e:
-            logger.error(f"[{tenant.schema_name}] Error unblocking IP {ip_address}: {str(e)}", exc_info=True)
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-class VulnerabilityAlertViewSet(TenantBaseView, viewsets.ModelViewSet):
-    serializer_class = VulnerabilityAlertSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
-    pagination_class = CustomPagination
-    filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['severity', 'status']
-    search_fields = ['title', 'component']
-
-    def get_queryset(self):
-        tenant = self.request.tenant
-        with tenant_context(tenant):
-            return VulnerabilityAlert.objects.all().order_by('-detected')
-
-    def perform_update(self, serializer):
-        serializer.save()
-        if serializer.validated_data.get('status') == 'resolved':
-            UserActivity.objects.create(
-                user=self.request.user,
-                activity_type='vulnerability_resolved',
-                details=f"Vulnerability {serializer.validated_data['title']} resolved by {self.request.user.email}",
-                status='success'
-            )
-
-
-class UserActivityViewSet(TenantBaseView, viewsets.ReadOnlyModelViewSet):
-    """Retrieve user activity logs for a tenant."""
-    serializer_class = UserActivitySerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
-    pagination_class = CustomPagination
-    filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['activity_type', 'status']
-    search_fields = ['user__email', 'details']
-
-    def get_queryset(self):
-        tenant = self.request.tenant
-        with tenant_context(tenant):
-            queryset = UserActivity.objects.filter(user__tenant=tenant).select_related('user').order_by('-timestamp')
-            user_id = self.request.query_params.get('user_id')
-            if user_id:
-                queryset = queryset.filter(user_id=user_id)
-            logger.debug(f"[{tenant.schema_name}] User activity query: {queryset.query}")
-            return queryset
-
-    def list(self, request, *args, **kwargs):
-        tenant = request.tenant
-        try:
-            queryset = self.get_queryset()
-            page = self.paginate_queryset(queryset)
-            serializer = self.get_serializer(page if page is not None else queryset, many=True)
-            logger.info(f"[{tenant.schema_name}] Retrieved {queryset.count()} user activity records")
-            return self.get_paginated_response(serializer.data) if page is not None else Response({
-                'detail': f'Retrieved {queryset.count()} user activity record(s)',
-                'data': serializer.data
-            })
-        except Exception as e:
-            logger.error(f"[{tenant.schema_name}] Error listing user activities: {str(e)}", exc_info=True)
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    @action(detail=False, methods=['get'])
-    def recent_events(self, request):
-        tenant = self.request.tenant
-        try:
-            with tenant_context(tenant):
-                security_types = ['user_login', 'user_logout', 'password_reset_initiated', 'user_impersonated', 'blocked_ip_added', 'blocked_ip_removed', 'vulnerability_resolved']
-                queryset = UserActivity.objects.filter(
-                    user__tenant=tenant,
-                    activity_type__in=security_types
-                ).select_related('user').order_by('-timestamp')[:50]
-                serializer = self.get_serializer(queryset, many=True)
-                logger.info(f"[{tenant.schema_name}] Retrieved recent security events")
+    def post(self, request):
+        logger.debug(f"User creation request for tenant {request.user.tenant.schema_name}: {dict(request.data)}")
+        serializer = UserCreateSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            try:
+                user = serializer.save()
+                refresh = RefreshToken.for_user(user)
+                logger.info(f"User created: {user.email} (ID: {user.id}) for tenant {user.tenant.schema_name}")
                 return Response({
-                    'detail': f'Retrieved {queryset.count()} recent security events',
-                    'data': serializer.data
-                })
+                    'status': 'success',
+                    'message': f"User {user.email} created successfully.",
+                    'data': {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'role': user.role,
+                        'job_role': user.job_role,
+                        'dashboard': user.dashboard,
+                        'access_level': user.access_level,
+                        'status': user.status,
+                        'two_factor': user.two_factor,
+                        'tenant_id': user.tenant.id,
+                        'tenant_schema': user.tenant.schema_name,
+                        'branch': user.branch.name if user.branch else None,
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                    }
+                }, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logger.error(f"Error creating user for tenant {request.user.tenant.schema_name}: {str(e)}")
+                return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Validation error for tenant {request.user.tenant.schema_name}: {serializer.errors}")
+        return Response({'status': 'error', 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class AdminUserCreateView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        serializer = AdminUserCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                user = serializer.save()
+                refresh = RefreshToken.for_user(user)
+                logger.info(f"Admin user created: {user.email} for tenant {user.tenant.schema_name}")
+                return Response({
+                    'status': 'success',
+                    'message': f"Admin user {user.email} created successfully.",
+                    'data': {
+                        'username': user.username,
+                        'email': user.email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'job_role': user.job_role,
+                        'tenant_id': user.tenant.id,
+                        'tenant_schema': user.tenant.schema_name,
+                        'branch': user.branch.name if user.branch else None,
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                    }
+                }, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logger.error(f"Error creating admin user: {str(e)}")
+                return Response({
+                    'status': 'error',
+                    'message': str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Validation error: {serializer.errors}")
+        return Response({
+            'status': 'error',
+            'message': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserBranchUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_tenant_from_token(self, request):
+        try:
+            if hasattr(request, 'tenant') and request.tenant:
+                logger.debug(f"Tenant from request: {request.tenant.schema_name}")
+                return request.tenant
+            if hasattr(request.user, 'tenant') and request.user.tenant:
+                logger.debug(f"Tenant from user: {request.user.tenant.schema_name}")
+                return request.user.tenant
+            auth_header = request.headers.get('Authorization', '')
+            if not auth_header.startswith('Bearer '):
+                logger.warning("No valid Bearer token provided")
+                raise ValueError("Invalid token format")
+            token = auth_header.split(' ')[1]
+            decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            tenant_id = decoded_token.get('tenant_id')
+            schema_name = decoded_token.get('tenant_schema')
+            if tenant_id:
+                tenant = Tenant.objects.get(id=tenant_id)
+                logger.debug(f"Tenant extracted from token by ID: {tenant.schema_name}")
+                return tenant
+            elif schema_name:
+                tenant = Tenant.objects.get(schema_name=schema_name)
+                logger.debug(f"Tenant extracted from token by schema: {tenant.schema_name}")
+                return tenant
+            else:
+                logger.warning("No tenant_id or schema_name in token")
+                raise ValueError("Tenant not specified in token")
+        except Tenant.DoesNotExist:
+            logger.error("Tenant not found")
+            raise serializers.ValidationError("Tenant not found")
+        except jwt.InvalidTokenError:
+            logger.error("Invalid JWT token")
+            raise serializers.ValidationError("Invalid token")
         except Exception as e:
-            logger.error(f"[{tenant.schema_name}] Error retrieving recent security events: {str(e)}", exc_info=True)
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f"Error extracting tenant: {str(e)}")
+            raise serializers.ValidationError(f"Error extracting tenant: {str(e)}")
 
+    def patch(self, request, user_id):
+        tenant = self.get_tenant_from_token(request)
+        with tenant_context(tenant):
+            try:
+                user = CustomUser.objects.get(id=user_id, tenant=tenant)
+            except CustomUser.DoesNotExist:
+                logger.error(f"User with ID {user_id} not found for tenant {tenant.schema_name}")
+                return Response(
+                    {"status": "error", "message": f"User with ID {user_id} not found"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
 
+            # Check permissions: Only admins, superusers, or team managers can update branch
+            if not (request.user.is_superuser or request.user.role == 'admin' or request.user.role == 'team_manager'):
+                logger.warning(f"Unauthorized branch update attempt by user {request.user.email} for user {user.email}")
+                return Response(
+                    {"status": "error", "message": "Only admins or team managers can update user branch"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
+            serializer = UserBranchUpdateSerializer(user, data=request.data, context={'request': request}, partial=True)
+            if serializer.is_valid():
+                try:
+                    with transaction.atomic():
+                        serializer.save()
+                        logger.info(f"User {user.email} assigned to branch {user.branch.name if user.branch else 'None'} for tenant {tenant.schema_name}")
+                        return Response(
+                            {
+                                "status": "success",
+                                "message": f"User {user.email} branch updated successfully",
+                                "data": CustomUserSerializer(user, context={'request': request}).data
+                            },
+                            status=status.HTTP_200_OK
+                        )
+                except Exception as e:
+                    logger.error(f"Error updating branch for user {user.email} in tenant {tenant.schema_name}: {str(e)}")
+                    return Response(
+                        {"status": "error", "message": str(e)},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            logger.error(f"Validation error for user {user.email} in tenant {tenant.schema_name}: {serializer.errors}")
+            return Response(
+                {"status": "error", "message": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+# New view for listing all users in a tenant
 class TenantUsersListView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -821,15 +670,6 @@ class BranchUsersListView(APIView):
 
 
 
-class CurrentUserView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        tenant = request.tenant
-        with tenant_context(tenant):
-            serializer = UserSerializer(request.user)
-            return Response(serializer.data)
-
 
 class UserSessionViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -921,7 +761,6 @@ class UserSessionViewSet(viewsets.ViewSet):
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.filter(role='client').prefetch_related('client_profile')
     serializer_class = ClientDetailSerializer
-    pagination_class = CustomPagination
     
     permission_classes = [IsAuthenticated]
 

@@ -6,24 +6,18 @@ from .views import (UserViewSet,TermsAndConditionsView,
     PasswordResetConfirmView,
     UserPasswordRegenerateView,
     ClientViewSet,
-    CurrentUserView,
+    AdminUserCreateView,
+    UserCreateView,
+    UserBranchUpdateView,
     TenantUsersListView,
     BranchUsersListView,
     UserSessionViewSet, jwks_view, protected_view,
 )
-from .views import (UserViewSet, FailedLoginViewSet, BlockedIPViewSet, VulnerabilityAlertViewSet,
-    UserActivityViewSet, PasswordResetRequestView, PasswordResetConfirmView, TenantUsersListView)
-
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'clients', ClientViewSet, basename='client')
 router.register(r'user-sessions', UserSessionViewSet, basename='user-session')
-router.register(r'user-activities', UserActivityViewSet, basename='user-activities')
-router.register(r'failed-logins', FailedLoginViewSet, basename='failed-logins')
-router.register(r'blocked-ips', BlockedIPViewSet, basename='blocked-ips')
-router.register(r'vulnerability-alerts', VulnerabilityAlertViewSet, basename='vulnerability-alerts')
-
 
 urlpatterns = [
     # Dynamic routes from router (should come first)
@@ -32,11 +26,9 @@ urlpatterns = [
     path('api/jwks/<int:tenant_id>/', jwks_view, name='jwks'),
     
     # User management endpoints
-
-    # path('users/admin/create/', AdminUserCreateView.as_view(), name='users_admin_create'),
-    path('user/me/', CurrentUserView.as_view(), name='current-user'),
-    path('recent-events/', UserActivityViewSet.as_view({'get': 'recent_events'}), name='recent-security-events'),
-
+    path('users/create/', UserCreateView.as_view(), name='users_user_create'),
+    path('users/admin/create/', AdminUserCreateView.as_view(), name='users_admin_create'),
+    path('users/<int:user_id>/branch/', UserBranchUpdateView.as_view(), name='users_branch_update'),
     path('users/<int:user_id>/regenerate-password/', UserPasswordRegenerateView.as_view(), name='users_regenerate_password'),
     path('tenant-users/', TenantUsersListView.as_view(), name='users_tenant_list'),
     path('branch-users/<int:branch_id>/', BranchUsersListView.as_view(), name='users_branch_list'),
@@ -49,8 +41,3 @@ urlpatterns = [
 
 
 ]
-
-
-
-
-

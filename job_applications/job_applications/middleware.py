@@ -15,7 +15,7 @@ public_paths = [
     '/api/health/',
     '/api/applications-engine/applications/parse-resume/autofill/',  # <-- Fix here
     '/api/applications-engine/apply-jobs/',
-    '/api/applications-engine/applications/job-requisitions/',
+    '/api/applications-engine/applications/code/', 
 ]
 
 

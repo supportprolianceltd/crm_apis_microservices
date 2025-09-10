@@ -82,15 +82,31 @@ tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
         username='dmin',
-        email='admin@prolianceltd.com',
+        email='david.dappa@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='Immanuel',
-        last_name='Kant',
-        job_role='Docker Engineer',
+        first_name='David',
+        last_name='Dappa',
+        job_role='Project Manager',
         tenant=tenant
     )
 
+
+from core.models import Tenant
+from users.models import CustomUser
+from django_tenants.utils import tenant_context
+
+# Get the tenant
+tenant = Tenant.objects.get(schema_name='proliance')
+
+# Enter tenant context
+with tenant_context(tenant):
+    try:
+        user = CustomUser.objects.get(email='tonna.ezugwu@prolianceltd.com')
+        user.delete()
+        print("User deleted successfully.")
+    except CustomUser.DoesNotExist:
+        print("User not found.")
 
 from core.models import Tenant
 from subscriptions.models import Subscription

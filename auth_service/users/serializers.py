@@ -10,12 +10,9 @@ from utils.supabase import upload_file_dynamic
 from rest_framework import serializers
 from .models import UserSession
 
-logger = logging.getLogger('auth_service')
+logger = logging.getLogger('users')
 
-from .models import (
-    FailedLogin, BlockedIP, VulnerabilityAlert,
-    ComplianceReport, CustomUser, UserActivity,
-)
+
 
 class ProfessionalQualificationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -822,73 +819,3 @@ class ClientCreateSerializer(serializers.ModelSerializer):
             )
             ClientProfile.objects.create(user=user, **profile_data)
             return user
-        
-class UserActivitySerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
-    timestamp = serializers.DateTimeField(format="%Y-%m-%d %H:%M")
-
-    class Meta:
-        model = UserActivity
-        fields = '__all__'
-
-class FailedLoginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FailedLogin
-        fields = ['id', 'ip_address', 'username', 'timestamp', 'attempts', 'status']
-
-class BlockedIPSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BlockedIP
-        fields = ['id', 'ip_address', 'action', 'reason', 'timestamp']
-        read_only_fields = ['id', 'timestamp']
-
-    def validate_ip_address(self, value):
-        import re
-        ipv4_pattern = r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
-        ipv6_pattern = r'^([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}$'
-        if not (re.match(ipv4_pattern, value) or re.match(ipv6_pattern, value)):
-            raise serializers.ValidationError("Invalid IP address format")
-        return value
-
-class VulnerabilityAlertSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VulnerabilityAlert
-        fields = ['id', 'severity', 'title', 'component', 'detected', 'status']
-
-class ComplianceReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ComplianceReport
-        fields = ['id', 'type', 'status', 'last_audit', 'next_audit']
-
-class PasswordResetRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-
-    def validate_email(self, value):
-        tenant = self.context['request'].tenant
-        with tenant_context(tenant):
-            if not CustomUser.objects.filter(email=value, tenant=tenant).exists():
-                raise serializers.ValidationError(f"No user found with email '{value}' for this tenant.")
-        return value
-
-class PasswordResetConfirmSerializer(serializers.Serializer):
-    token = serializers.CharField(required=True)
-    new_password = serializers.CharField(write_only=True, min_length=8, required=True)
-
-    def validate_token(self, value):
-        tenant = self.context['request'].tenant
-        with tenant_context(tenant):
-            try:
-                reset_token = PasswordResetToken.objects.get(token=value, tenant=tenant)
-                if reset_token.expires_at < timezone.now():
-                    raise serializers.ValidationError("This token has expired.")
-                if reset_token.used:
-                    raise serializers.ValidationError("This token has already been used.")
-            except PasswordResetToken.DoesNotExist:
-                raise serializers.ValidationError("Invalid token.")
-        return value
-
-    def validate_new_password(self, value):
-        if not any(c.isupper() for c in value) or not any(c.isdigit() for c in value):
-            raise serializers.ValidationError("Password must contain at least one uppercase letter and one number.")
-        return value
-
