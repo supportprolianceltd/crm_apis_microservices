@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #messages {
+            height: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            overflow-y: auto;
+        }
+        #message-form {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        #message-input {
+            flex-grow: 1;
+            padding: 8px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .typing-indicator {
+            font-style: italic;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Chat Test</h1>
+    
+    <div>
+        <label for="username">Your Name:</label>
+        <input type="text" id="username" value="User">
+    </div>
+    
+    <div>
+        <label for="chatId">Chat Room ID:</label>
+        <input type="text" id="chatId" value="general">
+        <button id="join-chat">Join Chat</button>
+    </div>
+    
+    <div id="chat-container" style="display: none;">
+        <div id="messages"></div>
+        <div id="typing-indicator" class="typing-indicator"></div>
+        <form id="message-form">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:3000');
+        const messages = document.getElementById('messages');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const usernameInput = document.getElementById('username');
+        const chatIdInput = document.getElementById('chatId');
+        const joinChatBtn = document.getElementById('join-chat');
+        const chatContainer = document.getElementById('chat-container');
+        const typingIndicator = document.getElementById('typing-indicator');
+        
+        let currentChatId = '';
+        let isTyping = false;
+        let typingTimeout;
+
+        // Join chat room
+        joinChatBtn.addEventListener('click', () => {
+            currentChatId = chatIdInput.value.trim();
+            if (currentChatId) {
+                socket.emit('join_chat', currentChatId);
+                chatContainer.style.display = 'block';
+                addMessage('System', `You joined chat: ${currentChatId}`, 'system');
+            }
+        });
+
+        // Handle incoming messages
+        socket.on('receive_message', (data) => {
+            const { userId, content, timestamp } = data;
+            addMessage(`User ${userId.substring(0, 6)}`, content);
+        });
+
+        // Handle user joined
+        socket.on('user_joined', (data) => {
+            addMessage('System', `User ${data.userId.substring(0, 6)} joined the chat`, 'system');
+        });
+
+        // Handle typing indicators
+        socket.on('user_typing', (data) => {
+            if (data.isTyping) {
+                typingIndicator.textContent = `User ${data.userId.substring(0, 6)} is typing...`;
+            } else {
+                typingIndicator.textContent = '';
+            }
+        });
+
+        // Send message
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (message && currentChatId) {
+                socket.emit('send_message', {
+                    chatId: currentChatId,
+                    content: message,
+                    userId: socket.id
+                });
+                addMessage('You', message, 'self');
+                messageInput.value = '';
+                
+                // Send typing stopped
+                isTyping = false;
+                socket.emit('typing', {
+                    chatId: currentChatId,
+                    userId: socket.id,
+                    isTyping: false
+                });
+            }
+        });
+
+        // Typing indicator
+        messageInput.addEventListener('input', () => {
+            if (!isTyping && currentChatId) {
+                isTyping = true;
+                socket.emit('typing', {
+                    chatId: currentChatId,
+                    userId: socket.id,
+                    isTyping: true
+                });
+            }
+
+            // Reset typing indicator after 2 seconds of no typing
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                if (isTyping && currentChatId) {
+                    isTyping = false;
+                    socket.emit('typing', {
+                        chatId: currentChatId,
+                        userId: socket.id,
+                        isTyping: false
+                    });
+                }
+            }, 2000);
+        });
+
+        // Helper function to add messages to the chat
+        function addMessage(sender, message, type = 'other') {
+            const messageElement = document.createElement('div');
+            messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            messageElement.style.margin = '5px 0';
+            messageElement.style.padding = '5px';
+            messageElement.style.borderRadius = '5px';
+            
+            if (type === 'self') {
+                messageElement.style.backgroundColor = '#e3f2fd';
+                messageElement.style.marginLeft = '20%';
+            } else if (type === 'system') {
+                messageElement.style.color = '#666';
+                messageElement.style.fontStyle = 'italic';
+                messageElement.style.textAlign = 'center';
+            } else {
+                messageElement.style.backgroundColor = '#f5f5f5';
+                messageElement.style.marginRight = '20%';
+            }
+            
+            messages.appendChild(messageElement);
+            messages.scrollTop = messages.scrollHeight;
+        }
+    </script>
+</body>
+</html>
