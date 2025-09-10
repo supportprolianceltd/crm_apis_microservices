@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics
+
+from django.db import connection
 from .models import Tenant, Domain, Module, TenantConfig, Branch
 from .serializers import TenantSerializer, ModuleSerializer, TenantConfigSerializer, BranchSerializer
 
@@ -306,6 +308,8 @@ class TenantConfigView(APIView):
                 logger.error(f"Error creating tenant config for tenant {tenant.schema_name}: {str(e)}")
                 return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
 class TenantViewSet(viewsets.ModelViewSet):
     queryset = Tenant.objects.all()
     serializer_class = TenantSerializer
@@ -355,17 +359,35 @@ class TenantViewSet(viewsets.ModelViewSet):
             logger.debug(f"Database search_path: {search_path}")
         return Tenant.objects.filter(id=tenant.id)
 
+    # def perform_create(self, serializer):
+    #     tenant = self.get_tenant(self.request)
+    #     try:
+    #         with transaction.atomic():
+    #             with tenant_context(tenant):
+    #                 new_tenant = serializer.save()
+    #                 logger.info(f"Tenant created: {new_tenant.name} (schema: {new_tenant.schema_name}) for tenant {tenant.schema_name}")
+    #                 return Response(serializer.data)
+    #     except Exception as e:
+    #         logger.error(f"Failed to create tenant: {str(e)}")
+    #         raise serializers.ValidationError(f"Failed to create tenant: {str(e)}")
+
+
     def perform_create(self, serializer):
-        tenant = self.get_tenant(self.request)
+        original_schema = connection.schema_name
         try:
+            # Force switch to 'public' schema for tenant creation
+            connection.set_schema('public')
+
             with transaction.atomic():
-                with tenant_context(tenant):
-                    new_tenant = serializer.save()
-                    logger.info(f"Tenant created: {new_tenant.name} (schema: {new_tenant.schema_name}) for tenant {tenant.schema_name}")
-                    return Response(serializer.data)
+                new_tenant = serializer.save()
+                logger.info(f"Tenant created: {new_tenant.name} (schema: {new_tenant.schema_name})")
         except Exception as e:
             logger.error(f"Failed to create tenant: {str(e)}")
             raise serializers.ValidationError(f"Failed to create tenant: {str(e)}")
+        finally:
+            # Restore original schema after creation
+            connection.set_schema(original_schema)
+
 
     def list(self, request, *args, **kwargs):
         try:
@@ -407,7 +429,7 @@ class TenantViewSet(viewsets.ModelViewSet):
         logger.info(f"Tenant deleted: {instance.name} for tenant {tenant.schema_name}")
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data, files=request.FILES)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

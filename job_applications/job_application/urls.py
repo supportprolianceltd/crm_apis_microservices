@@ -27,6 +27,10 @@ urlpatterns = [
     path('applications/deleted/soft_deleted/', SoftDeletedJobApplicationsView.as_view(), name='soft-deleted-applications'),
     path('applications/recover/application/', RecoverSoftDeletedJobApplicationsView.as_view(), name='recover-applications'),
     path('applications/permanent-delete/application/', PermanentDeleteJobApplicationsView.as_view(), name='permanent-delete-applications'),
+    
+    # https://server1.prolianceltd.com/api/applications-engine/applications/code/PRO-JA-0005/email/chinedu.okeke@example.com/with-schedules/schedules/?unique_link=2-PRO-react-frontend-engineer-f3137481
+
+
     path('applications/job-requisitions/<str:job_requisition_id>/applications/', JobApplicationsByRequisitionView.as_view(), name='job-applications-by-requisition'),
 
 

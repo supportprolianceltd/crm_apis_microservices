@@ -8,6 +8,9 @@ def upload_file_dynamic(file_obj, file_name, content_type="application/octet-str
     Upload files using the selected storage backend.
     storage_type: 'supabase', 's3', 'azure', or 'local'
     """
+    # logger.info("[upload_file_dynamic] Using bucket: %s", storage_service.bucket)
+    # logger.info("[upload_file_dynamic] Uploading to path: %s", file_name)
+
     storage_service = get_storage_service(storage_type)
     try:
         success = storage_service.upload_file(file_obj, file_name, content_type)

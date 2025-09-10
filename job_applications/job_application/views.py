@@ -527,6 +527,8 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+
+
 class JobApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = JobApplicationSerializer
     pagination_class = CustomPagination
@@ -639,7 +641,7 @@ class JobApplicationBulkDeleteView(APIView):
 
 class JobApplicationWithSchedulesView(APIView):
     serializer_class = SimpleMessageSerializer 
-    permission_classes = [AllowAny]
+    # permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         unique_link = request.query_params.get('unique_link')

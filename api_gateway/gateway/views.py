@@ -17,6 +17,7 @@ PUBLIC_PATHS = [
     '/api/talent-engine/requisitions/public/published/',
     '/api/talent-engine/requisitions/public/close/',
     '/api/applications-engine/apply-jobs/',
+    '/api/applications-engine/applications/job-requisitions/',
     
 ]
 

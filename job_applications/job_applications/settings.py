@@ -20,6 +20,8 @@ SPECTACULAR_SETTINGS = {
 
 import django.http.request
 from celery.schedules import crontab
+import logging
+logger = logging.getLogger(__name__)
 
 def patched_split_domain_port(host):
     # Accept underscores in hostnames
@@ -88,17 +90,7 @@ INSTALLED_APPS = [
 ]
 
 # ======================== Middleware ========================
-# MIDDLEWARE = [
-#     'corsheaders.middleware.CorsMiddleware',
-#     'django.middleware.security.SecurityMiddleware',
-#     'django.contrib.sessions.middleware.SessionMiddleware',
-#     'django.middleware.common.CommonMiddleware',
-#     'django.middleware.csrf.CsrfViewMiddleware',
-#     'django.contrib.auth.middleware.AuthenticationMiddleware',      # <-- must come BEFORE your JWT middleware
-#     'job_applications.middleware.MicroserviceRS256JWTMiddleware',   # <-- your JWT middleware
-#     'django.contrib.messages.middleware.MessageMiddleware',
-#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-# ]
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -153,7 +145,9 @@ SUPABASE_BUCKET = env('SUPABASE_BUCKET', default='')
 
 STORAGE_TYPE = env('STORAGE_TYPE', default='supabase')  # or 's3', 'azure', 'local', 'supabase'
 
+print("LOADED BUCKET:", SUPABASE_BUCKET)
 
+logger.info(f"[DEBUG] SUPABASE_BUCKET = {SUPABASE_BUCKET}")
 KAFKA_BOOTSTRAP_SERVERS = env('KAFKA_BOOTSTRAP_SERVERS', default='localhost:9092')
 KAFKA_TOPICS = {
     'requisition': 'requisition-events',
