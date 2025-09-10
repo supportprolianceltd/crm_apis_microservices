@@ -26,4 +26,4 @@ function initializeSocket(io) {
   });
 }
 
-module.exports = initializeSocket;
+export default initializeSocket;

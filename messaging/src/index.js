@@ -1,7 +1,10 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require("socket.io");
-require('dotenv').config();
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import { config } from 'dotenv';
+
+// Load environment variables
+config();
 
 const app = express();
 const server = http.createServer(app);
@@ -9,7 +12,8 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
-const apiRoutes = require('./api/routes');
+// Import routes
+import apiRoutes from './api/routes.js';
 
 app.use(express.json());
 
@@ -19,8 +23,8 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1', apiRoutes);
 
-
-const initializeSocket = require('./socket/socketHandler');
+// Initialize socket
+import initializeSocket from './socket/socketHandler.js';
 initializeSocket(io);
 
 server.listen(PORT, () => {
