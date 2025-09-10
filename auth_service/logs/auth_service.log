@@ -4674,3 +4674,60 @@ AssertionError: The field 'domain' was declared on serializer TenantSerializer, 
 2025-09-10 15:55:19,947 [INFO] core: Retrieving tenant: 3 for tenant proliance
 2025-09-10 15:55:30,751 [WARNING] django.request: Forbidden: /api/public-key/7db5d75b1b424112aa868b95bbbfd4ad/
 2025-09-10 15:55:30,795 [WARNING] django.request: Unauthorized: /api/token/refresh/
+2025-09-10 16:42:56,434 [WARNING] django.request: Forbidden: /api/tenant/tenants/
+2025-09-10 16:42:56,532 [WARNING] django.request: Forbidden: /api/tenant/tenants/
+2025-09-10 16:49:55,855 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:56,687 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:56,794 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:56,888 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:57,046 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:57,149 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:57,236 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:57,322 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:59,089 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:59,169 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:59,257 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:59,394 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:59,480 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:49:59,582 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:01,335 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:01,472 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:01,601 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:01,739 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:01,868 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:03,345 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:03,455 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:03,608 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:03,725 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:04,047 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:04,188 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:04,332 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:04,490 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:04,805 [INFO] core: Fetched TenantConfig for tenant proliance
+2025-09-10 16:50:04,866 [INFO] core: Fetched TenantConfig for tenant proliance
+2025-09-10 16:50:05,324 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:14,863 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:25,785 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:36,295 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:45,962 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:50:47,573 [WARNING] django.request: Forbidden: /api/tenant/tenants/
+2025-09-10 16:50:47,628 [WARNING] django.request: Forbidden: /api/tenant/tenants/
+2025-09-10 16:50:56,791 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:51:06,321 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:51:15,919 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:51:25,510 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:52:13,453 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:53:13,264 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:54:13,419 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:55:13,515 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:56:13,747 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:56:37,516 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:56:46,619 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:56:56,131 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:57:05,694 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:57:16,642 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:57:26,177 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:57:34,907 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:58:12,527 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 16:59:12,640 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-10 17:00:12,783 [INFO] core: Retrieving tenant: 3 for tenant proliance
