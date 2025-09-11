@@ -18,7 +18,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - auth_service_default
+      - messaging_network
 
   redis:
     image: redis:7-alpine
@@ -28,15 +28,13 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - auth_service_default
+      - messaging_network
 
-  messaging-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: messaging-service
+  websocket:
+    build: .
+    container_name: messaging_websocket
     ports:
-      - "3000:3000"
+      - "3500:3000"
     env_file:
       - ./.env
     volumes:
@@ -48,12 +46,14 @@ services:
       redis:
         condition: service_started
     networks:
-      - auth_service_default
+      - messaging_network
+
+networks:
+  messaging_network:
+    driver: bridge
+  auth_service_default:
+    external: true
 
 volumes:
   messaging_postgres_data:
   redis_data:
-
-networks:
-  auth_service_default:
-    external: true

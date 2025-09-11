@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 // CORS configuration
 const corsOptions = {
-  origin: "*", // Allow all origins for development
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -24,7 +24,9 @@ const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
+    credentials: true,
   },
+  transports: ["websocket", "polling"], // Explicitly specify transports
 });
 
 const PORT = process.env.PORT || 3000;
