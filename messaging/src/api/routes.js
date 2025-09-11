@@ -5,7 +5,7 @@ const router = Router();
 
 /**
  * @swagger
- * /users:
+ * /api/v1/users:
  *   get:
  *     summary: Get all users
  *     tags: [Users]
@@ -24,7 +24,7 @@ router.get('/users', async (req, res) => {
 
 /**
  * @swagger
- * /chats:
+ * /api/v1/chats:
  *   get:
  *     summary: Get all chats
  *     tags: [Chats]
@@ -52,7 +52,7 @@ router.get('/chats', async (req, res) => {
 
 /**
  * @swagger
- * /messages/{chatId}:
+ * /api/v1/messages/{chatId}:
  *   get:
  *     summary: Get messages for a specific chat
  *     tags: [Messages]
