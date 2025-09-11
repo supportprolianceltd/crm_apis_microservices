@@ -1,28 +1,68 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require("socket.io");
-require('dotenv').config();
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import { config } from "dotenv";
+import cors from "cors";
+import swaggerDocs from "./config/swagger.js";
+
+// Load environment variables
+config();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+
+// CORS configuration
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+// Initialize Socket.IO with CORS
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+  transports: ["websocket", "polling"], // Explicitly specify transports
+});
 
 const PORT = process.env.PORT || 3000;
 
-const apiRoutes = require('./api/routes');
-
+// Middleware
+app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.static("public"));
 
-app.get('/', (req, res) => {
-  res.send('<h1>Messaging Service</h1>');
+// API Documentation
+swaggerDocs(app);
+
+// Basic route
+app.get("/", (req, res) => {
+  res.redirect("/api-docs");
 });
 
-app.use('/api/v1', apiRoutes);
+// API Routes
+import apiRoutes from "./api/routes.js";
+app.use("/api/v1", apiRoutes);
 
-
-const initializeSocket = require('./socket/socketHandler');
+// Initialize WebSocket
+import initializeSocket from "./socket/socketHandler.js";
 initializeSocket(io);
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+    error: process.env.NODE_ENV === "development" ? err.message : {},
+  });
+});
+
+// Start server
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
