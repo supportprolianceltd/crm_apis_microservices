@@ -18,7 +18,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - messaging_network
+      - auth_service_default
 
   redis:
     image: redis:7-alpine
@@ -28,7 +28,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - messaging_network
+      - auth_service_default
 
   websocket:
     build: .
@@ -46,11 +46,9 @@ services:
       redis:
         condition: service_started
     networks:
-      - messaging_network
+      - auth_service_default
 
 networks:
-  messaging_network:
-    driver: bridge
   auth_service_default:
     external: true
 

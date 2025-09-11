@@ -7,14 +7,38 @@ const initializeSocket = (io) => {
     });
 
     // Join a specific chat room
-    socket.on("join_chat", (chatId) => {
-      socket.join(chatId);
-      console.log(`User ${socket.id} joined chat ${chatId}`);
-      io.to(chatId).emit("user_joined", {
-        userId: socket.id,
-        chatId,
-        message: `User ${socket.id} joined the chat`,
-      });
+    socket.on("join_chat", (data) => {
+      try {
+        const chatId =
+          typeof data === "string" ? data : data.chatId || data.room;
+        if (!chatId) {
+          console.error("No chatId provided in join_chat event");
+          return;
+        }
+
+        socket.join(chatId);
+        console.log(`User ${socket.id} joined chat ${chatId}`);
+
+        // Send confirmation back to the client
+        socket.emit("joined_chat", {
+          success: true,
+          chatId,
+          message: `Successfully joined chat ${chatId}`,
+        });
+
+        // Notify others in the room
+        socket.to(chatId).emit("user_joined", {
+          userId: socket.id,
+          chatId,
+          message: `User ${socket.id} joined the chat`,
+        });
+      } catch (error) {
+        console.error("Error in join_chat:", error);
+        socket.emit("error", {
+          error: "Failed to join chat",
+          details: error.message,
+        });
+      }
     });
 
     // Handle new messages
