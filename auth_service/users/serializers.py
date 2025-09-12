@@ -1,299 +1,574 @@
+# Standard library
 from django.db import transaction
-from rest_framework import serializers
-from .models import CustomUser, UserProfile, ProfessionalQualification, EmploymentDetail, EducationDetail, ReferenceCheck, OtherUserDocuments, PasswordResetToken, ProofOfAddress, InsuranceVerification, DrivingRiskAssessment, LegalWorkEligibility, ClientProfile
-from core.models import Module, Domain, Branch
-import re
 from django.utils import timezone
-import logging
+from django.views.decorators.csrf import csrf_exempt
+from core.models import Domain, Branch
 from django_tenants.utils import tenant_context
-from utils.supabase import upload_file_dynamic
 from rest_framework import serializers
-from .models import UserSession
+from utils.supabase import upload_file_dynamic
+import json
+import logging
+# Local App - Models
+from .models import (
+    CustomUser,
+    UserSession,
+    UserProfile,
+    ProfessionalQualification,
+    EmploymentDetail,
+    EducationDetail,
+    ReferenceCheck,
+    OtherUserDocuments,
+    PasswordResetToken,
+    ProofOfAddress,
+    InsuranceVerification,
+    DrivingRiskAssessment,
+    LegalWorkEligibility,
+    ClientProfile,
+    BlockedIP,
+    UserActivity,
+)
+logger = logging.getLogger('job_applications')
 
-logger = logging.getLogger('users')
 
+
+# class ProfessionalQualificationSerializer(serializers.ModelSerializer):
+#     image_file = serializers.FileField(required=False, allow_null=True)
+
+#     class Meta:
+#         model = ProfessionalQualification
+#         fields = ['id', 'name', 'image_file']
+#         read_only_fields = ['id']
+
+#     def create(self, validated_data):
+#         image = validated_data.pop('image_file', None)
+#         if image:
+#             logger.info(f"Uploading professional qualification image: {image.name}")
+#             url = upload_file_dynamic(image, image.name, content_type=getattr(image, 'content_type', 'application/octet-stream'))
+#             validated_data['image_file'] = url
+#             logger.info(f"Professional qualification image uploaded: {url}")
+#         return super().create(validated_data)
+
+#     def update(self, instance, validated_data):
+#         image = validated_data.pop('image_file', None)
+#         if image:
+#             logger.info(f"Updating professional qualification image: {image.name}")
+#             url = upload_file_dynamic(image, image.name, content_type=getattr(image, 'content_type', 'application/octet-stream'))
+#             validated_data['image_file'] = url
+#             logger.info(f"Professional qualification image updated: {url}")
+#         return super().update(instance, validated_data)
 
 
 class ProfessionalQualificationSerializer(serializers.ModelSerializer):
+    image_file = serializers.FileField(required=False, allow_null=True)
+
     class Meta:
         model = ProfessionalQualification
         fields = ['id', 'name', 'image_file']
+        read_only_fields = ['id']
+        extra_kwargs = {
+            'name': {'required': True},
+            'image_file': {'required': False, 'allow_null': True},
+        }
 
     def create(self, validated_data):
         image = validated_data.pop('image_file', None)
         if image:
+            logger.info(f"Uploading professional qualification image: {image.name}")
             url = upload_file_dynamic(image, image.name, content_type=getattr(image, 'content_type', 'application/octet-stream'))
             validated_data['image_file'] = url
+            logger.info(f"Professional qualification image uploaded: {url}")
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         image = validated_data.pop('image_file', None)
         if image:
+            logger.info(f"Updating professional qualification image: {image.name}")
             url = upload_file_dynamic(image, image.name, content_type=getattr(image, 'content_type', 'application/octet-stream'))
             validated_data['image_file'] = url
+            logger.info(f"Professional qualification image updated: {url}")
         return super().update(instance, validated_data)
 
+    def validate(self, data):
+        logger.info(f"Validating ProfessionalQualificationSerializer data: {data}")
+        return super().validate(data)
+
+
+# class EmploymentDetailSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = EmploymentDetail
+#         exclude = ['user_profile']
+#         extra_kwargs = {
+#             field: {'required': False, 'allow_null': True}
+#             for field in ['employer_name', 'job_title', 'start_date', 'end_date', 'description']
+#         }
 class EmploymentDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmploymentDetail
         exclude = ['user_profile']
+        extra_kwargs = {
+            'job_role': {'required': True},
+            'hierarchy': {'required': True},
+            'department': {'required': True},
+            'work_email': {'required': True},
+            'employment_type': {'required': True},
+            'employment_start_date': {'required': True},
+            'salary': {'required': True},
+            'working_days': {'required': True},
+            'maximum_working_hours': {'required': True},
+            'employment_end_date': {'required': False, 'allow_null': True},
+            'probation_end_date': {'required': False, 'allow_null': True},
+            'line_manager': {'required': False, 'allow_null': True},
+            'currency': {'required': False, 'allow_null': True},
+        }
 
-class EducationDetailSerializer(serializers.ModelSerializer):
-    certificate = serializers.ImageField(required=False, allow_null=True)
-
-    class Meta:
-        model = EducationDetail
-        exclude = ['user_profile']  # <-- Change from fields='__all__'
-
-    def create(self, validated_data):
-        certificate = validated_data.pop('certificate', None)
-        if certificate:
-            url = upload_file_dynamic(
-                certificate,
-                certificate.name,
-                content_type=getattr(certificate, 'content_type', 'application/octet-stream')
-            )
-            validated_data['certificate'] = url
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        certificate = validated_data.pop('certificate', None)
-        if certificate:
-            url = upload_file_dynamic(
-                certificate,
-                certificate.name,
-                content_type=getattr(certificate, 'content_type', 'application/octet-stream')
-            )
-            validated_data['certificate'] = url
-        return super().update(instance, validated_data)
+    def validate(self, data):
+        logger.info(f"Validating EmploymentDetailSerializer data: {data}")
+        return super().validate(data)
 
 class ReferenceCheckSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReferenceCheck
         exclude = ['user_profile']
+        extra_kwargs = {
+            'name': {'required': True},
+            'phone_number': {'required': True},
+            'email': {'required': True},
+            'relationship_to_applicant': {'required': True},
+        }
+
+    def validate(self, data):
+        logger.info(f"Validating ReferenceCheckSerializer data: {data}")
+        return super().validate(data)
+
+class EducationDetailSerializer(serializers.ModelSerializer):
+    certificate = serializers.FileField(required=False, allow_null=True)
+
+    class Meta:
+        model = EducationDetail
+        exclude = ['user_profile']
+        extra_kwargs = {
+            'institution': {'required': True},
+            'highest_qualification': {'required': True},
+            'course_of_study': {'required': True},
+            'start_year': {'required': True, 'min_value': 1900, 'max_value': 2100},
+            'end_year': {'required': True, 'min_value': 1900, 'max_value': 2100},
+            'skills': {'required': True},
+            'certificate': {'required': False, 'allow_null': True},
+            'uploaded_at': {'required': False, 'allow_null': True},
+        }
+
+    def create(self, validated_data):
+        certificate = validated_data.pop('certificate', None)
+        if certificate:
+            logger.info(f"Uploading education certificate: {certificate.name}")
+            url = upload_file_dynamic(
+                certificate,
+                certificate.name,
+                content_type=getattr(certificate, 'content_type', 'application/octet-stream')
+            )
+            validated_data['certificate'] = url
+            logger.info(f"Education certificate uploaded: {url}")
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        certificate = validated_data.pop('certificate', None)
+        if certificate:
+            logger.info(f"Updating education certificate: {certificate.name}")
+            url = upload_file_dynamic(
+                certificate,
+                certificate.name,
+                content_type=getattr(certificate, 'content_type', 'application/octet-stream')
+            )
+            validated_data['certificate'] = url
+            logger.info(f"Education certificate updated: {url}")
+        return super().update(instance, validated_data)
+
+    def validate(self, data):
+        logger.info(f"Validating EducationDetailSerializer data: {data}")
+        # Additional validation for start_year <= end_year
+        start_year = data.get('start_year')
+        end_year = data.get('end_year')
+        if start_year and end_year and start_year > end_year:
+            raise serializers.ValidationError({
+                'start_year': 'Start year cannot be greater than end year.'
+            })
+        return super().validate(data)
+
+
+
 
 class ProofOfAddressSerializer(serializers.ModelSerializer):
+    document = serializers.FileField(required=False, allow_null=True)
+    nin_document = serializers.FileField(required=False, allow_null=True)
+
     class Meta:
         model = ProofOfAddress
         exclude = ['user_profile']
+        extra_kwargs = {
+            field: {'required': False, 'allow_null': True}
+            for field in ['type', 'issue_date', 'nin']
+        }
 
     def create(self, validated_data):
         document = validated_data.pop('document', None)
         nin_document = validated_data.pop('nin_document', None)
         if document:
+            logger.info(f"Uploading proof of address document: {document.name}")
             url = upload_file_dynamic(document, document.name, content_type=getattr(document, 'content_type', 'application/octet-stream'))
             validated_data['document'] = url
+            logger.info(f"Proof of address document uploaded: {url}")
         if nin_document:
+            logger.info(f"Uploading proof of address NIN document: {nin_document.name}")
             url = upload_file_dynamic(nin_document, nin_document.name, content_type=getattr(nin_document, 'content_type', 'application/octet-stream'))
             validated_data['nin_document'] = url
+            logger.info(f"Proof of address NIN document uploaded: {url}")
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         document = validated_data.pop('document', None)
         nin_document = validated_data.pop('nin_document', None)
         if document:
+            logger.info(f"Updating proof of address document: {document.name}")
             url = upload_file_dynamic(document, document.name, content_type=getattr(document, 'content_type', 'application/octet-stream'))
             validated_data['document'] = url
+            logger.info(f"Proof of address document updated: {url}")
         if nin_document:
+            logger.info(f"Updating proof of address NIN document: {nin_document.name}")
             url = upload_file_dynamic(nin_document, nin_document.name, content_type=getattr(nin_document, 'content_type', 'application/octet-stream'))
             validated_data['nin_document'] = url
+            logger.info(f"Proof of address NIN document updated: {url}")
         return super().update(instance, validated_data)
 
 class InsuranceVerificationSerializer(serializers.ModelSerializer):
+    document = serializers.FileField(required=False, allow_null=True)
+
     class Meta:
         model = InsuranceVerification
         exclude = ['user_profile']
+        extra_kwargs = {
+            field: {'required': False, 'allow_null': True}
+            for field in ['insurance_type', 'provider_name', 'coverage_start_date', 'coverage_end_date']
+        }
 
     def create(self, validated_data):
         document = validated_data.pop('document', None)
         if document:
+            logger.info(f"Uploading insurance document: {document.name}")
             url = upload_file_dynamic(document, document.name, content_type=getattr(document, 'content_type', 'application/octet-stream'))
             validated_data['document'] = url
+            logger.info(f"Insurance document uploaded: {url}")
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         document = validated_data.pop('document', None)
         if document:
+            logger.info(f"Updating insurance document: {document.name}")
             url = upload_file_dynamic(document, document.name, content_type=getattr(document, 'content_type', 'application/octet-stream'))
             validated_data['document'] = url
+            logger.info(f"Insurance document updated: {url}")
         return super().update(instance, validated_data)
 
 class DrivingRiskAssessmentSerializer(serializers.ModelSerializer):
+    supporting_document = serializers.FileField(required=False, allow_null=True)
+
     class Meta:
         model = DrivingRiskAssessment
         exclude = ['user_profile']
+        extra_kwargs = {
+            field: {'required': False, 'allow_null': True}
+            for field in ['assessment_date', 'fuel_card_usage_compliance', 'road_traffic_compliance']
+        }
 
     def create(self, validated_data):
         supporting_document = validated_data.pop('supporting_document', None)
         if supporting_document:
+            logger.info(f"Uploading driving risk assessment document: {supporting_document.name}")
             url = upload_file_dynamic(supporting_document, supporting_document.name, content_type=getattr(supporting_document, 'content_type', 'application/octet-stream'))
             validated_data['supporting_document'] = url
+            logger.info(f"Driving risk assessment document uploaded: {url}")
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         supporting_document = validated_data.pop('supporting_document', None)
         if supporting_document:
+            logger.info(f"Updating driving risk assessment document: {supporting_document.name}")
             url = upload_file_dynamic(supporting_document, supporting_document.name, content_type=getattr(supporting_document, 'content_type', 'application/octet-stream'))
             validated_data['supporting_document'] = url
+            logger.info(f"Driving risk assessment document updated: {url}")
         return super().update(instance, validated_data)
 
 class LegalWorkEligibilitySerializer(serializers.ModelSerializer):
+    document = serializers.FileField(required=False, allow_null=True)
+
     class Meta:
         model = LegalWorkEligibility
         exclude = ['user_profile']
+        extra_kwargs = {
+            field: {'required': False, 'allow_null': True}
+            for field in ['evidence_of_right_to_rent', 'expiry_date', 'phone_number']
+        }
 
     def create(self, validated_data):
         document = validated_data.pop('document', None)
         if document:
+            logger.info(f"Uploading legal work eligibility document: {document.name}")
             url = upload_file_dynamic(document, document.name, content_type=getattr(document, 'content_type', 'application/octet-stream'))
             validated_data['document'] = url
+            logger.info(f"Legal work eligibility document uploaded: {url}")
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         document = validated_data.pop('document', None)
         if document:
+            logger.info(f"Updating legal work eligibility document: {document.name}")
             url = upload_file_dynamic(document, document.name, content_type=getattr(document, 'content_type', 'application/octet-stream'))
             validated_data['document'] = url
+            logger.info(f"Legal work eligibility document updated: {url}")
         return super().update(instance, validated_data)
 
 class OtherUserDocumentsSerializer(serializers.ModelSerializer):
-    file = serializers.FileField(required=True)
-    title = serializers.CharField(required=True)
+    file = serializers.FileField(required=False, allow_null=True)
+    title = serializers.CharField(required=False, allow_null=True)
     branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)
 
     class Meta:
         model = OtherUserDocuments
-        fields = ['id', 'title', 'file', 'uploaded_at', 'branch']
+        # fields = ['id', 'title', 'file', 'uploaded_at', 'branch']
+        exclude = ['user_profile']
         read_only_fields = ['id', 'uploaded_at']
 
     def validate_file(self, value):
-        if not value.name.lower().endswith(('.pdf', '.png', '.jpg', '.jpeg')):
+        if value and not value.name.lower().endswith(('.pdf', '.png', '.jpg', '.jpeg')):
             raise serializers.ValidationError("Only PDF or image files are allowed.")
-        if value.size > 10 * 1024 * 1024:
+        if value and value.size > 10 * 1024 * 1024:
             raise serializers.ValidationError("File size cannot exceed 10MB.")
         return value
 
     def create(self, validated_data):
         file = validated_data.pop('file', None)
         if file:
+            logger.info(f"Uploading other user document: {file.name}")
             url = upload_file_dynamic(file, file.name, content_type=getattr(file, 'content_type', 'application/octet-stream'))
             validated_data['file'] = url
+            logger.info(f"Other user document uploaded: {url}")
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         file = validated_data.pop('file', None)
         if file:
+            logger.info(f"Updating other user document: {file.name}")
             url = upload_file_dynamic(file, file.name, content_type=getattr(file, 'content_type', 'application/octet-stream'))
             validated_data['file'] = url
+            logger.info(f"Other user document updated: {url}")
         return super().update(instance, validated_data)
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    # modules = serializers.SlugRelatedField(
-    #     many=True,
-    #     required=False,
-    #     slug_field='name',
-    #     queryset=Module.objects.all()
-    # )
-    professional_qualifications = ProfessionalQualificationSerializer(many=True, required=False)
-    employment_details = EmploymentDetailSerializer(many=True, required=False)
-    education_details = EducationDetailSerializer(many=True, required=False)
-    reference_checks = ReferenceCheckSerializer(many=True, required=False)
-    proof_of_address = ProofOfAddressSerializer(many=True, required=False)
-    insurance_verifications = InsuranceVerificationSerializer(many=True, required=False)
-    driving_risk_assessments = DrivingRiskAssessmentSerializer(many=True, required=False)
-    legal_work_eligibilities = LegalWorkEligibilitySerializer(many=True, required=False)
-    other_user_documents = OtherUserDocumentsSerializer(many=True, required=False)
-    
 
-    # Explicitly declare image fields for proper URL representation
-    profile_image = serializers.ImageField(required=False, allow_null=True)
-    drivers_licence_image1 = serializers.ImageField(required=False, allow_null=True)
-    drivers_licence_image2 = serializers.ImageField(required=False, allow_null=True)
-    Right_to_Work_file = serializers.ImageField(required=False, allow_null=True)
-    dbs_certificate = serializers.ImageField(required=False, allow_null=True)
-    dbs_update_file = serializers.ImageField(required=False, allow_null=True)
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    professional_qualifications = ProfessionalQualificationSerializer(many=True, required=False, allow_null=True)
+    employment_details = EmploymentDetailSerializer(many=True, required=False, allow_null=True)
+    education_details = EducationDetailSerializer(many=True, required=False, allow_null=True)
+    reference_checks = ReferenceCheckSerializer(many=True, required=False, allow_null=True)
+    proof_of_address = ProofOfAddressSerializer(many=True, required=False, allow_null=True)
+    insurance_verifications = InsuranceVerificationSerializer(many=True, required=False, allow_null=True)
+    driving_risk_assessments = DrivingRiskAssessmentSerializer(many=True, required=False, allow_null=True)
+    legal_work_eligibilities = LegalWorkEligibilitySerializer(many=True, required=False, allow_null=True)
+    other_user_documents = OtherUserDocumentsSerializer(many=True, required=False, allow_null=True)
+
+
 
     class Meta:
         model = UserProfile
         fields = [
-            'id', 'user',
-            'work_phone', 'personal_phone',
-              'gender', 'dob', 'street', 'city', 'state', 'zip_code', 'department',
-            'employee_id',  'marital_status',  'profile_image',
-            'is_driver', 'type_of_vehicle', 'drivers_licence_image1', 'drivers_licence_image2', 'drivers_licence_country_of_issue',
+            'id', 'user', 'work_phone', 'personal_phone', 'gender', 'dob', 'street', 'city', 'state', 'zip_code',
+            'department', 'employee_id', 'marital_status', 'profile_image', 'profile_image_url',
+            'is_driver', 'type_of_vehicle', 'drivers_licence_image1', 'drivers_licence_image1_url',
+            'drivers_licence_image2', 'drivers_licence_image2_url', 'drivers_licence_country_of_issue',
             'drivers_licence_date_issue', 'drivers_licence_expiry_date', 'drivers_license_insurance_provider',
             'drivers_licence_insurance_expiry_date', 'drivers_licence_issuing_authority', 'drivers_licence_policy_number',
             'assessor_name', 'manual_handling_risk', 'lone_working_risk', 'infection_risk',
             'next_of_kin', 'next_of_kin_address', 'next_of_kin_phone_number', 'next_of_kin_alternate_phone',
             'relationship_to_next_of_kin', 'next_of_kin_email', 'next_of_kin_town', 'next_of_kin_zip_code',
-            'Right_to_Work_status', 'Right_to_Work_passport_holder', 'Right_to_Work_document_type', 'Right_to_Work_share_code',
-            'Right_to_Work_document_number', 'Right_to_Work_document_expiry_date', 'Right_to_Work_country_of_issue',
-            'Right_to_Work_file', 'Right_to_Work_restrictions',
-            'dbs_type', 'dbs_certificate', 'dbs_certificate_number', 'dbs_issue_date',
-            'dbs_update_file', 'dbs_update_certificate_number', 'dbs_update_issue_date', 'dbs_status_check',
-            'bank_name', 'account_number', 'account_name', 'account_type',
+            'Right_to_Work_status', 'Right_to_Work_passport_holder', 'Right_to_Work_document_type',
+            'Right_to_Work_share_code', 'Right_to_Work_document_number', 'Right_to_Work_document_expiry_date',
+            'Right_to_Work_country_of_issue', 'Right_to_Work_file', 'Right_to_Work_file_url', 'Right_to_Work_restrictions',
+            'dbs_type', 'dbs_certificate', 'dbs_certificate_url', 'dbs_certificate_number', 'dbs_issue_date',
+            'dbs_update_file', 'dbs_update_file_url', 'dbs_update_certificate_number', 'dbs_update_issue_date',
+            'dbs_status_check', 'bank_name', 'account_number', 'account_name', 'account_type',
             'access_duration', 'system_access_rostering', 'system_access_hr', 'system_access_recruitment',
             'system_access_training', 'system_access_finance', 'system_access_compliance', 'system_access_co_superadmin',
             'system_access_asset_management', 'vehicle_type',
-            # Related/reverse fields:
             'professional_qualifications', 'employment_details', 'education_details', 'reference_checks',
             'proof_of_address', 'insurance_verifications', 'driving_risk_assessments', 'legal_work_eligibilities',
             'other_user_documents'
         ]
         read_only_fields = ['id', 'user', 'employee_id']
+        extra_kwargs = {
+            field: {'required': False, 'allow_null': True}
+            for field in [
+                'drivers_licence_date_issue', 'drivers_licence_expiry_date', 'drivers_licence_country_of_issue',
+                'drivers_license_insurance_provider', 'drivers_licence_insurance_expiry_date',
+                'drivers_licence_issuing_authority', 'drivers_licence_policy_number', 'work_phone',
+                'personal_phone', 'gender', 'dob', 'street', 'city', 'state', 'zip_code', 'department',
+                'marital_status', 'is_driver', 'type_of_vehicle', 'assessor_name', 'manual_handling_risk',
+                'lone_working_risk', 'infection_risk', 'next_of_kin', 'next_of_kin_address',
+                'next_of_kin_phone_number', 'next_of_kin_alternate_phone', 'relationship_to_next_of_kin',
+                'next_of_kin_email', 'next_of_kin_town', 'next_of_kin_zip_code', 'Right_to_Work_status',
+                'Right_to_Work_passport_holder', 'Right_to_Work_document_type', 'Right_to_Work_share_code',
+                'Right_to_Work_document_number', 'Right_to_Work_document_expiry_date',
+                'Right_to_Work_country_of_issue', 'Right_to_Work_restrictions', 'dbs_type',
+                'dbs_certificate_number', 'dbs_issue_date', 'dbs_update_certificate_number',
+                'dbs_update_issue_date', 'dbs_status_check', 'bank_name', 'account_number',
+                'account_name', 'account_type', 'access_duration', 'system_access_rostering',
+                'system_access_hr', 'system_access_recruitment', 'system_access_training',
+                'system_access_finance', 'system_access_compliance', 'system_access_co_superadmin',
+                'system_access_asset_management', 'vehicle_type',
+                'profile_image_url', 'drivers_licence_image1_url', 'drivers_licence_image2_url',
+                'Right_to_Work_file_url', 'dbs_certificate_url', 'dbs_update_file_url'
+            ]
+        }
+
+
+
+    def validate(self, data):
+        logger.info(f"Validating UserProfileSerializer data: {data}")
+        nested_fields = [
+            'professional_qualifications', 'employment_details', 'education_details',
+            'reference_checks', 'proof_of_address', 'insurance_verifications',
+            'driving_risk_assessments', 'legal_work_eligibilities', 'other_user_documents'
+        ]
+        for field in nested_fields:
+            if field in data and data[field] is not None and len(data[field]) == 0:
+                logger.warning(f"Empty array provided for {field}")
+        return super().validate(data)
 
     def create(self, validated_data):
-        image_fields = [
-            'profile_image',
-            'drivers_licence_image1',
-            'drivers_licence_image2',
-            'Right_to_Work_file',
-            'dbs_certificate',
-            'dbs_update_file'
+        logger.info(f"Creating UserProfile with validated data: {validated_data}")
+        nested_fields = [
+            ('professional_qualifications', ProfessionalQualificationSerializer, 'professional_qualifications'),
+            ('employment_details', EmploymentDetailSerializer, 'employment_details'),
+            ('education_details', EducationDetailSerializer, 'education_details'),
+            ('reference_checks', ReferenceCheckSerializer, 'reference_checks'),
+            ('proof_of_address', ProofOfAddressSerializer, 'proof_of_address'),
+            ('insurance_verifications', InsuranceVerificationSerializer, 'insurance_verifications'),
+            ('driving_risk_assessments', DrivingRiskAssessmentSerializer, 'driving_risk_assessments'),
+            ('legal_work_eligibilities', LegalWorkEligibilitySerializer, 'legal_work_eligibilities'),
+            ('other_user_documents', OtherUserDocumentsSerializer, 'other_user_documents'),
         ]
-        # modules = validated_data.pop('modules', [])
-        for field in image_fields:
+        nested_data = {field: validated_data.pop(field, []) for field, _, _ in nested_fields}
+
+        image_fields = [
+            ('profile_image', 'profile_image_url'),
+            ('drivers_licence_image1', 'drivers_licence_image1_url'),
+            ('drivers_licence_image2', 'drivers_licence_image2_url'),
+            ('Right_to_Work_file', 'Right_to_Work_file_url'),
+            ('dbs_certificate', 'dbs_certificate_url'),
+            ('dbs_update_file', 'dbs_update_file_url')
+        ]
+        for field, url_field in image_fields:
             file = validated_data.pop(field, None)
-            if file:
-                url = upload_file_dynamic(file, file.name, content_type=getattr(file, 'content_type', 'application/octet-stream'))
-                validated_data[field] = url
+            if file and hasattr(file, 'name'):
+                logger.info(f"Uploading {field}: {file.name}")
+                try:
+                    url = upload_file_dynamic(file, file.name, content_type=getattr(file, 'content_type', 'application/octet-stream'))
+                    validated_data[url_field] = url
+                    logger.info(f"{field} uploaded: {url}")
+                except Exception as e:
+                    logger.error(f"Failed to upload {field}: {str(e)}")
+                    raise serializers.ValidationError(f"Failed to upload {field}: {str(e)}")
+            else:
+                logger.info(f"No file provided for {field}, setting {url_field} to None")
+                validated_data[url_field] = None
+
         profile = super().create(validated_data)
-        # if modules:
-        #     profile.modules.set(modules)
+
+        for field, serializer_class, related_name in nested_fields:
+            items = nested_data[field]
+            if items:
+                serializer = serializer_class(data=items, many=True, context=self.context)
+                if serializer.is_valid():
+                    try:
+                        serializer.save(user_profile=profile)
+                        logger.info(f"Created {len(items)} {field} for profile {profile.id}")
+                    except Exception as e:
+                        logger.error(f"Failed to save {field} for profile {profile.id}: {str(e)}")
+                        logger.error(f"Problematic data: {items}")
+                        raise serializers.ValidationError(f"Failed to save {field}: {str(e)}")
+                else:
+                    logger.error(f"Validation failed for {field}: {serializer.errors}")
+                    raise serializers.ValidationError({field: serializer.errors})
+            else:
+                logger.info(f"No {field} provided for profile {profile.id}")
+
         return profile
 
     def update(self, instance, validated_data):
-        image_fields = [
-            'profile_image',
-            'drivers_licence_image1',
-            'drivers_licence_image2',
-            'Right_to_Work_file',
-            'dbs_certificate',
-            'dbs_update_file'
+        logger.info(f"Updating UserProfile instance {instance.id} with validated data: {validated_data}")
+        nested_fields = [
+            ('professional_qualifications', ProfessionalQualificationSerializer, 'professional_qualifications'),
+            ('employment_details', EmploymentDetailSerializer, 'employment_details'),
+            ('education_details', EducationDetailSerializer, 'education_details'),
+            ('reference_checks', ReferenceCheckSerializer, 'reference_checks'),
+            ('proof_of_address', ProofOfAddressSerializer, 'proof_of_address'),
+            ('insurance_verifications', InsuranceVerificationSerializer, 'insurance_verifications'),
+            ('driving_risk_assessments', DrivingRiskAssessmentSerializer, 'driving_risk_assessments'),
+            ('legal_work_eligibilities', LegalWorkEligibilitySerializer, 'legal_work_eligibilities'),
+            ('other_user_documents', OtherUserDocumentsSerializer, 'other_user_documents'),
         ]
-        # modules = validated_data.pop('modules', None)
-        for field in image_fields:
-            file = validated_data.pop(field, None)
-            if file:
-                url = upload_file_dynamic(file, file.name, content_type=getattr(file, 'content_type', 'application/octet-stream'))
-                validated_data[field] = url
-        profile = super().update(instance, validated_data)
-        # if modules is not None:
-        #     profile.modules.set(modules)
-        return profile
+        nested_data = {field: validated_data.pop(field, None) for field, _, _ in nested_fields}
 
+        image_fields = [
+            ('profile_image', 'profile_image_url'),
+            ('drivers_licence_image1', 'drivers_licence_image1_url'),
+            ('drivers_licence_image2', 'drivers_licence_image2_url'),
+            ('Right_to_Work_file', 'Right_to_Work_file_url'),
+            ('dbs_certificate', 'dbs_certificate_url'),
+            ('dbs_update_file', 'dbs_update_file_url')
+        ]
+        for field, url_field in image_fields:
+            file = validated_data.pop(field, None)
+            if file and hasattr(file, 'name'):
+                logger.info(f"Uploading {field}: {file.name}")
+                try:
+                    url = upload_file_dynamic(file, file.name, content_type=getattr(file, 'content_type', 'application/octet-stream'))
+                    validated_data[url_field] = url
+                    logger.info(f"{field} uploaded: {url}")
+                except Exception as e:
+                    logger.error(f"Failed to upload {field}: {str(e)}")
+                    raise serializers.ValidationError(f"Failed to upload {field}: {str(e)}")
+            else:
+                logger.info(f"No file provided for {field}, keeping existing {url_field}")
+                validated_data[url_field] = getattr(instance, url_field, None)
+
+        updated_instance = super().update(instance, validated_data)
+
+        for field, serializer_class, related_name in nested_fields:
+            items = nested_data[field]
+            if items is not None:  # Only update if provided
+                if items:  # Non-empty array
+                    getattr(updated_instance, related_name).all().delete()
+                    serializer = serializer_class(data=items, many=True, context=self.context)
+                    if serializer.is_valid():
+                        try:
+                            serializer.save(user_profile=updated_instance)
+                            logger.info(f"Updated {len(items)} {field} for profile {updated_instance.id}")
+                        except Exception as e:
+                            logger.error(f"Failed to save {field} for profile {updated_instance.id}: {str(e)}")
+                            logger.error(f"Problematic data: {items}")
+                            raise serializers.ValidationError(f"Failed to save {field}: {str(e)}")
+                    else:
+                        logger.error(f"Validation failed for {field}: {serializer.errors}")
+                        raise serializers.ValidationError({field: serializer.errors})
+                else:
+                    logger.info(f"Empty {field} provided - clearing existing")
+                    getattr(updated_instance, related_name).all().delete()
+            else:
+                logger.info(f"No update for {field} - keeping existing")
+
+        return updated_instance
+    
 class UserCreateSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=True)
-    #modules = serializers.PrimaryKeyRelatedField(queryset=Module.objects.all(), many=True, required=False)
-    documents = OtherUserDocumentsSerializer(many=True, required=False)
-    professional_qualifications = ProfessionalQualificationSerializer(many=True, required=False)
-    employment_details = EmploymentDetailSerializer(many=True, required=False)
-    education_details = EducationDetailSerializer(many=True, required=False)
-    reference_checks = ReferenceCheckSerializer(many=True, required=False)
-    proof_of_address = ProofOfAddressSerializer(many=True, required=False)
-    insurance_verifications = InsuranceVerificationSerializer(many=True, required=False)
-    driving_risk_assessments = DrivingRiskAssessmentSerializer(many=True, required=False)
-    legal_work_eligibilities = LegalWorkEligibilitySerializer(many=True, required=False)
     password = serializers.CharField(write_only=True, required=True, min_length=8)
     is_superuser = serializers.BooleanField(default=False, required=False)
     branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)
@@ -302,66 +577,159 @@ class UserCreateSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = [
             'id', 'username', 'email', 'password', 'first_name', 'last_name', 'role', 'job_role',
-             'is_superuser', 'last_password_reset','profile','has_accepted_terms',
-            'permission_levels', 'documents', 'professional_qualifications',
-            'employment_details', 'education_details', 'reference_checks', 'proof_of_address',
-            'insurance_verifications', 'driving_risk_assessments', 'legal_work_eligibilities', 'branch'
+            'is_superuser', 'last_password_reset', 'profile', 'has_accepted_terms',
+            'permission_levels', 'branch'
         ]
         read_only_fields = ['id', 'last_password_reset']
         extra_kwargs = {
             'email': {'required': True},
             'first_name': {'required': True},
             'last_name': {'required': True},
+            'username': {'required': False, 'allow_null': True},
+            'role': {'required': False, 'allow_null': True},
+            'job_role': {'required': False, 'allow_null': True},
+            'has_accepted_terms': {'required': False, 'allow_null': True},
+            'permission_levels': {'required': False, 'allow_null': True},
         }
 
+        
     def to_internal_value(self, data):
-        # Avoid deepcopy issues with file objects in QueryDict
+        logger.info(f"Raw payload in UserCreateSerializer: {dict(data)}")
+        mutable_data = {}
+        profile_data = {}
+
         if hasattr(data, 'getlist'):
-            mutable_data = {}
-            for key in data.keys():
-                values = data.getlist(key)
-                mutable_data[key] = values if len(values) > 1 else values[0]
+            # Initialize nested arrays
+            nested_fields = [
+                'professional_qualifications',
+                'employment_details',
+                'education_details',
+                'reference_checks',
+                'proof_of_address',
+                'insurance_verifications',
+                'driving_risk_assessments',
+                'legal_work_eligibilities',
+                'other_user_documents'
+            ]
+            
+            for field in nested_fields:
+                profile_data[field] = []
+
+            for key in data:
+                # Handle both prefixed (profile[nested][0][field]) and non-prefixed (nested[0][field]) formats
+                if key.startswith('profile[') and key.endswith(']'):
+                    # Handle profile-prefixed fields
+                    if '][' in key:
+                        parts = key.split('[')
+                        field_name = parts[1][:-1]  # e.g., professional_qualifications
+                        index = int(parts[2][:-1])  # e.g., 0
+                        sub_field = parts[3][:-1]  # e.g., image_file
+                        
+                        # Ensure the list is long enough
+                        while len(profile_data.get(field_name, [])) <= index:
+                            profile_data[field_name].append({})
+                        
+                        # Add value to the appropriate index
+                        if key in self.context['request'].FILES:
+                            profile_data[field_name][index][sub_field] = self.context['request'].FILES[key]
+                        else:
+                            profile_data[field_name][index][sub_field] = data.get(key)
+                    else:
+                        # Handle simple profile fields
+                        field_name = key[len('profile['):-1]
+                        if key in self.context['request'].FILES:
+                            profile_data[field_name] = self.context['request'].FILES[key]
+                        else:
+                            profile_data[field_name] = data.get(key)
+                elif any(key.startswith(field + '[') for field in nested_fields) and '][' in key:
+                    # Handle non-prefixed nested fields (e.g., professional_qualifications[0][name])
+                    for field in nested_fields:
+                        if key.startswith(field + '['):
+                            parts = key.split('[')
+                            index = int(parts[1][:-1])  # e.g., 0
+                            sub_field = parts[2][:-1]  # e.g., name
+                            
+                            # Ensure the list is long enough
+                            while len(profile_data.get(field, [])) <= index:
+                                profile_data[field].append({})
+                            
+                            # Add value to the appropriate index
+                            if key in self.context['request'].FILES:
+                                profile_data[field][index][sub_field] = self.context['request'].FILES[key]
+                            else:
+                                profile_data[field][index][sub_field] = data.get(key)
+                            break
+                else:
+                    mutable_data[key] = data.get(key)
         else:
             mutable_data = dict(data)
+            profile_data = mutable_data.get('profile', {})
 
-        request = self.context.get('request')
-        profile_data = mutable_data.pop('profile', {})
+        logger.info(f"Parsed profile data: {profile_data}")
         mutable_data['profile'] = profile_data
-
-        for field in ['professional_qualifications', 'employment_details', 'education_details', 'reference_checks',
-                     'proof_of_address', 'insurance_verifications', 'driving_risk_assessments', 'legal_work_eligibilities']:
-            mutable_data[field] = [dict(item) for item in mutable_data.get(field, [])]
-
         return super().to_internal_value(mutable_data)
 
+    # def to_internal_value(self, data):
+    #     logger.info(f"Raw payload in UserCreateSerializer: {dict(data)}")
+    #     mutable_data = {}
+    #     profile_data = {}
+
+    #     if hasattr(data, 'getlist'):
+    #         # Initialize nested arrays
+    #         nested_fields = [
+    #             'professional_qualifications',
+    #             'employment_details',
+    #             'education_details',
+    #             'reference_checks',
+    #             'proof_of_address',
+    #             'insurance_verifications',
+    #             'driving_risk_assessments',
+    #             'legal_work_eligibilities',
+    #             'other_user_documents'
+    #         ]
+            
+    #         for field in nested_fields:
+    #             profile_data[field] = []
+
+    #         for key in data:
+    #             if key.startswith('profile[') and key.endswith(']'):
+    #                 # Handle nested array fields
+    #                 if '][' in key:
+    #                     parts = key.split('[')
+    #                     field_name = parts[1][:-1]  # e.g., professional_qualifications
+    #                     index = int(parts[2][:-1])  # e.g., 0
+    #                     sub_field = parts[3][:-1]  # e.g., image_file
+                        
+    #                     # Ensure the list is long enough
+    #                     while len(profile_data.get(field_name, [])) <= index:
+    #                         profile_data[field_name].append({})
+                        
+    #                     # Add value to the appropriate index
+    #                     if key in self.context['request'].FILES:
+    #                         profile_data[field_name][index][sub_field] = self.context['request'].FILES[key]
+    #                     else:
+    #                         profile_data[field_name][index][sub_field] = data.get(key)
+    #                 else:
+    #                     # Handle simple profile fields
+    #                     field_name = key[len('profile['):-1]
+    #                     if key in self.context['request'].FILES:
+    #                         profile_data[field_name] = self.context['request'].FILES[key]
+    #                     else:
+    #                         profile_data[field_name] = data.get(key)
+    #             else:
+    #                 mutable_data[key] = data.get(key)
+    #     else:
+    #         mutable_data = dict(data)
+    #         profile_data = mutable_data.get('profile', {})
+
+    #     logger.info(f"Parsed profile data: {profile_data}")
+    #     mutable_data['profile'] = profile_data
+    #     return super().to_internal_value(mutable_data)
+
+
     def create(self, validated_data):
-        if not validated_data.get('username'):
-            validated_data['username'] = validated_data['email']
-        profile_data = validated_data.pop('profile')
-
-        # Remove all reverse-related fields from profile_data if present
-        # modules = profile_data.pop('modules', [])
-        professional_qualifications = profile_data.pop('professional_qualifications', [])
-        employment_details = profile_data.pop('employment_details', [])
-        education_details = profile_data.pop('education_details', [])
-        reference_checks = profile_data.pop('reference_checks', [])
-        proof_of_address = profile_data.pop('proof_of_address', [])
-        insurance_verifications = profile_data.pop('insurance_verifications', [])
-        driving_risk_assessments = profile_data.pop('driving_risk_assessments', [])
-        legal_work_eligibilities = profile_data.pop('legal_work_eligibilities', [])
-
-        # Remove reverse-related fields from validated_data if present (important!)
-        # validated_data.pop('modules', None)
-        validated_data.pop('professional_qualifications', None)
-        validated_data.pop('employment_details', None)
-        validated_data.pop('education_details', None)
-        validated_data.pop('reference_checks', None)
-        validated_data.pop('proof_of_address', None)
-        validated_data.pop('insurance_verifications', None)
-        validated_data.pop('driving_risk_assessments', None)
-        validated_data.pop('legal_work_eligibilities', None)
-
-        documents = validated_data.pop('documents', [])
+        logger.info(f"Creating user with validated data: {validated_data}")
+        profile_data = validated_data.pop('profile', {})
         is_superuser = validated_data.pop('is_superuser', False)
         branch = validated_data.pop('branch', None)
         tenant = self.context['request'].user.tenant
@@ -374,180 +742,214 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 branch=branch,
                 is_superuser=is_superuser,
                 is_staff=is_superuser,
-                is_active=validated_data.get('status') == 'active',
+                is_active=True,
                 password=password
             )
 
-            profile = UserProfile.objects.create(user=user, **profile_data)
-            # profile.modules.set(modules)
-
-            # Now create related objects
-            for qual_data in professional_qualifications:
-                ProfessionalQualification.objects.create(user_profile=profile, **qual_data)
-            for emp_data in employment_details:
-                EmploymentDetail.objects.create(user_profile=profile, **emp_data)
-            for edu_data in education_details:
-                EducationDetail.objects.create(user_profile=profile, **edu_data)
-            for ref_data in reference_checks:
-                ReferenceCheck.objects.create(user_profile=profile, **ref_data)
-            for poa_data in proof_of_address:
-                ProofOfAddress.objects.create(user_profile=profile, **poa_data)
-            for ins_data in insurance_verifications:
-                InsuranceVerification.objects.create(user_profile=profile, **ins_data)
-            for dra_data in driving_risk_assessments:
-                DrivingRiskAssessment.objects.create(user_profile=profile, **dra_data)
-            for lwe_data in legal_work_eligibilities:
-                LegalWorkEligibility.objects.create(user_profile=profile, **lwe_data)
-
-            for doc_data in documents:
-                OtherUserDocuments.objects.create(
-                    user=user,
-                    tenant=tenant,
-                    title=doc_data['title'],
-                    file=doc_data['file'],
-                    branch=doc_data.get('branch')
-                )
+            # Create profile using UserProfileSerializer - it will handle nested objects
+            profile_serializer = UserProfileSerializer(data=profile_data, context=self.context)
+            profile_serializer.is_valid(raise_exception=True)
+            profile_serializer.save(user=user)
 
             return user
 
 
+    # def update(self, instance, validated_data):
+    #     logger.info(f"Updating user {instance.email} with validated data: {validated_data}")
+    #     with transaction.atomic():
+    #         profile_data = validated_data.pop('profile', {})
+    #         for attr, value in validated_data.items():
+    #             setattr(instance, attr, value)
+    #         instance.save()
+
+    #         profile = getattr(instance, 'profile', None)
+    #         if not profile:
+    #             profile = UserProfile.objects.create(user=instance)
+
+    #         if profile_data:
+    #             logger.info(f"Updating profile for user {instance.email} with data: {profile_data}")
+    #             profile_serializer = UserProfileSerializer(profile, data=profile_data, partial=True, context=self.context)
+    #             profile_serializer.is_valid(raise_exception=True)
+    #             profile_serializer.save()
+
+    #         # Update nested objects (support id-based update for file-only changes)
+    #         for model, field, related_name in [
+    #             (ProfessionalQualification, 'professional_qualifications', 'professional_qualifications'),
+    #             (EducationDetail, 'education_details', 'education_details'),
+    #             (ProofOfAddress, 'proof_of_address', 'proof_of_address'),
+    #             (EmploymentDetail, 'employment_details', 'employment_details'),
+    #             (ReferenceCheck, 'reference_checks', 'reference_checks'),
+    #             (InsuranceVerification, 'insurance_verifications', 'insurance_verifications'),
+    #             (DrivingRiskAssessment, 'driving_risk_assessments', 'driving_risk_assessments'),
+    #             (LegalWorkEligibility, 'legal_work_eligibilities', 'legal_work_eligibilities'),
+    #             (OtherUserDocuments, 'other_user_documents', 'other_user_documents'),
+    #         ]:
+    #             items = profile_data.get(field, None)
+    #             if items is not None and len(items) > 0:  # Only process if array is provided and non-empty
+    #                 existing_items = {item.id: item for item in getattr(profile, related_name).all()}
+    #                 sent_ids = set()
+    #                 for item_data in items:
+    #                     item_id = item_data.get('id')
+    #                     if item_id:
+    #                         if item_id in existing_items:
+    #                             item = existing_items[item_id]
+    #                             for attr, value in item_data.items():
+    #                                 if attr != 'id':
+    #                                     setattr(item, attr, value)
+    #                             item.save()
+    #                             sent_ids.add(item_id)
+    #                         else:
+    #                             logger.warning(f"Invalid {related_name} ID: {item_id} does not exist.")
+    #                     else:
+    #                         item_data['user_profile'] = profile
+    #                         model.objects.create(**item_data)
+    #                 # Optional: Delete unsent items
+    #                 for item_id in set(existing_items) - sent_ids:
+    #                     existing_items[item_id].delete()
+    #             else:
+    #                 logger.info(f"No update for {field} - skipping (array is empty or not provided)")
+
+    #         return instance
+
+    # def update(self, instance, validated_data):
+    #     logger.info(f"Updating user {instance.email} with validated data: {validated_data}")
+    #     with transaction.atomic():
+    #         profile_data = validated_data.pop('profile', {})
+    #         for attr, value in validated_data.items():
+    #             setattr(instance, attr, value)
+    #         instance.save()
+
+    #         profile = getattr(instance, 'profile', None)
+    #         if not profile:
+    #             profile = UserProfile.objects.create(user=instance)
+
+    #         if profile_data:
+    #             logger.info(f"Updating profile for user {instance.email} with data: {profile_data}")
+    #             profile_serializer = UserProfileSerializer(profile, data=profile_data, partial=True, context=self.context)
+    #             profile_serializer.is_valid(raise_exception=True)
+    #             profile_serializer.save()
+
+    #         return instance
 
     def update(self, instance, validated_data):
+        logger.info(f"Updating user {instance.email} with validated data: {validated_data}")
         with transaction.atomic():
-            profile_data = validated_data.pop('profile', None)
-
-            # Pop related fields from both validated_data (root) and profile_data (nested)
-            def get_related(field):
-                root_val = validated_data.pop(field, None)
-                nested_val = profile_data.pop(field, None) if profile_data else None
-                return nested_val if nested_val is not None else root_val
-
-            # modules = get_related('modules')
-            professional_qualifications = get_related('professional_qualifications')
-            employment_details = get_related('employment_details')
-            education_details = get_related('education_details')
-            reference_checks = get_related('reference_checks')
-            proof_of_address = get_related('proof_of_address')
-            insurance_verifications = get_related('insurance_verifications')
-            driving_risk_assessments = get_related('driving_risk_assessments')
-            legal_work_eligibilities = get_related('legal_work_eligibilities')
-            documents = validated_data.pop('documents', None)
-
+            profile_data = validated_data.pop('profile', {})
+            
             # Update user fields
             for attr, value in validated_data.items():
                 setattr(instance, attr, value)
             instance.save()
 
-            # Update profile if data exists
+            # Get or create profile
             profile = getattr(instance, 'profile', None)
             if not profile:
                 profile = UserProfile.objects.create(user=instance)
 
-            # Update regular profile fields
+            # Update profile using UserProfileSerializer
             if profile_data:
-                # for attr, value in profile_data.items():
-                #     setattr(profile, attr, value)
-                # profile.save()
-                for attr, value in profile_data.items():
-                    # Skip reverse/many-related fields
-                    if attr not in [
-                        'professional_qualifications', 'employment_details', 'education_details',
-                        'reference_checks', 'proof_of_address', 'insurance_verifications',
-                        'driving_risk_assessments', 'legal_work_eligibilities', 'other_user_documents'
-                    ]:
-                        setattr(profile, attr, value)
-                profile.save()
-
-            # Update many-to-many
-            # if modules is not None:
-            #     profile.modules.set(modules)
-
-            # Update one-to-many (clear and recreate)
-            if professional_qualifications is not None:
-                profile.professional_qualifications.all().delete()
-                for qual_data in professional_qualifications:
-                    qual_data.pop('user_profile', None)  # Remove if present
-                    ProfessionalQualification.objects.create(user_profile=profile, **qual_data)
-
-            if employment_details is not None:
-                profile.employment_details.all().delete()
-                for emp_data in employment_details:
-                    emp_data.pop('user_profile', None)  # Remove if present
-                    EmploymentDetail.objects.create(user_profile=profile, **emp_data)
-
-            if education_details is not None:
-                profile.education_details.all().delete()
-                for edu_data in education_details:
-                    edu_data.pop('user_profile', None)  # Remove if present
-                    EducationDetail.objects.create(user_profile=profile, **edu_data)
-
-            if reference_checks is not None:
-                profile.reference_checks.all().delete()
-                for ref_data in reference_checks:
-                    ref_data.pop('user_profile', None)  # Remove if present
-                    ReferenceCheck.objects.create(user_profile=profile, **ref_data)
-
-            if proof_of_address is not None:
-                profile.proof_of_address.all().delete()
-                for poa_data in proof_of_address:
-                    poa_data.pop('user_profile', None)  # Remove if present
-                    ProofOfAddress.objects.create(user_profile=profile, **poa_data)
-
-            if insurance_verifications is not None:
-                profile.insurance_verifications.all().delete()
-                for ins_data in insurance_verifications:
-                    ins_data.pop('user_profile', None)  # Remove if present
-                    InsuranceVerification.objects.create(user_profile=profile, **ins_data)
-
-            if driving_risk_assessments is not None:
-                profile.driving_risk_assessments.all().delete()
-                for dra_data in driving_risk_assessments:
-                    DrivingRiskAssessment.objects.create(user_profile=profile, **dra_data)
-
-            if legal_work_eligibilities is not None:
-                profile.legal_work_eligibilities.all().delete()
-                for lwe_data in legal_work_eligibilities:
-                    lwe_data.pop('user_profile', None)  # Remove if present
-                    LegalWorkEligibility.objects.create(user_profile=profile, **lwe_data)
-
-            # Update user documents
-            if documents is not None:
-                existing_docs = {doc.id: doc for doc in instance.documents.all()}
-                sent_doc_ids = set()
-                for doc_data in documents:
-                    doc_id = doc_data.get('id')
-                    if doc_id:
-                        if doc_id in existing_docs:
-                            doc = existing_docs[doc_id]
-                            for attr, value in doc_data.items():
-                                if attr != 'id':
-                                    setattr(doc, attr, value)
-                            doc.save()
-                            sent_doc_ids.add(doc_id)
-                        else:
-                            raise serializers.ValidationError(f"Invalid UserDocument ID: {doc_id} does not exist.")
-                    else:
-                        doc_data['user'] = instance
-                        doc_data['tenant'] = instance.tenant
-                        OtherUserDocuments.objects.create(**doc_data)
-                # Optionally delete docs not in sent_doc_ids
-                # instance.documents.exclude(id__in=sent_doc_ids).delete()
+                logger.info(f"Updating profile for user {instance.email} with data: {profile_data}")
+                profile_serializer = UserProfileSerializer(
+                    profile, 
+                    data=profile_data, 
+                    partial=True, 
+                    context=self.context
+                )
+                profile_serializer.is_valid(raise_exception=True)
+                profile_serializer.save()
 
             return instance
 
-class CustomUserSerializer(serializers.ModelSerializer):
+
+
+class CustomUserListSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
-   # modules = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', source='profile.modules')
     tenant = serializers.SlugRelatedField(read_only=True, slug_field='name')
     branch = serializers.SlugRelatedField(read_only=True, slug_field='name', allow_null=True)
     permission_levels = serializers.ListField(child=serializers.CharField(), required=False)
 
     class Meta:
         model = CustomUser
-        fields = "__all__"
-        read_only_fields = ['id', 'is_superuser', 'last_password_reset']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'job_role', 'tenant', 'branch', 'permission_levels', 'profile']  # Light fields
 
-# Other serializers (e.g., AdminUserCreateSerializer, PasswordResetRequestSerializer) remain unchanged unless you specify updates
+class CustomUserSerializer(CustomUserListSerializer):
+    profile = UserProfileSerializer(read_only=True)
+
+    class Meta(CustomUserListSerializer.Meta):
+        fields = "__all__"
+        read_only_fields = ['id', 'is_superuser', 'last_password_reset', 'is_locked', 'login_attempts']
+
+
+class UserAccountActionSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(choices=['lock', 'unlock', 'suspend', 'activate'], required=True)
+
+    def validate(self, data):
+        user = self.context['user']
+        request = self.context['request']
+        if not (request.user.is_superuser or request.user.role == 'admin'):
+            raise serializers.ValidationError("Only admins or superusers can perform this action.")
+        if user == request.user:
+            raise serializers.ValidationError("You cannot perform this action on your own account.")
+        return data
+
+class UserPasswordRegenerateSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+    def validate(self, data):
+        request = self.context['request']
+        if not (request.user.is_superuser or request.user.role == 'admin'):
+            raise serializers.ValidationError("Only admins or superusers can reset passwords.")
+        email = data.get('email')
+        with tenant_context(request.user.tenant):
+            user = CustomUser.objects.filter(email=email).first()
+            if not user:
+                raise serializers.ValidationError("User with this email does not exist.")
+            if user == request.user:
+                raise serializers.ValidationError("You cannot reset your own password.")
+        return data
+
+class BlockedIPSerializer(serializers.ModelSerializer):
+    tenant_name = serializers.CharField(source='tenant.name', read_only=True)
+    blocked_by_email = serializers.EmailField(source='blocked_by.email', read_only=True)
+
+    class Meta:
+        model = BlockedIP
+        fields = ['id', 'ip_address', 'tenant', 'tenant_name', 'reason', 'blocked_at', 'blocked_by', 'blocked_by_email', 'is_active']
+        read_only_fields = ['id', 'tenant_name', 'blocked_at', 'blocked_by_email']
+
+    def validate(self, data):
+        request = self.context['request']
+        if not (request.user.is_superuser or request.user.role == 'admin'):
+            raise serializers.ValidationError("Only admins or superusers can manage blocked IPs.")
+        ip_address = data.get('ip_address')
+        tenant = data.get('tenant')
+        with tenant_context(tenant):
+            if self.instance is None and BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+                raise serializers.ValidationError("This IP is already blocked for this tenant.")
+        return data
+
+class UserActivitySerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(source='user.email', read_only=True, allow_null=True)
+    tenant_name = serializers.CharField(source='tenant.name', read_only=True)
+    performed_by_email = serializers.EmailField(source='performed_by.email', read_only=True, allow_null=True)
+
+    class Meta:
+        model = UserActivity
+        fields = ['id', 'user', 'user_email', 'tenant', 'tenant_name', 'action', 'performed_by', 'performed_by_email', 'timestamp', 'details', 'ip_address', 'user_agent', 'success']
+        read_only_fields = ['id', 'user_email', 'tenant_name', 'performed_by_email', 'timestamp', 'ip_address', 'user_agent', 'success']
+
+class UserImpersonateSerializer(serializers.Serializer):
+    def validate(self, data):
+        request = self.context['request']
+        user = self.context['user']
+        if not request.user.is_superuser:
+            raise serializers.ValidationError("Only superusers can impersonate users.")
+        if user == request.user:
+            raise serializers.ValidationError("You cannot impersonate your own account.")
+        if user.is_locked or user.status == 'suspended' or not user.is_active:
+            raise serializers.ValidationError("Cannot impersonate a locked or suspended account.")
+        return data
+
 class AdminUserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
     branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)
@@ -599,7 +1001,6 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
             user.save()
             return user
 
-# New serializer for updating user branch
 class UserBranchUpdateSerializer(serializers.ModelSerializer):
     branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)
 
@@ -658,16 +1059,11 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         if not any(c.isupper() for c in value) or not any(c.isdigit() for c in value):
             raise serializers.ValidationError("Password must contain at least one uppercase letter and one number.")
         return value
-    
-
 
 class UserSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSession
         fields = ['id', 'login_time', 'logout_time', 'duration', 'date', 'ip_address', 'user_agent']
-
-
-
 
 class ClientProfileSerializer(serializers.ModelSerializer):
     preferred_carers = serializers.PrimaryKeyRelatedField(
@@ -744,8 +1140,6 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
-
 class ClientDetailSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer()
 
@@ -773,7 +1167,6 @@ class ClientDetailSerializer(serializers.ModelSerializer):
             profile_serializer.is_valid(raise_exception=True)
             profile_serializer.save()
         return instance
-
 
 class ClientCreateSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer(required=True)

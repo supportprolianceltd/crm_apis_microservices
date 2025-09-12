@@ -1,7 +1,8 @@
+# gateway/urls.py
 from django.urls import re_path, path
-from .views import api_gateway_view
+from .views import api_gateway_view, multi_docs_view
 
 urlpatterns = [
-    path('api/schema/', api_gateway_view, {'path': 'auth_service/schema/'}, name='gateway-schema'),
+    path('api/docs/', multi_docs_view, name='multi-docs'),
     re_path(r'^api/(?P<path>.*)$', api_gateway_view),
 ]

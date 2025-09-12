@@ -82,12 +82,12 @@ tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
         username='dmin',
-        email='david.dappa@prolianceltd.com',
+        email='support@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='David',
-        last_name='Dappa',
-        job_role='Project Manager',
+        first_name='Rowland',
+        last_name='Killion',
+        job_role='Backend Engineer',
         tenant=tenant
     )
 
@@ -138,35 +138,35 @@ for t in tenant:
 # https://server1.prolianceltd.com/
 
 
-# from core.models import Tenant
-# from users.models import RSAKeyPair
-# from django_tenants.utils import tenant_context
+from core.models import Tenant
+from users.models import RSAKeyPair
+from django_tenants.utils import tenant_context
 
-# # Your keypair generation function
-# from cryptography.hazmat.primitives.asymmetric import rsa
-# from cryptography.hazmat.primitives import serialization
+# Your keypair generation function
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
 
-# def generate_rsa_keypair(key_size=2048):
-#     private_key = rsa.generate_private_key(public_exponent=65537, key_size=key_size)
-#     private_pem = private_key.private_bytes(
-#         encoding=serialization.Encoding.PEM,
-#         format=serialization.PrivateFormat.PKCS8,
-#         encryption_algorithm=serialization.NoEncryption()
-#     ).decode('utf-8')
-#     public_pem = private_key.public_key().public_bytes(
-#         encoding=serialization.Encoding.PEM,
-#         format=serialization.PublicFormat.SubjectPublicKeyInfo
-#     ).decode('utf-8')
-#     return private_pem, public_pem
+def generate_rsa_keypair(key_size=2048):
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=key_size)
+    private_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    ).decode('utf-8')
+    public_pem = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode('utf-8')
+    return private_pem, public_pem
 
-# # Trigger for a specific tenant (e.g., 'auth-service')
-# tenant = Tenant.objects.get(schema_name='proliance')
-# with tenant_context(tenant):
-#     priv, pub = generate_rsa_keypair()
-#     RSAKeyPair.objects.create(
-#         tenant=tenant,
-#         private_key_pem=priv,
-#         public_key_pem=pub,
-#         active=True
-#     )
-#     print(f"RSAKeyPair created for tenant: {tenant.schema_name}")
+# Trigger for a specific tenant (e.g., 'auth-service')
+tenant = Tenant.objects.get(schema_name='proliance')
+with tenant_context(tenant):
+    priv, pub = generate_rsa_keypair()
+    RSAKeyPair.objects.create(
+        tenant=tenant,
+        private_key_pem=priv,
+        public_key_pem=pub,
+        active=True
+    )
+    print(f"RSAKeyPair created for tenant: {tenant.schema_name}")

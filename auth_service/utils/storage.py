@@ -6,7 +6,8 @@ from supabase import create_client
 import boto3
 from azure.storage.blob import BlobServiceClient
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
-
+import re
+import uuid
 logger = logging.getLogger(__name__)
 
 class StorageService:
@@ -22,8 +23,9 @@ class StorageService:
 class LocalStorageService(StorageService):
     def upload_file(self, file_obj, file_name, content_type=None):
         media_root = getattr(settings, "MEDIA_ROOT", "media")
-        os.makedirs(media_root, exist_ok=True)
         file_path = os.path.join(media_root, file_name)
+        # Ensure parent directories exist
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "wb") as f:
             f.write(file_obj.read())
         return True
@@ -44,6 +46,27 @@ class SupabaseStorageService(StorageService):
     def __init__(self):
         self.client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
         self.bucket = settings.SUPABASE_BUCKET
+        if not self.bucket:
+            raise ValueError("SUPABASE_BUCKET is not configured properly. Please check your .env and settings.")
+
+
+    def sanitize_filename(self, filename):
+            """Sanitize filename to be Supabase/S3-compatible: replace invalid chars, add UUID."""
+            if not filename:
+                return f"file_{uuid.uuid4()}.dat"
+            
+            # Replace common invalid characters
+            sanitized = re.sub(r'[^\w\.-]', '_', filename)  # Replace non-alphanumeric, dot, hyphen with _
+            sanitized = re.sub(r'_{2,}', '_', sanitized)  # Replace multiple _ with single _
+            sanitized = re.sub(r'^\_+|_+$', '', sanitized)  # Trim leading/trailing _
+            
+            # Prepend UUID for uniqueness
+            name, ext = os.path.splitext(sanitized)
+            unique_name = f"{uuid.uuid4()}_{name}{ext}"
+            
+            logger.info(f"Sanitized filename '{filename}' to '{unique_name}'")
+            return unique_name
+
 
     def upload_file(self, file_obj, file_name, content_type):
         try:
@@ -58,6 +81,9 @@ class SupabaseStorageService(StorageService):
                 file=file_data,
                 file_options={"content-type": content_type, "cache-control": "3600", "upsert": "true"}
             )
+            print("[DEBUG] Using bucket:", self.bucket)
+            logger.info("[DEBUG] Using bucket: %s", self.bucket)
+
             # Check if upload was successful by inspecting response for 'path'
             if hasattr(res, 'path') and res.path:
                 logger.info(f"Successfully uploaded {file_name} to Supabase")
@@ -171,6 +197,7 @@ class AzureStorageService(StorageService):
 def get_storage_service(storage_type=None):
     # Allow override per-call, else use settings
     storage_type = (storage_type or getattr(settings, 'STORAGE_TYPE', 'supabase')).lower()
+
     if storage_type == 'supabase':
         return SupabaseStorageService()
     elif storage_type == 's3':

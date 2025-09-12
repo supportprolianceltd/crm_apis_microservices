@@ -1,67 +1,141 @@
+# Standard library
+import base64
+import json
 import logging
-import uuid
 import secrets
 import string
-import json
-from datetime import timedelta
-from multiprocessing.connection import Client
+import uuid
+from datetime import datetime, timedelta
 
-import jwt
 
-from django.conf import settings
-from django.core.mail import EmailMessage
-from django.db import transaction, ProgrammingError
-from django.urls import reverse
+# Standard library
+from django.db import transaction
 from django.utils import timezone
-from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate
-
-from rest_framework import viewsets, status, serializers, generics
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied, NotFound, APIException
-from rest_framework.decorators import action
-from rest_framework_simplejwt.tokens import RefreshToken
-
+from core.models import Domain, Branch
 from django_tenants.utils import tenant_context
+from rest_framework import serializers
+from utils.supabase import upload_file_dynamic
+import json
 
-from auth_service.utils.jwt_rsa  import validate_rsa_jwt, issue_rsa_jwt
-from .utils import get_daily_usage
-from django.http import JsonResponse
-from .models import RSAKeyPair
-from core.models import Tenant
-from cryptography.hazmat.primitives import serialization
-import base64
-
-from core.models import Tenant, Branch, TenantConfig
-from users.models import CustomUser
-
+# Local App - Models
 from .models import (
-    ClientProfile,
+    CustomUser,
+    UserSession,
+    UserProfile,
+    ProfessionalQualification,
+    EmploymentDetail,
+    EducationDetail,
+    ReferenceCheck,
+    OtherUserDocuments,
     PasswordResetToken,
     ProofOfAddress,
     InsuranceVerification,
     DrivingRiskAssessment,
     LegalWorkEligibility,
+    ClientProfile,
+    BlockedIP,
+    UserActivity,
+)
+
+import logging
+import uuid
+from datetime import timedelta
+from django_tenants.utils import tenant_context
+from django.utils import timezone
+from rest_framework import serializers
+from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+from auth_service.views import CustomUserMinimalSerializer  # Assuming this is your minimal user serializer
+from auth_service.utils.jwt_rsa import issue_rsa_jwt  # Assuming this is your JWT issuer
+
+from .models import CustomUser, UserActivity
+from .serializers import (
+    CustomUserListSerializer, CustomUserSerializer, UserCreateSerializer,
+    UserAccountActionSerializer, UserImpersonateSerializer
+)
+from core.models import Branch  # If needed for branch filters
+
+
+
+
+
+# Django
+from django.core.mail.backends.smtp import EmailBackend
+from django.conf import settings
+from django.contrib.auth import authenticate
+from django.core.mail import EmailMessage, send_mail
+from django.db import transaction, ProgrammingError
+from django.http import JsonResponse, HttpResponse
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+
+# Django Tenants
+from django_tenants.utils import tenant_context
+
+from rest_framework import viewsets, status, serializers, generics, serializers
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied, NotFound, APIException
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from rest_framework_simplejwt.tokens import RefreshToken
+
+# Third-party
+import jwt
+from cryptography.hazmat.primitives import serialization
+
+# App-specific
+from auth_service.views import CustomUserMinimalSerializer
+from auth_service.utils.jwt_rsa import validate_rsa_jwt, issue_rsa_jwt
+from .utils import get_daily_usage
+
+from .models import (
+    CustomUser,RSAKeyPair,
     UserSession,
+    PasswordResetToken,
+    
+    BlockedIP,
+    UserActivity,
+    ClientProfile,
+    ProofOfAddress,
+    InsuranceVerification,
+    DrivingRiskAssessment,
+    LegalWorkEligibility,
 )
 
 from .serializers import (
     CustomUserSerializer,
-    ClientCreateSerializer,
-    ClientProfileSerializer,
-    ClientDetailSerializer,
+    UserAccountActionSerializer,
     UserCreateSerializer,
+    PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
     AdminUserCreateSerializer,
     UserBranchUpdateSerializer,
-    PasswordResetRequestSerializer,
     UserSessionSerializer,
+    ClientCreateSerializer,
+    ClientDetailSerializer,
+    UserPasswordRegenerateSerializer,
+    BlockedIPSerializer,
+    UserActivitySerializer,
+    UserImpersonateSerializer,
+    ClientProfileSerializer,
 )
 
+from core.models import Tenant, Branch, TenantConfig
+from users.models import CustomUser  # Only needed if used as a separate import
+
+# Logger
 logger = logging.getLogger('users')
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 20
 
 
 class TermsAndConditionsView(APIView):
@@ -119,7 +193,7 @@ def configure_email_backend(tenant):
     """
     Configure email backend using tenant settings.
     """
-    from django.core.mail.backends.smtp import EmailBackend
+ 
     return EmailBackend(
         host=tenant.email_host,
         port=tenant.email_port,
@@ -306,67 +380,56 @@ class PasswordResetConfirmView(generics.GenericAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+
+class UserViewSet(ModelViewSet):
     queryset = CustomUser.objects.all()
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
 
-    def get_queryset(self):
+    def get_base_queryset(self):
+        """DRY helper for tenant-filtered queryset with role-based access."""
         tenant = self.request.user.tenant
         user = self.request.user
         with tenant_context(tenant):
-            if user.is_superuser or user.role == 'admin':
-                return CustomUser.objects.filter(tenant=tenant).prefetch_related(
-                    'profile__professional_qualifications',
-                    'profile__employment_details',
-                    'profile__education_details',
-                    'profile__reference_checks',
-                    'profile__proof_of_address',
-                    'profile__insurance_verifications',
-                    'profile__driving_risk_assessments',
-                    'profile__legal_work_eligibilities',
-                    'profile__other_user_documents',
-                )
-            elif user.role == 'team_manager':
-                return CustomUser.objects.filter(tenant=tenant).prefetch_related(
-                    'profile__professional_qualifications',
-                    'profile__employment_details',
-                    'profile__education_details',
-                    'profile__reference_checks',
-                    'profile__proof_of_address',
-                    'profile__insurance_verifications',
-                    'profile__driving_risk_assessments',
-                    'profile__legal_work_eligibilities',
-                    'profile__other_user_documents',
-                )
-            elif user.role == 'recruiter' and user.branch:
-                return CustomUser.objects.filter(tenant=tenant, branch=user.branch).prefetch_related(
-                    'profile__professional_qualifications',
-                    'profile__employment_details',
-                    'profile__education_details',
-                    'profile__reference_checks',
-                    'profile__proof_of_address',
-                    'profile__insurance_verifications',
-                    'profile__driving_risk_assessments',
-                    'profile__legal_work_eligibilities',
-                    'profile__other_user_documents',
-                )
-            else:
-                return CustomUser.objects.filter(tenant=tenant, id=user.id).prefetch_related(
-                    'profile__professional_qualifications',
-                    'profile__employment_details',
-                    'profile__education_details',
-                    'profile__reference_checks',
-                    'profile__proof_of_address',
-                    'profile__insurance_verifications',
-                    'profile__driving_risk_assessments',
-                    'profile__legal_work_eligibilities',
-                    'profile__other_user_documents',
-                )
+            base_qs = CustomUser.objects.filter(tenant=tenant)
+            if not (user.is_superuser or user.role == 'admin'):
+                if user.role == 'team_manager':
+                    pass  # All users in tenant
+                elif user.role == 'recruiter' and user.branch:
+                    base_qs = base_qs.filter(branch=user.branch)
+                else:
+                    base_qs = base_qs.filter(id=user.id)  # Self only
+            return base_qs
+
+    def get_queryset(self):
+        """Optimized queryset: Minimal for lists, full prefetch for details."""
+        base_qs = self.get_base_queryset()
+        if self.action == 'list':
+            # Light: select_related for basic profile, no deep nests
+            return base_qs.select_related('profile', 'tenant', 'branch')
+        # Full prefetch for retrieve/update/detail
+        return base_qs.prefetch_related(
+            'profile__professional_qualifications',
+            'profile__employment_details',
+            'profile__education_details',
+            'profile__reference_checks',
+            'profile__proof_of_address',
+            'profile__insurance_verifications',
+            'profile__driving_risk_assessments',
+            'profile__legal_work_eligibilities',
+            'profile__other_user_documents',
+        )
 
     def get_serializer_class(self):
+        if self.action == 'list':
+            return CustomUserListSerializer  # Light for lists
         if self.action in ['create', 'update', 'partial_update']:
             return UserCreateSerializer
-        return CustomUserSerializer
+        if self.action in ['lock', 'unlock', 'suspend', 'activate']:
+            return UserAccountActionSerializer
+        if self.action == 'impersonate':
+            return UserImpersonateSerializer
+        return CustomUserSerializer  # Full for retrieve
 
     def perform_create(self, serializer):
         tenant = self.request.user.tenant
@@ -375,26 +438,28 @@ class UserViewSet(viewsets.ModelViewSet):
         with tenant_context(tenant):
             serializer.save()
 
+
     def update(self, request, *args, **kwargs):
         tenant = request.user.tenant
         user = request.user
+        logger.info(f"Raw PATCH request data for tenant {tenant.schema_name}: {dict(request.data)}")
+        logger.info(f"FILES in request: {dict(request.FILES)}")
         with tenant_context(tenant):
             instance = self.get_object()
             if not (user.is_superuser or user.role == 'admin' or user.id == instance.id):
                 raise PermissionDenied("You do not have permission to update this user.")
             serializer = self.get_serializer(instance, data=request.data, partial=True)
-            logger.info(f"Using serializer: {serializer.__class__.__name__}")
-            # print(f"Using serializer: {serializer.__class__.__name__}")
             try:
                 serializer.is_valid(raise_exception=True)
+                logger.info(f"Validated data for user {instance.email}: {serializer.validated_data}")
             except serializers.ValidationError as e:
-                logger.error(f"Serializer errors: {serializer.errors}")
-                print(f"Serializer errors: {serializer.errors}")
-                # Optionally, re-raise or return a custom response
+                logger.error(f"Serializer errors for user {instance.email}: {serializer.errors}")
                 raise
             self.perform_update(serializer)
+            logger.info(f"User {instance.email} updated by {user.email} in tenant {tenant.schema_name}")
             return Response(serializer.data)
 
+            
     def destroy(self, request, *args, **kwargs):
         tenant = request.user.tenant
         user = request.user
@@ -403,7 +468,549 @@ class UserViewSet(viewsets.ModelViewSet):
             if not (user.is_superuser or user.role == 'admin'):
                 raise PermissionDenied("You do not have permission to delete users.")
             self.perform_destroy(instance)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            logger.info(f"User {instance.email} deleted by {user.email} in tenant {tenant.schema_name}")
+            return Response(status=204)
+
+    @action(detail=True, methods=['post'], url_path='lock')
+    def lock(self, request, pk=None):
+        tenant = request.user.tenant
+        with tenant_context(tenant):
+            instance = self.get_object()
+            if request.data:  # Optional validation if data provided
+                serializer = self.get_serializer(data=request.data, context={'request': request, 'user': instance})
+                serializer.is_valid(raise_exception=True)
+            instance.lock_account(reason=request.data.get('reason', 'Manual lock'))
+            UserActivity.objects.create(
+                user=instance,
+                tenant=tenant,
+                action='account_lock',
+                performed_by=request.user,
+                details={'reason': 'Manual lock'},
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                success=True
+            )
+            logger.info(f"User {instance.email} locked by {request.user.email} in tenant {tenant.schema_name}")
+            return Response({
+                "status": "success",
+                "message": f"User {instance.email} account locked successfully."
+            }, status=200)
+
+    @action(detail=True, methods=['post'], url_path='unlock')
+    def unlock(self, request, pk=None):
+        tenant = request.user.tenant
+        with tenant_context(tenant):
+            instance = self.get_object()
+            if request.data:
+                serializer = self.get_serializer(data=request.data, context={'request': request, 'user': instance})
+                serializer.is_valid(raise_exception=True)
+            instance.unlock_account()
+            UserActivity.objects.create(
+                user=instance,
+                tenant=tenant,
+                action='account_unlock',
+                performed_by=request.user,
+                details={},
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                success=True
+            )
+            logger.info(f"User {instance.email} unlocked by {request.user.email} in tenant {tenant.schema_name}")
+            return Response({
+                "status": "success",
+                "message": f"User {instance.email} account unlocked successfully."
+            }, status=200)
+
+    @action(detail=True, methods=['post'], url_path='suspend')
+    def suspend(self, request, pk=None):
+        tenant = request.user.tenant
+        with tenant_context(tenant):
+            instance = self.get_object()
+            if request.data:
+                serializer = self.get_serializer(data=request.data, context={'request': request, 'user': instance})
+                serializer.is_valid(raise_exception=True)
+            instance.suspend_account()
+            UserActivity.objects.create(
+                user=instance,
+                tenant=tenant,
+                action='account_suspend',
+                performed_by=request.user,
+                details={},
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                success=True
+            )
+            logger.info(f"User {instance.email} suspended by {request.user.email} in tenant {tenant.schema_name}")
+            return Response({
+                "status": "success",
+                "message": f"User {instance.email} account suspended successfully."
+            }, status=200)
+
+    @action(detail=True, methods=['post'], url_path='activate')
+    def activate(self, request, pk=None):
+        tenant = request.user.tenant
+        with tenant_context(tenant):
+            instance = self.get_object()
+            if request.data:
+                serializer = self.get_serializer(data=request.data, context={'request': request, 'user': instance})
+                serializer.is_valid(raise_exception=True)
+            instance.activate_account()
+            UserActivity.objects.create(
+                user=instance,
+                tenant=tenant,
+                action='account_activate',
+                performed_by=request.user,
+                details={},
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                success=True
+            )
+            logger.info(f"User {instance.email} activated by {request.user.email} in tenant {tenant.schema_name}")
+            return Response({
+                "status": "success",
+                "message": f"User {instance.email} account activated successfully."
+            }, status=200)
+
+    @action(detail=True, methods=['post'], url_path='impersonate')
+    def impersonate(self, request, pk=None):
+        tenant = request.user.tenant
+        with tenant_context(tenant):
+            target_user = self.get_object()
+            if request.data:
+                serializer = self.get_serializer(data=request.data, context={'request': request, 'user': target_user})
+                serializer.is_valid(raise_exception=True)
+
+            try:
+                access_payload = {
+                    "jti": str(uuid.uuid4()),
+                    "sub": target_user.email,
+                    "role": target_user.role,
+                    "tenant_id": target_user.tenant.id,
+                    "tenant_schema": target_user.tenant.schema_name,
+                    "has_accepted_terms": target_user.has_accepted_terms,
+                    "user": CustomUserMinimalSerializer(target_user).data,
+                    "email": target_user.email,
+                    "type": "access",
+                    "exp": int((timezone.now() + timedelta(minutes=15)).timestamp()),  # Verified: ~1757598718 for Sep 11, 2025
+                    "impersonated_by": request.user.email
+                }
+                access_token = issue_rsa_jwt(access_payload, target_user.tenant)
+
+                refresh_jti = str(uuid.uuid4())
+                refresh_payload = {
+                    "jti": refresh_jti,
+                    "sub": target_user.email,
+                    "tenant_id": target_user.tenant.id,
+                    "type": "refresh",
+                    "exp": int((timezone.now() + timedelta(minutes=30)).timestamp()),
+                    "impersonated_by": request.user.email
+                }
+                refresh_token = issue_rsa_jwt(refresh_payload, target_user.tenant)
+
+                UserActivity.objects.create(
+                    user=target_user,
+                    tenant=tenant,
+                    action='impersonation',
+                    performed_by=request.user,
+                    details={'access_jti': access_payload['jti'], 'refresh_jti': refresh_jti},
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                    success=True
+                )
+
+                logger.info(f"User {target_user.email} impersonated by {request.user.email} in tenant {tenant.schema_name}")
+                return Response({
+                    "status": "success",
+                    "message": f"Impersonation token generated for {target_user.email}",
+                    "access": access_token,
+                    "refresh": refresh_token,
+                    "tenant_id": target_user.tenant.id,
+                    "tenant_schema": target_user.tenant.schema_name,
+                    "user": CustomUserMinimalSerializer(target_user).data
+                }, status=200)
+            except Exception as e:
+                logger.error(f"Impersonation failed for {target_user.email}: {str(e)}")
+                raise serializers.ValidationError(f"Failed to generate impersonation tokens: {str(e)}")
+
+
+
+
+class LoginAttemptViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = UserActivity.objects.filter(action='login')
+    serializer_class = UserActivitySerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        tenant = self.request.user.tenant
+        user = self.request.user
+        with tenant_context(tenant):
+            if not (user.is_superuser or user.role == 'admin'):
+                raise PermissionDenied("Only admins or superusers can view login attempts.")
+            
+            queryset = UserActivity.objects.filter(tenant=tenant, action='login')
+            
+            email = self.request.query_params.get('email')
+            ip_address = self.request.query_params.get('ip_address')
+            date_from = self.request.query_params.get('date_from')
+            date_to = self.request.query_params.get('date_to')
+            success = self.request.query_params.get('success')
+
+            if email:
+                queryset = queryset.filter(user__email__icontains=email)
+            if ip_address:
+                queryset = queryset.filter(ip_address=ip_address)
+            if date_from:
+                queryset = queryset.filter(timestamp__gte=date_from)
+            if date_to:
+                queryset = queryset.filter(timestamp__lte=date_to)
+            if success is not None:
+                queryset = queryset.filter(success=(success.lower() == 'true'))
+
+            return queryset.order_by('-timestamp')
+
+class BlockedIPViewSet(viewsets.ModelViewSet):
+    queryset = BlockedIP.objects.all()
+    serializer_class = BlockedIPSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        tenant = self.request.user.tenant
+        user = self.request.user
+        with tenant_context(tenant):
+            if not (user.is_superuser or user.role == 'admin'):
+                raise PermissionDenied("Only admins or superusers can manage blocked IPs.")
+            return BlockedIP.objects.filter(tenant=tenant).order_by('-blocked_at')
+
+    def perform_create(self, serializer):
+        serializer.save(
+            tenant=self.request.user.tenant,
+            blocked_by=self.request.user,
+            is_active=True
+        )
+        UserActivity.objects.create(
+            user=None,
+            tenant=self.request.user.tenant,
+            action='ip_block',
+            performed_by=self.request.user,
+            details={'ip_address': serializer.validated_data['ip_address']},
+            ip_address=self.request.META.get('REMOTE_ADDR'),
+            user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+            success=True
+        )
+        logger.info(f"IP {serializer.validated_data['ip_address']} blocked by {self.request.user.email} in tenant {self.request.user.tenant.schema_name}")
+
+    def perform_update(self, serializer):
+        serializer.save(blocked_by=self.request.user)
+        logger.info(f"IP {serializer.validated_data['ip_address']} updated by {self.request.user.email} in tenant {self.request.user.tenant.schema_name}")
+
+    @action(detail=True, methods=['post'], url_path='unblock')
+    def unblock(self, request, pk=None):
+        tenant = request.user.tenant
+        with tenant_context(tenant):
+            ip = self.get_object()
+            if not (request.user.is_superuser or request.user.role == 'admin'):
+                raise PermissionDenied("Only admins or superusers can unblock IPs.")
+            ip.is_active = False
+            ip.save()
+            UserActivity.objects.create(
+                user=None,
+                tenant=tenant,
+                action='ip_unblock',
+                performed_by=request.user,
+                details={'ip_address': ip.ip_address},
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                success=True
+            )
+            logger.info(f"IP {ip.ip_address} unblock by {request.user.email} in tenant {tenant.schema_name}")
+            return Response({
+                "status": "success",
+                "message": f"IP {ip.ip_address} unblocked successfully."
+            }, status=status.HTTP_200_OK)
+
+class UserActivityViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = UserActivity.objects.all()
+    serializer_class = UserActivitySerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        tenant = self.request.user.tenant
+        user = self.request.user
+        with tenant_context(tenant):
+            if not (user.is_superuser or user.role == 'admin'):
+                raise PermissionDenied("Only admins or superusers can view user activity logs.")
+            queryset = UserActivity.objects.filter(tenant=tenant)
+            action = self.request.query_params.get('action')
+            user_email = self.request.query_params.get('user_email')
+            date_from = self.request.query_params.get('date_from')
+            date_to = self.request.query_params.get('date_to')
+            success = self.request.query_params.get('success')
+
+            if action:
+                queryset = queryset.filter(action=action)
+            if user_email:
+                queryset = queryset.filter(user__email__icontains=user_email)
+            if date_from:
+                queryset = queryset.filter(timestamp__gte=date_from)
+            if date_to:
+                queryset = queryset.filter(timestamp__lte=date_to)
+            if success is not None:
+                queryset = queryset.filter(success=(success.lower() == 'true'))
+
+            return queryset.order_by('-timestamp')
+
+class UserPasswordRegenerateView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserPasswordRegenerateSerializer
+
+    def post(self, request, *args, **kwargs):
+        tenant = request.user.tenant
+        with tenant_context(tenant):
+            serializer = self.get_serializer(data=request.data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            email = serializer.validated_data['email']
+            user = CustomUser.objects.get(email=email)
+
+            characters = string.ascii_letters + string.digits + string.punctuation
+            new_password = ''.join(secrets.choice(characters) for _ in range(12))
+            user.set_password(new_password)
+            user.last_password_reset = timezone.now()
+            user.save()
+
+            try:
+                tenant_config = TenantConfig.objects.get(tenant=tenant)
+                email_from = tenant_config.email_from or 'no-reply@yourdomain.com'
+                email_subject = f"Password Reset for {tenant.name}"
+                email_body = (
+                    f"Dear {user.first_name or 'User'},\n\n"
+                    f"Your password has been reset by an administrator.\n"
+                    f"New Password: {new_password}\n\n"
+                    f"Please log in and change your password as soon as possible.\n"
+                    f"Login URL: {request.build_absolute_uri('/login/')}\n\n"
+                    f"If you did not request this, please contact support.\n"
+                    f"Best regards,\n{tenant.name} Team"
+                )
+
+                send_mail(
+                    subject=email_subject,
+                    message=email_body,
+                    from_email=email_from,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                    auth_user=tenant_config.email_user,
+                    auth_password=tenant_config.email_password,
+                    connection=None
+                )
+                UserActivity.objects.create(
+                    user=user,
+                    tenant=tenant,
+                    action='password_reset',
+                    performed_by=request.user,
+                    details={},
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                    success=True
+                )
+                logger.info(f"Password reset email sent to {user.email} for tenant {tenant.schema_name}")
+            except TenantConfig.DoesNotExist:
+                logger.error(f"No TenantConfig found for tenant {tenant.schema_name}")
+                return Response({"error": "Email configuration not set for this tenant"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as e:
+                logger.error(f"Failed to send password reset email to {user.email}: {str(e)}")
+                return Response({"error": f"Failed to send email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            logger.info(f"Password reset for user {user.email} by {request.user.email} in tenant {tenant.schema_name}")
+            return Response({
+                "status": "success",
+                "message": f"Password reset successfully for {user.email}. An email has been sent with the new password."
+            }, status=status.HTTP_200_OK)
+
+@csrf_exempt
+def token_view(request):
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    try:
+        body = json.loads(request.body.decode() or "{}")
+        email = body.get("email")
+        password = body.get("password")
+        if not email or not password:
+            ip_address = request.META.get('REMOTE_ADDR')
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+            tenant = Tenant.objects.first()  # Fallback tenant for logging
+            UserActivity.objects.create(
+                user=None,
+                tenant=tenant,
+                action='login',
+                performed_by=None,
+                details={'reason': 'Email or password missing'},
+                ip_address=ip_address,
+                user_agent=user_agent,
+                success=False
+            )
+            return JsonResponse({"error": "Email and password required"}, status=400)
+        
+        try:
+            domain = email.split('@')[1].lower()
+            tenant = Tenant.objects.get(domain__domain=domain)
+        except (IndexError, Tenant.DoesNotExist):
+            ip_address = request.META.get('REMOTE_ADDR')
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+            tenant = Tenant.objects.first()  # Fallback tenant for logging
+            UserActivity.objects.create(
+                user=None,
+                tenant=tenant,
+                action='login',
+                performed_by=None,
+                details={'reason': f"Invalid tenant for email: {email}"},
+                ip_address=ip_address,
+                user_agent=user_agent,
+                success=False
+            )
+            logger.error(f"Invalid email or tenant not found for email: {email}")
+            return JsonResponse({"error": "Invalid tenant"}, status=400)
+
+        with tenant_context(tenant):
+            ip_address = request.META.get('REMOTE_ADDR')
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+
+            if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+                UserActivity.objects.create(
+                    user=None,
+                    tenant=tenant,
+                    action='login',
+                    performed_by=None,
+                    details={'reason': 'IP address blocked'},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False
+                )
+                logger.info(f"Blocked IP {ip_address} attempted login for tenant {tenant.schema_name}")
+                return JsonResponse({"error": "This IP address is blocked"}, status=403)
+
+            user = CustomUser.objects.filter(email=email).first()
+            if user:
+                if user.is_locked or user.status == 'suspended' or not user.is_active:
+                    UserActivity.objects.create(
+                        user=user,
+                        tenant=tenant,
+                        action='login',
+                        performed_by=None,
+                        details={'reason': 'Account locked or suspended'},
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        success=False
+                    )
+                    return JsonResponse({"error": "Account is locked or suspended"}, status=403)
+                
+                authenticated_user = authenticate(email=email, password=password)
+                if authenticated_user:
+                    user.reset_login_attempts()
+                    UserActivity.objects.create(
+                        user=user,
+                        tenant=tenant,
+                        action='login',
+                        performed_by=None,
+                        details={},
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        success=True
+                    )
+                    payload = {
+                        "sub": user.email,
+                        "role": user.role,
+                        "tenant_id": user.tenant.id,
+                    }
+                    token = issue_rsa_jwt(payload, user.tenant)
+                    return JsonResponse({"access_token": token})
+                else:
+                    user.increment_login_attempts()
+                    UserActivity.objects.create(
+                        user=user,
+                        tenant=tenant,
+                        action='login',
+                        performed_by=None,
+                        details={'reason': 'Invalid credentials'},
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        success=False
+                    )
+
+                    ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+                    failed_attempts = UserActivity.objects.filter(
+                        action='login',
+                        success=False,
+                        ip_address=ip_address,
+                        tenant=tenant,
+                        timestamp__gte=ten_minutes_ago
+                    ).count()
+                    if failed_attempts >= 10 and not BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+                        BlockedIP.objects.create(
+                            ip_address=ip_address,
+                            tenant=tenant,
+                            reason="Excessive failed login attempts",
+                            blocked_by=None
+                        )
+                        UserActivity.objects.create(
+                            user=None,
+                            tenant=tenant,
+                            action='ip_block',
+                            performed_by=None,
+                            details={'ip_address': ip_address},
+                            ip_address=ip_address,
+                            user_agent=user_agent,
+                            success=True
+                        )
+                        logger.info(f"IP {ip_address} auto-blocked for tenant {tenant.schema_name} due to excessive failed logins")
+                        return JsonResponse({"error": "This IP address has been blocked due to excessive failed login attempts"}, status=403)
+
+                    return JsonResponse({"error": f"Invalid credentials. {5 - user.login_attempts} attempts remaining."}, status=401)
+            else:
+                UserActivity.objects.create(
+                    user=None,
+                    tenant=tenant,
+                    action='login',
+                    performed_by=None,
+                    details={'reason': f"User not found for email: {email}"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False
+                )
+
+                ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+                failed_attempts = UserActivity.objects.filter(
+                    action='login',
+                    success=False,
+                    ip_address=ip_address,
+                    tenant=tenant,
+                    timestamp__gte=ten_minutes_ago
+                ).count()
+                if failed_attempts >= 10 and not BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+                    BlockedIP.objects.create(
+                        ip_address=ip_address,
+                        tenant=tenant,
+                        reason="Excessive failed login attempts",
+                        blocked_by=None
+                    )
+                    UserActivity.objects.create(
+                        user=None,
+                        tenant=tenant,
+                        action='ip_block',
+                        performed_by=None,
+                        details={'ip_address': ip_address},
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        success=True
+                    )
+                    logger.info(f"IP {ip_address} auto-blocked for tenant {tenant.schema_name} due to excessive failed logins")
+                    return JsonResponse({"error": "This IP address has been blocked due to excessive failed login attempts"}, status=403)
+
+                return JsonResponse({"error": "Invalid credentials"}, status=401)
+    except Exception as e:
+        logger.error(f"Error in token_view: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 class UserCreateView(APIView):
@@ -444,6 +1051,9 @@ class UserCreateView(APIView):
                 return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         logger.error(f"Validation error for tenant {request.user.tenant.schema_name}: {serializer.errors}")
         return Response({'status': 'error', 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 class AdminUserCreateView(APIView):
     permission_classes = [IsAdminUser]
@@ -573,6 +1183,7 @@ class UserBranchUpdateView(APIView):
 # New view for listing all users in a tenant
 class TenantUsersListView(APIView):
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
 
     def get_tenant_from_token(self, request):
         try:
@@ -639,6 +1250,7 @@ class TenantUsersListView(APIView):
 
 class BranchUsersListView(APIView):
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
 
     def get(self, request, branch_id):
         tenant = self.get_tenant_from_token(request)
@@ -673,6 +1285,7 @@ class BranchUsersListView(APIView):
 
 class UserSessionViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
 
     def get_tenant(self, request):
         # Adjust this if you have a different way to get tenant
@@ -761,6 +1374,7 @@ class UserSessionViewSet(viewsets.ViewSet):
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.filter(role='client').prefetch_related('client_profile')
     serializer_class = ClientDetailSerializer
+    pagination_class = CustomPagination
     
     permission_classes = [IsAuthenticated]
 
@@ -813,28 +1427,28 @@ class ClientViewSet(viewsets.ModelViewSet):
         
 
 
-@csrf_exempt
-def token_view(request):
-    if request.method != "POST":
-        return HttpResponse(status=405)
-    try:
-        body = json.loads(request.body.decode() or "{}")
-        email = body.get("email")
-        password = body.get("password")
-        if not email or not password:
-            return JsonResponse({"error": "Email and password required"}, status=400)
-        user = authenticate(email=email, password=password)
-        if not user or not user.tenant:
-            return JsonResponse({"error": "Invalid credentials or tenant"}, status=401)
-        payload = {
-            "sub": user.email,
-            "role": user.role,
-            "tenant_id": user.tenant.id,
-        }
-        token = issue_rsa_jwt(payload, user.tenant)
-        return JsonResponse({"access_token": token})
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
+# @csrf_exempt
+# def token_view(request):
+#     if request.method != "POST":
+#         return HttpResponse(status=405)
+#     try:
+#         body = json.loads(request.body.decode() or "{}")
+#         email = body.get("email")
+#         password = body.get("password")
+#         if not email or not password:
+#             return JsonResponse({"error": "Email and password required"}, status=400)
+#         user = authenticate(email=email, password=password)
+#         if not user or not user.tenant:
+#             return JsonResponse({"error": "Invalid credentials or tenant"}, status=401)
+#         payload = {
+#             "sub": user.email,
+#             "role": user.role,
+#             "tenant_id": user.tenant.id,
+#         }
+#         token = issue_rsa_jwt(payload, user.tenant)
+#         return JsonResponse({"access_token": token})
+#     except Exception as e:
+#         return JsonResponse({"error": str(e)}, status=400)
     
 
 

@@ -1,0 +1,78 @@
+services:
+  lms-db:
+    image: postgres:15
+    container_name: lms_db
+    environment:
+      POSTGRES_DB: multi_tenant_lms
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwerty
+    volumes:
+      - lms_db_data:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d multi_tenant_lms"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - auth_service_default
+
+  lms-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lms_app
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://postgres:qwerty@lms-db:5432/multi_tenant_lms
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1,lms-app,0.0.0.0,*
+      - FRONTEND_URL=http://localhost:5173
+    ports:
+      - "8004:8004"
+    command: gunicorn --bind 0.0.0.0:8004 lumina_care.wsgi:application
+    depends_on:
+      lms-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - auth_service_default
+    mem_limit: 2g
+
+  lms-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lms_consumer
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://postgres:qwerty@lms-db:5432/multi_tenant_lms
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    command: python kafka_consumer.py
+    depends_on:
+      - lms-db
+      - redis
+    networks:
+      - auth_service_default
+    mem_limit: 1g
+
+  redis:
+    image: redis:6.2
+    container_name: lms_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - auth_service_default
+
+volumes:
+  lms_db_data:
+
+networks:
+  auth_service_default:
+    external: true

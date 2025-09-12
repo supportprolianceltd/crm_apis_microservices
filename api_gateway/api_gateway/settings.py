@@ -141,6 +141,9 @@ USE_I18N = True
 
 USE_TZ = True
 
+# settings.py
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
