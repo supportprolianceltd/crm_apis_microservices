@@ -74,3 +74,7 @@ RuntimeError: No active RSA keypair available for tenant
 2025-09-13 03:12:09 [INFO] core: Listing all tenants: [1, 2, 3, 4]
 2025-09-13 03:13:35 [DEBUG] core: Returning all tenants for list action
 2025-09-13 03:13:35 [INFO] core: Listing all tenants: [1, 2, 3, 4]
+2025-09-13 03:18:47 [WARNING] django.request: Forbidden: /api/tenant/tenants/
+2025-09-13 03:18:50 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-13 03:19:05 [DEBUG] core: Returning all tenants for list action
+2025-09-13 03:19:05 [INFO] core: Listing paginated tenants: [1, 2, 3, 4]
