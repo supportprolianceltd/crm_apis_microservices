@@ -950,6 +950,59 @@ class UserImpersonateSerializer(serializers.Serializer):
             raise serializers.ValidationError("Cannot impersonate a locked or suspended account.")
         return data
 
+
+
+# class AdminUserCreateSerializer(serializers.ModelSerializer):
+#     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+#     branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)
+
+#     class Meta:
+#         model = CustomUser
+#         fields = "__all__"
+#         extra_kwargs = {
+#             'role': {'required': False, 'default': 'admin'},
+#             'email': {'required': True},
+#             'is_superuser': {'default': True},
+#             'is_staff': {'default': True},
+#         }
+
+#     def validate_email(self, value):
+#         try:
+#             domain = value.split('@')[1].lower()
+#         except IndexError:
+#             raise serializers.ValidationError("Invalid email format.")
+#         if not Domain.objects.filter(domain=domain).exists():
+#             raise serializers.ValidationError(f"No tenant found for domain '{domain}'.")
+#         if CustomUser.objects.filter(email=value).exists():
+#             raise serializers.ValidationError(f"User with email '{value}' already exists.")
+#         return value
+
+#     def create(self, validated_data):
+#         email = validated_data['email']
+#         domain = email.split('@')[1].lower()
+#         domain_obj = Domain.objects.get(domain=domain)
+#         tenant = domain_obj.tenant
+#         password = validated_data.pop('password')
+#         validated_data['is_superuser'] = True
+#         validated_data['is_staff'] = True
+#         validated_data['role'] = validated_data.get('role', 'admin')
+#         # Remove status from validated_data before creating user
+#         status = validated_data.pop('status', None)
+
+#         from django_tenants.utils import tenant_context
+#         with tenant_context(tenant):
+#             user = CustomUser.objects.create_user(
+#                 **validated_data,
+#                 tenant=tenant,
+#                 is_active=True
+#             )
+#             user.set_password(password)
+#             # Set status after user creation if needed
+#             if status is not None:
+#                 user.status = status
+#             user.save()
+#             return user
+
 class AdminUserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
     branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)
@@ -976,7 +1029,7 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        email = validated_data['email']
+        email = validated_data.pop('email')  # Pop email to avoid duplicate
         domain = email.split('@')[1].lower()
         domain_obj = Domain.objects.get(domain=domain)
         tenant = domain_obj.tenant
@@ -984,22 +1037,24 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
         validated_data['is_superuser'] = True
         validated_data['is_staff'] = True
         validated_data['role'] = validated_data.get('role', 'admin')
-        # Remove status from validated_data before creating user
+        # Remove status and tenant from validated_data before creating user
         status = validated_data.pop('status', None)
+        validated_data.pop('tenant', None)  # Remove tenant to avoid duplicate argument
 
         from django_tenants.utils import tenant_context
         with tenant_context(tenant):
             user = CustomUser.objects.create_user(
-                **validated_data,
-                tenant=tenant,
-                is_active=True
+                email=email,  # Explicitly pass email
+                password=password,  # Pass password separately
+                tenant=tenant,  # Explicitly pass tenant
+                is_active=True,
+                **validated_data  # Unpack remaining validated_data
             )
-            user.set_password(password)
             # Set status after user creation if needed
             if status is not None:
                 user.status = status
             user.save()
-            return user
+            return user  
 
 class UserBranchUpdateSerializer(serializers.ModelSerializer):
     branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)

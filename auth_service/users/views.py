@@ -7,6 +7,18 @@ import string
 import uuid
 from datetime import datetime, timedelta
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAdminUser
+from core.models import Tenant
+from users.models import RSAKeyPair
+from django_tenants.utils import tenant_context
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+import logging
+
+logger = logging.getLogger('users')
 
 # Standard library
 from django.db import transaction
@@ -828,189 +840,189 @@ class UserPasswordRegenerateView(generics.GenericAPIView):
                 "message": f"Password reset successfully for {user.email}. An email has been sent with the new password."
             }, status=status.HTTP_200_OK)
 
-@csrf_exempt
-def token_view(request):
-    if request.method != "POST":
-        return HttpResponse(status=405)
-    try:
-        body = json.loads(request.body.decode() or "{}")
-        email = body.get("email")
-        password = body.get("password")
-        if not email or not password:
-            ip_address = request.META.get('REMOTE_ADDR')
-            user_agent = request.META.get('HTTP_USER_AGENT', '')
-            tenant = Tenant.objects.first()  # Fallback tenant for logging
-            UserActivity.objects.create(
-                user=None,
-                tenant=tenant,
-                action='login',
-                performed_by=None,
-                details={'reason': 'Email or password missing'},
-                ip_address=ip_address,
-                user_agent=user_agent,
-                success=False
-            )
-            return JsonResponse({"error": "Email and password required"}, status=400)
+# @csrf_exempt
+# def token_view(request):
+#     if request.method != "POST":
+#         return HttpResponse(status=405)
+#     try:
+#         body = json.loads(request.body.decode() or "{}")
+#         email = body.get("email")
+#         password = body.get("password")
+#         if not email or not password:
+#             ip_address = request.META.get('REMOTE_ADDR')
+#             user_agent = request.META.get('HTTP_USER_AGENT', '')
+#             tenant = Tenant.objects.first()  # Fallback tenant for logging
+#             UserActivity.objects.create(
+#                 user=None,
+#                 tenant=tenant,
+#                 action='login',
+#                 performed_by=None,
+#                 details={'reason': 'Email or password missing'},
+#                 ip_address=ip_address,
+#                 user_agent=user_agent,
+#                 success=False
+#             )
+#             return JsonResponse({"error": "Email and password required"}, status=400)
         
-        try:
-            domain = email.split('@')[1].lower()
-            tenant = Tenant.objects.get(domain__domain=domain)
-        except (IndexError, Tenant.DoesNotExist):
-            ip_address = request.META.get('REMOTE_ADDR')
-            user_agent = request.META.get('HTTP_USER_AGENT', '')
-            tenant = Tenant.objects.first()  # Fallback tenant for logging
-            UserActivity.objects.create(
-                user=None,
-                tenant=tenant,
-                action='login',
-                performed_by=None,
-                details={'reason': f"Invalid tenant for email: {email}"},
-                ip_address=ip_address,
-                user_agent=user_agent,
-                success=False
-            )
-            logger.error(f"Invalid email or tenant not found for email: {email}")
-            return JsonResponse({"error": "Invalid tenant"}, status=400)
+#         try:
+#             domain = email.split('@')[1].lower()
+#             tenant = Tenant.objects.get(domain__domain=domain)
+#         except (IndexError, Tenant.DoesNotExist):
+#             ip_address = request.META.get('REMOTE_ADDR')
+#             user_agent = request.META.get('HTTP_USER_AGENT', '')
+#             tenant = Tenant.objects.first()  # Fallback tenant for logging
+#             UserActivity.objects.create(
+#                 user=None,
+#                 tenant=tenant,
+#                 action='login',
+#                 performed_by=None,
+#                 details={'reason': f"Invalid tenant for email: {email}"},
+#                 ip_address=ip_address,
+#                 user_agent=user_agent,
+#                 success=False
+#             )
+#             logger.error(f"Invalid email or tenant not found for email: {email}")
+#             return JsonResponse({"error": "Invalid tenant"}, status=400)
 
-        with tenant_context(tenant):
-            ip_address = request.META.get('REMOTE_ADDR')
-            user_agent = request.META.get('HTTP_USER_AGENT', '')
+#         with tenant_context(tenant):
+#             ip_address = request.META.get('REMOTE_ADDR')
+#             user_agent = request.META.get('HTTP_USER_AGENT', '')
 
-            if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
-                UserActivity.objects.create(
-                    user=None,
-                    tenant=tenant,
-                    action='login',
-                    performed_by=None,
-                    details={'reason': 'IP address blocked'},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False
-                )
-                logger.info(f"Blocked IP {ip_address} attempted login for tenant {tenant.schema_name}")
-                return JsonResponse({"error": "This IP address is blocked"}, status=403)
+#             if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+#                 UserActivity.objects.create(
+#                     user=None,
+#                     tenant=tenant,
+#                     action='login',
+#                     performed_by=None,
+#                     details={'reason': 'IP address blocked'},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=False
+#                 )
+#                 logger.info(f"Blocked IP {ip_address} attempted login for tenant {tenant.schema_name}")
+#                 return JsonResponse({"error": "This IP address is blocked"}, status=403)
 
-            user = CustomUser.objects.filter(email=email).first()
-            if user:
-                if user.is_locked or user.status == 'suspended' or not user.is_active:
-                    UserActivity.objects.create(
-                        user=user,
-                        tenant=tenant,
-                        action='login',
-                        performed_by=None,
-                        details={'reason': 'Account locked or suspended'},
-                        ip_address=ip_address,
-                        user_agent=user_agent,
-                        success=False
-                    )
-                    return JsonResponse({"error": "Account is locked or suspended"}, status=403)
+#             user = CustomUser.objects.filter(email=email).first()
+#             if user:
+#                 if user.is_locked or user.status == 'suspended' or not user.is_active:
+#                     UserActivity.objects.create(
+#                         user=user,
+#                         tenant=tenant,
+#                         action='login',
+#                         performed_by=None,
+#                         details={'reason': 'Account locked or suspended'},
+#                         ip_address=ip_address,
+#                         user_agent=user_agent,
+#                         success=False
+#                     )
+#                     return JsonResponse({"error": "Account is locked or suspended"}, status=403)
                 
-                authenticated_user = authenticate(email=email, password=password)
-                if authenticated_user:
-                    user.reset_login_attempts()
-                    UserActivity.objects.create(
-                        user=user,
-                        tenant=tenant,
-                        action='login',
-                        performed_by=None,
-                        details={},
-                        ip_address=ip_address,
-                        user_agent=user_agent,
-                        success=True
-                    )
-                    payload = {
-                        "sub": user.email,
-                        "role": user.role,
-                        "tenant_id": user.tenant.id,
-                    }
-                    token = issue_rsa_jwt(payload, user.tenant)
-                    return JsonResponse({"access_token": token})
-                else:
-                    user.increment_login_attempts()
-                    UserActivity.objects.create(
-                        user=user,
-                        tenant=tenant,
-                        action='login',
-                        performed_by=None,
-                        details={'reason': 'Invalid credentials'},
-                        ip_address=ip_address,
-                        user_agent=user_agent,
-                        success=False
-                    )
+#                 authenticated_user = authenticate(email=email, password=password)
+#                 if authenticated_user:
+#                     user.reset_login_attempts()
+#                     UserActivity.objects.create(
+#                         user=user,
+#                         tenant=tenant,
+#                         action='login',
+#                         performed_by=None,
+#                         details={},
+#                         ip_address=ip_address,
+#                         user_agent=user_agent,
+#                         success=True
+#                     )
+#                     payload = {
+#                         "sub": user.email,
+#                         "role": user.role,
+#                         "tenant_id": user.tenant.id,
+#                     }
+#                     token = issue_rsa_jwt(payload, user.tenant)
+#                     return JsonResponse({"access_token": token})
+#                 else:
+#                     user.increment_login_attempts()
+#                     UserActivity.objects.create(
+#                         user=user,
+#                         tenant=tenant,
+#                         action='login',
+#                         performed_by=None,
+#                         details={'reason': 'Invalid credentials'},
+#                         ip_address=ip_address,
+#                         user_agent=user_agent,
+#                         success=False
+#                     )
 
-                    ten_minutes_ago = timezone.now() - timedelta(minutes=10)
-                    failed_attempts = UserActivity.objects.filter(
-                        action='login',
-                        success=False,
-                        ip_address=ip_address,
-                        tenant=tenant,
-                        timestamp__gte=ten_minutes_ago
-                    ).count()
-                    if failed_attempts >= 10 and not BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
-                        BlockedIP.objects.create(
-                            ip_address=ip_address,
-                            tenant=tenant,
-                            reason="Excessive failed login attempts",
-                            blocked_by=None
-                        )
-                        UserActivity.objects.create(
-                            user=None,
-                            tenant=tenant,
-                            action='ip_block',
-                            performed_by=None,
-                            details={'ip_address': ip_address},
-                            ip_address=ip_address,
-                            user_agent=user_agent,
-                            success=True
-                        )
-                        logger.info(f"IP {ip_address} auto-blocked for tenant {tenant.schema_name} due to excessive failed logins")
-                        return JsonResponse({"error": "This IP address has been blocked due to excessive failed login attempts"}, status=403)
+#                     ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+#                     failed_attempts = UserActivity.objects.filter(
+#                         action='login',
+#                         success=False,
+#                         ip_address=ip_address,
+#                         tenant=tenant,
+#                         timestamp__gte=ten_minutes_ago
+#                     ).count()
+#                     if failed_attempts >= 10 and not BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+#                         BlockedIP.objects.create(
+#                             ip_address=ip_address,
+#                             tenant=tenant,
+#                             reason="Excessive failed login attempts",
+#                             blocked_by=None
+#                         )
+#                         UserActivity.objects.create(
+#                             user=None,
+#                             tenant=tenant,
+#                             action='ip_block',
+#                             performed_by=None,
+#                             details={'ip_address': ip_address},
+#                             ip_address=ip_address,
+#                             user_agent=user_agent,
+#                             success=True
+#                         )
+#                         logger.info(f"IP {ip_address} auto-blocked for tenant {tenant.schema_name} due to excessive failed logins")
+#                         return JsonResponse({"error": "This IP address has been blocked due to excessive failed login attempts"}, status=403)
 
-                    return JsonResponse({"error": f"Invalid credentials. {5 - user.login_attempts} attempts remaining."}, status=401)
-            else:
-                UserActivity.objects.create(
-                    user=None,
-                    tenant=tenant,
-                    action='login',
-                    performed_by=None,
-                    details={'reason': f"User not found for email: {email}"},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False
-                )
+#                     return JsonResponse({"error": f"Invalid credentials. {5 - user.login_attempts} attempts remaining."}, status=401)
+#             else:
+#                 UserActivity.objects.create(
+#                     user=None,
+#                     tenant=tenant,
+#                     action='login',
+#                     performed_by=None,
+#                     details={'reason': f"User not found for email: {email}"},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=False
+#                 )
 
-                ten_minutes_ago = timezone.now() - timedelta(minutes=10)
-                failed_attempts = UserActivity.objects.filter(
-                    action='login',
-                    success=False,
-                    ip_address=ip_address,
-                    tenant=tenant,
-                    timestamp__gte=ten_minutes_ago
-                ).count()
-                if failed_attempts >= 10 and not BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
-                    BlockedIP.objects.create(
-                        ip_address=ip_address,
-                        tenant=tenant,
-                        reason="Excessive failed login attempts",
-                        blocked_by=None
-                    )
-                    UserActivity.objects.create(
-                        user=None,
-                        tenant=tenant,
-                        action='ip_block',
-                        performed_by=None,
-                        details={'ip_address': ip_address},
-                        ip_address=ip_address,
-                        user_agent=user_agent,
-                        success=True
-                    )
-                    logger.info(f"IP {ip_address} auto-blocked for tenant {tenant.schema_name} due to excessive failed logins")
-                    return JsonResponse({"error": "This IP address has been blocked due to excessive failed login attempts"}, status=403)
+#                 ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+#                 failed_attempts = UserActivity.objects.filter(
+#                     action='login',
+#                     success=False,
+#                     ip_address=ip_address,
+#                     tenant=tenant,
+#                     timestamp__gte=ten_minutes_ago
+#                 ).count()
+#                 if failed_attempts >= 10 and not BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+#                     BlockedIP.objects.create(
+#                         ip_address=ip_address,
+#                         tenant=tenant,
+#                         reason="Excessive failed login attempts",
+#                         blocked_by=None
+#                     )
+#                     UserActivity.objects.create(
+#                         user=None,
+#                         tenant=tenant,
+#                         action='ip_block',
+#                         performed_by=None,
+#                         details={'ip_address': ip_address},
+#                         ip_address=ip_address,
+#                         user_agent=user_agent,
+#                         success=True
+#                     )
+#                     logger.info(f"IP {ip_address} auto-blocked for tenant {tenant.schema_name} due to excessive failed logins")
+#                     return JsonResponse({"error": "This IP address has been blocked due to excessive failed login attempts"}, status=403)
 
-                return JsonResponse({"error": "Invalid credentials"}, status=401)
-    except Exception as e:
-        logger.error(f"Error in token_view: {str(e)}")
-        return JsonResponse({"error": str(e)}, status=400)
+#                 return JsonResponse({"error": "Invalid credentials"}, status=401)
+#     except Exception as e:
+#         logger.error(f"Error in token_view: {str(e)}")
+#         return JsonResponse({"error": str(e)}, status=400)
 
 
 class UserCreateView(APIView):
@@ -1092,6 +1104,8 @@ class AdminUserCreateView(APIView):
             'status': 'error',
             'message': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class UserBranchUpdateView(APIView):
@@ -1427,28 +1441,28 @@ class ClientViewSet(viewsets.ModelViewSet):
         
 
 
-# @csrf_exempt
-# def token_view(request):
-#     if request.method != "POST":
-#         return HttpResponse(status=405)
-#     try:
-#         body = json.loads(request.body.decode() or "{}")
-#         email = body.get("email")
-#         password = body.get("password")
-#         if not email or not password:
-#             return JsonResponse({"error": "Email and password required"}, status=400)
-#         user = authenticate(email=email, password=password)
-#         if not user or not user.tenant:
-#             return JsonResponse({"error": "Invalid credentials or tenant"}, status=401)
-#         payload = {
-#             "sub": user.email,
-#             "role": user.role,
-#             "tenant_id": user.tenant.id,
-#         }
-#         token = issue_rsa_jwt(payload, user.tenant)
-#         return JsonResponse({"access_token": token})
-#     except Exception as e:
-#         return JsonResponse({"error": str(e)}, status=400)
+@csrf_exempt
+def token_view(request):
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    try:
+        body = json.loads(request.body.decode() or "{}")
+        email = body.get("email")
+        password = body.get("password")
+        if not email or not password:
+            return JsonResponse({"error": "Email and password required"}, status=400)
+        user = authenticate(email=email, password=password)
+        if not user or not user.tenant:
+            return JsonResponse({"error": "Invalid credentials or tenant"}, status=401)
+        payload = {
+            "sub": user.email,
+            "role": user.role,
+            "tenant_id": user.tenant.id,
+        }
+        token = issue_rsa_jwt(payload, user.tenant)
+        return JsonResponse({"access_token": token})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
     
 
 
@@ -1493,3 +1507,77 @@ def jwks_view(request, tenant_id):
     keys = RSAKeyPair.objects.filter(tenant=tenant, active=True)
     jwks = {"keys": [pem_to_jwk(k.public_key_pem, k.kid) for k in keys]}
     return JsonResponse(jwks)
+
+
+
+def generate_rsa_keypair(key_size=2048):
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=key_size)
+    private_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    ).decode('utf-8')
+    public_pem = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode('utf-8')
+    return private_pem, public_pem
+
+class RSAKeyPairCreateView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        tenant_id = request.data.get('tenant_id')
+        schema_name = request.data.get('schema_name')
+        
+        # Validate input: either tenant_id or schema_name must be provided
+        if not tenant_id and not schema_name:
+            logger.error("No tenant_id or schema_name provided in request")
+            return Response({
+                'status': 'error',
+                'message': 'Either tenant_id or schema_name is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Fetch tenant based on tenant_id or schema_name
+            if tenant_id:
+                tenant = Tenant.objects.get(id=tenant_id)
+            else:
+                tenant = Tenant.objects.get(schema_name=schema_name)
+
+            # Generate RSA key pair
+            private_pem, public_pem = generate_rsa_keypair()
+
+            # Create RSAKeyPair within tenant context
+            with tenant_context(tenant):
+                keypair = RSAKeyPair.objects.create(
+                    tenant=tenant,
+                    private_key_pem=private_pem,
+                    public_key_pem=public_pem,
+                    active=True
+                )
+                logger.info(f"RSAKeyPair created for tenant: {tenant.schema_name}, kid: {keypair.kid}")
+
+            return Response({
+                'status': 'success',
+                'message': f'RSAKeyPair created successfully for tenant {tenant.schema_name}',
+                'data': {
+                    'tenant_id': tenant.id,
+                    'tenant_schema': tenant.schema_name,
+                    'kid': keypair.kid,
+                    'public_key': public_pem
+                }
+            }, status=status.HTTP_201_CREATED)
+
+        except Tenant.DoesNotExist:
+            logger.error(f"Tenant not found: tenant_id={tenant_id}, schema_name={schema_name}")
+            return Response({
+                'status': 'error',
+                'message': 'Tenant not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error creating RSAKeyPair: {str(e)}")
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

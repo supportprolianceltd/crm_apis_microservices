@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     UserViewSet, TermsAndConditionsView, PasswordResetRequestView, PasswordResetConfirmView,
-    UserPasswordRegenerateView, ClientViewSet, AdminUserCreateView, UserCreateView,
+    UserPasswordRegenerateView, ClientViewSet, AdminUserCreateView, UserCreateView,RSAKeyPairCreateView,
     UserBranchUpdateView, TenantUsersListView, BranchUsersListView, UserSessionViewSet,
     LoginAttemptViewSet, BlockedIPViewSet, UserActivityViewSet, jwks_view, protected_view
 )
@@ -28,4 +28,6 @@ urlpatterns = [
     path('password/reset/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password/reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('terms-and-conditions/', TermsAndConditionsView.as_view(), name='terms_and_conditions'),
+
+    path('keys/create/', RSAKeyPairCreateView.as_view(), name='rsa-keypair-create'),
 ]

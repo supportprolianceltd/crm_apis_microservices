@@ -3,8 +3,8 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="robots" content="NONE,NOARCHIVE">
-    <title>AssertionError
-      at /api/tenant/tenants/</title>
+    <title>RuntimeError
+      at /api/token/</title>
     <style>
     html * { padding:0; margin:0; }
     body * { padding:10px 20px; }
@@ -100,10 +100,10 @@
   </head>
   <body>
     <header id="summary">
-      <h1>AssertionError
-        at /api/tenant/tenants/</h1>
+      <h1>RuntimeError
+        at /api/token/</h1>
       <pre
-        class="exception_value">The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre>
+        class="exception_value">No active RSA keypair available for tenant</pre>
       <table class="meta">
 
         <tr>
@@ -112,7 +112,7 @@
         </tr>
         <tr>
           <th scope="row">Request URL:</th>
-          <td>http://auth-service/api/tenant/tenants/</td>
+          <td>http://auth-service/api/token/</td>
         </tr>
 
         <tr>
@@ -122,24 +122,23 @@
 
         <tr>
           <th scope="row">Exception Type:</th>
-          <td>AssertionError</td>
+          <td>RuntimeError</td>
         </tr>
 
         <tr>
           <th scope="row">Exception Value:</th>
-          <td><pre>The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre></td>
+          <td><pre>No active RSA keypair available for tenant</pre></td>
         </tr>
 
         <tr>
           <th scope="row">Exception Location:</th>
-          <td><span
-              class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</span>,
-            line 1177, in get_field_names</td>
+          <td><span class="fname">/app/auth_service/utils/jwt_rsa.py</span>,
+            line 46, in issue_rsa_jwt</td>
         </tr>
 
         <tr>
           <th scope="row">Raised during:</th>
-          <td>core.views.TenantViewSet</td>
+          <td>auth_service.views.CustomTokenObtainPairView</td>
         </tr>
 
         <tr>
@@ -161,7 +160,7 @@
         </tr>
         <tr>
           <th scope="row">Server time:</th>
-          <td>Wed, 10 Sep 2025 11:11:23 +0000</td>
+          <td>Sat, 13 Sep 2025 02:48:16 +0000</td>
         </tr>
       </table>
     </header>
@@ -182,58 +181,58 @@
                 class="fname">/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py</code>,
               line 55, in inner
 
-              <div class="context" id="c135800546988672">
+              <div class="context" id="c135482762325312">
 
-                <ol start="48" class="pre-context" id="pre135800546988672">
-
-                  <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre></pre></li>
+                <ol start="48" class="pre-context" id="pre135482762325312">
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre>        return inner</pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre>    else:</pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre>        return inner</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre></pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre>    else:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre>        @wraps(get_response)</pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre>        def inner(request):</pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre>        @wraps(get_response)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre>            try:</pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre>        def inner(request):</pre></li>
+
+                  <li
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre>            try:</pre></li>
 
                 </ol>
 
                 <ol start="55" class="context-line">
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre>                response = get_response(request)
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre>                response = get_response(request)
                                ^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='56' class="post-context" id="post135800546988672">
+                <ol start='56' class="post-context" id="post135482762325312">
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre>            except Exception as exc:</pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre>            except Exception as exc:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre>                response = response_for_exception(request, exc)</pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre>                response = response_for_exception(request, exc)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre>            return response</pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre>            return response</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre></pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre>        return inner</pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre>        return inner</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546988672', 'post135800546988672')"><pre></pre></li>
+                    onclick="toggle('pre135482762325312', 'post135482762325312')"><pre></pre></li>
 
                 </ol>
 
@@ -242,7 +241,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800546988672">
+                <table class="vars" id="v135482762325312">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -254,19 +253,19 @@
                     <tr>
                       <td>exc</td>
                       <td
-                        class="code"><pre>AssertionError(&quot;The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.&quot;)</pre></td>
+                        class="code"><pre>RuntimeError(&#x27;No active RSA keypair available for tenant&#x27;)</pre></td>
                     </tr>
 
                     <tr>
                       <td>get_response</td>
                       <td
-                        class="code"><pre>&lt;bound method BaseHandler._get_response of &lt;django.core.handlers.wsgi.WSGIHandler object at 0x7b828aff54d0&gt;&gt;</pre></td>
+                        class="code"><pre>&lt;bound method BaseHandler._get_response of &lt;django.core.handlers.wsgi.WSGIHandler object at 0x7b388d7c4410&gt;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/tenant/tenants/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/token/&#x27;&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -281,59 +280,59 @@
                 class="fname">/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py</code>,
               line 197, in _get_response
 
-              <div class="context" id="c135800546993152">
+              <div class="context" id="c135482762316352">
 
-                <ol start="190" class="pre-context" id="pre135800546993152">
-
-                  <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre></pre></li>
+                <ol start="190" class="pre-context" id="pre135482762316352">
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>        if response is None:</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>            wrapped_callback = self.make_view_atomic(callback)</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>        if response is None:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>            # If it is an asynchronous view, run it in a subthread.</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>            wrapped_callback = self.make_view_atomic(callback)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>            if iscoroutinefunction(wrapped_callback):</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>            # If it is an asynchronous view, run it in a subthread.</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>                wrapped_callback = async_to_sync(wrapped_callback)</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>            if iscoroutinefunction(wrapped_callback):</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>            try:</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>                wrapped_callback = async_to_sync(wrapped_callback)</pre></li>
+
+                  <li
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>            try:</pre></li>
 
                 </ol>
 
                 <ol start="197" class="context-line">
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>                response = wrapped_callback(request, *callback_args, **callback_kwargs)
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>                response = wrapped_callback(request, *callback_args, **callback_kwargs)
                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
                     <span>…</span></li>
                 </ol>
 
-                <ol start='198' class="post-context" id="post135800546993152">
+                <ol start='198' class="post-context" id="post135482762316352">
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>            except Exception as e:</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>            except Exception as e:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>                response = self.process_exception_by_middleware(e, request)</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>                response = self.process_exception_by_middleware(e, request)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>                if response is None:</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>                if response is None:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>                    raise</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>                    raise</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre></pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546993152', 'post135800546993152')"><pre>        # Complain if the view returned None (a common error).</pre></li>
+                    onclick="toggle('pre135482762316352', 'post135482762316352')"><pre>        # Complain if the view returned None (a common error).</pre></li>
 
                 </ol>
 
@@ -342,7 +341,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800546993152">
+                <table class="vars" id="v135482762316352">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -354,7 +353,7 @@
                     <tr>
                       <td>callback</td>
                       <td
-                        class="code"><pre>&lt;function TenantViewSet at 0x7b82876f99e0&gt;</pre></td>
+                        class="code"><pre>&lt;function View.as_view.&lt;locals&gt;.view at 0x7b388a076840&gt;</pre></td>
                     </tr>
 
                     <tr>
@@ -376,7 +375,7 @@
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/tenant/tenants/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/token/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
@@ -387,13 +386,13 @@
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;django.core.handlers.wsgi.WSGIHandler object at 0x7b828aff54d0&gt;</pre></td>
+                        class="code"><pre>&lt;django.core.handlers.wsgi.WSGIHandler object at 0x7b388d7c4410&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>wrapped_callback</td>
                       <td
-                        class="code"><pre>&lt;function TenantViewSet at 0x7b82876f99e0&gt;</pre></td>
+                        class="code"><pre>&lt;function View.as_view.&lt;locals&gt;.view at 0x7b388a076840&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -408,53 +407,53 @@
                 class="fname">/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py</code>,
               line 65, in _view_wrapper
 
-              <div class="context" id="c135800546995328">
+              <div class="context" id="c135482762318400">
 
-                <ol start="58" class="pre-context" id="pre135800546995328">
-
-                  <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre></pre></li>
+                <ol start="58" class="pre-context" id="pre135482762318400">
 
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre>        async def _view_wrapper(request, *args, **kwargs):</pre></li>
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre>            return await view_func(request, *args, **kwargs)</pre></li>
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre>        async def _view_wrapper(request, *args, **kwargs):</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre></pre></li>
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre>            return await view_func(request, *args, **kwargs)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre>    else:</pre></li>
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre></pre></li>
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre>    else:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre>        def _view_wrapper(request, *args, **kwargs):</pre></li>
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre>        def _view_wrapper(request, *args, **kwargs):</pre></li>
 
                 </ol>
 
                 <ol start="65" class="context-line">
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre>            return view_func(request, *args, **kwargs)
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre>            return view_func(request, *args, **kwargs)
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
                     <span>…</span></li>
                 </ol>
 
-                <ol start='66' class="post-context" id="post135800546995328">
+                <ol start='66' class="post-context" id="post135482762318400">
 
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre></pre></li>
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre>    _view_wrapper.csrf_exempt = True</pre></li>
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre>    _view_wrapper.csrf_exempt = True</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre></pre></li>
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546995328', 'post135800546995328')"><pre>    return wraps(view_func)(_view_wrapper)</pre></li>
+                    onclick="toggle('pre135482762318400', 'post135482762318400')"><pre>    return wraps(view_func)(_view_wrapper)</pre></li>
 
                 </ol>
 
@@ -463,7 +462,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800546995328">
+                <table class="vars" id="v135482762318400">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -485,13 +484,13 @@
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/tenant/tenants/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/token/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>view_func</td>
                       <td
-                        class="code"><pre>&lt;function TenantViewSet at 0x7b82876f9940&gt;</pre></td>
+                        class="code"><pre>&lt;function View.as_view.&lt;locals&gt;.view at 0x7b388a0767a0&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -500,65 +499,65 @@
 
             </li>
 
-            <li class="frame user">
+            <li class="frame django">
 
               <code
-                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py</code>,
-              line 125, in view
+                class="fname">/usr/local/lib/python3.11/site-packages/django/views/generic/base.py</code>,
+              line 105, in view
 
-              <div class="context" id="c135800546894656">
+              <div class="context" id="c135482762296512">
 
-                <ol start="118" class="pre-context" id="pre135800546894656">
-
-                  <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre>                setattr(self, method, handler)</pre></li>
+                <ol start="98" class="pre-context" id="pre135482762296512">
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre></pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>            self = cls(**initkwargs)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre>            self.request = request</pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>            self.setup(request, *args, **kwargs)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre>            self.args = args</pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>            if not hasattr(self, &quot;request&quot;):</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre>            self.kwargs = kwargs</pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>                raise AttributeError(</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre></pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>                    &quot;%s instance has no &#x27;request&#x27; attribute. Did you override &quot;</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre>            # And continue as usual</pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>                    &quot;setup() and forget to call super()?&quot; % cls.__name__</pre></li>
+
+                  <li
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>                )</pre></li>
 
                 </ol>
 
-                <ol start="125" class="context-line">
+                <ol start="105" class="context-line">
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre>            return self.dispatch(request, *args, **kwargs)
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>            return self.dispatch(request, *args, **kwargs)
                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
                     <span>…</span></li>
                 </ol>
 
-                <ol start='126' class="post-context" id="post135800546894656">
+                <ol start='106' class="post-context" id="post135482762296512">
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre></pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre>        # take name and docstring from class</pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>        view.view_class = cls</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre>        update_wrapper(view, cls, updated=())</pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>        view.view_initkwargs = initkwargs</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre></pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre>        # and possible attributes set by decorators</pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>        # __name__ and __qualname__ are intentionally left unchanged as</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546894656', 'post135800546894656')"><pre>        # like csrf_exempt from dispatch</pre></li>
+                    onclick="toggle('pre135482762296512', 'post135482762296512')"><pre>        # view_class should be used to robustly determine the name of the view</pre></li>
 
                 </ol>
 
@@ -567,7 +566,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800546894656">
+                <table class="vars" id="v135482762296512">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -575,17 +574,6 @@
                     </tr>
                   </thead>
                   <tbody>
-
-                    <tr>
-                      <td>action</td>
-                      <td class="code"><pre>&#x27;list&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>actions</td>
-                      <td
-                        class="code"><pre>{&#x27;get&#x27;: &#x27;list&#x27;, &#x27;head&#x27;: &#x27;list&#x27;, &#x27;post&#x27;: &#x27;create&#x27;}</pre></td>
-                    </tr>
 
                     <tr>
                       <td>args</td>
@@ -595,19 +583,12 @@
                     <tr>
                       <td>cls</td>
                       <td
-                        class="code"><pre>&lt;class &#x27;core.views.TenantViewSet&#x27;&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>handler</td>
-                      <td
-                        class="code"><pre>&lt;bound method TenantViewSet.list of &lt;core.views.TenantViewSet object at 0x7b82875b0ad0&gt;&gt;</pre></td>
+                        class="code"><pre>&lt;class &#x27;auth_service.views.CustomTokenObtainPairView&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>initkwargs</td>
-                      <td
-                        class="code"><pre>{&#x27;basename&#x27;: &#x27;tenant&#x27;, &#x27;detail&#x27;: False, &#x27;suffix&#x27;: &#x27;List&#x27;}</pre></td>
+                      <td class="code"><pre>{}</pre></td>
                     </tr>
 
                     <tr>
@@ -616,20 +597,15 @@
                     </tr>
 
                     <tr>
-                      <td>method</td>
-                      <td class="code"><pre>&#x27;head&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/tenant/tenants/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/token/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;core.views.TenantViewSet object at 0x7b82875b0ad0&gt;</pre></td>
+                        class="code"><pre>&lt;auth_service.views.CustomTokenObtainPairView object at 0x7b3889e9f350&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -644,58 +620,58 @@
                 class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/views.py</code>,
               line 515, in dispatch
 
-              <div class="context" id="c135800546989696">
+              <div class="context" id="c135482762283840">
 
-                <ol start="508" class="pre-context" id="pre135800546989696">
-
-                  <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre>                                  self.http_method_not_allowed)</pre></li>
+                <ol start="508" class="pre-context" id="pre135482762283840">
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre>            else:</pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre>                                  self.http_method_not_allowed)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre>                handler = self.http_method_not_allowed</pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre>            else:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre></pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre>                handler = self.http_method_not_allowed</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre>            response = handler(request, *args, **kwargs)</pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre></pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre>            response = handler(request, *args, **kwargs)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre>        except Exception as exc:</pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre>        except Exception as exc:</pre></li>
 
                 </ol>
 
                 <ol start="515" class="context-line">
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre>            response = self.handle_exception(exc)
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre>            response = self.handle_exception(exc)
                             ^^^^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='516' class="post-context" id="post135800546989696">
+                <ol start='516' class="post-context" id="post135482762283840">
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre></pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre>        self.response = self.finalize_response(request, response, *args, **kwargs)</pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre>        self.response = self.finalize_response(request, response, *args, **kwargs)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre>        return self.response</pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre>        return self.response</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre></pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre>    def options(self, request, *args, **kwargs):</pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre>    def options(self, request, *args, **kwargs):</pre></li>
 
                   <li
-                    onclick="toggle('pre135800546989696', 'post135800546989696')"><pre>        &quot;&quot;&quot;</pre></li>
+                    onclick="toggle('pre135482762283840', 'post135482762283840')"><pre>        &quot;&quot;&quot;</pre></li>
 
                 </ol>
 
@@ -704,7 +680,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800546989696">
+                <table class="vars" id="v135482762283840">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -721,7 +697,7 @@
                     <tr>
                       <td>handler</td>
                       <td
-                        class="code"><pre>&lt;bound method TenantViewSet.create of &lt;core.views.TenantViewSet object at 0x7b82875b0ad0&gt;&gt;</pre></td>
+                        class="code"><pre>&lt;bound method TokenViewBase.post of &lt;auth_service.views.CustomTokenObtainPairView object at 0x7b3889e9f350&gt;&gt;</pre></td>
                     </tr>
 
                     <tr>
@@ -732,13 +708,13 @@
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/tenant/tenants/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/token/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;core.views.TenantViewSet object at 0x7b82875b0ad0&gt;</pre></td>
+                        class="code"><pre>&lt;auth_service.views.CustomTokenObtainPairView object at 0x7b3889e9f350&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -753,58 +729,58 @@
                 class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/views.py</code>,
               line 475, in handle_exception
 
-              <div class="context" id="c135800547070784">
+              <div class="context" id="c135482764080320">
 
-                <ol start="468" class="pre-context" id="pre135800547070784">
-
-                  <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre></pre></li>
+                <ol start="468" class="pre-context" id="pre135482764080320">
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre>        exception_handler = self.get_exception_handler()</pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre></pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre>        exception_handler = self.get_exception_handler()</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre>        context = self.get_exception_handler_context()</pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre>        response = exception_handler(exc, context)</pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre>        context = self.get_exception_handler_context()</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre></pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre>        response = exception_handler(exc, context)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre>        if response is None:</pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre>        if response is None:</pre></li>
 
                 </ol>
 
                 <ol start="475" class="context-line">
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre>            self.raise_uncaught_exception(exc)
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre>            self.raise_uncaught_exception(exc)
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='476' class="post-context" id="post135800547070784">
+                <ol start='476' class="post-context" id="post135482764080320">
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre></pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre>        response.exception = True</pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre>        response.exception = True</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre>        return response</pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre>        return response</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre></pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre>    def raise_uncaught_exception(self, exc):</pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre>    def raise_uncaught_exception(self, exc):</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547070784', 'post135800547070784')"><pre>        if settings.DEBUG:</pre></li>
+                    onclick="toggle('pre135482764080320', 'post135482764080320')"><pre>        if settings.DEBUG:</pre></li>
 
                 </ol>
 
@@ -813,7 +789,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800547070784">
+                <table class="vars" id="v135482764080320">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -826,20 +802,20 @@
                       <td>context</td>
                       <td class="code"><pre>{&#x27;args&#x27;: (),
  &#x27;kwargs&#x27;: {},
- &#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/tenant/tenants/&#x27;&gt;,
- &#x27;view&#x27;: &lt;core.views.TenantViewSet object at 0x7b82875b0ad0&gt;}</pre></td>
+ &#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/token/&#x27;&gt;,
+ &#x27;view&#x27;: &lt;auth_service.views.CustomTokenObtainPairView object at 0x7b3889e9f350&gt;}</pre></td>
                     </tr>
 
                     <tr>
                       <td>exc</td>
                       <td
-                        class="code"><pre>AssertionError(&quot;The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.&quot;)</pre></td>
+                        class="code"><pre>RuntimeError(&#x27;No active RSA keypair available for tenant&#x27;)</pre></td>
                     </tr>
 
                     <tr>
                       <td>exception_handler</td>
                       <td
-                        class="code"><pre>&lt;function exception_handler at 0x7b828902ede0&gt;</pre></td>
+                        class="code"><pre>&lt;function exception_handler at 0x7b388b80ad40&gt;</pre></td>
                     </tr>
 
                     <tr>
@@ -850,7 +826,7 @@
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;core.views.TenantViewSet object at 0x7b82875b0ad0&gt;</pre></td>
+                        class="code"><pre>&lt;auth_service.views.CustomTokenObtainPairView object at 0x7b3889e9f350&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -865,58 +841,58 @@
                 class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/views.py</code>,
               line 486, in raise_uncaught_exception
 
-              <div class="context" id="c135800547076352">
+              <div class="context" id="c135482762190720">
 
-                <ol start="479" class="pre-context" id="pre135800547076352">
-
-                  <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre></pre></li>
+                <ol start="479" class="pre-context" id="pre135482762190720">
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>    def raise_uncaught_exception(self, exc):</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>        if settings.DEBUG:</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>    def raise_uncaught_exception(self, exc):</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>            request = self.request</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>        if settings.DEBUG:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>            renderer_format = getattr(request.accepted_renderer, &#x27;format&#x27;)</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>            request = self.request</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>            use_plaintext_traceback = renderer_format not in (&#x27;html&#x27;, &#x27;api&#x27;, &#x27;admin&#x27;)</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>            renderer_format = getattr(request.accepted_renderer, &#x27;format&#x27;)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>            request.force_plaintext_errors(use_plaintext_traceback)</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>            use_plaintext_traceback = renderer_format not in (&#x27;html&#x27;, &#x27;api&#x27;, &#x27;admin&#x27;)</pre></li>
+
+                  <li
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>            request.force_plaintext_errors(use_plaintext_traceback)</pre></li>
 
                 </ol>
 
                 <ol start="486" class="context-line">
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>        raise exc
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>        raise exc
              ^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='487' class="post-context" id="post135800547076352">
+                <ol start='487' class="post-context" id="post135482762190720">
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre></pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>    # Note: Views are made CSRF exempt from within `as_view` as to prevent</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>    # Note: Views are made CSRF exempt from within `as_view` as to prevent</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>    # accidental removal of this exemption in cases where `dispatch` needs to</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>    # accidental removal of this exemption in cases where `dispatch` needs to</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>    # be overridden.</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>    # be overridden.</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>    def dispatch(self, request, *args, **kwargs):</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>    def dispatch(self, request, *args, **kwargs):</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547076352', 'post135800547076352')"><pre>        &quot;&quot;&quot;</pre></li>
+                    onclick="toggle('pre135482762190720', 'post135482762190720')"><pre>        &quot;&quot;&quot;</pre></li>
 
                 </ol>
 
@@ -925,7 +901,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800547076352">
+                <table class="vars" id="v135482762190720">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -937,7 +913,7 @@
                     <tr>
                       <td>exc</td>
                       <td
-                        class="code"><pre>AssertionError(&quot;The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.&quot;)</pre></td>
+                        class="code"><pre>RuntimeError(&#x27;No active RSA keypair available for tenant&#x27;)</pre></td>
                     </tr>
 
                     <tr>
@@ -948,13 +924,13 @@
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/tenant/tenants/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/token/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;core.views.TenantViewSet object at 0x7b82875b0ad0&gt;</pre></td>
+                        class="code"><pre>&lt;auth_service.views.CustomTokenObtainPairView object at 0x7b3889e9f350&gt;</pre></td>
                     </tr>
 
                     <tr>
@@ -974,59 +950,59 @@
                 class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/views.py</code>,
               line 512, in dispatch
 
-              <div class="context" id="c135800547077696">
+              <div class="context" id="c135482762185536">
 
-                <ol start="505" class="pre-context" id="pre135800547077696">
-
-                  <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>            # Get the appropriate handler method</pre></li>
+                <ol start="505" class="pre-context" id="pre135482762185536">
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>            if request.method.lower() in self.http_method_names:</pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>            # Get the appropriate handler method</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>                handler = getattr(self, request.method.lower(),</pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>            if request.method.lower() in self.http_method_names:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>                                  self.http_method_not_allowed)</pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>                handler = getattr(self, request.method.lower(),</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>            else:</pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>                                  self.http_method_not_allowed)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>                handler = self.http_method_not_allowed</pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>            else:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre></pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>                handler = self.http_method_not_allowed</pre></li>
+
+                  <li
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre></pre></li>
 
                 </ol>
 
                 <ol start="512" class="context-line">
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>            response = handler(request, *args, **kwargs)
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>            response = handler(request, *args, **kwargs)
                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
                     <span>…</span></li>
                 </ol>
 
-                <ol start='513' class="post-context" id="post135800547077696">
+                <ol start='513' class="post-context" id="post135482762185536">
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre></pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>        except Exception as exc:</pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>        except Exception as exc:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>            response = self.handle_exception(exc)</pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>            response = self.handle_exception(exc)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre></pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>        self.response = self.finalize_response(request, response, *args, **kwargs)</pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>        self.response = self.finalize_response(request, response, *args, **kwargs)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077696', 'post135800547077696')"><pre>        return self.response</pre></li>
+                    onclick="toggle('pre135482762185536', 'post135482762185536')"><pre>        return self.response</pre></li>
 
                 </ol>
 
@@ -1035,7 +1011,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800547077696">
+                <table class="vars" id="v135482762185536">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -1052,7 +1028,7 @@
                     <tr>
                       <td>handler</td>
                       <td
-                        class="code"><pre>&lt;bound method TenantViewSet.create of &lt;core.views.TenantViewSet object at 0x7b82875b0ad0&gt;&gt;</pre></td>
+                        class="code"><pre>&lt;bound method TokenViewBase.post of &lt;auth_service.views.CustomTokenObtainPairView object at 0x7b3889e9f350&gt;&gt;</pre></td>
                     </tr>
 
                     <tr>
@@ -1063,13 +1039,13 @@
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/tenant/tenants/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/token/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;core.views.TenantViewSet object at 0x7b82875b0ad0&gt;</pre></td>
+                        class="code"><pre>&lt;auth_service.views.CustomTokenObtainPairView object at 0x7b3889e9f350&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -1080,60 +1056,63 @@
 
             <li class="frame user">
 
-              <code class="fname">/app/core/views.py</code>, line 413, in create
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/views.py</code>,
+              line 46, in post
 
-              <div class="context" id="c135800547078208">
+              <div class="context" id="c135482763812480">
 
-                <ol start="406" class="pre-context" id="pre135800547078208">
-
-                  <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>            raise serializers.ValidationError(&quot;Not authorized to delete this tenant&quot;)</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>        with tenant_context(tenant):</pre></li>
+                <ol start="39" class="pre-context" id="pre135482763812480">
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>            instance.delete()</pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre>            self.www_authenticate_realm,</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>        logger.info(f&quot;Tenant deleted: {instance.name} for tenant {tenant.schema_name}&quot;)</pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre>        )</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre></pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>    def create(self, request, *args, **kwargs):</pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre>    def post(self, request: Request, *args, **kwargs) -&gt; Response:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>        serializer = self.get_serializer(data=request.data)</pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre>        serializer = self.get_serializer(data=request.data)</pre></li>
+
+                  <li
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre>        try:</pre></li>
 
                 </ol>
 
-                <ol start="413" class="context-line">
+                <ol start="46" class="context-line">
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>        serializer.is_valid(raise_exception=True)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre>            serializer.is_valid(raise_exception=True)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+                    <span>…</span></li>
                 </ol>
 
-                <ol start='414' class="post-context" id="post135800547078208">
+                <ol start='47' class="post-context" id="post135482763812480">
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>        self.perform_create(serializer)</pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre>        except TokenError as e:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>        return Response(serializer.data, status=status.HTTP_201_CREATED)</pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre>            raise InvalidToken(e.args[0]) from e</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre></pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>    def update(self, request, *args, **kwargs):</pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre>        return Response(serializer.validated_data, status=status.HTTP_200_OK)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>        # print(&quot;request.data&quot;)</pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547078208', 'post135800547078208')"><pre>        # print(request.data)</pre></li>
+                    onclick="toggle('pre135482763812480', 'post135482763812480')"><pre></pre></li>
 
                 </ol>
 
@@ -1142,7 +1121,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800547078208">
+                <table class="vars" id="v135482763812480">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -1164,19 +1143,21 @@
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/tenant/tenants/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/token/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;core.views.TenantViewSet object at 0x7b82875b0ad0&gt;</pre></td>
+                        class="code"><pre>&lt;auth_service.views.CustomTokenObtainPairView object at 0x7b3889e9f350&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>serializer</td>
                       <td
-                        class="code"><pre>Error in formatting: AssertionError: The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre></td>
+                        class="code"><pre>CustomTokenSerializer(context={&#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/token/&#x27;&gt;, &#x27;format&#x27;: None, &#x27;view&#x27;: &lt;auth_service.views.CustomTokenObtainPairView object&gt;}, data={&#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;, &#x27;password&#x27;: &#x27;qwerty&#x27;}):
+    email = CharField(write_only=True)
+    password = PasswordField()</pre></td>
                     </tr>
 
                   </tbody>
@@ -1191,59 +1172,59 @@
                 class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</code>,
               line 225, in is_valid
 
-              <div class="context" id="c135800547077248">
+              <div class="context" id="c135482764207360">
 
-                <ol start="218" class="pre-context" id="pre135800547077248">
-
-                  <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>        assert hasattr(self, &#x27;initial_data&#x27;), (</pre></li>
+                <ol start="218" class="pre-context" id="pre135482764207360">
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>            &#x27;Cannot call `.is_valid()` as no `data=` keyword argument was &#x27;</pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>        assert hasattr(self, &#x27;initial_data&#x27;), (</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>            &#x27;passed when instantiating the serializer instance.&#x27;</pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>            &#x27;Cannot call `.is_valid()` as no `data=` keyword argument was &#x27;</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>        )</pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>            &#x27;passed when instantiating the serializer instance.&#x27;</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre></pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>        )</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>        if not hasattr(self, &#x27;_validated_data&#x27;):</pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>            try:</pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>        if not hasattr(self, &#x27;_validated_data&#x27;):</pre></li>
+
+                  <li
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>            try:</pre></li>
 
                 </ol>
 
                 <ol start="225" class="context-line">
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>                self._validated_data = self.run_validation(self.initial_data)
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>                self._validated_data = self.run_validation(self.initial_data)
                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
                     <span>…</span></li>
                 </ol>
 
-                <ol start='226' class="post-context" id="post135800547077248">
+                <ol start='226' class="post-context" id="post135482764207360">
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>            except ValidationError as exc:</pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>            except ValidationError as exc:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>                self._validated_data = {}</pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>                self._validated_data = {}</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>                self._errors = exc.detail</pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>                self._errors = exc.detail</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>            else:</pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>            else:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre>                self._errors = {}</pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre>                self._errors = {}</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547077248', 'post135800547077248')"><pre></pre></li>
+                    onclick="toggle('pre135482764207360', 'post135482764207360')"><pre></pre></li>
 
                 </ol>
 
@@ -1252,7 +1233,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800547077248">
+                <table class="vars" id="v135482764207360">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -1269,7 +1250,9 @@
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>Error in formatting: AssertionError: The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre></td>
+                        class="code"><pre>CustomTokenSerializer(context={&#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/token/&#x27;&gt;, &#x27;format&#x27;: None, &#x27;view&#x27;: &lt;auth_service.views.CustomTokenObtainPairView object&gt;}, data={&#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;, &#x27;password&#x27;: &#x27;qwerty&#x27;}):
+    email = CharField(write_only=True)
+    password = PasswordField()</pre></td>
                     </tr>
 
                   </tbody>
@@ -1282,60 +1265,60 @@
 
               <code
                 class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</code>,
-              line 444, in run_validation
+              line 447, in run_validation
 
-              <div class="context" id="c135800547072768">
+              <div class="context" id="c135482764703680">
 
-                <ol start="437" class="pre-context" id="pre135800547072768">
-
-                  <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>        performed by validators and the `.validate()` method should</pre></li>
+                <ol start="440" class="pre-context" id="pre135482764703680">
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>        be coerced into an error dictionary with a &#x27;non_fields_error&#x27; key.</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>        (is_empty_value, data) = self.validate_empty_values(data)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>        &quot;&quot;&quot;</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>        if is_empty_value:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>        (is_empty_value, data) = self.validate_empty_values(data)</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>            return data</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>        if is_empty_value:</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>            return data</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>        value = self.to_internal_value(data)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre></pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>        try:</pre></li>
+
+                  <li
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>            self.run_validators(value)</pre></li>
 
                 </ol>
 
-                <ol start="444" class="context-line">
+                <ol start="447" class="context-line">
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>        value = self.to_internal_value(data)
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>            value = self.validate(value)
+                         ^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='445' class="post-context" id="post135800547072768">
+                <ol start='448' class="post-context" id="post135482764703680">
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>        try:</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>            assert value is not None, &#x27;.validate() should return the validated data&#x27;</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>            self.run_validators(value)</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>        except (ValidationError, DjangoValidationError) as exc:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>            value = self.validate(value)</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>            raise ValidationError(detail=as_serializer_error(exc))</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>            assert value is not None, &#x27;.validate() should return the validated data&#x27;</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>        except (ValidationError, DjangoValidationError) as exc:</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre>        return value</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072768', 'post135800547072768')"><pre>            raise ValidationError(detail=as_serializer_error(exc))</pre></li>
+                    onclick="toggle('pre135482764703680', 'post135482764703680')"><pre></pre></li>
 
                 </ol>
 
@@ -1344,7 +1327,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800547072768">
+                <table class="vars" id="v135482764703680">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -1356,18 +1339,7 @@
                     <tr>
                       <td>data</td>
                       <td
-                        class="code"><pre>{&#x27;about_us&#x27;: &#x27;Acme Health is a leading provider of care and compliance &#x27;
-             &#x27;solutions for the elderly and vulnerable population.&#x27;,
- &#x27;default_from_email&#x27;: &#x27;noreply@acmehealth.com&#x27;,
- &#x27;domain&#x27;: &#x27;acmehealth.example.com&#x27;,
- &#x27;email_host&#x27;: &#x27;smtp.acmehealth.com&#x27;,
- &#x27;email_host_password&#x27;: &#x27;VerySecurePassword123!&#x27;,
- &#x27;email_host_user&#x27;: &#x27;noreply@acmehealth.com&#x27;,
- &#x27;email_port&#x27;: 587,
- &#x27;email_use_ssl&#x27;: True,
- &#x27;name&#x27;: &#x27;Acme&#x27;,
- &#x27;schema_name&#x27;: &#x27;acme_health&#x27;,
- &#x27;title&#x27;: &quot;Acme&#x27;s Home Care &amp; Compliance Platform&quot;}</pre></td>
+                        class="code"><pre>{&#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;, &#x27;password&#x27;: &#x27;qwerty&#x27;}</pre></td>
                     </tr>
 
                     <tr>
@@ -1378,7 +1350,15 @@
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>Error in formatting: AssertionError: The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre></td>
+                        class="code"><pre>CustomTokenSerializer(context={&#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/token/&#x27;&gt;, &#x27;format&#x27;: None, &#x27;view&#x27;: &lt;auth_service.views.CustomTokenObtainPairView object&gt;}, data={&#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;, &#x27;password&#x27;: &#x27;qwerty&#x27;}):
+    email = CharField(write_only=True)
+    password = PasswordField()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>value</td>
+                      <td
+                        class="code"><pre>{&#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;, &#x27;password&#x27;: &#x27;qwerty&#x27;}</pre></td>
                     </tr>
 
                   </tbody>
@@ -1389,63 +1369,62 @@
 
             <li class="frame user">
 
-              <code
-                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</code>,
-              line 497, in to_internal_value
+              <code class="fname">/app/auth_service/views.py</code>, line 710,
+              in validate
 
-              <div class="context" id="c135800547071040">
+              <div class="context" id="c135482764203392">
 
-                <ol start="490" class="pre-context" id="pre135800547071040">
-
-                  <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>                api_settings.NON_FIELD_ERRORS_KEY: [message]</pre></li>
+                <ol start="703" class="pre-context" id="pre135482764203392">
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>            }, code=&#x27;invalid&#x27;)</pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>                &quot;tenant_schema&quot;: user.tenant.schema_name,</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre></pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>                &quot;has_accepted_terms&quot;: user.has_accepted_terms,</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>        ret = {}</pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>                &quot;user&quot;: CustomUserMinimalSerializer(user).data,</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>        errors = {}</pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>                &quot;email&quot;: user.email,</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>        fields = self._writable_fields</pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>                &quot;type&quot;: &quot;access&quot;,</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre></pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>                &quot;exp&quot;: (timezone.now() + timedelta(minutes=15)).timestamp(),</pre></li>
+
+                  <li
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>            }</pre></li>
 
                 </ol>
 
-                <ol start="497" class="context-line">
+                <ol start="710" class="context-line">
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>        for field in fields:
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>            access_token = issue_rsa_jwt(access_payload, user.tenant)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
                     <span>…</span></li>
                 </ol>
 
-                <ol start='498' class="post-context" id="post135800547071040">
+                <ol start='711' class="post-context" id="post135482764203392">
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>            validate_method = getattr(self, &#x27;validate_&#x27; + field.field_name, None)</pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>            primitive_value = field.get_value(data)</pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>            refresh_jti = str(uuid.uuid4())</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>            try:</pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>            refresh_payload = {</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>                validated_value = field.run_validation(primitive_value)</pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>                &quot;jti&quot;: refresh_jti,</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>                if validate_method is not None:</pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>                &quot;sub&quot;: user.email,</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547071040', 'post135800547071040')"><pre>                    validated_value = validate_method(validated_value)</pre></li>
+                    onclick="toggle('pre135482764203392', 'post135482764203392')"><pre>                &quot;tenant_id&quot;: user.tenant.id,</pre></li>
 
                 </ol>
 
@@ -1454,7 +1433,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800547071040">
+                <table class="vars" id="v135482764203392">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -1464,42 +1443,54 @@
                   <tbody>
 
                     <tr>
-                      <td>data</td>
+                      <td>access_payload</td>
                       <td
-                        class="code"><pre>{&#x27;about_us&#x27;: &#x27;Acme Health is a leading provider of care and compliance &#x27;
-             &#x27;solutions for the elderly and vulnerable population.&#x27;,
- &#x27;default_from_email&#x27;: &#x27;noreply@acmehealth.com&#x27;,
- &#x27;domain&#x27;: &#x27;acmehealth.example.com&#x27;,
- &#x27;email_host&#x27;: &#x27;smtp.acmehealth.com&#x27;,
- &#x27;email_host_password&#x27;: &#x27;VerySecurePassword123!&#x27;,
- &#x27;email_host_user&#x27;: &#x27;noreply@acmehealth.com&#x27;,
- &#x27;email_port&#x27;: 587,
- &#x27;email_use_ssl&#x27;: True,
- &#x27;name&#x27;: &#x27;Acme&#x27;,
- &#x27;schema_name&#x27;: &#x27;acme_health&#x27;,
- &#x27;title&#x27;: &quot;Acme&#x27;s Home Care &amp; Compliance Platform&quot;}</pre></td>
+                        class="code"><pre>{&#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;,
+ &#x27;exp&#x27;: 1757732596.028691,
+ &#x27;has_accepted_terms&#x27;: False,
+ &#x27;jti&#x27;: &#x27;c23681f7-07c7-4a66-a80a-dbe4d97418aa&#x27;,
+ &#x27;role&#x27;: &#x27;admin&#x27;,
+ &#x27;sub&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;,
+ &#x27;tenant_id&#x27;: 4,
+ &#x27;tenant_schema&#x27;: &#x27;arts&#x27;,
+ &#x27;type&#x27;: &#x27;access&#x27;,
+ &#x27;user&#x27;: {&#x27;id&#x27;: 1, &#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;, &#x27;username&#x27;: &#x27;david&#x27;, &#x27;first_name&#x27;: &#x27;David&#x27;, &#x27;last_name&#x27;: &#x27;Dappa&#x27;, &#x27;role&#x27;: &#x27;admin&#x27;, &#x27;job_role&#x27;: &#x27;Frontend Developer&#x27;, &#x27;tenant&#x27;: 4, &#x27;branch&#x27;: None, &#x27;is_locked&#x27;: False, &#x27;has_accepted_terms&#x27;: False, &#x27;profile&#x27;: None}}</pre></td>
                     </tr>
 
                     <tr>
-                      <td>errors</td>
-                      <td class="code"><pre>{}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>fields</td>
+                      <td>attrs</td>
                       <td
-                        class="code"><pre>&lt;generator object Serializer._writable_fields at 0x7b828777bc60&gt;</pre></td>
+                        class="code"><pre>{&#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;, &#x27;password&#x27;: &#x27;qwerty&#x27;}</pre></td>
                     </tr>
 
                     <tr>
-                      <td>ret</td>
-                      <td class="code"><pre>{}</pre></td>
+                      <td>ip_address</td>
+                      <td class="code"><pre>&#x27;172.18.0.9&#x27;</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>Error in formatting: AssertionError: The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre></td>
+                        class="code"><pre>CustomTokenSerializer(context={&#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/token/&#x27;&gt;, &#x27;format&#x27;: None, &#x27;view&#x27;: &lt;auth_service.views.CustomTokenObtainPairView object&gt;}, data={&#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;, &#x27;password&#x27;: &#x27;qwerty&#x27;}):
+    email = CharField(write_only=True)
+    password = PasswordField()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>tenant</td>
+                      <td class="code"><pre>&lt;Tenant: arts&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>user</td>
+                      <td
+                        class="code"><pre>&lt;CustomUser: david.dappa@qwertybrightcare.com&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>user_agent</td>
+                      <td
+                        class="code"><pre>&#x27;Thunder Client (https://www.thunderclient.com)&#x27;</pre></td>
                     </tr>
 
                   </tbody>
@@ -1510,150 +1501,62 @@
 
             <li class="frame user">
 
-              <code
-                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</code>,
-              line 380, in _writable_fields
+              <code class="fname">/app/auth_service/utils/jwt_rsa.py</code>,
+              line 46, in issue_rsa_jwt
 
-              <div class="context" id="c135800547081536">
+              <div class="context" id="c135482764229696">
 
-                <ol start="373" class="pre-context" id="pre135800547081536">
-
-                  <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>        fields = BindingDict(self)</pre></li>
+                <ol start="39" class="pre-context" id="pre135482764229696">
 
                   <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>        for key, value in self.get_fields().items():</pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    &quot;&quot;&quot;</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>            fields[key] = value</pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    Signs payload with the tenant&#x27;s active private RSA key.</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>        return fields</pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    &quot;&quot;&quot;</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre></pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    if exp_seconds is None:</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>    @property</pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>        exp_seconds = DEFAULT_EXP_SECONDS</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>    def _writable_fields(self):</pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    keypair = RSAKeyPair.objects.filter(tenant=tenant, active=True).order_by(&#x27;-created_at&#x27;).first()</pre></li>
+
+                  <li
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    if not keypair:</pre></li>
 
                 </ol>
 
-                <ol start="380" class="context-line">
+                <ol start="46" class="context-line">
                   <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>        for field in self.fields.values():
-                          ^^^^^^^^^^^</pre> <span>…</span></li>
-                </ol>
-
-                <ol start='381' class="post-context" id="post135800547081536">
-
-                  <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>            if not field.read_only:</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>                yield field</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>    @property</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>    def _readable_fields(self):</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547081536', 'post135800547081536')"><pre>        for field in self.fields.values():</pre></li>
-
-                </ol>
-
-              </div>
-
-              <details>
-                <summary class="commands">Local vars</summary>
-
-                <table class="vars" id="v135800547081536">
-                  <thead>
-                    <tr>
-                      <th scope="col">Variable</th>
-                      <th scope="col">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>self</td>
-                      <td
-                        class="code"><pre>Error in formatting: AssertionError: The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </details>
-
-            </li>
-
-            <li class="frame django">
-
-              <code
-                class="fname">/usr/local/lib/python3.11/site-packages/django/utils/functional.py</code>,
-              line 47, in __get__
-
-              <div class="context" id="c135800547072064">
-
-                <ol start="40" class="pre-context" id="pre135800547072064">
-
-                  <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>        &quot;&quot;&quot;</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>        Call the function and put the return value in instance.__dict__ so that</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>        subsequent attribute access on the instance returns the cached value</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>        instead of calling cached_property.__get__().</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>        &quot;&quot;&quot;</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>        if instance is None:</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>            return self</pre></li>
-
-                </ol>
-
-                <ol start="47" class="context-line">
-                  <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>        res = instance.__dict__[self.name] = self.func(instance)
-                                                 ^^^^^^^^^^^^^^^^^^^</pre>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>        raise RuntimeError(&quot;No active RSA keypair available for tenant&quot;)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
                     <span>…</span></li>
                 </ol>
 
-                <ol start='48' class="post-context" id="post135800547072064">
+                <ol start='47' class="post-context" id="post135482764229696">
 
                   <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>        return res</pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    now = datetime.datetime.utcnow()</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre></pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    claims = payload.copy()</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre></pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    claims.setdefault(&#x27;iat&#x27;, now)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>class classproperty:</pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    claims.setdefault(&#x27;exp&#x27;, now + datetime.timedelta(seconds=exp_seconds))</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>    &quot;&quot;&quot;</pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    claims.setdefault(&#x27;tenant_id&#x27;, tenant.id)</pre></li>
 
                   <li
-                    onclick="toggle('pre135800547072064', 'post135800547072064')"><pre>    Decorator that converts a method with a single cls argument into a property</pre></li>
+                    onclick="toggle('pre135482764229696', 'post135482764229696')"><pre>    token = jwt.encode(</pre></li>
 
                 </ol>
 
@@ -1662,7 +1565,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v135800547072064">
+                <table class="vars" id="v135482764229696">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -1672,376 +1575,33 @@
                   <tbody>
 
                     <tr>
-                      <td>cls</td>
-                      <td
-                        class="code"><pre>&lt;class &#x27;core.serializers.TenantSerializer&#x27;&gt;</pre></td>
+                      <td>exp_seconds</td>
+                      <td class="code"><pre>3600</pre></td>
                     </tr>
 
                     <tr>
-                      <td>instance</td>
-                      <td
-                        class="code"><pre>Error in formatting: AssertionError: The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>self</td>
-                      <td
-                        class="code"><pre>&lt;django.utils.functional.cached_property object at 0x7b82891d9e10&gt;</pre></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </details>
-
-            </li>
-
-            <li class="frame user">
-
-              <code
-                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</code>,
-              line 374, in fields
-
-              <div class="context" id="c135800547077184">
-
-                <ol start="367" class="pre-context" id="pre135800547077184">
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>        &quot;&quot;&quot;</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>        A dictionary of {field_name: field_instance}.</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>        &quot;&quot;&quot;</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>        # `fields` is evaluated lazily. We do this to ensure that we don&#x27;t</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>        # have issues importing modules that use ModelSerializers as fields,</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>        # even if Django&#x27;s app-loading stage has not yet run.</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>        fields = BindingDict(self)</pre></li>
-
-                </ol>
-
-                <ol start="374" class="context-line">
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>        for key, value in self.get_fields().items():
-                               ^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
-                </ol>
-
-                <ol start='375' class="post-context" id="post135800547077184">
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>            fields[key] = value</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>        return fields</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>    @property</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>    def _writable_fields(self):</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547077184', 'post135800547077184')"><pre>        for field in self.fields.values():</pre></li>
-
-                </ol>
-
-              </div>
-
-              <details>
-                <summary class="commands">Local vars</summary>
-
-                <table class="vars" id="v135800547077184">
-                  <thead>
-                    <tr>
-                      <th scope="col">Variable</th>
-                      <th scope="col">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>fields</td>
-                      <td class="code"><pre>{}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>self</td>
-                      <td
-                        class="code"><pre>Error in formatting: AssertionError: The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </details>
-
-            </li>
-
-            <li class="frame user">
-
-              <code
-                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</code>,
-              line 1081, in get_fields
-
-              <div class="context" id="c135800547002368">
-
-                <ol start="1074" class="pre-context" id="pre135800547002368">
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>        if depth is not None:</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>            assert depth &gt;= 0, &quot;&#x27;depth&#x27; may not be negative.&quot;</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>            assert depth &lt;= 10, &quot;&#x27;depth&#x27; may not be greater than 10.&quot;</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>        # Retrieve metadata about fields &amp; relationships on the model class.</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>        info = model_meta.get_field_info(model)</pre></li>
-
-                </ol>
-
-                <ol start="1081" class="context-line">
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>        field_names = self.get_field_names(declared_fields, info)
-                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
-                    <span>…</span></li>
-                </ol>
-
-                <ol start='1082' class="post-context" id="post135800547002368">
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>        # Determine any extra field arguments and hidden fields that</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>        # should be included</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>        extra_kwargs = self.get_extra_kwargs()</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>        extra_kwargs, hidden_fields = self.get_uniqueness_extra_kwargs(</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800547002368', 'post135800547002368')"><pre>            field_names, declared_fields, extra_kwargs</pre></li>
-
-                </ol>
-
-              </div>
-
-              <details>
-                <summary class="commands">Local vars</summary>
-
-                <table class="vars" id="v135800547002368">
-                  <thead>
-                    <tr>
-                      <th scope="col">Variable</th>
-                      <th scope="col">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>declared_fields</td>
-                      <td
-                        class="code"><pre>{&#x27;domain&#x27;: CharField(required=True, write_only=True),
- &#x27;domains&#x27;: DomainSerializer(many=True, read_only=True, source=&#x27;domain_set&#x27;):
-    id = IntegerField(label=&#x27;ID&#x27;, read_only=True)
-    domain = CharField(max_length=253, validators=[&lt;UniqueValidator(queryset=Domain.objects.all())&gt;])
-    is_primary = BooleanField(required=False)
-    tenant = PrimaryKeyRelatedField(queryset=Tenant.objects.all()),
- &#x27;logo_file&#x27;: FileField(required=False, write_only=True)}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>depth</td>
-                      <td class="code"><pre>0</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>info</td>
-                      <td
-                        class="code"><pre>FieldInfo(pk=&lt;django.db.models.fields.BigAutoField: id&gt;, fields={&#x27;name&#x27;: &lt;django.db.models.fields.CharField: name&gt;, &#x27;title&#x27;: &lt;django.db.models.fields.CharField: title&gt;, &#x27;schema_name&#x27;: &lt;django.db.models.fields.CharField: schema_name&gt;, &#x27;created_at&#x27;: &lt;django.db.models.fields.DateTimeField: created_at&gt;, &#x27;logo&#x27;: &lt;django.db.models.fields.URLField: logo&gt;, &#x27;email_host&#x27;: &lt;django.db.models.fields.CharField: email_host&gt;, &#x27;email_port&#x27;: &lt;django.db.models.fields.IntegerField: email_port&gt;, &#x27;email_use_ssl&#x27;: &lt;django.db.models.fields.BooleanField: email_use_ssl&gt;, &#x27;email_host_user&#x27;: &lt;django.db.models.fields.EmailField: email_host_user&gt;, &#x27;email_host_password&#x27;: &lt;django.db.models.fields.CharField: email_host_password&gt;, &#x27;default_from_email&#x27;: &lt;django.db.models.fields.EmailField: default_from_email&gt;, &#x27;about_us&#x27;: &lt;django.db.models.fields.TextField: about_us&gt;}, forward_relations={}, reverse_relations={&#x27;domain_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Domain&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;branches&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Branch&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;module_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Module&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;rolepermission_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.RolePermission&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;aidecisionlog_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.AIDecisionLog&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;tenantconfig&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.TenantConfig&#x27;&gt;, to_many=False, to_field=None, has_through_model=False, reverse=True), &#x27;customuser_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;users.models.CustomUser&#x27;&gt;, to_many=True, to_field=&#x27;id&#x27;, has_through_model=False, reverse=True), &#x27;passwordresettoken_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;users.models.PasswordResetToken&#x27;&gt;, to_many=True, to_field=&#x27;id&#x27;, has_through_model=False, reverse=True), &#x27;compliancereport_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;users.models.ComplianceReport&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;rsa_keys&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;users.models.RSAKeyPair&#x27;&gt;, to_many=True, to_field=&#x27;id&#x27;, has_through_model=False, reverse=True)}, fields_and_pk={&#x27;pk&#x27;: &lt;django.db.models.fields.BigAutoField: id&gt;, &#x27;id&#x27;: &lt;django.db.models.fields.BigAutoField: id&gt;, &#x27;name&#x27;: &lt;django.db.models.fields.CharField: name&gt;, &#x27;title&#x27;: &lt;django.db.models.fields.CharField: title&gt;, &#x27;schema_name&#x27;: &lt;django.db.models.fields.CharField: schema_name&gt;, &#x27;created_at&#x27;: &lt;django.db.models.fields.DateTimeField: created_at&gt;, &#x27;logo&#x27;: &lt;django.db.models.fields.URLField: logo&gt;, &#x27;email_host&#x27;: &lt;django.db.models.fields.CharField: email_host&gt;, &#x27;email_port&#x27;: &lt;django.db.models.fields.IntegerField: email_port&gt;, &#x27;email_use_ssl&#x27;: &lt;django.db.models.fields.BooleanField: email_use_ssl&gt;, &#x27;email_host_user&#x27;: &lt;django.db.models.fields.EmailField: email_host_user&gt;, &#x27;email_host_password&#x27;: &lt;django.db.models.fields.CharField: email_host_password&gt;, &#x27;default_from_email&#x27;: &lt;django.db.models.fields.EmailField: default_from_email&gt;, &#x27;about_us&#x27;: &lt;django.db.models.fields.TextField: about_us&gt;}, relations={&#x27;domain_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Domain&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;branches&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Branch&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;module_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Module&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;rolepermission_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.RolePermission&#x27;&gt;, to_many=True, to_field=None, has_through_model=… &lt;trimmed 5147 bytes string&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>model</td>
-                      <td
-                        class="code"><pre>&lt;class &#x27;core.models.Tenant&#x27;&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>self</td>
-                      <td
-                        class="code"><pre>Error in formatting: AssertionError: The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </details>
-
-            </li>
-
-            <li class="frame user">
-
-              <code
-                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</code>,
-              line 1177, in get_field_names
-
-              <div class="context" id="c135800546821696">
-
-                <ol start="1170" class="pre-context" id="pre135800546821696">
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>            # in order to allow serializer subclasses to only include</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>            # a subset of fields.</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>            required_field_names = set(declared_fields)</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>            for cls in self.__class__.__bases__:</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>                required_field_names -= set(getattr(cls, &#x27;_declared_fields&#x27;, []))</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre></pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>            for field_name in required_field_names:</pre></li>
-
-                </ol>
-
-                <ol start="1177" class="context-line">
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>                assert field_name in fields, (
-                             ^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
-                </ol>
-
-                <ol start='1178' class="post-context" id="post135800546821696">
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>                    &quot;The field &#x27;{field_name}&#x27; was declared on serializer &quot;</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>                    &quot;{serializer_class}, but has not been included in the &quot;</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>                    &quot;&#x27;fields&#x27; option.&quot;.format(</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>                        field_name=field_name,</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>                        serializer_class=self.__class__.__name__</pre></li>
-
-                  <li
-                    onclick="toggle('pre135800546821696', 'post135800546821696')"><pre>                    )</pre></li>
-
-                </ol>
-
-              </div>
-
-              <details>
-                <summary class="commands">Local vars</summary>
-
-                <table class="vars" id="v135800546821696">
-                  <thead>
-                    <tr>
-                      <th scope="col">Variable</th>
-                      <th scope="col">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>cls</td>
-                      <td
-                        class="code"><pre>&lt;class &#x27;rest_framework.serializers.ModelSerializer&#x27;&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>declared_fields</td>
-                      <td
-                        class="code"><pre>{&#x27;domain&#x27;: CharField(required=True, write_only=True),
- &#x27;domains&#x27;: DomainSerializer(many=True, read_only=True, source=&#x27;domain_set&#x27;):
-    id = IntegerField(label=&#x27;ID&#x27;, read_only=True)
-    domain = CharField(max_length=253, validators=[&lt;UniqueValidator(queryset=Domain.objects.all())&gt;])
-    is_primary = BooleanField(required=False)
-    tenant = PrimaryKeyRelatedField(queryset=Tenant.objects.all()),
- &#x27;logo_file&#x27;: FileField(required=False, write_only=True)}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>exclude</td>
+                      <td>keypair</td>
                       <td class="code"><pre>None</pre></td>
                     </tr>
 
                     <tr>
-                      <td>field_name</td>
-                      <td class="code"><pre>&#x27;domain&#x27;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>fields</td>
-                      <td class="code"><pre>[&#x27;id&#x27;,
- &#x27;name&#x27;,
- &#x27;title&#x27;,
- &#x27;schema_name&#x27;,
- &#x27;created_at&#x27;,
- &#x27;logo&#x27;,
- &#x27;logo_file&#x27;,
- &#x27;email_host&#x27;,
- &#x27;email_port&#x27;,
- &#x27;email_use_ssl&#x27;,
- &#x27;email_host_user&#x27;,
- &#x27;email_host_password&#x27;,
- &#x27;default_from_email&#x27;,
- &#x27;about_us&#x27;,
- &#x27;domains&#x27;]</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>info</td>
+                      <td>payload</td>
                       <td
-                        class="code"><pre>FieldInfo(pk=&lt;django.db.models.fields.BigAutoField: id&gt;, fields={&#x27;name&#x27;: &lt;django.db.models.fields.CharField: name&gt;, &#x27;title&#x27;: &lt;django.db.models.fields.CharField: title&gt;, &#x27;schema_name&#x27;: &lt;django.db.models.fields.CharField: schema_name&gt;, &#x27;created_at&#x27;: &lt;django.db.models.fields.DateTimeField: created_at&gt;, &#x27;logo&#x27;: &lt;django.db.models.fields.URLField: logo&gt;, &#x27;email_host&#x27;: &lt;django.db.models.fields.CharField: email_host&gt;, &#x27;email_port&#x27;: &lt;django.db.models.fields.IntegerField: email_port&gt;, &#x27;email_use_ssl&#x27;: &lt;django.db.models.fields.BooleanField: email_use_ssl&gt;, &#x27;email_host_user&#x27;: &lt;django.db.models.fields.EmailField: email_host_user&gt;, &#x27;email_host_password&#x27;: &lt;django.db.models.fields.CharField: email_host_password&gt;, &#x27;default_from_email&#x27;: &lt;django.db.models.fields.EmailField: default_from_email&gt;, &#x27;about_us&#x27;: &lt;django.db.models.fields.TextField: about_us&gt;}, forward_relations={}, reverse_relations={&#x27;domain_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Domain&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;branches&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Branch&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;module_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Module&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;rolepermission_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.RolePermission&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;aidecisionlog_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.AIDecisionLog&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;tenantconfig&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.TenantConfig&#x27;&gt;, to_many=False, to_field=None, has_through_model=False, reverse=True), &#x27;customuser_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;users.models.CustomUser&#x27;&gt;, to_many=True, to_field=&#x27;id&#x27;, has_through_model=False, reverse=True), &#x27;passwordresettoken_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;users.models.PasswordResetToken&#x27;&gt;, to_many=True, to_field=&#x27;id&#x27;, has_through_model=False, reverse=True), &#x27;compliancereport_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;users.models.ComplianceReport&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;rsa_keys&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;users.models.RSAKeyPair&#x27;&gt;, to_many=True, to_field=&#x27;id&#x27;, has_through_model=False, reverse=True)}, fields_and_pk={&#x27;pk&#x27;: &lt;django.db.models.fields.BigAutoField: id&gt;, &#x27;id&#x27;: &lt;django.db.models.fields.BigAutoField: id&gt;, &#x27;name&#x27;: &lt;django.db.models.fields.CharField: name&gt;, &#x27;title&#x27;: &lt;django.db.models.fields.CharField: title&gt;, &#x27;schema_name&#x27;: &lt;django.db.models.fields.CharField: schema_name&gt;, &#x27;created_at&#x27;: &lt;django.db.models.fields.DateTimeField: created_at&gt;, &#x27;logo&#x27;: &lt;django.db.models.fields.URLField: logo&gt;, &#x27;email_host&#x27;: &lt;django.db.models.fields.CharField: email_host&gt;, &#x27;email_port&#x27;: &lt;django.db.models.fields.IntegerField: email_port&gt;, &#x27;email_use_ssl&#x27;: &lt;django.db.models.fields.BooleanField: email_use_ssl&gt;, &#x27;email_host_user&#x27;: &lt;django.db.models.fields.EmailField: email_host_user&gt;, &#x27;email_host_password&#x27;: &lt;django.db.models.fields.CharField: email_host_password&gt;, &#x27;default_from_email&#x27;: &lt;django.db.models.fields.EmailField: default_from_email&gt;, &#x27;about_us&#x27;: &lt;django.db.models.fields.TextField: about_us&gt;}, relations={&#x27;domain_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Domain&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;branches&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Branch&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;module_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.Module&#x27;&gt;, to_many=True, to_field=None, has_through_model=False, reverse=True), &#x27;rolepermission_set&#x27;: RelationInfo(model_field=None, related_model=&lt;class &#x27;core.models.RolePermission&#x27;&gt;, to_many=True, to_field=None, has_through_model=… &lt;trimmed 5147 bytes string&gt;</pre></td>
+                        class="code"><pre>{&#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;,
+ &#x27;exp&#x27;: 1757732596.028691,
+ &#x27;has_accepted_terms&#x27;: False,
+ &#x27;jti&#x27;: &#x27;c23681f7-07c7-4a66-a80a-dbe4d97418aa&#x27;,
+ &#x27;role&#x27;: &#x27;admin&#x27;,
+ &#x27;sub&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;,
+ &#x27;tenant_id&#x27;: 4,
+ &#x27;tenant_schema&#x27;: &#x27;arts&#x27;,
+ &#x27;type&#x27;: &#x27;access&#x27;,
+ &#x27;user&#x27;: {&#x27;id&#x27;: 1, &#x27;email&#x27;: &#x27;david.dappa@qwertybrightcare.com&#x27;, &#x27;username&#x27;: &#x27;david&#x27;, &#x27;first_name&#x27;: &#x27;David&#x27;, &#x27;last_name&#x27;: &#x27;Dappa&#x27;, &#x27;role&#x27;: &#x27;admin&#x27;, &#x27;job_role&#x27;: &#x27;Frontend Developer&#x27;, &#x27;tenant&#x27;: 4, &#x27;branch&#x27;: None, &#x27;is_locked&#x27;: False, &#x27;has_accepted_terms&#x27;: False, &#x27;profile&#x27;: None}}</pre></td>
                     </tr>
 
                     <tr>
-                      <td>required_field_names</td>
-                      <td
-                        class="code"><pre>{&#x27;logo_file&#x27;, &#x27;domain&#x27;, &#x27;domains&#x27;}</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>self</td>
-                      <td
-                        class="code"><pre>Error in formatting: AssertionError: The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.</pre></td>
+                      <td>tenant</td>
+                      <td class="code"><pre>&lt;Tenant: arts&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -2058,7 +1618,7 @@
           <div id="pastebinTraceback" class="pastebin">
             <input type="hidden" name="language" value="PythonConsole">
             <input type="hidden" name="title"
-              value="AssertionError at /api/tenant/tenants/">
+              value="RuntimeError at /api/token/">
             <input type="hidden" name="source" value="Django Dpaste Agent">
             <input type="hidden" name="poster" value="Django">
             <textarea name="content" id="traceback_area" cols="140" rows="25">
@@ -2066,7 +1626,7 @@ Environment:
 
 
 Request Method: POST
-Request URL: http://auth-service/api/tenant/tenants/
+Request URL: http://auth-service/api/token/
 
 Django Version: 5.2.5
 Python Version: 3.11.13
@@ -2106,7 +1666,7 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
     return view_func(request, *args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
     return self.dispatch(request, *args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
@@ -2121,36 +1681,24 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
     response = handler(request, *args, **kwargs)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/core/views.py", line 413, in create
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 46, in post
     serializer.is_valid(raise_exception=True)
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
     self._validated_data = self.run_validation(self.initial_data)
                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 444, in run_validation
-    value = self.to_internal_value(data)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 497, in to_internal_value
-    for field in fields:
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 710, in validate
+    access_token = issue_rsa_jwt(access_payload, user.tenant)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/utils/jwt_rsa.py", line 46, in issue_rsa_jwt
+    raise RuntimeError(&quot;No active RSA keypair available for tenant&quot;)
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 380, in _writable_fields
-    for field in self.fields.values():
-                 ^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/django/utils/functional.py", line 47, in __get__
-    res = instance.__dict__[self.name] = self.func(instance)
-                                         ^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 374, in fields
-    for key, value in self.get_fields().items():
-                      ^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 1081, in get_fields
-    field_names = self.get_field_names(declared_fields, info)
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 1177, in get_field_names
-    assert field_name in fields, (
-           ^^^^^^^^^^^^^^^^^^^^
 
-Exception Type: AssertionError at /api/tenant/tenants/
-Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantSerializer, but has not been included in the &#x27;fields&#x27; option.
+Exception Type: RuntimeError at /api/token/
+Exception Value: No active RSA keypair available for tenant
 </textarea>
             <br><br>
             <input type="submit"
@@ -2164,7 +1712,7 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
         <h2>Request information</h2>
 
         <h3 id="user-info">USER</h3>
-        <p>support@prolianceltd.com</p>
+        <p>AnonymousUser</p>
 
         <h3 id="get-info">GET</h3>
 
@@ -2194,7 +1742,7 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
 
             <tr>
               <td>CONTENT_LENGTH</td>
-              <td class="code"><pre>&#x27;519&#x27;</pre></td>
+              <td class="code"><pre>&#x27;73&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -2235,7 +1783,7 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
 
             <tr>
               <td>PATH_INFO</td>
-              <td class="code"><pre>&#x27;/api/tenant/tenants/&#x27;</pre></td>
+              <td class="code"><pre>&#x27;/api/token/&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -2245,17 +1793,17 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
 
             <tr>
               <td>RAW_URI</td>
-              <td class="code"><pre>&#x27;/api/tenant/tenants/&#x27;</pre></td>
+              <td class="code"><pre>&#x27;/api/token/&#x27;</pre></td>
             </tr>
 
             <tr>
               <td>REMOTE_ADDR</td>
-              <td class="code"><pre>&#x27;172.18.0.2&#x27;</pre></td>
+              <td class="code"><pre>&#x27;172.18.0.9&#x27;</pre></td>
             </tr>
 
             <tr>
               <td>REMOTE_PORT</td>
-              <td class="code"><pre>&#x27;34400&#x27;</pre></td>
+              <td class="code"><pre>&#x27;38122&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -2291,13 +1839,13 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
             <tr>
               <td>gunicorn.socket</td>
               <td
-                class="code"><pre>&lt;socket.socket fd=10, family=2, type=1, proto=0, laddr=(&#x27;172.18.0.8&#x27;, 8001), raddr=(&#x27;172.18.0.2&#x27;, 34400)&gt;</pre></td>
+                class="code"><pre>&lt;socket.socket fd=10, family=2, type=1, proto=0, laddr=(&#x27;172.18.0.11&#x27;, 8001), raddr=(&#x27;172.18.0.9&#x27;, 38122)&gt;</pre></td>
             </tr>
 
             <tr>
               <td>wsgi.errors</td>
               <td
-                class="code"><pre>&lt;gunicorn.http.wsgi.WSGIErrorsWrapper object at 0x7b82875c0040&gt;</pre></td>
+                class="code"><pre>&lt;gunicorn.http.wsgi.WSGIErrorsWrapper object at 0x7b388a0827d0&gt;</pre></td>
             </tr>
 
             <tr>
@@ -2309,7 +1857,7 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
             <tr>
               <td>wsgi.input</td>
               <td
-                class="code"><pre>&lt;gunicorn.http.body.Body object at 0x7b82875b8f90&gt;</pre></td>
+                class="code"><pre>&lt;gunicorn.http.body.Body object at 0x7b388f7ffa90&gt;</pre></td>
             </tr>
 
             <tr>
@@ -2525,7 +2073,7 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
              &#x27;OPTIONS&#x27;: {},
              &#x27;PASSWORD&#x27;: &#x27;********************&#x27;,
              &#x27;PORT&#x27;: &#x27;5432&#x27;,
-             &#x27;SCHEMA&#x27;: &#x27;proliance&#x27;,
+             &#x27;SCHEMA&#x27;: &#x27;arts&#x27;,
              &#x27;TEST&#x27;: {&#x27;CHARSET&#x27;: None,
                       &#x27;COLLATION&#x27;: None,
                       &#x27;MIGRATE&#x27;: True,
@@ -2965,27 +2513,34 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
               <td>LOGGING</td>
               <td
                 class="code"><pre>{&#x27;disable_existing_loggers&#x27;: False,
- &#x27;formatters&#x27;: {&#x27;simple&#x27;: {&#x27;format&#x27;: &#x27;[{levelname}] {message}&#x27;, &#x27;style&#x27;: &#x27;{&#x27;},
-                &#x27;verbose&#x27;: {&#x27;format&#x27;: &#x27;{asctime} [{levelname}] {name}: &#x27;
+ &#x27;formatters&#x27;: {&#x27;simple&#x27;: {&#x27;datefmt&#x27;: &#x27;%Y-%m-%d %H:%M:%S&#x27;,
+                           &#x27;format&#x27;: &#x27;[{levelname}] {message}&#x27;,
+                           &#x27;style&#x27;: &#x27;{&#x27;},
+                &#x27;verbose&#x27;: {&#x27;datefmt&#x27;: &#x27;%Y-%m-%d %H:%M:%S&#x27;,
+                            &#x27;format&#x27;: &#x27;{asctime} [{levelname}] {name}: &#x27;
                                       &#x27;{message}&#x27;,
                             &#x27;style&#x27;: &#x27;{&#x27;}},
  &#x27;handlers&#x27;: {&#x27;console&#x27;: {&#x27;class&#x27;: &#x27;logging.StreamHandler&#x27;,
-                          &#x27;formatter&#x27;: &#x27;simple&#x27;},
+                          &#x27;formatter&#x27;: &#x27;simple&#x27;,
+                          &#x27;level&#x27;: &#x27;DEBUG&#x27;},
               &#x27;file&#x27;: {&#x27;backupCount&#x27;: 5,
                        &#x27;class&#x27;: &#x27;logging.handlers.RotatingFileHandler&#x27;,
                        &#x27;filename&#x27;: &#x27;/app/logs/auth_service.log&#x27;,
                        &#x27;formatter&#x27;: &#x27;verbose&#x27;,
-                       &#x27;level&#x27;: &#x27;INFO&#x27;,
+                       &#x27;level&#x27;: &#x27;DEBUG&#x27;,
                        &#x27;maxBytes&#x27;: 5242880}},
- &#x27;loggers&#x27;: {&#x27;core&#x27;: {&#x27;handlers&#x27;: [&#x27;file&#x27;],
-                      &#x27;level&#x27;: &#x27;INFO&#x27;,
+ &#x27;loggers&#x27;: {&#x27;core&#x27;: {&#x27;handlers&#x27;: [&#x27;file&#x27;, &#x27;console&#x27;],
+                      &#x27;level&#x27;: &#x27;DEBUG&#x27;,
                       &#x27;propagate&#x27;: False},
              &#x27;django&#x27;: {&#x27;handlers&#x27;: [&#x27;file&#x27;, &#x27;console&#x27;],
                         &#x27;level&#x27;: &#x27;INFO&#x27;,
                         &#x27;propagate&#x27;: True},
-             &#x27;users&#x27;: {&#x27;handlers&#x27;: [&#x27;file&#x27;],
-                       &#x27;level&#x27;: &#x27;INFO&#x27;,
-                       &#x27;propagate&#x27;: False}},
+             &#x27;users&#x27;: {&#x27;handlers&#x27;: [&#x27;file&#x27;, &#x27;console&#x27;],
+                       &#x27;level&#x27;: &#x27;DEBUG&#x27;,
+                       &#x27;propagate&#x27;: False},
+             &#x27;utils.supabase&#x27;: {&#x27;handlers&#x27;: [&#x27;file&#x27;, &#x27;console&#x27;],
+                                &#x27;level&#x27;: &#x27;DEBUG&#x27;,
+                                &#x27;propagate&#x27;: False}},
  &#x27;version&#x27;: 1}</pre></td>
             </tr>
 
@@ -3300,6 +2855,18 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
             </tr>
 
             <tr>
+              <td>SPECTACULAR_SETTINGS</td>
+              <td
+                class="code"><pre>{&#x27;COMPONENTS&#x27;: {&#x27;securitySchemes&#x27;: {&#x27;BearerAuth&#x27;: &#x27;********************&#x27;}},
+ &#x27;COMPONENT_SPLIT_REQUEST&#x27;: True,
+ &#x27;DESCRIPTION&#x27;: &#x27;API documentation for LUMINA Care OS&#x27;,
+ &#x27;SECURITY&#x27;: [{&#x27;BearerAuth&#x27;: &#x27;********************&#x27;}],
+ &#x27;SERVE_INCLUDE_SCHEMA&#x27;: False,
+ &#x27;TITLE&#x27;: &#x27;LUMINA Care OS API&#x27;,
+ &#x27;VERSION&#x27;: &#x27;1.0.0&#x27;}</pre></td>
+            </tr>
+
+            <tr>
               <td>STATICFILES_DIRS</td>
               <td class="code"><pre>[]</pre></td>
             </tr>
@@ -3335,7 +2902,7 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
 
             <tr>
               <td>SUPABASE_BUCKET</td>
-              <td class="code"><pre>&#x27;your-supabase-bucket&#x27;</pre></td>
+              <td class="code"><pre>&#x27;luminacaremedia&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -3346,7 +2913,7 @@ Exception Value: The field &#x27;domain&#x27; was declared on serializer TenantS
             <tr>
               <td>SUPABASE_URL</td>
               <td
-                class="code"><pre>&#x27;https://your-supabase-url.supabase.co&#x27;</pre></td>
+                class="code"><pre>&#x27;https://gkvgqvosnetifsonhxuo.supabase.co&#x27;</pre></td>
             </tr>
 
             <tr>
