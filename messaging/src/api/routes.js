@@ -1,7 +1,10 @@
-import { Router } from 'express';
-import prisma from '../config/prisma.js';
+import { Router } from "express";
+import prisma from "../config/prisma.js";
+import indexRouter from "./routes/index.js";
 
-const router = Router();
+const apiRouter = Router();
+
+apiRouter.use("/", indexRouter);
 
 /**
  * @swagger
@@ -13,7 +16,7 @@ const router = Router();
  *       200:
  *         description: List of users
  */
-router.get('/users', async (req, res) => {
+apiRouter.get("/users", async (req, res) => {
   try {
     const users = await prisma.user.findMany();
     res.json(users);
@@ -32,17 +35,17 @@ router.get('/users', async (req, res) => {
  *       200:
  *         description: List of chats
  */
-router.get('/chats', async (req, res) => {
+apiRouter.get("/chats", async (req, res) => {
   try {
     const chats = await prisma.chat.findMany({
       include: {
         users: {
           include: {
-            user: true
-          }
+            user: true,
+          },
         },
-        messages: true
-      }
+        messages: true,
+      },
     });
     res.json(chats);
   } catch (error) {
@@ -67,17 +70,17 @@ router.get('/chats', async (req, res) => {
  *       200:
  *         description: List of messages in the chat
  */
-router.get('/messages/:chatId', async (req, res) => {
+apiRouter.get("/messages/:chatId", async (req, res) => {
   try {
     const { chatId } = req.params;
     const messages = await prisma.message.findMany({
       where: { chatId },
       include: {
-        author: true
+        author: true,
       },
       orderBy: {
-        createdAt: 'asc'
-      }
+        createdAt: "asc",
+      },
     });
     res.json(messages);
   } catch (error) {
@@ -85,4 +88,4 @@ router.get('/messages/:chatId', async (req, res) => {
   }
 });
 
-export default router;
+export default apiRouter;

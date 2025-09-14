@@ -1,4 +1,4 @@
-import prisma from "../config/prisma";
+import prisma from "../config/prisma.js";
 
 const getChatsForUser = async (userId) => {
   const userChats = await prisma.usersOnChats.findMany({
@@ -65,4 +65,7 @@ const updateMessageStatus = async (messageId, status) => {
   }
 };
 
-module.exports = { getChatsForUser, updateMessageStatus };
+export default {
+  getChatsForUser,
+  updateMessageStatus,
+};

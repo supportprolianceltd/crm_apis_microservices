@@ -1,6 +1,5 @@
-const express = require("express");
-const chatsController = require("../controllers/chatsController");
-
+import express from "express";
+import chatsController from "../controllers/chatsController.js";
 const router = express.Router();
 
 // GET /api/v1/chats/:tenantId/:userId
@@ -10,4 +9,4 @@ router.patch(
   chatsController.updateMessageStatusController
 );
 
-module.exports = router;
+export default router;

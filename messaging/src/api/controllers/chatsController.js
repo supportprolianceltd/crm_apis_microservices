@@ -1,4 +1,4 @@
-import { chatService } from "../../services/chatService";
+import chatService from "../../services/chatService.js";
 
 const getChatsController = async (req, res) => {
   try {
@@ -18,4 +18,4 @@ const updateMessageStatusController = async (req, res) => {
   res.status(200).json({ message: "Message status updated successfully" });
 };
 
-module.exports = { getChatsController, updateMessageStatusController };
+export default { getChatsController, updateMessageStatusController };
