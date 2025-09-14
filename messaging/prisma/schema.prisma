@@ -26,6 +26,8 @@ model User {
   id            Int            @id @default(autoincrement())
   email         String         @unique
   username      String?
+  online        Boolean        @default(false)
+  lastSeen      DateTime?
   firstName     String?
   lastName      String?
   role          String?

@@ -1,81 +1,150 @@
 const initializeSocket = (io) => {
-  io.on("connection", (socket) => {
-    console.log("New WebSocket connection:", {
-      id: socket.id,
-      handshake: socket.handshake,
-      connected: socket.connected,
-    });
+  const onlineUsers = new Map(); // userId -> socketId
 
-    // Join a specific chat room
-    socket.on("join_chat", (data) => {
+  // Update user's online status in DB
+  const updateOnlineStatus = async (userId, isOnline) => {
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          online: isOnline,
+          lastSeen: isOnline ? null : new Date(),
+        },
+      });
+    } catch (error) {
+      console.error("Error updating online status:", error);
+    }
+  };
+
+  io.on("connection", (socket) => {
+    console.log("New WebSocket connection:", socket.id);
+
+    socket.on("authenticate", async ({ userId, token }) => {
+      if (!userId || !token) {
+        socket.emit("error", { message: "User ID and token are required" });
+        return;
+      }
+
       try {
-        const chatId =
-          typeof data === "string" ? data : data.chatId || data.room;
-        if (!chatId) {
-          console.error("No chatId provided in join_chat event");
-          return;
+        // Verify token and get user with tenant info
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await prisma.user.findUnique({
+          where: {
+            id: userId,
+            tenantId: decoded.tenant_id, // Ensure user belongs to the tenant in token
+          },
+          include: {
+            contacts: {
+              where: { tenantId: decoded.tenant_id }, // Only include same-tenant contacts
+              select: { id: true, online: true },
+            },
+          },
+        });
+
+        if (!user) {
+          throw new Error("User not found or unauthorized");
         }
 
-        socket.join(chatId);
-        console.log(`User ${socket.id} joined chat ${chatId}`);
+        // Store socket info
+        onlineUsers.set(userId, socket.id);
+        socket.userId = userId;
+        socket.tenantId = decoded.tenant_id;
 
-        // Send confirmation back to the client
-        socket.emit("joined_chat", {
-          success: true,
-          chatId,
-          message: `Successfully joined chat ${chatId}`,
+        // Update online status in DB
+        await updateOnlineStatus(userId, true);
+
+        // Notify contacts
+        user.contacts.forEach((contact) => {
+          const contactSocketId = onlineUsers.get(contact.id);
+          if (contactSocketId) {
+            io.to(contactSocketId).emit("user_online", { userId });
+          }
         });
 
-        // Notify others in the room
-        socket.to(chatId).emit("user_joined", {
-          userId: socket.id,
-          chatId,
-          message: `User ${socket.id} joined the chat`,
-        });
+        // Send online contacts list
+        const onlineContacts = user.contacts
+          .filter((contact) => contact.online)
+          .map((contact) => contact.id);
+
+        socket.emit("online_contacts", onlineContacts);
       } catch (error) {
-        console.error("Error in join_chat:", error);
-        socket.emit("error", {
-          error: "Failed to join chat",
-          details: error.message,
-        });
+        console.error("Authentication error:", error);
+        socket.emit("error", { message: "Authentication failed" });
+        socket.disconnect();
       }
     });
-
-    // Handle new messages
-    socket.on("send_message", (data) => {
+    // Handle private messages
+    socket.on("private_message", async ({ to, content }) => {
       try {
-        const { chatId, content, userId } = data;
-        console.log("New message:", { chatId, content, userId });
+        if (!socket.userId) {
+          throw new Error("User not authenticated");
+        }
 
-        // Create message object
-        const message = {
-          id: Date.now().toString(),
-          chatId,
-          content,
-          userId,
+        // Save message to database
+        const message = await prisma.message.create({
+          data: {
+            content,
+            senderId: socket.userId,
+            receiverId: to,
+          },
+        });
+
+        // If recipient is online, send the message
+        const recipientSocketId = onlineUsers.get(to);
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit("new_message", message);
+        }
+
+        // Send delivery confirmation to sender
+        socket.emit("message_delivered", {
+          messageId: message.id,
           timestamp: new Date().toISOString(),
-        };
-
-        // Broadcast the message to all clients in the chat room
-        io.to(chatId).emit("receive_message", message);
+        });
       } catch (error) {
-        console.error("Error handling message:", error);
+        console.error("Error sending message:", error);
+        socket.emit("error", { message: "Failed to send message" });
       }
     });
 
-    // Handle typing indicators
-    socket.on("typing", (data) => {
-      const { chatId, userId, isTyping } = data;
-      socket.to(chatId).emit("user_typing", {
-        userId,
-        isTyping,
-        timestamp: new Date().toISOString(),
-      });
+    // Handle typing indicator
+    socket.on("typing", async ({ to, isTyping }) => {
+      try {
+        const recipientSocketId = onlineUsers.get(to);
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit("user_typing", {
+            from: socket.userId,
+            isTyping,
+            tenantId: socket.tenantId,
+          });
+        }
+      } catch (error) {
+        console.error("Error handling typing indicator:", error);
+      }
     });
 
-    // Handle disconnection
-    socket.on("disconnect", () => {
-      console.log(`User ${socket.id} disconnected`);
+    socket.on("disconnect", async () => {
+      if (socket.userId) {
+        onlineUsers.delete(socket.userId);
+        await updateOnlineStatus(socket.userId, false);
+
+        try {
+          const user = await prisma.user.findUnique({
+            where: { id: socket.userId },
+            select: { contacts: { select: { id: true } } },
+          });
+
+          user?.contacts.forEach(({ id }) => {
+            const contactSocketId = onlineUsers.get(id);
+            if (contactSocketId) {
+              io.to(contactSocketId).emit("user_offline", {
+                userId: socket.userId,
+              });
+            }
+          });
+        } catch (error) {
+          console.error("Error handling disconnection:", error);
+        }
+      }
     });
   });
 };
