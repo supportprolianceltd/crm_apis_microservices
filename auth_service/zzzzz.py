@@ -18,6 +18,16 @@ if not Tenant.objects.filter(schema_name='public').exists():
    
 
 from core.models import Tenant, Domain
+if not Tenant.objects.filter(schema_name='arts').exists():
+    tenant = Tenant.objects.create(
+        name='arts',
+        schema_name='arts',
+    )
+    tenant.auto_create_schema = False
+    tenant.save()
+    Domain.objects.create(tenant=tenant, domain='artstraining.co.uk', is_primary=True)
+
+from core.models import Tenant, Domain
 if not Tenant.objects.filter(schema_name='auth-service').exists():
     tenant = Tenant.objects.create(
         name='auth-service',
@@ -81,13 +91,13 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='david',
-        email='david.dappa@prolianceltd.com',
+        username='tonna',
+        email='tonna.ezugwu@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='David',
-        last_name='Dappa',
-        job_role='Frontend Developer',
+        first_name='Tonna',
+        last_name='Ezugwu',
+        job_role='Project Manager Developer',
         tenant=tenant
     )
 
@@ -160,7 +170,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='proliance')
+tenant = Tenant.objects.get(schema_name='arts')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(

@@ -118,137 +118,6 @@ class TenantConfigSerializer(serializers.ModelSerializer):
 
 
 
-# class TenantSerializer(serializers.ModelSerializer):
-#     logo_file = serializers.FileField(write_only=True, required=False)
-#     domains = DomainSerializer(many=True, read_only=True, source='domain_set')  # Adjust source if needed
-
-#     class Meta:
-#         model = Tenant
-#         fields = [
-#             'id', 'name', 'title', 'schema_name', 'created_at', 'logo', 'logo_file',
-#             'email_host', 'email_port', 'email_use_ssl', 'email_host_user',
-#             'email_host_password', 'default_from_email', 'about_us', 'domains'
-#         ]
-#         read_only_fields = ['id', 'created_at', 'schema_name', 'logo']
-
-#     def validate_name(self, value):
-#         if not re.match(r'^[a-zA-Z0-9\s\'-]+$', value):
-#             raise serializers.ValidationError("Tenant name can only contain letters, numbers, spaces, apostrophes, or hyphens.")
-#         return value
-
-#     def validate_schema_name(self, value):
-#         if not re.match(r'^[a-z0-9_]+$', value):
-#             raise serializers.ValidationError("Schema name can only contain lowercase letters, numbers, or underscores.")
-#         if Tenant.objects.filter(schema_name=value).exists():
-#             raise serializers.ValidationError("Schema name already exists.")
-#         return value
-
-#     def validate_domain(self, value):
-#         if not re.match(r'^[a-zA-Z0-9\-\.]+$', value):
-#             raise serializers.ValidationError("Invalid domain name.")
-#         if Domain.objects.filter(domain=value).exists():
-#             raise serializers.ValidationError(f"Domain '{value}' already exists.")
-#         return value
-
-#     def validate_logo_file(self, value):
-#         allowed_types = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif']
-#         if value.content_type not in allowed_types:
-#             raise serializers.ValidationError("Only image files are allowed for logo.")
-#         max_size = 5 * 1024 * 1024  # 5 MB
-#         if value.size > max_size:
-#             raise serializers.ValidationError("Logo file size exceeds 5 MB limit.")
-#         return value
-
-#     def create(self, validated_data):
-#         logo_file = validated_data.pop('logo_file', None)
-#         if logo_file:
-#             file_ext = os.path.splitext(logo_file.name)[1]
-#             filename = f"{uuid.uuid4()}{file_ext}"
-#             folder_path = f"tenant_logos/{timezone.now().strftime('%Y/%m/%d')}"
-#             path = f"{folder_path}/{filename}"
-#             content_type = mimetypes.guess_type(logo_file.name)[0]
-#             storage = get_storage_service()
-#             storage.upload_file(logo_file, path, content_type or 'application/octet-stream')
-#             file_url = storage.get_public_url(path)
-#             validated_data['logo'] = file_url
-#         domain_name = validated_data.pop('domain')
-#         schema_name = validated_data.get('schema_name') or validated_data['name'].lower().replace(' ', '_').replace('-', '_')
-#         validated_data['schema_name'] = schema_name
-#         logger.info(f"Creating tenant with name: {validated_data['name']}, schema_name: {schema_name}, domain: {domain_name}")
-#         try:
-#             with transaction.atomic():
-#                 tenant = Tenant.objects.create(**validated_data)
-#                 logger.info(f"Tenant created: {tenant.id}, schema_name: {tenant.schema_name}")
-#                 domain = Domain.objects.create(tenant=tenant, domain=domain_name, is_primary=True)
-#                 logger.info(f"Domain created: {domain.domain} for tenant {tenant.id}")
-
-#                 # Use imported default_templates
-#                 TenantConfig.objects.create(
-#                     tenant=tenant,
-#                     email_templates=default_templates
-#                 )
-#                 logger.info(f"TenantConfig created for tenant {tenant.id} with default email templates")
-
-#                 # Create default modules
-#                 default_modules = [
-#                     'Talent Engine', 'Compliance', 'Training', 'Care Coordination',
-#                     'Workforce', 'Analytics', 'Integrations', 'Assets Management', 'Payroll'
-#                 ]
-#                 for module_name in default_modules:
-#                     Module.objects.create(name=module_name, tenant=tenant)
-#                 logger.info(f"Modules created for tenant {tenant.id}")
-
-#                 try:
-#                     domains = tenant.domain_set.all()
-#                     logger.info(f"Domains for tenant {tenant.id}: {[d.domain for d in domains]}")
-#                 except AttributeError as e:
-#                     logger.error(f"domain_set access failed: {str(e)}")
-#                     domains = Domain.objects.filter(tenant=tenant)
-#                     logger.info(f"Fallback domains for tenant {tenant.id}: {[d.domain for d in domains]}")
-#                 return tenant
-#         except Exception as e:
-#             logger.error(f"Failed to create tenant or domain: {str(e)}")
-#             raise
-
-
-#     def update(self, instance, validated_data):
-#         logo_file = self.context['request'].FILES.get('logo') or validated_data.pop('logo', None)
-#         if logo_file:
-#             file_ext = os.path.splitext(logo_file.name)[1]
-#             filename = f"{uuid.uuid4()}{file_ext}"
-#             folder_path = f"tenant_logos/{timezone.now().strftime('%Y/%m/%d')}"
-#             path = f"{folder_path}/{filename}"
-#             content_type = mimetypes.guess_type(logo_file.name)[0]
-#             storage = get_storage_service()
-#             storage.upload_file(logo_file, path, content_type or 'application/octet-stream')
-#             file_url = storage.get_public_url(path)
-#             instance.logo = file_url  # Directly update the instance
-
-#         # Update other fields
-#         for attr, value in validated_data.items():
-#             setattr(instance, attr, value)
-#         instance.save()
-#         return instance
-
-
-#     def to_representation(self, instance):
-#         data = super().to_representation(instance)
-#         logo_path = instance.logo
-#         if logo_path:
-#             # If logo_path is already a URL, use it. Otherwise, generate public URL from storage utils.
-#             if logo_path.startswith('http'):
-#                 data['logo'] = logo_path
-#             else:
-#                 storage = get_storage_service()
-#                 data['logo'] = storage.get_public_url(logo_path)
-#         else:
-#             data['logo'] = ""
-#         return data
-
-# class TenantSerializer(serializers.ModelSerializer):
-#     logo_file = serializers.FileField(write_only=True, required=False)
-#     domains = DomainSerializer(many=True, read_only=True, source='domain_set')  # Adjust source if needed
-
 
 
 class TenantSerializer(serializers.ModelSerializer):
@@ -259,13 +128,17 @@ class TenantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tenant
         fields = [
-            'id', 'name', 'title', 'schema_name', 'created_at', 'logo', 'logo_file',
+            'id', 'unique_id', 'organizational_id', 'name', 'title', 'schema_name', 'created_at', 'logo', 'logo_file',
             'email_host', 'email_port', 'email_use_ssl', 'email_host_user',
             'email_host_password', 'default_from_email', 'about_us',
             'domain',  # for write
             'domains'  # for read
         ]
-        read_only_fields = ['id', 'created_at', 'schema_name', 'logo']
+        
+        read_only_fields = [
+            'id', 'unique_id', 'organizational_id',
+            'created_at', 'schema_name', 'logo'
+        ]
 
     def validate_schema_name(self, value):
         if not re.match(r'^[a-z0-9_]+$', value):

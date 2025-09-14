@@ -1089,8 +1089,8 @@ class AdminUserCreateView(APIView):
                         'tenant_id': user.tenant.id,
                         'tenant_schema': user.tenant.schema_name,
                         'branch': user.branch.name if user.branch else None,
-                        'refresh': str(refresh),
-                        'access': str(refresh.access_token),
+                        # 'refresh': str(refresh),
+                        # 'access': str(refresh.access_token),
                     }
                 }, status=status.HTTP_201_CREATED)
             except Exception as e:

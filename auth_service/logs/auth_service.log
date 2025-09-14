@@ -78,3 +78,1375 @@ RuntimeError: No active RSA keypair available for tenant
 2025-09-13 03:18:50 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
 2025-09-13 03:19:05 [DEBUG] core: Returning all tenants for list action
 2025-09-13 03:19:05 [INFO] core: Listing paginated tenants: [1, 2, 3, 4]
+2025-09-13 08:50:32 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-13 08:50:58 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:50:58 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:50:58 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:50:58 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:51:04 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:04 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:04 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:51:04 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:51:05 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:05 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:05 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:51:05 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:51:16 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:16 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:16 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:51:16 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:51:29 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:29 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:29 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:51:29 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:51:40 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:40 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:40 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:51:40 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:51:49 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:49 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:51:49 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:51:49 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:52:02 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-13 08:52:13 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:13 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:13 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:52:14 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:52:17 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:17 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:17 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:52:17 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:52:19 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:19 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:19 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:52:19 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:52:28 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:28 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:28 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:52:28 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:52:38 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:38 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:38 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:52:38 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:52:50 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:50 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:50 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:52:50 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:52:59 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:59 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:52:59 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:52:59 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:53:08 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:53:08 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:53:08 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:53:08 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:53:20 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:53:20 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:53:20 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:53:20 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:53:29 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:53:29 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:53:29 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:53:29 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 567, in retrieve
+    tenant = self.get_tenant(request)
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 87, in get_object
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 530, in get_queryset
+    logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+    ^^^^^^^^^^
+NameError: name 'connection' is not defined
+2025-09-13 08:57:17 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-13 08:57:23 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:57:23 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:57:23 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:57:23 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:57:23 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:57:50 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:57:50 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:57:50 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:57:50 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:57:50 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:57:50 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:57:50 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:57:50 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:57:50 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:57:50 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:57:50 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:57:50 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:57:50 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:57:50 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:57:50 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:57:54 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:57:54 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:57:54 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:57:54 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:57:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:58:04 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:04 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:04 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:58:04 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:58:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:58:15 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:15 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:15 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:58:15 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:58:15 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:58:24 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:24 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:24 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:58:24 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:58:24 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:58:33 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:33 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:33 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:58:33 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:58:33 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:58:43 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:43 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:43 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:58:43 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:58:43 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:58:52 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:52 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:58:52 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:58:52 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:58:52 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:59:01 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:59:01 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:59:01 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:59:01 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:59:01 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 08:59:58 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:59:58 [DEBUG] core: Tenant from user: proliance
+2025-09-13 08:59:58 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 08:59:58 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 08:59:58 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:00:02 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:02 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:02 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:00:02 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:00:02 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:00:07 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:07 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:07 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:00:07 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:00:07 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:00:07 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:07 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:07 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:00:07 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:00:07 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:00:19 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:19 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:19 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:00:19 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:00:19 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:00:28 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:28 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:28 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:00:28 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:00:28 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:00:37 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:37 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:37 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:00:37 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:00:37 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:00:49 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:49 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:49 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:00:49 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:00:49 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:00:58 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:58 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:00:58 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:00:58 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:00:58 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:01:07 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:07 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:07 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:01:07 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:01:07 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:01:16 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:16 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:16 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:01:16 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:01:16 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:01:28 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:28 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:28 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:01:28 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:01:28 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:01:37 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:37 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:37 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:01:37 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:01:37 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:01:46 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:46 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:46 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:01:47 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:01:47 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:01:53 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:53 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:01:53 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:01:53 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:01:53 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:02:02 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:02 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:02 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:02:02 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:02:02 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:02:18 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:18 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:18 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:02:18 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:02:18 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:02:28 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:28 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:28 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:02:28 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:02:28 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:02:37 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:37 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:37 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:02:37 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:02:37 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:02:46 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:46 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:46 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:02:46 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:02:46 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:02:59 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:59 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:02:59 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:02:59 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:02:59 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:03:08 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:08 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:08 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:03:08 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:03:08 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:03:18 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:18 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:18 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:03:18 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:03:18 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:03:27 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:27 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:27 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:03:27 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:03:27 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:03:39 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:39 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:39 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:03:39 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:03:39 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:03:48 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:48 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:48 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:03:48 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:03:48 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:03:57 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:57 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:03:57 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:03:57 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:03:57 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:04:04 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:04:04 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:04:04 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:04:04 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:04:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 09:04:54 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:04:54 [DEBUG] core: Tenant from user: proliance
+2025-09-13 09:04:54 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 09:04:54 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 09:04:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-13 10:41:03 [WARNING] django.request: Forbidden: /api/public-key/3be05348dc394060b1b47140d5ac8d85/
+2025-09-13 10:41:19 [WARNING] django.request: Forbidden: /api/public-key/3be05348dc394060b1b47140d5ac8d85/
+2025-09-13 10:41:20 [ERROR] django.request: Internal Server Error: /api/token/refresh/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "users_rsakeypair" does not exist
+LINE 1: ...r"."updated_at", "users_rsakeypair"."active" FROM "users_rsa...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/auth_service/views.py", line 756, in post
+    payload = decode_rsa_jwt(refresh_token)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/utils/jwt_rsa.py", line 112, in decode_rsa_jwt
+    keypair = RSAKeyPair.objects.filter(kid=kid, active=True).first()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1104, in first
+    for obj in queryset[:1]:
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 384, in __iter__
+    self._fetch_all()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "users_rsakeypair" does not exist
+LINE 1: ...r"."updated_at", "users_rsakeypair"."active" FROM "users_rsa...
+                                                             ^
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "users_useractivity" does not exist
+LINE 1: INSERT INTO "users_useractivity" ("user_id", "tenant_id", "a...
+                    ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 828, in post
+    UserActivity.objects.create(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 663, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "users_useractivity" does not exist
+LINE 1: INSERT INTO "users_useractivity" ("user_id", "tenant_id", "a...
+                    ^
+
+2025-09-13 10:41:21 [ERROR] django.request: Internal Server Error: /api/token/refresh/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "users_rsakeypair" does not exist
+LINE 1: ...r"."updated_at", "users_rsakeypair"."active" FROM "users_rsa...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/auth_service/views.py", line 756, in post
+    payload = decode_rsa_jwt(refresh_token)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/utils/jwt_rsa.py", line 112, in decode_rsa_jwt
+    keypair = RSAKeyPair.objects.filter(kid=kid, active=True).first()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1104, in first
+    for obj in queryset[:1]:
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 384, in __iter__
+    self._fetch_all()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "users_rsakeypair" does not exist
+LINE 1: ...r"."updated_at", "users_rsakeypair"."active" FROM "users_rsa...
+                                                             ^
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "users_useractivity" does not exist
+LINE 1: INSERT INTO "users_useractivity" ("user_id", "tenant_id", "a...
+                    ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 828, in post
+    UserActivity.objects.create(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 663, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "users_useractivity" does not exist
+LINE 1: INSERT INTO "users_useractivity" ("user_id", "tenant_id", "a...
+                    ^
+
+2025-09-13 11:53:46 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-13 11:53:50 [DEBUG] users: Tenant from request: proliance
+2025-09-13 11:53:51 [DEBUG] users: Tenant from request: proliance
+2025-09-13 12:34:13 [WARNING] django.request: Forbidden: /api/token/validate/
+2025-09-13 12:34:13 [WARNING] django.request: Forbidden: /api/token/validate/
+2025-09-13 12:36:03 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-13 12:36:17 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:36:17 [INFO] core: Listing paginated tenants: [1, 2, 3, 4]
+2025-09-13 12:36:18 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:36:18 [INFO] core: Listing paginated tenants: [1, 2, 3, 4]
+2025-09-13 12:36:18 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:36:18 [INFO] core: Listing paginated tenants: [1, 2, 3, 4]
+2025-09-13 12:36:31 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:36:31 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:36:31 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 12:36:31 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 12:36:31 [WARNING] django.request: Not Found: /api/tenant/tenants/2/
+2025-09-13 12:36:31 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:36:31 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:36:31 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 12:36:31 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 12:36:31 [WARNING] django.request: Not Found: /api/tenant/tenants/2/
+2025-09-13 12:36:34 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:36:34 [INFO] core: Listing paginated tenants: [1, 2, 3, 4]
+2025-09-13 12:36:34 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:36:34 [INFO] core: Listing paginated tenants: [1, 2, 3, 4]
+2025-09-13 12:36:34 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:36:34 [INFO] core: Listing paginated tenants: [1, 2, 3, 4]
+2025-09-13 12:37:39 [INFO] core: Creating tenant: netwiver | Schema: netwiver | Domain: netwiver.com
+2025-09-13 12:37:39 [INFO] core: Saving tenant with schema_name: netwiver
+2025-09-13 12:37:39 [WARNING] users: users_rsakeypair table does not exist in schema netwiver. Skipping RSA keypair creation.
+2025-09-13 12:37:43 [INFO] core: Saving tenant with schema_name: netwiver
+2025-09-13 12:37:43 [INFO] core: Uploaded logo for tenant 5
+2025-09-13 12:37:43 [INFO] core: Created modules for tenant 5
+2025-09-13 12:37:43 [INFO] core: Sent tenant_created event for tenant 5
+2025-09-13 12:37:43 [INFO] core: Tenant created: netwiver (schema: netwiver)
+2025-09-13 12:37:44 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:37:44 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:37:44 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:37:44 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:37:44 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:37:44 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:06 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:06 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:06 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:07 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:07 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:07 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:10 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:40:10 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:40:10 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 12:40:10 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 12:40:10 [WARNING] django.request: Not Found: /api/tenant/tenants/5/
+2025-09-13 12:40:10 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:40:10 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:40:10 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 12:40:10 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 12:40:10 [WARNING] django.request: Not Found: /api/tenant/tenants/5/
+2025-09-13 12:40:12 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:12 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:12 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:12 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:12 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:12 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:14 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:40:14 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:40:14 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 12:40:14 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 12:40:14 [WARNING] django.request: Not Found: /api/tenant/tenants/5/
+2025-09-13 12:40:14 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:40:14 [DEBUG] core: Tenant from user: proliance
+2025-09-13 12:40:14 [DEBUG] core: Filtering queryset for tenant: proliance
+2025-09-13 12:40:14 [DEBUG] core: Database search_path: proliance, public
+2025-09-13 12:40:14 [WARNING] django.request: Not Found: /api/tenant/tenants/5/
+2025-09-13 12:40:40 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:40 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:40 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:40 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:40 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:41 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:52 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:52 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:52 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:52 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-13 12:40:52 [DEBUG] core: Returning all tenants for list action
+2025-09-13 12:40:52 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-14 01:02:24 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-14 01:02:48 [DEBUG] core: Returning all tenants for list action
+2025-09-14 01:02:48 [INFO] core: Listing paginated tenants: [1, 2, 3, 4, 5]
+2025-09-14 06:10:13 [WARNING] django.request: Not Found: /api/token/
+2025-09-14 06:12:16 [INFO] core: Saving tenant arts with schema: arts, Org ID: TEN-0001
+2025-09-14 06:12:43 [INFO] core: Saving tenant public with schema: public, Org ID: TEN-0001
+2025-09-14 06:14:29 [INFO] core: Saving tenant public with schema: public, Org ID: TEN-0001
+2025-09-14 06:16:08 [INFO] core: Saving tenant public with schema: public, Org ID: TEN-0001
+2025-09-14 06:30:46 [INFO] core: Saving tenant public with schema: public, Org ID: TEN-0001
+2025-09-14 06:30:46 [WARNING] users: users_rsakeypair table does not exist in schema public. Skipping RSA keypair creation.
+2025-09-14 06:30:46 [INFO] core: Saving tenant public with schema: public, Org ID: TEN-0001
+2025-09-14 06:30:56 [INFO] core: Saving tenant arts with schema: arts, Org ID: TEN-0002
+2025-09-14 06:30:56 [WARNING] users: users_rsakeypair table does not exist in schema arts. Skipping RSA keypair creation.
+2025-09-14 06:31:00 [INFO] core: Saving tenant arts with schema: arts, Org ID: TEN-0002
+2025-09-14 06:32:56 [WARNING] django.request: Not Found: /api/token/
+2025-09-14 06:33:16 [INFO] users: Login attempts reset for user support@artstraining.co.uk in tenant arts
+2025-09-14 06:33:27 [DEBUG] core: Returning all tenants for list action
+2025-09-14 06:33:27 [INFO] core: Listing paginated tenants: [1, 2]
+2025-09-14 06:33:47 [INFO] core: Creating tenant: proliance | Schema: proliance | Domain: prolianceltd.com.
+2025-09-14 06:33:47 [INFO] core: Saving tenant proliance with schema: proliance, Org ID: TEN-0003
+2025-09-14 06:33:47 [WARNING] users: users_rsakeypair table does not exist in schema proliance. Skipping RSA keypair creation.
+2025-09-14 06:33:50 [INFO] core: Created modules for tenant 3
+2025-09-14 06:33:51 [INFO] core: Sent tenant_created event for tenant 3
+2025-09-14 06:33:51 [INFO] core: Tenant created: proliance (schema: proliance)
+2025-09-14 06:34:44 [ERROR] users: Validation error: {'email': [ErrorDetail(string="No tenant found for domain 'prolainceltd.com'.", code='invalid')]}
+2025-09-14 06:34:44 [WARNING] django.request: Bad Request: /api/user/users/admin/create/
+2025-09-14 06:34:55 [ERROR] users: Validation error: {'email': [ErrorDetail(string="No tenant found for domain 'prolianceltd.com'.", code='invalid')]}
+2025-09-14 06:34:55 [WARNING] django.request: Bad Request: /api/user/users/admin/create/
+2025-09-14 06:35:25 [DEBUG] core: Tenant from user: arts
+2025-09-14 06:35:25 [WARNING] core: Unauthorized access attempt to tenant 3 by tenant 2
+2025-09-14 06:35:25 [WARNING] django.request: Forbidden: /api/tenant/tenants/153e340d-f749-4e64-8911-27c59a42fe7d/
+2025-09-14 06:41:30 [INFO] core: Saving tenant Public with schema: public, Org ID: TEN-0001
+2025-09-14 06:41:31 [WARNING] users: users_rsakeypair table does not exist in schema public. Skipping RSA keypair creation.
+2025-09-14 06:41:31 [INFO] core: Saving tenant Public with schema: public, Org ID: TEN-0001
+2025-09-14 06:42:20 [INFO] core: Saving tenant arts with schema: arts, Org ID: TEN-0002
+2025-09-14 06:42:20 [WARNING] users: users_rsakeypair table does not exist in schema arts. Skipping RSA keypair creation.
+2025-09-14 06:42:23 [INFO] core: Saving tenant arts with schema: arts, Org ID: TEN-0002
+2025-09-14 06:42:43 [WARNING] django.request: Bad Request: /api/token/
+2025-09-14 06:43:21 [INFO] users: Login attempts reset for user support@artstraining.co.uk in tenant arts
+2025-09-14 06:43:47 [DEBUG] core: Returning all tenants for list action
+2025-09-14 06:43:47 [INFO] core: Listing paginated tenants: [1, 2]
+2025-09-14 06:43:51 [INFO] core: Creating tenant: proliance | Schema: proliance | Domain: prolianceltd.com
+2025-09-14 06:43:51 [INFO] core: Saving tenant proliance with schema: proliance, Org ID: TEN-0003
+2025-09-14 06:43:51 [WARNING] users: users_rsakeypair table does not exist in schema proliance. Skipping RSA keypair creation.
+2025-09-14 06:43:55 [INFO] core: Created modules for tenant 3
+2025-09-14 06:43:55 [INFO] core: Sent tenant_created event for tenant 3
+2025-09-14 06:43:55 [INFO] core: Tenant created: proliance (schema: proliance)
+2025-09-14 06:44:13 [INFO] users: Admin user created: david.dappa@prolianceltd.com for tenant proliance
+2025-09-14 06:44:54 [INFO] users: Login attempts reset for user david.dappa@prolianceltd.com in tenant proliance
+2025-09-14 06:44:54 [ERROR] django.request: Internal Server Error: /api/token/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 46, in post
+    serializer.is_valid(raise_exception=True)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 710, in validate
+    access_token = issue_rsa_jwt(access_payload, user.tenant)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/utils/jwt_rsa.py", line 46, in issue_rsa_jwt
+    raise RuntimeError("No active RSA keypair available for tenant")
+RuntimeError: No active RSA keypair available for tenant
+2025-09-14 06:45:37 [INFO] users: RSAKeyPair created for tenant: proliance, kid: e6a0c57c665b4d9cac104183b9c3c9b1
+2025-09-14 06:45:45 [INFO] users: Login attempts reset for user david.dappa@prolianceltd.com in tenant proliance
+2025-09-14 06:51:54 [INFO] users: Login attempts reset for user david.dappa@prolianceltd.com in tenant proliance
+2025-09-14 06:55:32 [INFO] users: Login attempts reset for user david.dappa@prolianceltd.com in tenant proliance
+2025-09-14 06:55:51 [DEBUG] core: Returning all tenants for list action
+2025-09-14 06:55:51 [INFO] core: Listing paginated tenants: [1, 2, 3]
+2025-09-14 06:55:59 [DEBUG] core: Tenant from user: proliance
+2025-09-14 06:55:59 [INFO] core: Retrieving tenant: 1 for tenant proliance
+2025-09-14 06:56:04 [DEBUG] core: Tenant from user: proliance
+2025-09-14 06:56:04 [ERROR] django.request: Internal Server Error: /api/tenant/tenants/1/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/__init__.py", line 2766, in to_python
+    return uuid.UUID(**{input_form: value})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/uuid.py", line 178, in __init__
+    raise ValueError('badly formed hexadecimal UUID string')
+ValueError: badly formed hexadecimal UUID string
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 439, in retrieve
+    instance = self.get_object()
+               ^^^^^^^^^^^^^^^^^
+  File "/app/core/views.py", line 345, in get_object
+    return Tenant.objects.get(unique_id=unique_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 619, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1493, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1511, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1518, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1415, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 38, in __init__
+    self.rhs = self.get_prep_lookup()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 410, in get_prep_lookup
+    return super().get_prep_lookup()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 96, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/__init__.py", line 2750, in get_prep_value
+    return self.to_python(value)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/__init__.py", line 2768, in to_python
+    raise exceptions.ValidationError(
+django.core.exceptions.ValidationError: ['“1” is not a valid UUID.']
+2025-09-14 06:56:11 [DEBUG] core: Tenant from user: proliance
+2025-09-14 06:56:11 [INFO] core: Retrieving tenant: 1 for tenant proliance
+2025-09-14 06:57:43 [INFO] users: Admin user created: david1.dappa@prolianceltd.com for tenant proliance
