@@ -146,6 +146,42 @@ const initializeSocket = (io) => {
       }
     });
 
+    socket.on("mark_as_read", async ({ messageId }) => {
+      try {
+        if (!socket.userId) {
+          throw new Error("Not authenticated");
+        }
+
+        const message = await prisma.message.update({
+          where: {
+            id: messageId,
+            // Ensure user is the recipient
+            chat: {
+              users: {
+                some: { userId: socket.userId },
+              },
+            },
+          },
+          data: {
+            status: "READ",
+            readAt: new Date(),
+          },
+        });
+
+        // Notify the sender that their message was read
+        const senderSocketId = onlineUsers.get(message.authorId);
+        if (senderSocketId) {
+          io.to(senderSocketId).emit("message_read", {
+            messageId: message.id,
+            readAt: message.readAt,
+          });
+        }
+      } catch (error) {
+        console.error("Error marking message as read:", error);
+        socket.emit("error", { message: "Failed to mark message as read" });
+      }
+    });
+
     socket.on("disconnect", async () => {
       if (socket.userId) {
         onlineUsers.delete(socket.userId);
