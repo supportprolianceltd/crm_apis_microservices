@@ -34,7 +34,7 @@ services:
     build: .
     container_name: messaging_websocket
     ports:
-      - "3500:3000"
+      - "3500:3500"
     env_file:
       - ./.env
     volumes:
