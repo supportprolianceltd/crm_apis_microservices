@@ -234,8 +234,12 @@ class TenantSerializer(serializers.ModelSerializer):
             logger.error(f"Tenant creation failed: {str(e)}")
             raise serializers.ValidationError(f"Tenant creation failed: {str(e)}")
 
+            
     def update(self, instance, validated_data):
-        logo_file = self.context['request'].FILES.get('logo') or validated_data.pop('logo', None)
+        request = self.context.get('request')
+
+        # Handle logo file if uploaded
+        logo_file = request.FILES.get('logo') if request else None
         if logo_file:
             file_ext = os.path.splitext(logo_file.name)[1]
             filename = f"{uuid.uuid4()}{file_ext}"
@@ -244,13 +248,15 @@ class TenantSerializer(serializers.ModelSerializer):
             content_type = mimetypes.guess_type(logo_file.name)[0]
             storage = get_storage_service()
             storage.upload_file(logo_file, path, content_type or 'application/octet-stream')
-            file_url = storage.get_public_url(path)
-            instance.logo = file_url
+            instance.logo = storage.get_public_url(path)
 
+        # Update remaining fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+
         instance.save()
         return instance
+
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

@@ -444,15 +444,7 @@ class TenantViewSet(viewsets.ModelViewSet):
         logger.info(f"Retrieving tenant: {instance.id} for tenant {tenant.schema_name}")
         return Response(serializer.data)
 
-    def perform_update(self, serializer):
-        tenant = self.get_tenant(self.request)
-        instance = self.get_object()
-        if instance.id != tenant.id:
-            logger.error(f"Unauthorized update attempt on tenant {instance.id} by tenant {tenant.id}")
-            raise serializers.ValidationError("Not authorized to update this tenant")
-        with tenant_context(tenant):
-            serializer.save()
-        logger.info(f"Tenant updated: {instance.name} for tenant {tenant.schema_name}")
+
 
     def perform_destroy(self, instance):
         tenant = self.get_tenant(self.request)
@@ -469,10 +461,35 @@ class TenantViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        tenant = self.get_tenant(self.request)
+
+        # Optional: only allow tenant owners or superusers
+        if instance.id != tenant.id and not self.request.user.is_superuser:
+            raise serializers.ValidationError("Not authorized to update this tenant")
+
+        # Use tenant context for schema switching
+        with tenant_context(tenant):
+            serializer.save()
+        logger.info(f"Tenant updated: {instance.name} for tenant {tenant.schema_name}")
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        tenant = self.get_tenant(request)
+
+        # Pass request to serializer context for file handling
+        serializer = self.get_serializer(
+            instance, 
+            data=request.data, 
+            partial=partial, 
+            context={'request': request}  # ensure request is available
+        )
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+
+        # Use tenant context when saving
+        with tenant_context(tenant):
+            serializer.save()
+
         return Response(serializer.data)

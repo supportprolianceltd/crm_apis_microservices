@@ -277,3 +277,5 @@ class CustomTenantSchemaMiddleware(MiddlewareMixin):
             return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
 
         return self.get_response(request)
+    
+    

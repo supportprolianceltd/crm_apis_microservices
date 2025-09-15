@@ -64,7 +64,8 @@ DATABASES = {
         'PASSWORD': env('DB_PASSWORD', default=''),
         'HOST': env('DB_HOST', default='localhost'),
         'PORT': env('DB_PORT', default='5432'),
-        'CONN_MAX_AGE': 60,
+        'CONN_MAX_AGE': 300,  # Reduce to 5 minutes
+        'CONN_HEALTH_CHECKS': True,  # Enable health checks
     }
 }
 
