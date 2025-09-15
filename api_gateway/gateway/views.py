@@ -19,9 +19,9 @@ PUBLIC_PATHS = [
 @csrf_exempt
 def api_gateway_view(request, path):
     try:
-        # Support multi-segment prefixes (e.g., talent-engine, applications-engine)
+        # Support multi-segment prefixes (e.g., talent-engine, applications-engine, messaging)
         segments = path.split('/')
-        if len(segments) >= 2 and segments[0] in {"talent-engine", "applications-engine"}:
+        if len(segments) >= 2 and segments[0] in {"talent-engine", "applications-engine", "messaging"}:
             prefix = segments[0]
             sub_path = '/'.join(segments[1:])
         else:

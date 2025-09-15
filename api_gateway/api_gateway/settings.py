@@ -183,6 +183,7 @@ MICROSERVICE_URLS = {
     "auth_service": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
     "applications-engine": env.str("JOB_APPLICATIONS_URL", default="http://job-applications:8003"),
     "talent-engine": env.str("TALENT_ENGINE_URL", default="http://talent-engine:8002"),
+    "messaging": env.str("MESSAGING_URL", default="http://messaging:3500"),
     "token": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
     "token/refresh": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
     "token/validate": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
