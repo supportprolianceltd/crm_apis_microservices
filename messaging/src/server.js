@@ -5,6 +5,7 @@ import { config } from "dotenv";
 import cors from "cors";
 import swaggerDocs from "./config/swagger.js";
 import { authenticate, errorHandler } from "./middleware/auth.middleware.js";
+import { PORT } from "./config/config.js";
 
 // Load environment variables
 config();
@@ -29,8 +30,6 @@ const io = new Server(server, {
   },
   transports: ["websocket", "polling"], // Explicitly specify transports
 });
-
-const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors(corsOptions));

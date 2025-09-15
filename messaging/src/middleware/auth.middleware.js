@@ -48,7 +48,7 @@ export const authenticate = async (req, res, next) => {
 
     try {
       // Verify JWT token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET);
 
       // Extract tenant and user info from token
       const tenantId = decoded.tenant_id;
@@ -70,10 +70,10 @@ export const authenticate = async (req, res, next) => {
 
         if (!tenant) {
           // Optional: Fetch tenant from auth service if not found locally
-          if (process.env.AUTH_SERVICE_URL) {
+          if (AUTH_SERVICE_URL) {
             try {
               const response = await axios.get(
-                `${process.env.AUTH_SERVICE_URL}/api/tenants/${tenantId}/`,
+                `${AUTH_SERVICE_URL}/api/tenants/${tenantId}/`,
                 { headers: { Authorization: `Bearer ${token}` } }
               );
 
@@ -173,7 +173,7 @@ export const socketAuth = async (socket, next) => {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET);
 
       if (!decoded.tenant_id) {
         console.warn(
