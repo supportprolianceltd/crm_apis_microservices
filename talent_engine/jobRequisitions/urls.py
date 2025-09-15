@@ -1,6 +1,6 @@
 from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
-from .views import (PublicPublishedJobRequisitionsView,PublicCloseJobRequisitionView,
+from .views import (PublicPublishedJobRequisitionsView,PublicCloseJobRequisitionView,PublicPublishedRequisitionsByTenantView,
     JobRequisitionListCreateView,MyJobRequisitionListView, JobRequisitionDetailView,PublishedJobRequisitionListView,
     JobRequisitionBulkDeleteView,SoftDeletedJobRequisitionsView, RecoverSoftDeletedJobRequisitionsView,
     PermanentDeleteJobRequisitionsView,JobRequisitionByLinkView,ComplianceItemView,VideoSessionViewSet,
@@ -21,6 +21,9 @@ urlpatterns = [
     path('requisitions/', JobRequisitionListCreateView.as_view(), name='requisition-list-create'),
     path('requisitions/published/requisition/', PublishedJobRequisitionListView.as_view(), name='published-requisitions'),  
     path('requisitions/public/published/', PublicPublishedJobRequisitionsView.as_view(), name='public-published-requisitions'),
+
+    path('requisitions/public/published/<str:tenant_unique_id>/', PublicPublishedRequisitionsByTenantView.as_view(),name='public-tenant-published-requisitions'),
+
     path('requisitions/public/close/<str:job_requisition_id>/', PublicCloseJobRequisitionView.as_view(), name='public-close-requisition'),
     path('requisitions/<str:id>/', JobRequisitionDetailView.as_view(), name='requisition-detail'),
     path('requisitions/bulk/bulk-delete/', JobRequisitionBulkDeleteView.as_view(), name='requisition-bulk-delete'),

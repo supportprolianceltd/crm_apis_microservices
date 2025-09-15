@@ -732,61 +732,6 @@ class JobApplicationBulkDeleteView(APIView):
 
 
 
-# class JobApplicationWithSchedulesView(APIView):
-#     serializer_class = SimpleMessageSerializer 
-#     # permission_classes = [AllowAny]
-
-#     def get(self, request, *args, **kwargs):
-#         unique_link = request.query_params.get('unique_link')
-#         if not unique_link:
-#             logger.error("No unique_link provided in the request")
-#             return Response({"detail": "Unique link is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # You must implement this function to resolve tenant and job_requisition via API, not ORM
-#         tenant, job_requisition = resolve_tenant_from_unique_link(unique_link)
-#         if not tenant or not job_requisition:
-#             logger.error(f"Invalid or expired unique_link: {unique_link}")
-#             return Response({"detail": "Invalid or expired job link."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         job_application_code = kwargs.get('code')
-#         email = kwargs.get('email')
-#         if not job_application_code or not email:
-#             logger.error("Missing job_application_code or email in request")
-#             return Response({"detail": "Both job application code and email are required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # Only use ORM for your own models
-#         try:
-#             job_application = JobApplication.active_objects.get(
-#                 job_requisition_id=job_requisition['id'],
-#                 email=email,
-#                 tenant_id=tenant['id']
-#             )
-#         except JobApplication.DoesNotExist:
-#             logger.error(f"JobApplication with code {job_application_code} and email {email} not found for tenant {tenant['id']}")
-#             return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
-#         except JobApplication.MultipleObjectsReturned:
-#             logger.error(f"Multiple JobApplications found for code {job_application_code} and email {email} in tenant {tenant['id']}")
-#             return Response({"detail": "Multiple job applications found. Please contact support."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         job_application_serializer = JobApplicationSerializer(job_application)
-#         schedules = Schedule.active_objects.filter(
-#             tenant_id=tenant['id'],
-#             job_application=job_application
-#         )
-#         if request.user.is_authenticated and getattr(request.user, 'role', None) == 'recruiter' and getattr(request.user, 'branch', None):
-#             schedules = schedules.filter(branch=request.user.branch)
-#         schedule_serializer = ScheduleSerializer(schedules, many=True)
-
-#         response_data = {
-#             'job_application': job_application_serializer.data,
-#             'job_requisition': job_requisition,  # Already a dict from API
-#             'schedules': schedule_serializer.data,
-#             'schedule_count': schedules.count()
-#         }
-
-#         logger.info(f"Retrieved job application with code {job_application_code} and email {email} for tenant {tenant['id']}")
-#         return Response(response_data, status=status.HTTP_200_OK)
-
 
 class JobApplicationWithSchedulesView(APIView):
     """

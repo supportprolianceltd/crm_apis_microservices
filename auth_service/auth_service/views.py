@@ -25,7 +25,7 @@ from core.models import Tenant
 from users.models import CustomUser, UserProfile, BlacklistedToken, RSAKeyPair, UserActivity,BlockedIP
 from users.serializers import CustomUserSerializer
 from auth_service.utils.jwt_rsa import issue_rsa_jwt, decode_rsa_jwt, blacklist_refresh_token
-
+from jose import jwk
 logger = logging.getLogger(__name__)
 
 class UserProfileMinimalSerializer(serializers.ModelSerializer):
@@ -559,6 +559,24 @@ class PublicKeyView(APIView):
             logger.error(f"No RSAKeyPair found for kid={kid} in schema={tenant.schema_name}")
             return Response({"error": "Keypair not found"}, status=404)
 
+# class JWKSView(APIView):
+#     permission_classes = [AllowAny]
+
+#     def get(self, request):
+#         jwks = {"keys": []}
+#         tenants = Tenant.objects.all()
+#         for tenant in tenants:
+#             with tenant_context(tenant):
+#                 for keypair in RSAKeyPair.objects.filter(active=True):
+#                     rsa_key = jose_jwk.RSAKey(key=keypair.public_key_pem, algorithm='RS256')
+#                     pub_jwk = rsa_key.to_dict()
+#                     pub_jwk['kid'] = keypair.kid
+#                     pub_jwk['use'] = 'sig'
+#                     pub_jwk['alg'] = 'RS256'
+#                     jwks["keys"].append(pub_jwk)
+#         return Response(jwks)
+
+
 class JWKSView(APIView):
     permission_classes = [AllowAny]
 
@@ -568,7 +586,7 @@ class JWKSView(APIView):
         for tenant in tenants:
             with tenant_context(tenant):
                 for keypair in RSAKeyPair.objects.filter(active=True):
-                    rsa_key = jose_jwk.RSAKey(key=keypair.public_key_pem, algorithm='RS256')
+                    rsa_key = jwk.construct(keypair.public_key_pem, algorithm='RS256')
                     pub_jwk = rsa_key.to_dict()
                     pub_jwk['kid'] = keypair.kid
                     pub_jwk['use'] = 'sig'
@@ -576,6 +594,7 @@ class JWKSView(APIView):
                     jwks["keys"].append(pub_jwk)
         return Response(jwks)
 
+        
 class JitsiTokenView(APIView):
     permission_classes = [IsAuthenticated]
 

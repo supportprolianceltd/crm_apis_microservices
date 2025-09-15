@@ -80,6 +80,31 @@ class PublicPublishedJobRequisitionsView(APIView):
 
 
 
+
+class PublicPublishedRequisitionsByTenantView(APIView):
+    permission_classes = []  # No auth required
+
+    def get(self, request, tenant_unique_id):
+        try:
+            today = timezone.now().date()
+            queryset = JobRequisition.active_objects.filter(
+                tenant_id=tenant_unique_id,
+                publish_status=True,
+                status='open',
+                is_deleted=False,
+                deadline_date__gte=today
+            )
+            serializer = PublicJobRequisitionSerializer(queryset, many=True)
+            logger.info(f"Fetched {queryset.count()} public 'open' requisitions for tenant: {tenant_unique_id}")
+            return Response({
+                "count": queryset.count(),
+                "results": serializer.data
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error fetching public requisitions for tenant {tenant_unique_id}: {str(e)}")
+            return Response({"detail": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class PublicCloseJobRequisitionView(APIView):
     permission_classes = []  # No authentication required
 
@@ -255,40 +280,6 @@ class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 
-# class JobRequisitionByLinkView(generics.RetrieveAPIView):
-#     serializer_class = JobRequisitionSerializer
-#     lookup_field = 'unique_link'
-#     permission_classes = []
-
-#     def get_queryset(self):
-#         unique_link = self.kwargs.get('unique_link', '')
-#         if not unique_link or '-' not in unique_link:
-#             logger.warning(f"Invalid unique_link format: {unique_link}")
-#             return JobRequisition.objects.none()
-#         try:
-#             tenant_id = unique_link.split('-')[0]
-#             queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id, publish_status=True)
-#             return queryset
-#         except Exception as e:
-#             logger.error(f"Error getting job requisition by link: {str(e)}")
-#             return JobRequisition.objects.none()
-
-#     def retrieve(self, request, *args, **kwargs):
-#         # print("request.data")
-#         # print(request.data)
-#         # print(request.user)
-#         # print("request.data")
-#         try:
-#             instance = self.get_object()
-#             serializer = self.get_serializer(instance)
-#             logger.info(f"Job requisition accessed via link: {instance.title} for tenant {instance.tenant_id}")
-#             return Response(serializer.data)
-#         except JobRequisition.DoesNotExist:
-#             logger.warning(f"Job with unique_link {kwargs.get('unique_link')} not found or not published")
-#             return Response({"detail": "Job not found or not published"}, status=status.HTTP_404_NOT_FOUND)
-#         except Exception as e:
-#             logger.error(f"Error retrieving job requisition: {str(e)}")
-#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class JobRequisitionByLinkView(generics.RetrieveAPIView):
     serializer_class = JobRequisitionSerializer
@@ -366,38 +357,6 @@ class CustomJobRequisitionByLinkView(generics.RetrieveAPIView):
             logger.error(f"Error retrieving job requisition: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-
-# class CustomJobRequisitionByLinkView(generics.RetrieveAPIView):
-#     serializer_class = PublicJobRequisitionSerializer
-#     lookup_field = 'unique_link'
-#     permission_classes = []
-
-#     def get_queryset(self):
-#         unique_link = self.kwargs.get('unique_link', '')
-#         if not unique_link or '-' not in unique_link:
-#             logger.warning(f"Invalid unique_link format: {unique_link}")
-#             return JobRequisition.objects.none()
-#         try:
-#             tenant_id = unique_link.split('-')[0]
-#             queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id, publish_status=True)
-#             return queryset
-#         except Exception as e:
-#             logger.error(f"Error getting job requisition by link: {str(e)}")
-#             return JobRequisition.objects.none()
-
-#     def retrieve(self, request, *args, **kwargs):
-#         try:
-#             instance = self.get_object()
-#             serializer = self.get_serializer(instance)
-#             logger.info(f"Job requisition accessed via link: {instance.title} for tenant {instance.tenant_id}")
-#             return Response(serializer.data)
-#         except JobRequisition.DoesNotExist:
-#             logger.warning(f"Job with unique_link {kwargs.get('unique_link')} not found or not published")
-#             return Response({"detail": "Job not found or not published"}, status=status.HTTP_404_NOT_FOUND)
-#         except Exception as e:
-#             logger.error(f"Error retrieving job requisition: {str(e)}")
-#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
