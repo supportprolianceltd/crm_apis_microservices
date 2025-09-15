@@ -9306,3 +9306,13 @@ Traceback (most recent call last):
 django.core.exceptions.ValidationError: ['“3” is not a valid UUID.']
 2025-09-15 14:49:32 [DEBUG] core: Tenant from user: proliance
 2025-09-15 14:49:32 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 14:49:42 [DEBUG] core: Tenant from user: proliance
+2025-09-15 14:49:42 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 14:49:52 [DEBUG] core: Tenant from user: proliance
+2025-09-15 14:49:52 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 14:50:02 [DEBUG] core: Tenant from user: proliance
+2025-09-15 14:50:02 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 14:50:13 [DEBUG] core: Tenant from user: proliance
+2025-09-15 14:50:13 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 14:50:23 [DEBUG] core: Tenant from user: proliance
+2025-09-15 14:50:23 [INFO] core: Retrieving tenant: 3 for tenant proliance

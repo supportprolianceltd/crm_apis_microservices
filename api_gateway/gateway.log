@@ -2108,3 +2108,18 @@
 2025-09-15 14:49:32,102 INFO gateway Incoming request content type: 
 2025-09-15 14:49:32,103 INFO gateway Raw body size: 0 bytes
 2025-09-15 14:49:32,208 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-15 14:49:42,743 INFO gateway Incoming request content type: 
+2025-09-15 14:49:42,751 INFO gateway Raw body size: 0 bytes
+2025-09-15 14:49:43,020 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-15 14:49:52,457 INFO gateway Incoming request content type: 
+2025-09-15 14:49:52,458 INFO gateway Raw body size: 0 bytes
+2025-09-15 14:49:52,639 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-15 14:50:02,874 INFO gateway Incoming request content type: 
+2025-09-15 14:50:02,874 INFO gateway Raw body size: 0 bytes
+2025-09-15 14:50:02,920 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-15 14:50:13,487 INFO gateway Incoming request content type: 
+2025-09-15 14:50:13,488 INFO gateway Raw body size: 0 bytes
+2025-09-15 14:50:13,541 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-15 14:50:23,205 INFO gateway Incoming request content type: 
+2025-09-15 14:50:23,206 INFO gateway Raw body size: 0 bytes
+2025-09-15 14:50:23,255 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
