@@ -1,10 +1,9 @@
 import { Router } from "express";
 import prisma from "../config/prisma.js";
-import indexRouter from "./routes/index.js";
-
+import chatsRouter from "./routes/chats.js";
 const apiRouter = Router();
 
-apiRouter.use("/", indexRouter);
+apiRouter.use("/", chatsRouter);
 
 /**
  * @swagger
