@@ -92,12 +92,12 @@ tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
         username='tonna',
-        email='tonna.ezugwu@prolianceltd.com',
+        email='support@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='Tonna',
-        last_name='Ezugwu',
-        job_role='Project Manager Developer',
+        first_name='Friday',
+        last_name='EzugMondaywu',
+        job_role='Backend Developer',
         tenant=tenant
     )
 
@@ -170,7 +170,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='arts')
+tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(

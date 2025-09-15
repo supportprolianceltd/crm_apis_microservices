@@ -4961,3 +4961,8 @@
 2025-09-14 00:42:22,733 [INFO] talent_engine: Set public schema for public endpoint
 2025-09-14 00:42:22,848 [INFO] talent_engine: Public requisitions fetched: 0
 2025-09-14 06:09:07,113 [INFO] talent_engine: Kafka consumer started and listening on topic 'job_application_events'...
+2025-09-14 17:19:05,040 [INFO] talent_engine: Incoming request path: /api/talent-engine/requisitions/public/published/
+2025-09-14 17:19:05,081 [INFO] talent_engine: Authorization header: None
+2025-09-14 17:19:05,102 [INFO] talent_engine: Set public schema for public endpoint
+2025-09-14 17:19:11,956 [INFO] talent_engine: Public requisitions fetched: 0
+2025-09-15 07:07:44,565 [INFO] talent_engine: Kafka consumer started and listening on topic 'job_application_events'...

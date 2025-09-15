@@ -1450,3 +1450,17 @@ django.core.exceptions.ValidationError: ['“1” is not a valid UUID.']
 2025-09-14 06:56:11 [DEBUG] core: Tenant from user: proliance
 2025-09-14 06:56:11 [INFO] core: Retrieving tenant: 1 for tenant proliance
 2025-09-14 06:57:43 [INFO] users: Admin user created: david1.dappa@prolianceltd.com for tenant proliance
+2025-09-15 07:13:04 [WARNING] django.request: Not Found: /api/token/
+2025-09-15 07:14:09 [INFO] core: Saving tenant public with schema: public, Org ID: TEN-0001
+2025-09-15 07:14:09 [WARNING] users: users_rsakeypair table does not exist in schema public. Skipping RSA keypair creation.
+2025-09-15 07:14:09 [INFO] core: Saving tenant public with schema: public, Org ID: TEN-0001
+2025-09-15 07:14:19 [INFO] core: Saving tenant arts with schema: arts, Org ID: TEN-0002
+2025-09-15 07:14:19 [WARNING] users: users_rsakeypair table does not exist in schema arts. Skipping RSA keypair creation.
+2025-09-15 07:14:21 [INFO] core: Saving tenant arts with schema: arts, Org ID: TEN-0002
+2025-09-15 07:14:27 [INFO] core: Saving tenant auth-service with schema: auth-service, Org ID: TEN-0003
+2025-09-15 07:14:27 [WARNING] users: users_rsakeypair table does not exist in schema auth-service. Skipping RSA keypair creation.
+2025-09-15 07:14:29 [INFO] core: Saving tenant auth-service with schema: auth-service, Org ID: TEN-0003
+2025-09-15 07:14:38 [INFO] core: Saving tenant proliance with schema: proliance, Org ID: TEN-0004
+2025-09-15 07:14:38 [WARNING] users: users_rsakeypair table does not exist in schema proliance. Skipping RSA keypair creation.
+2025-09-15 07:14:40 [INFO] core: Saving tenant proliance with schema: proliance, Org ID: TEN-0004
+2025-09-15 07:16:58 [INFO] users: Login attempts reset for user support@artstraining.co.uk in tenant arts
