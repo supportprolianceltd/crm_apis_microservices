@@ -96,7 +96,7 @@ with tenant_context(tenant):
         password='qwerty',
         role='admin',
         first_name='Friday',
-        last_name='EzugMondaywu',
+        last_name='Monday',
         job_role='Backend Developer',
         tenant=tenant
     )

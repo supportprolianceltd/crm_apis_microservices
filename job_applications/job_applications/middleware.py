@@ -244,7 +244,7 @@ class CustomTenantSchemaMiddleware(MiddlewareMixin):
         tenant_id = None
         if jwt_payload:
             tenant_schema = jwt_payload.get('tenant_schema')
-            tenant_id = jwt_payload.get('tenant_id')
+            tenant_id = jwt_payload.get('tenant_unique_id')
 
         if not tenant_schema or not tenant_id:
             logger.error(f"Tenant schema or ID missing in JWT: {jwt_payload}")

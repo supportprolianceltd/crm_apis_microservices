@@ -28,8 +28,8 @@ from job_application.serializers import JobApplicationSerializer, ScheduleSerial
 
 from .models import JobApplication, Schedule
 from .serializers import (
-    JobApplicationSerializer, ScheduleSerializer, ComplianceStatusSerializer, SimpleMessageSerializer, PublicJobApplicationSerializer
-)
+    JobApplicationSerializer, ScheduleSerializer, ComplianceStatusSerializer, SimpleMessageSerializer,
+      PublicJobApplicationSerializer, get_tenant_id_from_jwt)
 from utils.screen import parse_resume, screen_resume, extract_resume_fields
 from utils.email_utils import send_screening_notification
 from .tenant_utils import resolve_tenant_from_unique_link
@@ -71,6 +71,7 @@ def get_tenant_by_id(tenant_id, request):
     if resp.status_code == 200:
         return resp.json()
     return None
+
 
 def chunk_list(lst, chunk_size):
     for i in range(0, len(lst), chunk_size):
@@ -147,7 +148,8 @@ class ResumeScreeningView(APIView):
     def post(self, request, job_requisition_id):
         try:
             jwt_payload = getattr(request, 'jwt_payload', {})
-            tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+            tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+            #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
             role = jwt_payload.get('role')
             branch = jwt_payload.get('user', {}).get('branch')
 
@@ -463,6 +465,69 @@ class ResumeScreeningView(APIView):
 
 
  
+# class JobApplicationCreatePublicView(generics.CreateAPIView):
+#     serializer_class = PublicJobApplicationSerializer
+#     parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+#     def create(self, request, *args, **kwargs):
+#         unique_link = request.data.get('unique_link') or request.data.get('job_requisition_unique_link')
+#         if not unique_link:
+#             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         tenant_id = unique_link.split('-')[0]
+#         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+#         resp = requests.get(requisition_url)
+#         logger.info(f"Requisition unique_link: {unique_link}, API status: {resp.status_code}")
+#         if resp.status_code != 200:
+#             try:
+#                 error_detail = resp.json().get('detail', 'Invalid job requisition.')
+#             except Exception:
+#                 error_detail = 'Invalid job requisition.'
+#             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+#         job_requisition = resp.json()
+
+#         payload = dict(request.data.items())
+#         payload['job_requisition_id'] = job_requisition['id']
+#         payload['tenant_id'] = tenant_id
+
+#         documents = []
+#         i = 0
+#         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
+#             documents.append({
+#                 'document_type': request.data.get(f'documents[{i}][document_type]'),
+#                 'file': request.FILES.get(f'documents[{i}][file]')
+#             })
+#             i += 1
+#         if documents:
+#             payload['documents'] = documents
+
+#         logger.info(f"Full POST request payload (dict): {payload}")
+
+#         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
+#         if not serializer.is_valid():
+#             logger.error(f"Validation errors: {serializer.errors}")
+#             return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+#         self.perform_create(serializer)
+
+#         # Publish to Kafka
+#         try:
+#             producer = KafkaProducer(
+#                 bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+#                 value_serializer=lambda v: json.dumps(v).encode('utf-8')
+#             )
+#             kafka_data = {
+#                 "tenant_id": tenant_id,
+#                 "job_requisition_id": job_requisition['id'],
+#                 "event": "job_application_created"
+#             }
+#             producer.send('job_application_events', kafka_data)
+#             producer.flush()
+#             logger.info(f"Published job application event to Kafka for requisition {job_requisition['id']}")
+#         except Exception as e:
+#             logger.error(f"Failed to publish Kafka event: {str(e)}")
+
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -472,22 +537,39 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
         if not unique_link:
             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
 
-        tenant_id = unique_link.split('-')[0]
-        requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/unique_link/{unique_link}/"
-        resp = requests.get(requisition_url)
-        logger.info(f"Requisition unique_link: {unique_link}, API status: {resp.status_code}")
-        if resp.status_code != 200:
-            try:
-                error_detail = resp.json().get('detail', 'Invalid job requisition.')
-            except Exception:
-                error_detail = 'Invalid job requisition.'
-            return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
-        job_requisition = resp.json()
+        # ✅ Extract tenant_id from UUID-style prefix (first 5 segments)
+        try:
+            parts = unique_link.split('-')
+            if len(parts) < 5:
+                logger.warning(f"Invalid unique_link format: {unique_link}")
+                return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+            tenant_id = '-'.join(parts[:5])
+        except Exception as e:
+            logger.error(f"Error extracting tenant_id from link: {str(e)}")
+            return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # ✅ Fetch job requisition from Talent Engine
+        requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+        try:
+            resp = requests.get(requisition_url)
+            logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
+            if resp.status_code != 200:
+                try:
+                    error_detail = resp.json().get('detail', 'Invalid job requisition.')
+                except Exception:
+                    error_detail = 'Invalid job requisition.'
+                return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+            job_requisition = resp.json()
+        except Exception as e:
+            logger.error(f"Error fetching job requisition: {str(e)}")
+            return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
+
+        # ✅ Prepare payload
         payload = dict(request.data.items())
         payload['job_requisition_id'] = job_requisition['id']
         payload['tenant_id'] = tenant_id
 
+        # ✅ Extract documents from multipart form
         documents = []
         i = 0
         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
@@ -499,15 +581,17 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
         if documents:
             payload['documents'] = documents
 
-        logger.info(f"Full POST request payload (dict): {payload}")
+        logger.info(f"Full POST payload: {payload}")
 
+        # ✅ Validate and save
         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
         if not serializer.is_valid():
             logger.error(f"Validation errors: {serializer.errors}")
             return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
         self.perform_create(serializer)
 
-        # Publish to Kafka
+        # ✅ Publish to Kafka
         try:
             producer = KafkaProducer(
                 bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
@@ -520,12 +604,11 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
             }
             producer.send('job_application_events', kafka_data)
             producer.flush()
-            logger.info(f"Published job application event to Kafka for requisition {job_requisition['id']}")
+            logger.info(f"Published Kafka job application event for requisition {job_requisition['id']}")
         except Exception as e:
-            logger.error(f"Failed to publish Kafka event: {str(e)}")
+            logger.error(f"Kafka publish error: {str(e)}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 
 
@@ -537,24 +620,31 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
     def get_permissions(self):
         if self.request.method == 'POST':
             return [AllowAny()]
-        return [AllowAny()]  # Temporary for testing
+        return [AllowAny()]  # TODO: Use IsAuthenticated in production
 
     def get_queryset(self):
-        logger.info(f"request.user: {self.request.user}, is_authenticated: {getattr(self.request.user, 'is_authenticated', None)}")
-        tenant_id = self.request.query_params.get('tenant_id')
-        branch_id = self.request.query_params.get('branch_id')
-        queryset = JobApplication.active_objects.all()
-        if tenant_id:
-            queryset = queryset.filter(tenant_id=tenant_id)
+        request = self.request
+        tenant_id = request.jwt_payload.get('tenant_unique_id')
+
+        if not tenant_id:
+            logger.warning("Tenant unique ID not found in token")
+            return JobApplication.objects.none()
+
+        branch_id = request.query_params.get('branch_id')
+        queryset = JobApplication.active_objects.filter(tenant_id=tenant_id)
+
         if branch_id:
             queryset = queryset.filter(branch_id=branch_id)
-        if hasattr(self.request.user, 'branch') and self.request.user.branch:
-            queryset = queryset.filter(branch=self.request.user.branch)
+
+        if hasattr(request.user, 'branch') and request.user.branch and not branch_id:
+            queryset = queryset.filter(branch=request.user.branch)
+
         return queryset.order_by('-created_at')
-    
+
     def check_permissions(self, request):
         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
         return super().check_permissions(request)
+
 
 
 class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -772,7 +862,8 @@ class JobApplicationsByRequisitionView(generics.ListAPIView):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         job_requisition_id = self.kwargs['job_requisition_id']
@@ -869,7 +960,8 @@ class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
 
     def get(self, request):
         jwt_payload = getattr(request, 'jwt_payload', {})
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
 
@@ -967,7 +1059,8 @@ class PublishedPublicJobRequisitionsWithShortlistedApplicationsView(APIView):
 
     def get(self, request):
         jwt_payload = getattr(request, 'jwt_payload', {})
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         if not tenant_id:
@@ -1038,7 +1131,8 @@ class SoftDeletedJobApplicationsView(generics.ListAPIView):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         queryset = JobApplication.objects.filter(is_deleted=True)
@@ -1100,7 +1194,8 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         queryset = Schedule.active_objects.all()
@@ -1119,7 +1214,8 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         jwt_payload = getattr(request, 'jwt_payload', {})
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
 
@@ -1146,7 +1242,8 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+       # tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         queryset = Schedule.active_objects.all()
@@ -1200,6 +1297,7 @@ class ScheduleBulkDeleteView(APIView):
 
     def post(self, request):
         jwt_payload = getattr(request, 'jwt_payload', {})
+        #tenant_id = self.request.jwt_payload.get('tenant_unique_id')
         tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
@@ -1230,7 +1328,8 @@ class SoftDeletedSchedulesView(generics.ListAPIView):
     
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         queryset = Schedule.objects.filter(is_deleted=True)
@@ -1251,7 +1350,8 @@ class RecoverSoftDeletedSchedulesView(APIView):
     
     def post(self, request):
         jwt_payload = getattr(request, 'jwt_payload', {})
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         ids = request.data.get('ids', [])
@@ -1280,7 +1380,8 @@ class PermanentDeleteSchedulesView(APIView):
 
     def post(self, request):
         jwt_payload = getattr(request, 'jwt_payload', {})
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+       # tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         ids = request.data.get('ids', [])
