@@ -4,3 +4,1284 @@
 2025-09-16 08:35:11,257 INFO gateway Incoming request content type: application/json
 2025-09-16 08:35:11,257 INFO gateway Raw body size: 65 bytes
 2025-09-16 08:35:11,864 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 08:58:44,451 INFO gateway Incoming request content type: application/json
+2025-09-16 08:58:44,452 INFO gateway Raw body size: 65 bytes
+2025-09-16 08:58:46,289 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 08:58:56,965 INFO gateway Incoming request content type: application/json
+2025-09-16 08:58:56,968 INFO gateway Raw body size: 1963 bytes
+2025-09-16 08:58:58,148 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 08:59:08,612 INFO gateway Incoming request content type: application/json
+2025-09-16 08:59:08,613 INFO gateway Raw body size: 1963 bytes
+2025-09-16 08:59:08,845 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/
+2025-09-16 08:59:32,189 INFO gateway Incoming request content type: application/json
+2025-09-16 08:59:32,190 INFO gateway Raw body size: 49 bytes
+2025-09-16 08:59:32,545 INFO gateway METHOD: PATCH | PATH: /api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/
+2025-09-16 09:01:03,091 INFO gateway Incoming request content type: application/json
+2025-09-16 09:01:03,094 INFO gateway Raw body size: 49 bytes
+2025-09-16 09:01:33,261 ERROR gateway Gateway timeout on /api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/: HTTPConnectionPool(host='job-applications', port=8003): Read timed out. (read timeout=30)
+2025-09-16 09:01:55,809 INFO gateway Incoming request content type: application/json
+2025-09-16 09:01:55,810 INFO gateway Raw body size: 49 bytes
+2025-09-16 09:01:55,997 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/
+2025-09-16 09:02:01,726 INFO gateway Incoming request content type: application/json
+2025-09-16 09:02:01,728 INFO gateway Raw body size: 49 bytes
+2025-09-16 09:02:02,067 INFO gateway METHOD: PATCH | PATH: /api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/
+2025-09-16 09:08:27,627 INFO gateway Incoming request content type: application/json
+2025-09-16 09:08:27,628 INFO gateway Raw body size: 487 bytes
+2025-09-16 09:08:27,976 INFO gateway METHOD: PATCH | PATH: /api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/7871ad44-a7ec-4251-8d05-7ebd67db0150/
+2025-09-16 09:33:43,957 INFO gateway Incoming request content type: 
+2025-09-16 09:33:43,977 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:33:44,457 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 403 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 09:33:44,492 INFO gateway Incoming request content type: 
+2025-09-16 09:33:44,493 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:33:44,541 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 403 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 09:33:52,678 INFO gateway Incoming request content type: application/json
+2025-09-16 09:33:52,679 INFO gateway Raw body size: 56 bytes
+2025-09-16 09:33:53,580 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 09:33:56,644 INFO gateway Incoming request content type: 
+2025-09-16 09:33:56,645 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:33:56,711 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 09:33:56,718 INFO gateway Incoming request content type: 
+2025-09-16 09:33:56,718 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:33:56,764 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 09:33:56,860 INFO gateway Incoming request content type: 
+2025-09-16 09:33:56,860 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:33:57,067 INFO gateway METHOD: GET | PATH: /api/user/tenant-users/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/tenant-users/
+2025-09-16 09:33:57,082 INFO gateway Incoming request content type: 
+2025-09-16 09:33:57,083 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:33:57,295 INFO gateway METHOD: GET | PATH: /api/user/tenant-users/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/tenant-users/
+2025-09-16 09:33:59,319 INFO gateway Incoming request content type: 
+2025-09-16 09:33:59,320 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:33:59,848 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:33:59,851 INFO gateway Incoming request content type: 
+2025-09-16 09:33:59,851 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:00,280 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:34:00,283 INFO gateway Incoming request content type: 
+2025-09-16 09:34:00,283 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:00,432 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:34:00,435 INFO gateway Incoming request content type: 
+2025-09-16 09:34:00,435 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:00,555 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:34:01,658 INFO gateway Incoming request content type: 
+2025-09-16 09:34:01,658 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:01,757 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:34:01,763 INFO gateway Incoming request content type: 
+2025-09-16 09:34:01,764 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:01,876 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:34:03,211 INFO gateway Incoming request content type: 
+2025-09-16 09:34:03,212 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:03,350 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:34:03,356 INFO gateway Incoming request content type: 
+2025-09-16 09:34:03,357 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:03,467 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:34:09,353 INFO gateway Incoming request content type: 
+2025-09-16 09:34:09,354 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:09,497 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:34:19,312 INFO gateway Incoming request content type: 
+2025-09-16 09:34:19,314 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:19,435 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:34:25,216 INFO gateway Incoming request content type: 
+2025-09-16 09:34:25,217 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:25,329 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 09:34:29,919 INFO gateway Incoming request content type: 
+2025-09-16 09:34:29,920 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:30,044 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:34:39,946 INFO gateway Incoming request content type: 
+2025-09-16 09:34:39,947 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:40,029 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:34:49,305 INFO gateway Incoming request content type: 
+2025-09-16 09:34:49,307 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:49,407 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:34:59,874 INFO gateway Incoming request content type: 
+2025-09-16 09:34:59,876 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:34:59,970 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:35:09,839 INFO gateway Incoming request content type: 
+2025-09-16 09:35:09,840 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:35:10,011 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:35:19,890 INFO gateway Incoming request content type: 
+2025-09-16 09:35:19,890 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:35:19,923 ERROR gateway Connection error on /api/applications-engine/schedules/: HTTPConnectionPool(host='job-applications', port=8003): Max retries exceeded with url: /api/applications-engine/schedules/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x79a7d3107a90>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-09-16 09:35:29,933 INFO gateway Incoming request content type: 
+2025-09-16 09:35:29,935 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:35:32,603 ERROR gateway Connection error on /api/applications-engine/schedules/: HTTPConnectionPool(host='job-applications', port=8003): Max retries exceeded with url: /api/applications-engine/schedules/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x79a7d30f9510>: Failed to resolve 'job-applications' ([Errno -2] Name or service not known)"))
+2025-09-16 09:35:39,945 INFO gateway Incoming request content type: 
+2025-09-16 09:35:39,946 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:35:43,003 ERROR gateway Connection error on /api/applications-engine/schedules/: HTTPConnectionPool(host='job-applications', port=8003): Max retries exceeded with url: /api/applications-engine/schedules/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x79a7d30d5210>: Failed to resolve 'job-applications' ([Errno -2] Name or service not known)"))
+2025-09-16 09:35:49,878 INFO gateway Incoming request content type: 
+2025-09-16 09:35:49,879 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:36:09,791 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:36:35,043 INFO gateway Incoming request content type: 
+2025-09-16 09:36:35,043 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:36:35,129 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:37:34,969 INFO gateway Incoming request content type: 
+2025-09-16 09:37:34,970 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:37:35,075 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:38:34,972 INFO gateway Incoming request content type: 
+2025-09-16 09:38:34,972 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:38:35,096 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:39:34,829 INFO gateway Incoming request content type: 
+2025-09-16 09:39:34,830 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:39:34,944 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:39:58,550 INFO gateway Incoming request content type: 
+2025-09-16 09:39:58,550 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:39:58,659 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:39:59,315 INFO gateway Incoming request content type: 
+2025-09-16 09:39:59,316 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:39:59,403 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:40:03,533 INFO gateway Incoming request content type: 
+2025-09-16 09:40:03,534 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:40:03,757 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:40:03,763 INFO gateway Incoming request content type: 
+2025-09-16 09:40:03,764 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:40:03,874 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:40:07,794 INFO gateway Incoming request content type: 
+2025-09-16 09:40:07,794 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:40:07,913 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:40:07,919 INFO gateway Incoming request content type: 
+2025-09-16 09:40:07,920 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:40:08,025 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:40:09,412 INFO gateway Incoming request content type: 
+2025-09-16 09:40:09,413 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:40:09,501 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:40:19,370 INFO gateway Incoming request content type: 
+2025-09-16 09:40:19,370 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:40:19,460 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:40:29,290 INFO gateway Incoming request content type: 
+2025-09-16 09:40:29,291 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:40:29,449 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:40:39,195 INFO gateway Incoming request content type: 
+2025-09-16 09:40:39,195 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:40:39,324 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:40:49,300 INFO gateway Incoming request content type: 
+2025-09-16 09:40:49,301 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:40:49,387 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:40:57,930 INFO gateway Incoming request content type: 
+2025-09-16 09:40:57,930 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:40:58,034 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:40:59,907 INFO gateway Incoming request content type: 
+2025-09-16 09:40:59,908 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:00,013 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:41:09,961 INFO gateway Incoming request content type: 
+2025-09-16 09:41:09,962 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:10,053 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:41:19,901 INFO gateway Incoming request content type: 
+2025-09-16 09:41:19,902 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:20,001 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:41:25,680 INFO gateway Incoming request content type: 
+2025-09-16 09:41:25,680 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:25,831 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:41:25,838 INFO gateway Incoming request content type: 
+2025-09-16 09:41:25,838 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:25,961 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:41:29,311 INFO gateway Incoming request content type: 
+2025-09-16 09:41:29,311 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:29,399 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:41:40,057 INFO gateway Incoming request content type: 
+2025-09-16 09:41:40,057 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:40,166 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:41:46,028 INFO gateway Incoming request content type: 
+2025-09-16 09:41:46,030 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:46,156 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 09:41:46,159 INFO gateway Incoming request content type: 
+2025-09-16 09:41:46,159 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:46,213 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 09:41:46,214 INFO gateway Incoming request content type: 
+2025-09-16 09:41:46,215 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:46,316 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 09:41:46,317 INFO gateway Incoming request content type: 
+2025-09-16 09:41:46,318 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:46,367 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 09:41:46,375 INFO gateway Incoming request content type: 
+2025-09-16 09:41:46,376 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:46,429 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 09:41:49,426 INFO gateway Incoming request content type: 
+2025-09-16 09:41:49,427 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:49,513 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:41:59,306 INFO gateway Incoming request content type: 
+2025-09-16 09:41:59,307 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:41:59,414 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:42:09,362 INFO gateway Incoming request content type: 
+2025-09-16 09:42:09,363 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:42:09,445 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:42:14,160 INFO gateway Incoming request content type: application/json
+2025-09-16 09:42:14,160 INFO gateway Raw body size: 769 bytes
+2025-09-16 09:42:34,205 INFO gateway METHOD: POST | PATH: /api/applications-engine/requisitions/PRO-0001/screen-resumes/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/requisitions/PRO-0001/screen-resumes/
+2025-09-16 09:42:34,223 INFO gateway Incoming request content type: 
+2025-09-16 09:42:34,226 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:42:34,384 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:42:34,387 INFO gateway Incoming request content type: 
+2025-09-16 09:42:34,387 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:42:34,461 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 09:42:34,466 INFO gateway Incoming request content type: 
+2025-09-16 09:42:34,467 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:42:34,624 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:42:39,367 INFO gateway Incoming request content type: 
+2025-09-16 09:42:39,368 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:42:39,454 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:42:49,301 INFO gateway Incoming request content type: 
+2025-09-16 09:42:49,302 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:42:49,403 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:42:59,310 INFO gateway Incoming request content type: 
+2025-09-16 09:42:59,311 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:42:59,396 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:43:09,387 INFO gateway Incoming request content type: 
+2025-09-16 09:43:09,389 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:09,472 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:43:19,289 INFO gateway Incoming request content type: 
+2025-09-16 09:43:19,290 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:19,376 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:43:22,306 INFO gateway Incoming request content type: 
+2025-09-16 09:43:22,307 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:22,426 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:43:22,432 INFO gateway Incoming request content type: 
+2025-09-16 09:43:22,433 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:22,594 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 09:43:23,409 INFO gateway Incoming request content type: 
+2025-09-16 09:43:23,411 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:23,645 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 09:43:23,648 INFO gateway Incoming request content type: 
+2025-09-16 09:43:23,649 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:23,680 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 09:43:23,682 INFO gateway Incoming request content type: 
+2025-09-16 09:43:23,682 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:23,709 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 09:43:23,711 INFO gateway Incoming request content type: 
+2025-09-16 09:43:23,712 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:23,907 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 09:43:28,565 INFO gateway Incoming request content type: 
+2025-09-16 09:43:28,567 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:28,779 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:43:28,781 INFO gateway Incoming request content type: 
+2025-09-16 09:43:28,781 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:28,837 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 09:43:28,840 INFO gateway Incoming request content type: 
+2025-09-16 09:43:28,842 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:28,952 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:43:28,954 INFO gateway Incoming request content type: 
+2025-09-16 09:43:28,955 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:28,994 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 09:43:36,271 INFO gateway Incoming request content type: 
+2025-09-16 09:43:36,271 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:36,320 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 09:43:36,328 INFO gateway Incoming request content type: 
+2025-09-16 09:43:36,328 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:36,402 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 09:43:36,546 INFO gateway Incoming request content type: 
+2025-09-16 09:43:36,547 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:36,761 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:43:36,765 INFO gateway Incoming request content type: 
+2025-09-16 09:43:36,766 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:36,854 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 09:43:36,858 INFO gateway Incoming request content type: 
+2025-09-16 09:43:36,859 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:37,005 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:43:37,008 INFO gateway Incoming request content type: 
+2025-09-16 09:43:37,009 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:37,068 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 09:43:37,071 INFO gateway Incoming request content type: 
+2025-09-16 09:43:37,072 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:37,179 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 09:43:37,185 INFO gateway Incoming request content type: 
+2025-09-16 09:43:37,186 INFO gateway Raw body size: 0 bytes
+2025-09-16 09:43:37,299 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:12:56,895 INFO gateway Incoming request content type: 
+2025-09-16 10:12:56,902 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:12:57,239 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 403 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:12:57,298 INFO gateway Incoming request content type: 
+2025-09-16 10:12:57,316 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:12:57,369 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 403 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:13:04,561 INFO gateway Incoming request content type: application/json
+2025-09-16 10:13:04,562 INFO gateway Raw body size: 56 bytes
+2025-09-16 10:13:05,397 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 10:13:09,405 INFO gateway Incoming request content type: 
+2025-09-16 10:13:09,405 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:09,473 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:13:09,479 INFO gateway Incoming request content type: 
+2025-09-16 10:13:09,479 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:09,531 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:13:09,540 INFO gateway Incoming request content type: 
+2025-09-16 10:13:09,545 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:09,946 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:13:09,953 INFO gateway Incoming request content type: 
+2025-09-16 10:13:09,954 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:10,070 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:13:12,838 INFO gateway Incoming request content type: 
+2025-09-16 10:13:12,838 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:12,992 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:13:13,002 INFO gateway Incoming request content type: 
+2025-09-16 10:13:13,003 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:13,179 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:13:15,979 INFO gateway Incoming request content type: 
+2025-09-16 10:13:15,980 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:16,100 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:13:16,107 INFO gateway Incoming request content type: 
+2025-09-16 10:13:16,107 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:16,218 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:13:22,038 INFO gateway Incoming request content type: 
+2025-09-16 10:13:22,039 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:22,179 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 10:13:22,187 INFO gateway Incoming request content type: 
+2025-09-16 10:13:22,188 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:22,291 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 10:13:29,464 INFO gateway Incoming request content type: 
+2025-09-16 10:13:29,465 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:29,883 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:13:38,914 INFO gateway Incoming request content type: 
+2025-09-16 10:13:38,927 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:39,127 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:13:39,134 INFO gateway Incoming request content type: 
+2025-09-16 10:13:39,134 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:39,300 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:13:39,303 INFO gateway Incoming request content type: 
+2025-09-16 10:13:39,303 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:39,327 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:13:39,568 INFO gateway Incoming request content type: 
+2025-09-16 10:13:39,568 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:39,665 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:13:39,668 INFO gateway Incoming request content type: 
+2025-09-16 10:13:39,669 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:39,780 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:13:39,788 INFO gateway Incoming request content type: 
+2025-09-16 10:13:39,788 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:39,881 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:13:41,025 INFO gateway Incoming request content type: 
+2025-09-16 10:13:41,026 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:41,150 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:13:41,158 INFO gateway Incoming request content type: 
+2025-09-16 10:13:41,158 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:41,276 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:13:41,838 INFO gateway Incoming request content type: 
+2025-09-16 10:13:41,840 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:42,116 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:13:42,130 INFO gateway Incoming request content type: 
+2025-09-16 10:13:42,132 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:42,209 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:13:42,211 INFO gateway Incoming request content type: 
+2025-09-16 10:13:42,212 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:42,405 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:13:42,408 INFO gateway Incoming request content type: 
+2025-09-16 10:13:42,409 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:42,432 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:13:42,435 INFO gateway Incoming request content type: 
+2025-09-16 10:13:42,436 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:42,460 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:13:42,625 INFO gateway Incoming request content type: 
+2025-09-16 10:13:42,626 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:42,790 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:13:42,801 INFO gateway Incoming request content type: 
+2025-09-16 10:13:42,801 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:42,952 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:13:44,503 INFO gateway Incoming request content type: 
+2025-09-16 10:13:44,504 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:44,609 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 10:13:44,615 INFO gateway Incoming request content type: 
+2025-09-16 10:13:44,616 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:44,730 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 10:13:49,625 INFO gateway Incoming request content type: 
+2025-09-16 10:13:49,629 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:49,765 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:13:52,129 INFO gateway Incoming request content type: 
+2025-09-16 10:13:52,129 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:52,197 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:13:52,204 INFO gateway Incoming request content type: 
+2025-09-16 10:13:52,205 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:52,268 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:13:52,277 INFO gateway Incoming request content type: 
+2025-09-16 10:13:52,277 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:52,345 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:13:59,541 INFO gateway Incoming request content type: 
+2025-09-16 10:13:59,542 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:13:59,660 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:14:06,738 INFO gateway Incoming request content type: 
+2025-09-16 10:14:06,741 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:06,896 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:14:06,902 INFO gateway Incoming request content type: 
+2025-09-16 10:14:06,902 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:07,064 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:14:07,066 INFO gateway Incoming request content type: 
+2025-09-16 10:14:07,067 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:07,086 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:14:07,092 INFO gateway Incoming request content type: 
+2025-09-16 10:14:07,093 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:07,117 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:14:09,523 INFO gateway Incoming request content type: 
+2025-09-16 10:14:09,524 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:09,622 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:14:09,624 INFO gateway Incoming request content type: 
+2025-09-16 10:14:09,624 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:09,713 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:14:09,716 INFO gateway Incoming request content type: 
+2025-09-16 10:14:09,716 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:09,808 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:14:09,893 INFO gateway Incoming request content type: 
+2025-09-16 10:14:09,893 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:10,081 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:14:10,084 INFO gateway Incoming request content type: 
+2025-09-16 10:14:10,084 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:10,103 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:14:11,506 INFO gateway Incoming request content type: 
+2025-09-16 10:14:11,506 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:11,567 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:14:19,500 INFO gateway Incoming request content type: 
+2025-09-16 10:14:19,500 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:19,586 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:14:29,407 INFO gateway Incoming request content type: 
+2025-09-16 10:14:29,407 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:29,488 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:14:31,275 INFO gateway Incoming request content type: 
+2025-09-16 10:14:31,275 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:31,396 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:14:31,410 INFO gateway Incoming request content type: 
+2025-09-16 10:14:31,411 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:31,570 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:14:39,525 INFO gateway Incoming request content type: 
+2025-09-16 10:14:39,525 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:39,609 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:14:49,923 INFO gateway Incoming request content type: 
+2025-09-16 10:14:49,924 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:14:50,031 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:14:59,855 INFO gateway Incoming request content type: 
+2025-09-16 10:14:59,856 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:15:00,223 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:15:09,932 INFO gateway Incoming request content type: 
+2025-09-16 10:15:09,933 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:15:10,049 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:15:19,927 INFO gateway Incoming request content type: 
+2025-09-16 10:15:19,927 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:15:20,014 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:15:29,838 INFO gateway Incoming request content type: 
+2025-09-16 10:15:29,838 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:15:29,993 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:15:39,931 INFO gateway Incoming request content type: 
+2025-09-16 10:15:39,932 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:15:40,020 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:16:34,796 INFO gateway Incoming request content type: 
+2025-09-16 10:16:34,797 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:16:34,965 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:17:05,681 INFO gateway Incoming request content type: 
+2025-09-16 10:17:05,682 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:17:05,912 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:17:09,966 INFO gateway Incoming request content type: 
+2025-09-16 10:17:09,967 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:17:10,137 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:17:19,941 INFO gateway Incoming request content type: 
+2025-09-16 10:17:19,942 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:17:20,019 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:17:29,857 INFO gateway Incoming request content type: 
+2025-09-16 10:17:29,858 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:17:29,945 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:17:39,937 INFO gateway Incoming request content type: 
+2025-09-16 10:17:39,938 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:17:40,040 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:17:49,941 INFO gateway Incoming request content type: 
+2025-09-16 10:17:49,942 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:17:50,183 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:17:59,843 INFO gateway Incoming request content type: 
+2025-09-16 10:17:59,843 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:17:59,949 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:18:34,811 INFO gateway Incoming request content type: 
+2025-09-16 10:18:34,812 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:18:34,931 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:19:34,813 INFO gateway Incoming request content type: 
+2025-09-16 10:19:34,814 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:19:35,026 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:20:34,813 INFO gateway Incoming request content type: 
+2025-09-16 10:20:34,813 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:20:35,020 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:20:52,196 INFO gateway Incoming request content type: 
+2025-09-16 10:20:52,197 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:20:52,417 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:21:00,483 INFO gateway Incoming request content type: 
+2025-09-16 10:21:00,484 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:00,543 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:21:00,552 INFO gateway Incoming request content type: 
+2025-09-16 10:21:00,553 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:00,612 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:21:00,738 INFO gateway Incoming request content type: 
+2025-09-16 10:21:00,739 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:01,050 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:01,053 INFO gateway Incoming request content type: 
+2025-09-16 10:21:01,054 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:01,212 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:21:01,218 INFO gateway Incoming request content type: 
+2025-09-16 10:21:01,220 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:01,398 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:01,400 INFO gateway Incoming request content type: 
+2025-09-16 10:21:01,401 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:01,520 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:21:07,645 INFO gateway Incoming request content type: 
+2025-09-16 10:21:07,647 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:07,800 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:07,807 INFO gateway Incoming request content type: 
+2025-09-16 10:21:07,808 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:07,942 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:10,795 INFO gateway Incoming request content type: 
+2025-09-16 10:21:10,796 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:10,913 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:10,915 INFO gateway Incoming request content type: 
+2025-09-16 10:21:10,916 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:11,070 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:21:11,077 INFO gateway Incoming request content type: 
+2025-09-16 10:21:11,080 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:11,239 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:12,769 INFO gateway Incoming request content type: 
+2025-09-16 10:21:12,769 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:12,928 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 10:21:12,931 INFO gateway Incoming request content type: 
+2025-09-16 10:21:12,931 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:13,015 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:21:13,018 INFO gateway Incoming request content type: 
+2025-09-16 10:21:13,020 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:13,247 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 10:21:13,250 INFO gateway Incoming request content type: 
+2025-09-16 10:21:13,255 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:15,070 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:21:15,078 INFO gateway Incoming request content type: 
+2025-09-16 10:21:15,078 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:15,150 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:21:22,951 INFO gateway Incoming request content type: 
+2025-09-16 10:21:22,952 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:23,011 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:21:23,020 INFO gateway Incoming request content type: 
+2025-09-16 10:21:23,021 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:23,072 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:21:23,231 INFO gateway Incoming request content type: 
+2025-09-16 10:21:23,233 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:23,562 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 10:21:23,575 INFO gateway Incoming request content type: 
+2025-09-16 10:21:23,592 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:23,760 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:21:23,770 INFO gateway Incoming request content type: 
+2025-09-16 10:21:23,780 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:24,018 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:21:24,021 INFO gateway Incoming request content type: 
+2025-09-16 10:21:24,024 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:24,279 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 10:21:24,282 INFO gateway Incoming request content type: 
+2025-09-16 10:21:24,283 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:24,385 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:21:24,390 INFO gateway Incoming request content type: 
+2025-09-16 10:21:24,391 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:24,548 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:21:24,551 INFO gateway Incoming request content type: 
+2025-09-16 10:21:24,552 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:24,628 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:21:29,272 INFO gateway Incoming request content type: 
+2025-09-16 10:21:29,272 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:29,412 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:29,421 INFO gateway Incoming request content type: 
+2025-09-16 10:21:29,422 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:29,530 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:33,152 INFO gateway Incoming request content type: 
+2025-09-16 10:21:33,154 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:33,362 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:21:33,366 INFO gateway Incoming request content type: 
+2025-09-16 10:21:33,367 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:33,541 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:33,549 INFO gateway Incoming request content type: 
+2025-09-16 10:21:33,549 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:33,679 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:35,271 INFO gateway Incoming request content type: 
+2025-09-16 10:21:35,288 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:35,388 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:35,393 INFO gateway Incoming request content type: 
+2025-09-16 10:21:35,394 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:35,513 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:21:37,276 INFO gateway Incoming request content type: 
+2025-09-16 10:21:37,278 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:38,719 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:21:38,731 INFO gateway Incoming request content type: 
+2025-09-16 10:21:38,731 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:38,908 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:21:38,911 INFO gateway Incoming request content type: 
+2025-09-16 10:21:38,911 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:38,934 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:21:38,940 INFO gateway Incoming request content type: 
+2025-09-16 10:21:38,941 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:38,967 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:21:42,479 INFO gateway Incoming request content type: 
+2025-09-16 10:21:42,481 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:42,565 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:21:42,572 INFO gateway Incoming request content type: 
+2025-09-16 10:21:42,573 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:42,660 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:21:42,661 INFO gateway Incoming request content type: 
+2025-09-16 10:21:42,662 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:42,703 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 10:21:42,710 INFO gateway Incoming request content type: 
+2025-09-16 10:21:42,710 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:21:42,761 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 10:23:08,503 INFO gateway Incoming request content type: 
+2025-09-16 10:23:08,504 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:08,646 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:23:08,659 INFO gateway Incoming request content type: 
+2025-09-16 10:23:08,660 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:08,766 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:23:09,078 INFO gateway Incoming request content type: 
+2025-09-16 10:23:09,101 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:09,677 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:23:09,685 INFO gateway Incoming request content type: 
+2025-09-16 10:23:09,686 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:09,872 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 10:23:09,877 INFO gateway Incoming request content type: 
+2025-09-16 10:23:09,879 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:10,151 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:23:10,156 INFO gateway Incoming request content type: 
+2025-09-16 10:23:10,157 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:10,260 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 10:23:10,263 INFO gateway Incoming request content type: 
+2025-09-16 10:23:10,264 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:10,400 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:23:10,410 INFO gateway Incoming request content type: 
+2025-09-16 10:23:10,411 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:10,579 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:23:18,920 INFO gateway Incoming request content type: 
+2025-09-16 10:23:18,921 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:19,007 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:23:19,017 INFO gateway Incoming request content type: 
+2025-09-16 10:23:19,018 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:19,083 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:23:19,206 INFO gateway Incoming request content type: 
+2025-09-16 10:23:19,207 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:19,338 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:23:19,341 INFO gateway Incoming request content type: 
+2025-09-16 10:23:19,342 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:19,402 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 10:23:19,405 INFO gateway Incoming request content type: 
+2025-09-16 10:23:19,406 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:19,526 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:23:19,529 INFO gateway Incoming request content type: 
+2025-09-16 10:23:19,530 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:19,597 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 10:23:19,600 INFO gateway Incoming request content type: 
+2025-09-16 10:23:19,601 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:19,751 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:23:19,763 INFO gateway Incoming request content type: 
+2025-09-16 10:23:19,763 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:23:19,878 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:27:28,698 INFO gateway Incoming request content type: 
+2025-09-16 10:27:28,699 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:28,820 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:27:28,833 INFO gateway Incoming request content type: 
+2025-09-16 10:27:28,834 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:28,908 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:27:29,071 INFO gateway Incoming request content type: 
+2025-09-16 10:27:29,072 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:29,485 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:27:29,495 INFO gateway Incoming request content type: 
+2025-09-16 10:27:29,496 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:29,729 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:27:29,741 INFO gateway Incoming request content type: 
+2025-09-16 10:27:29,741 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:29,986 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:27:29,999 INFO gateway Incoming request content type: 
+2025-09-16 10:27:30,001 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:30,224 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:27:39,118 INFO gateway Incoming request content type: 
+2025-09-16 10:27:39,119 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:39,210 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:27:40,254 INFO gateway Incoming request content type: 
+2025-09-16 10:27:40,255 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:40,368 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:27:40,376 INFO gateway Incoming request content type: 
+2025-09-16 10:27:40,376 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:40,480 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:27:43,358 INFO gateway Incoming request content type: 
+2025-09-16 10:27:43,358 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:43,497 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:27:43,518 INFO gateway Incoming request content type: 
+2025-09-16 10:27:43,522 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:43,711 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:27:45,604 INFO gateway Incoming request content type: 
+2025-09-16 10:27:45,604 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:45,697 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:27:45,702 INFO gateway Incoming request content type: 
+2025-09-16 10:27:45,702 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:45,802 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:27:47,980 INFO gateway Incoming request content type: 
+2025-09-16 10:27:47,993 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:48,220 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 10:27:48,243 INFO gateway Incoming request content type: 
+2025-09-16 10:27:48,244 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:48,317 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:27:48,320 INFO gateway Incoming request content type: 
+2025-09-16 10:27:48,321 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:48,463 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/PRO-0001/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/PRO-0001/
+2025-09-16 10:27:48,467 INFO gateway Incoming request content type: 
+2025-09-16 10:27:48,468 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:48,536 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:27:48,544 INFO gateway Incoming request content type: 
+2025-09-16 10:27:48,545 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:48,618 INFO gateway METHOD: GET | PATH: /api/applications-engine/applications/job-requisitions/PRO-0001/applications/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/applications/job-requisitions/PRO-0001/applications/
+2025-09-16 10:27:49,137 INFO gateway Incoming request content type: 
+2025-09-16 10:27:49,138 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:49,240 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:27:49,243 INFO gateway Incoming request content type: 
+2025-09-16 10:27:49,243 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:49,310 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 10:27:54,289 INFO gateway Incoming request content type: 
+2025-09-16 10:27:54,290 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:54,494 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:27:54,504 INFO gateway Incoming request content type: 
+2025-09-16 10:27:54,505 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:54,700 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:27:56,067 INFO gateway Incoming request content type: 
+2025-09-16 10:27:56,068 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:56,382 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:27:56,392 INFO gateway Incoming request content type: 
+2025-09-16 10:27:56,393 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:56,605 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:27:56,611 INFO gateway Incoming request content type: 
+2025-09-16 10:27:56,612 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:56,645 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:27:56,647 INFO gateway Incoming request content type: 
+2025-09-16 10:27:56,648 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:56,685 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:27:59,059 INFO gateway Incoming request content type: 
+2025-09-16 10:27:59,059 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:27:59,192 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:28:02,323 INFO gateway Incoming request content type: 
+2025-09-16 10:28:02,324 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:02,447 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:28:02,454 INFO gateway Incoming request content type: 
+2025-09-16 10:28:02,455 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:02,557 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:28:03,364 INFO gateway Incoming request content type: 
+2025-09-16 10:28:03,367 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:03,679 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:28:03,688 INFO gateway Incoming request content type: 
+2025-09-16 10:28:03,690 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:03,889 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:28:03,891 INFO gateway Incoming request content type: 
+2025-09-16 10:28:03,894 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:03,918 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:28:09,121 INFO gateway Incoming request content type: 
+2025-09-16 10:28:09,123 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:09,175 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 401 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:28:09,200 INFO gateway Incoming request content type: application/json
+2025-09-16 10:28:09,201 INFO gateway Raw body size: 776 bytes
+2025-09-16 10:28:09,401 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-16 10:28:20,016 INFO gateway Incoming request content type: application/json
+2025-09-16 10:28:20,017 INFO gateway Raw body size: 56 bytes
+2025-09-16 10:28:20,908 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 10:28:28,703 INFO gateway Incoming request content type: 
+2025-09-16 10:28:28,704 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:28,742 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:28:28,749 INFO gateway Incoming request content type: 
+2025-09-16 10:28:28,750 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:28,799 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:28:28,803 INFO gateway Incoming request content type: 
+2025-09-16 10:28:28,803 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:28,928 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:28:28,931 INFO gateway Incoming request content type: 
+2025-09-16 10:28:28,931 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:29,090 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:28:29,094 INFO gateway Incoming request content type: 
+2025-09-16 10:28:29,095 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:29,253 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:28:29,256 INFO gateway Incoming request content type: 
+2025-09-16 10:28:29,257 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:29,411 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:28:30,422 INFO gateway Incoming request content type: 
+2025-09-16 10:28:30,425 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:30,638 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:28:30,651 INFO gateway Incoming request content type: 
+2025-09-16 10:28:30,651 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:30,847 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:28:30,850 INFO gateway Incoming request content type: 
+2025-09-16 10:28:30,851 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:30,878 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:28:30,880 INFO gateway Incoming request content type: 
+2025-09-16 10:28:30,880 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:30,914 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:28:38,803 INFO gateway Incoming request content type: 
+2025-09-16 10:28:38,804 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:38,944 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:28:43,010 INFO gateway Incoming request content type: 
+2025-09-16 10:28:43,011 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:43,112 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:28:43,114 INFO gateway Incoming request content type: 
+2025-09-16 10:28:43,114 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:43,156 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 10:28:43,158 INFO gateway Incoming request content type: 
+2025-09-16 10:28:43,159 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:43,276 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:28:43,279 INFO gateway Incoming request content type: 
+2025-09-16 10:28:43,280 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:28:43,330 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/api/timezone-choices/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/api/timezone-choices/
+2025-09-16 10:33:07,195 INFO gateway Incoming request content type: application/json
+2025-09-16 10:33:07,196 INFO gateway Raw body size: 222 bytes
+2025-09-16 10:33:07,222 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 404 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:33:11,825 INFO gateway Incoming request content type: application/json
+2025-09-16 10:33:11,825 INFO gateway Raw body size: 65 bytes
+2025-09-16 10:33:12,864 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 10:33:27,361 INFO gateway Incoming request content type: application/json
+2025-09-16 10:33:27,362 INFO gateway Raw body size: 222 bytes
+2025-09-16 10:33:27,385 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:34:36,320 INFO gateway Incoming request content type: 
+2025-09-16 10:34:36,321 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:34:36,450 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:34:36,462 INFO gateway Incoming request content type: 
+2025-09-16 10:34:36,463 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:34:36,579 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:37:05,060 INFO gateway Incoming request content type: 
+2025-09-16 10:37:05,061 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:05,297 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:37:05,318 INFO gateway Incoming request content type: 
+2025-09-16 10:37:05,319 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:05,467 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:37:05,704 INFO gateway Incoming request content type: 
+2025-09-16 10:37:05,705 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:06,916 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:37:06,923 INFO gateway Incoming request content type: 
+2025-09-16 10:37:06,926 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:07,380 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:37:07,387 INFO gateway Incoming request content type: 
+2025-09-16 10:37:07,398 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:07,526 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:37:07,538 INFO gateway Incoming request content type: 
+2025-09-16 10:37:07,562 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:08,074 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:37:08,079 INFO gateway Incoming request content type: 
+2025-09-16 10:37:08,081 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:08,327 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:37:08,331 INFO gateway Incoming request content type: 
+2025-09-16 10:37:08,332 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:08,371 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:37:11,980 INFO gateway Incoming request content type: 
+2025-09-16 10:37:11,981 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:12,048 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:37:12,052 INFO gateway Incoming request content type: 
+2025-09-16 10:37:12,053 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:12,277 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:37:12,283 INFO gateway Incoming request content type: 
+2025-09-16 10:37:12,284 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:12,436 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:37:12,439 INFO gateway Incoming request content type: 
+2025-09-16 10:37:12,440 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:12,468 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:37:22,933 INFO gateway Incoming request content type: 
+2025-09-16 10:37:22,933 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:23,042 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:37:32,879 INFO gateway Incoming request content type: 
+2025-09-16 10:37:32,882 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:33,116 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:37:42,938 INFO gateway Incoming request content type: 
+2025-09-16 10:37:42,939 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:43,071 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:37:52,942 INFO gateway Incoming request content type: 
+2025-09-16 10:37:52,943 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:37:53,033 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:38:02,867 INFO gateway Incoming request content type: 
+2025-09-16 10:38:02,869 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:38:03,167 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:38:12,916 INFO gateway Incoming request content type: 
+2025-09-16 10:38:12,917 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:38:13,101 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:38:22,946 INFO gateway Incoming request content type: 
+2025-09-16 10:38:22,950 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:38:23,147 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:38:32,862 INFO gateway Incoming request content type: 
+2025-09-16 10:38:32,863 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:38:32,947 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:41:27,726 INFO gateway Incoming request content type: 
+2025-09-16 10:41:27,727 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:41:27,848 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 404 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:41:36,927 INFO gateway Incoming request content type: 
+2025-09-16 10:41:36,929 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:41:36,943 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 404 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:41:36,954 INFO gateway Incoming request content type: 
+2025-09-16 10:41:36,955 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:41:36,969 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 404 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:43:04,962 INFO gateway Incoming request content type: application/json
+2025-09-16 10:43:04,963 INFO gateway Raw body size: 56 bytes
+2025-09-16 10:43:05,866 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 10:43:09,926 INFO gateway Incoming request content type: 
+2025-09-16 10:43:09,927 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:09,972 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:43:09,978 INFO gateway Incoming request content type: 
+2025-09-16 10:43:09,978 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:10,036 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 10:43:10,041 INFO gateway Incoming request content type: 
+2025-09-16 10:43:10,042 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:10,196 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:43:10,199 INFO gateway Incoming request content type: 
+2025-09-16 10:43:10,200 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:10,363 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:43:10,365 INFO gateway Incoming request content type: 
+2025-09-16 10:43:10,365 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:10,485 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:43:10,488 INFO gateway Incoming request content type: 
+2025-09-16 10:43:10,489 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:10,605 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:43:12,747 INFO gateway Incoming request content type: 
+2025-09-16 10:43:12,748 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:12,945 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:43:12,959 INFO gateway Incoming request content type: 
+2025-09-16 10:43:12,960 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:13,142 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:43:13,917 INFO gateway Incoming request content type: 
+2025-09-16 10:43:13,920 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:14,184 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:43:14,194 INFO gateway Incoming request content type: 
+2025-09-16 10:43:14,195 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:14,411 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:43:16,789 INFO gateway Incoming request content type: 
+2025-09-16 10:43:16,795 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:17,469 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:43:17,485 INFO gateway Incoming request content type: 
+2025-09-16 10:43:17,487 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:17,977 INFO gateway METHOD: GET | PATH: /api/applications-engine/published-requisitions-with-shortlisted/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/published-requisitions-with-shortlisted/
+2025-09-16 10:43:17,983 INFO gateway Incoming request content type: 
+2025-09-16 10:43:17,985 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:18,059 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:43:18,064 INFO gateway Incoming request content type: 
+2025-09-16 10:43:18,065 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:18,114 INFO gateway METHOD: GET | PATH: /api/tenant/config/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/config/
+2025-09-16 10:43:19,911 INFO gateway Incoming request content type: 
+2025-09-16 10:43:19,911 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:20,071 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:43:21,660 INFO gateway Incoming request content type: 
+2025-09-16 10:43:21,661 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:21,779 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:43:21,786 INFO gateway Incoming request content type: 
+2025-09-16 10:43:21,787 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:21,897 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:43:25,048 INFO gateway Incoming request content type: 
+2025-09-16 10:43:25,049 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:25,220 INFO gateway METHOD: GET | PATH: /api/tenant/tenants/3/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/tenants/3/
+2025-09-16 10:43:25,227 INFO gateway Incoming request content type: 
+2025-09-16 10:43:25,228 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:25,322 INFO gateway METHOD: GET | PATH: /api/tenant/tenants/3/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/tenants/3/
+2025-09-16 10:43:28,691 INFO gateway Incoming request content type: 
+2025-09-16 10:43:28,691 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:28,807 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:43:28,813 INFO gateway Incoming request content type: 
+2025-09-16 10:43:28,814 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:28,966 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 10:43:29,864 INFO gateway Incoming request content type: 
+2025-09-16 10:43:29,865 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:29,977 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:43:39,767 INFO gateway Incoming request content type: 
+2025-09-16 10:43:39,767 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:39,919 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:43:49,914 INFO gateway Incoming request content type: 
+2025-09-16 10:43:49,915 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:50,006 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:43:59,868 INFO gateway Incoming request content type: 
+2025-09-16 10:43:59,868 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:43:59,955 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:44:09,804 INFO gateway Incoming request content type: 
+2025-09-16 10:44:09,805 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:44:09,907 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:44:19,949 INFO gateway Incoming request content type: 
+2025-09-16 10:44:19,950 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:44:20,048 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:44:29,912 INFO gateway Incoming request content type: 
+2025-09-16 10:44:29,913 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:44:29,998 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:44:39,812 INFO gateway Incoming request content type: 
+2025-09-16 10:44:39,813 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:44:39,901 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:44:49,937 INFO gateway Incoming request content type: 
+2025-09-16 10:44:49,938 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:44:50,039 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:44:59,888 INFO gateway Incoming request content type: 
+2025-09-16 10:44:59,889 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:44:59,965 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:45:34,720 INFO gateway Incoming request content type: 
+2025-09-16 10:45:34,721 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:45:34,864 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:46:34,739 INFO gateway Incoming request content type: 
+2025-09-16 10:46:34,740 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:46:34,844 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:47:34,871 INFO gateway Incoming request content type: 
+2025-09-16 10:47:34,872 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:47:35,022 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:48:34,869 INFO gateway Incoming request content type: 
+2025-09-16 10:48:34,870 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:48:35,105 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:49:34,839 INFO gateway Incoming request content type: 
+2025-09-16 10:49:34,841 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:49:35,030 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:50:34,895 INFO gateway Incoming request content type: 
+2025-09-16 10:50:34,897 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:50:35,078 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:51:34,897 INFO gateway Incoming request content type: 
+2025-09-16 10:51:34,902 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:51:35,092 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:52:34,907 INFO gateway Incoming request content type: 
+2025-09-16 10:52:34,908 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:52:35,037 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:53:34,907 INFO gateway Incoming request content type: 
+2025-09-16 10:53:34,908 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:53:35,071 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:54:34,907 INFO gateway Incoming request content type: 
+2025-09-16 10:54:34,909 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:54:35,111 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:55:34,929 INFO gateway Incoming request content type: 
+2025-09-16 10:55:34,930 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:55:35,070 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:56:35,164 INFO gateway Incoming request content type: 
+2025-09-16 10:56:35,183 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:56:35,723 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:57:05,933 INFO gateway Incoming request content type: 
+2025-09-16 10:57:05,933 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:57:06,234 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:57:09,845 INFO gateway Incoming request content type: 
+2025-09-16 10:57:09,846 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:57:09,950 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:57:19,923 INFO gateway Incoming request content type: 
+2025-09-16 10:57:19,924 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:57:20,007 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:57:29,935 INFO gateway Incoming request content type: 
+2025-09-16 10:57:29,935 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:57:30,032 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:57:39,858 INFO gateway Incoming request content type: 
+2025-09-16 10:57:39,859 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:57:40,082 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:57:49,921 INFO gateway Incoming request content type: 
+2025-09-16 10:57:49,921 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:57:50,012 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:57:59,929 INFO gateway Incoming request content type: 
+2025-09-16 10:57:59,930 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:58:00,014 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:58:34,920 INFO gateway Incoming request content type: 
+2025-09-16 10:58:34,921 INFO gateway Raw body size: 0 bytes
+2025-09-16 10:58:34,961 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 401 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 10:58:34,983 INFO gateway Incoming request content type: application/json
+2025-09-16 10:58:34,984 INFO gateway Raw body size: 777 bytes
+2025-09-16 10:58:35,240 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-16 12:24:10,110 INFO gateway Incoming request content type: application/json
+2025-09-16 12:24:10,112 INFO gateway Raw body size: 65 bytes
+2025-09-16 12:24:14,104 ERROR gateway Connection error on /api/token/: HTTPConnectionPool(host='auth-service', port=8001): Max retries exceeded with url: /api/token/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x722e37dfa090>: Failed to resolve 'auth-service' ([Errno -2] Name or service not known)"))
+2025-09-16 12:36:45,143 INFO gateway Incoming request content type: application/json
+2025-09-16 12:36:45,144 INFO gateway Raw body size: 65 bytes
+2025-09-16 12:36:45,174 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 404 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 12:36:49,649 INFO gateway Incoming request content type: application/json
+2025-09-16 12:36:49,649 INFO gateway Raw body size: 65 bytes
+2025-09-16 12:36:49,656 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 404 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 12:38:45,146 INFO gateway Incoming request content type: application/json
+2025-09-16 12:38:45,146 INFO gateway Raw body size: 65 bytes
+2025-09-16 12:38:47,127 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 12:39:46,596 INFO gateway Incoming request content type: application/json
+2025-09-16 12:39:46,597 INFO gateway Raw body size: 31 bytes
+2025-09-16 12:39:46,616 INFO gateway METHOD: PATCH | PATH: /api/user/users/ | STATUS: 405 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-16 12:39:49,940 INFO gateway Incoming request content type: application/json
+2025-09-16 12:39:49,941 INFO gateway Raw body size: 31 bytes
+2025-09-16 12:39:49,976 INFO gateway METHOD: GET | PATH: /api/user/users/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-16 12:41:17,093 INFO gateway Incoming request content type: application/json
+2025-09-16 12:41:17,094 INFO gateway Raw body size: 65 bytes
+2025-09-16 12:41:17,754 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 12:41:30,570 INFO gateway Incoming request content type: application/json
+2025-09-16 12:41:30,570 INFO gateway Raw body size: 382 bytes
+2025-09-16 12:41:30,600 INFO gateway METHOD: GET | PATH: /api/user/users/1/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/1/
+2025-09-16 12:41:37,214 INFO gateway Incoming request content type: application/json
+2025-09-16 12:41:37,214 INFO gateway Raw body size: 382 bytes
+2025-09-16 12:41:37,273 INFO gateway METHOD: PATCH | PATH: /api/user/users/1/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/1/
+2025-09-16 12:42:24,088 INFO gateway Incoming request content type: application/json
+2025-09-16 12:42:24,089 INFO gateway Raw body size: 382 bytes
+2025-09-16 12:42:24,140 INFO gateway METHOD: GET | PATH: /api/user/users/1/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/1/
+2025-09-16 12:42:49,125 INFO gateway Incoming request content type: application/json
+2025-09-16 12:42:49,126 INFO gateway Raw body size: 382 bytes
+2025-09-16 12:42:49,169 INFO gateway METHOD: GET | PATH: /api/user/users/1/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/1/
+2025-09-16 12:44:23,898 INFO gateway Incoming request content type: application/json
+2025-09-16 12:44:23,898 INFO gateway Raw body size: 56 bytes
+2025-09-16 12:44:24,508 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 12:44:33,694 INFO gateway Incoming request content type: 
+2025-09-16 12:44:33,694 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:44:33,751 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 12:44:33,760 INFO gateway Incoming request content type: 
+2025-09-16 12:44:33,761 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:44:33,804 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 12:44:33,966 INFO gateway Incoming request content type: 
+2025-09-16 12:44:33,966 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:44:34,026 INFO gateway METHOD: GET | PATH: /api/user/tenant-users/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/tenant-users/
+2025-09-16 12:44:34,031 INFO gateway Incoming request content type: 
+2025-09-16 12:44:34,032 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:44:34,079 INFO gateway METHOD: GET | PATH: /api/user/tenant-users/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/tenant-users/
+2025-09-16 12:44:35,233 INFO gateway Incoming request content type: 
+2025-09-16 12:44:35,233 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:44:35,301 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 12:44:35,312 INFO gateway Incoming request content type: 
+2025-09-16 12:44:35,312 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:44:35,380 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 12:44:35,386 INFO gateway Incoming request content type: 
+2025-09-16 12:44:35,387 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:44:35,487 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 12:46:17,185 INFO gateway Incoming request content type: application/json
+2025-09-16 12:46:17,186 INFO gateway Raw body size: 4215 bytes
+2025-09-16 12:46:18,069 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-16 12:46:18,151 INFO gateway Incoming request content type: multipart/form-data; boundary=----WebKitFormBoundaryXStBIGlgomxDNs7M
+2025-09-16 12:46:18,152 INFO gateway Raw body size: 1667998 bytes
+2025-09-16 12:46:18,153 WARNING gateway Could not parse multipart body for file logging: 'utf-8' codec can't decode byte 0x89 in position 8729: invalid start byte. You passed in b'------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="username"\r\n\r\ntester1\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="email"\r\n\r\ntester1@prolianceltd.com\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="first_name"\r\n\r\nAbraham\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="last_name"\r\n\r\nHanson\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="role"\r\n\r\nadmin\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="job_role"\r\n\r\nqwertyui\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="is_superuser"\r\n\r\nfalse\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="last_password_reset"\r\n\r\n2025-09-16T12:46:16.592Z\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[work_phone]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[personal_phone]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[gender]"\r\n\r\nFemale\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[dob]"\r\n\r\n2025-09-01\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[street]"\r\n\r\nKm 20 lekki Epe Expressway Lagos\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[city]"\r\n\r\nLekki\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[state]"\r\n\r\n\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[zip_code]"\r\n\r\n105101\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[department]"\r\n\r\nFinance\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[marital_status]"\r\n\r\nWidowed\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[id_number]"\r\n\r\nnithing\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[document_number]"\r\n\r\n123456789kjhgfd\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[document_expiry_date]"\r\n\r\n2025-09-02\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[is_driver]"\r\n\r\ntrue\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[type_of_vehicle]"\r\n\r\nCompany Vehicle\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[drivers_licence_country_of_issue]"\r\n\r\nUSA\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[drivers_licence_date_issue]"\r\n\r\n2025-07-01\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[drivers_licence_expiry_date]"\r\n\r\n2025-09-03\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[drivers_license_insurance_provider]"\r\n\r\n\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[drivers_licence_insurance_expiry_date]"\r\n\r\n2025-09-03\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[drivers_licence_issuing_authority]"\r\n\r\n\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[drivers_licence_policy_number]"\r\n\r\nqwerty\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[assessor_name]"\r\n\r\n\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[manual_handling_risk]"\r\n\r\nLow\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[lone_working_risk]"\r\n\r\nLow\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[infection_risk]"\r\n\r\nLow\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[next_of_kin]"\r\n\r\nAnjhgfd\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[next_of_kin_address]"\r\n\r\nBehind Post Ofice Aggrey Road Twon ,Port- Harcourt\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[next_of_kin_phone_number]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[next_of_kin_alternate_phone]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[relationship_to_next_of_kin]"\r\n\r\nmother\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[next_of_kin_email]"\r\n\r\ntuyjhjhhjookkkkk@prolianceltd.com\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[next_of_kin_town]"\r\n\r\nPort Harcourt\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[next_of_kin_zip_code]"\r\n\r\n105101\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[Right_to_Work_status]"\r\n\r\nVisa Holder\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[Right_to_Work_passport_holder]"\r\n\r\nNo\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[Right_to_Work_document_type]"\r\n\r\nPassport\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[Right_to_Work_share_code]"\r\n\r\n\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[Right_to_Work_document_number]"\r\n\r\n123456789kjhgfd\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[Right_to_Work_document_expiry_date]"\r\n\r\n2025-09-02\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[Right_to_Work_country_of_issue]"\r\n\r\nUSA\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[Right_to_Work_restrictions]"\r\n\r\nqwertyui\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[dbs_type]"\r\n\r\nStandard\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[dbs_certificate_number]"\r\n\r\nnithingnithing\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[dbs_issue_date]"\r\n\r\n2025-09-09\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[dbs_update_certificate_number]"\r\n\r\nnithingnithing\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[dbs_update_issue_date]"\r\n\r\n2025-09-09\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[dbs_status_check]"\r\n\r\nfalse\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[bank_name]"\r\n\r\nAccess Diamond Bank\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[account_number]"\r\n\r\n12345678987654\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[account_name]"\r\n\r\nAbraham\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[account_type]"\r\n\r\nSavings\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[access_duration]"\r\n\r\n2025-09-15\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[system_access_rostering]"\r\n\r\ntrue\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[system_access_hr]"\r\n\r\ntrue\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[system_access_recruitment]"\r\n\r\ntrue\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[system_access_training]"\r\n\r\ntrue\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[system_access_finance]"\r\n\r\ntrue\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[system_access_compliance]"\r\n\r\ntrue\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[system_access_co_superadmin]"\r\n\r\ntrue\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[system_access_asset_management]"\r\n\r\ntrue\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[vehicle_type]"\r\n\r\nCompany Vehicle\r\n------WebKitFormBoundaryXStBIGlgomxDNs7M\r\nContent-Disposition: form-data; name="profile[profile_image]"; filename="Screenshot 2025-09-16 112918.png"\r\nContent-Type: image/png\r\n\r\n\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x01)\x00\x00\x02\xdd\x08\x06\x00\x00\x00pr\x95\x10\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x00\x04gAMA\x00\x00\xb1\x8f\x0b\xfca\x05\x00\x00\x00\tpHYs\x00\x00\x12t\x00\x00\x12t\x01\xdef\x1fx\x00\x00\xa3\xffIDATx^\xed\xfd\x7ft\x1bg\x9a\xdf\x89~\xf5\xc36\xdb\x00\xc7\xa2I\xbae@3]\x9c\xc9\x90\xddCh\x14\x99C\xdb\x81\x1c\x8e\xc0\x9e\xe1\xa4C!\x1b\xaa\xafV\x12"2n\xdb\x97\x89\xa2!\xe3\x9b\xec\n\xe2\xdd=W\xab\xbd{BQ\x93\xbbG\x97XE\xe7j\xa5\xb6B)\x90\x14mK\x9d\x818\x99\xe1\xa4E\rcal+4\x9bmp\xba\xc9\x9en\xd5\xf4\x08\xb4\xda$\x9bR\x13p\xd3m[\xbc\x7f\xd4\xaf\xb7\xde\xaaB\x01$\x00\x16\xa1\xe7s\x0e\xce!\xeb\xe7[o\xbd\xf5\xad\xe7y\xde\xb7\x9ew\xdd\x97\xbf\xfc\xe5%\x10\x04A8\x90\x8d\x1b7b=\xbf\x90 \x08\xc2I\x90H\x11\x04\xe1hH\xa4\x08\x82p4$R\x04A8\x1a\x12)\x82 \x1c\r\x89\x14A\x10\x8e\x86D\x8a \x08G\xb3\xee\x1f5\xfe\x0e\x8d\x93"\x08\xa2h<ZZ\xc2\xe2\xa3G\xf8\xf9\xa7\x9f\xe1\xe7\x9f~\xca\xaf\xd6A\xe3\xa4\x08\x82(:\xeb\xd7\xad\xc3\xd3\x1b6`s\xd9S\xf0~\xa1\x0c\xeb\xf8\r8H\xa4\x08\x82X5\\\x1b7\xc2\xf3\x852~\xb1\x8e\x8c"\xf5\xf4\x86\x8d\x10\xdcO\xe3\x0b\x1b2nF\x10\x04\xb1l\\\x1b7\xe2W\x9ex\x82_\xacb\x88ImX\xb7\x0e_\xf3<\x87\x97++\xf0\xec\x93O\xaa\xcb\xe7>\xf9%\xde\x9d{\x80\xff\xfc\xe1O\xf1\xf9\x12\x85\xb1\x08\x82\xc8\x1f\x1f\x7f\xfe9\xee}\xfc\x0b~16n\xdc\xa8\x17\xa9\xaa\xa7\x9eD\xe7o\x08\xd8\xf2\xb4\xb5\xf9\xf5\x93\x8f?\xc6\xd9\x1f\xfd\x04\xb3\x9f\xfc\x92_E\x10\x04\xb1,\x1e--\xe1\xafSi~\xb1^\xa4\x9eX\xb7\x0e\xff\x93\xaf\x0e\xcf=\xa5YOVL\xffb\x11\xbd\x7f\xf5C\xb2\xa8\x96C[\x14\xa1\x80\xc0,\x101\xde\x1d\xc2\x04\xb3\xc4\x9a\x1e\xb4\xf4\x07\x81a?\x86\xae\xf3\xeb\x96K\xee\xc7\xac\x0f\xc7\xb1\xcd+\xff\x93\x1e\xc5\xad\x9e.Ls\xdbd&\xcbs6F\xb0\xbb\xbd\x01HDp\xed\xcc%~m\x11\x91\xca[\x95\x8c!\xda\xd7\xcb\xaf,,\\{\x99\xe5\xeaLw/d\x16\xb9\xfa\xd2o\x93K{+.S\x0b)~\x91\xbew\xaf\xedW\x9fW\x05\xea\xcf\xef\xcf`p\xfa\xa7\xec\xb6\xf8\xe3\xe4}\xdc\xfc\xe9,\x00\xc0\xf3\x852\xb4my^\xb7\xde\x8e\'\x9fz\n5_\xfe2\xbf\xf8\xb1\xc2\xd39\x84P\xa0\n\xe2\x05?\xa2\xdd\xca\xcf\x99\r&\x13\x13}R\xd9o%\x8c\x8d\xcaIx:\x87\x10\xea\x8d\xc0\xc3\xafX+\xb4E\xf5\xed\xe5\xc2(\xdc\x81!\xf8\x1b\xf5\x9b-&"L{\xf2\xeb\x04\xca\xd39\x84m\x9bFqK^7\x9e\x14\xb0m\x8d\xd5\xc9z\x00xb\xfd:\xfc\xfd\xeaJu\xa1k\xe3\x06\x0cN\xff\x14C\xf7?\x02\x00\\\xbf\xf7!\xfe\xec\xc3\x8f\xe0\xda\xb8A\xdd\xe6\x95\xeag\xb1a\x9d]\xe7\xa1\x9e}\xff\xe2\x10v\x06\x83\xfc\xe2\xc7\x86\x8a\n7\x90\x1cF\xfc\x0e\xbf\x860\xe5N\x17\xaeq\x0f\xdd\xea\xd0\x8b\xa1n\x7f\xd1\xad\xa8\xfaZA\xdf^\xeeta2\xe9\x86\xd0\xdc\xc3miE\x0f|>7f\xdf\xd3,\xdd\x89\x9b\xa3Xt5\xc0\xd7\xc6m\xea`\xd6\x03\x80\xf7\xe9/\xe8\x04\xc7_\xf5,\xf6}\xc9\x8bo\xdf\xbb\x8f\xfe\xa9\x1f\xe3\xbf\xdc\x9f\xc1?\x11\xb6\xe0\xa5\xca\nu\x9b\'\xd7\xaf\x877C\xec\xca\x8a\xbf\xf7\xfb-x\xf5_\xff\x0f\xf0\n5\xfc\xaa\xc7\x03o\xc0\xf0&\xe4\xa9\x0f\xc7\x11\xea\xd7~\xbb;\xf7s[\xf4\xa0E]o|\xb3\xea\xf7\x8f\xa2^\xbfZzC\xab\xeb\x83\xa82\xac\xd3\xefS\x1f\x8e#\x14\xce\xf6\xc1\x90\xb0-CF\xd8\xeb3\xbb~\x00\xd8\x0f\x7f\xaf\xbe\x9eZ\xe4\x07\xcf\xd39\x84P\x7f\x1c;}n\xc0\xd5\x80\x9d\x19\xea\xca\x12]\x1d\xc9?C\x1dX\x97\x01\x8d\x11\xec\xe6\xf7\x91\x97\xf1\xd7\xa3\x94W\xdd\x97aq^\xd4\xfd??\x9f\x026y\xb2\xb3\x84\xda\xb6\xa2\n"\x92\xac{\xd8\xdc\x802\x00\xeej\xb3:u&\xeb\x01\xe0\xe9\xf5\x9a\x85\xa4\xd0T]\x89\x86\x8ag\xf0\x83\x9f\xa7\xd0\xf0\xec&\xf8\xab\x9e\xe57\xc1\xd3\x1b\x8c\xfbe\xc3\xf3_\xfa\x12:\xfe\xd5\xbf\x82\xbf\xa5\x85_U\xd2L\xf4E \xa6\xdd\x10\xda\xad\x1f\x98\xfap\\g\x9e\xf3\xe6;\x00T\x05\x02H\xc9.\xc0x\xd2\ra\xb7f\xbe\xf3\xfb\xdfJTa\x1b+\x12\xbc\x0b\xd1\x1d\x83\xe4\xc4\xe7\x0f\xdb2\xd8"[.\xdd\x11\x88\xc6X*\x00\xa0>\xdc\x05\xe1AL\xe7\xe6(\xb1\x9a\xe93-\x9a;\x9af\xeb\xb2%{+\xf6zHw\xec\xf1$\xbfA\xe62\xe0N\x17\xae]\x18\xc5\xa27(\x8bO\x0fZr\x8c\xaf\xcd\xcf\xa7P\xe6\x0b2\xf5&YF<e\xbe.M(yW.=\x87' (<class 'bytes'>)
+2025-09-16 12:46:20,096 INFO gateway METHOD: PATCH | PATH: /api/user/users/2/ | STATUS: 400 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/2/
+2025-09-16 12:46:53,338 INFO gateway Incoming request content type: application/json
+2025-09-16 12:46:53,338 INFO gateway Raw body size: 4215 bytes
+2025-09-16 12:46:53,373 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 400 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-16 12:47:18,111 INFO gateway Incoming request content type: application/json
+2025-09-16 12:47:18,111 INFO gateway Raw body size: 4216 bytes
+2025-09-16 12:47:18,664 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-16 12:47:18,695 INFO gateway Incoming request content type: multipart/form-data; boundary=----WebKitFormBoundaryPoulng4UcFqIVj3J
+2025-09-16 12:47:18,696 INFO gateway Raw body size: 1518675 bytes
+2025-09-16 12:47:18,696 WARNING gateway Could not parse multipart body for file logging: 'utf-8' codec can't decode byte 0x89 in position 8730: invalid start byte. You passed in b'------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="username"\r\n\r\ntester2\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="email"\r\n\r\ntester2@prolianceltd.com\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="first_name"\r\n\r\nUbokIneme\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="last_name"\r\n\r\nPious\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="role"\r\n\r\nadmin\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="job_role"\r\n\r\nqwertyui\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="is_superuser"\r\n\r\nfalse\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="last_password_reset"\r\n\r\n2025-09-16T12:47:17.170Z\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[work_phone]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[personal_phone]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[gender]"\r\n\r\nFemale\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[dob]"\r\n\r\n2025-09-01\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[street]"\r\n\r\nKm 20 lekki Epe Expressway Lagos\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[city]"\r\n\r\nLekki\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[state]"\r\n\r\n\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[zip_code]"\r\n\r\n105101\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[department]"\r\n\r\nFinance\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[marital_status]"\r\n\r\nWidowed\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[id_number]"\r\n\r\nnithing\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[document_number]"\r\n\r\n123456789kjhgfd\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[document_expiry_date]"\r\n\r\n2025-09-02\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[is_driver]"\r\n\r\ntrue\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[type_of_vehicle]"\r\n\r\nCompany Vehicle\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[drivers_licence_country_of_issue]"\r\n\r\nUSA\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[drivers_licence_date_issue]"\r\n\r\n2025-07-01\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[drivers_licence_expiry_date]"\r\n\r\n2025-09-03\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[drivers_license_insurance_provider]"\r\n\r\n\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[drivers_licence_insurance_expiry_date]"\r\n\r\n2025-09-03\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[drivers_licence_issuing_authority]"\r\n\r\n\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[drivers_licence_policy_number]"\r\n\r\nqwerty\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[assessor_name]"\r\n\r\n\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[manual_handling_risk]"\r\n\r\nLow\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[lone_working_risk]"\r\n\r\nLow\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[infection_risk]"\r\n\r\nLow\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[next_of_kin]"\r\n\r\nAnjhgfd\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[next_of_kin_address]"\r\n\r\nBehind Post Ofice Aggrey Road Twon ,Port- Harcourt\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[next_of_kin_phone_number]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[next_of_kin_alternate_phone]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[relationship_to_next_of_kin]"\r\n\r\nmother\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[next_of_kin_email]"\r\n\r\ntuyjhjhhjookkkkk@prolianceltd.com\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[next_of_kin_town]"\r\n\r\nPort Harcourt\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[next_of_kin_zip_code]"\r\n\r\n105101\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[Right_to_Work_status]"\r\n\r\nVisa Holder\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[Right_to_Work_passport_holder]"\r\n\r\nNo\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[Right_to_Work_document_type]"\r\n\r\nPassport\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[Right_to_Work_share_code]"\r\n\r\n\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[Right_to_Work_document_number]"\r\n\r\n123456789kjhgfd\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[Right_to_Work_document_expiry_date]"\r\n\r\n2025-09-02\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[Right_to_Work_country_of_issue]"\r\n\r\nUSA\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[Right_to_Work_restrictions]"\r\n\r\nqwertyui\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[dbs_type]"\r\n\r\nStandard\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[dbs_certificate_number]"\r\n\r\nnithingnithing\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[dbs_issue_date]"\r\n\r\n2025-09-09\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[dbs_update_certificate_number]"\r\n\r\nnithingnithing\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[dbs_update_issue_date]"\r\n\r\n2025-09-09\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[dbs_status_check]"\r\n\r\nfalse\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[bank_name]"\r\n\r\nAccess Diamond Bank\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[account_number]"\r\n\r\n12345678987654\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[account_name]"\r\n\r\nAbraham\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[account_type]"\r\n\r\nSavings\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[access_duration]"\r\n\r\n2025-09-15\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[system_access_rostering]"\r\n\r\ntrue\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[system_access_hr]"\r\n\r\ntrue\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[system_access_recruitment]"\r\n\r\ntrue\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[system_access_training]"\r\n\r\ntrue\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[system_access_finance]"\r\n\r\ntrue\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[system_access_compliance]"\r\n\r\ntrue\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[system_access_co_superadmin]"\r\n\r\ntrue\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[system_access_asset_management]"\r\n\r\ntrue\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[vehicle_type]"\r\n\r\nCompany Vehicle\r\n------WebKitFormBoundaryPoulng4UcFqIVj3J\r\nContent-Disposition: form-data; name="profile[profile_image]"; filename="Screenshot 2025-09-16 112918.png"\r\nContent-Type: image/png\r\n\r\n\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x01)\x00\x00\x02\xdd\x08\x06\x00\x00\x00pr\x95\x10\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x00\x04gAMA\x00\x00\xb1\x8f\x0b\xfca\x05\x00\x00\x00\tpHYs\x00\x00\x12t\x00\x00\x12t\x01\xdef\x1fx\x00\x00\xa3\xffIDATx^\xed\xfd\x7ft\x1bg\x9a\xdf\x89~\xf5\xc36\xdb\x00\xc7\xa2I\xbae@3]\x9c\xc9\x90\xddCh\x14\x99C\xdb\x81\x1c\x8e\xc0\x9e\xe1\xa4C!\x1b\xaa\xafV\x12"2n\xdb\x97\x89\xa2!\xe3\x9b\xec\n\xe2\xdd=W\xab\xbd{BQ\x93\xbbG\x97XE\xe7j\xa5\xb6B)\x90\x14mK\x9d\x818\x99\xe1\xa4E\rcal+4\x9bmp\xba\xc9\x9en\xd5\xf4\x08\xb4\xda$\x9bR\x13p\xd3m[\xbc\x7f\xd4\xaf\xb7\xde\xaaB\x01$\x00\x16\xa1\xe7s\x0e\xce!\xeb\xe7[o\xbd\xf5\xad\xe7y\xde\xb7\x9ew\xdd\x97\xbf\xfc\xe5%\x10\x04A8\x90\x8d\x1b7b=\xbf\x90 \x08\xc2I\x90H\x11\x04\xe1hH\xa4\x08\x82p4$R\x04A8\x1a\x12)\x82 \x1c\r\x89\x14A\x10\x8e\x86D\x8a \x08G\xb3\xee\x1f5\xfe\x0e\x8d\x93"\x08\xa2h<ZZ\xc2\xe2\xa3G\xf8\xf9\xa7\x9f\xe1\xe7\x9f~\xca\xaf\xd6A\xe3\xa4\x08\x82(:\xeb\xd7\xad\xc3\xd3\x1b6`s\xd9S\xf0~\xa1\x0c\xeb\xf8\r8H\xa4\x08\x82X5\\\x1b7\xc2\xf3\x852~\xb1\x8e\x8c"\xf5\xf4\x86\x8d\x10\xdcO\xe3\x0b\x1b2nF\x10\x04\xb1l\\\x1b7\xe2W\x9ex\x82_\xacb\x88ImX\xb7\x0e_\xf3<\x87\x97++\xf0\xec\x93O\xaa\xcb\xe7>\xf9%\xde\x9d{\x80\xff\xfc\xe1O\xf1\xf9\x12\x85\xb1\x08\x82\xc8\x1f\x1f\x7f\xfe9\xee}\xfc\x0b~16n\xdc\xa8\x17\xa9\xaa\xa7\x9eD\xe7o\x08\xd8\xf2\xb4\xb5\xf9\xf5\x93\x8f?\xc6\xd9\x1f\xfd\x04\xb3\x9f\xfc\x92_E\x10\x04\xb1,\x1e--\xe1\xafSi~\xb1^\xa4\x9eX\xb7\x0e\xff\x93\xaf\x0e\xcf=\xa5YOVL\xffb\x11\xbd\x7f\xf5C\xb2\xa8\x96C[\x14\xa1\x80\xc0,\x101\xde\x1d\xc2\x04\xb3\xc4\x9a\x1e\xb4\xf4\x07\x81a?\x86\xae\xf3\xeb\x96K\xee\xc7\xac\x0f\xc7\xb1\xcd+\xff\x93\x1e\xc5\xad\x9e.Ls\xdbd&\xcbs6F\xb0\xbb\xbd\x01HDp\xed\xcc%~m\x11\x91\xca[\x95\x8c!\xda\xd7\xcb\xaf,,\\{\x99\xe5\xeaLw/d\x16\xb9\xfa\xd2o\x93K{+.S\x0b)~\x91\xbew\xaf\xedW\x9fW\x05\xea\xcf\xef\xcf`p\xfa\xa7\xec\xb6\xf8\xe3\xe4}\xdc\xfc\xe9,\x00\xc0\xf3\x852\xb4my^\xb7\xde\x8e\'\x9fz\n5_\xfe2\xbf\xf8\xb1\xc2\xd39\x84P\xa0\n\xe2\x05?\xa2\xdd\xca\xcf\x99\r&\x13\x13}R\xd9o%\x8c\x8d\xcaIx:\x87\x10\xea\x8d\xc0\xc3\xafX+\xb4E\xf5\xed\xe5\xc2(\xdc\x81!\xf8\x1b\xf5\x9b-&"L{\xf2\xeb\x04\xca\xd39\x84m\x9bFqK^7\x9e\x14\xb0m\x8d\xd5\xc9z\x00xb\xfd:\xfc\xfd\xeaJu\xa1k\xe3\x06\x0cN\xff\x14C\xf7?\x02\x00\\\xbf\xf7!\xfe\xec\xc3\x8f\xe0\xda\xb8A\xdd\xe6\x95\xeag\xb1a\x9d]\xe7\xa1\x9e}\xff\xe2\x10v\x06\x83\xfc\xe2\xc7\x86\x8a\n7\x90\x1cF\xfc\x0e\xbf\x860\xe5N\x17\xaeq\x0f\xdd\xea\xd0\x8b\xa1n\x7f\xd1\xad\xa8\xfaZA\xdf^\xeeta2\xe9\x86\xd0\xdc\xc3miE\x0f|>7f\xdf\xd3,\xdd\x89\x9b\xa3Xt5\xc0\xd7\xc6m\xea`\xd6\x03\x80\xf7\xe9/\xe8\x04\xc7_\xf5,\xf6}\xc9\x8bo\xdf\xbb\x8f\xfe\xa9\x1f\xe3\xbf\xdc\x9f\xc1?\x11\xb6\xe0\xa5\xca\nu\x9b\'\xd7\xaf\x877C\xec\xca\x8a\xbf\xf7\xfb-x\xf5_\xff\x0f\xf0\n5\xfc\xaa\xc7\x03o\xc0\xf0&\xe4\xa9\x0f\xc7\x11\xea\xd7~\xbb;\xf7s[\xf4\xa0E]o|\xb3\xea\xf7\x8f\xa2^\xbfZzC\xab\xeb\x83\xa82\xac\xd3\xefS\x1f\x8e#\x14\xce\xf6\xc1\x90\xb0-CF\xd8\xeb3\xbb~\x00\xd8\x0f\x7f\xaf\xbe\x9eZ\xe4\x07\xcf\xd39\x84P\x7f\x1c;}n\xc0\xd5\x80\x9d\x19\xea\xca\x12]\x1d\xc9?C\x1dX\x97\x01\x8d\x11\xec\xe6\xf7\x91\x97\xf1\xd7\xa3\x94W\xdd\x97aq^\xd4\xfd??\x9f\x026y\xb2\xb3\x84\xda\xb6\xa2\n"\x92\xac{\xd8\xdc\x802\x00\xeej\xb3:u&\xeb\x01\xe0\xe9\xf5\x9a\x85\xa4\xd0T]\x89\x86\x8ag\xf0\x83\x9f\xa7\xd0\xf0\xec&\xf8\xab\x9e\xe57\xc1\xd3\x1b\x8c\xfbe\xc3\xf3_\xfa\x12:\xfe\xd5\xbf\x82\xbf\xa5\x85_U\xd2L\xf4E \xa6\xdd\x10\xda\xad\x1f\x98\xfap\\g\x9e\xf3\xe6;\x00T\x05\x02H\xc9.\xc0x\xd2\ra\xb7f\xbe\xf3\xfb\xdfJTa\x1b+\x12\xbc\x0b\xd1\x1d\x83\xe4\xc4\xe7\x0f\xdb2\xd8"[.\xdd\x11\x88\xc6X*\x00\xa0>\xdc\x05\xe1AL\xe7\xe6(\xb1\x9a\xe93-\x9a;\x9af\xeb\xb2%{+\xf6zHw\xec\xf1$\xbfA\xe62\xe0N\x17\xae]\x18\xc5\xa27(\x8bO\x0fZr\x8c\xaf\xcd\xcf\xa7P\xe6\x0b2\xf5&YF<e\xbe.M(yW.=' (<class 'bytes'>)
+2025-09-16 12:47:20,233 INFO gateway METHOD: PATCH | PATH: /api/user/users/3/ | STATUS: 400 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/3/
+2025-09-16 12:49:29,858 INFO gateway Incoming request content type: application/json
+2025-09-16 12:49:29,859 INFO gateway Raw body size: 4216 bytes
+2025-09-16 12:49:29,919 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 400 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-16 12:49:54,288 INFO gateway Incoming request content type: application/json
+2025-09-16 12:49:54,289 INFO gateway Raw body size: 4214 bytes
+2025-09-16 12:49:54,848 INFO gateway METHOD: POST | PATH: /api/user/users/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-16 12:49:54,870 INFO gateway Incoming request content type: multipart/form-data; boundary=----WebKitFormBoundaryReG2ZLhOxRLd31bd
+2025-09-16 12:49:54,871 INFO gateway Raw body size: 521759 bytes
+2025-09-16 12:49:54,871 WARNING gateway Could not parse multipart body for file logging: 'utf-8' codec can't decode byte 0xff in position 8724: invalid start byte. You passed in b'------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="username"\r\n\r\ntester3\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="email"\r\n\r\ntester3@prolianceltd.com\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="first_name"\r\n\r\nGandus\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="last_name"\r\n\r\nOkwusi\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="role"\r\n\r\nadmin\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="job_role"\r\n\r\nqwertyui\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="is_superuser"\r\n\r\nfalse\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="last_password_reset"\r\n\r\n2025-09-16T12:49:53.197Z\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[work_phone]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[personal_phone]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[gender]"\r\n\r\nFemale\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[dob]"\r\n\r\n2025-09-01\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[street]"\r\n\r\nKm 20 lekki Epe Expressway Lagos\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[city]"\r\n\r\nLekki\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[state]"\r\n\r\n\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[zip_code]"\r\n\r\n105101\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[department]"\r\n\r\nFinance\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[marital_status]"\r\n\r\nWidowed\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[id_number]"\r\n\r\nnithing\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[document_number]"\r\n\r\n123456789kjhgfd\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[document_expiry_date]"\r\n\r\n2025-09-02\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[is_driver]"\r\n\r\ntrue\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[type_of_vehicle]"\r\n\r\nCompany Vehicle\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[drivers_licence_country_of_issue]"\r\n\r\nUSA\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[drivers_licence_date_issue]"\r\n\r\n2025-07-01\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[drivers_licence_expiry_date]"\r\n\r\n2025-09-03\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[drivers_license_insurance_provider]"\r\n\r\n\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[drivers_licence_insurance_expiry_date]"\r\n\r\n2025-09-03\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[drivers_licence_issuing_authority]"\r\n\r\n\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[drivers_licence_policy_number]"\r\n\r\nqwerty\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[assessor_name]"\r\n\r\n\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[manual_handling_risk]"\r\n\r\nLow\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[lone_working_risk]"\r\n\r\nLow\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[infection_risk]"\r\n\r\nLow\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[next_of_kin]"\r\n\r\nAnjhgfd\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[next_of_kin_address]"\r\n\r\nBehind Post Ofice Aggrey Road Twon ,Port- Harcourt\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[next_of_kin_phone_number]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[next_of_kin_alternate_phone]"\r\n\r\n+108146955393\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[relationship_to_next_of_kin]"\r\n\r\nmother\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[next_of_kin_email]"\r\n\r\ntuyjhjhhjookkkkk@prolianceltd.com\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[next_of_kin_town]"\r\n\r\nPort Harcourt\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[next_of_kin_zip_code]"\r\n\r\n105101\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[Right_to_Work_status]"\r\n\r\nVisa Holder\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[Right_to_Work_passport_holder]"\r\n\r\nNo\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[Right_to_Work_document_type]"\r\n\r\nPassport\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[Right_to_Work_share_code]"\r\n\r\n\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[Right_to_Work_document_number]"\r\n\r\n123456789kjhgfd\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[Right_to_Work_document_expiry_date]"\r\n\r\n2025-09-02\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[Right_to_Work_country_of_issue]"\r\n\r\nUSA\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[Right_to_Work_restrictions]"\r\n\r\nqwertyui\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[dbs_type]"\r\n\r\nStandard\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[dbs_certificate_number]"\r\n\r\nnithingnithing\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[dbs_issue_date]"\r\n\r\n2025-09-09\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[dbs_update_certificate_number]"\r\n\r\nnithingnithing\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[dbs_update_issue_date]"\r\n\r\n2025-09-09\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[dbs_status_check]"\r\n\r\nfalse\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[bank_name]"\r\n\r\nAccess Diamond Bank\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[account_number]"\r\n\r\n12345678987654\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[account_name]"\r\n\r\nAbraham\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[account_type]"\r\n\r\nSavings\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[access_duration]"\r\n\r\n2025-09-15\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[system_access_rostering]"\r\n\r\ntrue\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[system_access_hr]"\r\n\r\ntrue\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[system_access_recruitment]"\r\n\r\ntrue\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[system_access_training]"\r\n\r\ntrue\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[system_access_finance]"\r\n\r\ntrue\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[system_access_compliance]"\r\n\r\ntrue\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[system_access_co_superadmin]"\r\n\r\ntrue\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[system_access_asset_management]"\r\n\r\ntrue\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[vehicle_type]"\r\n\r\nCompany Vehicle\r\n------WebKitFormBoundaryReG2ZLhOxRLd31bd\r\nContent-Disposition: form-data; name="profile[profile_image]"; filename="Customer Support Intern.jpg"\r\nContent-Type: image/jpeg\r\n\r\n\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xdb\x00\x84\x00\t\x06\x07\x12\x12\x12\x15\x12\x12\x13\x16\x15\x15\x17\x17\x18\x1a\x18\x18\x18\x18\x17\x1a\x1d\x1a\x18\x1a\x17\x1d\x18\x17\x18\x16\x18\x18\x1d( \x18\x1d%\x1d\x17\x17"1!&)+...\x18\x1f383-7(-.+\x01\n\n\n\x0e\r\x0e\x1a\x10\x10\x1b/%\x1f%----/+-0-+---25------------------/-/--------+-----\xff\xc0\x00\x11\x08\x00\xe1\x00\xe1\x03\x01"\x00\x02\x11\x01\x03\x11\x01\xff\xc4\x00\x1c\x00\x00\x01\x05\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x04\x05\x06\x07\x03\x02\x08\xff\xc4\x00S\x10\x00\x02\x01\x03\x02\x02\x05\x05\x0b\x07\x07\x0b\x04\x03\x01\x00\x01\x02\x03\x00\x04\x11\x12!\x051\x06\x13AQa\x07"q\x81\xf0\x14\x152RT\x91\x93\xa1\xb1\xd1\xd2\x16#3S\x92\x94\xc15Brs\xb4\xd3\xe1\x17$6bt\x82\xb2\xb3\xc2\xc3\xf1\x084\x84\xa2u\x83\xc4%\xff\xc4\x00\x1b\x01\x01\x00\x03\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x04\x03\x05\x06\x07\xff\xc4\x005\x11\x00\x02\x02\x01\x02\x03\x05\x07\x02\x05\x05\x00\x00\x00\x00\x00\x00\x01\x02\x11\x03\x04!\x121A\x05Qa\xa1\xd1\x13\x14\x15q\x81\x91\xf0\xc1\xe1"34R\xf12BSb\xb1\xff\xda\x00\x0c\x03\x01\x00\x02\x11\x03\x11\x00?\x00\xc8\xe8\xa7\x9e\xf4\\\xfc\x9a\x7f\xa1\x93\xf0\xd1\xefE\xcf\xc9\xa7\xfa\x19?\rt9S\x19\xd1O=\xe8\xb9\xf94\xff\x00C\'\xe1\xa3\xde\x8b\x9f\x93O\xf42~\x1a\nc:)\xe7\xbd\x17?&\x9f\xe8d\xfc4{\xd1s\xf2i\xfe\x86O\xc3ALgE<\xf7\xa2\xe7\xe4\xd3\xfd\x0c\x9f\x86\x8fz.~M?\xd0\xc9\xf8h)\x8c\xe8\xa7\x9e\xf4\\\xfc\x9a\x7f\xa1\x93\xf0\xd3:\x00\xa2\x8a\xf7\x04,\xec\x11FY\x8e\x00\xc8\x19>\x93\xb5\x08<QN-\xac&\x90\xe1"v:\x19\xf6S\xf0\x11u;\x0c\xf3\x00`\xfa\xc7x\xaeB\x078\xc21\xc8\xc8\xf3N\xe3\x96F\xdb\x8c\xf6\xd0\x93\xc5\x14\xe2\x0bq\xa8,\x9a\x93W\xc1$c~[\xe7\x98\xce\xdbS\xfbN\x02\xd2H\x91\tS[\x07%w:B\xfcoN6\xa9\xad\xac\xad\xefDE\x14\x8ar3KPHQEHE\xc0/\x19C-\xa5\xcb+\x00C,\x12\x90A\xdc\x10B\xe0\x82;hI\x1fEI\xfeN^\xfc\x8a\xeb\xf7y\xbf\x05\x1f\x93\x97\xbf"\xba\xfd\xdeo\xc1K\x14\xc8\xca*S\xf2r\xfb\xe4w_\xbb\xcd\xf8)?\'/~Eu\xfb\xbc\xdf\x86\x96)\x91\x94T\x9f\xe4\xe5\xf7\xc8\xee\xbfw\x9b\xf0Q\xf99{\xf2+\xaf\xdd\xe6\xfc\x14\xb1L\x8c\xa2\xa4\xff\x00\'/\xbeGu\xfb\xbc\xdf\x82\x8f\xc9\xcb\xdf\x91]~\xef7\xe1\xa5\x8ade\x15)\xf99}\xf2;\xaf\xdd\xe6\xfc\x14R\xc51\xaf\xbeS\xfe\xbeo\xa4\x7f\xbe\x8f|\xa7\xfd|\xdfH\xff\x00}5\xa2\x80u\xef\x94\xff\x00\xaf\x9b\xe9\x1f\xef\xa3\xdf)\xff\x00_7\xd2?\xdfMjK\x81pf\xbavE`\xa5WVN{\xf1\xd9\xe9\xabF\x0eO\x86<\xcaO$a\x17):Ho\xef\x94\xff\x00\xaf\x9b\xe9\x1f\xef\xa3\xdf)\xff\x00_7\xd2?\xdfV?\xc8)\xbf]\x1f\xcc\xd5\x15\xc3x\x03M|\x96:\xc2\xb3I\xd5\xeb\xc1 \x1c\x13\x9cd\x13\xca\xaf\x93\x06Lj\xe6\xa8\xe7\x87U\x8b3\xacr\xb1\x8f\xbeS\xfe\xbeo\xa4\x7f\xbe\x8f|\xa7\xfd|\xdfH\xff\x00}Xzk\xd0\x87\xe1\xd3\xc1\x03L\xb2\x99\x86\xcc\x10\xae\x9f<&\xe0\xb1\xcf<\xd4\xd7I|\x92\xcdf\xb0\xb9\xb9I\x04\xb7\x11Bq\x1b.\x9e\xb5\xb4\x87>y\xc8\x07\x1bm\xcf\x9dq\xb3E2\x89\xef\x94\xff\x00\xaf\x9b\xe9\x1f\xef\xa6\xb5s\xe9\xb7\x93\xe98k[+\\,\xbe\xe8r\xa3\x08WN\n\x0c\x9c\xb1\xcf\xc3\xfa\xaa\xd3\xfeBf\xf9t\x7fB\xdf\xdeR\xc53#\xa7\xbc\x13\x895\xb5\xc4W\n\xa1\x9a\'\x0e\x14\xe4\x02Ga\xc5Yx\x9f\x93\xf9!\xe2pp\xc3p\xac\xd3 a&\x82\x02\xe7\xac\xd8\xa6\xac\x9f\xd1\x1e\xde\xdf\n\xb5\x7f\x90\x99\xbe]\x1f\xd0\xb7\xf7\x94\xb48YQ\xb6\xf2\x81r\x8a\xa9\xa7*\xaa\x13\x1dd\x83\xcc\xf7*\xdb\x15R\xa4\x14\xce\x81&G\xf3\xf7\xaf\\K\xca%\xd4\xd1\x84\xd0\x91\x91n\xd0j\x8f*F\xa3\t.\xa4n\xbb@\xa3Nq\xe7\x1f\x009\xf4C\xa0\xef\xc4.\xae-Vu\x8c\xc1\xab,P\xb0m2u{\x00\xc3\x1c\xb3\xce\xadw>C.B\x93\x1d\xdcN\xc0l\xa66@Ov\xadM\x8f\x9a\x9b\x13\xb9J\xe3]/\x96\xe8\xa9\x91\x01)#\xbae\x99\x82k\x8e(\xf4\xa8nJ:\x9dX\xefs\\8\x7fI\x1e0\x9a\xa3Y\x1a=zX\xe0\x1d/\xf0\x94\xf9\xa7V\xfb\xefN\xfa\x15\xd0\xd98\x8d\xcc\xb6\xbd`\x81\xe2Ff\xd4\xa5\xb0U\xc22\xe00\xdc\x13\xdf\xd9V\x0b_$\xb3=\xec' (<class 'bytes'>)
+2025-09-16 12:50:04,718 INFO gateway METHOD: PATCH | PATH: /api/user/users/4/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/4/
+2025-09-16 12:50:16,692 INFO gateway Incoming request content type: application/json
+2025-09-16 12:50:16,693 INFO gateway Raw body size: 382 bytes
+2025-09-16 12:50:16,757 INFO gateway METHOD: GET | PATH: /api/user/users/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/
+2025-09-16 12:50:28,772 INFO gateway Incoming request content type: application/json
+2025-09-16 12:50:28,773 INFO gateway Raw body size: 382 bytes
+2025-09-16 12:50:28,872 INFO gateway METHOD: GET | PATH: /api/user/users/4/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/4/
+2025-09-16 12:59:41,229 INFO gateway Incoming request content type: 
+2025-09-16 12:59:41,229 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:59:41,317 INFO gateway METHOD: GET | PATH: /api/user/tenant-users/ | STATUS: 403 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/tenant-users/
+2025-09-16 12:59:41,329 INFO gateway Incoming request content type: 
+2025-09-16 12:59:41,329 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:59:41,345 INFO gateway METHOD: GET | PATH: /api/user/tenant-users/ | STATUS: 403 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/tenant-users/
+2025-09-16 12:59:53,314 INFO gateway Incoming request content type: 
+2025-09-16 12:59:53,315 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:59:53,420 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 403 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 12:59:53,431 INFO gateway Incoming request content type: 
+2025-09-16 12:59:53,431 INFO gateway Raw body size: 0 bytes
+2025-09-16 12:59:53,476 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 403 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:08:41,504 INFO gateway Incoming request content type: application/json
+2025-09-16 13:08:41,505 INFO gateway Raw body size: 382 bytes
+2025-09-16 13:08:42,930 INFO gateway METHOD: GET | PATH: /api/user/users/4/ | STATUS: 403 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/4/
+2025-09-16 13:08:48,443 INFO gateway Incoming request content type: application/json
+2025-09-16 13:08:48,443 INFO gateway Raw body size: 65 bytes
+2025-09-16 13:08:49,214 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 13:08:59,673 INFO gateway Incoming request content type: application/json
+2025-09-16 13:08:59,674 INFO gateway Raw body size: 382 bytes
+2025-09-16 13:08:59,738 INFO gateway METHOD: GET | PATH: /api/user/users/4/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/4/
+2025-09-16 13:28:47,826 INFO gateway Incoming request content type: 
+2025-09-16 13:28:47,827 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:28:47,925 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 401 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 13:28:47,929 INFO gateway Incoming request content type: 
+2025-09-16 13:28:47,930 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:28:47,996 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 401 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 13:28:47,999 INFO gateway Incoming request content type: 
+2025-09-16 13:28:47,999 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:28:48,030 INFO gateway METHOD: GET | PATH: /api/applications-engine/schedules/ | STATUS: 401 | IP: 172.18.0.1 | FORWARDED TO: http://job-applications:8003/api/applications-engine/schedules/
+2025-09-16 13:28:48,034 INFO gateway Incoming request content type: 
+2025-09-16 13:28:48,035 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:28:48,076 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 401 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-16 13:28:48,083 INFO gateway Incoming request content type: application/json
+2025-09-16 13:28:48,085 INFO gateway Raw body size: 779 bytes
+2025-09-16 13:28:48,280 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-16 13:28:48,283 INFO gateway Incoming request content type: application/json
+2025-09-16 13:28:48,284 INFO gateway Raw body size: 779 bytes
+2025-09-16 13:28:48,613 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-16 13:28:48,617 INFO gateway Incoming request content type: application/json
+2025-09-16 13:28:48,627 INFO gateway Raw body size: 779 bytes
+2025-09-16 13:28:49,034 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-16 13:28:49,053 INFO gateway Incoming request content type: application/json
+2025-09-16 13:28:49,058 INFO gateway Raw body size: 779 bytes
+2025-09-16 13:28:49,533 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-16 13:28:59,915 INFO gateway Incoming request content type: application/json
+2025-09-16 13:28:59,915 INFO gateway Raw body size: 56 bytes
+2025-09-16 13:29:00,614 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 13:29:42,536 INFO gateway Incoming request content type: 
+2025-09-16 13:29:42,539 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:29:42,658 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 13:29:42,666 INFO gateway Incoming request content type: 
+2025-09-16 13:29:42,667 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:29:42,731 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 13:29:42,859 INFO gateway Incoming request content type: 
+2025-09-16 13:29:42,860 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:29:42,958 INFO gateway METHOD: GET | PATH: /api/user/tenant-users/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/tenant-users/
+2025-09-16 13:29:42,966 INFO gateway Incoming request content type: 
+2025-09-16 13:29:42,967 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:29:43,054 INFO gateway METHOD: GET | PATH: /api/user/tenant-users/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/tenant-users/
+2025-09-16 13:29:44,464 INFO gateway Incoming request content type: 
+2025-09-16 13:29:44,465 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:29:44,623 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:29:44,641 INFO gateway Incoming request content type: 
+2025-09-16 13:29:44,644 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:29:44,832 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:29:44,838 INFO gateway Incoming request content type: 
+2025-09-16 13:29:44,838 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:29:44,972 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:33:00,924 INFO gateway Incoming request content type: 
+2025-09-16 13:33:00,925 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:33:01,025 INFO gateway METHOD: GET | PATH: /api/user/users/3/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/3/
+2025-09-16 13:33:01,033 INFO gateway Incoming request content type: 
+2025-09-16 13:33:01,034 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:33:01,079 INFO gateway METHOD: GET | PATH: /api/user/users/3/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/3/
+2025-09-16 13:33:07,787 INFO gateway Incoming request content type: 
+2025-09-16 13:33:07,788 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:33:07,921 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:33:07,929 INFO gateway Incoming request content type: 
+2025-09-16 13:33:07,929 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:33:08,043 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:33:08,052 INFO gateway Incoming request content type: 
+2025-09-16 13:33:08,052 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:33:08,230 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:47:25,646 INFO gateway Incoming request content type: application/json
+2025-09-16 13:47:25,646 INFO gateway Raw body size: 65 bytes
+2025-09-16 13:47:27,533 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 13:49:44,087 INFO gateway Incoming request content type: application/json
+2025-09-16 13:49:44,090 INFO gateway Raw body size: 65 bytes
+2025-09-16 13:49:47,167 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 13:49:59,020 INFO gateway Incoming request content type: application/json
+2025-09-16 13:49:59,020 INFO gateway Raw body size: 56 bytes
+2025-09-16 13:49:59,735 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-16 13:50:01,585 INFO gateway Incoming request content type: 
+2025-09-16 13:50:01,586 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:01,642 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 13:50:01,649 INFO gateway Incoming request content type: 
+2025-09-16 13:50:01,650 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:01,703 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 13:50:01,759 INFO gateway Incoming request content type: 
+2025-09-16 13:50:01,759 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:01,897 INFO gateway METHOD: GET | PATH: /api/user/tenant-users/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/tenant-users/
+2025-09-16 13:50:01,903 INFO gateway Incoming request content type: 
+2025-09-16 13:50:01,904 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:02,006 INFO gateway METHOD: GET | PATH: /api/user/tenant-users/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/tenant-users/
+2025-09-16 13:50:04,044 INFO gateway Incoming request content type: 
+2025-09-16 13:50:04,045 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:04,179 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:50:04,188 INFO gateway Incoming request content type: 
+2025-09-16 13:50:04,188 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:04,346 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:50:04,355 INFO gateway Incoming request content type: 
+2025-09-16 13:50:04,357 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:04,607 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:50:16,034 INFO gateway Incoming request content type: 
+2025-09-16 13:50:16,035 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:16,115 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 13:50:16,125 INFO gateway Incoming request content type: 
+2025-09-16 13:50:16,126 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:16,215 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 13:50:16,367 INFO gateway Incoming request content type: 
+2025-09-16 13:50:16,368 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:16,661 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:50:16,678 INFO gateway Incoming request content type: 
+2025-09-16 13:50:16,706 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:17,205 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:50:17,226 INFO gateway Incoming request content type: 
+2025-09-16 13:50:17,226 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:50:17,536 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:51:54,720 INFO gateway Incoming request content type: 
+2025-09-16 13:51:54,730 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:51:56,550 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 13:51:56,559 INFO gateway Incoming request content type: 
+2025-09-16 13:51:56,559 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:51:56,647 INFO gateway METHOD: GET | PATH: /api/token/validate/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/validate/
+2025-09-16 13:51:56,722 INFO gateway Incoming request content type: 
+2025-09-16 13:51:56,724 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:51:57,152 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:51:57,189 INFO gateway Incoming request content type: 
+2025-09-16 13:51:57,190 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:51:57,476 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users
+2025-09-16 13:51:57,486 INFO gateway Incoming request content type: 
+2025-09-16 13:51:57,487 INFO gateway Raw body size: 0 bytes
+2025-09-16 13:51:57,650 INFO gateway METHOD: GET | PATH: /api/user/users | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users

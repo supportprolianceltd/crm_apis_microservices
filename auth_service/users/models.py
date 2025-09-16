@@ -163,6 +163,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     role = models.CharField(max_length=20, choices=ROLES, default='carer')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     permission_levels = models.JSONField(default=list, blank=True)
     job_role = models.CharField(max_length=255, blank=True, null=True, default='staff')
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, null=True)
@@ -219,6 +220,128 @@ class CustomUser(AbstractUser):
         self.login_attempts = 0
         self.save()
         logger.info(f"Login attempts reset for user {self.email} in tenant {self.tenant.schema_name}")
+
+
+    def calculate_completion_percentage(self):
+        """
+        Calculate the completion percentage of the user profile based on filled fields.
+        Returns a float between 0 and 100.
+        """
+        total_weight = 0
+        completed_weight = 0
+
+        # CustomUser fields (20%)
+        user_fields = [
+            ('email', 7),
+            ('first_name', 7),
+            ('last_name', 7),
+            ('role', 2),
+            ('job_role', 2),
+            ('has_accepted_terms', 2),
+        ]
+        for field, weight in user_fields:
+            total_weight += weight
+            if getattr(self, field):
+                completed_weight += weight
+
+        # Ensure profile exists
+        try:
+            profile = self.profile
+        except UserProfile.DoesNotExist:
+            return round(completed_weight / total_weight * 100, 2) if total_weight > 0 else 0
+
+        # UserProfile - Personal Info (20%)
+        personal_fields = [
+            ('work_phone', 2.5),
+            ('personal_phone', 2.5),
+            ('gender', 2.5),
+            ('dob', 2.5),
+            ('street', 2.5),
+            ('city', 2.5),
+            ('state', 2.5),
+            ('zip_code', 2.5),
+            ('marital_status', 2.5),
+        ]
+        for field, weight in personal_fields:
+            total_weight += weight
+            if getattr(profile, field):
+                completed_weight += weight
+
+        # UserProfile - Next of Kin (10%)
+        next_of_kin_fields = [
+            ('next_of_kin', 2.5),
+            ('next_of_kin_phone_number', 2.5),
+            ('relationship_to_next_of_kin', 2.5),
+            ('next_of_kin_email', 2.5),
+        ]
+        for field, weight in next_of_kin_fields:
+            total_weight += weight
+            if getattr(profile, field):
+                completed_weight += weight
+
+        # UserProfile - Right to Work (15%)
+        right_to_work_fields = [
+            ('Right_to_Work_document_type', 3.75),
+            ('Right_to_Work_document_number', 3.75),
+            ('Right_to_Work_document_expiry_date', 3.75),
+            ('Right_to_Work_file', 3.75),
+        ]
+        for field, weight in right_to_work_fields:
+            total_weight += weight
+            if getattr(profile, field):
+                completed_weight += weight
+
+        # UserProfile - DBS Check (10%)
+        dbs_fields = [
+            ('dbs_type', 2.5),
+            ('dbs_certificate_number', 2.5),
+            ('dbs_issue_date', 2.5),
+            ('dbs_certificate', 2.5),
+        ]
+        for field, weight in dbs_fields:
+            total_weight += weight
+            if getattr(profile, field):
+                completed_weight += weight
+
+        # UserProfile - Bank Details (10%)
+        bank_fields = [
+            ('bank_name', 2.5),
+            ('account_number', 2.5),
+            ('account_name', 2.5),
+            ('account_type', 2.5),
+        ]
+        for field, weight in bank_fields:
+            total_weight += weight
+            if getattr(profile, field):
+                completed_weight += weight
+
+        # Related Models (15%)
+        related_models = [
+            ('professional_qualifications', 5),
+            ('employment_details', 5),
+            ('education_details', 5),
+            ('reference_checks', 5),
+        ]
+        for field, weight in related_models:
+            total_weight += weight
+            if getattr(profile, field).exists():
+                completed_weight += weight
+
+        # Driver-Specific Fields (10%, only if is_driver=True)
+        if profile.is_driver:
+            driver_fields = [
+                ('drivers_licence_image1', 2.5),
+                ('drivers_licence_date_issue', 2.5),
+                ('drivers_licence_expiry_date', 2.5),
+                ('drivers_license_insurance_provider', 2.5),
+            ]
+            for field, weight in driver_fields:
+                total_weight += weight
+                if getattr(profile, field):
+                    completed_weight += weight
+
+        return round(completed_weight / total_weight * 100, 2) if total_weight > 0 else 0
+
 
 
 

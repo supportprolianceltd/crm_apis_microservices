@@ -30,34 +30,6 @@ from .models import (
 logger = logging.getLogger('job_applications')
 
 
-
-# class ProfessionalQualificationSerializer(serializers.ModelSerializer):
-#     image_file = serializers.FileField(required=False, allow_null=True)
-
-#     class Meta:
-#         model = ProfessionalQualification
-#         fields = ['id', 'name', 'image_file']
-#         read_only_fields = ['id']
-
-#     def create(self, validated_data):
-#         image = validated_data.pop('image_file', None)
-#         if image:
-#             logger.info(f"Uploading professional qualification image: {image.name}")
-#             url = upload_file_dynamic(image, image.name, content_type=getattr(image, 'content_type', 'application/octet-stream'))
-#             validated_data['image_file'] = url
-#             logger.info(f"Professional qualification image uploaded: {url}")
-#         return super().create(validated_data)
-
-#     def update(self, instance, validated_data):
-#         image = validated_data.pop('image_file', None)
-#         if image:
-#             logger.info(f"Updating professional qualification image: {image.name}")
-#             url = upload_file_dynamic(image, image.name, content_type=getattr(image, 'content_type', 'application/octet-stream'))
-#             validated_data['image_file'] = url
-#             logger.info(f"Professional qualification image updated: {url}")
-#         return super().update(instance, validated_data)
-
-
 class ProfessionalQualificationSerializer(serializers.ModelSerializer):
     image_file = serializers.FileField(required=False, allow_null=True)
 
@@ -92,15 +64,6 @@ class ProfessionalQualificationSerializer(serializers.ModelSerializer):
         logger.info(f"Validating ProfessionalQualificationSerializer data: {data}")
         return super().validate(data)
 
-
-# class EmploymentDetailSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = EmploymentDetail
-#         exclude = ['user_profile']
-#         extra_kwargs = {
-#             field: {'required': False, 'allow_null': True}
-#             for field in ['employer_name', 'job_title', 'start_date', 'end_date', 'description']
-#         }
 class EmploymentDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmploymentDetail
@@ -193,9 +156,6 @@ class EducationDetailSerializer(serializers.ModelSerializer):
                 'start_year': 'Start year cannot be greater than end year.'
             })
         return super().validate(data)
-
-
-
 
 class ProofOfAddressSerializer(serializers.ModelSerializer):
     document = serializers.FileField(required=False, allow_null=True)
@@ -361,8 +321,6 @@ class OtherUserDocumentsSerializer(serializers.ModelSerializer):
             validated_data['file'] = url
             logger.info(f"Other user document updated: {url}")
         return super().update(instance, validated_data)
-
-
 
 class UserProfileSerializer(serializers.ModelSerializer):
     professional_qualifications = ProfessionalQualificationSerializer(many=True, required=False, allow_null=True)
@@ -860,8 +818,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
             return instance
 
-
-
 class CustomUserListSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
     tenant = serializers.SlugRelatedField(read_only=True, slug_field='name')
@@ -870,16 +826,23 @@ class CustomUserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'job_role', 'tenant', 'branch', 'permission_levels', 'profile']  # Light fields
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'job_role', 'tenant', 'branch', 'status', 'permission_levels', 'profile']  # Light fields
 
 class CustomUserSerializer(CustomUserListSerializer):
     profile = UserProfileSerializer(read_only=True)
+    completion_percentage = serializers.SerializerMethodField()
 
     class Meta(CustomUserListSerializer.Meta):
         fields = "__all__"
         read_only_fields = ['id', 'is_superuser', 'last_password_reset', 'is_locked', 'login_attempts']
 
-
+    def get_completion_percentage(self, obj):
+        try:
+            return obj.calculate_completion_percentage()
+        except Exception as e:
+            logger.error(f"Error calculating completion percentage for user {obj.email}: {str(e)}")
+            return 0
+            
 class UserAccountActionSerializer(serializers.Serializer):
     action = serializers.ChoiceField(choices=['lock', 'unlock', 'suspend', 'activate'], required=True)
 
@@ -949,59 +912,6 @@ class UserImpersonateSerializer(serializers.Serializer):
         if user.is_locked or user.status == 'suspended' or not user.is_active:
             raise serializers.ValidationError("Cannot impersonate a locked or suspended account.")
         return data
-
-
-
-# class AdminUserCreateSerializer(serializers.ModelSerializer):
-#     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
-#     branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)
-
-#     class Meta:
-#         model = CustomUser
-#         fields = "__all__"
-#         extra_kwargs = {
-#             'role': {'required': False, 'default': 'admin'},
-#             'email': {'required': True},
-#             'is_superuser': {'default': True},
-#             'is_staff': {'default': True},
-#         }
-
-#     def validate_email(self, value):
-#         try:
-#             domain = value.split('@')[1].lower()
-#         except IndexError:
-#             raise serializers.ValidationError("Invalid email format.")
-#         if not Domain.objects.filter(domain=domain).exists():
-#             raise serializers.ValidationError(f"No tenant found for domain '{domain}'.")
-#         if CustomUser.objects.filter(email=value).exists():
-#             raise serializers.ValidationError(f"User with email '{value}' already exists.")
-#         return value
-
-#     def create(self, validated_data):
-#         email = validated_data['email']
-#         domain = email.split('@')[1].lower()
-#         domain_obj = Domain.objects.get(domain=domain)
-#         tenant = domain_obj.tenant
-#         password = validated_data.pop('password')
-#         validated_data['is_superuser'] = True
-#         validated_data['is_staff'] = True
-#         validated_data['role'] = validated_data.get('role', 'admin')
-#         # Remove status from validated_data before creating user
-#         status = validated_data.pop('status', None)
-
-#         from django_tenants.utils import tenant_context
-#         with tenant_context(tenant):
-#             user = CustomUser.objects.create_user(
-#                 **validated_data,
-#                 tenant=tenant,
-#                 is_active=True
-#             )
-#             user.set_password(password)
-#             # Set status after user creation if needed
-#             if status is not None:
-#                 user.status = status
-#             user.save()
-#             return user
 
 class AdminUserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})

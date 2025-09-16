@@ -55,8 +55,6 @@ class Domain(DomainMixin):
     tenant = models.ForeignKey('core.Tenant', related_name='domain_set', on_delete=models.CASCADE)
 
 
-
-
 class Branch(models.Model):
     tenant = models.ForeignKey('Tenant', on_delete=models.CASCADE, related_name='branches')
     name = models.CharField(max_length=100)

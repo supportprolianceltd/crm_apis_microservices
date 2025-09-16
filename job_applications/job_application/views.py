@@ -1242,7 +1242,7 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+        tenant_id = jwt_payload.get('tenant_unique_id')
        # tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
@@ -1399,6 +1399,7 @@ class PermanentDeleteSchedulesView(APIView):
             return Response({"detail": "No soft-deleted schedules found."}, status=status.HTTP_404_NOT_FOUND)
         deleted_count = schedules.delete()[0]
         return Response({"detail": f"Successfully permanently deleted {deleted_count} schedule(s)."}, status=status.HTTP_200_OK)
+
 
 class ComplianceStatusUpdateView(APIView):
     serializer_class = ComplianceStatusSerializer

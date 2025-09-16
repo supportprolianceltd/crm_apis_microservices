@@ -61,6 +61,7 @@ class CustomUserMinimalSerializer(serializers.ModelSerializer):
             "job_role",
             "tenant",
             "branch",
+            "status",
             "is_locked",
             "has_accepted_terms",
             "profile"
@@ -168,6 +169,7 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
                 "jti": str(uuid.uuid4()),
                 "sub": user.email,
                 "role": user.role,
+                "status": user.status,
                 "tenant_id": user.tenant.id,
                 "tenant_organizational_id": str(tenant.organizational_id),
                 "tenant_unique_id": str(tenant.unique_id),
