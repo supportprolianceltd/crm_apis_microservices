@@ -92,7 +92,7 @@ class PublicPublishedRequisitionsByTenantView(APIView):
                 publish_status=True,
                 status='open',
                 is_deleted=False,
-                deadline_date__gte=today
+                # deadline_date__gte=today
             )
             serializer = PublicJobRequisitionSerializer(queryset, many=True)
             logger.info(f"Fetched {queryset.count()} public 'open' requisitions for tenant: {tenant_unique_id}")

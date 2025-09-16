@@ -146,9 +146,9 @@ SUPABASE_BUCKET = env('SUPABASE_BUCKET', default='')
 
 STORAGE_TYPE = env('STORAGE_TYPE', default='supabase')  # or 's3', 'azure', 'local', 'supabase'
 
-print("LOADED BUCKET:", SUPABASE_BUCKET)
+# print("LOADED BUCKET:", SUPABASE_BUCKET)
 
-logger.info(f"[DEBUG] SUPABASE_BUCKET = {SUPABASE_BUCKET}")
+#logger.info(f"[DEBUG] SUPABASE_BUCKET = {SUPABASE_BUCKET}")
 KAFKA_BOOTSTRAP_SERVERS = env('KAFKA_BOOTSTRAP_SERVERS', default='localhost:9092')
 KAFKA_TOPICS = {
     'requisition': 'requisition-events',

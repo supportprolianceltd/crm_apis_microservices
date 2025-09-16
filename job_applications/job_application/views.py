@@ -1,5 +1,6 @@
 import logging
 import os
+from urllib import request
 import uuid
 import requests
 import time
@@ -464,7 +465,8 @@ class ResumeScreeningView(APIView):
 
 
 
- 
+
+
 # class JobApplicationCreatePublicView(generics.CreateAPIView):
 #     serializer_class = PublicJobApplicationSerializer
 #     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -474,22 +476,39 @@ class ResumeScreeningView(APIView):
 #         if not unique_link:
 #             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
 
-#         tenant_id = unique_link.split('-')[0]
-#         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
-#         resp = requests.get(requisition_url)
-#         logger.info(f"Requisition unique_link: {unique_link}, API status: {resp.status_code}")
-#         if resp.status_code != 200:
-#             try:
-#                 error_detail = resp.json().get('detail', 'Invalid job requisition.')
-#             except Exception:
-#                 error_detail = 'Invalid job requisition.'
-#             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
-#         job_requisition = resp.json()
+#         # ✅ Extract tenant_id from UUID-style prefix (first 5 segments)
+#         try:
+#             parts = unique_link.split('-')
+#             if len(parts) < 5:
+#                 logger.warning(f"Invalid unique_link format: {unique_link}")
+#                 return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+#             tenant_id = '-'.join(parts[:5])
+#         except Exception as e:
+#             logger.error(f"Error extracting tenant_id from link: {str(e)}")
+#             return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
 
+#         # ✅ Fetch job requisition from Talent Engine
+#         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+#         try:
+#             resp = requests.get(requisition_url)
+#             logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
+#             if resp.status_code != 200:
+#                 try:
+#                     error_detail = resp.json().get('detail', 'Invalid job requisition.')
+#                 except Exception:
+#                     error_detail = 'Invalid job requisition.'
+#                 return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+#             job_requisition = resp.json()
+#         except Exception as e:
+#             logger.error(f"Error fetching job requisition: {str(e)}")
+#             return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
+
+#         # ✅ Prepare payload
 #         payload = dict(request.data.items())
 #         payload['job_requisition_id'] = job_requisition['id']
 #         payload['tenant_id'] = tenant_id
 
+#         # ✅ Extract documents from multipart form
 #         documents = []
 #         i = 0
 #         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
@@ -501,15 +520,17 @@ class ResumeScreeningView(APIView):
 #         if documents:
 #             payload['documents'] = documents
 
-#         logger.info(f"Full POST request payload (dict): {payload}")
+#         logger.info(f"Full POST payload: {payload}")
 
+#         # ✅ Validate and save
 #         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
 #         if not serializer.is_valid():
 #             logger.error(f"Validation errors: {serializer.errors}")
 #             return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 #         self.perform_create(serializer)
 
-#         # Publish to Kafka
+#         # ✅ Publish to Kafka
 #         try:
 #             producer = KafkaProducer(
 #                 bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
@@ -522,11 +543,13 @@ class ResumeScreeningView(APIView):
 #             }
 #             producer.send('job_application_events', kafka_data)
 #             producer.flush()
-#             logger.info(f"Published job application event to Kafka for requisition {job_requisition['id']}")
+#             logger.info(f"Published Kafka job application event for requisition {job_requisition['id']}")
 #         except Exception as e:
-#             logger.error(f"Failed to publish Kafka event: {str(e)}")
+#             logger.error(f"Kafka publish error: {str(e)}")
 
 #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
@@ -583,12 +606,25 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
 
         logger.info(f"Full POST payload: {payload}")
 
-        # ✅ Validate and save
+        # ✅ Validate serializer
         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
         if not serializer.is_valid():
             logger.error(f"Validation errors: {serializer.errors}")
-            return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "detail": "Validation error",
+                "errors": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
+        # ✅ Prevent duplicate application by email for same requisition
+        email = payload.get('email')
+        job_requisition_id = job_requisition['id']
+        if JobApplication.objects.filter(email=email, job_requisition_id=job_requisition_id).exists():
+            logger.warning(f"Duplicate application attempt by email: {email} for requisition: {job_requisition_id}")
+            return Response({
+                "detail": "You have already applied for this job"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # ✅ Save
         self.perform_create(serializer)
 
         # ✅ Publish to Kafka
@@ -609,6 +645,7 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
             logger.error(f"Kafka publish error: {str(e)}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 
 
@@ -1157,7 +1194,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+        tenant_id = jwt_payload.get('tenant_unique_id')
         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')

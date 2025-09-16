@@ -886,3 +886,575 @@ LINE 1: INSERT INTO "users_useractivity" ("user_id", "tenant_id", "a...
                     ^
 
 2025-09-15 17:34:27 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-15 18:18:41 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-15 18:18:53 [DEBUG] core: Tenant from user: proliance
+2025-09-15 18:18:53 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 18:18:58 [DEBUG] core: Tenant from user: proliance
+2025-09-15 18:18:58 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 18:19:10 [DEBUG] core: Tenant from user: proliance
+2025-09-15 18:19:10 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 18:35:53 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-15 18:36:03 [DEBUG] core: Tenant from user: proliance
+2025-09-15 18:36:03 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 18:37:49 [DEBUG] core: Tenant from user: proliance
+2025-09-15 18:37:49 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 18:37:53 [DEBUG] core: Tenant from user: proliance
+2025-09-15 18:37:53 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 18:37:55 [WARNING] django.request: Forbidden: /api/public-key/36aba0f0182245159f7a3c3a8cd62657/
+2025-09-15 20:28:48 [WARNING] django.request: Forbidden: /api/public-key/36aba0f0182245159f7a3c3a8cd62657/
+2025-09-15 20:28:53 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-15 20:29:06 [DEBUG] core: Tenant from user: proliance
+2025-09-15 20:29:06 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-15 20:29:22 [DEBUG] core: Tenant from user: proliance
+2025-09-15 20:29:22 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:39:49 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-16 07:39:55 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:39:55 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:39:55 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:39:55 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:39:56 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:39:56 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:39:56 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:39:56 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:00 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:00 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:00 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:00 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:03 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:03 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:03 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:03 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:03 [INFO] core: Fetched TenantConfig for tenant proliance
+2025-09-16 07:40:03 [INFO] core: Fetched TenantConfig for tenant proliance
+2025-09-16 07:40:03 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:03 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:03 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:03 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:04 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:14 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:24 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:24 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:34 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:39 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:39 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:44 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:44 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:40:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:40:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:41:04 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:41:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:41:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:41:15 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:41:24 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:41:24 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:41:35 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:41:35 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:41:45 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:41:45 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:41:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:41:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:42:35 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:42:35 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:43:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:43:34 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:44:01 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:44:01 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:44:04 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:44:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:44:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:44:14 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:44:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:44:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:44:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:44:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:44:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:44:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:44:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:44:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:45:04 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:45:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:45:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:45:14 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:45:24 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:45:24 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:45:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:45:34 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:45:44 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:45:44 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:45:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:45:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:46:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:46:34 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:47:35 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:47:35 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:48:10 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:48:10 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:48:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:48:14 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:48:18 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:48:18 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:48:24 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:48:24 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:48:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:48:34 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:48:44 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:48:44 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:48:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:48:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:49:04 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:49:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:49:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:49:14 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:49:24 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:49:24 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:49:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:49:34 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:49:45 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:49:45 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:49:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:49:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:50:04 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:50:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:50:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:50:14 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:50:24 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:50:24 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:50:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:50:34 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:50:44 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:50:44 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:50:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:50:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:51:04 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:51:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:51:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:51:14 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:51:24 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:51:24 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:51:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:51:35 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:51:45 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:51:45 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:51:54 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:51:54 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:52:04 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:52:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:52:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:52:14 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:52:25 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:52:25 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:52:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:52:34 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:53:28 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-16 07:53:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:53:34 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:53:45 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:53:45 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:54:02 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:54:02 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:54:04 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:54:04 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:54:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:54:14 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:54:25 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:54:25 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:54:35 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:54:35 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:54:44 [DEBUG] core: Tenant from user: proliance
+2025-09-16 07:54:44 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 07:54:54 [WARNING] django.request: Forbidden: /api/public-key/36aba0f0182245159f7a3c3a8cd62657/
+2025-09-16 07:54:55 [ERROR] django.request: Internal Server Error: /api/token/refresh/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "users_rsakeypair" does not exist
+LINE 1: ...r"."updated_at", "users_rsakeypair"."active" FROM "users_rsa...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/auth_service/views.py", line 231, in post
+    payload = decode_rsa_jwt(refresh_token)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/utils/jwt_rsa.py", line 112, in decode_rsa_jwt
+    keypair = RSAKeyPair.objects.filter(kid=kid, active=True).first()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1104, in first
+    for obj in queryset[:1]:
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 384, in __iter__
+    self._fetch_all()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "users_rsakeypair" does not exist
+LINE 1: ...r"."updated_at", "users_rsakeypair"."active" FROM "users_rsa...
+                                                             ^
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "users_useractivity" does not exist
+LINE 1: INSERT INTO "users_useractivity" ("user_id", "tenant_id", "a...
+                    ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 303, in post
+    UserActivity.objects.create(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 663, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "users_useractivity" does not exist
+LINE 1: INSERT INTO "users_useractivity" ("user_id", "tenant_id", "a...
+                    ^
+
+2025-09-16 08:00:21 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-16 08:00:34 [ERROR] django.request: Internal Server Error: /api/public-key/36aba0f0182245159f7a3c3a8cd62657/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: '40c4a578-8f39-4f20-827a-c71b209190c3'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 550, in get
+    tenant = Tenant.objects.get(id=tenant_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 619, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1493, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1511, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1518, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1415, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 38, in __init__
+    self.rhs = self.get_prep_lookup()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 410, in get_prep_lookup
+    return super().get_prep_lookup()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 96, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got '40c4a578-8f39-4f20-827a-c71b209190c3'.
+2025-09-16 08:00:38 [ERROR] django.request: Internal Server Error: /api/public-key/36aba0f0182245159f7a3c3a8cd62657/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: '40c4a578-8f39-4f20-827a-c71b209190c3'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/auth_service/views.py", line 550, in get
+    tenant = Tenant.objects.get(id=tenant_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 619, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1493, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1511, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1518, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1415, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 38, in __init__
+    self.rhs = self.get_prep_lookup()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 410, in get_prep_lookup
+    return super().get_prep_lookup()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 96, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+ValueError: Field 'id' expected a number but got '40c4a578-8f39-4f20-827a-c71b209190c3'.
+2025-09-16 08:01:41 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:01:41 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:02:50 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:02:50 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:21 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-16 08:09:27 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:27 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:41 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:41 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:41 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:41 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:41 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:41 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:41 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:41 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:44 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:44 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:44 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:44 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:44 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:44 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:44 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:44 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:44 [INFO] core: Fetched TenantConfig for tenant proliance
+2025-09-16 08:09:44 [INFO] core: Fetched TenantConfig for tenant proliance
+2025-09-16 08:09:47 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:47 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:09:56 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:09:56 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:05 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:05 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:05 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:05 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:05 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:05 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:06 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:06 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:06 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:06 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:42 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:42 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:42 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:42 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:43 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:43 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:43 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:43 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:43 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:43 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:10:43 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:10:43 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:16:32 [WARNING] django.request: Forbidden: /api/public-key/36aba0f0182245159f7a3c3a8cd62657/
+2025-09-16 08:16:40 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-16 08:16:55 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:16:55 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:17:28 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:17:28 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:17:32 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:17:32 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:17:41 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:17:41 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:17:59 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:17:59 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:17:59 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:17:59 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:17:59 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:17:59 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:17:59 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:17:59 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:18:31 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:18:31 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:18:31 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:18:31 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:18:31 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:18:31 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:18:31 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:18:31 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:18:31 [INFO] core: Fetched TenantConfig for tenant proliance
+2025-09-16 08:18:48 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:18:48 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:18:58 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:18:58 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:18:59 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:18:59 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:18:59 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:18:59 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:19:03 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:19:03 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:19:03 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:19:03 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:19:04 [INFO] core: Fetched TenantConfig for tenant proliance
+2025-09-16 08:19:34 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:19:34 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:19:48 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:19:48 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:19:48 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:19:48 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:19:58 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:19:59 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:20:08 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:20:08 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:20:14 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:20:14 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:20:15 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:20:15 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:20:15 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:20:15 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:20:15 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:20:15 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:20:15 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:20:15 [INFO] core: Retrieving tenant: 3 for tenant proliance
+2025-09-16 08:20:20 [DEBUG] core: Tenant from user: proliance
+2025-09-16 08:20:20 [INFO] core: Retrieving tenant: 3 for tenant proliance
