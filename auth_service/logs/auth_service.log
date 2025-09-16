@@ -3125,3 +3125,75 @@ LINE 1: INSERT INTO "users_useractivity" ("user_id", "tenant_id", "a...
 2025-09-16 13:49:59 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
 2025-09-16 13:50:01 [DEBUG] users: Tenant from request: proliance
 2025-09-16 13:50:01 [DEBUG] users: Tenant from request: proliance
+2025-09-16 14:08:48 [WARNING] django.request: Forbidden: /api/user/users/4/
+2025-09-16 14:08:53 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-16 14:21:29 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-16 14:31:44 [WARNING] django.request: Forbidden: /api/token/validate/
+2025-09-16 14:31:44 [WARNING] django.request: Forbidden: /api/token/validate/
+2025-09-16 14:31:53 [INFO] users: Login attempts reset for user support@prolianceltd.com in tenant proliance
+2025-09-16 14:32:08 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:32:08 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:32:43 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:32:43 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:32:43 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:32:43 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:32:50 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:32:50 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:32:59 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:32:59 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:33:11 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:33:11 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:33:20 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:33:20 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:33:30 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:33:30 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:33:39 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:33:39 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:34:01 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:34:01 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:35:01 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:35:01 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:36:01 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:36:01 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:37:01 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:37:01 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:37:38 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:37:38 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:37:40 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:37:40 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:37:49 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:37:49 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:38:01 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:38:01 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:38:10 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:38:10 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:38:19 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:38:19 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:38:31 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:38:31 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:38:40 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:38:40 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:38:49 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:38:49 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:38:59 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:38:59 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:39:10 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:39:10 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:39:19 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:39:19 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:39:29 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:39:29 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:39:40 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:39:40 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:39:50 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:39:50 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:39:59 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:39:59 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:40:11 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:40:11 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:40:20 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:40:20 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:41:00 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:41:00 [INFO] core: Retrieving tenant: 4 for tenant proliance
+2025-09-16 14:42:01 [DEBUG] core: Tenant from user: proliance
+2025-09-16 14:42:01 [INFO] core: Retrieving tenant: 4 for tenant proliance

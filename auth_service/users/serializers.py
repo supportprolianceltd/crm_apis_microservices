@@ -828,21 +828,25 @@ class CustomUserListSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'job_role', 'tenant', 'branch', 'status', 'permission_levels', 'profile']  # Light fields
 
+
+
 class CustomUserSerializer(CustomUserListSerializer):
     profile = UserProfileSerializer(read_only=True)
-    completion_percentage = serializers.SerializerMethodField()
+    profile_completion_percentage = serializers.SerializerMethodField()
 
     class Meta(CustomUserListSerializer.Meta):
         fields = "__all__"
         read_only_fields = ['id', 'is_superuser', 'last_password_reset', 'is_locked', 'login_attempts']
 
-    def get_completion_percentage(self, obj):
+    def get_profile_completion_percentage(self, obj):
         try:
             return obj.calculate_completion_percentage()
         except Exception as e:
-            logger.error(f"Error calculating completion percentage for user {obj.email}: {str(e)}")
+            logger.error(f"Error calculating profile completion for user {obj.email}: {str(e)}")
             return 0
-            
+
+
+
 class UserAccountActionSerializer(serializers.Serializer):
     action = serializers.ChoiceField(choices=['lock', 'unlock', 'suspend', 'activate'], required=True)
 
