@@ -59,7 +59,7 @@ services:
         condition: service_healthy
     networks:
       - auth_service_default
-    command: python consumer.py
+    command: sh -c "./wait-for-it.sh kafka:9092 -- python consumer.py"
 
   talent_postgres:
     image: postgres:15
@@ -86,7 +86,6 @@ volumes:
 networks:
   auth_service_default:
     external: true
-
 
 
 

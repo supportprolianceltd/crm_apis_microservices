@@ -3,8 +3,8 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="robots" content="NONE,NOARCHIVE">
-    <title>DisallowedHost
-      at /api/talent-engine/schedules/</title>
+    <title>TypeError
+      at /api/talent-engine/requisitions/</title>
     <style>
     html * { padding:0; margin:0; }
     body * { padding:10px 20px; }
@@ -100,19 +100,34 @@
   </head>
   <body>
     <header id="summary">
-      <h1>DisallowedHost
-        at /api/talent-engine/schedules/</h1>
+      <h1>TypeError
+        at /api/talent-engine/requisitions/</h1>
       <pre
-        class="exception_value">Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The domain name provided is not valid according to RFC 1034/1035.</pre>
+        class="exception_value">Got a `TypeError` when calling `JobRequisition.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `JobRequisition.objects.create()`. You may need to make the field read-only, or override the JobRequisitionSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File &quot;/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py&quot;, line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/manager.py&quot;, line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/query.py&quot;, line 661, in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/base.py&quot;, line 569, in __init__
+    raise TypeError(
+TypeError: JobRequisition() got unexpected keyword arguments: &#x27;tenant_unique_id&#x27;
+</pre>
       <table class="meta">
 
         <tr>
           <th scope="row">Request Method:</th>
-          <td>GET</td>
+          <td>POST</td>
         </tr>
         <tr>
           <th scope="row">Request URL:</th>
-          <td>http://talent_engine:8001/api/talent-engine/schedules/</td>
+          <td>http://talent-engine/api/talent-engine/requisitions/</td>
         </tr>
 
         <tr>
@@ -122,19 +137,39 @@
 
         <tr>
           <th scope="row">Exception Type:</th>
-          <td>DisallowedHost</td>
+          <td>TypeError</td>
         </tr>
 
         <tr>
           <th scope="row">Exception Value:</th>
-          <td><pre>Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The domain name provided is not valid according to RFC 1034/1035.</pre></td>
+          <td><pre>Got a `TypeError` when calling `JobRequisition.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `JobRequisition.objects.create()`. You may need to make the field read-only, or override the JobRequisitionSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File &quot;/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py&quot;, line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/manager.py&quot;, line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/query.py&quot;, line 661, in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/base.py&quot;, line 569, in __init__
+    raise TypeError(
+TypeError: JobRequisition() got unexpected keyword arguments: &#x27;tenant_unique_id&#x27;
+</pre></td>
         </tr>
 
         <tr>
           <th scope="row">Exception Location:</th>
           <td><span
-              class="fname">/usr/local/lib/python3.11/site-packages/django/http/request.py</span>,
-            line 202, in get_host</td>
+              class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</span>,
+            line 1010, in create</td>
+        </tr>
+
+        <tr>
+          <th scope="row">Raised during:</th>
+          <td>jobRequisitions.views.JobRequisitionListCreateView</td>
         </tr>
 
         <tr>
@@ -156,7 +191,7 @@
         </tr>
         <tr>
           <th scope="row">Server time:</th>
-          <td>Thu, 28 Aug 2025 10:06:00 +0000</td>
+          <td>Mon, 15 Sep 2025 10:59:18 +0000</td>
         </tr>
       </table>
     </header>
@@ -171,64 +206,65 @@
         <div id="browserTraceback">
           <ul class="traceback">
 
-            <li class="frame django">
+            <li class="frame user">
 
               <code
-                class="fname">/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py</code>,
-              line 55, in inner
+                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</code>,
+              line 991, in create
 
-              <div class="context" id="c138408659777408">
+              <div class="context" id="c129254509854592">
 
-                <ol start="48" class="pre-context" id="pre138408659777408">
-
-                  <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre></pre></li>
+                <ol start="984" class="pre-context" id="pre129254509854592">
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre>        return inner</pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>        info = model_meta.get_field_info(ModelClass)</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre>    else:</pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>        many_to_many = {}</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre></pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>        for field_name, relation_info in info.relations.items():</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre>        @wraps(get_response)</pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>            if relation_info.to_many and (field_name in validated_data):</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre>        def inner(request):</pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>                many_to_many[field_name] = validated_data.pop(field_name)</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre>            try:</pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>        try:</pre></li>
 
                 </ol>
 
-                <ol start="55" class="context-line">
+                <ol start="991" class="context-line">
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre>                response = get_response(request)
-                               ^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>            instance = ModelClass._default_manager.create(**validated_data)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+                    <span>…</span></li>
                 </ol>
 
-                <ol start='56' class="post-context" id="post138408659777408">
+                <ol start='992' class="post-context" id="post129254509854592">
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre>            except Exception as exc:</pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>        except TypeError:</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre>                response = response_for_exception(request, exc)</pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>            tb = traceback.format_exc()</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre>            return response</pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>            msg = (</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre></pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>                &#x27;Got a `TypeError` when calling `%s.%s.create()`. &#x27;</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre>        return inner</pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>                &#x27;This may be because you have a writable field on the &#x27;</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659777408', 'post138408659777408')"><pre></pre></li>
+                    onclick="toggle('pre129254509854592', 'post129254509854592')"><pre>                &#x27;serializer class that is not a valid argument to &#x27;</pre></li>
 
                 </ol>
 
@@ -237,7 +273,722 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v138408659777408">
+                <table class="vars" id="v129254509854592">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>ModelClass</td>
+                      <td
+                        class="code"><pre>&lt;class &#x27;jobRequisitions.models.JobRequisition&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>info</td>
+                      <td
+                        class="code"><pre>FieldInfo(pk=&lt;django.db.models.fields.CharField: id&gt;, fields={&#x27;tenant_name&#x27;: &lt;django.db.models.fields.CharField: tenant_name&gt;, &#x27;requisition_number&#x27;: &lt;django.db.models.fields.CharField: requisition_number&gt;, &#x27;job_requisition_code&#x27;: &lt;django.db.models.fields.CharField: job_requisition_code&gt;, &#x27;job_application_code&#x27;: &lt;django.db.models.fields.CharField: job_application_code&gt;, &#x27;compliance_checklist&#x27;: &lt;django.db.models.fields.json.JSONField: compliance_checklist&gt;, &#x27;last_compliance_check&#x27;: &lt;django.db.models.fields.DateTimeField: last_compliance_check&gt;, &#x27;checked_by&#x27;: &lt;django.db.models.fields.CharField: checked_by&gt;, &#x27;tenant_id&#x27;: &lt;django.db.models.fields.CharField: tenant_id&gt;, &#x27;branch_id&#x27;: &lt;django.db.models.fields.CharField: branch_id&gt;, &#x27;department_id&#x27;: &lt;django.db.models.fields.CharField: department_id&gt;, &#x27;hiring_manager_id&#x27;: &lt;django.db.models.fields.CharField: hiring_manager_id&gt;, &#x27;title&#x27;: &lt;django.db.models.fields.CharField: title&gt;, &#x27;unique_link&#x27;: &lt;django.db.models.fields.CharField: unique_link&gt;, &#x27;status&#x27;: &lt;django.db.models.fields.CharField: status&gt;, &#x27;role&#x27;: &lt;django.db.models.fields.CharField: role&gt;, &#x27;requested_by_id&#x27;: &lt;django.db.models.fields.CharField: requested_by_id&gt;, &#x27;approved_by_id&#x27;: &lt;django.db.models.fields.CharField: approved_by_id&gt;, &#x27;created_by_id&#x27;: &lt;django.db.models.fields.CharField: created_by_id&gt;, &#x27;updated_by_id&#x27;: &lt;django.db.models.fields.CharField: updated_by_id&gt;, &#x27;company_name&#x27;: &lt;django.db.models.fields.CharField: company_name&gt;, &#x27;company_address&#x27;: &lt;django.db.models.fields.TextField: company_address&gt;, &#x27;job_type&#x27;: &lt;django.db.models.fields.CharField: job_type&gt;, &#x27;position_type&#x27;: &lt;django.db.models.fields.CharField: position_type&gt;, &#x27;location_type&#x27;: &lt;django.db.models.fields.CharField: location_type&gt;, &#x27;job_location&#x27;: &lt;django.db.models.fields.TextField: job_location&gt;, &#x27;interview_location&#x27;: &lt;django.db.models.fields.CharField: interview_location&gt;, &#x27;salary_range&#x27;: &lt;django.db.models.fields.CharField: salary_range&gt;, &#x27;salary_range_min&#x27;: &lt;django.db.models.fields.DecimalField: salary_range_min&gt;, &#x27;salary_range_max&#x27;: &lt;django.db.models.fields.DecimalField: salary_range_max&gt;, &#x27;job_description&#x27;: &lt;django.db.models.fields.TextField: job_description&gt;, &#x27;requirements&#x27;: &lt;django.db.models.fields.json.JSONField: requirements&gt;, &#x27;qualification_requirement&#x27;: &lt;django.db.models.fields.TextField: qualification_requirement&gt;, &#x27;experience_requirement&#x27;: &lt;django.db.models.fields.TextField: experience_requirement&gt;, &#x27;knowledge_requirement&#x27;: &lt;django.db.models.fields.TextField: knowledge_requirement&gt;, &#x27;number_of_candidates&#x27;: &lt;django.db.models.fields.IntegerField: number_of_candidates&gt;, &#x27;num_of_applications&#x27;: &lt;django.db.models.fields.IntegerField: num_of_applications&gt;, &#x27;urgency_level&#x27;: &lt;django.db.models.fields.CharField: urgency_level&gt;, &#x27;reason&#x27;: &lt;django.db.models.fields.TextField: reason&gt;, &#x27;deadline_date&#x27;: &lt;django.db.models.fields.DateField: deadline_date&gt;, &#x27;start_date&#x27;: &lt;django.db.models.fields.DateField: start_date&gt;, &#x27;responsibilities&#x27;: &lt;django.db.models.fields.json.JSONField: responsibilities&gt;, &#x27;documents_required&#x27;: &lt;django.db.models.fields.json.JSONField: documents_required&gt;, &#x27;approval_workflow&#x27;: &lt;django.db.models.fields.json.JSONField: approval_workflow&gt;, &#x27;current_approval_stage&#x27;: &lt;django.db.models.fields.IntegerField: current_approval_stage&gt;, &#x27;approval_date&#x27;: &lt;django.db.models.fields.DateTimeField: approval_date&gt;, &#x27;time_to_fill_days&#x27;: &lt;django.db.models.fields.IntegerField: time_to_fill_days&gt;, &#x27;advert_banner&#x27;: &lt;django.db.models.fields.files.ImageField: advert_banner&gt;, &#x27;advert_banner_url&#x27;: &lt;django.db.models.fields.CharField: advert_banner_url&gt;, &#x27;requested_date&#x27;: &lt;django.db.models.fields.DateField: requested_date&gt;, &#x27;publish_status&#x27;: &lt;django.db.models.fields.BooleanField: publish_status&gt;, &#x27;is_deleted&#x27;: &lt;django.db.models.fields.BooleanField: is_deleted&gt;, &#x27;created_at&#x27;: &lt;django.db.models.fields.DateTimeField: created_at&gt;, &#x27;updated_at&#x27;: &lt;django.db.models.fields.DateTimeField: updated_at&gt;, &#x27;comment&#x27;: &lt;django.db.models.fields.TextField: comment&gt;}, forward_relations={}, reverse_relations={}, fields_and_pk={&#x27;pk&#x27;: &lt;django.db.models.fields.CharField: id&gt;, &#x27;id&#x27;: &lt;django.db.… &lt;trimmed 8050 bytes string&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>many_to_many</td>
+                      <td class="code"><pre>{}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>msg</td>
+                      <td
+                        class="code"><pre>(&#x27;Got a `TypeError` when calling `JobRequisition.objects.create()`. This may &#x27;
+ &#x27;be because you have a writable field on the serializer class that is not a &#x27;
+ &#x27;valid argument to `JobRequisition.objects.create()`. You may need to make &#x27;
+ &#x27;the field read-only, or override the JobRequisitionSerializer.create() &#x27;
+ &#x27;method to handle this correctly.\n&#x27;
+ &#x27;Original exception was:\n&#x27;
+ &#x27; Traceback (most recent call last):\n&#x27;
+ &#x27;  File &#x27;
+ &#x27;&quot;/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py&quot;, &#x27;
+ &#x27;line 991, in create\n&#x27;
+ &#x27;    instance = ModelClass._default_manager.create(**validated_data)\n&#x27;
+ &#x27;               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &#x27;
+ &#x27;&quot;/usr/local/lib/python3.11/site-packages/django/db/models/manager.py&quot;, line &#x27;
+ &#x27;87, in manager_method\n&#x27;
+ &#x27;    return getattr(self.get_queryset(), name)(*args, **kwargs)\n&#x27;
+ &#x27;           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/query.py&quot;, &#x27;
+ &#x27;line 661, in create\n&#x27;
+ &#x27;    obj = self.model(**kwargs)\n&#x27;
+ &#x27;          ^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/base.py&quot;, &#x27;
+ &#x27;line 569, in __init__\n&#x27;
+ &#x27;    raise TypeError(\n&#x27;
+ &#x27;TypeError: JobRequisition() got unexpected keyword arguments: &#x27;
+ &quot;&#x27;tenant_unique_id&#x27;\n&quot;)</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>JobRequisitionSerializer(context={&#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;, &#x27;format&#x27;: None, &#x27;view&#x27;: &lt;jobRequisitions.views.JobRequisitionListCreateView object&gt;}, data={&#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;, &#x27;role&#x27;: &#x27;staff&#x27;, &#x27;requested_by_id&#x27;: &#x27;user-req-uuid-1234&#x27;, &#x27;approved_by_id&#x27;: None, &#x27;created_by_id&#x27;: &#x27;user-create-uuid-5678&#x27;, &#x27;updated_by_id&#x27;: &#x27;user-update-uuid-5678&#x27;, &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;, &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;, &#x27;job_type&#x27;: &#x27;full_time&#x27;, &#x27;position_type&#x27;: &#x27;permanent&#x27;, &#x27;location_type&#x27;: &#x27;remote&#x27;, &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;, &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;, &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;, &#x27;salary_range_min&#x27;: 300000.0, &#x27;salary_range_max&#x27;: 500000.0, &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with experience in Django and PostgreSQL.&#x27;, &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;, &#x27;Strong knowledge of Django and DRF&#x27;, &#x27;Experience with PostgreSQL and Redis&#x27;], &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;, &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software development&#x27;, &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system design&#x27;, &#x27;number_of_candidates&#x27;: 2, &#x27;urgency_level&#x27;: &#x27;high&#x27;, &#x27;reason&#x27;: &#x27;Expanding product team&#x27;, &#x27;deadline_date&#x27;: &#x27;2025-10-01&#x27;, &#x27;start_date&#x27;: &#x27;2025-11-01&#x27;, &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;, &#x27;Collaborate with frontend and product teams&#x27;, &#x27;Ensure system scalability and security&#x27;], &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;, &#x27;Cover Letter&#x27;, &#x27;NYSC Certificate&#x27;], &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;level&#x27;: 1, &#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;}]}, &#x27;current_approval_stage&#x27;: 0, &#x27;approval_date&#x27;: None, &#x27;time_to_fill_days&#x27;: None, &#x27;publish_status&#x27;: True, &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;}):
+    id = CharField(read_only=True)
+    requisition_number = CharField(allow_null=True, read_only=True)
+    num_of_applications = IntegerField(allow_null=True, max_value=2147483647, min_value=-2147483648, required=False)
+    job_requisition_code = CharField(allow_null=True, read_only=True)
+    job_application_code = CharField(allow_null=True, read_only=True)
+    tenant_id = CharField(max_length=36, read_only=True)
+    tenant_domain = SerializerMethodField()
+    branch_id = CharField(allow_null=True, max_length=36, required=False)
+    branch_name = SerializerMethodField()
+    department_id = CharField(allow_null=True, max_length=36, required=False)
+    title = CharField(max_length=255)
+    unique_link = CharField(read_only=True)
+    status = ChoiceField(choices=[(&#x27;open&#x27;, &#x27;Open&#x27;), (&#x27;pending&#x27;, &#x27;Pending&#x27;), (&#x27;closed&#x27;, &#x27;Closed&#x27;), (&#x27;rejected&#x27;, &#x27;Rejected&#x27;), (&#x27;draft&#x27;, &#x27;Draft&#x27;), (&#x27;pending_approval&#x27;, &#x27;Pending Approval&#x27;), (&#x27;approved&#x27;, &#x27;Approved&#x27;), (&#x27;on_hold&#x27;, &#x27;On Hold&#x27;)], required=False)
+    role = ChoiceField(choices=[(&#x27;staff&#x27;, &#x27;Staff&#x27;), (&#x27;admin&#x27;, &#x27;Admin&#x27;)], required=False)
+    requested_by = SerializerMethodField()
+    requested_by_id = CharField(max_length=36, read_only=True)
+    created_by = SerializerMethodField()
+    created_by_id = CharField(max_length=36, read_only=True)
+    updated_by = SerializerMethodField()
+    updated_by_id = CharField(max_length=36, read_only=True)
+    approved_by = SerializerMethodField()
+    approved_by_id = CharField(max_length=36, read_only=True)
+    company_name = CharField(allow_blank=True, allow_null=True, max_length=255, required=False)
+    company_address = CharField(allow_blank=True, allow_null=True, required=False, style={&#x27;base_template&#x27;: &#x27;textarea.html&#x27;})
+    job_type = ChoiceField(choices=[(&#x27;full_time&#x27;, &#x27;Full-time&#x27;), (&#x27;part_time&#x27;, &#x27;Part-time&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;freelance&#x27;, &#x27;Freelance&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;), (&#x27;temporary&#x27;, &#x27;Temporary&#x27;)], required=False)
+    position_type = ChoiceField(choices=[(&#x27;permanent&#x27;, &#x27;Permanent&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;)], required=False)
+    location_type = ChoiceField(choices=[(&#x27;on_site&#x27;, &#x27;On-site&#x27;), (&#x27;remote&#x27;, &#x27;Remote&#x27;), (&#x27;hybrid&#x27;, &#x27;Hyb… &lt;trimmed 7624 bytes string&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>tb</td>
+                      <td
+                        class="code"><pre>(&#x27;Traceback (most recent call last):\n&#x27;
+ &#x27;  File &#x27;
+ &#x27;&quot;/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py&quot;, &#x27;
+ &#x27;line 991, in create\n&#x27;
+ &#x27;    instance = ModelClass._default_manager.create(**validated_data)\n&#x27;
+ &#x27;               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &#x27;
+ &#x27;&quot;/usr/local/lib/python3.11/site-packages/django/db/models/manager.py&quot;, line &#x27;
+ &#x27;87, in manager_method\n&#x27;
+ &#x27;    return getattr(self.get_queryset(), name)(*args, **kwargs)\n&#x27;
+ &#x27;           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/query.py&quot;, &#x27;
+ &#x27;line 661, in create\n&#x27;
+ &#x27;    obj = self.model(**kwargs)\n&#x27;
+ &#x27;          ^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/base.py&quot;, &#x27;
+ &#x27;line 569, in __init__\n&#x27;
+ &#x27;    raise TypeError(\n&#x27;
+ &#x27;TypeError: JobRequisition() got unexpected keyword arguments: &#x27;
+ &quot;&#x27;tenant_unique_id&#x27;\n&quot;)</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>validated_data</td>
+                      <td class="code"><pre>{&#x27;approval_date&#x27;: None,
+ &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;,
+                                  &#x27;level&#x27;: 1,
+                                  &#x27;status&#x27;: &#x27;pending&#x27;}]},
+ &#x27;branch_id&#x27;: None,
+ &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;,
+ &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;,
+ &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;,
+ &#x27;current_approval_stage&#x27;: 0,
+ &#x27;deadline_date&#x27;: datetime.date(2025, 10, 1),
+ &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;,
+                        &#x27;Cover Letter&#x27;,
+                        &#x27;NYSC Certificate&#x27;],
+ &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software &#x27;
+                           &#x27;development&#x27;,
+ &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;,
+ &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with &#x27;
+                    &#x27;experience in Django and PostgreSQL.&#x27;,
+ &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;,
+ &#x27;job_type&#x27;: &#x27;full_time&#x27;,
+ &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system &#x27;
+                          &#x27;design&#x27;,
+ &#x27;location_type&#x27;: &#x27;remote&#x27;,
+ &#x27;number_of_candidates&#x27;: 2,
+ &#x27;position_type&#x27;: &#x27;permanent&#x27;,
+ &#x27;publish_status&#x27;: True,
+ &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;,
+ &#x27;reason&#x27;: &#x27;Expanding product team&#x27;,
+ &#x27;requested_by_id&#x27;: &#x27;1&#x27;,
+ &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;,
+                  &#x27;Strong knowledge of Django and DRF&#x27;,
+                  &#x27;Experience with PostgreSQL and Redis&#x27;],
+ &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;,
+                      &#x27;Collaborate with frontend and product teams&#x27;,
+                      &#x27;Ensure system scalability and security&#x27;],
+ &#x27;role&#x27;: &#x27;staff&#x27;,
+ &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;,
+ &#x27;salary_range_max&#x27;: Decimal(&#x27;500000.00&#x27;),
+ &#x27;salary_range_min&#x27;: Decimal(&#x27;300000.00&#x27;),
+ &#x27;start_date&#x27;: datetime.date(2025, 11, 1),
+ &#x27;status&#x27;: &#x27;pending&#x27;,
+ &#x27;tenant_id&#x27;: &#x27;4&#x27;,
+ &#x27;tenant_unique_id&#x27;: &#x27;e068c78c-ba04-44a5-886b-89b76b16fe05&#x27;,
+ &#x27;time_to_fill_days&#x27;: None,
+ &#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;,
+ &#x27;urgency_level&#x27;: &#x27;high&#x27;}</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame django">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/django/db/models/manager.py</code>,
+              line 87, in manager_method
+
+              <div class="context" id="c129254509854656">
+
+                <ol start="80" class="pre-context" id="pre129254509854656">
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>        return []</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>    @classmethod</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>    def _get_queryset_methods(cls, queryset_class):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>        def create_method(name, method):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>            @wraps(method)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>            def manager_method(self, *args, **kwargs):</pre></li>
+
+                </ol>
+
+                <ol start="87" class="context-line">
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>                return getattr(self.get_queryset(), name)(*args, **kwargs)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+                    <span>…</span></li>
+                </ol>
+
+                <ol start='88' class="post-context" id="post129254509854656">
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>            return manager_method</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>        new_methods = {}</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>        for name, method in inspect.getmembers(</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854656', 'post129254509854656')"><pre>            queryset_class, predicate=inspect.isfunction</pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254509854656">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>args</td>
+                      <td class="code"><pre>()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>kwargs</td>
+                      <td class="code"><pre>{&#x27;approval_date&#x27;: None,
+ &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;,
+                                  &#x27;level&#x27;: 1,
+                                  &#x27;status&#x27;: &#x27;pending&#x27;}]},
+ &#x27;branch_id&#x27;: None,
+ &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;,
+ &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;,
+ &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;,
+ &#x27;current_approval_stage&#x27;: 0,
+ &#x27;deadline_date&#x27;: datetime.date(2025, 10, 1),
+ &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;,
+                        &#x27;Cover Letter&#x27;,
+                        &#x27;NYSC Certificate&#x27;],
+ &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software &#x27;
+                           &#x27;development&#x27;,
+ &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;,
+ &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with &#x27;
+                    &#x27;experience in Django and PostgreSQL.&#x27;,
+ &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;,
+ &#x27;job_type&#x27;: &#x27;full_time&#x27;,
+ &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system &#x27;
+                          &#x27;design&#x27;,
+ &#x27;location_type&#x27;: &#x27;remote&#x27;,
+ &#x27;number_of_candidates&#x27;: 2,
+ &#x27;position_type&#x27;: &#x27;permanent&#x27;,
+ &#x27;publish_status&#x27;: True,
+ &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;,
+ &#x27;reason&#x27;: &#x27;Expanding product team&#x27;,
+ &#x27;requested_by_id&#x27;: &#x27;1&#x27;,
+ &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;,
+                  &#x27;Strong knowledge of Django and DRF&#x27;,
+                  &#x27;Experience with PostgreSQL and Redis&#x27;],
+ &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;,
+                      &#x27;Collaborate with frontend and product teams&#x27;,
+                      &#x27;Ensure system scalability and security&#x27;],
+ &#x27;role&#x27;: &#x27;staff&#x27;,
+ &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;,
+ &#x27;salary_range_max&#x27;: Decimal(&#x27;500000.00&#x27;),
+ &#x27;salary_range_min&#x27;: Decimal(&#x27;300000.00&#x27;),
+ &#x27;start_date&#x27;: datetime.date(2025, 11, 1),
+ &#x27;status&#x27;: &#x27;pending&#x27;,
+ &#x27;tenant_id&#x27;: &#x27;4&#x27;,
+ &#x27;tenant_unique_id&#x27;: &#x27;e068c78c-ba04-44a5-886b-89b76b16fe05&#x27;,
+ &#x27;time_to_fill_days&#x27;: None,
+ &#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;,
+ &#x27;urgency_level&#x27;: &#x27;high&#x27;}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>name</td>
+                      <td class="code"><pre>&#x27;create&#x27;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;django.db.models.manager.Manager object at 0x758e6b48be10&gt;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame django">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/django/db/models/query.py</code>,
+              line 661, in create
+
+              <div class="context" id="c129254509854336">
+
+                <ol start="654" class="pre-context" id="pre129254509854336">
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>        )</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>        if reverse_one_to_one_fields:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>            raise ValueError(</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>                &quot;The following fields do not exist in this model: %s&quot;</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>                % &quot;, &quot;.join(reverse_one_to_one_fields)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>            )</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre></pre></li>
+
+                </ol>
+
+                <ol start="661" class="context-line">
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>        obj = self.model(**kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='662' class="post-context" id="post129254509854336">
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>        self._for_write = True</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>        obj.save(force_insert=True, using=self.db)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>        return obj</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre>    create.alters_data = True</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854336', 'post129254509854336')"><pre></pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254509854336">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>kwargs</td>
+                      <td class="code"><pre>{&#x27;approval_date&#x27;: None,
+ &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;,
+                                  &#x27;level&#x27;: 1,
+                                  &#x27;status&#x27;: &#x27;pending&#x27;}]},
+ &#x27;branch_id&#x27;: None,
+ &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;,
+ &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;,
+ &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;,
+ &#x27;current_approval_stage&#x27;: 0,
+ &#x27;deadline_date&#x27;: datetime.date(2025, 10, 1),
+ &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;,
+                        &#x27;Cover Letter&#x27;,
+                        &#x27;NYSC Certificate&#x27;],
+ &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software &#x27;
+                           &#x27;development&#x27;,
+ &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;,
+ &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with &#x27;
+                    &#x27;experience in Django and PostgreSQL.&#x27;,
+ &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;,
+ &#x27;job_type&#x27;: &#x27;full_time&#x27;,
+ &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system &#x27;
+                          &#x27;design&#x27;,
+ &#x27;location_type&#x27;: &#x27;remote&#x27;,
+ &#x27;number_of_candidates&#x27;: 2,
+ &#x27;position_type&#x27;: &#x27;permanent&#x27;,
+ &#x27;publish_status&#x27;: True,
+ &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;,
+ &#x27;reason&#x27;: &#x27;Expanding product team&#x27;,
+ &#x27;requested_by_id&#x27;: &#x27;1&#x27;,
+ &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;,
+                  &#x27;Strong knowledge of Django and DRF&#x27;,
+                  &#x27;Experience with PostgreSQL and Redis&#x27;],
+ &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;,
+                      &#x27;Collaborate with frontend and product teams&#x27;,
+                      &#x27;Ensure system scalability and security&#x27;],
+ &#x27;role&#x27;: &#x27;staff&#x27;,
+ &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;,
+ &#x27;salary_range_max&#x27;: Decimal(&#x27;500000.00&#x27;),
+ &#x27;salary_range_min&#x27;: Decimal(&#x27;300000.00&#x27;),
+ &#x27;start_date&#x27;: datetime.date(2025, 11, 1),
+ &#x27;status&#x27;: &#x27;pending&#x27;,
+ &#x27;tenant_id&#x27;: &#x27;4&#x27;,
+ &#x27;tenant_unique_id&#x27;: &#x27;e068c78c-ba04-44a5-886b-89b76b16fe05&#x27;,
+ &#x27;time_to_fill_days&#x27;: None,
+ &#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;,
+ &#x27;urgency_level&#x27;: &#x27;high&#x27;}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>reverse_one_to_one_fields</td>
+                      <td class="code"><pre>frozenset()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;QuerySet [&lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (e068c78c-ba04-44a5-886b-89b76b16fe05)&gt;, &lt;JobRequisition: Senior Backend Engineer (e068c78c-ba04-44a5-886b-89b76b16fe05)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;, &lt;JobRequisition: Senior Backend Engineer (4)&gt;]&gt;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame django">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/django/db/models/base.py</code>,
+              line 569, in __init__
+
+              <div class="context" id="c129254509687872">
+
+                <ol start="562" class="pre-context" id="pre129254509687872">
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>                    except FieldDoesNotExist:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>                        unexpected += (prop,)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>                    else:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>                        if value is not _DEFERRED:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>                            _setattr(self, prop, value)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>            if unexpected:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>                unexpected_names = &quot;, &quot;.join(repr(n) for n in unexpected)</pre></li>
+
+                </ol>
+
+                <ol start="569" class="context-line">
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>                raise TypeError(
+                     ^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='570' class="post-context" id="post129254509687872">
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>                    f&quot;{cls.__name__}() got unexpected keyword arguments: &quot;</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>                    f&quot;{unexpected_names}&quot;</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>                )</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>        super().__init__()</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre>        post_init.send(sender=cls, instance=self)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509687872', 'post129254509687872')"><pre></pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254509687872">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>_DEFERRED</td>
+                      <td class="code"><pre>&lt;Deferred field&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>__class__</td>
+                      <td
+                        class="code"><pre>&lt;class &#x27;django.db.models.base.Model&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>_setattr</td>
+                      <td
+                        class="code"><pre>&lt;built-in function setattr&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>args</td>
+                      <td class="code"><pre>()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>cls</td>
+                      <td
+                        class="code"><pre>&lt;class &#x27;jobRequisitions.models.JobRequisition&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>field</td>
+                      <td
+                        class="code"><pre>&lt;django.db.models.fields.TextField: comment&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>fields_iter</td>
+                      <td
+                        class="code"><pre>&lt;tuple_iterator object at 0x758e6a8b79d0&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>is_related_object</td>
+                      <td class="code"><pre>False</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>kwargs</td>
+                      <td
+                        class="code"><pre>{&#x27;tenant_unique_id&#x27;: &#x27;e068c78c-ba04-44a5-886b-89b76b16fe05&#x27;}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>opts</td>
+                      <td
+                        class="code"><pre>&lt;Options for JobRequisition&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>prop</td>
+                      <td
+                        class="code"><pre>&#x27;tenant_unique_id&#x27;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>property_names</td>
+                      <td
+                        class="code"><pre>frozenset({&#x27;pk&#x27;})</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;JobRequisition: Senior Backend Engineer (4)&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>unexpected</td>
+                      <td
+                        class="code"><pre>(&#x27;tenant_unique_id&#x27;,)</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>unexpected_names</td>
+                      <td
+                        class="code"><pre>&quot;&#x27;tenant_unique_id&#x27;&quot;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>val</td>
+                      <td
+                        class="code"><pre>&#x27;Urgent need to fill this backend role&#x27;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>value</td>
+                      <td
+                        class="code"><pre>&#x27;e068c78c-ba04-44a5-886b-89b76b16fe05&#x27;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="cause"><h3>
+
+                During handling of the above exception (JobRequisition() got
+                unexpected keyword arguments: &#x27;tenant_unique_id&#x27;),
+                another exception occurred:
+
+              </h3></li>
+
+            <li class="frame django">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py</code>,
+              line 55, in inner
+
+              <div class="context" id="c129254508324224">
+
+                <ol start="48" class="pre-context" id="pre129254508324224">
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre>        return inner</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre>    else:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre>        @wraps(get_response)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre>        def inner(request):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre>            try:</pre></li>
+
+                </ol>
+
+                <ol start="55" class="context-line">
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre>                response = get_response(request)
+                               ^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='56' class="post-context" id="post129254508324224">
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre>            except Exception as exc:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre>                response = response_for_exception(request, exc)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre>            return response</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre>        return inner</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324224', 'post129254508324224')"><pre></pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254508324224">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -249,19 +1000,19 @@
                     <tr>
                       <td>exc</td>
                       <td
-                        class="code"><pre>DisallowedHost(&quot;Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The domain name provided is not valid according to RFC 1034/1035.&quot;)</pre></td>
+                        class="code"><pre>TypeError(&#x27;Got a `TypeError` when calling `JobRequisition.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `JobRequisition.objects.create()`. You may need to make the field read-only, or override the JobRequisitionSerializer.create() method to handle this correctly.\nOriginal exception was:\n Traceback (most recent call last):\n  File &quot;/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py&quot;, line 991, in create\n    instance = ModelClass._default_manager.create(**validated_data)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/manager.py&quot;, line 87, in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/query.py&quot;, line 661, in create\n    obj = self.model(**kwargs)\n          ^^^^^^^^^^^^^^^^^^^^\n  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/base.py&quot;, line 569, in __init__\n    raise TypeError(\nTypeError: JobRequisition() got unexpected keyword arguments: \&#x27;tenant_unique_id\&#x27;\n&#x27;)</pre></td>
                     </tr>
 
                     <tr>
                       <td>get_response</td>
                       <td
-                        class="code"><pre>&lt;CommonMiddleware get_response=convert_exception_to_response.&lt;locals&gt;.inner&gt;</pre></td>
+                        class="code"><pre>&lt;bound method BaseHandler._get_response of &lt;django.core.handlers.wsgi.WSGIHandler object at 0x758e6b4a47d0&gt;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/talent-engine/schedules/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -273,62 +1024,62 @@
             <li class="frame django">
 
               <code
-                class="fname">/usr/local/lib/python3.11/site-packages/django/utils/deprecation.py</code>,
-              line 119, in __call__
+                class="fname">/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py</code>,
+              line 197, in _get_response
 
-              <div class="context" id="c138408659778176">
+              <div class="context" id="c129254508324160">
 
-                <ol start="112" class="pre-context" id="pre138408659778176">
-
-                  <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre></pre></li>
+                <ol start="190" class="pre-context" id="pre129254508324160">
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>    def __call__(self, request):</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>        # Exit out to async mode, if needed</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>        if response is None:</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>        if self.async_mode:</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>            wrapped_callback = self.make_view_atomic(callback)</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>            return self.__acall__(request)</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>            # If it is an asynchronous view, run it in a subthread.</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>        response = None</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>            if iscoroutinefunction(wrapped_callback):</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>        if hasattr(self, &quot;process_request&quot;):</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>                wrapped_callback = async_to_sync(wrapped_callback)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>            try:</pre></li>
 
                 </ol>
 
-                <ol start="119" class="context-line">
+                <ol start="197" class="context-line">
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>            response = self.process_request(request)
-                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>                response = wrapped_callback(request, *callback_args, **callback_kwargs)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
                     <span>…</span></li>
                 </ol>
 
-                <ol start='120' class="post-context" id="post138408659778176">
+                <ol start='198' class="post-context" id="post129254508324160">
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>        response = response or self.get_response(request)</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>            except Exception as e:</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>        if hasattr(self, &quot;process_response&quot;):</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>                response = self.process_exception_by_middleware(e, request)</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>            response = self.process_response(request, response)</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>                if response is None:</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>        return response</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>                    raise</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre></pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre138408659778176', 'post138408659778176')"><pre>    async def __acall__(self, request):</pre></li>
+                    onclick="toggle('pre129254508324160', 'post129254508324160')"><pre>        # Complain if the view returned None (a common error).</pre></li>
 
                 </ol>
 
@@ -337,7 +1088,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v138408659778176">
+                <table class="vars" id="v129254508324160">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -347,9 +1098,31 @@
                   <tbody>
 
                     <tr>
+                      <td>callback</td>
+                      <td
+                        class="code"><pre>&lt;function View.as_view.&lt;locals&gt;.view at 0x758e69227380&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>callback_args</td>
+                      <td class="code"><pre>()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>callback_kwargs</td>
+                      <td class="code"><pre>{}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>middleware_method</td>
+                      <td
+                        class="code"><pre>&lt;bound method CsrfViewMiddleware.process_view of &lt;CsrfViewMiddleware get_response=convert_exception_to_response.&lt;locals&gt;.inner&gt;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/talent-engine/schedules/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
@@ -360,7 +1133,13 @@
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;CommonMiddleware get_response=convert_exception_to_response.&lt;locals&gt;.inner&gt;</pre></td>
+                        class="code"><pre>&lt;django.core.handlers.wsgi.WSGIHandler object at 0x758e6b4a47d0&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>wrapped_callback</td>
+                      <td
+                        class="code"><pre>&lt;function View.as_view.&lt;locals&gt;.view at 0x758e69227380&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -372,61 +1151,56 @@
             <li class="frame django">
 
               <code
-                class="fname">/usr/local/lib/python3.11/site-packages/django/middleware/common.py</code>,
-              line 48, in process_request
+                class="fname">/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py</code>,
+              line 65, in _view_wrapper
 
-              <div class="context" id="c138408659775808">
+              <div class="context" id="c129254508324096">
 
-                <ol start="41" class="pre-context" id="pre138408659775808">
-
-                  <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>        user_agent = request.META.get(&quot;HTTP_USER_AGENT&quot;)</pre></li>
+                <ol start="58" class="pre-context" id="pre129254508324096">
 
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>        if user_agent is not None:</pre></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>            for user_agent_regex in settings.DISALLOWED_USER_AGENTS:</pre></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre>        async def _view_wrapper(request, *args, **kwargs):</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>                if user_agent_regex.search(user_agent):</pre></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre>            return await view_func(request, *args, **kwargs)</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>                    raise PermissionDenied(&quot;Forbidden user agent&quot;)</pre></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre></pre></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre>    else:</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>        # Check for a redirect based on settings.PREPEND_WWW</pre></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre>        def _view_wrapper(request, *args, **kwargs):</pre></li>
 
                 </ol>
 
-                <ol start="48" class="context-line">
+                <ol start="65" class="context-line">
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>        host = request.get_host()
-                   ^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre>            return view_func(request, *args, **kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+                    <span>…</span></li>
                 </ol>
 
-                <ol start='49' class="post-context" id="post138408659775808">
+                <ol start='66' class="post-context" id="post129254508324096">
 
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre></pre></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>        if settings.PREPEND_WWW and host and not host.startswith(&quot;www.&quot;):</pre></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre>    _view_wrapper.csrf_exempt = True</pre></li>
 
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>            # Check if we also need to append a slash so we can do it all</pre></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>            # with a single redirect. (This check may be somewhat expensive,</pre></li>
-
-                  <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>            # so we only do it if we already know we&#x27;re sending a redirect,</pre></li>
-
-                  <li
-                    onclick="toggle('pre138408659775808', 'post138408659775808')"><pre>            # or in process_response if we get a 404.)</pre></li>
+                    onclick="toggle('pre129254508324096', 'post129254508324096')"><pre>    return wraps(view_func)(_view_wrapper)</pre></li>
 
                 </ol>
 
@@ -435,7 +1209,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v138408659775808">
+                <table class="vars" id="v129254508324096">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -445,21 +1219,140 @@
                   <tbody>
 
                     <tr>
+                      <td>args</td>
+                      <td class="code"><pre>()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>kwargs</td>
+                      <td class="code"><pre>{}</pre></td>
+                    </tr>
+
+                    <tr>
                       <td>request</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/talent-engine/schedules/&#x27;&gt;</pre></td>
+                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>view_func</td>
+                      <td
+                        class="code"><pre>&lt;function View.as_view.&lt;locals&gt;.view at 0x758e692272e0&gt;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame django">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/django/views/generic/base.py</code>,
+              line 105, in view
+
+              <div class="context" id="c129254509753152">
+
+                <ol start="98" class="pre-context" id="pre129254509753152">
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>            self = cls(**initkwargs)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>            self.setup(request, *args, **kwargs)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>            if not hasattr(self, &quot;request&quot;):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>                raise AttributeError(</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>                    &quot;%s instance has no &#x27;request&#x27; attribute. Did you override &quot;</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>                    &quot;setup() and forget to call super()?&quot; % cls.__name__</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>                )</pre></li>
+
+                </ol>
+
+                <ol start="105" class="context-line">
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>            return self.dispatch(request, *args, **kwargs)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+                    <span>…</span></li>
+                </ol>
+
+                <ol start='106' class="post-context" id="post129254509753152">
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>        view.view_class = cls</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>        view.view_initkwargs = initkwargs</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>        # __name__ and __qualname__ are intentionally left unchanged as</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753152', 'post129254509753152')"><pre>        # view_class should be used to robustly determine the name of the view</pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254509753152">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>args</td>
+                      <td class="code"><pre>()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>cls</td>
+                      <td
+                        class="code"><pre>&lt;class &#x27;jobRequisitions.views.JobRequisitionListCreateView&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>initkwargs</td>
+                      <td class="code"><pre>{}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>kwargs</td>
+                      <td class="code"><pre>{}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>request</td>
+                      <td
+                        class="code"><pre>&lt;WSGIRequest: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;CommonMiddleware get_response=convert_exception_to_response.&lt;locals&gt;.inner&gt;</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>user_agent</td>
-                      <td
-                        class="code"><pre>&#x27;Thunder Client (https://www.thunderclient.com)&#x27;</pre></td>
+                        class="code"><pre>&lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;</pre></td>
                     </tr>
 
                   </tbody>
@@ -468,64 +1361,64 @@
 
             </li>
 
-            <li class="frame django">
+            <li class="frame user">
 
               <code
-                class="fname">/usr/local/lib/python3.11/site-packages/django/http/request.py</code>,
-              line 202, in get_host
+                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/views.py</code>,
+              line 515, in dispatch
 
-              <div class="context" id="c138408661741248">
+              <div class="context" id="c129254508323520">
 
-                <ol start="195" class="pre-context" id="pre138408661741248">
-
-                  <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>            msg = &quot;Invalid HTTP_HOST header: %r.&quot; % host</pre></li>
+                <ol start="508" class="pre-context" id="pre129254508323520">
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>            if domain:</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre>                                  self.http_method_not_allowed)</pre></li>
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>                msg += &quot; You may need to add %r to ALLOWED_HOSTS.&quot; % domain</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre>            else:</pre></li>
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>            else:</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre>                handler = self.http_method_not_allowed</pre></li>
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>                msg += (</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>                    &quot; The domain name provided is not valid according to RFC 1034/1035.&quot;</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre>            response = handler(request, *args, **kwargs)</pre></li>
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>                )</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre>        except Exception as exc:</pre></li>
 
                 </ol>
 
-                <ol start="202" class="context-line">
+                <ol start="515" class="context-line">
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>            raise DisallowedHost(msg)
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre>            response = self.handle_exception(exc)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
                 </ol>
 
-                <ol start='203' class="post-context" id="post138408661741248">
+                <ol start='516' class="post-context" id="post129254508323520">
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre></pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>    def get_port(self):</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre>        self.response = self.finalize_response(request, response, *args, **kwargs)</pre></li>
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>        &quot;&quot;&quot;Return the port number for the request as a string.&quot;&quot;&quot;</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre>        return self.response</pre></li>
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>        if settings.USE_X_FORWARDED_PORT and &quot;HTTP_X_FORWARDED_PORT&quot; in self.META:</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre></pre></li>
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>            port = self.META[&quot;HTTP_X_FORWARDED_PORT&quot;]</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre>    def options(self, request, *args, **kwargs):</pre></li>
 
                   <li
-                    onclick="toggle('pre138408661741248', 'post138408661741248')"><pre>        else:</pre></li>
+                    onclick="toggle('pre129254508323520', 'post129254508323520')"><pre>        &quot;&quot;&quot;</pre></li>
 
                 </ol>
 
@@ -534,7 +1427,7 @@
               <details>
                 <summary class="commands">Local vars</summary>
 
-                <table class="vars" id="v138408661741248">
+                <table class="vars" id="v129254508323520">
                   <thead>
                     <tr>
                       <th scope="col">Variable</th>
@@ -544,38 +1437,1373 @@
                   <tbody>
 
                     <tr>
-                      <td>allowed_hosts</td>
-                      <td
-                        class="code"><pre>[&#x27;localhost&#x27;, &#x27;127.0.0.1&#x27;, &#x27;*&#x27;]</pre></td>
+                      <td>args</td>
+                      <td class="code"><pre>()</pre></td>
                     </tr>
 
                     <tr>
-                      <td>domain</td>
-                      <td class="code"><pre>&#x27;&#x27;</pre></td>
+                      <td>handler</td>
+                      <td
+                        class="code"><pre>&lt;bound method ListCreateAPIView.post of &lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;&gt;</pre></td>
                     </tr>
 
                     <tr>
-                      <td>host</td>
+                      <td>kwargs</td>
+                      <td class="code"><pre>{}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>request</td>
                       <td
-                        class="code"><pre>&#x27;talent_engine:8001&#x27;</pre></td>
+                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame user">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/views.py</code>,
+              line 475, in handle_exception
+
+              <div class="context" id="c129254508323456">
+
+                <ol start="468" class="pre-context" id="pre129254508323456">
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre>        exception_handler = self.get_exception_handler()</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre>        context = self.get_exception_handler_context()</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre>        response = exception_handler(exc, context)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre>        if response is None:</pre></li>
+
+                </ol>
+
+                <ol start="475" class="context-line">
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre>            self.raise_uncaught_exception(exc)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='476' class="post-context" id="post129254508323456">
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre>        response.exception = True</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre>        return response</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre>    def raise_uncaught_exception(self, exc):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323456', 'post129254508323456')"><pre>        if settings.DEBUG:</pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254508323456">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>context</td>
+                      <td class="code"><pre>{&#x27;args&#x27;: (),
+ &#x27;kwargs&#x27;: {},
+ &#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;,
+ &#x27;view&#x27;: &lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>exc</td>
+                      <td
+                        class="code"><pre>TypeError(&#x27;Got a `TypeError` when calling `JobRequisition.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `JobRequisition.objects.create()`. You may need to make the field read-only, or override the JobRequisitionSerializer.create() method to handle this correctly.\nOriginal exception was:\n Traceback (most recent call last):\n  File &quot;/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py&quot;, line 991, in create\n    instance = ModelClass._default_manager.create(**validated_data)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/manager.py&quot;, line 87, in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/query.py&quot;, line 661, in create\n    obj = self.model(**kwargs)\n          ^^^^^^^^^^^^^^^^^^^^\n  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/base.py&quot;, line 569, in __init__\n    raise TypeError(\nTypeError: JobRequisition() got unexpected keyword arguments: \&#x27;tenant_unique_id\&#x27;\n&#x27;)</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>exception_handler</td>
+                      <td
+                        class="code"><pre>&lt;function exception_handler at 0x758e6a5bc400&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>response</td>
+                      <td class="code"><pre>None</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame user">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/views.py</code>,
+              line 486, in raise_uncaught_exception
+
+              <div class="context" id="c129254509907456">
+
+                <ol start="479" class="pre-context" id="pre129254509907456">
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>    def raise_uncaught_exception(self, exc):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>        if settings.DEBUG:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>            request = self.request</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>            renderer_format = getattr(request.accepted_renderer, &#x27;format&#x27;)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>            use_plaintext_traceback = renderer_format not in (&#x27;html&#x27;, &#x27;api&#x27;, &#x27;admin&#x27;)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>            request.force_plaintext_errors(use_plaintext_traceback)</pre></li>
+
+                </ol>
+
+                <ol start="486" class="context-line">
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>        raise exc
+             ^^^^^^^^^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='487' class="post-context" id="post129254509907456">
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>    # Note: Views are made CSRF exempt from within `as_view` as to prevent</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>    # accidental removal of this exemption in cases where `dispatch` needs to</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>    # be overridden.</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>    def dispatch(self, request, *args, **kwargs):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509907456', 'post129254509907456')"><pre>        &quot;&quot;&quot;</pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254509907456">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>exc</td>
+                      <td
+                        class="code"><pre>TypeError(&#x27;Got a `TypeError` when calling `JobRequisition.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `JobRequisition.objects.create()`. You may need to make the field read-only, or override the JobRequisitionSerializer.create() method to handle this correctly.\nOriginal exception was:\n Traceback (most recent call last):\n  File &quot;/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py&quot;, line 991, in create\n    instance = ModelClass._default_manager.create(**validated_data)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/manager.py&quot;, line 87, in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/query.py&quot;, line 661, in create\n    obj = self.model(**kwargs)\n          ^^^^^^^^^^^^^^^^^^^^\n  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/base.py&quot;, line 569, in __init__\n    raise TypeError(\nTypeError: JobRequisition() got unexpected keyword arguments: \&#x27;tenant_unique_id\&#x27;\n&#x27;)</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>renderer_format</td>
+                      <td class="code"><pre>&#x27;json&#x27;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>request</td>
+                      <td
+                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>use_plaintext_traceback</td>
+                      <td class="code"><pre>True</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame user">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/views.py</code>,
+              line 512, in dispatch
+
+              <div class="context" id="c129254508322880">
+
+                <ol start="505" class="pre-context" id="pre129254508322880">
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>            # Get the appropriate handler method</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>            if request.method.lower() in self.http_method_names:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>                handler = getattr(self, request.method.lower(),</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>                                  self.http_method_not_allowed)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>            else:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>                handler = self.http_method_not_allowed</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre></pre></li>
+
+                </ol>
+
+                <ol start="512" class="context-line">
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>            response = handler(request, *args, **kwargs)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+                    <span>…</span></li>
+                </ol>
+
+                <ol start='513' class="post-context" id="post129254508322880">
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>        except Exception as exc:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>            response = self.handle_exception(exc)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>        self.response = self.finalize_response(request, response, *args, **kwargs)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508322880', 'post129254508322880')"><pre>        return self.response</pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254508322880">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>args</td>
+                      <td class="code"><pre>()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>handler</td>
+                      <td
+                        class="code"><pre>&lt;bound method ListCreateAPIView.post of &lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>kwargs</td>
+                      <td class="code"><pre>{}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>request</td>
+                      <td
+                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame user">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/generics.py</code>,
+              line 246, in post
+
+              <div class="context" id="c129254509753920">
+
+                <ol start="239" class="pre-context" id="pre129254509753920">
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>    &quot;&quot;&quot;</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>    Concrete view for listing a queryset or creating a model instance.</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>    &quot;&quot;&quot;</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>    def get(self, request, *args, **kwargs):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>        return self.list(request, *args, **kwargs)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>    def post(self, request, *args, **kwargs):</pre></li>
+
+                </ol>
+
+                <ol start="246" class="context-line">
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>        return self.create(request, *args, **kwargs)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+                    <span>…</span></li>
+                </ol>
+
+                <ol start='247' class="post-context" id="post129254509753920">
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>class RetrieveUpdateAPIView(mixins.RetrieveModelMixin,</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>                            mixins.UpdateModelMixin,</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>                            GenericAPIView):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509753920', 'post129254509753920')"><pre>    &quot;&quot;&quot;</pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254509753920">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>args</td>
+                      <td class="code"><pre>()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>kwargs</td>
+                      <td class="code"><pre>{}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>request</td>
+                      <td
+                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame user">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/mixins.py</code>,
+              line 19, in create
+
+              <div class="context" id="c129254508323264">
+
+                <ol start="12" class="pre-context" id="pre129254508323264">
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>class CreateModelMixin:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>    &quot;&quot;&quot;</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>    Create a model instance.</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>    &quot;&quot;&quot;</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>    def create(self, request, *args, **kwargs):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>        serializer = self.get_serializer(data=request.data)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>        serializer.is_valid(raise_exception=True)</pre></li>
+
+                </ol>
+
+                <ol start="19" class="context-line">
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>        self.perform_create(serializer)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='20' class="post-context" id="post129254508323264">
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>        headers = self.get_success_headers(serializer.data)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>    def perform_create(self, serializer):</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre>        serializer.save()</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254508323264', 'post129254508323264')"><pre></pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254508323264">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>args</td>
+                      <td class="code"><pre>()</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>kwargs</td>
+                      <td class="code"><pre>{}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>request</td>
+                      <td
+                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>serializer</td>
+                      <td
+                        class="code"><pre>JobRequisitionSerializer(context={&#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;, &#x27;format&#x27;: None, &#x27;view&#x27;: &lt;jobRequisitions.views.JobRequisitionListCreateView object&gt;}, data={&#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;, &#x27;role&#x27;: &#x27;staff&#x27;, &#x27;requested_by_id&#x27;: &#x27;user-req-uuid-1234&#x27;, &#x27;approved_by_id&#x27;: None, &#x27;created_by_id&#x27;: &#x27;user-create-uuid-5678&#x27;, &#x27;updated_by_id&#x27;: &#x27;user-update-uuid-5678&#x27;, &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;, &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;, &#x27;job_type&#x27;: &#x27;full_time&#x27;, &#x27;position_type&#x27;: &#x27;permanent&#x27;, &#x27;location_type&#x27;: &#x27;remote&#x27;, &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;, &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;, &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;, &#x27;salary_range_min&#x27;: 300000.0, &#x27;salary_range_max&#x27;: 500000.0, &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with experience in Django and PostgreSQL.&#x27;, &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;, &#x27;Strong knowledge of Django and DRF&#x27;, &#x27;Experience with PostgreSQL and Redis&#x27;], &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;, &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software development&#x27;, &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system design&#x27;, &#x27;number_of_candidates&#x27;: 2, &#x27;urgency_level&#x27;: &#x27;high&#x27;, &#x27;reason&#x27;: &#x27;Expanding product team&#x27;, &#x27;deadline_date&#x27;: &#x27;2025-10-01&#x27;, &#x27;start_date&#x27;: &#x27;2025-11-01&#x27;, &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;, &#x27;Collaborate with frontend and product teams&#x27;, &#x27;Ensure system scalability and security&#x27;], &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;, &#x27;Cover Letter&#x27;, &#x27;NYSC Certificate&#x27;], &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;level&#x27;: 1, &#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;}]}, &#x27;current_approval_stage&#x27;: 0, &#x27;approval_date&#x27;: None, &#x27;time_to_fill_days&#x27;: None, &#x27;publish_status&#x27;: True, &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;}):
+    id = CharField(read_only=True)
+    requisition_number = CharField(allow_null=True, read_only=True)
+    num_of_applications = IntegerField(allow_null=True, max_value=2147483647, min_value=-2147483648, required=False)
+    job_requisition_code = CharField(allow_null=True, read_only=True)
+    job_application_code = CharField(allow_null=True, read_only=True)
+    tenant_id = CharField(max_length=36, read_only=True)
+    tenant_domain = SerializerMethodField()
+    branch_id = CharField(allow_null=True, max_length=36, required=False)
+    branch_name = SerializerMethodField()
+    department_id = CharField(allow_null=True, max_length=36, required=False)
+    title = CharField(max_length=255)
+    unique_link = CharField(read_only=True)
+    status = ChoiceField(choices=[(&#x27;open&#x27;, &#x27;Open&#x27;), (&#x27;pending&#x27;, &#x27;Pending&#x27;), (&#x27;closed&#x27;, &#x27;Closed&#x27;), (&#x27;rejected&#x27;, &#x27;Rejected&#x27;), (&#x27;draft&#x27;, &#x27;Draft&#x27;), (&#x27;pending_approval&#x27;, &#x27;Pending Approval&#x27;), (&#x27;approved&#x27;, &#x27;Approved&#x27;), (&#x27;on_hold&#x27;, &#x27;On Hold&#x27;)], required=False)
+    role = ChoiceField(choices=[(&#x27;staff&#x27;, &#x27;Staff&#x27;), (&#x27;admin&#x27;, &#x27;Admin&#x27;)], required=False)
+    requested_by = SerializerMethodField()
+    requested_by_id = CharField(max_length=36, read_only=True)
+    created_by = SerializerMethodField()
+    created_by_id = CharField(max_length=36, read_only=True)
+    updated_by = SerializerMethodField()
+    updated_by_id = CharField(max_length=36, read_only=True)
+    approved_by = SerializerMethodField()
+    approved_by_id = CharField(max_length=36, read_only=True)
+    company_name = CharField(allow_blank=True, allow_null=True, max_length=255, required=False)
+    company_address = CharField(allow_blank=True, allow_null=True, required=False, style={&#x27;base_template&#x27;: &#x27;textarea.html&#x27;})
+    job_type = ChoiceField(choices=[(&#x27;full_time&#x27;, &#x27;Full-time&#x27;), (&#x27;part_time&#x27;, &#x27;Part-time&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;freelance&#x27;, &#x27;Freelance&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;), (&#x27;temporary&#x27;, &#x27;Temporary&#x27;)], required=False)
+    position_type = ChoiceField(choices=[(&#x27;permanent&#x27;, &#x27;Permanent&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;)], required=False)
+    location_type = ChoiceField(choices=[(&#x27;on_site&#x27;, &#x27;On-site&#x27;), (&#x27;remote&#x27;, &#x27;Remote&#x27;), (&#x27;hybrid&#x27;, &#x27;Hyb… &lt;trimmed 7624 bytes string&gt;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame user">
+
+              <code class="fname">/app/jobRequisitions/views.py</code>, line
+              216, in perform_create
+
+              <div class="context" id="c129254509904128">
+
+                <ol start="209" class="pre-context" id="pre129254509904128">
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>        tenant_id = str(jwt_payload.get(&#x27;tenant_id&#x27;)) if jwt_payload.get(&#x27;tenant_id&#x27;) is not None else None</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>        user_id = str(jwt_payload.get(&#x27;user&#x27;, {}).get(&#x27;id&#x27;)) if jwt_payload.get(&#x27;user&#x27;, {}).get(&#x27;id&#x27;) is not None else None</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>        role = jwt_payload.get(&#x27;role&#x27;)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>        branch = jwt_payload.get(&#x27;user&#x27;, {}).get(&#x27;branch&#x27;)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>        if not tenant_id or not user_id:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>            logger.error(&quot;Missing tenant_id or user_id in JWT payload&quot;)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>            raise serializers.ValidationError(&quot;Missing tenant_id or user_id in token.&quot;)</pre></li>
+
+                </ol>
+
+                <ol start="216" class="context-line">
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>        serializer.save(
+             ^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='217' class="post-context" id="post129254509904128">
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>            tenant_id=tenant_id,</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>            requested_by_id=user_id,</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>            branch=branch if role == &#x27;recruiter&#x27; and branch else None</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>        )</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre>        logger.info(f&quot;Job requisition created: {serializer.validated_data[&#x27;title&#x27;]} for tenant {tenant_id} by user {user_id}&quot;)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904128', 'post129254509904128')"><pre></pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254509904128">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>branch</td>
+                      <td class="code"><pre>None</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>jwt_payload</td>
+                      <td
+                        class="code"><pre>{&#x27;email&#x27;: &#x27;support@prolianceltd.com&#x27;,
+ &#x27;exp&#x27;: 1757934333.666892,
+ &#x27;has_accepted_terms&#x27;: False,
+ &#x27;iat&#x27;: 1757933433,
+ &#x27;jti&#x27;: &#x27;58a7de05-506e-419a-aa8d-7624787b1130&#x27;,
+ &#x27;role&#x27;: &#x27;admin&#x27;,
+ &#x27;sub&#x27;: &#x27;support@prolianceltd.com&#x27;,
+ &#x27;tenant_id&#x27;: 4,
+ &#x27;tenant_organizational_id&#x27;: &#x27;TEN-0004&#x27;,
+ &#x27;tenant_schema&#x27;: &#x27;proliance&#x27;,
+ &#x27;tenant_unique_id&#x27;: &#x27;e068c78c-ba04-44a5-886b-89b76b16fe05&#x27;,
+ &#x27;type&#x27;: &#x27;access&#x27;,
+ &#x27;user&#x27;: {&#x27;branch&#x27;: None,
+          &#x27;email&#x27;: &#x27;support@prolianceltd.com&#x27;,
+          &#x27;first_name&#x27;: &#x27;Friday&#x27;,
+          &#x27;has_accepted_terms&#x27;: False,
+          &#x27;id&#x27;: 1,
+          &#x27;is_locked&#x27;: False,
+          &#x27;job_role&#x27;: &#x27;Backend Developer&#x27;,
+          &#x27;last_name&#x27;: &#x27;EzugMondaywu&#x27;,
+          &#x27;profile&#x27;: None,
+          &#x27;role&#x27;: &#x27;admin&#x27;,
+          &#x27;tenant&#x27;: 4,
+          &#x27;username&#x27;: &#x27;tonna&#x27;}}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>role</td>
+                      <td class="code"><pre>&#x27;admin&#x27;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>&lt;jobRequisitions.views.JobRequisitionListCreateView object at 0x758e6923b090&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>serializer</td>
+                      <td
+                        class="code"><pre>JobRequisitionSerializer(context={&#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;, &#x27;format&#x27;: None, &#x27;view&#x27;: &lt;jobRequisitions.views.JobRequisitionListCreateView object&gt;}, data={&#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;, &#x27;role&#x27;: &#x27;staff&#x27;, &#x27;requested_by_id&#x27;: &#x27;user-req-uuid-1234&#x27;, &#x27;approved_by_id&#x27;: None, &#x27;created_by_id&#x27;: &#x27;user-create-uuid-5678&#x27;, &#x27;updated_by_id&#x27;: &#x27;user-update-uuid-5678&#x27;, &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;, &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;, &#x27;job_type&#x27;: &#x27;full_time&#x27;, &#x27;position_type&#x27;: &#x27;permanent&#x27;, &#x27;location_type&#x27;: &#x27;remote&#x27;, &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;, &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;, &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;, &#x27;salary_range_min&#x27;: 300000.0, &#x27;salary_range_max&#x27;: 500000.0, &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with experience in Django and PostgreSQL.&#x27;, &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;, &#x27;Strong knowledge of Django and DRF&#x27;, &#x27;Experience with PostgreSQL and Redis&#x27;], &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;, &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software development&#x27;, &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system design&#x27;, &#x27;number_of_candidates&#x27;: 2, &#x27;urgency_level&#x27;: &#x27;high&#x27;, &#x27;reason&#x27;: &#x27;Expanding product team&#x27;, &#x27;deadline_date&#x27;: &#x27;2025-10-01&#x27;, &#x27;start_date&#x27;: &#x27;2025-11-01&#x27;, &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;, &#x27;Collaborate with frontend and product teams&#x27;, &#x27;Ensure system scalability and security&#x27;], &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;, &#x27;Cover Letter&#x27;, &#x27;NYSC Certificate&#x27;], &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;level&#x27;: 1, &#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;}]}, &#x27;current_approval_stage&#x27;: 0, &#x27;approval_date&#x27;: None, &#x27;time_to_fill_days&#x27;: None, &#x27;publish_status&#x27;: True, &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;}):
+    id = CharField(read_only=True)
+    requisition_number = CharField(allow_null=True, read_only=True)
+    num_of_applications = IntegerField(allow_null=True, max_value=2147483647, min_value=-2147483648, required=False)
+    job_requisition_code = CharField(allow_null=True, read_only=True)
+    job_application_code = CharField(allow_null=True, read_only=True)
+    tenant_id = CharField(max_length=36, read_only=True)
+    tenant_domain = SerializerMethodField()
+    branch_id = CharField(allow_null=True, max_length=36, required=False)
+    branch_name = SerializerMethodField()
+    department_id = CharField(allow_null=True, max_length=36, required=False)
+    title = CharField(max_length=255)
+    unique_link = CharField(read_only=True)
+    status = ChoiceField(choices=[(&#x27;open&#x27;, &#x27;Open&#x27;), (&#x27;pending&#x27;, &#x27;Pending&#x27;), (&#x27;closed&#x27;, &#x27;Closed&#x27;), (&#x27;rejected&#x27;, &#x27;Rejected&#x27;), (&#x27;draft&#x27;, &#x27;Draft&#x27;), (&#x27;pending_approval&#x27;, &#x27;Pending Approval&#x27;), (&#x27;approved&#x27;, &#x27;Approved&#x27;), (&#x27;on_hold&#x27;, &#x27;On Hold&#x27;)], required=False)
+    role = ChoiceField(choices=[(&#x27;staff&#x27;, &#x27;Staff&#x27;), (&#x27;admin&#x27;, &#x27;Admin&#x27;)], required=False)
+    requested_by = SerializerMethodField()
+    requested_by_id = CharField(max_length=36, read_only=True)
+    created_by = SerializerMethodField()
+    created_by_id = CharField(max_length=36, read_only=True)
+    updated_by = SerializerMethodField()
+    updated_by_id = CharField(max_length=36, read_only=True)
+    approved_by = SerializerMethodField()
+    approved_by_id = CharField(max_length=36, read_only=True)
+    company_name = CharField(allow_blank=True, allow_null=True, max_length=255, required=False)
+    company_address = CharField(allow_blank=True, allow_null=True, required=False, style={&#x27;base_template&#x27;: &#x27;textarea.html&#x27;})
+    job_type = ChoiceField(choices=[(&#x27;full_time&#x27;, &#x27;Full-time&#x27;), (&#x27;part_time&#x27;, &#x27;Part-time&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;freelance&#x27;, &#x27;Freelance&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;), (&#x27;temporary&#x27;, &#x27;Temporary&#x27;)], required=False)
+    position_type = ChoiceField(choices=[(&#x27;permanent&#x27;, &#x27;Permanent&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;)], required=False)
+    location_type = ChoiceField(choices=[(&#x27;on_site&#x27;, &#x27;On-site&#x27;), (&#x27;remote&#x27;, &#x27;Remote&#x27;), (&#x27;hybrid&#x27;, &#x27;Hyb… &lt;trimmed 7624 bytes string&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>tenant_id</td>
+                      <td class="code"><pre>&#x27;4&#x27;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>user_id</td>
+                      <td class="code"><pre>&#x27;1&#x27;</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame user">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</code>,
+              line 210, in save
+
+              <div class="context" id="c129254509904832">
+
+                <ol start="203" class="pre-context" id="pre129254509904832">
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>        if self.instance is not None:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>            self.instance = self.update(self.instance, validated_data)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>            assert self.instance is not None, (</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>                &#x27;`update()` did not return an object instance.&#x27;</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>            )</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>        else:</pre></li>
+
+                </ol>
+
+                <ol start="210" class="context-line">
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>            self.instance = self.create(validated_data)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+                    <span>…</span></li>
+                </ol>
+
+                <ol start='211' class="post-context" id="post129254509904832">
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>            assert self.instance is not None, (</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>                &#x27;`create()` did not return an object instance.&#x27;</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>            )</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre>        return self.instance</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509904832', 'post129254509904832')"><pre></pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254509904832">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>kwargs</td>
+                      <td
+                        class="code"><pre>{&#x27;branch&#x27;: None, &#x27;requested_by_id&#x27;: &#x27;1&#x27;, &#x27;tenant_id&#x27;: &#x27;4&#x27;}</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>JobRequisitionSerializer(context={&#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;, &#x27;format&#x27;: None, &#x27;view&#x27;: &lt;jobRequisitions.views.JobRequisitionListCreateView object&gt;}, data={&#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;, &#x27;role&#x27;: &#x27;staff&#x27;, &#x27;requested_by_id&#x27;: &#x27;user-req-uuid-1234&#x27;, &#x27;approved_by_id&#x27;: None, &#x27;created_by_id&#x27;: &#x27;user-create-uuid-5678&#x27;, &#x27;updated_by_id&#x27;: &#x27;user-update-uuid-5678&#x27;, &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;, &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;, &#x27;job_type&#x27;: &#x27;full_time&#x27;, &#x27;position_type&#x27;: &#x27;permanent&#x27;, &#x27;location_type&#x27;: &#x27;remote&#x27;, &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;, &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;, &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;, &#x27;salary_range_min&#x27;: 300000.0, &#x27;salary_range_max&#x27;: 500000.0, &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with experience in Django and PostgreSQL.&#x27;, &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;, &#x27;Strong knowledge of Django and DRF&#x27;, &#x27;Experience with PostgreSQL and Redis&#x27;], &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;, &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software development&#x27;, &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system design&#x27;, &#x27;number_of_candidates&#x27;: 2, &#x27;urgency_level&#x27;: &#x27;high&#x27;, &#x27;reason&#x27;: &#x27;Expanding product team&#x27;, &#x27;deadline_date&#x27;: &#x27;2025-10-01&#x27;, &#x27;start_date&#x27;: &#x27;2025-11-01&#x27;, &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;, &#x27;Collaborate with frontend and product teams&#x27;, &#x27;Ensure system scalability and security&#x27;], &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;, &#x27;Cover Letter&#x27;, &#x27;NYSC Certificate&#x27;], &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;level&#x27;: 1, &#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;}]}, &#x27;current_approval_stage&#x27;: 0, &#x27;approval_date&#x27;: None, &#x27;time_to_fill_days&#x27;: None, &#x27;publish_status&#x27;: True, &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;}):
+    id = CharField(read_only=True)
+    requisition_number = CharField(allow_null=True, read_only=True)
+    num_of_applications = IntegerField(allow_null=True, max_value=2147483647, min_value=-2147483648, required=False)
+    job_requisition_code = CharField(allow_null=True, read_only=True)
+    job_application_code = CharField(allow_null=True, read_only=True)
+    tenant_id = CharField(max_length=36, read_only=True)
+    tenant_domain = SerializerMethodField()
+    branch_id = CharField(allow_null=True, max_length=36, required=False)
+    branch_name = SerializerMethodField()
+    department_id = CharField(allow_null=True, max_length=36, required=False)
+    title = CharField(max_length=255)
+    unique_link = CharField(read_only=True)
+    status = ChoiceField(choices=[(&#x27;open&#x27;, &#x27;Open&#x27;), (&#x27;pending&#x27;, &#x27;Pending&#x27;), (&#x27;closed&#x27;, &#x27;Closed&#x27;), (&#x27;rejected&#x27;, &#x27;Rejected&#x27;), (&#x27;draft&#x27;, &#x27;Draft&#x27;), (&#x27;pending_approval&#x27;, &#x27;Pending Approval&#x27;), (&#x27;approved&#x27;, &#x27;Approved&#x27;), (&#x27;on_hold&#x27;, &#x27;On Hold&#x27;)], required=False)
+    role = ChoiceField(choices=[(&#x27;staff&#x27;, &#x27;Staff&#x27;), (&#x27;admin&#x27;, &#x27;Admin&#x27;)], required=False)
+    requested_by = SerializerMethodField()
+    requested_by_id = CharField(max_length=36, read_only=True)
+    created_by = SerializerMethodField()
+    created_by_id = CharField(max_length=36, read_only=True)
+    updated_by = SerializerMethodField()
+    updated_by_id = CharField(max_length=36, read_only=True)
+    approved_by = SerializerMethodField()
+    approved_by_id = CharField(max_length=36, read_only=True)
+    company_name = CharField(allow_blank=True, allow_null=True, max_length=255, required=False)
+    company_address = CharField(allow_blank=True, allow_null=True, required=False, style={&#x27;base_template&#x27;: &#x27;textarea.html&#x27;})
+    job_type = ChoiceField(choices=[(&#x27;full_time&#x27;, &#x27;Full-time&#x27;), (&#x27;part_time&#x27;, &#x27;Part-time&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;freelance&#x27;, &#x27;Freelance&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;), (&#x27;temporary&#x27;, &#x27;Temporary&#x27;)], required=False)
+    position_type = ChoiceField(choices=[(&#x27;permanent&#x27;, &#x27;Permanent&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;)], required=False)
+    location_type = ChoiceField(choices=[(&#x27;on_site&#x27;, &#x27;On-site&#x27;), (&#x27;remote&#x27;, &#x27;Remote&#x27;), (&#x27;hybrid&#x27;, &#x27;Hyb… &lt;trimmed 7624 bytes string&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>validated_data</td>
+                      <td class="code"><pre>{&#x27;approval_date&#x27;: None,
+ &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;,
+                                  &#x27;level&#x27;: 1,
+                                  &#x27;status&#x27;: &#x27;pending&#x27;}]},
+ &#x27;branch_id&#x27;: None,
+ &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;,
+ &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;,
+ &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;,
+ &#x27;current_approval_stage&#x27;: 0,
+ &#x27;deadline_date&#x27;: datetime.date(2025, 10, 1),
+ &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;,
+                        &#x27;Cover Letter&#x27;,
+                        &#x27;NYSC Certificate&#x27;],
+ &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software &#x27;
+                           &#x27;development&#x27;,
+ &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;,
+ &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with &#x27;
+                    &#x27;experience in Django and PostgreSQL.&#x27;,
+ &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;,
+ &#x27;job_type&#x27;: &#x27;full_time&#x27;,
+ &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system &#x27;
+                          &#x27;design&#x27;,
+ &#x27;location_type&#x27;: &#x27;remote&#x27;,
+ &#x27;number_of_candidates&#x27;: 2,
+ &#x27;position_type&#x27;: &#x27;permanent&#x27;,
+ &#x27;publish_status&#x27;: True,
+ &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;,
+ &#x27;reason&#x27;: &#x27;Expanding product team&#x27;,
+ &#x27;requested_by_id&#x27;: &#x27;1&#x27;,
+ &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;,
+                  &#x27;Strong knowledge of Django and DRF&#x27;,
+                  &#x27;Experience with PostgreSQL and Redis&#x27;],
+ &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;,
+                      &#x27;Collaborate with frontend and product teams&#x27;,
+                      &#x27;Ensure system scalability and security&#x27;],
+ &#x27;role&#x27;: &#x27;staff&#x27;,
+ &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;,
+ &#x27;salary_range_max&#x27;: Decimal(&#x27;500000.00&#x27;),
+ &#x27;salary_range_min&#x27;: Decimal(&#x27;300000.00&#x27;),
+ &#x27;start_date&#x27;: datetime.date(2025, 11, 1),
+ &#x27;status&#x27;: &#x27;pending&#x27;,
+ &#x27;tenant_id&#x27;: &#x27;4&#x27;,
+ &#x27;tenant_unique_id&#x27;: &#x27;e068c78c-ba04-44a5-886b-89b76b16fe05&#x27;,
+ &#x27;time_to_fill_days&#x27;: None,
+ &#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;,
+ &#x27;urgency_level&#x27;: &#x27;high&#x27;}</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame user">
+
+              <code class="fname">/app/jobRequisitions/serializers.py</code>,
+              line 368, in create
+
+              <div class="context" id="c129254509905088">
+
+                <ol start="361" class="pre-context" id="pre129254509905088">
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>            except Exception as e:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>                logger.error(f&quot;Error fetching tenant name for {validated_data[&#x27;tenant_id&#x27;]}: {str(e)}&quot;)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>        if tenant_name:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>            validated_data[&#x27;tenant_name&#x27;] = tenant_name</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>        compliance_checklist = validated_data.pop(&#x27;compliance_checklist&#x27;, [])</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>        advert_banner_file = validated_data.pop(&#x27;advert_banner&#x27;, None)</pre></li>
+
+                </ol>
+
+                <ol start="368" class="context-line">
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>        instance = super().create(validated_data)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='369' class="post-context" id="post129254509905088">
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>        for item in compliance_checklist:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>            instance.add_compliance_item(</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>                name=item[&quot;name&quot;],</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>                description=item.get(&quot;description&quot;, &quot;&quot;),</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>                required=item.get(&quot;required&quot;, True)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509905088', 'post129254509905088')"><pre>            )</pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254509905088">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>__class__</td>
+                      <td
+                        class="code"><pre>&lt;class &#x27;jobRequisitions.serializers.JobRequisitionSerializer&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>advert_banner_file</td>
+                      <td class="code"><pre>None</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>compliance_checklist</td>
+                      <td class="code"><pre>[]</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>request</td>
+                      <td
+                        class="code"><pre>&lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>self</td>
+                      <td
+                        class="code"><pre>JobRequisitionSerializer(context={&#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;, &#x27;format&#x27;: None, &#x27;view&#x27;: &lt;jobRequisitions.views.JobRequisitionListCreateView object&gt;}, data={&#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;, &#x27;role&#x27;: &#x27;staff&#x27;, &#x27;requested_by_id&#x27;: &#x27;user-req-uuid-1234&#x27;, &#x27;approved_by_id&#x27;: None, &#x27;created_by_id&#x27;: &#x27;user-create-uuid-5678&#x27;, &#x27;updated_by_id&#x27;: &#x27;user-update-uuid-5678&#x27;, &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;, &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;, &#x27;job_type&#x27;: &#x27;full_time&#x27;, &#x27;position_type&#x27;: &#x27;permanent&#x27;, &#x27;location_type&#x27;: &#x27;remote&#x27;, &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;, &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;, &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;, &#x27;salary_range_min&#x27;: 300000.0, &#x27;salary_range_max&#x27;: 500000.0, &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with experience in Django and PostgreSQL.&#x27;, &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;, &#x27;Strong knowledge of Django and DRF&#x27;, &#x27;Experience with PostgreSQL and Redis&#x27;], &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;, &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software development&#x27;, &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system design&#x27;, &#x27;number_of_candidates&#x27;: 2, &#x27;urgency_level&#x27;: &#x27;high&#x27;, &#x27;reason&#x27;: &#x27;Expanding product team&#x27;, &#x27;deadline_date&#x27;: &#x27;2025-10-01&#x27;, &#x27;start_date&#x27;: &#x27;2025-11-01&#x27;, &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;, &#x27;Collaborate with frontend and product teams&#x27;, &#x27;Ensure system scalability and security&#x27;], &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;, &#x27;Cover Letter&#x27;, &#x27;NYSC Certificate&#x27;], &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;level&#x27;: 1, &#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;}]}, &#x27;current_approval_stage&#x27;: 0, &#x27;approval_date&#x27;: None, &#x27;time_to_fill_days&#x27;: None, &#x27;publish_status&#x27;: True, &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;}):
+    id = CharField(read_only=True)
+    requisition_number = CharField(allow_null=True, read_only=True)
+    num_of_applications = IntegerField(allow_null=True, max_value=2147483647, min_value=-2147483648, required=False)
+    job_requisition_code = CharField(allow_null=True, read_only=True)
+    job_application_code = CharField(allow_null=True, read_only=True)
+    tenant_id = CharField(max_length=36, read_only=True)
+    tenant_domain = SerializerMethodField()
+    branch_id = CharField(allow_null=True, max_length=36, required=False)
+    branch_name = SerializerMethodField()
+    department_id = CharField(allow_null=True, max_length=36, required=False)
+    title = CharField(max_length=255)
+    unique_link = CharField(read_only=True)
+    status = ChoiceField(choices=[(&#x27;open&#x27;, &#x27;Open&#x27;), (&#x27;pending&#x27;, &#x27;Pending&#x27;), (&#x27;closed&#x27;, &#x27;Closed&#x27;), (&#x27;rejected&#x27;, &#x27;Rejected&#x27;), (&#x27;draft&#x27;, &#x27;Draft&#x27;), (&#x27;pending_approval&#x27;, &#x27;Pending Approval&#x27;), (&#x27;approved&#x27;, &#x27;Approved&#x27;), (&#x27;on_hold&#x27;, &#x27;On Hold&#x27;)], required=False)
+    role = ChoiceField(choices=[(&#x27;staff&#x27;, &#x27;Staff&#x27;), (&#x27;admin&#x27;, &#x27;Admin&#x27;)], required=False)
+    requested_by = SerializerMethodField()
+    requested_by_id = CharField(max_length=36, read_only=True)
+    created_by = SerializerMethodField()
+    created_by_id = CharField(max_length=36, read_only=True)
+    updated_by = SerializerMethodField()
+    updated_by_id = CharField(max_length=36, read_only=True)
+    approved_by = SerializerMethodField()
+    approved_by_id = CharField(max_length=36, read_only=True)
+    company_name = CharField(allow_blank=True, allow_null=True, max_length=255, required=False)
+    company_address = CharField(allow_blank=True, allow_null=True, required=False, style={&#x27;base_template&#x27;: &#x27;textarea.html&#x27;})
+    job_type = ChoiceField(choices=[(&#x27;full_time&#x27;, &#x27;Full-time&#x27;), (&#x27;part_time&#x27;, &#x27;Part-time&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;freelance&#x27;, &#x27;Freelance&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;), (&#x27;temporary&#x27;, &#x27;Temporary&#x27;)], required=False)
+    position_type = ChoiceField(choices=[(&#x27;permanent&#x27;, &#x27;Permanent&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;)], required=False)
+    location_type = ChoiceField(choices=[(&#x27;on_site&#x27;, &#x27;On-site&#x27;), (&#x27;remote&#x27;, &#x27;Remote&#x27;), (&#x27;hybrid&#x27;, &#x27;Hyb… &lt;trimmed 7624 bytes string&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>tenant_name</td>
+                      <td class="code"><pre>None</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>tenant_response</td>
+                      <td class="code"><pre>&lt;Response [500]&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>validated_data</td>
+                      <td class="code"><pre>{&#x27;approval_date&#x27;: None,
+ &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;,
+                                  &#x27;level&#x27;: 1,
+                                  &#x27;status&#x27;: &#x27;pending&#x27;}]},
+ &#x27;branch_id&#x27;: None,
+ &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;,
+ &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;,
+ &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;,
+ &#x27;current_approval_stage&#x27;: 0,
+ &#x27;deadline_date&#x27;: datetime.date(2025, 10, 1),
+ &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;,
+                        &#x27;Cover Letter&#x27;,
+                        &#x27;NYSC Certificate&#x27;],
+ &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software &#x27;
+                           &#x27;development&#x27;,
+ &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;,
+ &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with &#x27;
+                    &#x27;experience in Django and PostgreSQL.&#x27;,
+ &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;,
+ &#x27;job_type&#x27;: &#x27;full_time&#x27;,
+ &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system &#x27;
+                          &#x27;design&#x27;,
+ &#x27;location_type&#x27;: &#x27;remote&#x27;,
+ &#x27;number_of_candidates&#x27;: 2,
+ &#x27;position_type&#x27;: &#x27;permanent&#x27;,
+ &#x27;publish_status&#x27;: True,
+ &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;,
+ &#x27;reason&#x27;: &#x27;Expanding product team&#x27;,
+ &#x27;requested_by_id&#x27;: &#x27;1&#x27;,
+ &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;,
+                  &#x27;Strong knowledge of Django and DRF&#x27;,
+                  &#x27;Experience with PostgreSQL and Redis&#x27;],
+ &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;,
+                      &#x27;Collaborate with frontend and product teams&#x27;,
+                      &#x27;Ensure system scalability and security&#x27;],
+ &#x27;role&#x27;: &#x27;staff&#x27;,
+ &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;,
+ &#x27;salary_range_max&#x27;: Decimal(&#x27;500000.00&#x27;),
+ &#x27;salary_range_min&#x27;: Decimal(&#x27;300000.00&#x27;),
+ &#x27;start_date&#x27;: datetime.date(2025, 11, 1),
+ &#x27;status&#x27;: &#x27;pending&#x27;,
+ &#x27;tenant_id&#x27;: &#x27;4&#x27;,
+ &#x27;tenant_unique_id&#x27;: &#x27;e068c78c-ba04-44a5-886b-89b76b16fe05&#x27;,
+ &#x27;time_to_fill_days&#x27;: None,
+ &#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;,
+ &#x27;urgency_level&#x27;: &#x27;high&#x27;}</pre></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </details>
+
+            </li>
+
+            <li class="frame user">
+
+              <code
+                class="fname">/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py</code>,
+              line 1010, in create
+
+              <div class="context" id="c129254509854272">
+
+                <ol start="1003" class="pre-context" id="pre129254509854272">
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>                    ModelClass._default_manager.name,</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>                    ModelClass.__name__,</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>                    ModelClass._default_manager.name,</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>                    self.__class__.__name__,</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>                    tb</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>                )</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>            )</pre></li>
+
+                </ol>
+
+                <ol start="1010" class="context-line">
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>            raise TypeError(msg)
+                  ^^^^^^^^^^^^^^^^^^^^</pre> <span>…</span></li>
+                </ol>
+
+                <ol start='1011' class="post-context" id="post129254509854272">
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre></pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>        # Save many-to-many relationships after the instance is created.</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>        if many_to_many:</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>            for field_name, value in many_to_many.items():</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>                field = getattr(instance, field_name)</pre></li>
+
+                  <li
+                    onclick="toggle('pre129254509854272', 'post129254509854272')"><pre>                field.set(value)</pre></li>
+
+                </ol>
+
+              </div>
+
+              <details>
+                <summary class="commands">Local vars</summary>
+
+                <table class="vars" id="v129254509854272">
+                  <thead>
+                    <tr>
+                      <th scope="col">Variable</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr>
+                      <td>ModelClass</td>
+                      <td
+                        class="code"><pre>&lt;class &#x27;jobRequisitions.models.JobRequisition&#x27;&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>info</td>
+                      <td
+                        class="code"><pre>FieldInfo(pk=&lt;django.db.models.fields.CharField: id&gt;, fields={&#x27;tenant_name&#x27;: &lt;django.db.models.fields.CharField: tenant_name&gt;, &#x27;requisition_number&#x27;: &lt;django.db.models.fields.CharField: requisition_number&gt;, &#x27;job_requisition_code&#x27;: &lt;django.db.models.fields.CharField: job_requisition_code&gt;, &#x27;job_application_code&#x27;: &lt;django.db.models.fields.CharField: job_application_code&gt;, &#x27;compliance_checklist&#x27;: &lt;django.db.models.fields.json.JSONField: compliance_checklist&gt;, &#x27;last_compliance_check&#x27;: &lt;django.db.models.fields.DateTimeField: last_compliance_check&gt;, &#x27;checked_by&#x27;: &lt;django.db.models.fields.CharField: checked_by&gt;, &#x27;tenant_id&#x27;: &lt;django.db.models.fields.CharField: tenant_id&gt;, &#x27;branch_id&#x27;: &lt;django.db.models.fields.CharField: branch_id&gt;, &#x27;department_id&#x27;: &lt;django.db.models.fields.CharField: department_id&gt;, &#x27;hiring_manager_id&#x27;: &lt;django.db.models.fields.CharField: hiring_manager_id&gt;, &#x27;title&#x27;: &lt;django.db.models.fields.CharField: title&gt;, &#x27;unique_link&#x27;: &lt;django.db.models.fields.CharField: unique_link&gt;, &#x27;status&#x27;: &lt;django.db.models.fields.CharField: status&gt;, &#x27;role&#x27;: &lt;django.db.models.fields.CharField: role&gt;, &#x27;requested_by_id&#x27;: &lt;django.db.models.fields.CharField: requested_by_id&gt;, &#x27;approved_by_id&#x27;: &lt;django.db.models.fields.CharField: approved_by_id&gt;, &#x27;created_by_id&#x27;: &lt;django.db.models.fields.CharField: created_by_id&gt;, &#x27;updated_by_id&#x27;: &lt;django.db.models.fields.CharField: updated_by_id&gt;, &#x27;company_name&#x27;: &lt;django.db.models.fields.CharField: company_name&gt;, &#x27;company_address&#x27;: &lt;django.db.models.fields.TextField: company_address&gt;, &#x27;job_type&#x27;: &lt;django.db.models.fields.CharField: job_type&gt;, &#x27;position_type&#x27;: &lt;django.db.models.fields.CharField: position_type&gt;, &#x27;location_type&#x27;: &lt;django.db.models.fields.CharField: location_type&gt;, &#x27;job_location&#x27;: &lt;django.db.models.fields.TextField: job_location&gt;, &#x27;interview_location&#x27;: &lt;django.db.models.fields.CharField: interview_location&gt;, &#x27;salary_range&#x27;: &lt;django.db.models.fields.CharField: salary_range&gt;, &#x27;salary_range_min&#x27;: &lt;django.db.models.fields.DecimalField: salary_range_min&gt;, &#x27;salary_range_max&#x27;: &lt;django.db.models.fields.DecimalField: salary_range_max&gt;, &#x27;job_description&#x27;: &lt;django.db.models.fields.TextField: job_description&gt;, &#x27;requirements&#x27;: &lt;django.db.models.fields.json.JSONField: requirements&gt;, &#x27;qualification_requirement&#x27;: &lt;django.db.models.fields.TextField: qualification_requirement&gt;, &#x27;experience_requirement&#x27;: &lt;django.db.models.fields.TextField: experience_requirement&gt;, &#x27;knowledge_requirement&#x27;: &lt;django.db.models.fields.TextField: knowledge_requirement&gt;, &#x27;number_of_candidates&#x27;: &lt;django.db.models.fields.IntegerField: number_of_candidates&gt;, &#x27;num_of_applications&#x27;: &lt;django.db.models.fields.IntegerField: num_of_applications&gt;, &#x27;urgency_level&#x27;: &lt;django.db.models.fields.CharField: urgency_level&gt;, &#x27;reason&#x27;: &lt;django.db.models.fields.TextField: reason&gt;, &#x27;deadline_date&#x27;: &lt;django.db.models.fields.DateField: deadline_date&gt;, &#x27;start_date&#x27;: &lt;django.db.models.fields.DateField: start_date&gt;, &#x27;responsibilities&#x27;: &lt;django.db.models.fields.json.JSONField: responsibilities&gt;, &#x27;documents_required&#x27;: &lt;django.db.models.fields.json.JSONField: documents_required&gt;, &#x27;approval_workflow&#x27;: &lt;django.db.models.fields.json.JSONField: approval_workflow&gt;, &#x27;current_approval_stage&#x27;: &lt;django.db.models.fields.IntegerField: current_approval_stage&gt;, &#x27;approval_date&#x27;: &lt;django.db.models.fields.DateTimeField: approval_date&gt;, &#x27;time_to_fill_days&#x27;: &lt;django.db.models.fields.IntegerField: time_to_fill_days&gt;, &#x27;advert_banner&#x27;: &lt;django.db.models.fields.files.ImageField: advert_banner&gt;, &#x27;advert_banner_url&#x27;: &lt;django.db.models.fields.CharField: advert_banner_url&gt;, &#x27;requested_date&#x27;: &lt;django.db.models.fields.DateField: requested_date&gt;, &#x27;publish_status&#x27;: &lt;django.db.models.fields.BooleanField: publish_status&gt;, &#x27;is_deleted&#x27;: &lt;django.db.models.fields.BooleanField: is_deleted&gt;, &#x27;created_at&#x27;: &lt;django.db.models.fields.DateTimeField: created_at&gt;, &#x27;updated_at&#x27;: &lt;django.db.models.fields.DateTimeField: updated_at&gt;, &#x27;comment&#x27;: &lt;django.db.models.fields.TextField: comment&gt;}, forward_relations={}, reverse_relations={}, fields_and_pk={&#x27;pk&#x27;: &lt;django.db.models.fields.CharField: id&gt;, &#x27;id&#x27;: &lt;django.db.… &lt;trimmed 8050 bytes string&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>many_to_many</td>
+                      <td class="code"><pre>{}</pre></td>
                     </tr>
 
                     <tr>
                       <td>msg</td>
                       <td
-                        class="code"><pre>(&quot;Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The domain name provided is &quot;
- &#x27;not valid according to RFC 1034/1035.&#x27;)</pre></td>
-                    </tr>
-
-                    <tr>
-                      <td>port</td>
-                      <td class="code"><pre>&#x27;&#x27;</pre></td>
+                        class="code"><pre>(&#x27;Got a `TypeError` when calling `JobRequisition.objects.create()`. This may &#x27;
+ &#x27;be because you have a writable field on the serializer class that is not a &#x27;
+ &#x27;valid argument to `JobRequisition.objects.create()`. You may need to make &#x27;
+ &#x27;the field read-only, or override the JobRequisitionSerializer.create() &#x27;
+ &#x27;method to handle this correctly.\n&#x27;
+ &#x27;Original exception was:\n&#x27;
+ &#x27; Traceback (most recent call last):\n&#x27;
+ &#x27;  File &#x27;
+ &#x27;&quot;/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py&quot;, &#x27;
+ &#x27;line 991, in create\n&#x27;
+ &#x27;    instance = ModelClass._default_manager.create(**validated_data)\n&#x27;
+ &#x27;               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &#x27;
+ &#x27;&quot;/usr/local/lib/python3.11/site-packages/django/db/models/manager.py&quot;, line &#x27;
+ &#x27;87, in manager_method\n&#x27;
+ &#x27;    return getattr(self.get_queryset(), name)(*args, **kwargs)\n&#x27;
+ &#x27;           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/query.py&quot;, &#x27;
+ &#x27;line 661, in create\n&#x27;
+ &#x27;    obj = self.model(**kwargs)\n&#x27;
+ &#x27;          ^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/base.py&quot;, &#x27;
+ &#x27;line 569, in __init__\n&#x27;
+ &#x27;    raise TypeError(\n&#x27;
+ &#x27;TypeError: JobRequisition() got unexpected keyword arguments: &#x27;
+ &quot;&#x27;tenant_unique_id&#x27;\n&quot;)</pre></td>
                     </tr>
 
                     <tr>
                       <td>self</td>
                       <td
-                        class="code"><pre>&lt;WSGIRequest: GET &#x27;/api/talent-engine/schedules/&#x27;&gt;</pre></td>
+                        class="code"><pre>JobRequisitionSerializer(context={&#x27;request&#x27;: &lt;rest_framework.request.Request: POST &#x27;/api/talent-engine/requisitions/&#x27;&gt;, &#x27;format&#x27;: None, &#x27;view&#x27;: &lt;jobRequisitions.views.JobRequisitionListCreateView object&gt;}, data={&#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;, &#x27;role&#x27;: &#x27;staff&#x27;, &#x27;requested_by_id&#x27;: &#x27;user-req-uuid-1234&#x27;, &#x27;approved_by_id&#x27;: None, &#x27;created_by_id&#x27;: &#x27;user-create-uuid-5678&#x27;, &#x27;updated_by_id&#x27;: &#x27;user-update-uuid-5678&#x27;, &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;, &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;, &#x27;job_type&#x27;: &#x27;full_time&#x27;, &#x27;position_type&#x27;: &#x27;permanent&#x27;, &#x27;location_type&#x27;: &#x27;remote&#x27;, &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;, &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;, &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;, &#x27;salary_range_min&#x27;: 300000.0, &#x27;salary_range_max&#x27;: 500000.0, &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with experience in Django and PostgreSQL.&#x27;, &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;, &#x27;Strong knowledge of Django and DRF&#x27;, &#x27;Experience with PostgreSQL and Redis&#x27;], &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;, &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software development&#x27;, &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system design&#x27;, &#x27;number_of_candidates&#x27;: 2, &#x27;urgency_level&#x27;: &#x27;high&#x27;, &#x27;reason&#x27;: &#x27;Expanding product team&#x27;, &#x27;deadline_date&#x27;: &#x27;2025-10-01&#x27;, &#x27;start_date&#x27;: &#x27;2025-11-01&#x27;, &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;, &#x27;Collaborate with frontend and product teams&#x27;, &#x27;Ensure system scalability and security&#x27;], &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;, &#x27;Cover Letter&#x27;, &#x27;NYSC Certificate&#x27;], &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;level&#x27;: 1, &#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;, &#x27;status&#x27;: &#x27;pending&#x27;}]}, &#x27;current_approval_stage&#x27;: 0, &#x27;approval_date&#x27;: None, &#x27;time_to_fill_days&#x27;: None, &#x27;publish_status&#x27;: True, &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;}):
+    id = CharField(read_only=True)
+    requisition_number = CharField(allow_null=True, read_only=True)
+    num_of_applications = IntegerField(allow_null=True, max_value=2147483647, min_value=-2147483648, required=False)
+    job_requisition_code = CharField(allow_null=True, read_only=True)
+    job_application_code = CharField(allow_null=True, read_only=True)
+    tenant_id = CharField(max_length=36, read_only=True)
+    tenant_domain = SerializerMethodField()
+    branch_id = CharField(allow_null=True, max_length=36, required=False)
+    branch_name = SerializerMethodField()
+    department_id = CharField(allow_null=True, max_length=36, required=False)
+    title = CharField(max_length=255)
+    unique_link = CharField(read_only=True)
+    status = ChoiceField(choices=[(&#x27;open&#x27;, &#x27;Open&#x27;), (&#x27;pending&#x27;, &#x27;Pending&#x27;), (&#x27;closed&#x27;, &#x27;Closed&#x27;), (&#x27;rejected&#x27;, &#x27;Rejected&#x27;), (&#x27;draft&#x27;, &#x27;Draft&#x27;), (&#x27;pending_approval&#x27;, &#x27;Pending Approval&#x27;), (&#x27;approved&#x27;, &#x27;Approved&#x27;), (&#x27;on_hold&#x27;, &#x27;On Hold&#x27;)], required=False)
+    role = ChoiceField(choices=[(&#x27;staff&#x27;, &#x27;Staff&#x27;), (&#x27;admin&#x27;, &#x27;Admin&#x27;)], required=False)
+    requested_by = SerializerMethodField()
+    requested_by_id = CharField(max_length=36, read_only=True)
+    created_by = SerializerMethodField()
+    created_by_id = CharField(max_length=36, read_only=True)
+    updated_by = SerializerMethodField()
+    updated_by_id = CharField(max_length=36, read_only=True)
+    approved_by = SerializerMethodField()
+    approved_by_id = CharField(max_length=36, read_only=True)
+    company_name = CharField(allow_blank=True, allow_null=True, max_length=255, required=False)
+    company_address = CharField(allow_blank=True, allow_null=True, required=False, style={&#x27;base_template&#x27;: &#x27;textarea.html&#x27;})
+    job_type = ChoiceField(choices=[(&#x27;full_time&#x27;, &#x27;Full-time&#x27;), (&#x27;part_time&#x27;, &#x27;Part-time&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;freelance&#x27;, &#x27;Freelance&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;), (&#x27;temporary&#x27;, &#x27;Temporary&#x27;)], required=False)
+    position_type = ChoiceField(choices=[(&#x27;permanent&#x27;, &#x27;Permanent&#x27;), (&#x27;contract&#x27;, &#x27;Contract&#x27;), (&#x27;internship&#x27;, &#x27;Internship&#x27;)], required=False)
+    location_type = ChoiceField(choices=[(&#x27;on_site&#x27;, &#x27;On-site&#x27;), (&#x27;remote&#x27;, &#x27;Remote&#x27;), (&#x27;hybrid&#x27;, &#x27;Hyb… &lt;trimmed 7624 bytes string&gt;</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>tb</td>
+                      <td
+                        class="code"><pre>(&#x27;Traceback (most recent call last):\n&#x27;
+ &#x27;  File &#x27;
+ &#x27;&quot;/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py&quot;, &#x27;
+ &#x27;line 991, in create\n&#x27;
+ &#x27;    instance = ModelClass._default_manager.create(**validated_data)\n&#x27;
+ &#x27;               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &#x27;
+ &#x27;&quot;/usr/local/lib/python3.11/site-packages/django/db/models/manager.py&quot;, line &#x27;
+ &#x27;87, in manager_method\n&#x27;
+ &#x27;    return getattr(self.get_queryset(), name)(*args, **kwargs)\n&#x27;
+ &#x27;           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/query.py&quot;, &#x27;
+ &#x27;line 661, in create\n&#x27;
+ &#x27;    obj = self.model(**kwargs)\n&#x27;
+ &#x27;          ^^^^^^^^^^^^^^^^^^^^\n&#x27;
+ &#x27;  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/base.py&quot;, &#x27;
+ &#x27;line 569, in __init__\n&#x27;
+ &#x27;    raise TypeError(\n&#x27;
+ &#x27;TypeError: JobRequisition() got unexpected keyword arguments: &#x27;
+ &quot;&#x27;tenant_unique_id&#x27;\n&quot;)</pre></td>
+                    </tr>
+
+                    <tr>
+                      <td>validated_data</td>
+                      <td class="code"><pre>{&#x27;approval_date&#x27;: None,
+ &#x27;approval_workflow&#x27;: {&#x27;steps&#x27;: [{&#x27;approver_id&#x27;: &#x27;user-lead-uuid-9999&#x27;,
+                                  &#x27;level&#x27;: 1,
+                                  &#x27;status&#x27;: &#x27;pending&#x27;}]},
+ &#x27;branch_id&#x27;: None,
+ &#x27;comment&#x27;: &#x27;Urgent need to fill this backend role&#x27;,
+ &#x27;company_address&#x27;: &#x27;123 Innovation Drive, Lagos, Nigeria&#x27;,
+ &#x27;company_name&#x27;: &#x27;TechNova Ltd.&#x27;,
+ &#x27;current_approval_stage&#x27;: 0,
+ &#x27;deadline_date&#x27;: datetime.date(2025, 10, 1),
+ &#x27;documents_required&#x27;: [&#x27;Curriculum Vitae (CV)&#x27;,
+                        &#x27;Cover Letter&#x27;,
+                        &#x27;NYSC Certificate&#x27;],
+ &#x27;experience_requirement&#x27;: &#x27;Minimum of 5 years experience in software &#x27;
+                           &#x27;development&#x27;,
+ &#x27;interview_location&#x27;: &#x27;Zoom Interview&#x27;,
+ &#x27;job_description&#x27;: &#x27;We are looking for a senior backend engineer with &#x27;
+                    &#x27;experience in Django and PostgreSQL.&#x27;,
+ &#x27;job_location&#x27;: &#x27;Remote - Nigeria&#x27;,
+ &#x27;job_type&#x27;: &#x27;full_time&#x27;,
+ &#x27;knowledge_requirement&#x27;: &#x27;Strong understanding of RESTful APIs and system &#x27;
+                          &#x27;design&#x27;,
+ &#x27;location_type&#x27;: &#x27;remote&#x27;,
+ &#x27;number_of_candidates&#x27;: 2,
+ &#x27;position_type&#x27;: &#x27;permanent&#x27;,
+ &#x27;publish_status&#x27;: True,
+ &#x27;qualification_requirement&#x27;: &#x27;BSc or MSc in Computer Science or related field&#x27;,
+ &#x27;reason&#x27;: &#x27;Expanding product team&#x27;,
+ &#x27;requested_by_id&#x27;: &#x27;1&#x27;,
+ &#x27;requirements&#x27;: [&#x27;5+ years experience in backend development&#x27;,
+                  &#x27;Strong knowledge of Django and DRF&#x27;,
+                  &#x27;Experience with PostgreSQL and Redis&#x27;],
+ &#x27;responsibilities&#x27;: [&#x27;Develop and maintain APIs&#x27;,
+                      &#x27;Collaborate with frontend and product teams&#x27;,
+                      &#x27;Ensure system scalability and security&#x27;],
+ &#x27;role&#x27;: &#x27;staff&#x27;,
+ &#x27;salary_range&#x27;: &#x27;₦300,000 - ₦500,000&#x27;,
+ &#x27;salary_range_max&#x27;: Decimal(&#x27;500000.00&#x27;),
+ &#x27;salary_range_min&#x27;: Decimal(&#x27;300000.00&#x27;),
+ &#x27;start_date&#x27;: datetime.date(2025, 11, 1),
+ &#x27;status&#x27;: &#x27;pending&#x27;,
+ &#x27;tenant_id&#x27;: &#x27;4&#x27;,
+ &#x27;tenant_unique_id&#x27;: &#x27;e068c78c-ba04-44a5-886b-89b76b16fe05&#x27;,
+ &#x27;time_to_fill_days&#x27;: None,
+ &#x27;title&#x27;: &#x27;Senior Backend Engineer&#x27;,
+ &#x27;urgency_level&#x27;: &#x27;high&#x27;}</pre></td>
                     </tr>
 
                   </tbody>
@@ -592,15 +2820,15 @@
           <div id="pastebinTraceback" class="pastebin">
             <input type="hidden" name="language" value="PythonConsole">
             <input type="hidden" name="title"
-              value="DisallowedHost at /api/talent-engine/schedules/">
+              value="TypeError at /api/talent-engine/requisitions/">
             <input type="hidden" name="source" value="Django Dpaste Agent">
             <input type="hidden" name="poster" value="Django">
             <textarea name="content" id="traceback_area" cols="140" rows="25">
 Environment:
 
 
-Request Method: GET
-Request URL: http://talent_engine:8001/api/talent-engine/schedules/
+Request Method: POST
+Request URL: http://talent-engine/api/talent-engine/requisitions/
 
 Django Version: 5.2.5
 Python Version: 3.11.13
@@ -618,34 +2846,93 @@ Installed Applications:
  &#x27;jobRequisitions&#x27;,
  &#x27;django_extensions&#x27;]
 Installed Middleware:
-[&#x27;talent_engine.middleware.MicroserviceJWTMiddleware&#x27;,
+[&#x27;talent_engine.middleware.MicroserviceRS256JWTMiddleware&#x27;,
+ &#x27;talent_engine.middleware.CustomTenantSchemaMiddleware&#x27;,
  &#x27;corsheaders.middleware.CorsMiddleware&#x27;,
  &#x27;django.middleware.security.SecurityMiddleware&#x27;,
  &#x27;django.contrib.sessions.middleware.SessionMiddleware&#x27;,
  &#x27;django.middleware.common.CommonMiddleware&#x27;,
  &#x27;django.middleware.csrf.CsrfViewMiddleware&#x27;,
- &#x27;django.contrib.auth.middleware.AuthenticationMiddleware&#x27;,
  &#x27;django.contrib.messages.middleware.MessageMiddleware&#x27;,
  &#x27;django.middleware.clickjacking.XFrameOptionsMiddleware&#x27;]
 
 
 
 Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 661, in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 569, in __init__
+    raise TypeError(
+    ^
+
+During handling of the above exception (JobRequisition() got unexpected keyword arguments: &#x27;tenant_unique_id&#x27;), another exception occurred:
   File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
     response = get_response(request)
                ^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/django/utils/deprecation.py", line 119, in __call__
-    response = self.process_request(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/django/middleware/common.py", line 48, in process_request
-    host = request.get_host()
-           ^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/django/http/request.py", line 202, in get_host
-    raise DisallowedHost(msg)
-    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+    ^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/generics.py", line 246, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/jobRequisitions/views.py", line 216, in perform_create
+    serializer.save(
+    ^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/jobRequisitions/serializers.py", line 368, in create
+    instance = super().create(validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 1010, in create
+    raise TypeError(msg)
+    ^^^^^^^^^^^^^^^^^^^^
 
-Exception Type: DisallowedHost at /api/talent-engine/schedules/
-Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The domain name provided is not valid according to RFC 1034/1035.
+Exception Type: TypeError at /api/talent-engine/requisitions/
+Exception Value: Got a `TypeError` when calling `JobRequisition.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `JobRequisition.objects.create()`. You may need to make the field read-only, or override the JobRequisitionSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File &quot;/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py&quot;, line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/manager.py&quot;, line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/query.py&quot;, line 661, in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+  File &quot;/usr/local/lib/python3.11/site-packages/django/db/models/base.py&quot;, line 569, in __init__
+    raise TypeError(
+TypeError: JobRequisition() got unexpected keyword arguments: &#x27;tenant_unique_id&#x27;
+
 </textarea>
             <br><br>
             <input type="submit"
@@ -659,7 +2946,7 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
         <h2>Request information</h2>
 
         <h3 id="user-info">USER</h3>
-        <p>None</p>
+        <p>AnonymousUser</p>
 
         <h3 id="get-info">GET</h3>
 
@@ -689,7 +2976,7 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
 
             <tr>
               <td>CONTENT_LENGTH</td>
-              <td class="code"><pre>&#x27;6&#x27;</pre></td>
+              <td class="code"><pre>&#x27;1963&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -719,7 +3006,7 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
 
             <tr>
               <td>HTTP_HOST</td>
-              <td class="code"><pre>&#x27;talent_engine:8001&#x27;</pre></td>
+              <td class="code"><pre>&#x27;talent-engine&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -731,7 +3018,7 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
             <tr>
               <td>PATH_INFO</td>
               <td
-                class="code"><pre>&#x27;/api/talent-engine/schedules/&#x27;</pre></td>
+                class="code"><pre>&#x27;/api/talent-engine/requisitions/&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -742,22 +3029,22 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
             <tr>
               <td>RAW_URI</td>
               <td
-                class="code"><pre>&#x27;/api/talent-engine/schedules/&#x27;</pre></td>
+                class="code"><pre>&#x27;/api/talent-engine/requisitions/&#x27;</pre></td>
             </tr>
 
             <tr>
               <td>REMOTE_ADDR</td>
-              <td class="code"><pre>&#x27;172.19.0.11&#x27;</pre></td>
+              <td class="code"><pre>&#x27;172.18.0.2&#x27;</pre></td>
             </tr>
 
             <tr>
               <td>REMOTE_PORT</td>
-              <td class="code"><pre>&#x27;59520&#x27;</pre></td>
+              <td class="code"><pre>&#x27;58020&#x27;</pre></td>
             </tr>
 
             <tr>
               <td>REQUEST_METHOD</td>
-              <td class="code"><pre>&#x27;GET&#x27;</pre></td>
+              <td class="code"><pre>&#x27;POST&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -772,7 +3059,7 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
 
             <tr>
               <td>SERVER_PORT</td>
-              <td class="code"><pre>&#x27;8001&#x27;</pre></td>
+              <td class="code"><pre>&#x27;8002&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -788,13 +3075,13 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
             <tr>
               <td>gunicorn.socket</td>
               <td
-                class="code"><pre>&lt;socket.socket fd=10, family=2, type=1, proto=0, laddr=(&#x27;172.19.0.10&#x27;, 8001), raddr=(&#x27;172.19.0.11&#x27;, 59520)&gt;</pre></td>
+                class="code"><pre>&lt;socket.socket fd=10, family=2, type=1, proto=0, laddr=(&#x27;172.18.0.12&#x27;, 8002), raddr=(&#x27;172.18.0.2&#x27;, 58020)&gt;</pre></td>
             </tr>
 
             <tr>
               <td>wsgi.errors</td>
               <td
-                class="code"><pre>&lt;gunicorn.http.wsgi.WSGIErrorsWrapper object at 0x7de1c71d13c0&gt;</pre></td>
+                class="code"><pre>&lt;gunicorn.http.wsgi.WSGIErrorsWrapper object at 0x758e6a8b57e0&gt;</pre></td>
             </tr>
 
             <tr>
@@ -806,7 +3093,7 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
             <tr>
               <td>wsgi.input</td>
               <td
-                class="code"><pre>&lt;gunicorn.http.body.Body object at 0x7de1c7e229d0&gt;</pre></td>
+                class="code"><pre>&lt;gunicorn.http.body.Body object at 0x758e6a8ddc50&gt;</pre></td>
             </tr>
 
             <tr>
@@ -1017,7 +3304,7 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
              &#x27;OPTIONS&#x27;: {},
              &#x27;PASSWORD&#x27;: &#x27;********************&#x27;,
              &#x27;PORT&#x27;: &#x27;5432&#x27;,
-             &#x27;SCHEMA&#x27;: &#x27;public&#x27;,
+             &#x27;SCHEMA&#x27;: &#x27;proliance&#x27;,
              &#x27;TEST&#x27;: {&#x27;CHARSET&#x27;: None,
                       &#x27;COLLATION&#x27;: None,
                       &#x27;MIGRATE&#x27;: True,
@@ -1291,7 +3578,7 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
             <tr>
               <td>JOB_APPLICATIONS_URL</td>
               <td
-                class="code"><pre>&#x27;http://job_applications:8002&#x27;</pre></td>
+                class="code"><pre>&#x27;http://job_applications:8003&#x27;</pre></td>
             </tr>
 
             <tr>
@@ -1540,13 +3827,13 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
             <tr>
               <td>MIDDLEWARE</td>
               <td
-                class="code"><pre>[&#x27;talent_engine.middleware.MicroserviceJWTMiddleware&#x27;,
+                class="code"><pre>[&#x27;talent_engine.middleware.MicroserviceRS256JWTMiddleware&#x27;,
+ &#x27;talent_engine.middleware.CustomTenantSchemaMiddleware&#x27;,
  &#x27;corsheaders.middleware.CorsMiddleware&#x27;,
  &#x27;django.middleware.security.SecurityMiddleware&#x27;,
  &#x27;django.contrib.sessions.middleware.SessionMiddleware&#x27;,
  &#x27;django.middleware.common.CommonMiddleware&#x27;,
  &#x27;django.middleware.csrf.CsrfViewMiddleware&#x27;,
- &#x27;django.contrib.auth.middleware.AuthenticationMiddleware&#x27;,
  &#x27;django.contrib.messages.middleware.MessageMiddleware&#x27;,
  &#x27;django.middleware.clickjacking.XFrameOptionsMiddleware&#x27;]</pre></td>
             </tr>
@@ -1757,20 +4044,6 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
             </tr>
 
             <tr>
-              <td>SIMPLE_JWT</td>
-              <td
-                class="code"><pre>{&#x27;ACCESS_TOKEN_LIFETIME&#x27;: &#x27;********************&#x27;,
- &#x27;ALGORITHM&#x27;: &#x27;HS256&#x27;,
- &#x27;AUTH_HEADER_TYPES&#x27;: &#x27;********************&#x27;,
- &#x27;AUTH_TOKEN_CLASSES&#x27;: &#x27;********************&#x27;,
- &#x27;BLACKLIST_AFTER_ROTATION&#x27;: True,
- &#x27;REFRESH_TOKEN_LIFETIME&#x27;: &#x27;********************&#x27;,
- &#x27;ROTATE_REFRESH_TOKENS&#x27;: &#x27;********************&#x27;,
- &#x27;SIGNING_KEY&#x27;: &#x27;********************&#x27;,
- &#x27;VERIFYING_KEY&#x27;: &#x27;********************&#x27;}</pre></td>
-            </tr>
-
-            <tr>
               <td>SPECTACULAR_SETTINGS</td>
               <td class="code"><pre>{&#x27;COMPONENT_SPLIT_REQUEST&#x27;: True,
  &#x27;DESCRIPTION&#x27;: &#x27;API documentation for Talent Engine microservice&#x27;,
@@ -1813,7 +4086,7 @@ Exception Value: Invalid HTTP_HOST header: &#x27;talent_engine:8001&#x27;. The d
 
             <tr>
               <td>STORAGE_TYPE</td>
-              <td class="code"><pre>&#x27;local&#x27;</pre></td>
+              <td class="code"><pre>&#x27;supabase&#x27;</pre></td>
             </tr>
 
             <tr>

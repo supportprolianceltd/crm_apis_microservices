@@ -1,146 +1,208 @@
-# MicroserviceJWTMiddleware: Decodes JWT from Authorization header and attaches payload to request
-import jwt
-from django.conf import settings
-from rest_framework.exceptions import AuthenticationFailed
 import logging
-import requests
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.exceptions import InvalidToken
+from django.db import connection
 from django.http import JsonResponse
-from django.contrib.auth.models import AnonymousUser
-from rest_framework.authentication import BaseAuthentication
-from django.contrib.auth.models import AnonymousUser
-
+from rest_framework.exceptions import AuthenticationFailed
+import jwt
+import requests
+from django.conf import settings
+from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger('job_applications')
+
+public_paths = [
+    '/api/docs/',
+    '/api/schema/',
+    '/api/health/',
+    '/api/applications-engine/applications/parse-resume/autofill/',  # <-- Fix here
+    '/api/applications-engine/apply-jobs/',
+    '/api/applications-engine/applications/code/', 
+]
+
 
 class SimpleUser:
     is_authenticated = True
     is_active = True
     is_anonymous = False
-    username = "microservice"
-    email = ""
+
     def __init__(self, payload):
         self.id = payload.get('user_id')
         self.tenant_id = payload.get('tenant_id')
-        self.role = payload.get('role', None)
-        self.branch = payload.get('branch', None)
-    def save(self, *args, **kwargs): pass  # For compatibility
+        self.role = payload.get('role')
+        self.branch = payload.get('branch')
+        self.email = payload.get('email', '')
+        self.username = payload.get('username', '')
+        # Add Django auth compatibility
+        self.pk = self.id
+        self.is_staff = (self.role == 'admin')
+        self.is_superuser = (self.role == 'admin')
 
-    
-class MicroserviceJWTMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
+    def save(self, *args, **kwargs):
+        pass  # For compatibility
 
+    def get_username(self):
+        return self.username
+
+
+class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
     def __call__(self, request):
+        logger.info("Entering MicroserviceRS256JWTMiddleware")
         auth = request.headers.get('Authorization', '')
-        if auth.startswith('Bearer '):
-            token = auth.split(' ')[1]
+        if not auth.startswith('Bearer '):
+            logger.info("No Bearer token provided")
+            return self.get_response(request)
+        token = auth.split(' ')[1]
+        try:
+            unverified_header = jwt.get_unverified_header(token)
+            kid = unverified_header.get("kid")
+            unverified_payload = jwt.decode(token, options={"verify_signature": False})
+            tenant_id = unverified_payload.get("tenant_id")
+            tenant_schema = unverified_payload.get("tenant_schema")
+            #logger.info(f"Unverified JWT: kid={kid}, tenant_id={tenant_id}, tenant_schema={tenant_schema}")
+
+            # Try RS256 first
+            try:
+                if kid:
+                    public_key_url = f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/?tenant_id={tenant_id}"
+                    logger.info(f"Fetching public key from: {public_key_url}")
+                    resp = requests.get(
+                        public_key_url,
+                        headers={'Authorization': auth},
+                        timeout=5
+                    )
+                   # logger.info(f"Public key response: {resp.status_code} {resp.text}")
+                    if resp.status_code == 200:
+                        public_key = resp.json().get("public_key")
+                        if public_key:
+                            payload = jwt.decode(token, public_key, algorithms=["RS256"])
+                            request.jwt_payload = payload
+                            request.user = SimpleUser(payload)
+                           # logger.info(f"Set request.user: {request.user}, is_authenticated={request.user.is_authenticated}")
+                            return self.get_response(request)
+                        else:
+                            logger.warning("Public key not found in auth-service response")
+                    else:
+                        logger.error(f"Public key fetch failed: {resp.status_code} {resp.text}")
+            except requests.RequestException as e:
+                logger.error(f"Failed to fetch public key: {str(e)}")
+
+            # Fallback to HS256
             try:
                 payload = jwt.decode(
                     token,
-                    settings.SIMPLE_JWT['SIGNING_KEY'],
-                    algorithms=[settings.SIMPLE_JWT['ALGORITHM']]
+                    settings.SECRET_KEY,  # Remove SIMPLE_JWT reference
+                    algorithms=["HS256"]
                 )
                 request.jwt_payload = payload
                 request.user = SimpleUser(payload)
-                logger.info(f"Set request.user: {request.user}, is_authenticated: {request.user.is_authenticated}")
-            except jwt.ExpiredSignatureError:
-                return JsonResponse({'error': 'Token expired'}, status=401)
-            except jwt.InvalidTokenError:
-                return JsonResponse({'error': 'Invalid token'}, status=401)
-            except Exception as e:
-                logger.error(f"JWT decoding error: {str(e)}")
-                return JsonResponse({'error': 'Token error'}, status=401)
-        else:
-            request.user = AnonymousUser()
+                #logger.info(f"Set request.user (HS256): {request.user}, is_authenticated={request.user.is_authenticated}")
+            except jwt.InvalidTokenError as e:
+                logger.error(f"HS256 decoding failed: {str(e)}")
+                raise AuthenticationFailed(f"Invalid token: {str(e)}")
 
-        response = self.get_response(request)
-        logger.info(f"After MicroserviceJWTMiddleware response: request.user={request.user}, is_authenticated={getattr(request.user, 'is_authenticated', False)}")
-        return response
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'error': 'Token has expired'}, status=401)
+        except jwt.InvalidTokenError as e:
+            return JsonResponse({'error': f'Invalid token: {str(e)}'}, status=401)
+        except Exception as e:
+            logger.error(f"JWT error: {str(e)}")
+            return JsonResponse({'error': f'JWT error: {str(e)}'}, status=401)
 
-class CustomTenantMiddleware:
+        return self.get_response(request)
+
+class CustomTenantSchemaMiddleware(MiddlewareMixin):
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-        logger.info(f"Incoming Authorization header: {auth_header}")
+        # logger.info("Entering CustomTenantSchemaMiddleware")
+        # logger.info(f"Incoming request path: {request.path}")
+        # logger.info(f"Authorization header: {request.META.get('HTTP_AUTHORIZATION')}")
 
-        public_paths = [
-            '/api/docs/', '/api/schema/', '/api/health/',
-            '/api/applications-engine/applications/parse-resume/autofill/',  # <-- Add this line
-            '/api/applications-engine/apply-jobs/',  # <-- Add this line
-        ]
+        # Handle public endpoints
+
         if any(request.path.startswith(path) for path in public_paths):
-            request.tenant = None
-            request.tenant_id = None
-            request.user = AnonymousUser()  # <-- Add this line
+            connection.set_schema_to_public()
+            #logger.info("Set public schema for public endpoint")
             return self.get_response(request)
 
-        if not auth_header.startswith("Bearer "):
-            logger.warning("Authorization header missing Bearer prefix.")
-            return JsonResponse({'error': 'Unauthorized'}, status=401)
+        # Extract tenant_schema from JWT payload
+        jwt_payload = getattr(request, 'jwt_payload', None)
+        tenant_schema = None
+        tenant_id = None
+        if jwt_payload:
+            tenant_schema = jwt_payload.get('tenant_schema')
+            tenant_id = jwt_payload.get('tenant_id')
 
-        token_str = auth_header.split(" ")[1]
+        if not tenant_schema or not tenant_id:
+            logger.error(f"Tenant schema or ID missing in JWT: {jwt_payload}")
+            return JsonResponse({'error': 'Tenant schema or ID missing from token'}, status=403)
+
+        # Set schema directly from JWT
         try:
-            validated_token = JWTAuthentication().get_validated_token(token_str)
-            tenant_id = validated_token.get('tenant_id')
-            user_id = validated_token.get('user_id')
+            connection.set_schema(tenant_schema)
+            #logger.info(f"Set schema to: {tenant_schema}")
+        except Exception as e:
+            logger.error(f"Schema switch failed: {str(e)}")
+            return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
 
-            if not tenant_id:
-                logger.error(f"Tenant ID missing in JWT token. Payload: {validated_token}")
-                return JsonResponse({'error': 'Tenant ID missing from token'}, status=403)
+        return self.get_response(request)
 
+        
+# class CustomTenantSchemaMiddleware(MiddlewareMixin):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # logger.info("Entering CustomTenantSchemaMiddleware")  # <-- Added logging
+        # logger.info(f"Incoming request path: {request.path}")
+        # logger.info(f"Authorization header: {request.headers.get('HTTP_AUTHORIZATION')}")
+        
+
+        # Handle public endpoints
+      
+        if any(request.path.startswith(path) for path in public_paths):
+            connection.set_schema_to_public()
+            #logger.info("Set public schema for public endpoint")
+            return self.get_response(request)
+
+        # Extract tenant_schema from JWT payload
+        jwt_payload = getattr(request, 'jwt_payload', None)
+        tenant_schema = None
+        tenant_id = None
+        if jwt_payload:
+            tenant_schema = jwt_payload.get('tenant_schema')
+            tenant_id = jwt_payload.get('tenant_unique_id')
+
+        if not tenant_schema or not tenant_id:
+            logger.error(f"Tenant schema or ID missing in JWT: {jwt_payload}")
+            return JsonResponse({'error': 'Tenant schema or ID missing from token'}, status=403)
+
+        # Validate tenant with auth-service
+        try:
+            tenant_url = f"{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{tenant_id}/"
+            #logger.info(f"Validating tenant at: {tenant_url}")
             resp = requests.get(
-                f"{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{tenant_id}/",
-                headers={'Authorization': auth_header},
+                tenant_url,
+                # headers={'Authorization': request.META.get('HTTP_AUTHORIZATION', '')},
+                headers={'Authorization': request.headers.get('Authorization', '')},
                 timeout=5
             )
-            if resp.status_code == 200:
-                tenant = resp.json()
-                request.tenant = tenant
-                request.tenant_id = tenant_id
-                logger.info(f"Tenant set from AUTH_SERVICE: {tenant.get('schema_name', '')} (ID: {tenant_id})")
-            else:
-                logger.error(f"Tenant {tenant_id} not found in AUTH_SERVICE. Status: {resp.status_code}")
+            # logger.info(f"Tenant validation response: {resp.status_code} {resp.text}")
+            if resp.status_code != 200:
+                logger.error(f"Tenant validation failed: {resp.status_code} {resp.text}")
                 return JsonResponse({'error': 'Invalid tenant'}, status=404)
+        except requests.RequestException as e:
+            logger.error(f"Tenant validation request failed: {str(e)}")
+            return JsonResponse({'error': 'Failed to validate tenant'}, status=503)
 
-            if not hasattr(request, 'user') or isinstance(request.user, AnonymousUser):
-                request.user = SimpleUser(validated_token)
-                logger.info(f"Set request.user from CustomTenantMiddleware: {request.user}, is_authenticated: {request.user.is_authenticated}")
-
-        except InvalidToken as e:
-            logger.error(f"Invalid JWT token: {str(e)} | Token: {token_str}")
-            return JsonResponse({'error': 'Unauthorized - Invalid Token'}, status=401)
-        except Exception as e:
-            logger.exception("Unexpected error decoding JWT token.")
-            return JsonResponse({'error': 'Unauthorized'}, status=401)
-
-        response = self.get_response(request)
-        logger.info(f"After CustomTenantMiddleware response: request.user={request.user}, is_authenticated={getattr(request.user, 'is_authenticated', False)}")
-        return response
-
-class MicroserviceJWTAuthentication(BaseAuthentication):
-    def authenticate(self, request):
-        # Only check if '_user' is set, not 'user' property
-        if hasattr(request, '_user') and request._user and not isinstance(request._user, AnonymousUser):
-            return (request._user, None)
-        # Otherwise, let the middleware handle it (this should already be done)
-        auth = request.META.get('HTTP_AUTHORIZATION', '')
-        if not auth.startswith('Bearer '):
-            return None
-        token = auth.split(' ')[1]
+        # Switch schema
         try:
-            payload = jwt.decode(
-                token,
-                settings.SIMPLE_JWT['SIGNING_KEY'],
-                algorithms=[settings.SIMPLE_JWT['ALGORITHM']]
-            )
-            user = SimpleUser(payload)
-            return (user, None)
-        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-            return None
+            connection.set_schema(tenant_schema)
+            logger.info(f"Set schema to: {tenant_schema}")
         except Exception as e:
-            logger.error(f"JWT authentication error: {str(e)}")
-            return None
+            logger.error(f"Schema switch failed: {str(e)}")
+            return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
+
+        return self.get_response(request)
+    
+    

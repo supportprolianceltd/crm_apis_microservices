@@ -1,7 +1,7 @@
 import logging
 import requests
 from django.conf import settings
-
+import jwt
 logger = logging.getLogger('tenant_utils')
 
 
@@ -15,7 +15,7 @@ def get_tenant_from_request(request):
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         if not auth_header.startswith('Bearer '):
             return None, None
-        import jwt
+        
         try:
             token = auth_header.split(' ')[1]
             payload = jwt.decode(token, settings.SIMPLE_JWT['SIGNING_KEY'], algorithms=[settings.SIMPLE_JWT['ALGORITHM']])

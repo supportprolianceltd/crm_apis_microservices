@@ -76,7 +76,7 @@ class JobRequisition(models.Model):
     checked_by = models.CharField(max_length=255, null=True, blank=True)
 
 
-    tenant_id = models.CharField(max_length=36, blank=False, null=False)  # Store Tenant ID
+    tenant_id = models.CharField(max_length=255, blank=False, null=False)  # Store Tenant ID
     branch_id = models.CharField(max_length=36, blank=True, null=True)  # Store Branch ID
     department_id = models.CharField(max_length=36, blank=True, null=True)  # Store Department ID
     hiring_manager_id = models.CharField(max_length=36, blank=True, null=True)  # Store Department ID
@@ -400,3 +400,6 @@ class Request(models.Model):
             })
             producer.flush()
             logger.info(f"Request {self.id} created for tenant {self.tenant_id}")
+
+
+

@@ -1,15 +1,6 @@
 import jwt
 from rest_framework.exceptions import ValidationError
-def get_tenant_id_from_jwt(request):
-    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
-    if not auth_header.startswith("Bearer "):
-        raise ValidationError("No valid Bearer token provided.")
-    token = auth_header.split(" ")[1]
-    try:
-        payload = jwt.decode(token, options={"verify_signature": False})
-        return payload.get("tenant_id")
-    except Exception:
-        raise ValidationError("Invalid JWT token.")
+
 # talent_engine/serializers.py
 import logging
 import requests
@@ -20,6 +11,19 @@ import uuid
 from .models import JobRequisition, VideoSession, Participant, Request
 
 logger = logging.getLogger('talent_engine')
+
+
+def get_tenant_id_from_jwt(request):
+    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+    if not auth_header.startswith("Bearer "):
+        raise ValidationError("No valid Bearer token provided.")
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, options={"verify_signature": False})
+        return payload.get("tenant_unique_id")
+    except Exception:
+        raise ValidationError("Invalid JWT token.")
+
 
 class ComplianceItemSerializer(serializers.Serializer):
     id = serializers.UUIDField(required=False, default=uuid.uuid4)
@@ -67,7 +71,8 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
     updated_by = serializers.SerializerMethodField()
     approved_by = serializers.SerializerMethodField()
     tenant_domain = serializers.SerializerMethodField()
-    compliance_checklist = serializers.SerializerMethodField()
+    # compliance_checklist = serializers.SerializerMethodField()
+    compliance_checklist = ComplianceItemSerializer(many=True, required=False)
     branch_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -221,8 +226,9 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
     @extend_schema_field(str)
     def get_tenant_domain(self, obj):
         try:
+            tenant_id = get_tenant_id_from_jwt(self.context['request'])
             tenant_response = requests.get(
-                f'{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{obj.tenant_id}/',
+                f'{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{tenant_id}/',
                 headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
             )
             if tenant_response.status_code == 200:
@@ -260,11 +266,19 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
                 logger.error(f"Error fetching branch name for {obj.branch_id}: {str(e)}")
         return None
 
+
+
     def validate(self, data):
-        jwt_payload = getattr(self.context['request'], 'jwt_payload', {})
-        tenant_id = jwt_payload.get('tenant_id')
-        if data.get('tenant_id', tenant_id) != tenant_id:
-            raise serializers.ValidationError({"tenant_id": "Tenant ID mismatch."})
+        tenant_id = get_tenant_id_from_jwt(self.context['request'])
+
+    
+
+        if data.get('tenant_unique_id', tenant_id) != tenant_id:
+            raise serializers.ValidationError({"tenant_unique_id": "Tenant ID mismatch."})
+        
+        # data['tenant_unique_id'] = tenant_id  # ✅ Inject it into validated data
+
+        # Validate branch_id
         if data.get('branch_id'):
             branch_response = requests.get(
                 f'{settings.AUTH_SERVICE_URL}/api/tenant/branches/{data["branch_id"]}/',
@@ -273,10 +287,11 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             if branch_response.status_code != 200:
                 raise serializers.ValidationError({"branch_id": "Invalid branch ID."})
             branch_data = branch_response.json()
-            if branch_data['tenant_id'] != tenant_id:
+            if branch_data['tenant_unique_id'] != tenant_id:
                 raise serializers.ValidationError({"branch_id": "Branch does not belong to this tenant."})
+
+        # Validate department_id
         if data.get('department_id'):
-            # Assuming departments are managed in auth_service
             dept_response = requests.get(
                 f'{settings.AUTH_SERVICE_URL}/api/departments/{data["department_id"]}/',
                 headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
@@ -284,9 +299,14 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             if dept_response.status_code != 200:
                 raise serializers.ValidationError({"department_id": "Invalid department ID."})
             dept_data = dept_response.json()
-            if dept_data['tenant_id'] != tenant_id:
+            if dept_data['tenant_unique_id'] != tenant_id:
                 raise serializers.ValidationError({"department_id": "Department does not belong to this tenant."})
+
+        # logger.info(f"THIS IS THE {data} WE GOT")
         return data
+
+
+
 
     def validate_compliance_checklist(self, value):
         if not isinstance(value, list):
@@ -319,6 +339,9 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        tenant_id = get_tenant_id_from_jwt(self.context['request'])
+        validated_data['tenant_id'] = tenant_id  # <- inject here instead of validate()
+        logger.info(f"THIS IS THE validated_data recieved in the created method {validated_data} WE GOT")
         # Map 'branch' to 'branch_id' if present
         if 'branch' in validated_data:
             validated_data['branch_id'] = validated_data.pop('branch')
@@ -357,30 +380,25 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        # Log the incoming request data, especially advert_banner
         request = self.context.get('request')
         logger.info(f"JobRequisition update request data: {getattr(request, 'data', {})}")
         logger.info(f"advert_banner in request.FILES: {getattr(request, 'FILES', {}).get('advert_banner')}")
         logger.info(f"advert_banner in validated_data: {validated_data.get('advert_banner')}")
 
-        # Map 'branch' to 'branch_id' if present
         if 'branch' in validated_data:
             validated_data['branch_id'] = validated_data.pop('branch')
-        # Ensure tenant_id is always a string
         if 'tenant_id' in validated_data:
             validated_data['tenant_id'] = str(validated_data['tenant_id'])
+
         compliance_checklist = validated_data.pop('compliance_checklist', None)
         advert_banner_file = validated_data.pop('advert_banner', None)
         instance = super().update(instance, validated_data)
+
         if compliance_checklist is not None:
-            instance.compliance_checklist = []
-            for item in compliance_checklist:
-                instance.add_compliance_item(
-                    name=item["name"],
-                    description=item.get("description", ""),
-                    required=item.get("required", True)
-                )
-        # Handle advert_banner upload if a new file is provided
+            # Directly assign the validated list
+            instance.compliance_checklist = compliance_checklist
+            instance.save(update_fields=['compliance_checklist'])
+
         self._handle_advert_banner_upload(instance, advert_banner_file)
         return instance
     
@@ -622,7 +640,7 @@ class PublicJobRequisitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobRequisition
         fields = [
-            'id', 'requisition_number', 'job_requisition_code', 'job_application_code',
+            'id', 'requisition_number', 'tenant_id', 'job_requisition_code', 'job_application_code',
             'title', 'unique_link', 'status', 'job_type', 'position_type', 'location_type',
             'job_description', 'requirements', 'qualification_requirement', 'experience_requirement',
             'knowledge_requirement', 'urgency_level', 'reason', 'deadline_date', 'num_of_applications',
@@ -633,3 +651,4 @@ class PublicJobRequisitionSerializer(serializers.ModelSerializer):
             'id', 'requisition_number', 'job_requisition_code', 'job_application_code',
              'is_deleted', 
         ]
+

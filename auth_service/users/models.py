@@ -1,10 +1,98 @@
+#users.models
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from core.models import Tenant, Module, Branch
 from django.db.models import Max
+from django.db import models
+from core.models import Tenant
+import uuid
+from django.db import models
+from django.contrib.auth.models import AbstractUser, UserManager
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from core.models import Tenant, Module, Branch
+from django.db.models import Max
+import uuid
+import logging
 
+def generate_kid():
+    return uuid.uuid4().hex
+
+def today():
+    return timezone.now().date()
+from django.db import models
+from django.contrib.auth.models import AbstractUser, UserManager
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from core.models import Tenant, Module, Branch
+from django.db.models import Max
+import uuid
+import logging
+
+logger = logging.getLogger('users')
+
+def generate_kid():
+    return uuid.uuid4().hex
+
+def today():
+    return timezone.now().date()
+from django.db import models
+from django.contrib.auth.models import AbstractUser, UserManager
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from core.models import Tenant, Module, Branch
+from django.db.models import Max
+import uuid
+import logging
+
+logger = logging.getLogger('users')
+
+def generate_kid():
+    return uuid.uuid4().hex
+
+def today():
+    return timezone.now().date()
+
+
+logger = logging.getLogger('users')
+
+def generate_kid():
+    return uuid.uuid4().hex
+
+def today():
+    return timezone.now().date()
+
+from django.db import models
+from django.contrib.auth.models import AbstractUser, UserManager
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from core.models import Tenant, Module, Branch
+from django.db.models import Max
+import uuid
+import logging
+
+logger = logging.getLogger('users')
+
+def generate_kid():
+    return uuid.uuid4().hex
+
+def today():
+    return timezone.now().date()
+from django.db import models
+from django.contrib.auth.models import AbstractUser, UserManager
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from core.models import Tenant, Module, Branch
+import uuid
+import logging
+
+logger = logging.getLogger('users')
+
+def generate_kid():
+    return uuid.uuid4().hex
 
 def today():
     return timezone.now().date()
@@ -14,7 +102,7 @@ class CustomUserManager(UserManager):
         if not email:
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
-        username = extra_fields.pop('username', None) or email  # Remove from extra_fields to avoid duplicate
+        username = extra_fields.pop('username', None) or email
         return super().create_user(
             username,
             email=email,
@@ -27,6 +115,8 @@ class CustomUserManager(UserManager):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
         return self.create_user(email, password, **extra_fields)
+
+
 
 class CustomUser(AbstractUser):
     ROLES = (
@@ -59,6 +149,7 @@ class CustomUser(AbstractUser):
     STATUS_CHOICES = (
         ('active', 'Active'),
         ('inactive', 'Inactive'),
+        ('suspended', 'Suspended'),
     )
 
     TWO_FACTOR_CHOICES = (
@@ -76,10 +167,9 @@ class CustomUser(AbstractUser):
     job_role = models.CharField(max_length=255, blank=True, null=True, default='staff')
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, null=True)
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
-
-  
     has_accepted_terms = models.BooleanField(default=False, help_text="Indicates if the user has accepted the terms and conditions.")
-
+    is_locked = models.BooleanField(default=False, help_text="Indicates if the user account is locked.")
+    login_attempts = models.PositiveIntegerField(default=0, help_text="Number of consecutive failed login attempts.")
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -88,6 +178,105 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    def lock_account(self, reason="Manual lock"):
+        """Lock the user account with a reason."""
+        self.is_locked = True
+        self.save()
+        logger.info(f"Account locked for user {self.email} in tenant {self.tenant.schema_name}. Reason: {reason}")
+
+    def unlock_account(self):
+        """Unlock the user account and reset login attempts."""
+        self.is_locked = False
+        self.login_attempts = 0
+        self.save()
+        logger.info(f"Account unlocked for user {self.email} in tenant {self.tenant.schema_name}")
+
+    def suspend_account(self):
+        """Suspend the user account."""
+        self.status = 'suspended'
+        self.is_active = False
+        self.save()
+        logger.info(f"Account suspended for user {self.email} in tenant {self.tenant.schema_name}")
+
+    def activate_account(self):
+        """Activate the user account."""
+        self.status = 'active'
+        self.is_active = True
+        self.save()
+        logger.info(f"Account activated for user {self.email} in tenant {self.tenant.schema_name}")
+
+    def increment_login_attempts(self):
+        """Increment failed login attempts and lock if threshold reached."""
+        self.login_attempts += 1
+        if self.login_attempts >= 5:
+            self.lock_account(reason="Too many failed login attempts")
+        self.save()
+        logger.info(f"Failed login attempt for {self.email}. Attempts: {self.login_attempts}")
+
+    def reset_login_attempts(self):
+        """Reset login attempts on successful login."""
+        self.login_attempts = 0
+        self.save()
+        logger.info(f"Login attempts reset for user {self.email} in tenant {self.tenant.schema_name}")
+
+
+
+class BlockedIP(models.Model):
+    ip_address = models.GenericIPAddressField(unique=True)
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
+    reason = models.CharField(max_length=255, default="Blocked due to excessive failed logins")
+    blocked_at = models.DateTimeField(auto_now_add=True)
+    blocked_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Blocked IP"
+        verbose_name_plural = "Blocked IPs"
+        indexes = [
+            models.Index(fields=['ip_address']),
+            models.Index(fields=['tenant', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f"Blocked IP {self.ip_address} for tenant {self.tenant.name}"
+
+class UserActivity(models.Model):
+    ACTION_TYPES = (
+        ('impersonation', 'Impersonation'),
+        ('login', 'Login'),
+        ('logout', 'Logout'),
+        ('password_reset', 'Password Reset'),
+        ('account_lock', 'Account Lock'),
+        ('account_unlock', 'Account Unlock'),
+        ('account_suspend', 'Account Suspend'),
+        ('account_activate', 'Account Activate'),
+        ('ip_block', 'IP Block'),
+        ('ip_unblock', 'IP Unblock'),
+    )
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='activities', null=True, blank=True)
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
+    action = models.CharField(max_length=50, choices=ACTION_TYPES)
+    performed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='performed_activities')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    details = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    success = models.BooleanField(null=True, help_text="Indicates if the action (e.g., login) was successful.")
+
+    class Meta:
+        verbose_name = "User Activity"
+        verbose_name_plural = "User Activities"
+        indexes = [
+            models.Index(fields=['user', 'timestamp']),
+            models.Index(fields=['action', 'timestamp']),
+            models.Index(fields=['ip_address']),
+        ]
+
+    def __str__(self):
+        return f"{self.action} {'success' if self.success else 'failed' if self.success is False else ''} for {self.user.email if self.user else 'unknown'} at {self.timestamp}"
+
 
 
 
@@ -115,7 +304,7 @@ class UserProfile(models.Model):
     # document_expiry_date = models.DateField(null=True, blank=True)
   
     # Image fields and their corresponding URL fields
-    profile_image = models.ImageField(upload_to='profile_image/', blank=True, null=True)
+    profile_image = models.ImageField(upload_to='profile_image/', max_length=255, blank=True, null=True)
     profile_image_url = models.CharField(max_length=1024, blank=True, null=True)
 
 
@@ -126,7 +315,7 @@ class UserProfile(models.Model):
     drivers_licence_image1 = models.ImageField(upload_to='driver_licences/', blank=True, null=True)
     drivers_licence_image1_url = models.CharField(max_length=1024, blank=True, null=True)
 
-    drivers_licence_image2 = models.ImageField(upload_to='driver_licences/', blank=True, null=True)
+    drivers_licence_image2 = models.ImageField(upload_to='driver_licences/',max_length=255, blank=True, null=True)
     drivers_licence_image2_url = models.CharField(max_length=1024, blank=True, null=True)
 
     drivers_licence_country_of_issue = models.CharField(max_length=100, blank=True)
@@ -156,13 +345,20 @@ class UserProfile(models.Model):
     # Right to Work (Basic fields here, detailed to LegalWorkEligibility)
     Right_to_Work_status = models.CharField(max_length=100, blank=True)
     Right_to_Work_passport_holder = models.CharField(max_length=100, null=True, blank=True)
-    Right_to_Work_document_type = models.CharField(max_length=100, choices=[('Biometric Residence Permit', 'Biometric Residence Permit'), ('Passport', 'Passport'), ("National ID", "National ID")], blank=True)
+    Right_to_Work_document_type = models.CharField(max_length=100, choices=[
+        ('Biometric Residence Permit', 'Biometric Residence Permit'), 
+        ('Passport', 'Passport'), 
+        ('National ID', 'National ID'),
+        ('Residence Card', 'Residence Card'),
+        ('Visa', 'Visa'),
+        ('Work Permit', 'Work Permit')
+    ], blank=True)
     Right_to_Work_share_code = models.CharField(max_length=20, blank=True)
     Right_to_Work_document_number = models.CharField(max_length=100, blank=True)
     Right_to_Work_document_expiry_date = models.DateField(null=True, blank=True)
     Right_to_Work_country_of_issue = models.CharField(max_length=100, blank=True)
 
-    Right_to_Work_file = models.ImageField(upload_to='right_to_work/', blank=True, null=True)
+    Right_to_Work_file = models.ImageField(upload_to='right_to_work/', max_length=255, blank=True, null=True)
     Right_to_Work_file_url = models.CharField(max_length=1024, blank=True, null=True)
 
 
@@ -172,14 +368,14 @@ class UserProfile(models.Model):
     #DBS CHECK
     dbs_type = models.CharField(max_length=100,  blank=True)
 
-    dbs_certificate = models.ImageField(upload_to='dbs_certificates/', blank=True, null=True)
+    dbs_certificate = models.ImageField(upload_to='dbs_certificates/', max_length=255, blank=True, null=True)
     dbs_certificate_url = models.CharField(max_length=1024, blank=True, null=True)
 
 
     dbs_certificate_number = models.CharField(max_length=100, blank=True)
     dbs_issue_date = models.DateField(null=True, blank=True)
 
-    dbs_update_file = models.ImageField(upload_to='dbs_update_service/', blank=True, null=True)
+    dbs_update_file = models.ImageField(upload_to='dbs_update_service/', max_length=255, blank=True, null=True)
     dbs_update_file_url = models.CharField(max_length=1024, blank=True, null=True)
 
 
@@ -247,7 +443,7 @@ class UserProfile(models.Model):
 class ProfessionalQualification(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='professional_qualifications')
     name = models.CharField(max_length=255)
-    image_file = models.ImageField(upload_to='professional_qualifications/', blank=True, null=True)
+    image_file = models.ImageField(upload_to='professional_qualifications/', max_length=255, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -280,7 +476,7 @@ class EducationDetail(models.Model):
     course_of_study = models.CharField(max_length=255)
     start_year = models.PositiveIntegerField()
     end_year = models.PositiveIntegerField()
-    certificate = models.ImageField(upload_to='Educational-certificates/', blank=True, null=True)
+    certificate = models.ImageField(upload_to='Educational-certificates/', max_length=255, blank=True, null=True)
     skills = models.TextField(blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
@@ -307,10 +503,10 @@ class ProofOfAddress(models.Model):
     ]
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='proof_of_address')
     type = models.CharField(max_length=50, choices=TYPE_CHOICES)
-    document = models.ImageField(upload_to='proof_of_address/', blank=True, null=True)
-    issue_date = models.DateField(null=True, blank=True)   
+    document = models.ImageField(upload_to='proof_of_address/', max_length=255, blank=True, null=True)
+    issue_date = models.DateField(null=True, blank=True)
     nin = models.CharField(max_length=20, blank=True, null=True, verbose_name="National Insurance Number (NIN)")
-    nin_document = models.ImageField(upload_to='nin_documents/', blank=True, null=True)
+    nin_document = models.ImageField(upload_to='nin_documents/', max_length=255, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -324,7 +520,7 @@ class InsuranceVerification(models.Model):
     ]
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='insurance_verifications')
     insurance_type = models.CharField(max_length=50, choices=INSURANCE_TYPES)
-    document = models.ImageField(upload_to='insurance_documents/', blank=True, null=True)
+    document = models.ImageField(upload_to='insurance_documents/', max_length=255, blank=True, null=True)
     provider_name = models.CharField(max_length=255, blank=True, null=True)
     coverage_start_date = models.DateField(blank=True, null=True)
     expiry_date = models.DateField(blank=True, null=True)
@@ -342,7 +538,7 @@ class DrivingRiskAssessment(models.Model):
     tracker_usage_compliance = models.BooleanField(default=False)
     maintenance_schedule_compliance = models.BooleanField(default=False)
     additional_notes = models.TextField(blank=True, null=True)
-    supporting_document = models.ImageField(upload_to='driving_risk_docs/', blank=True, null=True)
+    supporting_document = models.ImageField(upload_to='driving_risk_docs/', max_length=255, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -351,7 +547,7 @@ class DrivingRiskAssessment(models.Model):
 class LegalWorkEligibility(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='legal_work_eligibilities')
     evidence_of_right_to_rent = models.BooleanField(default=False)
-    document = models.ImageField(upload_to='legal_work_docs/', blank=True, null=True)
+    document = models.ImageField(upload_to='legal_work_docs/', max_length=255, blank=True, null=True)
     expiry_date = models.DateField(blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -362,15 +558,19 @@ class LegalWorkEligibility(models.Model):
 class OtherUserDocuments(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='other_user_documents')
     government_id_type = models.CharField(max_length=100, blank=True)
+    title = models.CharField(max_length=255, blank=True)
     document_number = models.CharField(max_length=20, blank=True)
     expiry_date = models.DateField(blank=True, null=True)
-    file = models.ImageField(upload_to='other_user_documents', blank=True, null=True)
+    file = models.ImageField(upload_to='other_user_documents', max_length=255, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
     class Meta:
         verbose_name = "User Document"
         verbose_name_plural = "User Documents"
+
+
+
 
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -446,7 +646,7 @@ class ClientProfile(models.Model):
         blank=True,
         null=True
     )
-    photo = models.ImageField(upload_to='client_photos/', blank=True, null=True)
+    photo = models.ImageField(upload_to='client_photos/', max_length=255, blank=True, null=True)
     
     # Next of Kin
     next_of_kin_name = models.CharField(max_length=255, blank=True, null=True)
@@ -520,6 +720,37 @@ class ClientProfile(models.Model):
     compliance = models.CharField(max_length=50, default='Passed', blank=True, null=True)  # e.g., 'Passed'
     last_visit = models.DateField(blank=True, null=True)
     
+
+    # Company Info
+    company_name = models.CharField(max_length=255, null=True, blank=True, help_text="Official name of the client company")
+    contact_person_name = models.CharField(max_length=255, null=True, blank=True, help_text="Primary contact person's full name")
+    contact_person_title = models.CharField(max_length=100, null=True, blank=True, help_text="Contact person's job title")
+    contact_person_department = models.CharField(max_length=100, null=True, blank=True, help_text="Contact person's department")
+    contact_email = models.EmailField(null=True, blank=True, help_text="Contact person's email address")
+    contact_phone = models.CharField(max_length=20, null=True, blank=True, help_text="Contact person's phone number")
+    company_address = models.TextField(null=True, blank=True, help_text="Client company's physical address")
+
+    # Client Profile
+    industry = models.CharField(max_length=100, null=True, blank=True, help_text="Client's industry or sector")
+    business_type = models.CharField(max_length=100, null=True, blank=True, help_text="Client's business type (e.g., supplier, customer, partner)")
+    client_type = models.CharField(max_length=100, null=True, blank=True, help_text="Client's relationship with the company (e.g., direct customer)")
+
+    # Order and Payment Information
+    order_history = models.JSONField(null=True, blank=True, help_text="Record of past orders including dates, quantities, and values")
+    payment_terms = models.TextField(null=True, blank=True, help_text="Client's payment terms, methods, and schedules")
+    credit_limit = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, help_text="Client's credit limit")
+    credit_utilization = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, help_text="Client's current credit usage")
+    payment_history = models.JSONField(null=True, blank=True, help_text="Record of past payments including dates and amounts")
+
+    # Communication and Feedback
+    communication_preferences = models.CharField(max_length=255, null=True, blank=True, help_text="Client's preferred communication channels (e.g., email, phone)")
+    feedback = models.JSONField(null=True, blank=True, help_text="Client feedback and satisfaction ratings")
+    complaints = models.JSONField(null=True, blank=True, help_text="Record of client complaints and resolutions")
+
+    # Additional Information
+    special_requirements = models.TextField(null=True, blank=True, help_text="Client's special requirements or requests (e.g., custom packaging)")
+    notes = models.TextField(null=True, blank=True, help_text="Additional notes or comments about the client")
+
     class Meta:
         verbose_name = "Client Profile"
         verbose_name_plural = "Client Profiles"
@@ -554,4 +785,31 @@ class ClientProfile(models.Model):
             self.client_id = f"{client_prefix}{next_number:04d}"
 
         super().save(*args, **kwargs)
-  
+
+
+
+
+
+
+class RSAKeyPair(models.Model):
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='rsa_keys')
+    kid = models.CharField(max_length=64, unique=True, default=generate_kid)
+    private_key_pem = models.TextField()  # PEM encoded private key
+    public_key_pem = models.TextField()   # PEM encoded public key
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  # <-- Add this
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"RSAKeyPair(kid={self.kid}, tenant={self.tenant_id}, active={self.active})"
+
+
+
+class BlacklistedToken(models.Model):
+    jti = models.CharField(max_length=255, unique=True)  # JWT ID
+    blacklisted_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+
+# docker compose exec auth-service python manage.py makemigrations users
+# docker compose exec auth-service python manage.py migrate

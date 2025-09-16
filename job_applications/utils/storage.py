@@ -45,6 +45,9 @@ class SupabaseStorageService(StorageService):
     def __init__(self):
         self.client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
         self.bucket = settings.SUPABASE_BUCKET
+        if not self.bucket:
+            raise ValueError("SUPABASE_BUCKET is not configured properly. Please check your .env and settings.")
+
 
     def upload_file(self, file_obj, file_name, content_type):
         try:
@@ -59,6 +62,9 @@ class SupabaseStorageService(StorageService):
                 file=file_data,
                 file_options={"content-type": content_type, "cache-control": "3600", "upsert": "true"}
             )
+            print("[DEBUG] Using bucket:", self.bucket)
+            logger.info("[DEBUG] Using bucket: %s", self.bucket)
+
             # Check if upload was successful by inspecting response for 'path'
             if hasattr(res, 'path') and res.path:
                 logger.info(f"Successfully uploaded {file_name} to Supabase")
@@ -172,6 +178,7 @@ class AzureStorageService(StorageService):
 def get_storage_service(storage_type=None):
     # Allow override per-call, else use settings
     storage_type = (storage_type or getattr(settings, 'STORAGE_TYPE', 'supabase')).lower()
+
     if storage_type == 'supabase':
         return SupabaseStorageService()
     elif storage_type == 's3':

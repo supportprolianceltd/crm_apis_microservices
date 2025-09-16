@@ -18,3 +18,6 @@ EXPOSE 9090
 
 # Command to run the application
 CMD ["gunicorn", "--bind", "0.0.0.0:9090", "api_gateway.wsgi:application"]
+
+
+

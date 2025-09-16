@@ -6,29 +6,56 @@ import uuid
 
 logger = logging.getLogger('core')
 
+from django_tenants.models import TenantMixin
+from django.db import models, transaction
+import uuid
+import logging
+
+logger = logging.getLogger('core')
+
+
 class Tenant(TenantMixin):
     name = models.CharField(max_length=100)
-    title = models.CharField(max_length=150, null=True, blank=True)  # Added title field
+    title = models.CharField(max_length=150, null=True, blank=True)
     schema_name = models.CharField(max_length=63, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    logo = models.URLField(null=True, blank=True)  # Store Supabase public URL
+
+    # ✅ NEW FIELDS
+    organizational_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    unique_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, null=True)
+
+    # Other existing fields
+    logo = models.URLField(null=True, blank=True)
     email_host = models.CharField(max_length=255, null=True, blank=True)
     email_port = models.IntegerField(null=True, blank=True)
     email_use_ssl = models.BooleanField(default=True)
     email_host_user = models.EmailField(null=True, blank=True)
     email_host_password = models.CharField(max_length=255, null=True, blank=True)
     default_from_email = models.EmailField(null=True, blank=True)
-    about_us = models.TextField(null=True, blank=True)  # Description of the tenant
+    about_us = models.TextField(null=True, blank=True)
+
     auto_create_schema = True
 
     def save(self, *args, **kwargs):
+        # Set schema_name from name if not already set
         if not self.schema_name or self.schema_name.strip() == '':
             self.schema_name = self.name.lower().replace(' ', '_').replace('-', '_')
-        logger.info(f"Saving tenant with schema_name: {self.schema_name}")
+
+        # Generate organizational_id if not already set
+        if not self.organizational_id:
+            with transaction.atomic():
+                last_id = Tenant.objects.all().count() + 1
+                self.organizational_id = f"TEN-{str(last_id).zfill(4)}"
+
+        logger.info(f"Saving tenant {self.name} with schema: {self.schema_name}, Org ID: {self.organizational_id}")
         super().save(*args, **kwargs)
+
 
 class Domain(DomainMixin):
     tenant = models.ForeignKey('core.Tenant', related_name='domain_set', on_delete=models.CASCADE)
+
+
+
 
 class Branch(models.Model):
     tenant = models.ForeignKey('Tenant', on_delete=models.CASCADE, related_name='branches')
@@ -87,12 +114,3 @@ class TenantConfig(models.Model):
 
 
 
-class TenantKey(models.Model):
-    tenant = models.OneToOneField(Tenant, on_delete=models.CASCADE, related_name='rsa_keys')
-    key_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    public_key = models.TextField()
-    private_key = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"RSA Key for {self.tenant.schema_name}"

@@ -16,7 +16,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # Core Settings
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 DEBUG = env('DEBUG')
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', 'auth_service', '*'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', 'auth_service', 'http://localhost:9090', '*'])
 
 # Application Definition
 INSTALLED_APPS = [
@@ -97,7 +97,7 @@ AUTHENTICATION_BACKENDS = (
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'auth_service.authentication.RS256TenantJWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -115,7 +115,6 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'SIGNING_KEY': env('DJANGO_SECRET_KEY'),
     'TOKEN_OBTAIN_SERIALIZER': 'users.serializers.CustomTokenSerializer',
     'BLACKLIST_AFTER_ROTATION': True,
 }
@@ -199,12 +198,12 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {'format': '{asctime} [{levelname}] {name}: {message}', 'style': '{'},
-        'simple': {'format': '[{levelname}] {message}', 'style': '{'},
+        'verbose': {'format': '{asctime} [{levelname}] {name}: {message}', 'style': '{', 'datefmt': '%Y-%m-%d %H:%M:%S'},
+        'simple': {'format': '[{levelname}] {message}', 'style': '{', 'datefmt': '%Y-%m-%d %H:%M:%S'},
     },
     'handlers': {
         'file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(LOG_DIR, 'auth_service.log'),
             'maxBytes': 5 * 1024 * 1024,  # 5MB
@@ -212,6 +211,7 @@ LOGGING = {
             'formatter': 'verbose',
         },
         'console': {
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
@@ -223,18 +223,22 @@ LOGGING = {
             'propagate': True,
         },
         'core': {
-            'handlers': ['file'],
-            'level': 'INFO',
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
             'propagate': False,
         },
         'users': {
-            'handlers': ['file'],
-            'level': 'INFO',
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'utils.supabase': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
 }
-
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -249,12 +253,39 @@ AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
 NOTIFICATIONS_EVENT_URL = env('NOTIFICATIONS_EVENT_URL', default='http://app:3000/events/')
 print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 
+SUPABASE_URL = env('SUPABASE_URL', default='')
+SUPABASE_KEY = env('SUPABASE_KEY', default='')
+SUPABASE_BUCKET = env('SUPABASE_BUCKET', default='')
+
+STORAGE_TYPE = env('STORAGE_TYPE', default='supabase')  # or 's3', 'azure', 'local', 'supabase'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'LUMINA Care OS API',
+    'DESCRIPTION': 'API documentation for LUMINA Care OS',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SECURITY': [{'BearerAuth': []}],  # Important: tells Swagger to use JWT Auth
+    'COMPONENTS': {
+        'securitySchemes': {
+            'BearerAuth': {
+                'type': 'http',
+                'scheme': 'bearer',
+                'bearerFormat': 'JWT',
+            }
+        }
+    },
+}
+
+
+
 # sudo nano /etc/nginx/nginx.conf
 # sudo nano /etc/nginx/conf.d/crm_api.conf
 
 # sudo hostnamectl set-hostname server1.prolianceltd.com
 
-# docker exec -it auth-service python manage.py shell
+# docker exec -it auth-service  python manage.py shell
 
 #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 #ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
+

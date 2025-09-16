@@ -1,7 +1,7 @@
 # drf-spectacular: Add Bearer token security scheme for Swagger UI
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Job Applications Engine API',
-    'DESCRIPTION': 'API documentation for Job Applications Microservice',
+    'TITLE': 'Talent Engine API',
+    'DESCRIPTION': 'API documentation for Talent Engine microservice',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'SWAGGER_UI_SETTINGS': {
@@ -17,6 +17,22 @@ SPECTACULAR_SETTINGS = {
         },
     },
 }
+
+import django.http.request
+from celery.schedules import crontab
+import logging
+logger = logging.getLogger(__name__)
+
+def patched_split_domain_port(host):
+    # Accept underscores in hostnames
+    if host and host.count(':') == 1 and host.rfind(']') < host.find(':'):
+        host, port = host.split(':', 1)
+    else:
+        port = ''
+    return host, port
+
+django.http.request.split_domain_port = patched_split_domain_port
+
 import os
 from pathlib import Path
 import environ
@@ -35,23 +51,29 @@ DATABASE_ROUTERS = []
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 DEBUG = env.bool('DEBUG', default=False)
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
+    "localhost", "127.0.0.1", "job_applications", "0.0.0.0", "http://localhost:9090","*", "job_applications:8001"
+])
 # ======================== Database ========================
 
 DATABASES = {
     'default': {
-        'ENGINE': env('DB_ENGINE', default='django.db.backends.postgresql'),
+        'ENGINE': 'django_tenants.postgresql_backend',
         'NAME': env('DB_NAME', default=''),
         'USER': env('DB_USER', default=''),
         'PASSWORD': env('DB_PASSWORD', default=''),
         'HOST': env('DB_HOST', default='localhost'),
         'PORT': env('DB_PORT', default='5432'),
-        'CONN_MAX_AGE': 60,
+        'CONN_MAX_AGE': 300,  # Reduce to 5 minutes
+        'CONN_HEALTH_CHECKS': True,  # Enable health checks
     }
 }
 
+
+
 if not DATABASES['default']['ENGINE']:
     raise ImproperlyConfigured("DATABASES['default']['ENGINE'] must be set.")
+
 
 INSTALLED_APPS = [
     'django.contrib.contenttypes',
@@ -69,31 +91,18 @@ INSTALLED_APPS = [
 ]
 
 # ======================== Middleware ========================
+
 MIDDLEWARE = [
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'job_applications.middleware.MicroserviceJWTMiddleware',  # Custom JWT first
-    'job_applications.middleware.CustomTenantMiddleware',     # Then tenant
-    'django.middleware.security.SecurityMiddleware',
+    'job_applications.middleware.MicroserviceRS256JWTMiddleware',
+    'job_applications.middleware.CustomTenantSchemaMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-# settings.py
-# MIDDLEWARE = [
-#     'django.contrib.sessions.middleware.SessionMiddleware',
-#     'corsheaders.middleware.CorsMiddleware',
-#     'django.middleware.common.CommonMiddleware',
-#     'django.middleware.csrf.CsrfViewMiddleware',
-#     'job_applications.middleware.MicroserviceJWTMiddleware',  # Custom JWT first
-#     'django.contrib.auth.middleware.AuthenticationMiddleware',  # Then Django auth
-#     'job_applications.middleware.CustomTenantMiddleware',  # Then tenant
-#     'django.middleware.security.SecurityMiddleware',
-#     'django.contrib.messages.middleware.MessageMiddleware',
-#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-# ]
-# # # ======================== Middleware ========================
 
 
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
@@ -102,45 +111,44 @@ ROOT_URLCONF = 'job_applications.urls'
 WSGI_APPLICATION = 'job_applications.wsgi.application'
 
 # ======================== REST Framework ========================
+# REST_FRAMEWORK = {
+#     # Use only custom JWT middleware, not DRF JWTAuthentication
+#     'DEFAULT_AUTHENTICATION_CLASSES': (),
+#     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
+#     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+#     'DEFAULT_PARSER_CLASSES': [
+#         'rest_framework.parsers.JSONParser',
+#         'rest_framework.parsers.FormParser',
+#         'rest_framework.parsers.MultiPartParser',
+#     ],
+# }
+
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'job_applications.middleware.MicroserviceJWTAuthentication',
-    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (),  # Empty tuple - handled by middleware
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_PARSER_CLASSES': [
+        'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
     ],
-}
-
-# ======================== Simple JWT ========================
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': env('DJANGO_SECRET_KEY'),
-    'VERIFYING_KEY': env('DJANGO_SECRET_KEY'),
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    # ... other settings
 }
 
 
 # ======================== External Services ========================
-AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth_service:8001')
-JOB_APPLICATIONS_URL = env('JOB_APPLICATIONS_URL', default='http://job_applications:8003')
-TALENT_ENGINE_URL = env('TALENT_ENGINE_URL', default='http://talent_engine:8002')
-
+AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
+TALENT_ENGINE_URL = env('TALENT_ENGINE_URL', default='http://talent-engine:8002')
+JOB_APPLICATIONS_URL = env('JOB_APPLICATIONS_URL', default='http://job-applications:8003')
+NOTIFICATIONS_EVENT_URL = env('NOTIFICATIONS_EVENT_URL', default='http://app:3000/events/')
 SUPABASE_URL = env('SUPABASE_URL', default='')
 SUPABASE_KEY = env('SUPABASE_KEY', default='')
 SUPABASE_BUCKET = env('SUPABASE_BUCKET', default='')
 
-STORAGE_TYPE = env('STORAGE_TYPE', default='local')  # or 's3', 'azure', 'local', 'supabase'
+STORAGE_TYPE = env('STORAGE_TYPE', default='supabase')  # or 's3', 'azure', 'local', 'supabase'
 
+# print("LOADED BUCKET:", SUPABASE_BUCKET)
 
+#logger.info(f"[DEBUG] SUPABASE_BUCKET = {SUPABASE_BUCKET}")
 KAFKA_BOOTSTRAP_SERVERS = env('KAFKA_BOOTSTRAP_SERVERS', default='localhost:9092')
 KAFKA_TOPICS = {
     'requisition': 'requisition-events',
@@ -184,41 +192,51 @@ TEMPLATES = [
 ]
 
 # ======================== Logging ========================
-LOG_DIR = os.path.join(BASE_DIR, 'job_applications', 'logs')
+LOG_DIR = os.path.join('/tmp', 'job_applications_logs')
 os.makedirs(LOG_DIR, exist_ok=True)
-timeout = 120 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOG_DIR, 'app.log'),
-            'formatter': 'verbose',
-        },
-    },
     'formatters': {
         'verbose': {
-            'format': '[{asctime}] {levelname} {name} {message}',
-            'style': '{',
+            'format': '{asctime} [{levelname}] {name}: {message}',
+            'style': '{'
+        },
+        'simple': {
+            'format': '[{levelname}] {message}',
+            'style': '{'
         },
     },
-    'root': {
-        'handlers': ['console', 'file'],
-        'level': 'INFO',
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'job_applications.log'),
+            'maxBytes': 5 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
     },
     'loggers': {
-        'job_applications': {
-            'handlers': ['console', 'file'],
+        'django': {
+            'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
+        'job_applications': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
+
+
 
 # ======================== Defaults ========================
 LANGUAGE_CODE = 'en-us'
@@ -227,6 +245,19 @@ USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://job_app_redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://job_app_redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC' #GMT = Lagos/Africa Time - 1
+CELERY_ENABLE_UTC = True
 
-
-
+# Celery Beat Schedule
+CELERY_BEAT_SCHEDULE = {
+    'auto-screen-all-applications-at-midnight': {
+        'task': 'job_application.tasks.auto_screen_all_applications',
+        'schedule': crontab(hour=16, minute=20),  # Runs daily at 16:17 UTC
+    },
+}

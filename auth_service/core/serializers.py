@@ -1,19 +1,22 @@
-# apps/core/serializers.py
 from rest_framework import serializers
-from .models import Tenant, Domain, Module, TenantConfig, Branch
+from core.models import Tenant, Domain, Module, TenantConfig, Branch
 from django.utils import timezone
-import re
-import logging
 from django.db import transaction
+from django.conf import settings
+from django_tenants.utils import tenant_context
+
+import logging
+import re
 import uuid
 import os
 import mimetypes
-from django.conf import settings
-logger = logging.getLogger('core')
-from django_tenants.utils import tenant_context
+import json
+
 from utils.storage import get_storage_service
 from core.email_default_templates import default_templates
+from kafka import KafkaProducer
 
+logger = logging.getLogger('core')
 
 
 class BranchSerializer(serializers.ModelSerializer):
@@ -115,23 +118,27 @@ class TenantConfigSerializer(serializers.ModelSerializer):
 
 
 
+
+
 class TenantSerializer(serializers.ModelSerializer):
+    domain = serializers.CharField(write_only=True, required=True)  # Accept domain in POST
     logo_file = serializers.FileField(write_only=True, required=False)
-    domains = DomainSerializer(many=True, read_only=True, source='domain_set')  # Adjust source if needed
+    domains = DomainSerializer(many=True, read_only=True, source='domain_set')  # List domains in response
 
     class Meta:
         model = Tenant
         fields = [
-            'id', 'name', 'title', 'schema_name', 'created_at', 'logo', 'logo_file',
+            'id', 'unique_id', 'organizational_id', 'name', 'title', 'schema_name', 'created_at', 'logo', 'logo_file',
             'email_host', 'email_port', 'email_use_ssl', 'email_host_user',
-            'email_host_password', 'default_from_email', 'about_us', 'domains'
+            'email_host_password', 'default_from_email', 'about_us',
+            'domain',  # for write
+            'domains'  # for read
         ]
-        read_only_fields = ['id', 'created_at', 'schema_name', 'logo']
-
-    def validate_name(self, value):
-        if not re.match(r'^[a-zA-Z0-9\s\'-]+$', value):
-            raise serializers.ValidationError("Tenant name can only contain letters, numbers, spaces, apostrophes, or hyphens.")
-        return value
+        
+        read_only_fields = [
+            'id', 'unique_id', 'organizational_id',
+            'created_at', 'schema_name', 'logo'
+        ]
 
     def validate_schema_name(self, value):
         if not re.match(r'^[a-z0-9_]+$', value):
@@ -158,33 +165,38 @@ class TenantSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         logo_file = validated_data.pop('logo_file', None)
-        if logo_file:
-            file_ext = os.path.splitext(logo_file.name)[1]
-            filename = f"{uuid.uuid4()}{file_ext}"
-            folder_path = f"tenant_logos/{timezone.now().strftime('%Y/%m/%d')}"
-            path = f"{folder_path}/{filename}"
-            content_type = mimetypes.guess_type(logo_file.name)[0]
-            storage = get_storage_service()
-            storage.upload_file(logo_file, path, content_type or 'application/octet-stream')
-            file_url = storage.get_public_url(path)
-            validated_data['logo'] = file_url
         domain_name = validated_data.pop('domain')
         schema_name = validated_data.get('schema_name') or validated_data['name'].lower().replace(' ', '_').replace('-', '_')
         validated_data['schema_name'] = schema_name
-        logger.info(f"Creating tenant with name: {validated_data['name']}, schema_name: {schema_name}, domain: {domain_name}")
+
+        logger.info(f"Creating tenant: {validated_data['name']} | Schema: {schema_name} | Domain: {domain_name}")
+
         try:
             with transaction.atomic():
+                # Create tenant
                 tenant = Tenant.objects.create(**validated_data)
-                logger.info(f"Tenant created: {tenant.id}, schema_name: {tenant.schema_name}")
-                domain = Domain.objects.create(tenant=tenant, domain=domain_name, is_primary=True)
-                logger.info(f"Domain created: {domain.domain} for tenant {tenant.id}")
 
-                # Use imported default_templates
+                # Create primary domain
+                Domain.objects.create(tenant=tenant, domain=domain_name, is_primary=True)
+
+                # Upload logo if provided
+                if logo_file:
+                    file_ext = os.path.splitext(logo_file.name)[1]
+                    filename = f"{uuid.uuid4()}{file_ext}"
+                    folder_path = f"tenant_logos/{timezone.now().strftime('%Y/%m/%d')}"
+                    path = f"{folder_path}/{filename}"
+                    content_type = mimetypes.guess_type(logo_file.name)[0]
+                    storage = get_storage_service()
+                    storage.upload_file(logo_file, path, content_type or 'application/octet-stream')
+                    tenant.logo = storage.get_public_url(path)
+                    tenant.save()
+                    logger.info(f"Uploaded logo for tenant {tenant.id}")
+
+                # Create tenant config
                 TenantConfig.objects.create(
                     tenant=tenant,
                     email_templates=default_templates
                 )
-                logger.info(f"TenantConfig created for tenant {tenant.id} with default email templates")
 
                 # Create default modules
                 default_modules = [
@@ -193,23 +205,41 @@ class TenantSerializer(serializers.ModelSerializer):
                 ]
                 for module_name in default_modules:
                     Module.objects.create(name=module_name, tenant=tenant)
-                logger.info(f"Modules created for tenant {tenant.id}")
+                logger.info(f"Created modules for tenant {tenant.id}")
 
+                # Send Kafka event
                 try:
-                    domains = tenant.domain_set.all()
-                    logger.info(f"Domains for tenant {tenant.id}: {[d.domain for d in domains]}")
-                except AttributeError as e:
-                    logger.error(f"domain_set access failed: {str(e)}")
-                    domains = Domain.objects.filter(tenant=tenant)
-                    logger.info(f"Fallback domains for tenant {tenant.id}: {[d.domain for d in domains]}")
+                    producer = KafkaProducer(
+                        bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+                        value_serializer=lambda v: json.dumps(v).encode('utf-8')
+                    )
+                    event_data = {
+                        'event_type': 'tenant_created',
+                        'tenant_id': str(tenant.id),
+                        'schema_name': tenant.schema_name,
+                        'name': tenant.name,
+                        'title': tenant.title,
+                        'email_host': tenant.email_host,
+                        'domains': [d.domain for d in tenant.domain_set.all()],
+                    }
+                    producer.send('tenant-events', event_data)
+                    producer.flush()
+                    logger.info(f"Sent tenant_created event for tenant {tenant.id}")
+                except Exception as e:
+                    logger.error(f"Kafka publish failed: {str(e)}")
+
                 return tenant
+
         except Exception as e:
-            logger.error(f"Failed to create tenant or domain: {str(e)}")
-            raise
+            logger.error(f"Tenant creation failed: {str(e)}")
+            raise serializers.ValidationError(f"Tenant creation failed: {str(e)}")
 
-
+            
     def update(self, instance, validated_data):
-        logo_file = self.context['request'].FILES.get('logo') or validated_data.pop('logo', None)
+        request = self.context.get('request')
+
+        # Handle logo file if uploaded
+        logo_file = request.FILES.get('logo') if request else None
         if logo_file:
             file_ext = os.path.splitext(logo_file.name)[1]
             filename = f"{uuid.uuid4()}{file_ext}"
@@ -218,12 +248,12 @@ class TenantSerializer(serializers.ModelSerializer):
             content_type = mimetypes.guess_type(logo_file.name)[0]
             storage = get_storage_service()
             storage.upload_file(logo_file, path, content_type or 'application/octet-stream')
-            file_url = storage.get_public_url(path)
-            instance.logo = file_url  # Directly update the instance
+            instance.logo = storage.get_public_url(path)
 
-        # Update other fields
+        # Update remaining fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+
         instance.save()
         return instance
 
@@ -232,7 +262,6 @@ class TenantSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         logo_path = instance.logo
         if logo_path:
-            # If logo_path is already a URL, use it. Otherwise, generate public URL from storage utils.
             if logo_path.startswith('http'):
                 data['logo'] = logo_path
             else:
@@ -241,5 +270,3 @@ class TenantSerializer(serializers.ModelSerializer):
         else:
             data['logo'] = ""
         return data
-
-

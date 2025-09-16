@@ -18,6 +18,16 @@ if not Tenant.objects.filter(schema_name='public').exists():
    
 
 from core.models import Tenant, Domain
+if not Tenant.objects.filter(schema_name='arts').exists():
+    tenant = Tenant.objects.create(
+        name='arts',
+        schema_name='arts',
+    )
+    tenant.auto_create_schema = False
+    tenant.save()
+    Domain.objects.create(tenant=tenant, domain='artstraining.co.uk', is_primary=True)
+
+from core.models import Tenant, Domain
 if not Tenant.objects.filter(schema_name='auth-service').exists():
     tenant = Tenant.objects.create(
         name='auth-service',
@@ -29,14 +39,14 @@ if not Tenant.objects.filter(schema_name='auth-service').exists():
 
 
 from core.models import Tenant, Domain
-if not Tenant.objects.filter(schema_name='arts').exists():
+if not Tenant.objects.filter(schema_name='proliance').exists():
     tenant = Tenant.objects.create(
-        name='arts',
-        schema_name='arts',
+        name='proliance',
+        schema_name='proliance',
     )
     tenant.auto_create_schema = False
     tenant.save()
-    Domain.objects.create(tenant=tenant, domain='artstraining.co.uk', is_primary=True)
+    Domain.objects.create(tenant=tenant, domain='prolianceltd.com', is_primary=True)
     
 
 # python manage.py shell
@@ -61,11 +71,11 @@ with tenant_context(tenant):
 from core.models import Tenant
 from users.models import CustomUser
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='proliance')
+tenant = Tenant.objects.get(schema_name='arts')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='info',
-        email='admin@prolianceltd.com',
+        username='admin',
+        email='admin@artstraining.co.uk',
         password='qwerty',
         role='admin',
         first_name='Gauis',
@@ -81,16 +91,32 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='david_dappa',
-        email='david.dappa@prolianceltd.com',
+        username='tonna',
+        email='support@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='David',
-        last_name='Dappa',
-        job_role='Frontend Engineer',
+        first_name='Friday',
+        last_name='Monday',
+        job_role='Backend Developer',
         tenant=tenant
     )
 
+
+from core.models import Tenant
+from users.models import CustomUser
+from django_tenants.utils import tenant_context
+
+# Get the tenant
+tenant = Tenant.objects.get(schema_name='proliance')
+
+# Enter tenant context
+with tenant_context(tenant):
+    try:
+        user = CustomUser.objects.get(email='tonna.ezugwu@prolianceltd.com')
+        user.delete()
+        print("User deleted successfully.")
+    except CustomUser.DoesNotExist:
+        print("User not found.")
 
 from core.models import Tenant
 from subscriptions.models import Subscription
@@ -120,3 +146,37 @@ for t in tenant:
 
 
 # https://server1.prolianceltd.com/
+
+
+from core.models import Tenant
+from users.models import RSAKeyPair
+from django_tenants.utils import tenant_context
+
+# Your keypair generation function
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+
+def generate_rsa_keypair(key_size=2048):
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=key_size)
+    private_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    ).decode('utf-8')
+    public_pem = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode('utf-8')
+    return private_pem, public_pem
+
+# Trigger for a specific tenant (e.g., 'auth-service')
+tenant = Tenant.objects.get(schema_name='proliance')
+with tenant_context(tenant):
+    priv, pub = generate_rsa_keypair()
+    RSAKeyPair.objects.create(
+        tenant=tenant,
+        private_key_pem=priv,
+        public_key_pem=pub,
+        active=True
+    )
+    print(f"RSAKeyPair created for tenant: {tenant.schema_name}")

@@ -326,6 +326,7 @@ api_gateway/venv/
 api_gateway/.env
 notifications_app/.env
 notifications_app/.gitignore
+docker-jitsi-meet/.gitignore
 
 # Ignore notifications_app patterns
 notifications_app/dist/

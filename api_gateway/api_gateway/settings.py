@@ -141,6 +141,9 @@ USE_I18N = True
 
 USE_TZ = True
 
+# settings.py
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
@@ -180,7 +183,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 MICROSERVICE_URLS = {
-    "auth_service": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
+    "auth_service": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
     "applications-engine": env.str("JOB_APPLICATIONS_URL", default="http://job-applications:8003"),
     "talent-engine": env.str("TALENT_ENGINE_URL", default="http://talent-engine:8002"),
     "messaging": env.str("MESSAGING_URL", default="http://messaging:3500"),
@@ -193,6 +196,19 @@ MICROSERVICE_URLS = {
     "doc": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
     "user": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
     "tenant": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),  # <--- Add this line
+    "token": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+    "public-key": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+    "token/refresh": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+    "token/validate": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+    "login": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+    "logout": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+    "verify-2fa": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+    "docs": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+    "doc": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+    "user": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+    "tenant": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+
+    "jitsi": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
 }
 
 

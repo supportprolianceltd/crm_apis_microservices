@@ -1,0 +1,15 @@
+# Ignore log folder
+logs/
+
+# Ignore media uploads
+media/
+
+# Ignore Python virtual environment
+venv/
+
+errors.htm
+# Ignore temporary or static files
+zzzzz.py
+
+# (Optional) Ignore Docker's own ignore file if it's not needed in image
+.dockerignore

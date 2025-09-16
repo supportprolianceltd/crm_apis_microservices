@@ -1,20 +1,43 @@
 import pytz
 import uuid
 import os
+import mimetypes
 from django.conf import settings
 from django.utils import timezone
 from django.core.validators import URLValidator
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from .models import JobApplication, Schedule
 import logging
-from lumina_care.supabase_client import supabase
-import mimetypes
-import io
+import requests
+from utils.supabase import upload_file_dynamic
+from django.db import IntegrityError
+import pytz
+import logging
+import requests
+from django.conf import settings
+from django.utils import timezone
+from django.core.validators import URLValidator
+from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
+from .models import JobApplication, Schedule
+from rest_framework.exceptions import ValidationError
+import uuid
+import jwt
 
 logger = logging.getLogger('job_applications')
 
-
-
+def get_tenant_id_from_jwt(request):
+    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+    if not auth_header.startswith("Bearer "):
+        raise ValidationError("No valid Bearer token provided.")
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, options={"verify_signature": False})
+        return payload.get("tenant_unique_id")
+    except Exception:
+        raise ValidationError("Invalid JWT token.")
+    
 
 class DocumentSerializer(serializers.Serializer):
     document_type = serializers.CharField(max_length=50)
@@ -23,10 +46,7 @@ class DocumentSerializer(serializers.Serializer):
     uploaded_at = serializers.DateTimeField(read_only=True, default=timezone.now)
 
     def get_file_url(self, obj):
-        file_url = obj.get('file_url', None)
-        if file_url:
-            return file_url
-        return None
+        return obj.get('file_url', None)
 
     def validate_file(self, value):
         allowed_types = [
@@ -42,12 +62,13 @@ class DocumentSerializer(serializers.Serializer):
         if value.size > max_size:
             raise serializers.ValidationError(f"File size exceeds 50 MB limit.")
         return value
-    
+
     def validate_document_type(self, value):
         job_requisition = self.context.get('job_requisition')
         if not job_requisition:
             raise serializers.ValidationError("Job requisition context is missing.")
-        documents_required = job_requisition.documents_required or []
+        # FIX: Use .get() for dict
+        documents_required = job_requisition.get('documents_required', [])
         if not value:
             raise serializers.ValidationError("Document type is required.")
         try:
@@ -55,39 +76,17 @@ class DocumentSerializer(serializers.Serializer):
             return value
         except ValueError:
             pass
-        if value.lower() in ['resume', 'curriculum vitae (cv)']:  # Allow "Curriculum Vitae (CV)" explicitly
+        if value.lower() in ['resume', 'curriculum vitae (cv)']:
             return value
         if documents_required and value not in documents_required:
             raise serializers.ValidationError(
-                f"Invalid document type: {value}. Must be one of {documents_required} or 'Curriculum Vitae (CV)'."
+                f"Invalid document type: {value}. Must be one of {documents_required} or 'Curriculum Vitae (CV)'.",
             )
         return value
-
-    # def validate_document_type(self, value):
-    #     job_requisition = self.context.get('job_requisition')
-    #     if not job_requisition:
-    #         raise serializers.ValidationError("Job requisition context is missing.")
-    #     documents_required = job_requisition.documents_required or []
-    #     if not value:
-    #         raise serializers.ValidationError("Document type is required.")
-    #     try:
-    #         uuid.UUID(value)
-    #         return value
-    #     except ValueError:
-    #         pass
-    #     if value.lower() == 'resume':
-    #         return value
-    #     if documents_required and value not in documents_required:
-    #         raise serializers.ValidationError(
-    #             f"Invalid document type: {value}. Must be one of {documents_required} or 'resume'."
-    #         )
-    #     return value
-
 
 class ComplianceDocumentSerializer(serializers.Serializer):
     file_url = serializers.CharField(allow_blank=True, required=False, allow_null=True)
     uploaded_at = serializers.DateTimeField(allow_null=True, required=False)
-
 
 class ComplianceStatusSerializer(serializers.Serializer):
     id = serializers.CharField(allow_blank=True, required=False, allow_null=True)
@@ -101,189 +100,294 @@ class ComplianceStatusSerializer(serializers.Serializer):
     document = ComplianceDocumentSerializer(required=False, allow_null=True)
 
 
-class JobApplicationSerializer(serializers.ModelSerializer):
-    documents = DocumentSerializer(many=True, required=False)
-    job_requisition_id = serializers.CharField(source='job_requisition.id', read_only=True)
-    job_requisition_title = serializers.CharField(source='job_requisition.title', read_only=True)
-    tenant_schema = serializers.CharField(source='tenant.schema_name', read_only=True)
-    compliance_status = ComplianceStatusSerializer(many=True, required=False)
 
-    branch = serializers.SlugRelatedField(slug_field='name', read_only=True, allow_null=True)
+class PublicJobApplicationSerializer(serializers.ModelSerializer):
+    documents = DocumentSerializer(many=True, required=False)
+    compliance_status = ComplianceStatusSerializer(many=True, required=False)
+    job_requisition_id = serializers.CharField()
+    tenant_id = serializers.CharField(required=False)
+    # first_name = serializers.CharField(required=False, allow_null=True)
+    # last_name = serializers.CharField(required=False, allow_null=True)
+    resume_url = serializers.CharField(read_only=True)
+    cover_letter_url = serializers.CharField(read_only=True)
 
     class Meta:
         model = JobApplication
         fields = [
-            'id', 'tenant', 'tenant_schema', 'branch', 'job_requisition', 'job_requisition_id',
-            'job_requisition_title', 'date_of_birth', 'full_name', 'email', 'phone',
-            'qualification', 'experience', 'screening_status', 'screening_score',
-            'knowledge_skill', 'cover_letter', 'resume_status', 'employment_gaps',
-            'status', 'source', 'documents', 'compliance_status', 'interview_location',
-            'is_deleted', 'applied_at', 'created_at', 'updated_at'
+            'id', 'tenant_id', 'job_requisition_id', 'full_name',
+            'email', 'phone', 'date_of_birth', 'resume_url', 'cover_letter_url', 'source',
+            'application_date', 'current_stage', 'status', 'qualification', 'experience',
+            'knowledge_skill', 'cover_letter', 'documents', 'compliance_status',
+            'disposition_reason', 'is_deleted',
         ]
         read_only_fields = [
-            'id', 'tenant', 'tenant_schema', 'job_requisition_id', 'job_requisition_title',
-            'is_deleted', 'applied_at', 'created_at', 'updated_at', 'branch'
+            'id', 'resume_url', 'cover_letter_url', 'is_deleted', 'applied_at', 'created_at', 'updated_at'
         ]
 
     def validate(self, data):
-        tenant = self.context['request'].tenant
-        job_requisition = self.context.get('job_requisition')
-        instance = self.instance  # Get the existing instance for updates
-
-        if not job_requisition:
-            raise serializers.ValidationError("Job requisition is required.")
-        if not job_requisition.publish_status:
-            raise serializers.ValidationError("This job is not published.")
-
-        documents_required = job_requisition.documents_required or []
-        documents_data = data.get('documents', [])
-        existing_documents = instance.documents if instance else []
-
-        # Get existing document types
-        existing_types = {doc['document_type'] for doc in existing_documents}
-        provided_types = {doc['document_type'] for doc in documents_data}
-
-        # Combine existing and provided document types
-        all_provided_types = existing_types.union(provided_types)
-
-        # Check for missing required documents
-        missing_docs = [doc for doc in documents_required if doc not in all_provided_types]
-        if missing_docs:
-            raise serializers.ValidationError(
-                f"Missing required documents: {', '.join(missing_docs)}."
-            )
-
+        if not data.get('job_requisition_id'):
+            raise serializers.ValidationError({"job_requisition_id": "This field is required."})
+        if not data.get('email'):
+            raise serializers.ValidationError({"email": "This field is required."})
+        # first_name and last_name are now optional and nullable
         return data
 
     def create(self, validated_data):
+        resume_file = self.context['request'].FILES.get('resume')
+        cover_letter_file = self.context['request'].FILES.get('cover_letter')
         documents_data = validated_data.pop('documents', [])
         compliance_status = validated_data.pop('compliance_status', [])
-        tenant = self.context['request'].tenant
-        validated_data['tenant'] = tenant
-        user = self.context['request'].user
-        if user.is_authenticated and user.role == 'recruiter' and user.branch:
-            validated_data['branch'] = user.branch
-        logger.debug(f"Creating application for tenant: {tenant.schema_name}, job_requisition: {validated_data['job_requisition'].title}")
+        # Set tenant_id from payload/context if present
+        validated_data['tenant_id'] = validated_data.get('tenant_id', None)
 
+        # Handle document uploads
         documents = []
-        #FOR SUPERBASE FILE HANDLING
         for doc_data in documents_data:
             file = doc_data['file']
             file_ext = os.path.splitext(file.name)[1]
             filename = f"{uuid.uuid4()}{file_ext}"
             folder_path = f"application_documents/{timezone.now().strftime('%Y/%m/%d')}"
             path = f"{folder_path}/{filename}"
-            content_type = mimetypes.guess_type(file.name)[0]
-
-            # Upload to Supabase
-            supabase.storage.from_(settings.SUPABASE_BUCKET).upload(
-                path, file.read(), {"content-type": content_type or 'application/octet-stream'}
-            )
-            file_url = supabase.storage.from_(settings.SUPABASE_BUCKET).get_public_url(path)
-
+            content_type = mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
+            public_url = upload_file_dynamic(file, path, content_type)
             documents.append({
                 'document_type': doc_data['document_type'],
                 'file_path': path,
-                'file_url': file_url,
+                'file_url': public_url,
                 'uploaded_at': timezone.now().isoformat()
             })
-        #FOR SUPERBASE FILE HANDLING
-
         validated_data['documents'] = documents
-        logger.debug(f"Documents to be saved: {documents}")
+
         application = JobApplication.objects.create(**validated_data)
-        application.initialize_compliance_status(validated_data['job_requisition'])
-        logger.info(f"Application created: {application.id} for {application.full_name}")
+
+        # Upload resume
+        if resume_file:
+            ext = resume_file.name.split('.')[-1]
+            file_name = f"resumes/{application.tenant_id}/{application.id}_{uuid.uuid4()}.{ext}"
+            content_type = getattr(resume_file, 'content_type', 'application/octet-stream')
+            public_url = upload_file_dynamic(resume_file, file_name, content_type)
+            application.resume_url = public_url
+
+        # Upload cover letter
+        if cover_letter_file:
+            ext = cover_letter_file.name.split('.')[-1]
+            file_name = f"cover_letters/{application.tenant_id}/{application.id}_{uuid.uuid4()}.{ext}"
+            content_type = getattr(cover_letter_file, 'content_type', 'application/octet-stream')
+            public_url = upload_file_dynamic(cover_letter_file, file_name, content_type)
+            application.cover_letter_url = public_url
+
+        application.save()
         return application
 
-
-    # def update(self, instance, validated_data):
-    #     documents_data = validated_data.pop('documents', [])
-    #     compliance_status = validated_data.pop('compliance_status', None)
-    #     job_requisition = instance.job_requisition
-
-    #     if documents_data:
-    #         existing_documents = instance.documents or []
-    #         for doc_data in documents_data:
-    #             file = doc_data['file']
-    #             document_type = doc_data['document_type']
-
-    #             folder_path = os.path.join('compliance_documents', timezone.now().strftime('%Y/%m/%d'))
-    #             full_folder_path = os.path.join(settings.MEDIA_ROOT, folder_path)
-    #             os.makedirs(full_folder_path, exist_ok=True)
-    #             file_extension = os.path.splitext(file.name)[1]
-    #             filename = f"{uuid.uuid4()}{file_extension}"
-    #             upload_path = os.path.join(folder_path, filename).replace('\\', '/')
-    #             full_upload_path = os.path.join(settings.MEDIA_ROOT, upload_path)
-    #             logger.debug(f"Saving file to full_upload_path: {full_upload_path}")
-
-    #             try:
-
-
-    #                 with open(full_upload_path, 'wb+') as destination:
-    #                     for chunk in file.chunks():
-    #                         destination.write(chunk)
-
-
-
-    #                 logger.debug(f"File saved successfully: {full_upload_path}")
-    #             except Exception as e:
-    #                 logger.error(f"Failed to save file {full_upload_path}: {str(e)}")
-    #                 raise serializers.ValidationError(f"Failed to save file: {str(e)}")
-
-    #             file_url = f"/media/{upload_path.lstrip('/')}"
-    #             doc_data['file_url'] = file_url
-    #             doc_data['uploaded_at'] = timezone.now().isoformat()
-    #             existing_documents.append(doc_data)
-
-    #         validated_data['documents'] = existing_documents
-
-    #     if compliance_status is not None:
-    #         validated_data['compliance_status'] = compliance_status
-
-    #     return super().update(instance, validated_data)
-
-
-#FOR SUPERBASE FILE HANDLING
     def update(self, instance, validated_data):
+        resume_file = self.context['request'].FILES.get('resume')
+        cover_letter_file = self.context['request'].FILES.get('cover_letter')
         documents_data = validated_data.pop('documents', [])
         compliance_status = validated_data.pop('compliance_status', None)
-        job_requisition = instance.job_requisition
 
+        # Handle document uploads
         if documents_data:
             existing_documents = instance.documents or []
             for doc_data in documents_data:
                 file = doc_data['file']
-                document_type = doc_data['document_type']
-
-                file_extension = os.path.splitext(file.name)[1]
-                unique_filename = f"{uuid.uuid4()}{file_extension}"
-                folder_path = timezone.now().strftime('%Y/%m/%d')
-                upload_path = f"compliance_documents/{folder_path}/{unique_filename}"
-
-                try:
-                    file_like = io.BytesIO(file.read())
-                    file_like.seek(0)
-
-                    supabase.storage.from_("your-bucket-name").upload(upload_path, file_like)
-                    public_url = supabase.storage.from_("your-bucket-name").get_public_url(upload_path)
-
-                    doc_data['file_url'] = public_url
-                    doc_data['uploaded_at'] = timezone.now().isoformat()
-                    existing_documents.append(doc_data)
-
-                except Exception as e:
-                    logger.error(f"Failed to upload file to Supabase: {str(e)}")
-                    raise serializers.ValidationError(f"Supabase upload failed: {str(e)}")
-
+                file_ext = os.path.splitext(file.name)[1]
+                filename = f"{uuid.uuid4()}{file_ext}"
+                folder_path = f"application_documents/{timezone.now().strftime('%Y/%m/%d')}"
+                path = f"{folder_path}/{filename}"
+                content_type = mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
+                public_url = upload_file_dynamic(file, path, content_type)
+                doc_data['file_url'] = public_url
+                doc_data['uploaded_at'] = timezone.now().isoformat()
+                existing_documents.append(doc_data)
             validated_data['documents'] = existing_documents
 
         if compliance_status is not None:
             validated_data['compliance_status'] = compliance_status
 
-        return super().update(instance, validated_data)
+        instance = super().update(instance, validated_data)
 
-#FOR SUPERBASE FILE HANDLING
+        # Upload resume if provided
+        if resume_file:
+            ext = resume_file.name.split('.')[-1]
+            file_name = f"resumes/{instance.tenant_id}/{instance.id}_{uuid.uuid4()}.{ext}"
+            content_type = getattr(resume_file, 'content_type', 'application/octet-stream')
+            public_url = upload_file_dynamic(resume_file, file_name, content_type)
+            instance.resume_url = public_url
+
+        # Upload cover letter if provided
+        if cover_letter_file:
+            ext = cover_letter_file.name.split('.')[-1]
+            file_name = f"cover_letters/{instance.tenant_id}/{instance.id}_{uuid.uuid4()}.{ext}"
+            content_type = getattr(cover_letter_file, 'content_type', 'application/octet-stream')
+            public_url = upload_file_dynamic(cover_letter_file, file_name, content_type)
+            instance.cover_letter_url = public_url
+
+        instance.save()
+        return instance
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if 'compliance_status' in data:
+            data['compliance_status'] = [
+                {
+                    'id': item.get('id', ''),
+                    'name': item.get('name', ''),
+                    'description': item.get('description', ''),
+                    'required': item.get('required', False),
+                    'status': item.get('status', 'pending'),
+                    'checked_by': item.get('checked_by', None),
+                    'checked_at': item.get('checked_at', None),
+                    'notes': item.get('notes', ''),
+                    'document': item.get('document', {'file_url': '', 'uploaded_at': ''})
+                } for item in data['compliance_status']
+            ]
+        return data
+
+
+
+
+class JobApplicationSerializer(serializers.ModelSerializer):
+    documents = DocumentSerializer(many=True, required=False)
+    compliance_status = ComplianceStatusSerializer(many=True, required=False)
+    # Remove direct model relations for microservice style
+    job_requisition_id = serializers.CharField()
+    branch_id = serializers.CharField(allow_null=True, required=False)
+    tenant_id = serializers.CharField(read_only=True)
+    resume_url = serializers.CharField(read_only=True)
+    cover_letter_url = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = JobApplication
+        fields = [
+            'id', 'tenant_id', 'branch_id', 'job_requisition_id', 'full_name',
+            'email', 'phone', 'date_of_birth', 'resume_url', 'cover_letter_url', 'source', 'referred_by',
+            'application_date', 'current_stage', 'status', 'ai_vetting_score', 'ai_vetting_notes',
+            'screening_status', 'screening_score', 'screening_questions', 'tags', 'qualification', 'experience',
+            'knowledge_skill', 'cover_letter', 'resume_status', 'employment_gaps', 'documents', 'compliance_status',
+            'interview_location', 'disposition_reason', 'is_deleted', 'applied_at', 'created_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'id', 'tenant_id', 'resume_url', 'cover_letter_url', 'is_deleted', 'applied_at', 'created_at', 'updated_at'
+        ]
+
+    def validate(self, data):
+        request = self.context['request']
+        tenant_id = get_tenant_id_from_jwt(request)
+
+        # Only validate job_application_id on create
+        if self.instance is None and 'job_application_id' in data:
+            job_app = JobApplication.objects.filter(id=data['job_application_id']).first()
+            logger.info(f"Validating job_application_id={data['job_application_id']}, found={job_app}, job_app.tenant_id={getattr(job_app, 'tenant_id', None)}, jwt_tenant_id={tenant_id}")
+            if not job_app:
+                raise serializers.ValidationError({"job_application_id": "Invalid job application ID."})
+            if str(job_app.tenant_id) != str(tenant_id):
+                raise serializers.ValidationError({"job_application_id": "Job application does not belong to this tenant."})
+
+        # Validate branch_id if provided
+        if data.get('branch_id'):
+            resp = requests.get(
+                f"{settings.AUTH_SERVICE_URL}/api/tenant/branches/{data['branch_id']}/",
+                headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
+            )
+            if resp.status_code != 200:
+                raise serializers.ValidationError({"branch_id": "Invalid branch ID."})
+            branch_data = resp.json()
+            if branch_data['tenant_id'] != tenant_id:
+                raise serializers.ValidationError({"branch_id": "Branch does not belong to this tenant."})
+
+        return data
+
+    def create(self, validated_data):
+        resume_file = self.context['request'].FILES.get('resume')
+        cover_letter_file = self.context['request'].FILES.get('cover_letter')
+        documents_data = validated_data.pop('documents', [])
+        compliance_status = validated_data.pop('compliance_status', [])
+        validated_data['tenant_id'] = get_tenant_id_from_jwt(self.context['request'])
+
+        # Handle document uploads
+        documents = []
+        for doc_data in documents_data:
+            file = doc_data['file']
+            file_ext = os.path.splitext(file.name)[1]
+            filename = f"{uuid.uuid4()}{file_ext}"
+            folder_path = f"application_documents/{timezone.now().strftime('%Y/%m/%d')}"
+            path = f"{folder_path}/{filename}"
+            content_type = mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
+            public_url = upload_file_dynamic(file, path, content_type)
+            documents.append({
+                'document_type': doc_data['document_type'],
+                'file_path': path,
+                'file_url': public_url,
+                'uploaded_at': timezone.now().isoformat()
+            })
+        validated_data['documents'] = documents
+
+        application = JobApplication.objects.create(**validated_data)
+
+        # Upload resume
+        if resume_file:
+            ext = resume_file.name.split('.')[-1]
+            file_name = f"resumes/{application.tenant_id}/{application.id}_{uuid.uuid4()}.{ext}"
+            content_type = getattr(resume_file, 'content_type', 'application/octet-stream')
+            public_url = upload_file_dynamic(resume_file, file_name, content_type)
+            application.resume_url = public_url
+
+        # Upload cover letter
+        if cover_letter_file:
+            ext = cover_letter_file.name.split('.')[-1]
+            file_name = f"cover_letters/{application.tenant_id}/{application.id}_{uuid.uuid4()}.{ext}"
+            content_type = getattr(cover_letter_file, 'content_type', 'application/octet-stream')
+            public_url = upload_file_dynamic(cover_letter_file, file_name, content_type)
+            application.cover_letter_url = public_url
+
+        application.save()
+        return application
+
+    def update(self, instance, validated_data):
+        resume_file = self.context['request'].FILES.get('resume')
+        cover_letter_file = self.context['request'].FILES.get('cover_letter')
+        documents_data = validated_data.pop('documents', [])
+        compliance_status = validated_data.pop('compliance_status', None)
+
+        # Handle document uploads
+        if documents_data:
+            existing_documents = instance.documents or []
+            for doc_data in documents_data:
+                file = doc_data['file']
+                file_ext = os.path.splitext(file.name)[1]
+                filename = f"{uuid.uuid4()}{file_ext}"
+                folder_path = f"application_documents/{timezone.now().strftime('%Y/%m/%d')}"
+                path = f"{folder_path}/{filename}"
+                content_type = mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
+                public_url = upload_file_dynamic(file, path, content_type)
+                doc_data['file_url'] = public_url
+                doc_data['uploaded_at'] = timezone.now().isoformat()
+                existing_documents.append(doc_data)
+            validated_data['documents'] = existing_documents
+
+        if compliance_status is not None:
+            validated_data['compliance_status'] = compliance_status
+
+        instance = super().update(instance, validated_data)
+
+        # Upload resume if provided
+        if resume_file:
+            ext = resume_file.name.split('.')[-1]
+            file_name = f"resumes/{instance.tenant_id}/{instance.id}_{uuid.uuid4()}.{ext}"
+            content_type = getattr(resume_file, 'content_type', 'application/octet-stream')
+            public_url = upload_file_dynamic(resume_file, file_name, content_type)
+            instance.resume_url = public_url
+
+        # Upload cover letter if provided
+        if cover_letter_file:
+            ext = cover_letter_file.name.split('.')[-1]
+            file_name = f"cover_letters/{instance.tenant_id}/{instance.id}_{uuid.uuid4()}.{ext}"
+            content_type = getattr(cover_letter_file, 'content_type', 'application/octet-stream')
+            public_url = upload_file_dynamic(cover_letter_file, file_name, content_type)
+            instance.cover_letter_url = public_url
+
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -306,24 +410,63 @@ class JobApplicationSerializer(serializers.ModelSerializer):
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
-    job_application_id = serializers.CharField(source='job_application.id', read_only=True)
-    tenant_schema = serializers.CharField(source='tenant.schema_name', read_only=True)
-    candidate_name = serializers.CharField(source='job_application.full_name', read_only=True)
-    job_requisition_title = serializers.CharField(source='job_application.job_requisition.title', read_only=True)
-    branch = serializers.SlugRelatedField(slug_field='name', read_only=True, allow_null=True)
+    job_application_id = serializers.CharField()
+    branch_id = serializers.CharField(allow_null=True, required=False)
+    tenant_id = serializers.CharField(read_only=True)
+    candidate_name = serializers.SerializerMethodField()
+    scheduled_by = serializers.SerializerMethodField()
 
     class Meta:
         model = Schedule
         fields = [
-            'id', 'tenant', 'tenant_schema', 'branch', 'job_application', 'job_application_id',
-            'candidate_name', 'job_requisition_title', 'interview_start_date_time', 'interview_end_date_time',
-            'meeting_mode', 'meeting_link', 'interview_address', 'message', 'timezone',
-            'status', 'cancellation_reason', 'is_deleted', 'created_at', 'updated_at'
+            'id', 'tenant_id', 'branch_id', 'job_application_id', 'candidate_name',
+            'interview_start_date_time', 'interview_end_date_time', 'meeting_mode', 'meeting_link', 'interview_address',
+            'message', 'timezone', 'status', 'cancellation_reason', 'is_deleted', 'created_at', 'updated_at',
+            'scheduled_by_id', 'scheduled_by',
         ]
         read_only_fields = [
-            'id', 'tenant', 'tenant_schema', 'job_application_id', 'candidate_name',
-            'job_requisition_title', 'is_deleted', 'created_at', 'updated_at', 'branch'
+            'id', 'tenant_id', 'candidate_name', 'is_deleted', 'created_at', 'updated_at',
+            'scheduled_by',
         ]
+
+    def get_candidate_name(self, obj):
+        try:
+            job_app = JobApplication.objects.filter(id=obj.job_application_id).first()
+            if job_app:
+                return job_app.full_name
+        except Exception as e:
+            logger.error(f"Error fetching candidate name for {obj.job_application_id}: {str(e)}")
+        return None
+
+    @extend_schema_field({
+        'type': 'object',
+        'properties': {
+            'id': {'type': 'string'},
+            'email': {'type': 'string'},
+            'first_name': {'type': 'string'},
+            'last_name': {'type': 'string'}
+        }
+    })
+    def get_scheduled_by(self, obj):
+        if obj.scheduled_by_id:
+            try:
+                auth_header = self.context["request"].headers.get("Authorization", "")
+                user_response = requests.get(
+                    f'{settings.AUTH_SERVICE_URL}/api/user/users/{obj.scheduled_by_id}/',
+                    headers={'Authorization': auth_header}
+                )
+                if user_response.status_code == 200:
+                    user_data = user_response.json()
+                    return {
+                        'id': user_data.get('id', ''),
+                        'email': user_data.get('email', ''),
+                        'first_name': user_data.get('first_name', ''),
+                        'last_name': user_data.get('last_name', '')
+                    }
+                logger.error(f"Failed to fetch user {obj.scheduled_by_id} from auth_service")
+            except Exception as e:
+                logger.error(f"Error fetching scheduled_by {obj.scheduled_by_id}: {str(e)}")
+        return None
 
     def validate_timezone(self, value):
         if value not in pytz.all_timezones:
@@ -331,13 +474,34 @@ class ScheduleSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        tenant = self.context['request'].tenant
-        job_application = data.get('job_application', getattr(self.instance, 'job_application', None))
-        if not job_application:
-            logger.error("Job application is required but not provided or found on instance")
-            raise serializers.ValidationError("Job application is required.")
-        if job_application.status != 'shortlisted':
-            raise serializers.ValidationError("Schedules can only be created for shortlisted applicants.")
+        request = self.context['request']
+        tenant_id = get_tenant_id_from_jwt(request)
+        if str(data.get('tenant_id', tenant_id)) != str(tenant_id):
+            raise serializers.ValidationError({"tenant_id": "Tenant ID mismatch."})
+
+        # Validate job_application_id exists and belongs to tenant
+        if data.get('job_application_id'):
+            job_app = JobApplication.objects.filter(id=data['job_application_id']).first()
+            logger.info(f"Validating job_application_id={data['job_application_id']}, found={job_app}, job_app.tenant_id={getattr(job_app, 'tenant_id', None)}, jwt_tenant_id={tenant_id}")
+            if not job_app:
+                raise serializers.ValidationError({"job_application_id": "Invalid job application ID."})
+            if str(job_app.tenant_id) != str(tenant_id):
+                raise serializers.ValidationError({"job_application_id": "Job application does not belong to this tenant."})
+
+        # Validate branch_id if provided
+        if data.get('branch_id'):
+            auth_header = request.headers.get("Authorization", "")
+            resp = requests.get(
+                f"{settings.AUTH_SERVICE_URL}/api/tenant/branches/{data['branch_id']}/",
+                headers={'Authorization': auth_header}
+            )
+            if resp.status_code != 200:
+                raise serializers.ValidationError({"branch_id": "Invalid branch ID."})
+            branch_data = resp.json()
+            if str(branch_data['tenant_id']) != str(tenant_id):
+                raise serializers.ValidationError({"branch_id": "Branch does not belong to this tenant."})
+
+        # Additional schedule validations
         if data.get('meeting_mode') == 'Virtual' and not data.get('meeting_link'):
             raise serializers.ValidationError("Meeting link is required for virtual interviews.")
         if data.get('meeting_mode') == 'Virtual' and data.get('meeting_link'):
@@ -359,14 +523,16 @@ class ScheduleSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        tenant = self.context['request'].tenant
-        user = self.context['request'].user
-        validated_data['tenant'] = tenant
-        if user.is_authenticated and user.role == 'recruiter' and user.branch:
-            validated_data['branch'] = user.branch
-        schedule = Schedule.objects.create(**validated_data)
-        logger.info(f"Schedule created: {schedule.id} for {schedule.job_application.full_name}")
-        return schedule
+        validated_data['tenant_id'] = str(get_tenant_id_from_jwt(self.context['request']))
+        try:
+            schedule = Schedule.objects.create(**validated_data)
+            logger.info(f"Schedule created: {schedule.id} for job_application_id: {schedule.job_application_id}")
+            return schedule
+        except IntegrityError as e:
+            logger.error(f"IntegrityError on schedule create: {str(e)}")
+            raise serializers.ValidationError({
+                "job_application_id": "An active schedule already exists for this job application."
+            })
 
     def update(self, instance, validated_data):
         if validated_data.get('status') == 'cancelled' and instance.status != 'cancelled' and not validated_data.get('cancellation_reason'):
@@ -375,5 +541,8 @@ class ScheduleSerializer(serializers.ModelSerializer):
             validated_data['cancellation_reason'] = None
         return super().update(instance, validated_data)
     
+
+class SimpleMessageSerializer(serializers.Serializer):
+    detail = serializers.CharField()
 
 

@@ -7,14 +7,14 @@ RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
     tesseract-ocr \
+    libffi-dev \
+    libssl-dev \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
-
-
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir --disable-pip-version-check -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install pytesseract pillow
 
 # Pre-download ML models during build
@@ -38,5 +38,4 @@ EXPOSE 8003
 # Make entrypoint script executable
 RUN chmod +x entrypoint.sh
 
-# Use entrypoint script to run migrations and start server
-ENTRYPOINT ["/app/entrypoint.sh"]
+
