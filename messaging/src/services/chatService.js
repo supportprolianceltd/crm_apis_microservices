@@ -1,18 +1,6 @@
-const prisma = require('../config/prisma');
+import prisma from "../config/prisma.js";
 
 const getChatsForUser = async (userId) => {
-  // This is a placeholder. It will fetch the actual chats from the database
-  // once the migration is complete and the service is connected to the DB.
-  console.log(`Fetching chats for user: ${userId}`);
-  
-  // Placeholder data:
-  return [
-    { id: 'chat1', name: 'General', members: ['user1', 'user2'] },
-    { id: 'chat2', name: 'Random', members: ['user1', 'user3'] },
-  ];
-
-  /*
-  // Actual implementation would look something like this:
   const userChats = await prisma.usersOnChats.findMany({
     where: { userId: userId },
     include: {
@@ -20,16 +8,64 @@ const getChatsForUser = async (userId) => {
         include: {
           users: {
             include: {
-              user: true
-            }
-          }
-        }
-      }
-    }
+              user: true,
+            },
+          },
+        },
+      },
+    },
   });
 
-  return userChats.map(uc => uc.chat);
-  */
+  return userChats.map((uc) => uc.chat);
 };
 
-module.exports = { getChatsForUser };
+const updateMessageStatus = async (messageId, status) => {
+  try {
+    const { messageId } = req.params;
+    const userId = req.user.id;
+
+    // 1. Find the message
+    const message = await prisma.message.findUnique({
+      where: { id: messageId },
+      include: {
+        chat: {
+          include: { users: true },
+        },
+      },
+    });
+
+    // 2. Verify user has access to this message
+    const hasAccess = message.chat.users.some((u) => u.userId === userId);
+    if (!hasAccess) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // 3. Update message status
+    const updatedMessage = await prisma.message.update({
+      where: { id: messageId },
+      data: {
+        status: "READ",
+        readAt: new Date(),
+      },
+    });
+
+    // 4. Notify other participants in the chat
+    const recipientSocketId = onlineUsers.get(message.authorId);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("message_read", {
+        messageId: message.id,
+        readAt: updatedMessage.readAt,
+      });
+    }
+
+    res.json(updatedMessage);
+  } catch (error) {
+    console.error("Error marking message as read:", error);
+    res.status(500).json({ error: "Failed to mark message as read" });
+  }
+};
+
+export default {
+  getChatsForUser,
+  updateMessageStatus,
+};

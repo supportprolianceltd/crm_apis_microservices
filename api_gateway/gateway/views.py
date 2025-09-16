@@ -46,9 +46,21 @@ PUBLIC_PATHS = [
 @ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def api_gateway_view(request, path):
     try:
+
+        # Support multi-segment prefixes (e.g., talent-engine, applications-engine, messaging)
+        segments = path.split('/')
+        if len(segments) >= 2 and segments[0] in {"talent-engine", "applications-engine", "messaging"}:
+            prefix = segments[0]
+            sub_path = '/'.join(segments[1:])
+        else:
+            prefix = segments[0]
+            sub_path = '/'.join(segments[1:])
+
+
         segments = path.split('/')
         prefix = segments[0]
         sub_path = '/'.join(segments[1:])
+
         base_url = settings.MICROSERVICE_URLS.get(prefix)
 
         if not base_url:
