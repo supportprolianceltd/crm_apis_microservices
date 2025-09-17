@@ -270,3 +270,9 @@ class TenantSerializer(serializers.ModelSerializer):
         else:
             data['logo'] = ""
         return data
+
+
+class PublicTenantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tenant
+        fields = ['name', 'title', 'logo']

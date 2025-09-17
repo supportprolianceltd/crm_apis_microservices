@@ -22,6 +22,8 @@ class ActiveRequisitionsManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
 
+
+
 class JobRequisition(models.Model):
  
     tenant_name = models.CharField(max_length=255, blank=True, null=True, help_text="Tenant name for code generation")
@@ -122,6 +124,7 @@ class JobRequisition(models.Model):
     deadline_date = models.DateField(blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
     responsibilities = models.JSONField(default=list, blank=True)
+    compliance_checklist = models.JSONField(default=list, blank=True)
     documents_required = models.JSONField(default=list, blank=True)
 
     approval_workflow = models.JSONField(default=dict, blank=True)
@@ -200,46 +203,46 @@ class JobRequisition(models.Model):
         self.save()
         logger.info(f"JobRequisition {self.id} restored for tenant {self.tenant_id}")
 
-    def add_compliance_item(self, name, description='', required=True, status='pending', checked_by=None, checked_at=None):
-        new_item = {
-            'id': str(uuid.uuid4()),
-            'name': name,
-            'description': description,
-            'required': required,
-            'status': status,
-            'checked_by': checked_by,
-            'checked_at': checked_at
-        }
-        self.compliance_checklist.append(new_item)
-        self.last_compliance_check = checked_at or self.last_compliance_check
-        self.checked_by = checked_by or self.checked_by
-        self.save()
-        return new_item
+    # def add_compliance_item(self, name, description='', required=True, status='pending', checked_by=None, checked_at=None):
+    #     new_item = {
+    #         'id': str(uuid.uuid4()),
+    #         'name': name,
+    #         'description': description,
+    #         'required': required,
+    #         'status': status,
+    #         'checked_by': checked_by,
+    #         'checked_at': checked_at
+    #     }
+    #     self.compliance_checklist.append(new_item)
+    #     self.last_compliance_check = checked_at or self.last_compliance_check
+    #     self.checked_by = checked_by or self.checked_by
+    #     self.save()
+    #     return new_item
 
-    def update_compliance_item(self, item_id, **kwargs):
-        for item in self.compliance_checklist:
-            if item["id"] == item_id:
-                item.update(kwargs)
-                if 'status' in kwargs and kwargs['status'] in ['completed', 'failed']:
-                    item['checked_at'] = kwargs.get('checked_at', timezone.now().isoformat())
-                    item['checked_by'] = kwargs.get('checked_by', item.get('checked_by'))
-                    self.last_compliance_check = item['checked_at']
-                    self.checked_by = item['checked_by']
-                self.save()
-                logger.info(f"Updated compliance item {item_id} for requisition {self.id}")
-                return item
-        logger.warning(f"Compliance item {item_id} not found in requisition {self.id}")
-        raise ValueError("Compliance item not found")
+    # def update_compliance_item(self, item_id, **kwargs):
+    #     for item in self.compliance_checklist:
+    #         if item["id"] == item_id:
+    #             item.update(kwargs)
+    #             if 'status' in kwargs and kwargs['status'] in ['completed', 'failed']:
+    #                 item['checked_at'] = kwargs.get('checked_at', timezone.now().isoformat())
+    #                 item['checked_by'] = kwargs.get('checked_by', item.get('checked_by'))
+    #                 self.last_compliance_check = item['checked_at']
+    #                 self.checked_by = item['checked_by']
+    #             self.save()
+    #             logger.info(f"Updated compliance item {item_id} for requisition {self.id}")
+    #             return item
+    #     logger.warning(f"Compliance item {item_id} not found in requisition {self.id}")
+    #     raise ValueError("Compliance item not found")
 
-    def remove_compliance_item(self, item_id):
-        original_length = len(self.compliance_checklist)
-        self.compliance_checklist = [item for item in self.compliance_checklist if item["id"] != item_id]
-        if len(self.compliance_checklist) < original_length:
-            self.save()
-            logger.info(f"Removed compliance item {item_id} from requisition {self.id}")
-        else:
-            logger.warning(f"Compliance item {item_id} not found in requisition {self.id}")
-            raise ValueError("Compliance item not found")
+    # def remove_compliance_item(self, item_id):
+    #     original_length = len(self.compliance_checklist)
+    #     self.compliance_checklist = [item for item in self.compliance_checklist if item["id"] != item_id]
+    #     if len(self.compliance_checklist) < original_length:
+    #         self.save()
+    #         logger.info(f"Removed compliance item {item_id} from requisition {self.id}")
+    #     else:
+    #         logger.warning(f"Compliance item {item_id} not found in requisition {self.id}")
+    #         raise ValueError("Compliance item not found")
 
 
 

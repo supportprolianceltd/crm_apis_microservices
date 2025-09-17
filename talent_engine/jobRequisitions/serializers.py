@@ -72,7 +72,7 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
     approved_by = serializers.SerializerMethodField()
     tenant_domain = serializers.SerializerMethodField()
     # compliance_checklist = serializers.SerializerMethodField()
-    compliance_checklist = ComplianceItemSerializer(many=True, required=False)
+    # compliance_checklist = ComplianceItemSerializer(many=True, required=False)
     branch_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -241,15 +241,15 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             logger.error(f"Error fetching tenant domain for {obj.tenant_id}: {str(e)}")
         return None
 
-    @extend_schema_field(list)
-    def get_compliance_checklist(self, obj):
-        serialized_items = []
-        for item in obj.compliance_checklist:
-            if isinstance(item, dict) and 'name' in item:
-                serialized_item = ComplianceItemSerializer(item, context=self.context).data
-                if serialized_item:
-                    serialized_items.append(serialized_item)
-        return serialized_items
+    # @extend_schema_field(list)
+    # def get_compliance_checklist(self, obj):
+    #     serialized_items = []
+    #     for item in obj.compliance_checklist:
+    #         if isinstance(item, dict) and 'name' in item:
+    #             serialized_item = ComplianceItemSerializer(item, context=self.context).data
+    #             if serialized_item:
+    #                 serialized_items.append(serialized_item)
+    #     return serialized_items
 
     @extend_schema_field(str)
     def get_branch_name(self, obj):
@@ -308,15 +308,15 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
 
 
 
-    def validate_compliance_checklist(self, value):
-        if not isinstance(value, list):
-            raise serializers.ValidationError("Compliance checklist must be a list.")
-        for item in value:
-            if not isinstance(item, dict) or not item.get("name"):
-                raise serializers.ValidationError("Each compliance item must be a dictionary with a 'name' field.")
-            serializer = ComplianceItemSerializer(data=item, context=self.context)
-            serializer.is_valid(raise_exception=True)
-        return value
+    # def validate_compliance_checklist(self, value):
+    #     if not isinstance(value, list):
+    #         raise serializers.ValidationError("Compliance checklist must be a list.")
+    #     for item in value:
+    #         if not isinstance(item, dict) or not item.get("name"):
+    #             raise serializers.ValidationError("Each compliance item must be a dictionary with a 'name' field.")
+    #         serializer = ComplianceItemSerializer(data=item, context=self.context)
+    #         serializer.is_valid(raise_exception=True)
+    #     return value
 
     def validate_requirements(self, value):
         if not isinstance(value, list):
@@ -326,6 +326,10 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
     def validate_responsibilities(self, value):
         if not isinstance(value, list):
             raise serializers.ValidationError("Responsibilities must be a list.")
+        return value
+    def validate_compliance_checklist(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("compliance_checklist must be a list.")
         return value
 
     def validate_documents_required(self, value):
@@ -366,38 +370,38 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
         if tenant_name:
             validated_data['tenant_name'] = tenant_name
 
-        compliance_checklist = validated_data.pop('compliance_checklist', [])
+        # compliance_checklist = validated_data.pop('compliance_checklist', [])
         advert_banner_file = validated_data.pop('advert_banner', None)
         instance = super().create(validated_data)
-        for item in compliance_checklist:
-            instance.add_compliance_item(
-                name=item["name"],
-                description=item.get("description", ""),
-                required=item.get("required", True)
-            )
+        # for item in compliance_checklist:
+        #     instance.add_compliance_item(
+        #         name=item["name"],
+        #         description=item.get("description", ""),
+        #         required=item.get("required", True)
+        #     )
         # Handle advert_banner upload after instance is created (so instance.id exists)
         self._handle_advert_banner_upload(instance, advert_banner_file)
         return instance
 
     def update(self, instance, validated_data):
         request = self.context.get('request')
-        logger.info(f"JobRequisition update request data: {getattr(request, 'data', {})}")
-        logger.info(f"advert_banner in request.FILES: {getattr(request, 'FILES', {}).get('advert_banner')}")
-        logger.info(f"advert_banner in validated_data: {validated_data.get('advert_banner')}")
+        # logger.info(f"JobRequisition update request data: {getattr(request, 'data', {})}")
+        # logger.info(f"advert_banner in request.FILES: {getattr(request, 'FILES', {}).get('advert_banner')}")
+        # logger.info(f"advert_banner in validated_data: {validated_data.get('advert_banner')}")
 
         if 'branch' in validated_data:
             validated_data['branch_id'] = validated_data.pop('branch')
         if 'tenant_id' in validated_data:
             validated_data['tenant_id'] = str(validated_data['tenant_id'])
 
-        compliance_checklist = validated_data.pop('compliance_checklist', None)
+        # compliance_checklist = validated_data.pop('compliance_checklist', None)
         advert_banner_file = validated_data.pop('advert_banner', None)
         instance = super().update(instance, validated_data)
 
-        if compliance_checklist is not None:
-            # Directly assign the validated list
-            instance.compliance_checklist = compliance_checklist
-            instance.save(update_fields=['compliance_checklist'])
+        # if compliance_checklist is not None:
+        #     # Directly assign the validated list
+        #     instance.compliance_checklist = compliance_checklist
+        #     instance.save(update_fields=['compliance_checklist'])
 
         self._handle_advert_banner_upload(instance, advert_banner_file)
         return instance
@@ -644,7 +648,7 @@ class PublicJobRequisitionSerializer(serializers.ModelSerializer):
             'title', 'unique_link', 'status', 'job_type', 'position_type', 'location_type',
             'job_description', 'requirements', 'qualification_requirement', 'experience_requirement',
             'knowledge_requirement', 'urgency_level', 'reason', 'deadline_date', 'num_of_applications',
-            'start_date', 'responsibilities',  'advert_banner', 'publish_status',
+            'start_date', 'responsibilities',  'advert_banner', 'publish_status','compliance_checklist',
             'approval_workflow', 'current_approval_stage', 'approval_date', 'time_to_fill_days'
         ]
         read_only_fields = [

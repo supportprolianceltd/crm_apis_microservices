@@ -1,11 +1,13 @@
-import logging
 import jwt
-
+import logging
 from django.conf import settings
 from django.db import transaction
 from django_tenants.utils import tenant_context
 from cryptography.hazmat.primitives import serialization
 from rest_framework import viewsets, status, serializers, generics
+
+logger = logging.getLogger(__name__)
+
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,7 +16,12 @@ from rest_framework.pagination import PageNumberPagination
 from django.db import transaction, connection
 from .models import Tenant, Domain, Module, TenantConfig, Branch
 from .serializers import TenantSerializer, ModuleSerializer, TenantConfigSerializer, BranchSerializer
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from .models import Tenant
+from .serializers import PublicTenantSerializer
 from core.models import Tenant
 
 
@@ -25,7 +32,8 @@ class CustomPagination(PageNumberPagination):
 class IsSuperUser(IsAuthenticated):
     def has_permission(self, request, view):
         return super().has_permission(request, view) and request.user.is_superuser
-logger = logging.getLogger('core')
+
+
 
 class BranchListCreateView(generics.ListCreateAPIView):
     serializer_class = BranchSerializer
@@ -493,3 +501,15 @@ class TenantViewSet(viewsets.ModelViewSet):
             serializer.save()
 
         return Response(serializer.data)
+
+
+class PublicTenantInfoView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, unique_id):
+        try:
+            tenant = Tenant.objects.get(unique_id=unique_id)
+            serializer = PublicTenantSerializer(tenant)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Tenant.DoesNotExist:
+            return Response({"detail": "Tenant not found."}, status=status.HTTP_404_NOT_FOUND)

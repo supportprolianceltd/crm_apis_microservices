@@ -16,7 +16,6 @@ from users.models import RSAKeyPair
 from django_tenants.utils import tenant_context
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
-import logging
 
 logger = logging.getLogger('users')
 

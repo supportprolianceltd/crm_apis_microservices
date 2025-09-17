@@ -7,7 +7,18 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import JobRequisition
 import logging
+import requests
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils import timezone
+import logging
 
+from .models import JobRequisition
+from .serializers import PublicJobRequisitionSerializer
+
+logger = logging.getLogger(__name__)
 logger = logging.getLogger('talent_engine')
 import uuid
 from django.conf import settings
@@ -32,7 +43,6 @@ from .models import (
 )
 from .serializers import JobRequisitionSerializer, ComplianceItemSerializer,VideoSessionSerializer, ParticipantSerializer, RequestSerializer, PublicJobRequisitionSerializer
 from .permissions import IsMicroserviceAuthenticated
-logger = logging.getLogger('talent_engine')
 
 
 from rest_framework.views import APIView
@@ -81,12 +91,56 @@ class PublicPublishedJobRequisitionsView(APIView):
 
 
 
+# class PublicPublishedRequisitionsByTenantView(APIView):
+#     permission_classes = []  # No auth required
+
+#     def get(self, request, tenant_unique_id):
+#         try:
+#             today = timezone.now().date()
+#             queryset = JobRequisition.active_objects.filter(
+#                 tenant_id=tenant_unique_id,
+#                 publish_status=True,
+#                 status='open',
+#                 is_deleted=False,
+#                 # deadline_date__gte=today
+#             )
+#             serializer = PublicJobRequisitionSerializer(queryset, many=True)
+#             logger.info(f"Fetched {queryset.count()} public 'open' requisitions for tenant: {tenant_unique_id}")
+#             return Response({
+#                 "count": queryset.count(),
+#                 "results": serializer.data
+#             }, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             logger.error(f"Error fetching public requisitions for tenant {tenant_unique_id}: {str(e)}")
+#             return Response({"detail": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
 class PublicPublishedRequisitionsByTenantView(APIView):
-    permission_classes = []  # No auth required
+    permission_classes = []  # Public
+
+    def get_tenant_info(self, tenant_unique_id):
+        """
+        Call the auth-service to fetch tenant info using unique_id.
+        """
+        try:
+            url = f"{settings.AUTH_SERVICE_URL}/api/tenant/public/{tenant_unique_id}/"
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                logger.warning(f"Auth-service returned {response.status_code} for tenant ID {tenant_unique_id}")
+                return None
+        except requests.RequestException as e:
+            logger.error(f"Failed to fetch tenant info from auth-service: {e}")
+            return None
 
     def get(self, request, tenant_unique_id):
         try:
             today = timezone.now().date()
+
+            # Fetch job requisitions for this tenant
             queryset = JobRequisition.active_objects.filter(
                 tenant_id=tenant_unique_id,
                 publish_status=True,
@@ -94,15 +148,24 @@ class PublicPublishedRequisitionsByTenantView(APIView):
                 is_deleted=False,
                 # deadline_date__gte=today
             )
-            serializer = PublicJobRequisitionSerializer(queryset, many=True)
-            logger.info(f"Fetched {queryset.count()} public 'open' requisitions for tenant: {tenant_unique_id}")
+            requisitions_data = PublicJobRequisitionSerializer(queryset, many=True).data
+
+            # Fetch tenant metadata from auth-service
+            tenant_info = self.get_tenant_info(tenant_unique_id)
+
+            logger.info(f"Fetched {len(requisitions_data)} public requisitions for tenant {tenant_unique_id}")
+
             return Response({
-                "count": queryset.count(),
-                "results": serializer.data
+                "tenant": tenant_info,
+                "count": len(requisitions_data),
+                "results": requisitions_data
             }, status=status.HTTP_200_OK)
+
         except Exception as e:
-            logger.error(f"Error fetching public requisitions for tenant {tenant_unique_id}: {str(e)}")
+            logger.error(f"Error fetching requisitions for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 class PublicCloseJobRequisitionView(APIView):
