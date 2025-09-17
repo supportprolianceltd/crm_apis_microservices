@@ -1,6 +1,7 @@
 
 ### Django ###
 *.log
+*/logs
 *.pot
 *.pyc
 __pycache__/
@@ -367,3 +368,9 @@ notifications_app/*.seed
 notifications_app/*.pid.lock
 notifications_app/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 notifications_app/generated/prisma
+
+# Log files
+*.log
+!*/logs/
+!*/logs/*.log
+!auth_service.log

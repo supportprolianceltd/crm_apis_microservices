@@ -18,23 +18,6 @@ SECRET_KEY = env('DJANGO_SECRET_KEY')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', 'auth_service', 'http://localhost:9090', '*'])
 
-# Application Definition
-INSTALLED_APPS = [
-    'django_tenants',  # Multi-tenancy support
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
-    'rest_framework_simplejwt',
-    'drf_spectacular',  # API documentation
-    'core',  # Tenant, Domain models
-    'users',  # CustomUser, PasswordResetToken, etc.
-    'django_extensions',  # Added for extended management commands
-]
-
 # Middleware
 MIDDLEWARE = [
     'auth_service.middleware.CustomTenantMiddleware',  # Tenant resolution
@@ -72,15 +55,15 @@ SHARED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'rest_framework',
+    'drf_spectacular',
     'core',  # Tenant, Domain
 ]
 
 TENANT_APPS = [
     'django.contrib.auth',
     'django.contrib.admin',  # Moved to TENANT_APPS to avoid CustomUser dependency in public schema
-    'rest_framework',
     'rest_framework_simplejwt',
-    'drf_spectacular',
     'users',  # CustomUser, PasswordResetToken, etc.
 ]
 
@@ -251,7 +234,6 @@ WEB_PAGE_URL = env('WEB_PAGE_URL', default='https://crm-frontend-react.vercel.ap
 
 AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
 NOTIFICATIONS_EVENT_URL = env('NOTIFICATIONS_EVENT_URL', default='http://app:3000/events/')
-print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 
 SUPABASE_URL = env('SUPABASE_URL', default='')
 SUPABASE_KEY = env('SUPABASE_KEY', default='')

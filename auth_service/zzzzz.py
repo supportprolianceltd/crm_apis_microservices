@@ -15,7 +15,20 @@ if not Tenant.objects.filter(schema_name='public').exists():
     Domain.objects.create(tenant=tenant, domain='127.0.0.1', is_primary=True)
     Domain.objects.create(tenant=tenant, domain='localhost', is_primary=False)
 
-   
+from django_tenants.utils import tenant_context
+tenant = Tenant.objects.get(schema_name='proliance')
+with tenant_context(tenant):
+    CustomUser.objects.create_superuser(
+        username='admin',
+        email='admin@prolianceltd.com',
+        password='qwerty',
+        role='admin',
+        first_name='Gauis',
+        last_name='Immanuel',
+        job_role='Backend Developer',
+        tenant=tenant
+    )
+
 
 from core.models import Tenant, Domain
 if not Tenant.objects.filter(schema_name='arts').exists():
