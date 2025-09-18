@@ -30,7 +30,6 @@ const initializeSocket = (io) => {
       try {
         // Verify token and get user with tenant info
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decoded);
 
         const user = await prisma.user.findUnique({
           where: {
