@@ -4,7 +4,7 @@ import { Server } from "socket.io";
 import { config } from "dotenv";
 import cors from "cors";
 import swaggerDocs from "./config/swagger.js";
-import { authenticate, errorHandler } from "./middleware/auth.middleware.js";
+import { authMiddleware, socketAuth } from "./middleware/auth.middleware.js";
 import { PORT } from "./config/config.js";
 
 // Load environment variables
@@ -35,8 +35,7 @@ const io = new Server(server, {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static("public"));
-// app.use(authenticate);
-app.use(errorHandler);
+app.use(authMiddleware);
 
 // API Documentation
 swaggerDocs(app);
@@ -53,7 +52,7 @@ app.use("/api/v1", apiRoutes);
 // Initialize WebSocket
 import initializeSocket from "./socket/socketHandler.js";
 initializeSocket(io);
-// io.use(socketAuth);
+io.use(socketAuth);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

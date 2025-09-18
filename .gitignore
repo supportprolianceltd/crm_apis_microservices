@@ -374,3 +374,4 @@ notifications_app/generated/prisma
 !*/logs/
 !*/logs/*.log
 !auth_service.log
+auth_service/logs
