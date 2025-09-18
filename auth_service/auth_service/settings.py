@@ -22,21 +22,6 @@ ALLOWED_HOSTS = env.list(
 )
 NOTIFICATIONS_SERVICE_URL = env("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
 # Application Definition
-INSTALLED_APPS = [
-    "django_tenants",  # Multi-tenancy support
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "rest_framework",
-    "corsheaders",
-    "rest_framework_simplejwt",
-    "drf_spectacular",  # API documentation
-    "core",  # Tenant, Domain models
-    "users",  # CustomUser, PasswordResetToken, etc.
-    "django_extensions",  # Added for extended management commands
-]
 
 # Middleware
 MIDDLEWARE = [
@@ -78,6 +63,7 @@ SHARED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "core",  # Tenant, Domain
+    "django_extensions",
 ]
 
 TENANT_APPS = [
@@ -294,7 +280,6 @@ SPECTACULAR_SETTINGS = {
 
 
 # docker exec -it auth-service  python manage.py shell
-
 
 #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 # ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
