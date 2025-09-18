@@ -284,7 +284,9 @@ SPECTACULAR_SETTINGS = {
 
 # sudo hostnamectl set-hostname server1.prolianceltd.com
 
+
 # docker exec -it auth-service  python manage.py shell
+
 
 #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 #ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158

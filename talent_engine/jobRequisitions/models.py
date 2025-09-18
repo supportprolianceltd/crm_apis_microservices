@@ -23,7 +23,6 @@ class ActiveRequisitionsManager(models.Manager):
         return super().get_queryset().filter(is_deleted=False)
 
 
-
 class JobRequisition(models.Model):
  
     tenant_name = models.CharField(max_length=255, blank=True, null=True, help_text="Tenant name for code generation")
@@ -258,9 +257,6 @@ class JobRequisition(models.Model):
         logger.info(f"JobRequisition {self.id} approved by user {approver_id} for tenant {self.tenant_id}")
 
 
-
-
-
 class VideoSession(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     job_application_id = models.CharField(max_length=20, blank=False, null=False)  # Reference JobApplication ID from job_applications
@@ -338,8 +334,6 @@ class Participant(models.Model):
             })
             producer.flush()
             logger.info(f"Participant created for session {self.session.id}")
-
-
 
 
 class Request(models.Model):

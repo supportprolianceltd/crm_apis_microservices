@@ -1,4 +1,4 @@
-# Standard library
+# Standard Library
 import base64
 import json
 import logging
@@ -7,31 +7,54 @@ import string
 import uuid
 from datetime import datetime, timedelta
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAdminUser
-from core.models import Tenant
-from users.models import RSAKeyPair
-from django_tenants.utils import tenant_context
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import serialization
-
-logger = logging.getLogger('users')
-
-# Standard library
-from django.db import transaction
+# Django
+from django.conf import settings
+from django.core.mail import send_mail, EmailMessage
+from django.core.mail.backends.smtp import EmailBackend
+from django.contrib.auth import authenticate
+from django.db import transaction, ProgrammingError
+from django.http import JsonResponse, HttpResponse
+from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
-from core.models import Domain, Branch
-from django_tenants.utils import tenant_context
-from rest_framework import serializers
-from utils.supabase import upload_file_dynamic
-import json
 
-# Local App - Models
+from django.views.decorators.csrf import csrf_exempt
+
+# Django REST Framework
+from rest_framework import (
+    status,
+    serializers,
+    generics,
+    viewsets,
+)
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import PermissionDenied, NotFound, APIException
+from rest_framework_simplejwt.tokens import RefreshToken
+
+# Django Tenants
+from django_tenants.utils import tenant_context
+
+# Third-Party
+import jwt
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+
+# Core Models
+from core.models import (
+    Tenant,
+    Domain,
+    Branch,
+    TenantConfig,
+)
+
+# Local App Models
 from .models import (
     CustomUser,
+    RSAKeyPair,
     UserSession,
     UserProfile,
     ProfessionalQualification,
@@ -47,86 +70,20 @@ from .models import (
     ClientProfile,
     BlockedIP,
     UserActivity,
+    Document,
+    DocumentAcknowledgment,
 )
 
-import logging
-import uuid
-from datetime import timedelta
-from django_tenants.utils import tenant_context
-from django.utils import timezone
-from rest_framework import serializers
-from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from auth_service.views import CustomUserMinimalSerializer  # Assuming this is your minimal user serializer
-from auth_service.utils.jwt_rsa import issue_rsa_jwt  # Assuming this is your JWT issuer
-
-from .models import CustomUser, UserActivity
-from .serializers import (
-    CustomUserListSerializer, CustomUserSerializer, UserCreateSerializer,
-    UserAccountActionSerializer, UserImpersonateSerializer
-)
-from core.models import Branch  # If needed for branch filters
-
-
-
-
-
-# Django
-from django.core.mail.backends.smtp import EmailBackend
-from django.conf import settings
-from django.contrib.auth import authenticate
-from django.core.mail import EmailMessage, send_mail
-from django.db import transaction, ProgrammingError
-from django.http import JsonResponse, HttpResponse
-from django.urls import reverse
-from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
-
-# Django Tenants
-from django_tenants.utils import tenant_context
-
-from rest_framework import viewsets, status, serializers, generics, serializers
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied, NotFound, APIException
-from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from rest_framework_simplejwt.tokens import RefreshToken
-
-# Third-party
-import jwt
-from cryptography.hazmat.primitives import serialization
-
-# App-specific
-from auth_service.views import CustomUserMinimalSerializer
-from auth_service.utils.jwt_rsa import validate_rsa_jwt, issue_rsa_jwt
-from .utils import get_daily_usage
-
-from .models import (
-    CustomUser,RSAKeyPair,
-    UserSession,
-    PasswordResetToken,
-    
-    BlockedIP,
-    UserActivity,
-    ClientProfile,
-    ProofOfAddress,
-    InsuranceVerification,
-    DrivingRiskAssessment,
-    LegalWorkEligibility,
-)
-
+# Local App Serializers
 from .serializers import (
     CustomUserSerializer,
-    UserAccountActionSerializer,
+    CustomUserListSerializer,
     UserCreateSerializer,
+    AdminUserCreateSerializer,
+    UserAccountActionSerializer,
+    UserImpersonateSerializer,
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
-    AdminUserCreateSerializer,
     UserBranchUpdateSerializer,
     UserSessionSerializer,
     ClientCreateSerializer,
@@ -134,15 +91,24 @@ from .serializers import (
     UserPasswordRegenerateSerializer,
     BlockedIPSerializer,
     UserActivitySerializer,
-    UserImpersonateSerializer,
-    ClientProfileSerializer,
+    ClientProfileSerializer,get_tenant_id_from_jwt,DocumentSerializer,
+    DocumentAcknowledgmentSerializer,
 )
 
-from core.models import Tenant, Branch, TenantConfig
-from users.models import CustomUser  # Only needed if used as a separate import
+# Auth Service Utils & Serializers
+from auth_service.views import CustomUserMinimalSerializer
+from auth_service.utils.jwt_rsa import (
+    validate_rsa_jwt,
+    issue_rsa_jwt,
+)
+
+# Utility Functions
+from utils.supabase import upload_file_dynamic
+from .utils import get_daily_usage
 
 # Logger
 logger = logging.getLogger('users')
+
 
 
 class CustomPagination(PageNumberPagination):
@@ -200,19 +166,21 @@ class UserPasswordRegenerateView(APIView):
         }, status=status.HTTP_200_OK)
     
 
-def configure_email_backend(tenant):
-    """
-    Configure email backend using tenant settings.
-    """
+# def configure_email_backend(tenant):
+#     """
+#     Configure email backend using tenant settings.
+#     """
  
-    return EmailBackend(
-        host=tenant.email_host,
-        port=tenant.email_port,
-        username=tenant.email_host_user,
-        password=tenant.email_host_password,
-        use_ssl=tenant.email_use_ssl,
-        fail_silently=False
-    )
+#     return EmailBackend(
+#         host=tenant.email_host,
+#         port=tenant.email_port,
+#         username=tenant.email_host_user,
+#         password=tenant.email_host_password,
+#         use_ssl=tenant.email_use_ssl,
+#         fail_silently=False
+#     )
+
+
 
 class PasswordResetRequestView(generics.GenericAPIView):
     serializer_class = PasswordResetRequestSerializer
@@ -773,6 +741,7 @@ class UserActivityViewSet(viewsets.ReadOnlyModelViewSet):
 
             return queryset.order_by('-timestamp')
 
+
 class UserPasswordRegenerateView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserPasswordRegenerateSerializer
@@ -791,53 +760,16 @@ class UserPasswordRegenerateView(generics.GenericAPIView):
             user.last_password_reset = timezone.now()
             user.save()
 
-            try:
-                tenant_config = TenantConfig.objects.get(tenant=tenant)
-                email_from = tenant_config.email_from or 'no-reply@yourdomain.com'
-                email_subject = f"Password Reset for {tenant.name}"
-                email_body = (
-                    f"Dear {user.first_name or 'User'},\n\n"
-                    f"Your password has been reset by an administrator.\n"
-                    f"New Password: {new_password}\n\n"
-                    f"Please log in and change your password as soon as possible.\n"
-                    f"Login URL: {request.build_absolute_uri('/login/')}\n\n"
-                    f"If you did not request this, please contact support.\n"
-                    f"Best regards,\n{tenant.name} Team"
-                )
-
-                send_mail(
-                    subject=email_subject,
-                    message=email_body,
-                    from_email=email_from,
-                    recipient_list=[user.email],
-                    fail_silently=False,
-                    auth_user=tenant_config.email_user,
-                    auth_password=tenant_config.email_password,
-                    connection=None
-                )
-                UserActivity.objects.create(
-                    user=user,
-                    tenant=tenant,
-                    action='password_reset',
-                    performed_by=request.user,
-                    details={},
-                    ip_address=request.META.get('REMOTE_ADDR'),
-                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                    success=True
-                )
-                logger.info(f"Password reset email sent to {user.email} for tenant {tenant.schema_name}")
-            except TenantConfig.DoesNotExist:
-                logger.error(f"No TenantConfig found for tenant {tenant.schema_name}")
-                return Response({"error": "Email configuration not set for this tenant"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            except Exception as e:
-                logger.error(f"Failed to send password reset email to {user.email}: {str(e)}")
-                return Response({"error": f"Failed to send email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
             logger.info(f"Password reset for user {user.email} by {request.user.email} in tenant {tenant.schema_name}")
+
             return Response({
                 "status": "success",
-                "message": f"Password reset successfully for {user.email}. An email has been sent with the new password."
+                "message": f"Password reset successfully for {user.email}.",
+                "user_email": user.email,
+                "new_password": new_password
             }, status=status.HTTP_200_OK)
+
+            
 
 # @csrf_exempt
 # def token_view(request):
@@ -1062,8 +994,6 @@ class UserCreateView(APIView):
                 return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         logger.error(f"Validation error for tenant {request.user.tenant.schema_name}: {serializer.errors}")
         return Response({'status': 'error', 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 class AdminUserCreateView(APIView):
@@ -1580,3 +1510,116 @@ class RSAKeyPairCreateView(APIView):
                 'status': 'error',
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class DocumentListCreateView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        try:
+            tenant_id = get_tenant_id_from_jwt(request)
+            documents = Document.objects.filter(tenant_id=tenant_id)
+            serializer = DocumentSerializer(documents, many=True, context={'request': request})
+            logger.info(f"Retrieved {documents.count()} documents for tenant {tenant_id}")
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error listing documents for tenant {tenant_id}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request):
+        try:
+            serializer = DocumentSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                document = serializer.save()
+                logger.info(f"Document created: {document.title} for tenant {serializer.validated_data['tenant_id']}")
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            logger.error(f"Validation error: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error creating document: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DocumentDetailView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request, id):
+        try:
+            tenant_id = get_tenant_id_from_jwt(request)
+            document = Document.objects.get(id=id, tenant_id=tenant_id)
+            serializer = DocumentSerializer(document, context={'request': request})
+            logger.info(f"Retrieved document {document.title} for tenant {tenant_id}")
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Document.DoesNotExist:
+            logger.error(f"Document not found for tenant {tenant_id}")
+            return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error retrieving document for tenant {tenant_id}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def patch(self, request, id):
+        try:
+            tenant_id = get_tenant_id_from_jwt(request)
+            document = Document.objects.get(id=id, tenant_id=tenant_id)
+            serializer = DocumentSerializer(
+                document,
+                data=request.data,
+                partial=True,
+                context={'request': request}
+            )
+            if serializer.is_valid():
+                serializer.save()
+                logger.info(f"Document updated: {document.title} for tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            logger.error(f"Validation error for tenant {tenant_id}: {serializer.errors}")
+            return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Document.DoesNotExist:
+            logger.error(f"Document not found for tenant {tenant_id}")
+            return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error updating document for tenant {tenant_id}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, id):
+        try:
+            tenant_id = get_tenant_id_from_jwt(request)
+            document = Document.objects.get(id=id, tenant_id=tenant_id)
+            document.delete()
+            logger.info(f"Document deleted: {document.title} for tenant {tenant_id}")
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Document.DoesNotExist:
+            logger.error(f"Document not found for tenant {tenant_id}")
+            return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error deleting document for tenant {tenant_id}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DocumentAcknowledgeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, document_id):
+        tenant = request.user.tenant
+        try:
+            with tenant_context(tenant):
+                document = Document.objects.get(id=document_id, tenant=tenant)
+                if DocumentAcknowledgment.objects.filter(document=document, user=request.user).exists():
+                    return Response(
+                        {"detail": "You have already acknowledged this document"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                acknowledgment = DocumentAcknowledgment.objects.create(
+                    document=document,
+                    user=request.user,
+                    tenant=tenant
+                )
+                serializer = DocumentAcknowledgmentSerializer(acknowledgment)
+                logger.info(f"Document {document.title} acknowledged by {request.user.username} in tenant {tenant.schema_name}")
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Document.DoesNotExist:
+            logger.error(f"Document not found for tenant {tenant.schema_name}")
+            return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error acknowledging document for tenant {tenant.schema_name}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

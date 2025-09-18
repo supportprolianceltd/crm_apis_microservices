@@ -18,6 +18,24 @@ from rest_framework.permissions import  AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+import os
+import uuid
+import logging
+from django.conf import settings
+from django.utils import timezone
+from django.db import transaction
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+import requests
+import mimetypes
+from .models import JobApplication
+from .serializers import JobApplicationSerializer
+from utils.supabase import  upload_file_dynamic
+
+logger = logging.getLogger(__name__)
 import requests
 from django.conf import settings
 from rest_framework.views import APIView
@@ -465,92 +483,6 @@ class ResumeScreeningView(APIView):
 
 
 
-
-
-# class JobApplicationCreatePublicView(generics.CreateAPIView):
-#     serializer_class = PublicJobApplicationSerializer
-#     parser_classes = (MultiPartParser, FormParser, JSONParser)
-
-#     def create(self, request, *args, **kwargs):
-#         unique_link = request.data.get('unique_link') or request.data.get('job_requisition_unique_link')
-#         if not unique_link:
-#             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # ✅ Extract tenant_id from UUID-style prefix (first 5 segments)
-#         try:
-#             parts = unique_link.split('-')
-#             if len(parts) < 5:
-#                 logger.warning(f"Invalid unique_link format: {unique_link}")
-#                 return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
-#             tenant_id = '-'.join(parts[:5])
-#         except Exception as e:
-#             logger.error(f"Error extracting tenant_id from link: {str(e)}")
-#             return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # ✅ Fetch job requisition from Talent Engine
-#         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
-#         try:
-#             resp = requests.get(requisition_url)
-#             logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
-#             if resp.status_code != 200:
-#                 try:
-#                     error_detail = resp.json().get('detail', 'Invalid job requisition.')
-#                 except Exception:
-#                     error_detail = 'Invalid job requisition.'
-#                 return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
-#             job_requisition = resp.json()
-#         except Exception as e:
-#             logger.error(f"Error fetching job requisition: {str(e)}")
-#             return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
-
-#         # ✅ Prepare payload
-#         payload = dict(request.data.items())
-#         payload['job_requisition_id'] = job_requisition['id']
-#         payload['tenant_id'] = tenant_id
-
-#         # ✅ Extract documents from multipart form
-#         documents = []
-#         i = 0
-#         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
-#             documents.append({
-#                 'document_type': request.data.get(f'documents[{i}][document_type]'),
-#                 'file': request.FILES.get(f'documents[{i}][file]')
-#             })
-#             i += 1
-#         if documents:
-#             payload['documents'] = documents
-
-#         logger.info(f"Full POST payload: {payload}")
-
-#         # ✅ Validate and save
-#         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
-#         if not serializer.is_valid():
-#             logger.error(f"Validation errors: {serializer.errors}")
-#             return Response({"detail": "Validation error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
-#         self.perform_create(serializer)
-
-#         # ✅ Publish to Kafka
-#         try:
-#             producer = KafkaProducer(
-#                 bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
-#                 value_serializer=lambda v: json.dumps(v).encode('utf-8')
-#             )
-#             kafka_data = {
-#                 "tenant_id": tenant_id,
-#                 "job_requisition_id": job_requisition['id'],
-#                 "event": "job_application_created"
-#             }
-#             producer.send('job_application_events', kafka_data)
-#             producer.flush()
-#             logger.info(f"Published Kafka job application event for requisition {job_requisition['id']}")
-#         except Exception as e:
-#             logger.error(f"Kafka publish error: {str(e)}")
-
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-
 class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -877,81 +809,6 @@ class JobApplicationsByRequisitionView(generics.ListAPIView):
         elif branch:
             queryset = queryset.filter(branch=branch)
         return queryset.order_by('-created_at')
-
-
-# class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
-#     serializer_class = SimpleMessageSerializer 
-#     # permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-#         jwt_payload = getattr(request, 'jwt_payload', {})
-#         tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')
-#         if not tenant_id:
-#             return Response({"detail": "tenant_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # Fetch published job requisitions via API
-#         resp = requests.get(
-#             f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/",
-#             params={'tenant_id': tenant_id, 'publish_status': True},
-#             headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
-#         )
-#         if resp.status_code != 200:
-#             return Response({"detail": "Failed to fetch job requisitions."}, status=resp.status_code)
-#         job_requisitions = resp.json()
-
-#         response_data = []
-#         for job_requisition in job_requisitions:
-#             job_requisition_id = job_requisition['id']
-#             applications = JobApplication.active_objects.filter(
-#                 tenant_id=tenant_id,
-#                 job_requisition_id=job_requisition_id,
-#                 status='shortlisted'
-#             )
-#             if role == 'recruiter' and branch:
-#                 applications = applications.filter(branch=branch)
-#             elif branch:
-#                 applications = applications.filter(branch=branch)
-#             application_serializer = JobApplicationSerializer(applications, many=True)
-
-#             # Add schedule info for each application
-#             enhanced_applications = []
-#             for app_data in application_serializer.data:
-#                 application_id = app_data['id']
-#                 schedules = Schedule.active_objects.filter(
-#                     tenant_id=tenant_id,
-#                     job_application_id=application_id
-#                 )
-#                 if role == 'recruiter' and branch:
-#                     schedules = schedules.filter(branch=branch)
-#                 elif branch:
-#                     schedules = schedules.filter(branch=branch)
-#                 schedule_serializer = ScheduleSerializer(schedules, many=True)
-#                 app_data['scheduled'] = schedules.exists()
-#                 app_data['schedules'] = schedule_serializer.data
-#                 enhanced_applications.append(app_data)
-
-#             total_applications = JobApplication.active_objects.filter(
-#                 tenant_id=tenant_id,
-#                 job_requisition_id=job_requisition_id
-#             )
-#             if role == 'recruiter' and branch:
-#                 total_applications = total_applications.filter(branch=branch)
-#             elif branch:
-#                 total_applications = total_applications.filter(branch=branch)
-#             total_applications = total_applications.count()
-
-#             response_data.append({
-#                 'job_requisition': job_requisition,
-#                 'shortlisted_applications': enhanced_applications,
-#                 'shortlisted_count': applications.count(),
-#                 'total_applications': total_applications
-#             })
-
-#         # Sort by created_at descending if present
-#         response_data.sort(key=lambda x: x['job_requisition'].get('created_at', ''), reverse=True)
-#         return Response(response_data, status=status.HTTP_200_OK)
 
 
 class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
@@ -1401,95 +1258,219 @@ class PermanentDeleteSchedulesView(APIView):
         return Response({"detail": f"Successfully permanently deleted {deleted_count} schedule(s)."}, status=status.HTTP_200_OK)
 
 
+
 class ComplianceStatusUpdateView(APIView):
-    serializer_class = ComplianceStatusSerializer
-    # permission_classes = [IsAuthenticated]
-    def get_permissions(self):
-        return [AllowAny()]  # Temporary for testing
-    
+    permission_classes = [AllowAny]  # Temporary for testing
+    parser_classes = [JSONParser]
+
     def post(self, request, application_id, item_id):
+        # Extract JWT payload for authorization
         jwt_payload = getattr(request, 'jwt_payload', {})
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
+        user_id = jwt_payload.get('user_id')
+
+        # Validate user_id
+        if not user_id:
+            logger.warning("No user_id found in JWT payload")
+            return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Fetch the job application
         try:
             application = JobApplication.active_objects.get(id=application_id)
         except JobApplication.DoesNotExist:
+            logger.warning(f"Job application not found: {application_id}")
             return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
-        if branch and application.branch != branch:
+
+        # Check branch authorization
+        if branch and application.branch_id != branch:
+            logger.warning(f"User not authorized to access application {application_id} for branch {branch}")
             return Response({"detail": "Not authorized to access this application."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Validate input data
         status_val = request.data.get('status')
         notes = request.data.get('notes', '')
-        if status_val not in ['pending', 'passed', 'failed']:
-            return Response({"detail": "Invalid status. Must be 'pending', 'passed', or 'failed'."}, status=status.HTTP_400_BAD_REQUEST)
-        updated_item = application.update_compliance_status(
-            item_id=item_id,
-            status=status_val,
-            checked_by=request.user,
-            notes=notes
-        )
+        if status_val not in ['accepted', 'rejected']:
+            logger.warning(f"Invalid status provided: {status_val}")
+            return Response({"detail": "Invalid status. Must be 'accepted' or 'rejected'."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch user details for checked_by
+        checked_by = None
+        try:
+            user_response = requests.get(
+                f'{settings.AUTH_SERVICE_URL}/api/user/users/{user_id}/',
+                headers={'Authorization': f'Bearer {request.META.get("HTTP_AUTHORIZATION", "").split(" ")[1] if request.META.get("HTTP_AUTHORIZATION") else ""}'}
+            )
+            if user_response.status_code == 200:
+                user_data = user_response.json()
+                checked_by = {
+                    'email': user_data.get('email', ''),
+                    'first_name': user_data.get('first_name', ''),
+                    'last_name': user_data.get('last_name', ''),
+                    'job_role': user_data.get('job_role', '')
+                }
+            else:
+                logger.error(f"Failed to fetch user {user_id} from auth_service: {user_response.status_code}")
+                return Response({"detail": "Failed to fetch user details."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            logger.error(f"Error fetching user {user_id}: {str(e)}")
+            return Response({"detail": "Error fetching user details."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Update compliance_status
+        updated_compliance_status = application.compliance_status.copy() if application.compliance_status else []
+        item_updated = False
+
+        for item in updated_compliance_status:
+            if str(item.get('id')) == str(item_id):
+                if not item.get('document'):
+                    logger.warning(f"No document found for compliance item {item_id} in application {application_id}")
+                    return Response({"detail": "No document found for this compliance item."}, status=status.HTTP_400_BAD_REQUEST)
+                item['status'] = status_val
+                item['notes'] = notes
+                item['checked_by'] = checked_by
+                item['checked_at'] = timezone.now().isoformat()
+                item_updated = True
+                logger.info(f"Updated compliance item {item_id} in application {application_id} to status {status_val}")
+                break
+
+        if not item_updated:
+            logger.warning(f"Compliance item {item_id} not found in application {application_id}")
+            return Response({"detail": f"Compliance item {item_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Save the updated application
+        with transaction.atomic():
+            application.compliance_status = updated_compliance_status
+            application.save()
+            logger.info(f"Job application {application_id} saved with updated compliance status")
+
+        serializer = JobApplicationSerializer(application, context={'request': request})
         return Response({
             "detail": "Compliance status updated successfully.",
-            "compliance_item": updated_item
+            "compliance_item": next((item for item in serializer.data['compliance_status'] if str(item['id']) == str(item_id)), None)
         }, status=status.HTTP_200_OK)
 
 class ApplicantComplianceUploadView(APIView):
-    serializer_class = SimpleMessageSerializer 
-    def get_permissions(self):
-        return [AllowAny()]  # Temporary for testing
+    permission_classes = [AllowAny]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
-    def put(self, request, job_application_id):
-        jwt_payload = getattr(request, 'jwt_payload', {})
-        role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')
+    def put(self, request):
+        unique_link = request.data.get('unique_link')
+        email = request.data.get('email')
+
+        if not unique_link:
+            return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
+        if not email:
+            return Response({"detail": "Missing email."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Extract tenant_id from unique_link
         try:
-            application = JobApplication.active_objects.get(id=job_application_id)
+            parts = unique_link.split('-')
+            if len(parts) < 5:
+                logger.warning(f"Invalid unique_link format: {unique_link}")
+                return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+            tenant_id = '-'.join(parts[:5])
+        except Exception as e:
+            logger.error(f"Error extracting tenant_id from link: {str(e)}")
+            return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch job requisition from Talent Engine
+        requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+        try:
+            resp = requests.get(requisition_url)
+            logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
+            if resp.status_code != 200:
+                error_detail = resp.json().get('detail', 'Invalid job requisition.') if resp.content else 'Invalid job requisition.'
+                return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+            job_requisition = resp.json()
+        except Exception as e:
+            logger.error(f"Error fetching job requisition: {str(e)}")
+            return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
+
+        # Get the job application
+        try:
+            application = JobApplication.active_objects.get(
+                tenant_id=tenant_id,
+                job_requisition_id=job_requisition['id'],
+                email=email
+            )
         except JobApplication.DoesNotExist:
+            logger.warning(f"Job application not found for email: {email}, requisition: {job_requisition['id']}")
             return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
-        if branch and application.branch != branch:
-            return Response({"detail": "Not authorized to access this application."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Initialize compliance_status if empty, using job_requisition's compliance_checklist
+        if not application.compliance_status:
+            application.compliance_status = [
+                {
+                    'id': item.get('id'),
+                    'name': item.get('name'),
+                    'description': item.get('description', ''),
+                    'required': item.get('required', True),
+                    'status': 'pending',
+                    'checked_by': None,
+                    'checked_at': None,
+                    'notes': '',
+                    'document': None
+                } for item in job_requisition.get('compliance_checklist', [])
+            ]
+            application.save()
+
+        # Process uploaded files and document IDs
         files = request.FILES.getlist('documents')
         document_ids = request.POST.getlist('document_ids')
-        document_names = request.POST.getlist('document_names')
-        if not files or len(files) != len(document_ids) or len(files) != len(document_names):
-            return Response({"detail": "Mismatch in documents, document_ids, or document_names."}, status=status.HTTP_400_BAD_REQUEST)
-        compliance_checklist = {item['id']: item['name'] for item in (application.compliance_status or [])}
+
+        if not files or len(files) != len(document_ids):
+            logger.warning(f"Mismatch in documents or document_ids: files={len(files)}, document_ids={len(document_ids)}")
+            return Response({"detail": "Mismatch in documents or document_ids."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate document_ids against compliance_checklist
+        compliance_checklist = {str(item['id']): item['name'] for item in (application.compliance_status or [])}
         for doc_id in document_ids:
             if doc_id not in compliance_checklist:
+                logger.warning(f"Invalid compliance item ID: {doc_id}")
                 return Response({"detail": f"Invalid compliance item ID: {doc_id}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Handle file uploads using dynamic storage
         documents_data = []
-        for i, (file, doc_id, doc_name) in enumerate(zip(files, document_ids, document_names)):
-            folder_path = os.path.join('compliance_documents', timezone.now().strftime('%Y/%m/%d'))
-            os.makedirs(os.path.join(settings.MEDIA_ROOT, folder_path), exist_ok=True)
-            file_extension = os.path.splitext(file.name)[1]
-            filename = f"{uuid.uuid4()}{file_extension}"
-            upload_path = os.path.join(folder_path, filename).replace('\\', '/')
-            full_upload_path = os.path.join(settings.MEDIA_ROOT, upload_path)
-            with open(full_upload_path, 'wb+') as destination:
-                for chunk in file.chunks():
-                    destination.write(chunk)
-            file_url = f"/media/{upload_path.lstrip('/')}"
-            documents_data.append({
-                'document_type': doc_id,
-                'file': file,
-                'file_url': file_url,
-                'uploaded_at': timezone.now().isoformat()
-            })
+        storage_type = getattr(settings, 'STORAGE_TYPE', 'supabase').lower()
+
+        for file, doc_id in zip(files, document_ids):
+            file_ext = os.path.splitext(file.name)[1]
+            filename = f"{uuid.uuid4()}{file_ext}"
+            folder_path = f"compliance_documents/{timezone.now().strftime('%Y/%m/%d')}"
+            file_path = f"{folder_path}/{filename}"
+            content_type = mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
+
+            try:
+                public_url = upload_file_dynamic(file, file_path, content_type, storage_type)
+                documents_data.append({
+                    'file_url': public_url,
+                    'uploaded_at': timezone.now().isoformat()
+                })
+                logger.info(f"Successfully uploaded file {file_path} for document_id {doc_id}")
+            except Exception as e:
+                logger.error(f"Failed to upload file {file_path}: {str(e)}")
+                return Response({"detail": f"Failed to upload document: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update compliance_status
         updated_compliance_status = application.compliance_status.copy() if application.compliance_status else []
-        for doc_id, doc_name, doc_data in zip(document_ids, document_names, documents_data):
+
+        for doc_id, doc_data in zip(document_ids, documents_data):
+            found = False
             for item in updated_compliance_status:
                 if str(item.get('id')) == str(doc_id):
-                    item['name'] = compliance_checklist[doc_id]
                     item['document'] = {
                         'file_url': doc_data['file_url'],
                         'uploaded_at': doc_data['uploaded_at']
                     }
                     item['status'] = 'uploaded'
                     item['notes'] = ''
+                    found = True
+                    logger.info(f"Updated compliance item {doc_id} with new document")
                     break
-            else:
+            if not found:
                 updated_compliance_status.append({
                     'id': doc_id,
-                    'name': compliance_checklist[doc_id],
+                    'name': compliance_checklist.get(doc_id),
                     'description': '',
                     'required': True,
                     'status': 'uploaded',
@@ -1501,9 +1482,14 @@ class ApplicantComplianceUploadView(APIView):
                         'uploaded_at': doc_data['uploaded_at']
                     }
                 })
+                logger.info(f"Added new compliance item {doc_id} with document")
+
+        # Save the updated application
         with transaction.atomic():
             application.compliance_status = updated_compliance_status
             application.save()
+            logger.info(f"Job application {application.id} updated with new compliance documents")
+
         serializer = JobApplicationSerializer(application, context={'request': request})
         return Response({
             "detail": "Compliance documents uploaded successfully.",

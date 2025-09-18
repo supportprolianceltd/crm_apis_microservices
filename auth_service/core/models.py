@@ -1,16 +1,11 @@
 from django_tenants.models import TenantMixin, DomainMixin
-from django.db import models
 import logging
-from django.db import models
 import uuid
-
-logger = logging.getLogger('core')
-
 from django_tenants.models import TenantMixin
 from django.db import models, transaction
-import uuid
-import logging
-
+from django.db import models
+from django_tenants.utils import tenant_context
+from django.utils import timezone
 logger = logging.getLogger('core')
 
 
@@ -24,7 +19,7 @@ class Tenant(TenantMixin):
     organizational_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
     unique_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, null=True)
 
-    # Other existing fields
+    # Other existing fields3
     logo = models.URLField(null=True, blank=True)
     email_host = models.CharField(max_length=255, null=True, blank=True)
     email_port = models.IntegerField(null=True, blank=True)
@@ -107,7 +102,6 @@ class TenantConfig(models.Model):
     logo = models.URLField(null=True, blank=True)  # Store Supabase public URL
     custom_fields = models.JSONField(default=dict)
     email_templates = models.JSONField(default=dict)
-
 
 
 

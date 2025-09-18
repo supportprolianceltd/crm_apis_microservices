@@ -8,7 +8,6 @@ from core.models import Tenant, Module, Branch
 from django.db.models import Max
 from django.db import models
 from core.models import Tenant
-import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils import timezone
@@ -17,12 +16,7 @@ from core.models import Tenant, Module, Branch
 from django.db.models import Max
 import uuid
 import logging
-
-def generate_kid():
-    return uuid.uuid4().hex
-
-def today():
-    return timezone.now().date()
+from django_tenants.utils import tenant_context
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils import timezone
@@ -936,3 +930,70 @@ class BlacklistedToken(models.Model):
 
 # docker compose exec auth-service python manage.py makemigrations users
 # docker compose exec auth-service python manage.py migrate
+
+
+
+
+class Document(models.Model):
+    tenant_id = models.CharField(max_length=255, blank=True, null=True)
+    title = models.CharField(max_length=255)
+    file_url = models.URLField(null=True, blank=True)  # Store the public URL from storage
+    file_path = models.CharField(max_length=255, null=True, blank=True)  # Store the storage path
+    file_type = models.CharField(max_length=50, null=True, blank=True)  # e.g., pdf, docx
+    file_size = models.BigIntegerField(null=True, blank=True)  # Size in bytes
+    version = models.CharField(max_length=10, default='v01')  # Version like v01, v02
+    uploaded_by_id = models.CharField(max_length=36, blank=True, null=True)  # Store CustomUser ID
+    updated_by_id = models.CharField(max_length=36, blank=True, null=True)  # Store CustomUser ID
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  # Track last update time
+    expiring_date = models.DateField(null=True, blank=True)  # Optional expiration date
+    status = models.CharField(
+        max_length=20,
+        choices=[('active', 'Active'), ('expired', 'Expired')],
+        default='active'
+    )
+    document_number = models.CharField(max_length=20, unique=True, blank=True)  # Auto-generated like DOC-0001
+
+    class Meta:
+        unique_together = ('tenant_id', 'title', 'version')
+        indexes = [
+            models.Index(fields=['tenant_id', 'document_number'], name='idx_doc_tenant_number'),
+        ]
+
+    def save(self, *args, **kwargs):
+        # Auto-generate document_number if not set
+        if not self.document_number:
+            
+            # Note: This assumes tenant_id can resolve to a tenant object for django-tenants
+            # If not using django-tenants, modify this logic
+            with tenant_context(self.tenant_id):
+                last_doc = Document.objects.filter(tenant_id=self.tenant_id).count() + 1
+                self.document_number = f"DOC-{str(last_doc).zfill(4)}"
+        
+        # Set status based on expiring_date
+        if self.expiring_date and self.expiring_date < timezone.now().date():
+            self.status = 'expired'
+        else:
+            self.status = 'active'
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.document_number} - {self.title} ({self.version})"
+
+
+class DocumentAcknowledgment(models.Model):
+    document = models.ForeignKey('Document', on_delete=models.CASCADE, related_name='acknowledgments')
+    user_id = models.CharField(max_length=36, blank=True, null=True)  # Store CustomUser ID
+    acknowledged_at = models.DateTimeField(auto_now_add=True)
+    tenant_id = models.CharField(max_length=255, blank=True, null=True)
+
+
+    class Meta:
+        unique_together = ('document', 'user_id')
+        indexes = [
+            models.Index(fields=['tenant_id', 'user_id'], name='idx_ack_tenant_user'),
+        ]
+
+    def __str__(self):
+        return f"User {self.user_id} acknowledged {self.document.title}"

@@ -9,13 +9,22 @@ from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger('job_applications')
 
+# public_paths = [
+#     '/api/docs/',
+#     '/api/schema/',
+#     '/api/health/',
+#     '/api/applications-engine/applications/parse-resume/autofill/',  # <-- Fix here
+#     '/api/applications-engine/apply-jobs/',
+#     '/api/applications-engine/applications/code/', 
+# ]
 public_paths = [
     '/api/docs/',
     '/api/schema/',
     '/api/health/',
-    '/api/applications-engine/applications/parse-resume/autofill/',  # <-- Fix here
+    '/api/applications-engine/applications/parse-resume/autofill/',
     '/api/applications-engine/apply-jobs/',
-    '/api/applications-engine/applications/code/', 
+    '/api/applications-engine/applications/code/',
+    '/api/applications-engine/applications/applicant/upload/',
 ]
 
 

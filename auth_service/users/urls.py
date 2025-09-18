@@ -1,9 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    UserViewSet, TermsAndConditionsView, PasswordResetRequestView, PasswordResetConfirmView,
+    UserViewSet, TermsAndConditionsView, PasswordResetRequestView, PasswordResetConfirmView,DocumentDetailView,DocumentListCreateView,
     UserPasswordRegenerateView, ClientViewSet, AdminUserCreateView, UserCreateView,RSAKeyPairCreateView,
-    UserBranchUpdateView, TenantUsersListView, BranchUsersListView, UserSessionViewSet,
+    UserBranchUpdateView, TenantUsersListView, BranchUsersListView, UserSessionViewSet,DocumentAcknowledgeView,
     LoginAttemptViewSet, BlockedIPViewSet, UserActivityViewSet, jwks_view, protected_view
 )
 
@@ -30,4 +30,8 @@ urlpatterns = [
     path('terms-and-conditions/', TermsAndConditionsView.as_view(), name='terms_and_conditions'),
 
     path('keys/create/', RSAKeyPairCreateView.as_view(), name='rsa-keypair-create'),
+
+    path('documents/', DocumentListCreateView.as_view(), name='document-list-create'),
+    path('documents/<int:id>/', DocumentDetailView.as_view(), name='document-detail'),
+    path('documents/<int:document_id>/acknowledge/', DocumentAcknowledgeView.as_view(), name='document-acknowledge'),
 ]

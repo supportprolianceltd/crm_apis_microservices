@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  messaging:
+    build: .
+    container_name: messaging
+    ports:
+      - "8004:8004"
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=notifications_service.settings
+      - REDIS_HOST=redis
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - redis
+      - kafka
+    networks:
+      - auth_service_default
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - auth_service_default
+
+  kafka:
+    image: bitnami/kafka:latest
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - auth_service_default
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    ports:
+      - "2181:2181"
+    networks:
+      - auth_service_default
+
+networks:
+  auth_service_default:
+    external: true

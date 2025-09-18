@@ -28,8 +28,6 @@ urlpatterns = [
     path('applications/recover/application/', RecoverSoftDeletedJobApplicationsView.as_view(), name='recover-applications'),
     path('applications/permanent-delete/application/', PermanentDeleteJobApplicationsView.as_view(), name='permanent-delete-applications'),
     
-    # https://server1.prolianceltd.com/api/applications-engine/applications/code/PRO-JA-0005/email/chinedu.okeke@example.com/with-schedules/schedules/?unique_link=2-PRO-react-frontend-engineer-f3137481
-
 
     path('applications/job-requisitions/<str:job_requisition_id>/applications/', JobApplicationsByRequisitionView.as_view(), name='job-applications-by-requisition'),
 
@@ -37,15 +35,14 @@ urlpatterns = [
     path('applications/code/<str:code>/email/<str:email>/with-schedules/schedules/', JobApplicationWithSchedulesView.as_view(), name='application-with-schedules'),
 
     # path('applications/<str:id>/with-schedules/schedules/', JobApplicationWithSchedulesView.as_view(), name='application-with-schedules'),
-    path('applications/compliance/<str:job_application_id>/compliance-items/<str:item_id>/', ComplianceStatusUpdateView.as_view(), name='applicant-compliance-status'),
-    path('applications/<str:job_application_id>/compliance-items/submit/', ComplianceStatusUpdateView.as_view(), name='submit-compliance-items'),
+    # path('applications/compliance/<str:job_application_id>/compliance-items/<str:item_id>/', ComplianceStatusUpdateView.as_view(), name='applicant-compliance-status'),
+    # path('applications/<str:job_application_id>/compliance-items/submit/', ComplianceStatusUpdateView.as_view(), name='submit-compliance-items'),
     
     #No Authentication required to update a pplicants data 
-    path('document/applications/applicant/upload/<str:job_application_id>/compliance-update/', ApplicantComplianceUploadView.as_view(), name='applicant-compliance-upload'),
-
-
-    path('applications/applicant/upload/<str:job_application_id>/compliance-items/', ComplianceStatusUpdateView.as_view(), name='applicant-compliance-status'),
-    path('applications/<str:job_application_id>/compliance-items/<str:item_id>/', ComplianceStatusUpdateView.as_view(), name='applicant-compliance-item-status'),
+    path('applications/applicant/upload/<str:job_application_id>/compliance-update/', ApplicantComplianceUploadView.as_view(), name='applicant-compliance-upload'),
+    
+    
+    path('applications/applicant/check/<str:job_application_id>/compliance/', ComplianceStatusUpdateView.as_view(), name='applicant-compliance-status'),
 
 
 

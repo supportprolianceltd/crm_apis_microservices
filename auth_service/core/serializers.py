@@ -1,24 +1,45 @@
-from rest_framework import serializers
-from core.models import Tenant, Domain, Module, TenantConfig, Branch
+import os
+import re
+import uuid
+import json
+import jwt
+import mimetypes
+import logging
+import requests
+from drf_spectacular.utils import extend_schema_field
+
 from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
+
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from django_tenants.utils import tenant_context
 
-import logging
-import re
-import uuid
-import os
-import mimetypes
-import json
-
-from utils.storage import get_storage_service
-from core.email_default_templates import default_templates
 from kafka import KafkaProducer
 
-logger = logging.getLogger('core')
+from core.models import Tenant, Domain, Module, TenantConfig, Branch
+from core.email_default_templates import default_templates
+
+from utils.storage import get_storage_service
+
+# Logger
+logger = logging.getLogger(__name__)
 
 
+
+def get_tenant_id_from_jwt(request):
+    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+    if not auth_header.startswith("Bearer "):
+        raise ValidationError("No valid Bearer token provided.")
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, options={"verify_signature": False})
+        return payload.get("tenant_unique_id")
+    except Exception:
+        raise ValidationError("Invalid JWT token.")
+    
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Branch
@@ -276,3 +297,5 @@ class PublicTenantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tenant
         fields = ['name', 'title', 'logo']
+
+

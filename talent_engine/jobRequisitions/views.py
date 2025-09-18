@@ -90,33 +90,6 @@ class PublicPublishedJobRequisitionsView(APIView):
 
 
 
-
-# class PublicPublishedRequisitionsByTenantView(APIView):
-#     permission_classes = []  # No auth required
-
-#     def get(self, request, tenant_unique_id):
-#         try:
-#             today = timezone.now().date()
-#             queryset = JobRequisition.active_objects.filter(
-#                 tenant_id=tenant_unique_id,
-#                 publish_status=True,
-#                 status='open',
-#                 is_deleted=False,
-#                 # deadline_date__gte=today
-#             )
-#             serializer = PublicJobRequisitionSerializer(queryset, many=True)
-#             logger.info(f"Fetched {queryset.count()} public 'open' requisitions for tenant: {tenant_unique_id}")
-#             return Response({
-#                 "count": queryset.count(),
-#                 "results": serializer.data
-#             }, status=status.HTTP_200_OK)
-#         except Exception as e:
-#             logger.error(f"Error fetching public requisitions for tenant {tenant_unique_id}: {str(e)}")
-#             return Response({"detail": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-
 class PublicPublishedRequisitionsByTenantView(APIView):
     permission_classes = []  # Public
 
@@ -166,8 +139,6 @@ class PublicPublishedRequisitionsByTenantView(APIView):
             return Response({"detail": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
-
 class PublicCloseJobRequisitionView(APIView):
     permission_classes = []  # No authentication required
 
@@ -188,8 +159,7 @@ class PublicCloseJobRequisitionView(APIView):
         except Exception as e:
             logger.error(f"Error closing job requisition {job_requisition_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-                 
+                         
 
 class JobRequisitionBulkDeleteView(generics.GenericAPIView):
     serializer_class = JobRequisitionSerializer
@@ -222,7 +192,6 @@ class JobRequisitionBulkDeleteView(generics.GenericAPIView):
         except Exception as e:
             logger.error(f"Bulk soft delete failed: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 class MyJobRequisitionListView(generics.ListCreateAPIView):
@@ -292,6 +261,8 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(branch=branch)
         return queryset
     
+        #Send notification to admin when job requisition is created
+    
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
@@ -307,8 +278,6 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
             branch=branch if role == 'recruiter' and branch else None
         )
         logger.info(f"Job requisition created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
-
-
 
 
 class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -340,8 +309,6 @@ class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
         tenant_id = jwt_payload.get('tenant_unique_id')
         instance.soft_delete()
         logger.info(f"Job requisition soft-deleted: {instance.title} for tenant {tenant_id}")
-
-
 
 
 class JobRequisitionByLinkView(generics.RetrieveAPIView):
@@ -382,7 +349,6 @@ class JobRequisitionByLinkView(generics.RetrieveAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class CustomJobRequisitionByLinkView(generics.RetrieveAPIView):
     serializer_class = JobRequisitionSerializer
     permission_classes = []
@@ -419,8 +385,6 @@ class CustomJobRequisitionByLinkView(generics.RetrieveAPIView):
         except Exception as e:
             logger.error(f"Error retrieving job requisition: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 
 class SoftDeletedJobRequisitionsView(generics.ListAPIView):
@@ -614,13 +578,6 @@ class ComplianceItemView(APIView):
             logger.exception(f"Error deleting compliance item {item_id} for JobRequisition {job_requisition_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-
-
-
-
-
-
-
 
 class VideoSessionViewSet(viewsets.ModelViewSet):
     serializer_class = VideoSessionSerializer
@@ -875,7 +832,6 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
         except VideoSession.DoesNotExist:
             logger.error(f"Session {session_id} not found or inactive for tenant {tenant_id}")
             return Response({'error': 'Session not found or inactive'}, status=status.HTTP_404_NOT_FOUND)
-
 
 
 class RequestListCreateView(generics.ListCreateAPIView):
