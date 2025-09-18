@@ -17,6 +17,8 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework.permissions import  AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.utils.text import slugify
+
 
 import os
 import uuid
@@ -1259,62 +1261,81 @@ class PermanentDeleteSchedulesView(APIView):
 
 
 
+# Assuming JobApplication and JobApplicationSerializer are defined elsewhere
+
 class ComplianceStatusUpdateView(APIView):
-    permission_classes = [AllowAny]  # Temporary for testing
+    permission_classes = [AllowAny]  # Temporary for testing; replace with IsAuthenticated in production
     parser_classes = [JSONParser]
 
-    def post(self, request, application_id, item_id):
+    def post(self, request, job_application_id):
+        # Extract item_id from request body
+        item_id = request.data.get('item_id')
+        if not item_id:
+            logger.warning("No item_id provided in request data")
+            return Response({"detail": "Item ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
         # Extract JWT payload for authorization
         jwt_payload = getattr(request, 'jwt_payload', {})
+        logger.info(f"JWT payload: {jwt_payload}")  # Log payload for debugging
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
-        user_id = jwt_payload.get('user_id')
+        user_id = jwt_payload.get('user', {}).get('id')  # Extract user_id from user.id
 
-        # Validate user_id
-        if not user_id:
-            logger.warning("No user_id found in JWT payload")
-            return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+        # Validate update data
+        update_data = {k: v for k, v in request.data.items() if k != 'item_id'}
+        if not update_data or not isinstance(update_data, dict):
+            logger.warning("No update data provided or invalid format")
+            return Response({"detail": "Update data must be a dictionary with fields to update."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Define valid fields
+        valid_fields = ['status', 'notes', 'description', 'required', 'checked_by', 'checked_at']
+        invalid_fields = [field for field in update_data if field not in valid_fields]
+        if invalid_fields:
+            logger.warning(f"Invalid fields provided: {invalid_fields}")
+            return Response({"detail": f"Invalid fields: {invalid_fields}. Must be one of {valid_fields}."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate status if provided
+        if 'status' in update_data and update_data['status'] not in ['pending', 'uploaded', 'accepted', 'rejected']:
+            logger.warning(f"Invalid status provided: {update_data['status']}")
+            return Response({"detail": "Invalid status. Must be 'pending', 'uploaded', 'accepted', or 'rejected'."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch user details for checked_by when updating status
+        checked_by = None
+        if 'status' in update_data:
+            if not user_id:
+                logger.warning("No user.id found in JWT payload for status update")
+                return Response({"detail": "Authentication required for status update."}, status=status.HTTP_401_UNAUTHORIZED)
+            try:
+                user_response = requests.get(
+                    f'{settings.AUTH_SERVICE_URL}/api/user/users/{user_id}/',
+                    headers={'Authorization': f'Bearer {request.META.get("HTTP_AUTHORIZATION", "").split(" ")[1] if request.META.get("HTTP_AUTHORIZATION") else ""}'}
+                )
+                if user_response.status_code == 200:
+                    user_data = user_response.json()
+                    checked_by = {
+                        'email': user_data.get('email', ''),
+                        'first_name': user_data.get('first_name', ''),
+                        'last_name': user_data.get('last_name', ''),
+                        'job_role': user_data.get('job_role', '')
+                    }
+                else:
+                    logger.error(f"Failed to fetch user {user_id} from auth_service: {user_response.status_code}")
+                    return Response({"detail": "Failed to fetch user details."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as e:
+                logger.error(f"Error fetching user {user_id}: {str(e)}")
+                return Response({"detail": "Error fetching user details."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Fetch the job application
         try:
-            application = JobApplication.active_objects.get(id=application_id)
+            application = JobApplication.active_objects.get(id=job_application_id)
         except JobApplication.DoesNotExist:
-            logger.warning(f"Job application not found: {application_id}")
+            logger.warning(f"Job application not found: {job_application_id}")
             return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Check branch authorization
+        # Check branch authorization if branch is provided
         if branch and application.branch_id != branch:
-            logger.warning(f"User not authorized to access application {application_id} for branch {branch}")
+            logger.warning(f"User not authorized to access application {job_application_id} for branch {branch}")
             return Response({"detail": "Not authorized to access this application."}, status=status.HTTP_403_FORBIDDEN)
-
-        # Validate input data
-        status_val = request.data.get('status')
-        notes = request.data.get('notes', '')
-        if status_val not in ['accepted', 'rejected']:
-            logger.warning(f"Invalid status provided: {status_val}")
-            return Response({"detail": "Invalid status. Must be 'accepted' or 'rejected'."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Fetch user details for checked_by
-        checked_by = None
-        try:
-            user_response = requests.get(
-                f'{settings.AUTH_SERVICE_URL}/api/user/users/{user_id}/',
-                headers={'Authorization': f'Bearer {request.META.get("HTTP_AUTHORIZATION", "").split(" ")[1] if request.META.get("HTTP_AUTHORIZATION") else ""}'}
-            )
-            if user_response.status_code == 200:
-                user_data = user_response.json()
-                checked_by = {
-                    'email': user_data.get('email', ''),
-                    'first_name': user_data.get('first_name', ''),
-                    'last_name': user_data.get('last_name', ''),
-                    'job_role': user_data.get('job_role', '')
-                }
-            else:
-                logger.error(f"Failed to fetch user {user_id} from auth_service: {user_response.status_code}")
-                return Response({"detail": "Failed to fetch user details."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except Exception as e:
-            logger.error(f"Error fetching user {user_id}: {str(e)}")
-            return Response({"detail": "Error fetching user details."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Update compliance_status
         updated_compliance_status = application.compliance_status.copy() if application.compliance_status else []
@@ -1322,26 +1343,29 @@ class ComplianceStatusUpdateView(APIView):
 
         for item in updated_compliance_status:
             if str(item.get('id')) == str(item_id):
-                if not item.get('document'):
-                    logger.warning(f"No document found for compliance item {item_id} in application {application_id}")
+                if not item.get('document') and 'status' in update_data and update_data['status'] in ['accepted', 'rejected']:
+                    logger.warning(f"No document found for compliance item {item_id} in application {job_application_id}")
                     return Response({"detail": "No document found for this compliance item."}, status=status.HTTP_400_BAD_REQUEST)
-                item['status'] = status_val
-                item['notes'] = notes
-                item['checked_by'] = checked_by
-                item['checked_at'] = timezone.now().isoformat()
+                # Update all provided fields
+                for field_name, field_value in update_data.items():
+                    item[field_name] = field_value
+                # Set checked_by and checked_at if status is updated
+                if 'status' in update_data and checked_by:
+                    item['checked_by'] = checked_by
+                    item['checked_at'] = timezone.now().isoformat()
                 item_updated = True
-                logger.info(f"Updated compliance item {item_id} in application {application_id} to status {status_val}")
+                logger.info(f"Updated compliance item {item_id} in application {job_application_id} with fields {list(update_data.keys())}")
                 break
 
         if not item_updated:
-            logger.warning(f"Compliance item {item_id} not found in application {application_id}")
+            logger.warning(f"Compliance item {item_id} not found in application {job_application_id}")
             return Response({"detail": f"Compliance item {item_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Save the updated application
         with transaction.atomic():
             application.compliance_status = updated_compliance_status
             application.save()
-            logger.info(f"Job application {application_id} saved with updated compliance status")
+            logger.info(f"Job application {job_application_id} saved with updated compliance status")
 
         serializer = JobApplicationSerializer(application, context={'request': request})
         return Response({
@@ -1349,60 +1373,71 @@ class ComplianceStatusUpdateView(APIView):
             "compliance_item": next((item for item in serializer.data['compliance_status'] if str(item['id']) == str(item_id)), None)
         }, status=status.HTTP_200_OK)
 
+
+
 class ApplicantComplianceUploadView(APIView):
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
-    def put(self, request):
+    def post(self, request, job_application_id):
+        return self._handle_upload(request, job_application_id)
+
+    def _handle_upload(self, request, job_application_id):
         unique_link = request.data.get('unique_link')
         email = request.data.get('email')
+        names = request.POST.getlist('names')  # Changed from document_ids to names
 
         if not unique_link:
             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
         if not email:
             return Response({"detail": "Missing email."}, status=status.HTTP_400_BAD_REQUEST)
+        if not names:
+            return Response({"detail": "No compliance item names provided."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Extract tenant_id from unique_link
         try:
             parts = unique_link.split('-')
-            if len(parts) < 5:
-                logger.warning(f"Invalid unique_link format: {unique_link}")
+            if len(parts) < 6:
                 return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
             tenant_id = '-'.join(parts[:5])
         except Exception as e:
-            logger.error(f"Error extracting tenant_id from link: {str(e)}")
+            logger.error(f"Error extracting tenant_id from {unique_link}: {str(e)}")
             return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Fetch job requisition from Talent Engine
-        requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+        # Fetch job requisition
         try:
+            requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
             resp = requests.get(requisition_url)
-            logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
             if resp.status_code != 200:
-                error_detail = resp.json().get('detail', 'Invalid job requisition.') if resp.content else 'Invalid job requisition.'
-                return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "Invalid job requisition."}, status=status.HTTP_400_BAD_REQUEST)
             job_requisition = resp.json()
         except Exception as e:
             logger.error(f"Error fetching job requisition: {str(e)}")
             return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
 
-        # Get the job application
+        # Retrieve job application
         try:
             application = JobApplication.active_objects.get(
+                id=job_application_id,
                 tenant_id=tenant_id,
                 job_requisition_id=job_requisition['id'],
                 email=email
             )
         except JobApplication.DoesNotExist:
-            logger.warning(f"Job application not found for email: {email}, requisition: {job_requisition['id']}")
             return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Initialize compliance_status if empty, using job_requisition's compliance_checklist
-        if not application.compliance_status:
-            application.compliance_status = [
-                {
-                    'id': item.get('id'),
-                    'name': item.get('name'),
+        # Initialize compliance_status if empty
+        if not application.compliance_status or len(application.compliance_status) == 0:
+            checklist = job_requisition.get('compliance_checklist', [])
+            application.compliance_status = []
+            for item in checklist:
+                name = item.get('name', '')
+                if not name:
+                    continue
+                generated_id = f"compliance-{slugify(name)}"
+                application.compliance_status.append({
+                    'id': generated_id,
+                    'name': name,
                     'description': item.get('description', ''),
                     'required': item.get('required', True),
                     'status': 'pending',
@@ -1410,30 +1445,29 @@ class ApplicantComplianceUploadView(APIView):
                     'checked_at': None,
                     'notes': '',
                     'document': None
-                } for item in job_requisition.get('compliance_checklist', [])
-            ]
+                })
             application.save()
+            application.refresh_from_db()
 
-        # Process uploaded files and document IDs
+        # Validate files and names
         files = request.FILES.getlist('documents')
-        document_ids = request.POST.getlist('document_ids')
+        if not files:
+            return Response({"detail": "No documents provided."}, status=status.HTTP_400_BAD_REQUEST)
+        if len(files) != len(names):
+            return Response({"detail": "Number of documents must match number of names."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not files or len(files) != len(document_ids):
-            logger.warning(f"Mismatch in documents or document_ids: files={len(files)}, document_ids={len(document_ids)}")
-            return Response({"detail": "Mismatch in documents or document_ids."}, status=status.HTTP_400_BAD_REQUEST)
+        # Map compliance item names to their generated IDs
+        compliance_checklist = {item['name']: item['id'] for item in application.compliance_status}
 
-        # Validate document_ids against compliance_checklist
-        compliance_checklist = {str(item['id']): item['name'] for item in (application.compliance_status or [])}
-        for doc_id in document_ids:
-            if doc_id not in compliance_checklist:
-                logger.warning(f"Invalid compliance item ID: {doc_id}")
-                return Response({"detail": f"Invalid compliance item ID: {doc_id}"}, status=status.HTTP_400_BAD_REQUEST)
+        for name in names:
+            if name not in compliance_checklist:
+                return Response({"detail": f"Invalid compliance item name: {name}. Must match checklist."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Handle file uploads using dynamic storage
+        # Upload files
         documents_data = []
         storage_type = getattr(settings, 'STORAGE_TYPE', 'supabase').lower()
 
-        for file, doc_id in zip(files, document_ids):
+        for file, name in zip(files, names):
             file_ext = os.path.splitext(file.name)[1]
             filename = f"{uuid.uuid4()}{file_ext}"
             folder_path = f"compliance_documents/{timezone.now().strftime('%Y/%m/%d')}"
@@ -1444,51 +1478,27 @@ class ApplicantComplianceUploadView(APIView):
                 public_url = upload_file_dynamic(file, file_path, content_type, storage_type)
                 documents_data.append({
                     'file_url': public_url,
-                    'uploaded_at': timezone.now().isoformat()
+                    'uploaded_at': timezone.now().isoformat(),
+                    'doc_id': compliance_checklist[name]  # Map name to generated ID
                 })
-                logger.info(f"Successfully uploaded file {file_path} for document_id {doc_id}")
             except Exception as e:
-                logger.error(f"Failed to upload file {file_path}: {str(e)}")
+                logger.error(f"Failed to upload document for {name}: {str(e)}")
                 return Response({"detail": f"Failed to upload document: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Update compliance_status
-        updated_compliance_status = application.compliance_status.copy() if application.compliance_status else []
-
-        for doc_id, doc_data in zip(document_ids, documents_data):
-            found = False
-            for item in updated_compliance_status:
-                if str(item.get('id')) == str(doc_id):
+        # Update compliance status
+        for doc in documents_data:
+            for item in application.compliance_status:
+                if item['id'] == doc['doc_id']:
                     item['document'] = {
-                        'file_url': doc_data['file_url'],
-                        'uploaded_at': doc_data['uploaded_at']
+                        'file_url': doc['file_url'],
+                        'uploaded_at': doc['uploaded_at']
                     }
                     item['status'] = 'uploaded'
                     item['notes'] = ''
-                    found = True
-                    logger.info(f"Updated compliance item {doc_id} with new document")
-                    break
-            if not found:
-                updated_compliance_status.append({
-                    'id': doc_id,
-                    'name': compliance_checklist.get(doc_id),
-                    'description': '',
-                    'required': True,
-                    'status': 'uploaded',
-                    'checked_by': None,
-                    'checked_at': None,
-                    'notes': '',
-                    'document': {
-                        'file_url': doc_data['file_url'],
-                        'uploaded_at': doc_data['uploaded_at']
-                    }
-                })
-                logger.info(f"Added new compliance item {doc_id} with document")
 
         # Save the updated application
         with transaction.atomic():
-            application.compliance_status = updated_compliance_status
             application.save()
-            logger.info(f"Job application {application.id} updated with new compliance documents")
 
         serializer = JobApplicationSerializer(application, context={'request': request})
         return Response({
