@@ -34,10 +34,7 @@ urlpatterns = [
 
     path('applications/code/<str:code>/email/<str:email>/with-schedules/schedules/', JobApplicationWithSchedulesView.as_view(), name='application-with-schedules'),
 
-    # path('applications/<str:id>/with-schedules/schedules/', JobApplicationWithSchedulesView.as_view(), name='application-with-schedules'),
-    # path('applications/compliance/<str:job_application_id>/compliance-items/<str:item_id>/', ComplianceStatusUpdateView.as_view(), name='applicant-compliance-status'),
-    # path('applications/<str:job_application_id>/compliance-items/submit/', ComplianceStatusUpdateView.as_view(), name='submit-compliance-items'),
-    
+
     #No Authentication required to update a pplicants data 
     path('applications/applicant/upload/<str:job_application_id>/compliance-update/', ApplicantComplianceUploadView.as_view(), name='applicant-compliance-upload'),
     

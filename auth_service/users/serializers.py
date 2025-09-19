@@ -10,7 +10,7 @@ import json
 import logging
 # Local App - Models
 from .models import (
-    CustomUser,
+    CustomUser,Group, GroupMembership,
     UserSession,
     UserProfile,
     ProfessionalQualification,
@@ -1461,4 +1461,52 @@ class DocumentAcknowledgmentSerializer(serializers.ModelSerializer):
         tenant_id = get_tenant_id_from_jwt(self.context['request'])
         validated_data['tenant_id'] = str(tenant_id)
         validated_data['user_id'] = self.context['request'].user.id  # Set from authenticated user
+        return super().create(validated_data)
+    
+
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ['id', 'name', 'description', 'tenant', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'tenant', 'created_at', 'updated_at']
+
+    def validate_name(self, value):
+        tenant = self.context['request'].user.tenant
+        with tenant_context(tenant):
+            if self.instance is None and Group.objects.filter(name=value, tenant=tenant).exists():
+                raise serializers.ValidationError(f"Group with name '{value}' already exists in this tenant.")
+        return value
+
+    def create(self, validated_data):
+        tenant = self.context['request'].user.tenant
+        validated_data['tenant'] = tenant
+        return super().create(validated_data)
+
+class GroupMembershipSerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    group_name = serializers.CharField(source='group.name', read_only=True)
+
+    class Meta:
+        model = GroupMembership
+        fields = ['id', 'group', 'user', 'user_email', 'group_name', 'tenant', 'joined_at']
+        read_only_fields = ['id', 'tenant', 'joined_at', 'user_email', 'group_name']
+
+    def validate(self, data):
+        tenant = self.context['request'].user.tenant
+        group = data.get('group')
+        user = data.get('user')
+        
+        with tenant_context(tenant):
+            if not Group.objects.filter(id=group.id, tenant=tenant).exists():
+                raise serializers.ValidationError({"group": "Group does not belong to this tenant."})
+            if not CustomUser.objects.filter(id=user.id, tenant=tenant).exists():
+                raise serializers.ValidationError({"user": "User does not belong to this tenant."})
+            if GroupMembership.objects.filter(group=group, user=user).exists():
+                raise serializers.ValidationError("User is already a member of this group.")
+        return data
+
+    def create(self, validated_data):
+        validated_data['tenant'] = self.context['request'].user.tenant
         return super().create(validated_data)

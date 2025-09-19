@@ -26,6 +26,9 @@ from django.db.models import Max
 import uuid
 import logging
 
+
+
+
 logger = logging.getLogger('users')
 
 def generate_kid():
@@ -997,3 +1000,39 @@ class DocumentAcknowledgment(models.Model):
 
     def __str__(self):
         return f"User {self.user_id} acknowledged {self.document.title}"
+
+
+
+
+class Group(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='groups')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('tenant', 'name')
+        indexes = [
+            models.Index(fields=['tenant', 'name']),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.tenant.name})"
+
+class GroupMembership(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='memberships')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='group_memberships')
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('group', 'user')
+        indexes = [
+            models.Index(fields=['group', 'user']),
+            models.Index(fields=['tenant', 'user']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.email} in {self.group.name}"

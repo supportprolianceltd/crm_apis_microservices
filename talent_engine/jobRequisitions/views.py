@@ -139,27 +139,56 @@ class PublicPublishedRequisitionsByTenantView(APIView):
             return Response({"detail": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class PublicCloseJobRequisitionView(APIView):
-    permission_classes = []  # No authentication required
+# class PublicCloseJobRequisitionView(APIView):
+#     permission_classes = []  # No authentication required
 
-    def post(self, request, job_requisition_id):
-        try:
-            job_req = JobRequisition.active_objects.get(id=job_requisition_id)
-            job_req.status = 'closed'
-            job_req.save(update_fields=['status', 'updated_at'])
-            logger.info(f"JobRequisition {job_requisition_id} status changed to closed (public endpoint)")
-            return Response({
-                "detail": f"Job requisition {job_requisition_id} status changed to closed.",
-                "id": job_requisition_id,
-                "status": job_req.status
-            }, status=status.HTTP_200_OK)
-        except JobRequisition.DoesNotExist:
-            logger.warning(f"JobRequisition {job_requisition_id} not found for public close")
-            return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            logger.error(f"Error closing job requisition {job_requisition_id}: {str(e)}")
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#     def post(self, request, job_requisition_id):
+#         try:
+#             job_req = JobRequisition.active_objects.get(id=job_requisition_id)
+#             job_req.status = 'closed'
+#             job_req.save(update_fields=['status', 'updated_at'])
+#             logger.info(f"JobRequisition {job_requisition_id} status changed to closed (public endpoint)")
+#             return Response({
+#                 "detail": f"Job requisition {job_requisition_id} status changed to closed.",
+#                 "id": job_requisition_id,
+#                 "status": job_req.status
+#             }, status=status.HTTP_200_OK)
+#         except JobRequisition.DoesNotExist:
+#             logger.warning(f"JobRequisition {job_requisition_id} not found for public close")
+#             return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             logger.error(f"Error closing job requisition {job_requisition_id}: {str(e)}")
+#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                          
+# views.py
+class PublicCloseJobRequisitionBatchView(APIView):
+    permission_classes = []  # public endpoint
+
+    def post(self, request):
+        job_ids = request.data.get("job_requisition_ids", [])
+        if not job_ids:
+            return Response({"detail": "No job requisitions provided."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        closed_jobs = []
+        not_found_jobs = []
+
+        for job_id in job_ids:
+            try:
+                job_req = JobRequisition.active_objects.get(id=job_id)
+                job_req.status = 'closed'
+                job_req.save(update_fields=['status', 'updated_at'])
+                closed_jobs.append(job_id)
+            except JobRequisition.DoesNotExist:
+                not_found_jobs.append(job_id)
+            except Exception as e:
+                logger.error(f"Error closing job {job_id}: {str(e)}")
+
+        return Response({
+            "closed_jobs": closed_jobs,
+            "not_found_jobs": not_found_jobs
+        }, status=status.HTTP_200_OK)
+
+
 
 class JobRequisitionBulkDeleteView(generics.GenericAPIView):
     serializer_class = JobRequisitionSerializer

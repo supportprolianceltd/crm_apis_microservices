@@ -38,7 +38,9 @@ services:
       - ./job_applications_logs:/app/job_applications_logs
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
-    command: gunicorn job_applications.wsgi:application --bind 0.0.0.0:8003 --workers=1 --timeout 120
+    command: >
+      sh -c "/app/wait-for-it.sh kafka:9092 -t 60 -- 
+             gunicorn job_applications.wsgi:application --bind 0.0.0.0:8003 --workers=1 --timeout 120"
     depends_on:
       job_app_postgres:
         condition: service_healthy

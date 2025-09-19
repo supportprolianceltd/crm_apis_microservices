@@ -17,7 +17,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', 'auth_service', 'http://localhost:9090', '*'])
-
+NOTIFICATIONS_SERVICE_URL = env('NOTIFICATIONS_SERVICE_URL', default='http://app:3001')
 # Application Definition
 INSTALLED_APPS = [
     'django_tenants',  # Multi-tenancy support
@@ -146,6 +146,7 @@ SOCIALACCOUNT_PROVIDERS = {
 # Kafka Configuration
 KAFKA_BOOTSTRAP_SERVERS = env.list('KAFKA_BOOTSTRAP_SERVERS', default=['kafka:9092'])
 KAFKA_TOPIC_USER_EVENTS = 'user-events'
+KAFKA_TOPIC_TENANT_EVENTS = 'tenant-created'
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
@@ -233,6 +234,11 @@ LOGGING = {
             'propagate': False,
         },
         'utils.supabase': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'auth_service': {  # Add this logger configuration
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': False,

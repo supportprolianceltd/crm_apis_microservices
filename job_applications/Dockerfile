@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     libssl-dev \
     build-essential \
+    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -24,6 +25,10 @@ RUN python -c "from transformers import AutoTokenizer, AutoModelForTokenClassifi
 # Copy project files
 COPY . .
 COPY .env .env
+COPY wait-for-it.sh /app/wait-for-it.sh
+
+# Make wait-for-it.sh executable
+RUN chmod +x /app/wait-for-it.sh
 
 # Create directories for logs and media
 RUN mkdir -p /app/logs /app/media /app/staticfiles
@@ -37,5 +42,3 @@ EXPOSE 8003
 
 # Make entrypoint script executable
 RUN chmod +x entrypoint.sh
-
-

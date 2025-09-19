@@ -20,6 +20,11 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Toke
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from kafka import KafkaProducer
+import requests
+import uuid
+from django.utils.timezone import now
+from django.conf import settings
+
 from django_tenants.utils import tenant_context
 from core.models import Tenant
 from users.models import CustomUser, UserProfile, BlacklistedToken, RSAKeyPair, UserActivity,BlockedIP
@@ -99,12 +104,148 @@ class TokenValidateView(APIView):
             # logger.info(f"TokenValidateView response: {response_data}")
             return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
 
+
+
 class CustomTokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         return super().get_token(user)
 
+    # def validate(self, attrs):
+    #     ip_address = self.context['request'].META.get('REMOTE_ADDR')
+    #     user_agent = self.context['request'].META.get('HTTP_USER_AGENT', '')
+    #     tenant = self.context['request'].tenant
+
+    #     with tenant_context(tenant):
+    #         user = authenticate(
+    #             email=attrs.get("email"),
+    #             password=attrs.get("password")
+    #         )
+    #         if not user:
+    #             UserActivity.objects.create(
+    #                 user=None,
+    #                 tenant=tenant,
+    #                 action='login',
+    #                 performed_by=None,
+    #                 details={'reason': 'Invalid credentials'},
+    #                 ip_address=ip_address,
+    #                 user_agent=user_agent,
+    #                 success=False
+    #             )
+    #             raise serializers.ValidationError("Invalid credentials")
+
+    #         if user.is_locked or not user.is_active:
+    #             UserActivity.objects.create(
+    #                 user=user,
+    #                 tenant=tenant,
+    #                 action='login',
+    #                 performed_by=None,
+    #                 details={'reason': 'Account locked or suspended'},
+    #                 ip_address=ip_address,
+    #                 user_agent=user_agent,
+    #                 success=False
+    #             )
+    #             raise serializers.ValidationError("Account is locked or suspended")
+
+    #         logger.info("📤 Sending login success event to notifications service")
+
+    #         try:
+    #             event_payload = {
+    #                 "metadata": {
+    #                     "tenant_id": str(tenant.unique_id),
+    #                     "event_type": "user.login.succeeded",
+    #                     "event_id": str(uuid.uuid4()),
+    #                     "created_at": now().isoformat(),
+    #                     "source": "auth-service"
+    #                 },
+    #                 "data": {
+    #                     "user_email": user.email,
+    #                     "ip": ip_address,
+    #                     "time": now().isoformat(),
+    #                     "user_id": str(user.id)
+    #                 }
+    #             }
+
+    #             notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
+    #             logger.info(f"➡️ POST to {notifications_url} with payload: {event_payload}")
+                
+    #             response = requests.post(notifications_url, json=event_payload, timeout=5)
+                
+    #             logger.info(f"✅ Notification sent. Status: {response.status_code}, Response: {response.text}")
+
+    #         except Exception as e:
+    #             logger.warning(f"[❌ Notification Error] Failed to send login event: {str(e)}")
+
+
+    #         if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+    #             UserActivity.objects.create(
+    #                 user=user,
+    #                 tenant=tenant,
+    #                 action='login',
+    #                 performed_by=None,
+    #                 details={'reason': 'IP address blocked'},
+    #                 ip_address=ip_address,
+    #                 user_agent=user_agent,
+    #                 success=False
+    #             )
+    #             raise serializers.ValidationError("This IP address is blocked")
+
+    #         user.reset_login_attempts()
+    #         UserActivity.objects.create(
+    #             user=user,
+    #             tenant=tenant,
+    #             action='login',
+    #             performed_by=None,
+    #             details={},
+    #             ip_address=ip_address,
+    #             user_agent=user_agent,
+    #             success=True
+    #         )
+
+    #         access_payload = {
+    #             "jti": str(uuid.uuid4()),
+    #             "sub": user.email,
+    #             "role": user.role,
+    #             "status": user.status,
+    #             "tenant_id": user.tenant.id,
+    #             "tenant_organizational_id": str(tenant.organizational_id),
+    #             "tenant_unique_id": str(tenant.unique_id),
+    #             "tenant_schema": user.tenant.schema_name,
+    #             "has_accepted_terms": user.has_accepted_terms,
+    #             "user": CustomUserMinimalSerializer(user).data,
+    #             "email": user.email,
+    #             "type": "access",
+    #             "exp": (timezone.now() + timedelta(minutes=15)).timestamp(),
+    #         }
+    #         access_token = issue_rsa_jwt(access_payload, user.tenant)
+
+    #         refresh_jti = str(uuid.uuid4())
+    #         refresh_payload = {
+    #             "jti": refresh_jti,
+    #             "sub": user.email,
+    #             "tenant_id": user.tenant.id,
+    #             "tenant_organizational_id": str(user.tenant.organizational_id),
+    #             "tenant_unique_id": str(user.tenant.unique_id),
+    #             "type": "refresh",
+    #             "exp": (timezone.now() + timedelta(days=7)).timestamp(),
+    #         }
+    #         refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
+
+    #         data = {
+    #             "access": access_token,
+    #             "refresh": refresh_token,
+    #             "tenant_id": user.tenant.id,
+    #             "tenant_organizational_id": str(user.tenant.organizational_id),
+    #             "tenant_unique_id": str(user.tenant.unique_id),
+    #             "tenant_schema": user.tenant.schema_name,
+    #             "user": CustomUserMinimalSerializer(user).data,
+    #             "has_accepted_terms": user.has_accepted_terms,
+    #         }
+    #         return data
+
     def validate(self, attrs):
+        print("🔥🔥🔥 validate() from CustomTokenSerializer called!")
+
         ip_address = self.context['request'].META.get('REMOTE_ADDR')
         user_agent = self.context['request'].META.get('HTTP_USER_AGENT', '')
         tenant = self.context['request'].tenant
@@ -114,6 +255,7 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
                 email=attrs.get("email"),
                 password=attrs.get("password")
             )
+
             if not user:
                 UserActivity.objects.create(
                     user=None,
@@ -153,6 +295,7 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
                 )
                 raise serializers.ValidationError("This IP address is blocked")
 
+            # ✅ SUCCESS: Reset login attempts & log activity
             user.reset_login_attempts()
             UserActivity.objects.create(
                 user=user,
@@ -165,6 +308,39 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
                 success=True
             )
 
+            # ✅ SEND NOTIFICATION EVENT AFTER LOGIN SUCCESS
+            logger.info("🎯 Reached login success block. Sending login event to notification service.")
+            try:
+                event_payload = {
+                    "metadata": {
+                        "tenant_id": str(tenant.unique_id),
+                        "event_type": "user.login.succeeded",
+                        "event_id": str(uuid.uuid4()),
+                        "created_at": timezone.now().isoformat(),
+                        "source": "auth-service"
+                    },
+                    "data": {
+                        "user_email": user.email,
+                        "ip_address": ip_address,
+                        "timestamp": timezone.now().isoformat(),
+                        "user_id": str(user.id),
+                        "user_agent": user_agent
+                    }
+                }
+
+                notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
+                logger.info(f"➡️ POST to {notifications_url} with payload: {event_payload}")
+
+                response = requests.post(notifications_url, json=event_payload, timeout=5)
+                response.raise_for_status()  # Raise if status != 200
+                logger.info(f"✅ Notification sent. Status: {response.status_code}, Response: {response.text}")
+
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"[❌ Notification Error] Failed to send login event: {str(e)}")
+            except Exception as e:
+                logger.error(f"[❌ Notification Exception] Unexpected error: {str(e)}")
+
+            # ✅ Issue JWT Tokens
             access_payload = {
                 "jti": str(uuid.uuid4()),
                 "sub": user.email,
@@ -204,10 +380,18 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
                 "user": CustomUserMinimalSerializer(user).data,
                 "has_accepted_terms": user.has_accepted_terms,
             }
+
             return data
+
+
+
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenSerializer
+
+
+
 
 class CustomTokenRefreshView(APIView):
     permission_classes = [AllowAny]

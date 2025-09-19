@@ -24,7 +24,11 @@ urlpatterns = [
 
     path('requisitions/public/published/<str:tenant_unique_id>/', PublicPublishedRequisitionsByTenantView.as_view(),name='public-tenant-published-requisitions'),
 
-    path('requisitions/public/close/<str:job_requisition_id>/', PublicCloseJobRequisitionView.as_view(), name='public-close-requisition'),
+    # path('requisitions/public/close/<str:job_requisition_id>/', PublicCloseJobRequisitionView.as_view(), name='public-close-requisition'),
+
+    # urls.py
+    path('requisitions/public/close/batch/', PublicCloseJobRequisitionBatchView.as_view(), name='public-close-requisition-batch'),
+
     path('requisitions/<str:id>/', JobRequisitionDetailView.as_view(), name='requisition-detail'),
     path('requisitions/bulk/bulk-delete/', JobRequisitionBulkDeleteView.as_view(), name='requisition-bulk-delete'),
     path('requisitions/deleted/soft_deleted/', SoftDeletedJobRequisitionsView.as_view(), name='soft-deleted-requisitions'),

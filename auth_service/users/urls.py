@@ -1,11 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    UserViewSet, TermsAndConditionsView, PasswordResetRequestView, PasswordResetConfirmView,DocumentDetailView,DocumentListCreateView,
-    UserPasswordRegenerateView, ClientViewSet, AdminUserCreateView, UserCreateView,RSAKeyPairCreateView,
-    UserBranchUpdateView, TenantUsersListView, BranchUsersListView, UserSessionViewSet,DocumentAcknowledgeView,
-    LoginAttemptViewSet, BlockedIPViewSet, UserActivityViewSet, jwks_view, protected_view
+    UserViewSet, TermsAndConditionsView, PasswordResetRequestView, PasswordResetConfirmView, DocumentDetailView, DocumentListCreateView,
+    UserPasswordRegenerateView, ClientViewSet, AdminUserCreateView, UserCreateView, RSAKeyPairCreateView,
+    UserBranchUpdateView, TenantUsersListView, BranchUsersListView, UserSessionViewSet, DocumentAcknowledgeView,
+    LoginAttemptViewSet, BlockedIPViewSet, UserActivityViewSet, jwks_view, protected_view, GroupViewSet
 )
+
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
@@ -14,12 +15,13 @@ router.register(r'user-sessions', UserSessionViewSet, basename='user-session')
 router.register(r'login-attempts', LoginAttemptViewSet, basename='login-attempt')
 router.register(r'blocked-ips', BlockedIPViewSet, basename='blocked-ip')
 router.register(r'user-activities', UserActivityViewSet, basename='user-activity')
+router.register(r'groups', GroupViewSet, basename='group')
 
 urlpatterns = [
     path('', include(router.urls)),
     path('protected/', protected_view, name='protected_token'),
     path('api/jwks/<int:tenant_id>/', jwks_view, name='jwks'),
-    path('users/create/', UserCreateView.as_view(), name='users_user_create'),
+    # path('users/create/', UserCreateView.as_view(), name='users_user_create'),
     path('users/admin/create/', AdminUserCreateView.as_view(), name='users_admin_create'),
     path('users/<int:user_id>/branch/', UserBranchUpdateView.as_view(), name='users_branch_update'),
     path('password/regenerate/', UserPasswordRegenerateView.as_view(), name='users_regenerate_password'),

@@ -139,7 +139,7 @@ REST_FRAMEWORK = {
 AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
 TALENT_ENGINE_URL = env('TALENT_ENGINE_URL', default='http://talent-engine:8002')
 JOB_APPLICATIONS_URL = env('JOB_APPLICATIONS_URL', default='http://job-applications:8003')
-NOTIFICATIONS_EVENT_URL = env('NOTIFICATIONS_EVENT_URL', default='http://app:3000/events/')
+NOTIFICATIONS_SERVICE_URL = env('NOTIFICATIONS_SERVICE_URL', default='http://app:3001')
 SUPABASE_URL = env('SUPABASE_URL', default='')
 SUPABASE_KEY = env('SUPABASE_KEY', default='')
 SUPABASE_BUCKET = env('SUPABASE_BUCKET', default='')
@@ -258,6 +258,6 @@ CELERY_ENABLE_UTC = True
 CELERY_BEAT_SCHEDULE = {
     'auto-screen-all-applications-at-midnight': {
         'task': 'job_application.tasks.auto_screen_all_applications',
-        'schedule': crontab(hour=16, minute=20),  # Runs daily at 16:17 UTC
+        'schedule': crontab(hour=23, minute=0),  # Runs daily at 23:00 UTC
     },
 }

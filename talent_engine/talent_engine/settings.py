@@ -144,6 +144,7 @@ REST_FRAMEWORK = {
 # ======================== External Services ========================
 AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
 JOB_APPLICATIONS_URL = env('JOB_APPLICATIONS_URL', default='http://job-applications:8003')
+NOTIFICATIONS_SERVICE_URL = env('NOTIFICATIONS_SERVICE_URL', default='http://app:3001')
 
 SUPABASE_URL = env('SUPABASE_URL', default='')
 SUPABASE_KEY = env('SUPABASE_KEY', default='')

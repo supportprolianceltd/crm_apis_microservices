@@ -428,9 +428,44 @@ def extract_experience_entries(resume_text):
     
     return experience
 
-def extract_resume_fields(resume_text):
+
+
+def extract_name_from_resume(resume_text):
+    """
+    Attempts to extract the full name from resume text using multiple patterns:
+    1. Explicit "First Name" and "Last Name" labels.
+    2. Full name line at the top of the document.
+    """
+    # Try pattern 1: First Name: John, Last Name: Doe
+    first_name_match = re.search(r'First Name[:\-]?\s*([A-Z][a-z]+)', resume_text, re.IGNORECASE)
+    last_name_match = re.search(r'Last Name[:\-]?\s*([A-Z][a-z]+)', resume_text, re.IGNORECASE)
+
+    if first_name_match and last_name_match:
+        return f"{first_name_match.group(1)} {last_name_match.group(1)}"
+
+    # Try pattern 2: Full name at top of resume (e.g., John Doe)
+    full_name_match = re.search(r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)', resume_text, re.MULTILINE)
+    if full_name_match:
+        return full_name_match.group(1)
+
+    return ""
+
+
+
+def extract_name_from_filename(filename):
+    """
+    Extracts a name from the resume filename if it resembles a full name.
+    Example: "Blessing Okonkwo.pdf" => "Blessing Okonkwo"
+    """
+    name_part = os.path.splitext(filename)[0]
+    if re.match(r'^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+$', name_part):
+        return name_part
+    return ""
+
+def extract_resume_fields(resume_text, resume_filename=None):
     """
     Extracts structured fields from resume text using NER, regex, and heuristics.
+    Optionally takes `resume_filename` for fallback name extraction.
     """
     try:
         logger.info(f"Extracting fields from resume text of length: {len(resume_text)}")
@@ -449,31 +484,37 @@ def extract_resume_fields(resume_text):
             logger.warning("Resume text is too short or empty, skipping extraction")
             return extracted_data
 
-        # More robust email pattern
+        # Email
         email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         email_match = re.search(email_pattern, resume_text)
-        
-        # More robust phone pattern
-        phone_pattern = r'(\+?(\d{1,3})?[\s-]?)?(\(?\d{3}\)?[\s-]?)?\d{3}[\s-]?\d{4}'
-        phone_match = re.search(phone_pattern, resume_text)
-        
-        # More robust name extraction
-        name_pattern = r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)'
-        name_match = re.search(name_pattern, resume_text, re.MULTILINE)
-        
         if email_match:
             extracted_data["email"] = email_match.group(0)
             logger.info(f"Found email: {email_match.group(0)}")
-        
+
+        # Phone
+        phone_pattern = r'(\+?(\d{1,3})?[\s-]?)?(\(?\d{3}\)?[\s-]?)?\d{3}[\s-]?\d{4}'
+        phone_match = re.search(phone_pattern, resume_text)
         if phone_match:
             extracted_data["phone"] = phone_match.group(0)
             logger.info(f"Found phone: {phone_match.group(0)}")
-        
-        if name_match:
-            extracted_data["full_name"] = name_match.group(1)
-            logger.info(f"Found name: {name_match.group(1)}")
-        
-        # Try to extract qualifications using multiple patterns
+
+        # Full name (from text)
+        full_name = extract_name_from_resume(resume_text)
+        if full_name:
+            extracted_data["full_name"] = full_name
+            logger.info(f"Found full name from text: {full_name}")
+        elif resume_filename:
+            # Try fallback: name from filename
+            full_name = extract_name_from_filename(resume_filename)
+            if full_name:
+                extracted_data["full_name"] = full_name
+                logger.info(f"Fallback: extracted full name from filename: {full_name}")
+            else:
+                logger.warning("Could not extract full name.")
+        else:
+            logger.warning("Could not extract full name.")
+
+        # Qualifications
         qualification_patterns = [
             r'(Bachelor|B\.?Sc|B\.?Eng|B\.?Tech|B\.?Com)',
             r'(Master|M\.?Sc|M\.?Eng|M\.?Tech|M\.?Com)',
@@ -481,45 +522,40 @@ def extract_resume_fields(resume_text):
             r'(Diploma|Certificate|Associate)',
             r'(High School|Secondary School)'
         ]
-        
         qualifications = []
         for pattern in qualification_patterns:
             matches = re.findall(pattern, resume_text, re.IGNORECASE)
             qualifications.extend(matches)
-        
         if qualifications:
             extracted_data["qualification"] = ", ".join(set(qualifications))
             logger.info(f"Found qualifications: {extracted_data['qualification']}")
-        
-        # Extract skills using common section headers
+
+        # Skills
         skill_patterns = [
             r'(?:Skills|Technologies|Proficiencies|Expertise)[:\s]*(.*?)(?:\n\n|\n[A-Z]|$)',
             r'(?:Programming Languages|Frameworks|Tools)[:\s]*(.*?)(?:\n\n|\n[A-Z]|$)'
         ]
-        
         skills = []
         for pattern in skill_patterns:
             match = re.search(pattern, resume_text, re.IGNORECASE | re.DOTALL)
             if match:
                 skills_text = match.group(1)
-                # Extract individual skills
                 skill_items = re.findall(r'[A-Za-z+.#]+', skills_text)
                 skills.extend(skill_items)
-        
         if skills:
             extracted_data["knowledge_skill"] = ", ".join(set(skills))
             logger.info(f"Found skills: {extracted_data['knowledge_skill']}")
-        
-        # Simple experience extraction (just look for years)
+
+        # Experience
         experience_pattern = r'(\d+)\s*(?:years?|yrs?)\s*(?:of|experience)'
         experience_match = re.search(experience_pattern, resume_text, re.IGNORECASE)
-        
         if experience_match:
             extracted_data["experience"] = [f"{experience_match.group(1)} years of experience"]
             logger.info(f"Found experience: {extracted_data['experience']}")
 
         logger.info(f"Final extracted data: {extracted_data}")
         return extracted_data
+
     except Exception as e:
         logger.exception(f"Error extracting fields from resume: {str(e)}")
         return {}

@@ -41,6 +41,7 @@ PUBLIC_PATHS = [
     "/api/applications-engine/apply-jobs/",
     "/api/applications-engine/applications/code/",
     "/api/applications-engine/applications/applicant/upload/",
+    "/api/talent-engine/requisitions/public/close/batch/",
 ]
 
 @csrf_exempt

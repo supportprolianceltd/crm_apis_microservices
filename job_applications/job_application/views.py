@@ -1,62 +1,42 @@
-import logging
 import os
-from urllib import request
 import uuid
-import requests
-import time
-import tempfile
-import mimetypes
-from kafka import KafkaProducer
 import json
-from django.conf import settings
-from django.utils import timezone
-from django.db import transaction
+import time
+import logging
+import mimetypes
+import tempfile
+import requests
 import concurrent.futures
-from rest_framework import generics, status
-from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
-from rest_framework.permissions import  AllowAny
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from urllib import request
+from kafka import KafkaProducer
+
+from django.conf import settings
+from django.db import transaction
+from django.utils import timezone
 from django.utils.text import slugify
 
-
-import os
-import uuid
-import logging
-from django.conf import settings
-from django.utils import timezone
-from django.db import transaction
+from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.permissions import AllowAny
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-import requests
-import mimetypes
-from .models import JobApplication
-from .serializers import JobApplicationSerializer
-from utils.supabase import  upload_file_dynamic
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from rest_framework.pagination import PageNumberPagination
 
-logger = logging.getLogger(__name__)
-import requests
-from django.conf import settings
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from job_application.models import JobApplication, Schedule
-from job_application.serializers import JobApplicationSerializer, ScheduleSerializer, SimpleMessageSerializer
-
-
-from .models import JobApplication, Schedule
-from .serializers import (
-    JobApplicationSerializer, ScheduleSerializer, ComplianceStatusSerializer, SimpleMessageSerializer,
-      PublicJobApplicationSerializer, get_tenant_id_from_jwt)
 from utils.screen import parse_resume, screen_resume, extract_resume_fields
 from utils.email_utils import send_screening_notification
-from .tenant_utils import resolve_tenant_from_unique_link
-from job_applications.celery_task import screen_resumes_task
-from rest_framework.pagination import PageNumberPagination
+from utils.supabase import upload_file_dynamic
+from .serializers import (
+    JobApplicationSerializer,
+    ScheduleSerializer,
+    ComplianceStatusSerializer,
+    SimpleMessageSerializer,
+    PublicJobApplicationSerializer
+)
+
+import logging
 logger = logging.getLogger('job_applications')
+
 
 def get_job_requisition_by_id(job_requisition_id, request):
     try:
@@ -146,7 +126,7 @@ class ResumeParseView(APIView):
                 
             # Extract fields with timeout
             try:
-                extracted_data = extract_resume_fields(resume_text)
+                extracted_data = extract_resume_fields(resume_text, resume_file.name)
             except Exception as e:
                 logger.error(f"Field extraction failed: {str(e)}")
                 return Response({"detail": "Failed to extract fields from resume."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -161,6 +141,328 @@ class ResumeParseView(APIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# FOR LARGER FILES USE MULTI-THREADED FOR THIS FOR  APPLICATIONS UP TO A THOUSAND
+# class ResumeScreeningView(APIView):
+#     serializer_class = SimpleMessageSerializer
+#     parser_classes = [JSONParser, MultiPartParser, FormParser]
+
+#     def post(self, request, job_requisition_id):
+#         try:
+#             jwt_payload = getattr(request, 'jwt_payload', {})
+#             tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+#             #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+#             role = jwt_payload.get('role')
+#             branch = jwt_payload.get('user', {}).get('branch')
+
+#             document_type = request.data.get('document_type')
+#             applications_data = request.data.get('applications', [])
+#             num_candidates = request.data.get('number_of_candidates')
+#             try:
+#                 num_candidates = int(num_candidates)
+#             except (TypeError, ValueError):
+#                 num_candidates = 0
+
+#             job_requisition = get_job_requisition_by_id(job_requisition_id, request)
+#             if not job_requisition:
+#                 return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
+
+#             if not document_type:
+#                 return Response({"detail": "Document type is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+#             document_type_lower = document_type.lower()
+#             allowed_docs = [doc.lower() for doc in (job_requisition.get('documents_required') or [])]
+#             if document_type_lower not in allowed_docs and document_type_lower not in ['resume', 'curriculum vitae (cv)']:
+#                 return Response({"detail": f"Invalid document type: {document_type}"}, status=status.HTTP_400_BAD_REQUEST)
+
+#             # Filter applications by tenant and branch
+#             if not applications_data:
+#                 applications = JobApplication.active_objects.filter(
+#                     job_requisition_id=job_requisition_id,
+#                     tenant_id=tenant_id,
+#                     resume_status=True
+#                 )
+#             else:
+#                 application_ids = [app['application_id'] for app in applications_data]
+#                 applications = JobApplication.active_objects.filter(
+#                     job_requisition_id=job_requisition_id,
+#                     tenant_id=tenant_id,
+#                     id__in=application_ids,
+#                     resume_status=True
+#                 )
+
+#             logger.info(f"Screening {applications.count()} applications: {[str(app.id) for app in applications]}")
+#             if not applications.exists():
+#                 logger.warning("No applications with resume_status=True found for provided IDs and filters.")
+#                 return Response({"detail": "No applications with resumes found.", "documentType": document_type}, status=status.HTTP_400_BAD_REQUEST)
+
+#             if role == 'recruiter' and branch:
+#                 applications = applications.filter(branch=branch)
+#             elif branch:
+#                 applications = applications.filter(branch=branch)
+
+#             def download_resume(app, app_data, document_type_lower):
+#                 try:
+#                     if app_data and 'file_url' in app_data:
+#                         file_url = app_data['file_url']
+#                     else:
+#                         cv_doc = next(
+#                             (doc for doc in app.documents if doc['document_type'].lower() == document_type_lower),
+#                             None
+#                         )
+#                         if not cv_doc:
+#                             app.screening_status = 'failed'
+#                             app.screening_score = 0.0
+#                             app.save()
+#                             return {
+#                                 "app": app,
+#                                 "success": False,
+#                                 "error": f"No {document_type} document found",
+#                             }
+#                         file_url = cv_doc['file_url']
+
+#                     logger.info(f"About to download file for app {app.id}: {file_url}")
+#                     start_download = time.time()
+#                     headers = {"Authorization": f"Bearer {settings.SUPABASE_KEY}"}
+#                     try:
+#                         response = requests.get(file_url, headers=headers, timeout=10)
+#                     except requests.exceptions.Timeout:
+#                         app.screening_status = 'failed'
+#                         app.screening_score = 0.0
+#                         app.save()
+#                         return {
+#                             "app": app,
+#                             "success": False,
+#                             "error": f"Resume download timed out after 10 seconds for {file_url}",
+#                         }
+#                     except requests.exceptions.RequestException as e:
+#                         app.screening_status = 'failed'
+#                         app.screening_score = 0.0
+#                         app.save()
+#                         return {
+#                             "app": app,
+#                             "success": False,
+#                             "error": f"Resume download error: {str(e)}",
+#                         }
+#                     download_time = time.time() - start_download
+#                     file_size = len(response.content)
+#                     logger.info(f"Downloaded file for app {app.id} in {download_time:.2f}s, size: {file_size} bytes")
+#                     if response.status_code != 200:
+#                         app.screening_status = 'failed'
+#                         app.screening_score = 0.0
+#                         app.save()
+#                         return {
+#                             "app": app,
+#                             "success": False,
+#                             "error": f"Failed to download resume from {file_url}, status code: {response.status_code}",
+#                         }
+
+#                     content_type = response.headers.get('content-type', '')
+#                     file_ext = mimetypes.guess_extension(content_type) or os.path.splitext(file_url)[1] or '.pdf'
+#                     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=file_ext)
+#                     temp_file.write(response.content)
+#                     temp_file.close()
+#                     temp_file_path = temp_file.name
+#                     logger.info(f"Finished download for app {app.id}")
+#                     return {
+#                         "app": app,
+#                         "success": True,
+#                         "temp_file_path": temp_file_path,
+#                         "file_url": file_url,
+#                     }
+#                 except Exception as e:
+#                     logger.error(f"Download failed for app {app.id}: {str(e)}")
+#                     app.screening_status = 'failed'
+#                     app.screening_score = 0.0
+#                     app.save()
+#                     return {
+#                         "app": app,
+#                         "success": False,
+#                         "error": f"Download error for file: {str(e)}",
+#                     }
+
+#             # Step 1: Parallel download all files
+#             download_results = []
+#             applications_list = list(applications)
+#             applications_data_map = {str(a['application_id']): a for a in applications_data}
+#             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+#                 future_to_app = {
+#                     executor.submit(
+#                         download_resume,
+#                         app,
+#                         applications_data_map.get(str(app.id)),
+#                         document_type_lower
+#                     ): app for app in applications_list
+#                 }
+#                 for future in concurrent.futures.as_completed(future_to_app):
+#                     result = future.result()
+#                     download_results.append(result)
+
+#             # Step 2: Parallel parse and screen only successfully downloaded files
+#             job_requirements = (
+#                 (job_requisition.get('job_description') or '') + ' ' +
+#                 (job_requisition.get('qualification_requirement') or '') + ' ' +
+#                 (job_requisition.get('experience_requirement') or '') + ' ' +
+#                 (job_requisition.get('knowledge_requirement') or '')
+#             ).strip()
+
+#             def parse_and_screen(result, job_requirements):
+#                 app = result["app"]
+#                 if not result["success"]:
+#                     # If the error is a timeout, return a specific message
+#                     error_msg = result["error"]
+#                     if "timed out" in error_msg.lower():
+#                         error_msg = f"Resume parsing or download timed out. Please try again or check the file."
+#                     return {
+#                         "application_id": str(app.id),
+#                         "full_name": app.full_name,
+#                         "email": app.email,
+#                         "error": error_msg,
+#                         "success": False
+#                     }
+#                 temp_file_path = result["temp_file_path"]
+#                 file_url = result.get("file_url", "")
+#                 try:
+#                     logger.info(f"About to parse resume for app {app.id}")
+#                     start_parse = time.time()
+#                     resume_text = parse_resume(temp_file_path)
+#                     parse_time = time.time() - start_parse
+#                     logger.info(f"Finished parsing resume for app {app.id} in {parse_time:.2f}s")
+#                     logger.info(f"Extracted text length for app {app.id}: {len(resume_text) if resume_text else 0}")
+#                     logger.debug(f"Resume text sample for app {app.id}: {resume_text[:200] if resume_text else 'No text'}")
+#                     if temp_file_path and os.path.exists(temp_file_path):
+#                         os.unlink(temp_file_path)
+#                     if not resume_text:
+#                         app.screening_status = 'failed'
+#                         app.screening_score = 0.0
+#                         app.save()
+#                         return {
+#                             "application_id": str(app.id),
+#                             "full_name": app.full_name,
+#                             "email": app.email,
+#                             "error": f"Failed to parse resume for file: {file_url}",
+#                             "success": False
+#                         }
+#                     score = screen_resume(resume_text, job_requirements)
+#                     resume_data = extract_resume_fields(resume_text)
+#                     employment_gaps = resume_data.get("employment_gaps", [])
+#                     app.screening_status = 'processed'
+#                     app.screening_score = score
+#                     app.employment_gaps = employment_gaps
+#                     app.save()
+#                     return {
+#                         "application_id": str(app.id),
+#                         "full_name": app.full_name,
+#                         "email": app.email,
+#                         "score": score,
+#                         "screening_status": app.screening_status,
+#                         "employment_gaps": employment_gaps,
+#                         "success": True
+#                     }
+#                 except Exception as e:
+#                     logger.error(f"Parsing failed for app {app.id}: {str(e)}")
+#                     app.screening_status = 'failed'
+#                     app.screening_score = 0.0
+#                     app.save()
+#                     if temp_file_path and os.path.exists(temp_file_path):
+#                         os.unlink(temp_file_path)
+#                     return {
+#                         "application_id": str(app.id),
+#                         "full_name": app.full_name,
+#                         "email": app.email,
+#                         "error": f"Screening error for file: {file_url} - {str(e)}",
+#                         "success": False
+#                     }
+
+#             results = []
+#             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+#                 future_to_result = {
+#                     executor.submit(parse_and_screen, result, job_requirements): result for result in download_results
+#                 }
+#                 for future in concurrent.futures.as_completed(future_to_result):
+#                     results.append(future.result())
+
+#             # Separate successful and failed applications
+#             shortlisted = [r for r in results if r.get("success")]
+#             failed_applications = [r for r in results if not r.get("success")]
+
+#             if not shortlisted and failed_applications:
+#                 return Response({
+#                     "detail": "All resume screenings failed.",
+#                     "failed_applications": failed_applications,
+#                     "document_type": document_type
+#                 }, status=status.HTTP_400_BAD_REQUEST)
+
+#             shortlisted.sort(key=lambda x: x['score'], reverse=True)
+#             final_shortlisted = shortlisted[:num_candidates]
+#             shortlisted_ids = {item['application_id'] for item in final_shortlisted}
+
+#             for app in applications:
+#                 app_id_str = str(app.id)
+#                 if app_id_str in shortlisted_ids:
+#                     app.status = 'shortlisted'
+#                     app.save()
+#                     shortlisted_app = next((item for item in final_shortlisted if item['application_id'] == app_id_str), None)
+#                     if shortlisted_app:
+#                         shortlisted_app['job_requisition_id'] = job_requisition['id']
+#                         shortlisted_app['status'] = 'shortlisted'
+#                         employment_gaps = shortlisted_app.get('employment_gaps', [])
+#                         event_type = "job.application.shortlisted.gaps" if employment_gaps else "job.application.shortlisted"
+#                         send_screening_notification(
+#                             shortlisted_app,
+#                             tenant_id,
+#                             event_type=event_type,
+#                             employment_gaps=employment_gaps
+#                         )
+#                 else:
+#                     app.status = 'rejected'
+#                     app.save()
+#                     rejected_app = {
+#                         "application_id": app_id_str,
+#                         "full_name": app.full_name,
+#                         "email": app.email,
+#                         "job_requisition_id": job_requisition['id'],
+#                         "status": "rejected",
+#                         "score": getattr(app, "screening_score", None)
+#                     }
+#                     send_screening_notification(rejected_app, tenant_id, event_type="job.application.rejected")
+
+#             return Response({
+#                 "detail": f"Screened {len(shortlisted)} applications using '{document_type}', shortlisted {len(final_shortlisted)} candidates.",
+#                 "shortlisted_candidates": final_shortlisted,
+#                 "failed_applications": failed_applications,
+#                 "number_of_candidates": num_candidates,
+#                 "document_type": document_type
+#             }, status=status.HTTP_200_OK)
+
+#         except requests.exceptions.Timeout as e:
+#             logger.error(f"Gateway timeout during resume screening: {str(e)}")
+#             return Response({
+#                 "error": "Resume screening timed out",
+#                 "details": str(e),
+#                 "suggestion": "The operation took too long to complete. Please try again later or reduce the number of applications."
+#             }, status=status.HTTP_504_GATEWAY_TIMEOUT)
+#         except requests.exceptions.ConnectionError as e:
+#             logger.error(f"Connection error during resume screening: {str(e)}")
+#             return Response({
+#                 "error": "Unable to connect to resume screening service",
+#                 "details": str(e),
+#                 "suggestion": "Please check your network connection or contact support."
+#             }, status=status.HTTP_502_BAD_GATEWAY)
+#         except requests.exceptions.RequestException as e:
+#             logger.error(f"Gateway error during resume screening: {str(e)}")
+#             return Response({
+#                 "error": "Resume screening gateway error",
+#                 "details": str(e),
+#                 "suggestion": "There was a network or service error. Please check your connection or contact support if the issue persists."
+#             }, status=status.HTTP_502_BAD_GATEWAY)
+#         except Exception as e:
+#             logger.exception(f"Error screening resumes for JobRequisition {job_requisition_id}: {str(e)}")
+#             return Response({
+#                 "error": "Internal server error during resume screening",
+#                 "details": str(e),
+#                 "suggestion": "An unexpected error occurred. Please try again or contact support."
+#             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class ResumeScreeningView(APIView):
     serializer_class = SimpleMessageSerializer
@@ -170,7 +472,6 @@ class ResumeScreeningView(APIView):
         try:
             jwt_payload = getattr(request, 'jwt_payload', {})
             tenant_id = self.request.jwt_payload.get('tenant_unique_id')
-            #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
             role = jwt_payload.get('role')
             branch = jwt_payload.get('user', {}).get('branch')
 
@@ -328,7 +629,6 @@ class ResumeScreeningView(APIView):
             def parse_and_screen(result, job_requirements):
                 app = result["app"]
                 if not result["success"]:
-                    # If the error is a timeout, return a specific message
                     error_msg = result["error"]
                     if "timed out" in error_msg.lower():
                         error_msg = f"Resume parsing or download timed out. Please try again or check the file."
@@ -347,7 +647,6 @@ class ResumeScreeningView(APIView):
                     resume_text = parse_resume(temp_file_path)
                     parse_time = time.time() - start_parse
                     logger.info(f"Finished parsing resume for app {app.id} in {parse_time:.2f}s")
-                    logger.info(f"Extracted text length for app {app.id}: {len(resume_text) if resume_text else 0}")
                     logger.debug(f"Resume text sample for app {app.id}: {resume_text[:200] if resume_text else 'No text'}")
                     if temp_file_path and os.path.exists(temp_file_path):
                         os.unlink(temp_file_path)
@@ -426,7 +725,7 @@ class ResumeScreeningView(APIView):
                         shortlisted_app['job_requisition_id'] = job_requisition['id']
                         shortlisted_app['status'] = 'shortlisted'
                         employment_gaps = shortlisted_app.get('employment_gaps', [])
-                        event_type = "job.application.shortlisted.gaps" if employment_gaps else "job.application.shortlisted"
+                        event_type = "job_application.shortlisted.gaps" if employment_gaps else "job_application.shortlisted"
                         send_screening_notification(
                             shortlisted_app,
                             tenant_id,
@@ -444,7 +743,7 @@ class ResumeScreeningView(APIView):
                         "status": "rejected",
                         "score": getattr(app, "screening_score", None)
                     }
-                    send_screening_notification(rejected_app, tenant_id, event_type="job.application.rejected")
+                    send_screening_notification(rejected_app, tenant_id, event_type="job_application.rejected")
 
             return Response({
                 "detail": f"Screened {len(shortlisted)} applications using '{document_type}', shortlisted {len(final_shortlisted)} candidates.",
@@ -482,8 +781,6 @@ class ResumeScreeningView(APIView):
                 "details": str(e),
                 "suggestion": "An unexpected error occurred. Please try again or contact support."
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
@@ -1045,16 +1342,59 @@ class PermanentDeleteJobApplicationsView(APIView):
 
 
 
+# class ScheduleListCreateView(generics.ListCreateAPIView):
+#     serializer_class = ScheduleSerializer
+#     pagination_class = CustomPagination
+#     parser_classes = (MultiPartParser, FormParser, JSONParser)
+#     # permission_classes = [AllowAny]  # Allow unauthenticated requests
+
+#     def get_queryset(self):
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')
+#         queryset = Schedule.active_objects.all()
+#         if not tenant_id:
+#             logger.error("No tenant_id in token")
+#             return Schedule.active_objects.none()
+#         queryset = queryset.filter(tenant_id=tenant_id)
+#         if role == 'recruiter' and branch:
+#             queryset = queryset.filter(branch=branch)
+#         elif branch:
+#             queryset = queryset.filter(branch=branch)
+#         status_param = self.request.query_params.get('status', None)
+#         if status_param:
+#             queryset = queryset.filter(status=status_param)
+#         return queryset.order_by('-created_at')
+
+#     def create(self, request, *args, **kwargs):
+#         jwt_payload = getattr(request, 'jwt_payload', {})
+#         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+#         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')
+
+#         if not tenant_id:
+#             logger.error("Tenant schema or ID missing from token")
+#             return Response({"error": "Tenant schema or ID missing from token"}, status=status.HTTP_401_UNAUTHORIZED)
+
+#         data = request.data.copy()
+#         serializer = self.get_serializer(data=data, context={'request': request})
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_create(serializer)
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
     pagination_class = CustomPagination
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-    # permission_classes = [AllowAny]  # Allow unauthenticated requests
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
-        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         queryset = Schedule.active_objects.all()
@@ -1074,9 +1414,6 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         jwt_payload = getattr(request, 'jwt_payload', {})
         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
-        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
-        role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')
 
         if not tenant_id:
             logger.error("Tenant schema or ID missing from token")
@@ -1085,24 +1422,108 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         data = request.data.copy()
         serializer = self.get_serializer(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        schedule = serializer.save()  # Calls create method in serializer
+
+        # Send notification after successful schedule creation
+        try:
+            job_app = JobApplication.objects.filter(id=schedule.job_application_id).first()
+            if not job_app:
+                logger.error(f"Job application {schedule.job_application_id} not found for schedule {schedule.id}")
+            else:
+                notification_payload = {
+                    "application_id": str(schedule.job_application_id),
+                    "full_name": job_app.full_name,
+                    "email": job_app.email,
+                    "job_requisition_id": str(job_app.job_requisition_id),
+                    "status": schedule.status,
+                    "interview_start_date_time": schedule.interview_start_date_time.isoformat(),
+                    "interview_end_date_time": schedule.interview_end_date_time.isoformat() if schedule.interview_end_date_time else None,
+                    "meeting_mode": schedule.meeting_mode,
+                    "meeting_link": schedule.meeting_link,
+                    "interview_address": schedule.interview_address,
+                    "message": schedule.message,
+                    "timezone": schedule.timezone,
+                    "schedule_id": str(schedule.id)
+                }
+                send_screening_notification(
+                    notification_payload,
+                    tenant_id=tenant_id,
+                    event_type="job_application.schedule.created"
+                )
+                logger.info(f"Schedule creation notification sent for schedule {schedule.id}, job application {schedule.job_application_id}")
+        except Exception as e:
+            logger.error(f"Failed to send schedule creation notification for schedule {schedule.id}: {str(e)}")
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
+# class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     serializer_class = ScheduleSerializer
+#     parser_classes = (MultiPartParser, FormParser, JSONParser)
+#     # permission_classes = [IsAuthenticated]
+#     lookup_field = 'id'
+#     def get_permissions(self):
+#         return [AllowAny()]  # Temporary for testing
+
+#     def get_queryset(self):
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#        # tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')
+#         queryset = Schedule.active_objects.all()
+#         if not tenant_id:
+#             logger.error("No tenant_id in token")
+#             return Schedule.active_objects.none()
+#         queryset = queryset.filter(tenant_id=tenant_id)
+#         if role == 'recruiter' and branch:
+#             queryset = queryset.filter(branch=branch)
+#         elif branch:
+#             queryset = queryset.filter(branch=branch)
+#         return queryset.order_by('-created_at')
+
+#     def retrieve(self, request, *args, **kwargs):
+#         try:
+#             instance = self.get_object()
+#             return Response(self.get_serializer(instance).data)
+#         except Exception as e:
+#             logger.exception(f"Error retrieving schedule: {str(e)}")
+#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#     def update(self, request, *args, **kwargs):
+#         try:
+#             partial = kwargs.pop('partial', False)
+#             instance = self.get_object()
+#             serializer = self.get_serializer(instance, data=request.data, partial=partial)
+#             serializer.is_valid(raise_exception=True)
+#             self.perform_update(serializer)
+#             return Response(serializer.data)
+#         except Exception as e:
+#             logger.exception(f"Error updating schedule: {str(e)}")
+#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#     def destroy(self, request, *args, **kwargs):
+#         try:
+#             instance = self.get_object()
+#             self.perform_destroy(instance)
+#             return Response(status=status.HTTP_204_NO_CONTENT)
+#         except Exception as e:
+#             logger.exception(f"Error deleting schedule: {str(e)}")
+#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
 class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ScheduleSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-    # permission_classes = [IsAuthenticated]
     lookup_field = 'id'
+
     def get_permissions(self):
         return [AllowAny()]  # Temporary for testing
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
-       # tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         queryset = Schedule.active_objects.all()
@@ -1131,6 +1552,38 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
             serializer = self.get_serializer(instance, data=request.data, partial=partial)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
+
+            # Send notification after successful schedule update
+            try:
+                job_app = JobApplication.objects.filter(id=instance.job_application_id).first()
+                if not job_app:
+                    logger.error(f"Job application {instance.job_application_id} not found for schedule {instance.id}")
+                else:
+                    notification_payload = {
+                        "application_id": str(instance.job_application_id),
+                        "full_name": job_app.full_name,
+                        "email": job_app.email,
+                        "job_requisition_id": str(job_app.job_requisition_id),
+                        "status": instance.status,
+                        "interview_start_date_time": instance.interview_start_date_time.isoformat(),
+                        "interview_end_date_time": instance.interview_end_date_time.isoformat() if instance.interview_end_date_time else None,
+                        "meeting_mode": instance.meeting_mode,
+                        "meeting_link": instance.meeting_link,
+                        "interview_address": instance.interview_address,
+                        "message": instance.message,
+                        "timezone": instance.timezone,
+                        "schedule_id": str(instance.id),
+                        "cancellation_reason": instance.cancellation_reason
+                    }
+                    send_screening_notification(
+                        notification_payload,
+                        tenant_id=instance.tenant_id,
+                        event_type="job_application.schedule.updated"
+                    )
+                    logger.info(f"Schedule update notification sent for schedule {instance.id}, job application {instance.job_application_id}")
+            except Exception as e:
+                logger.error(f"Failed to send schedule update notification for schedule {instance.id}: {str(e)}")
+
             return Response(serializer.data)
         except Exception as e:
             logger.exception(f"Error updating schedule: {str(e)}")
@@ -1144,8 +1597,6 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
         except Exception as e:
             logger.exception(f"Error deleting schedule: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 class ScheduleBulkDeleteView(APIView):
     serializer_class = SimpleMessageSerializer 
@@ -1375,6 +1826,8 @@ class ComplianceStatusUpdateView(APIView):
 
 
 
+
+# Assuming JobApplication, JobApplicationSerializer, and upload_file_dynamic are defined elsewhere
 class ApplicantComplianceUploadView(APIView):
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -1383,9 +1836,10 @@ class ApplicantComplianceUploadView(APIView):
         return self._handle_upload(request, job_application_id)
 
     def _handle_upload(self, request, job_application_id):
+        logger.info(f"Request data: {request.data}")
         unique_link = request.data.get('unique_link')
         email = request.data.get('email')
-        names = request.POST.getlist('names')  # Changed from document_ids to names
+        names = request.data.getlist('names')  # List of compliance item names
 
         if not unique_link:
             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
@@ -1463,7 +1917,16 @@ class ApplicantComplianceUploadView(APIView):
             if name not in compliance_checklist:
                 return Response({"detail": f"Invalid compliance item name: {name}. Must match checklist."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Upload files
+        # Collect additional fields from request.data (excluding reserved fields)
+        reserved_fields = {'unique_link', 'email', 'names', 'documents'}
+        additional_fields = {}
+        for key in request.data:
+            if key not in reserved_fields:
+                value = request.data.getlist(key)[0] if isinstance(request.data.get(key), list) else request.data.get(key)
+                additional_fields[key] = value
+        logger.info(f"Additional fields: {additional_fields}")
+
+        # Upload files and prepare document data
         documents_data = []
         storage_type = getattr(settings, 'STORAGE_TYPE', 'supabase').lower()
 
@@ -1476,32 +1939,64 @@ class ApplicantComplianceUploadView(APIView):
 
             try:
                 public_url = upload_file_dynamic(file, file_path, content_type, storage_type)
-                documents_data.append({
+                doc_data = {
                     'file_url': public_url,
                     'uploaded_at': timezone.now().isoformat(),
-                    'doc_id': compliance_checklist[name]  # Map name to generated ID
-                })
+                    'doc_id': compliance_checklist[name],
+                    'name': name
+                }
+                documents_data.append(doc_data)
             except Exception as e:
                 logger.error(f"Failed to upload document for {name}: {str(e)}")
                 return Response({"detail": f"Failed to upload document: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Update compliance status
-        for doc in documents_data:
-            for item in application.compliance_status:
+        # Update compliance status - this is the key fix
+        updated_compliance_status = []
+        
+        for item in application.compliance_status:
+            # Check if this item is being updated
+            item_updated = False
+            for doc in documents_data:
                 if item['id'] == doc['doc_id']:
-                    item['document'] = {
-                        'file_url': doc['file_url'],
-                        'uploaded_at': doc['uploaded_at']
+                    # Create a new item with all the updates
+                    updated_item = {
+                        'id': item['id'],
+                        'name': item['name'],
+                        'description': item.get('description', ''),
+                        'required': item.get('required', True),
+                        'status': 'uploaded',
+                        'checked_by': item.get('checked_by'),
+                        'checked_at': item.get('checked_at'),
+                        'notes': '',
+                        'document': {
+                            'file_url': doc['file_url'],
+                            'uploaded_at': doc['uploaded_at']
+                        }
                     }
-                    item['status'] = 'uploaded'
-                    item['notes'] = ''
+                    
+                    # Add all additional fields to the top level of this compliance item
+                    for key, value in additional_fields.items():
+                        updated_item[key] = value
+                    
+                    updated_compliance_status.append(updated_item)
+                    item_updated = True
+                    logger.info(f"Updated compliance item {item['id']}: {updated_item}")
+                    break
+            
+            # If this item wasn't updated, keep it as is
+            if not item_updated:
+                updated_compliance_status.append(item)
 
         # Save the updated application
         with transaction.atomic():
+            application.compliance_status = updated_compliance_status
             application.save()
 
-        serializer = JobApplicationSerializer(application, context={'request': request})
+        # Refresh the instance to get the latest data
+        application.refresh_from_db()
+        
+        # Return the actual compliance_status from the database
         return Response({
             "detail": "Compliance documents uploaded successfully.",
-            "compliance_status": serializer.data['compliance_status']
+            "compliance_status": application.compliance_status
         }, status=status.HTTP_200_OK)

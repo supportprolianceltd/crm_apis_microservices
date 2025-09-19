@@ -277,11 +277,13 @@ def screen_resumes_task(self, job_requisition_id, document_type, num_candidates,
                     shortlisted_app['job_requisition_id'] = job_requisition['id']
                     shortlisted_app['status'] = 'shortlisted'
                     employment_gaps = shortlisted_app.get('employment_gaps', [])
-                    event_type = "job.application.shortlisted.gaps" if employment_gaps else "job.application.shortlisted"
+                    event_type = "job_application.shortlisted.gaps" if employment_gaps else "job_application.shortlisted"
+                    tenant_id = applications_data_map.get(app_id_str, {}).get('tenant_id')
                     send_screening_notification(
                         shortlisted_app,
+                        tenant_id=tenant_id,
                         event_type=event_type,
-                        employment_gaps=employment_gaps
+                        employment_gaps=employment_gaps,
                     )
             else:
                 app.status = 'rejected'
@@ -294,20 +296,26 @@ def screen_resumes_task(self, job_requisition_id, document_type, num_candidates,
                     "status": "rejected",
                     "score": getattr(app, "screening_score", None)
                 }
-                send_screening_notification(rejected_app, event_type="job.application.rejected")
+                send_screening_notification(rejected_app, tenant_id=tenant_id, event_type="job_application.rejected")
 
         logger.info(f"Screening complete for job requisition {job_requisition_id}")
 
         # Automatically close the requisition via public endpoint
-        close_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/public/close/{job_requisition_id}/"
+        #UPDATE THIS CLOSE REQUISITION TO OCCUR IN BATCH PROCESSING, SEND IT AS A LIST SO THE REQUISITION SERVICE UPDATE IN A SINGLE BATCH.
+        # close_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/public/close/"
+      
+        close_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/public/close/batch/"
+
         try:
-            close_resp = requests.post(close_url, timeout=10)
+            batch_payload = {"job_requisition_ids": [job_requisition_id]}  # add more if needed
+            close_resp = requests.post(close_url, json=batch_payload, timeout=10)
             if close_resp.status_code == 200:
-                logger.info(f"Job requisition {job_requisition_id} successfully closed via public endpoint.")
+                logger.info(f"Job requisitions closed via batch endpoint: {batch_payload['job_requisition_ids']}")
             else:
-                logger.warning(f"Failed to close job requisition {job_requisition_id}: {close_resp.text}")
+                logger.warning(f"Failed to close job requisitions: {close_resp.text}")
         except Exception as e:
-            logger.error(f"Error closing job requisition {job_requisition_id} via public endpoint: {str(e)}")
+            logger.error(f"Error closing job requisitions via batch endpoint: {str(e)}")
+
             
     except Exception as e:
         logger.error(f"Unexpected error in screen_resumes_task: {str(e)}")

@@ -107,6 +107,7 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             # For remote storage, use the public URL field
             return obj.advert_banner_url
 
+
     @extend_schema_field({
         'type': 'object',
         'properties': {
@@ -135,6 +136,7 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             except Exception as e:
                 logger.error(f"Error fetching requested_by {obj.requested_by_id}: {str(e)}")
         return None
+
 
     @extend_schema_field({
         'type': 'object',
@@ -165,6 +167,7 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
                 logger.error(f"Error fetching created_by {obj.created_by_id}: {str(e)}")
         return None
 
+
     @extend_schema_field({
         'type': 'object',
         'properties': {
@@ -193,6 +196,7 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             except Exception as e:
                 logger.error(f"Error fetching updated_by {obj.updated_by_id}: {str(e)}")
         return None
+
 
     @extend_schema_field({
         'type': 'object',
@@ -241,15 +245,6 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             logger.error(f"Error fetching tenant domain for {obj.tenant_id}: {str(e)}")
         return None
 
-    # @extend_schema_field(list)
-    # def get_compliance_checklist(self, obj):
-    #     serialized_items = []
-    #     for item in obj.compliance_checklist:
-    #         if isinstance(item, dict) and 'name' in item:
-    #             serialized_item = ComplianceItemSerializer(item, context=self.context).data
-    #             if serialized_item:
-    #                 serialized_items.append(serialized_item)
-    #     return serialized_items
 
     @extend_schema_field(str)
     def get_branch_name(self, obj):
