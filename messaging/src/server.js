@@ -6,6 +6,8 @@ import cors from "cors";
 import swaggerDocs from "./config/swagger.js";
 import { authMiddleware, socketAuth } from "./middleware/auth.middleware.js";
 import { PORT } from "./config/config.js";
+import apiRoutes from "./api/routes.js";
+import { initializeSocket } from "./socket/socketHandler.js";
 
 // Load environment variables
 config();
@@ -46,11 +48,9 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
-import apiRoutes from "./api/routes.js";
 app.use("/api/v1", apiRoutes);
 
 // Initialize WebSocket
-import initializeSocket from "./socket/socketHandler.js";
 initializeSocket(io);
 io.use(socketAuth);
 

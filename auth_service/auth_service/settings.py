@@ -63,7 +63,6 @@ SHARED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "core",  # Tenant, Domain
-    "django_extensions",
 ]
 
 TENANT_APPS = [

@@ -15,10 +15,8 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.db import transaction
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from django_tenants.utils import tenant_context
 from drf_spectacular.utils import extend_schema_field
-from kafka import KafkaProducer
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from utils.supabase import upload_file_dynamic
@@ -27,7 +25,10 @@ from auth_service.utils.jwt_rsa import issue_rsa_jwt
 
 # Local App - Models
 from .models import (
+    BlockedIP,
+    ClientProfile,
     CustomUser,
+    DrivingRiskAssessment,
     EducationDetail,
     EmploymentDetail,
     Group,
