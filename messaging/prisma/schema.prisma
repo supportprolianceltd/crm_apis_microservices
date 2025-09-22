@@ -18,6 +18,7 @@ model Tenant {
   name      String
   schema    String    @unique
   users     User[]
+  chats     Chat[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -40,20 +41,34 @@ model User {
 }
 
 model Chat {
-  id        String         @id @default(cuid())
-  name      String?
-  users     UsersOnChats[]
-  messages  Message[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  id          String         @id @default(cuid())
+  name        String?
+  type        ChatType      @default(DIRECT) 
+  avatar      String?       
+  users       UsersOnChats[]
+  messages    Message[]
+  lastMessageId String?     
+  lastMessage  Message?     @relation("ChatLastMessage", fields: [lastMessageId], references: [id])
+  tenantId    Int?          
+  tenant      Tenant?       @relation(fields: [tenantId], references: [id]) 
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum ChatType {
+  DIRECT
+  GROUP
 }
 
 model UsersOnChats {
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  chat      Chat     @relation(fields: [chatId], references: [id])
-  chatId    String
-  assignedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  chat        Chat     @relation(fields: [chatId], references: [id])
+  chatId      String
+  assignedAt  DateTime @default(now())
+  leftAt      DateTime? 
+  unreadCount Int       @default(0)  
+  role        String    @default("MEMBER") 
 
   @@id([userId, chatId])
 }

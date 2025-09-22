@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+
 const initializeSocket = (io) => {
   const onlineUsers = new Map(); // userId -> socketId
 
