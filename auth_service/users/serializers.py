@@ -27,7 +27,10 @@ from auth_service.utils.jwt_rsa import issue_rsa_jwt
 
 # Local App - Models
 from .models import (
+    BlockedIP,
+    ClientProfile,
     CustomUser,
+    DrivingRiskAssessment,
     EducationDetail,
     EmploymentDetail,
     Group,
