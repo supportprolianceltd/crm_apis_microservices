@@ -1,100 +1,84 @@
-import logging
-from django.db import connection
-from django.http import JsonResponse
-from rest_framework.exceptions import AuthenticationFailed
+# complete_lms/middleware.py
 import jwt
 import requests
+import logging
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
+from rest_framework.exceptions import AuthenticationFailed
+from django.http import JsonResponse
+from django.db import connection
+from django_tenants.utils import get_tenant_model  # Import Tenant model
 
-logger = logging.getLogger('job_applications')
+logger = logging.getLogger('complete_lms')
 
-public_paths = [
-    '/api/docs/',
-    '/api/schema/',
-    '/api/health/',
-]
+from django.contrib.auth.models import AnonymousUser
+from rest_framework.exceptions import AuthenticationFailed
+
+public_paths = ['/api/docs/', '/api/schema/', '/api/health/']
+
+TenantModel = get_tenant_model()  # shared.Tenant
 
 class SimpleUser:
-    is_authenticated = True
-    is_active = True
-    is_anonymous = False
-
     def __init__(self, payload):
-        self.id = payload.get('user_id')
-        self.tenant_id = payload.get('tenant_id')
-        self.role = payload.get('role')
-        self.branch = payload.get('branch')
+        self.pk = payload.get('user', {}).get('id')
+        self.username = payload.get('user', {}).get('username', '')
         self.email = payload.get('email', '')
-        self.username = payload.get('username', '')
-        # Add Django auth compatibility
-        self.pk = self.id
-        self.is_staff = (self.role == 'admin')
-        self.is_superuser = (self.role == 'admin')
+        self.role = payload.get('role', '')
+        self.tenant_id = payload.get('tenant_id')
+        self.tenant_schema = payload.get('tenant_schema')
+        self.is_authenticated = True
+        self.is_active = True
+        self.is_staff = payload.get('role') in ['admin', 'staff']
+        self.is_superuser = payload.get('role') == 'admin'
+        self._auth = None  # For DRF compatibility
 
-    def save(self, *args, **kwargs):
-        pass  # For compatibility
+    def __str__(self):
+        return self.username or self.email
 
-    def get_username(self):
-        return self.username
-    
-
+    def get_all_permissions(self):
+        return set()  # For DRF compatibility
 
 class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
-    def __call__(self, request):
-        logger.info("Entering MicroserviceRS256JWTMiddleware")
+    def process_request(self, request):
+        if any(request.path.startswith(public) for public in public_paths):
+            request.user = AnonymousUser()
+            return
+
         auth = request.headers.get('Authorization', '')
         if not auth.startswith('Bearer '):
             logger.info("No Bearer token provided")
-            return self.get_response(request)
+            request.user = AnonymousUser()
+            return
+
         token = auth.split(' ')[1]
         try:
             unverified_header = jwt.get_unverified_header(token)
             kid = unverified_header.get("kid")
+            if not kid:
+                raise AuthenticationFailed("No 'kid' in token header.")
+
             unverified_payload = jwt.decode(token, options={"verify_signature": False})
             tenant_id = unverified_payload.get("tenant_id")
             tenant_schema = unverified_payload.get("tenant_schema")
             logger.info(f"Unverified JWT: kid={kid}, tenant_id={tenant_id}, tenant_schema={tenant_schema}")
 
-            # Try RS256 first
-            try:
-                if kid:
-                    public_key_url = f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/?tenant_id={tenant_id}"
-                    logger.info(f"Fetching public key from: {public_key_url}")
-                    resp = requests.get(
-                        public_key_url,
-                        headers={'Authorization': auth},
-                        timeout=5
-                    )
-                    logger.info(f"Public key response: {resp.status_code} {resp.text}")
-                    if resp.status_code == 200:
-                        public_key = resp.json().get("public_key")
-                        if public_key:
-                            payload = jwt.decode(token, public_key, algorithms=["RS256"])
-                            request.jwt_payload = payload
-                            request.user = SimpleUser(payload)
-                            logger.info(f"Set request.user: {request.user}, is_authenticated={request.user.is_authenticated}")
-                            return self.get_response(request)
-                        else:
-                            logger.warning("Public key not found in auth-service response")
-                    else:
-                        logger.error(f"Public key fetch failed: {resp.status_code} {resp.text}")
-            except requests.RequestException as e:
-                logger.error(f"Failed to fetch public key: {str(e)}")
+            resp = requests.get(
+                f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/?tenant_id={tenant_id}",
+                timeout=5
+            )
+            logger.info(f"Public key response: {resp.status_code} {resp.text}")
+            if resp.status_code != 200:
+                logger.error(f"Failed to fetch public key: {resp.status_code} {resp.text}")
+                raise AuthenticationFailed(f"Could not fetch public key: {resp.status_code} {resp.text}")
 
-            # Fallback to HS256
-            try:
-                payload = jwt.decode(
-                    token,
-                    settings.SECRET_KEY,  # Remove SIMPLE_JWT reference
-                    algorithms=["HS256"]
-                )
-                request.jwt_payload = payload
-                request.user = SimpleUser(payload)
-                logger.info(f"Set request.user (HS256): {request.user}, is_authenticated={request.user.is_authenticated}")
-            except jwt.InvalidTokenError as e:
-                logger.error(f"HS256 decoding failed: {str(e)}")
-                raise AuthenticationFailed(f"Invalid token: {str(e)}")
+            public_key = resp.json().get("public_key")
+            if not public_key:
+                raise AuthenticationFailed("Public key not found.")
+
+            payload = jwt.decode(token, public_key, algorithms=["RS256"])
+            request.jwt_payload = payload
+            request.user = SimpleUser(payload)
+            logger.info(f"Set request.user: {request.user}, is_authenticated={request.user.is_authenticated}")
 
         except jwt.ExpiredSignatureError:
             return JsonResponse({'error': 'Token has expired'}, status=401)
@@ -104,100 +88,41 @@ class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
             logger.error(f"JWT error: {str(e)}")
             return JsonResponse({'error': f'JWT error: {str(e)}'}, status=401)
 
-        return self.get_response(request)
-
-class CustomTenantSchemaMiddleware(MiddlewareMixin):
+class CustomTenantSchemaMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # logger.info("Entering CustomTenantSchemaMiddleware")
-        # logger.info(f"Incoming request path: {request.path}")
-        # logger.info(f"Authorization header: {request.META.get('HTTP_AUTHORIZATION')}")
-
-        # Handle public endpoints
-
-        if any(request.path.startswith(path) for path in public_paths):
-            connection.set_schema_to_public()
-            logger.info("Set public schema for public endpoint")
-            return self.get_response(request)
-
-        # Extract tenant_schema from JWT payload
-        jwt_payload = getattr(request, 'jwt_payload', None)
-        tenant_schema = None
-        tenant_id = None
-        if jwt_payload:
-            tenant_schema = jwt_payload.get('tenant_schema')
-            tenant_id = jwt_payload.get('tenant_id')
-
-        if not tenant_schema or not tenant_id:
-            logger.error(f"Tenant schema or ID missing in JWT: {jwt_payload}")
-            return JsonResponse({'error': 'Tenant schema or ID missing from token'}, status=403)
-
-        # Set schema directly from JWT
-        try:
-            connection.set_schema(tenant_schema)
-            logger.info(f"Set schema to: {tenant_schema}")
-        except Exception as e:
-            logger.error(f"Schema switch failed: {str(e)}")
-            return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
-
-        return self.get_response(request)
-
-        
-# class CustomTenantSchemaMiddleware(MiddlewareMixin):
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        logger.info("Entering CustomTenantSchemaMiddleware")  # <-- Added logging
         logger.info(f"Incoming request path: {request.path}")
-        logger.info(f"Authorization header: {request.headers.get('HTTP_AUTHORIZATION')}")
-        
+        logger.info(f"Authorization header: {request.META.get('HTTP_AUTHORIZATION')}")
 
-        # Handle public endpoints
-      
         if any(request.path.startswith(path) for path in public_paths):
             connection.set_schema_to_public()
             logger.info("Set public schema for public endpoint")
             return self.get_response(request)
 
-        # Extract tenant_schema from JWT payload
         jwt_payload = getattr(request, 'jwt_payload', None)
-        tenant_schema = None
         tenant_id = None
+        tenant_schema = None
         if jwt_payload:
-            tenant_schema = jwt_payload.get('tenant_schema')
             tenant_id = jwt_payload.get('tenant_id')
+            tenant_schema = jwt_payload.get('tenant_schema')
+        if not tenant_id or not tenant_schema:
+            logger.error("Tenant ID or schema missing in JWT or request.")
+            return JsonResponse({'error': 'Tenant ID or schema missing from token'}, status=403)
 
-        if not tenant_schema or not tenant_id:
-            logger.error(f"Tenant schema or ID missing in JWT: {jwt_payload}")
-            return JsonResponse({'error': 'Tenant schema or ID missing from token'}, status=403)
-
-        # Validate tenant with auth-service
         try:
-            tenant_url = f"{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{tenant_id}/"
-            logger.info(f"Validating tenant at: {tenant_url}")
-            resp = requests.get(
-                tenant_url,
-                # headers={'Authorization': request.META.get('HTTP_AUTHORIZATION', '')},
-                headers={'Authorization': request.headers.get('Authorization', '')},
-                timeout=5
-            )
-            # logger.info(f"Tenant validation response: {resp.status_code} {resp.text}")
-            if resp.status_code != 200:
-                logger.error(f"Tenant validation failed: {resp.status_code} {resp.text}")
-                return JsonResponse({'error': 'Invalid tenant'}, status=404)
-        except requests.RequestException as e:
-            logger.error(f"Tenant validation request failed: {str(e)}")
-            return JsonResponse({'error': 'Failed to validate tenant'}, status=503)
-
-        # Switch schema
-        try:
-            connection.set_schema(tenant_schema)
-            logger.info(f"Set schema to: {tenant_schema}")
+            # Fetch real Tenant instance from shared schema (public)
+            connection.set_schema_to_public()  # Ensure we're in public for Tenant lookup
+            tenant = TenantModel.objects.get(id=tenant_id, schema_name=tenant_schema)
+            request.tenant = tenant  # Set full Tenant instance
+            connection.set_schema(tenant_schema)  # Switch to tenant schema
+            logger.info(f"Set tenant: {tenant.schema_name} (ID: {tenant.id})")
+        except TenantModel.DoesNotExist:
+            logger.error(f"Tenant not found: ID={tenant_id}, schema={tenant_schema}")
+            return JsonResponse({'error': 'Invalid tenant'}, status=404)
         except Exception as e:
-            logger.error(f"Schema switch failed: {str(e)}")
+            logger.error(f"Schema/tenant switch failed: {str(e)}")
             return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
 
         return self.get_response(request)

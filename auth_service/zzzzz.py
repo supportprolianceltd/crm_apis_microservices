@@ -47,17 +47,27 @@ if not Tenant.objects.filter(schema_name='proliance').exists():
     tenant.auto_create_schema = False
     tenant.save()
     Domain.objects.create(tenant=tenant, domain='prolianceltd.com', is_primary=True)
+
+from core.models import Tenant, Domain
+if not Tenant.objects.filter(schema_name='netwiver').exists():
+    tenant = Tenant.objects.create(
+        name='netwiver',
+        schema_name='netwiver',
+    )
+    tenant.auto_create_schema = False
+    tenant.save()
+    Domain.objects.create(tenant=tenant, domain='netwiver.com', is_primary=True)
     
 
 # python manage.py shell
 from core.models import Tenant
 from users.models import CustomUser
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='arts')
+tenant = Tenant.objects.get(schema_name='netwiver')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
         username='ekeneonwon',
-        email='support@artstraining.co.uk',
+        email='support@netwiver.com',
         password='qwerty',
         role='admin',
         first_name='Ekene-onwon',
@@ -91,12 +101,12 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='tonna',
+        username='dappa',
         email='support@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='Friday',
-        last_name='Monday',
+        first_name='Daniel',
+        last_name='Davidson',
         job_role='Backend Developer',
         tenant=tenant
     )
@@ -170,7 +180,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='proliance')
+tenant = Tenant.objects.get(schema_name='arts')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(
@@ -180,3 +190,7 @@ with tenant_context(tenant):
         active=True
     )
     print(f"RSAKeyPair created for tenant: {tenant.schema_name}")
+
+
+
+

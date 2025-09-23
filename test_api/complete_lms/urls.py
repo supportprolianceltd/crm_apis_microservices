@@ -5,7 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from .views import TokenObtainPairView, TokenRefreshView, TokenValidateView, LogoutView
+
 
 
 from django.http import HttpResponse
@@ -19,46 +19,36 @@ def root_view(request):
         'status': 'success',
         'message': 'Welcome to LUMINA Care OS API',
         'endpoints': {
-            'tenants': '/api/tenant/tenants/',
-            'users': '/api/users/',
-            'docs': '/api/docs/',
-            'token': '/api/token/',
-            'schedules': '/schedule/',
-            'courses': '/api/courses/',
-            'messaging': '/messaging/',
-            'groups': '/api/groups/',
-            'adverts': '/adverts/',
-            'payments': '/payments/',
-            'forums': '/api/forums/',
+            'tenants': '/api/lms/tenant/tenants/',
+            'users': '/api/lms//users/',
+            'docs': '/api/lms/docs/',
+            'token': '/api/lms/token/',
+            'schedules': '/api/lms/schedule/',
+            'courses': '/api/lms/courses/',
+            'messaging': '/api/lms/messaging/',
+            'groups': '/api/lms/groups/',
+            'adverts': '/api/lms/adverts/',
+            'payments': '/api/lms/payments/',
+            'forums': '/api/lms/forums/',
             'django_prometheus': '/django_prometheus/',
         }
     })
 
 urlpatterns = [
     path('', root_view, name='root'),
-    path('api/tenant/', include('core.urls')),
-    path('api/users/', include('users.urls')),
-    path('api/activitylog/', include('activitylog.urls')),
-    path('api/courses/', include('courses.urls')),
-    path('api/schedule/', include('schedule.urls')),
-    path('api/messaging/', include('messaging.urls')),
-    path('api/carts/', include('carts.urls')),
-    path('api/ai_chat/', include('ai_chat.urls')),
-    path('api/groups/', include('groups.urls')),
-    path('adverts/', include('advert.urls')),
-    path('api/payments/', include('payments.urls')),
-    path('api/forums/', include('forum.urls')),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/validate/', TokenValidateView.as_view(), name='token_validate'),
-    path('api/logout/', LogoutView.as_view(), name='logout'),
-    path('admin/', admin.site.urls),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('accounts/', include('allauth.urls')),
+    path('api/lms/activitylog/', include('activitylog.urls')),
+    path('api/lms/courses/', include('courses.urls')),
+    path('api/lms/schedule/', include('schedule.urls')),
+    path('api/lms/messaging/', include('messaging.urls')),
+    path('api/lms/carts/', include('carts.urls')),
+    path('api/lms/ai_chat/', include('ai_chat.urls')),
+    path('api/lms/groups/', include('groups.urls')),
+    path('api/lms/adverts/', include('advert.urls')),
+    path('api/lms/payments/', include('payments.urls')),
+    path('api/lms/forums/', include('forum.urls')),
     path('django_prometheus/', include('django_prometheus.urls')),
-    
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

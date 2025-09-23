@@ -88,17 +88,46 @@ class ComplianceDocumentSerializer(serializers.Serializer):
     file_url = serializers.CharField(allow_blank=True, required=False, allow_null=True)
     uploaded_at = serializers.DateTimeField(allow_null=True, required=False)
 
-class ComplianceStatusSerializer(serializers.Serializer):
-    id = serializers.CharField(allow_blank=True, required=False, allow_null=True)
-    name = serializers.CharField(allow_blank=True, required=False, allow_null=True)
-    description = serializers.CharField(allow_blank=True, required=False, allow_null=True)
-    required = serializers.BooleanField(required=False)
-    status = serializers.CharField(allow_blank=True, required=False, allow_null=True)
-    checked_by = serializers.CharField(allow_blank=True, required=False, allow_null=True)
-    checked_at = serializers.DateTimeField(allow_null=True, required=False)
-    notes = serializers.CharField(allow_blank=True, required=False, allow_null=True)
-    document = ComplianceDocumentSerializer(required=False, allow_null=True)
 
+
+# class ComplianceStatusSerializer(serializers.Serializer):
+#     id = serializers.CharField()
+#     name = serializers.CharField()
+#     description = serializers.CharField(allow_blank=True)
+#     required = serializers.BooleanField(default=False)
+#     status = serializers.CharField(default='pending')
+#     checked_by = serializers.CharField(allow_null=True)
+#     checked_at = serializers.DateTimeField(allow_null=True)
+#     notes = serializers.CharField(allow_blank=True)
+#     document = serializers.DictField(allow_null=True)
+
+#     def to_representation(self, instance):
+#         # Include all fields from the instance, not just the defined ones
+#         data = super().to_representation(instance)
+#         for key, value in instance.items():
+#             if key not in data:
+#                 data[key] = value
+#         return data
+
+class ComplianceStatusSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    description = serializers.CharField(allow_blank=True)
+    required = serializers.BooleanField(default=False)
+    status = serializers.CharField(default='pending')
+    checked_by = serializers.CharField(allow_null=True)
+    checked_at = serializers.DateTimeField(allow_null=True)
+    notes = serializers.CharField(allow_blank=True)
+    documents = serializers.ListField(
+        child=serializers.DictField(), allow_empty=True, required=False
+    )
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        for key, value in instance.items():
+            if key not in data:
+                data[key] = value
+        return data
 
 
 class PublicJobApplicationSerializer(serializers.ModelSerializer):
@@ -258,14 +287,7 @@ class JobApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = JobApplication
-        fields = [
-            'id', 'tenant_id', 'branch_id', 'job_requisition_id', 'full_name',
-            'email', 'phone', 'date_of_birth', 'resume_url', 'cover_letter_url', 'source', 'referred_by',
-            'application_date', 'current_stage', 'status', 'ai_vetting_score', 'ai_vetting_notes',
-            'screening_status', 'screening_score', 'screening_questions', 'tags', 'qualification', 'experience',
-            'knowledge_skill', 'cover_letter', 'resume_status', 'employment_gaps', 'documents', 'compliance_status',
-            'interview_location', 'disposition_reason', 'is_deleted', 'applied_at', 'created_at', 'updated_at'
-        ]
+        fields = "__all__"
         read_only_fields = [
             'id', 'tenant_id', 'resume_url', 'cover_letter_url', 'is_deleted', 'applied_at', 'created_at', 'updated_at'
         ]
@@ -389,23 +411,36 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     if 'compliance_status' in data:
+    #         data['compliance_status'] = [
+    #             {
+    #                 'id': item.get('id', ''),
+    #                 'name': item.get('name', ''),
+    #                 'description': item.get('description', ''),
+    #                 'required': item.get('required', False),
+    #                 'status': item.get('status', 'pending'),
+    #                 'checked_by': item.get('checked_by', None),
+    #                 'checked_at': item.get('checked_at', None),
+    #                 'notes': item.get('notes', ''),
+    #                 'document': item.get('document', {'file_url': '', 'uploaded_at': ''})
+    #             } for item in data['compliance_status']
+    #         ]
+    #     return data
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         if 'compliance_status' in data:
+            # Use the raw compliance_status items directly to preserve all fields
             data['compliance_status'] = [
                 {
-                    'id': item.get('id', ''),
-                    'name': item.get('name', ''),
-                    'description': item.get('description', ''),
-                    'required': item.get('required', False),
-                    'status': item.get('status', 'pending'),
-                    'checked_by': item.get('checked_by', None),
-                    'checked_at': item.get('checked_at', None),
-                    'notes': item.get('notes', ''),
-                    'document': item.get('document', {'file_url': '', 'uploaded_at': ''})
+                    **item,  # Include all fields from the item
+                    'document': item.get('document', {'file_url': '', 'uploaded_at': ''})  # Ensure document defaults
                 } for item in data['compliance_status']
             ]
         return data
+
 
 
 

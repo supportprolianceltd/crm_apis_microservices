@@ -36,7 +36,7 @@ django_asgi_app = get_asgi_application()
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from messaging.routing import websocket_urlpatterns  # Only import from messaging
-from lumina_care.websocket_middleware import WebSocketJWTAuthMiddleware
+from complete_lms.websocket_middleware import WebSocketJWTAuthMiddleware
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,

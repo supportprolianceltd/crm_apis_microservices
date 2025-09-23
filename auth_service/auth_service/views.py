@@ -105,7 +105,6 @@ class TokenValidateView(APIView):
             return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
 
 
-
 class CustomTokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -384,13 +383,8 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
             return data
 
 
-
-
-
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenSerializer
-
-
 
 
 class CustomTokenRefreshView(APIView):
@@ -497,6 +491,7 @@ class CustomTokenRefreshView(APIView):
                 success=False
             )
             return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class LoginWith2FAView(TokenObtainPairView):
     serializer_class = CustomTokenSerializer
@@ -733,6 +728,7 @@ class PublicKeyView(APIView):
             return Response({"error": "tenant_id is required"}, status=400)
 
         try:
+            logger.info(f"Set tenant_id to {tenant_id} ")
             tenant = Tenant.objects.get(id=tenant_id)
             connection.set_schema(tenant.schema_name)
             logger.info(f"Set schema to {tenant.schema_name} for kid={kid}")

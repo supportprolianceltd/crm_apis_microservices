@@ -9,7 +9,7 @@ import requests
 import concurrent.futures
 from urllib import request
 from kafka import KafkaProducer
-
+import re 
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
@@ -878,8 +878,6 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-
-
 class JobApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = JobApplicationSerializer
     pagination_class = CustomPagination
@@ -912,7 +910,6 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
     def check_permissions(self, request):
         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
         return super().check_permissions(request)
-
 
 
 class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -996,9 +993,6 @@ class JobApplicationBulkDeleteView(APIView):
         except Exception as e:
             logger.error(f"Bulk soft delete failed: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
 
 
 class JobApplicationWithSchedulesView(APIView):
@@ -1341,52 +1335,6 @@ class PermanentDeleteJobApplicationsView(APIView):
         return Response({"detail": f"Successfully permanently deleted {deleted_count} application(s)."}, status=status.HTTP_200_OK)
 
 
-
-# class ScheduleListCreateView(generics.ListCreateAPIView):
-#     serializer_class = ScheduleSerializer
-#     pagination_class = CustomPagination
-#     parser_classes = (MultiPartParser, FormParser, JSONParser)
-#     # permission_classes = [AllowAny]  # Allow unauthenticated requests
-
-#     def get_queryset(self):
-#         jwt_payload = getattr(self.request, 'jwt_payload', {})
-#         tenant_id = jwt_payload.get('tenant_unique_id')
-#         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')
-#         queryset = Schedule.active_objects.all()
-#         if not tenant_id:
-#             logger.error("No tenant_id in token")
-#             return Schedule.active_objects.none()
-#         queryset = queryset.filter(tenant_id=tenant_id)
-#         if role == 'recruiter' and branch:
-#             queryset = queryset.filter(branch=branch)
-#         elif branch:
-#             queryset = queryset.filter(branch=branch)
-#         status_param = self.request.query_params.get('status', None)
-#         if status_param:
-#             queryset = queryset.filter(status=status_param)
-#         return queryset.order_by('-created_at')
-
-#     def create(self, request, *args, **kwargs):
-#         jwt_payload = getattr(request, 'jwt_payload', {})
-#         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
-#         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')
-
-#         if not tenant_id:
-#             logger.error("Tenant schema or ID missing from token")
-#             return Response({"error": "Tenant schema or ID missing from token"}, status=status.HTTP_401_UNAUTHORIZED)
-
-#         data = request.data.copy()
-#         serializer = self.get_serializer(data=data, context={'request': request})
-#         serializer.is_valid(raise_exception=True)
-#         self.perform_create(serializer)
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
     pagination_class = CustomPagination
@@ -1455,61 +1403,6 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             logger.error(f"Failed to send schedule creation notification for schedule {schedule.id}: {str(e)}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-# class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     serializer_class = ScheduleSerializer
-#     parser_classes = (MultiPartParser, FormParser, JSONParser)
-#     # permission_classes = [IsAuthenticated]
-#     lookup_field = 'id'
-#     def get_permissions(self):
-#         return [AllowAny()]  # Temporary for testing
-
-#     def get_queryset(self):
-#         jwt_payload = getattr(self.request, 'jwt_payload', {})
-#         tenant_id = jwt_payload.get('tenant_unique_id')
-#        # tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')
-#         queryset = Schedule.active_objects.all()
-#         if not tenant_id:
-#             logger.error("No tenant_id in token")
-#             return Schedule.active_objects.none()
-#         queryset = queryset.filter(tenant_id=tenant_id)
-#         if role == 'recruiter' and branch:
-#             queryset = queryset.filter(branch=branch)
-#         elif branch:
-#             queryset = queryset.filter(branch=branch)
-#         return queryset.order_by('-created_at')
-
-#     def retrieve(self, request, *args, **kwargs):
-#         try:
-#             instance = self.get_object()
-#             return Response(self.get_serializer(instance).data)
-#         except Exception as e:
-#             logger.exception(f"Error retrieving schedule: {str(e)}")
-#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#     def update(self, request, *args, **kwargs):
-#         try:
-#             partial = kwargs.pop('partial', False)
-#             instance = self.get_object()
-#             serializer = self.get_serializer(instance, data=request.data, partial=partial)
-#             serializer.is_valid(raise_exception=True)
-#             self.perform_update(serializer)
-#             return Response(serializer.data)
-#         except Exception as e:
-#             logger.exception(f"Error updating schedule: {str(e)}")
-#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#     def destroy(self, request, *args, **kwargs):
-#         try:
-#             instance = self.get_object()
-#             self.perform_destroy(instance)
-#             return Response(status=status.HTTP_204_NO_CONTENT)
-#         except Exception as e:
-#             logger.exception(f"Error deleting schedule: {str(e)}")
-#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -1597,6 +1490,7 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
         except Exception as e:
             logger.exception(f"Error deleting schedule: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class ScheduleBulkDeleteView(APIView):
     serializer_class = SimpleMessageSerializer 
@@ -1709,8 +1603,6 @@ class PermanentDeleteSchedulesView(APIView):
             return Response({"detail": "No soft-deleted schedules found."}, status=status.HTTP_404_NOT_FOUND)
         deleted_count = schedules.delete()[0]
         return Response({"detail": f"Successfully permanently deleted {deleted_count} schedule(s)."}, status=status.HTTP_200_OK)
-
-
 
 # Assuming JobApplication and JobApplicationSerializer are defined elsewhere
 
@@ -1825,9 +1717,6 @@ class ComplianceStatusUpdateView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-
-
-# Assuming JobApplication, JobApplicationSerializer, and upload_file_dynamic are defined elsewhere
 class ApplicantComplianceUploadView(APIView):
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -1839,14 +1728,14 @@ class ApplicantComplianceUploadView(APIView):
         logger.info(f"Request data: {request.data}")
         unique_link = request.data.get('unique_link')
         email = request.data.get('email')
-        names = request.data.getlist('names')  # List of compliance item names
+        names = request.data.getlist('names', [])  # List of compliance item names, optional
+        files = request.FILES.getlist('documents', [])  # List of uploaded files, optional
 
+        # Validate required fields
         if not unique_link:
             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
         if not email:
             return Response({"detail": "Missing email."}, status=status.HTTP_400_BAD_REQUEST)
-        if not names:
-            return Response({"detail": "No compliance item names provided."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Extract tenant_id from unique_link
         try:
@@ -1880,44 +1769,51 @@ class ApplicantComplianceUploadView(APIView):
         except JobApplication.DoesNotExist:
             return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Initialize compliance_status if empty
+        # Initialize or update compliance_status with checklist items
+        checklist = job_requisition.get('compliance_checklist', [])
         if not application.compliance_status or len(application.compliance_status) == 0:
-            checklist = job_requisition.get('compliance_checklist', [])
             application.compliance_status = []
-            for item in checklist:
-                name = item.get('name', '')
-                if not name:
-                    continue
-                generated_id = f"compliance-{slugify(name)}"
-                application.compliance_status.append({
-                    'id': generated_id,
-                    'name': name,
-                    'description': item.get('description', ''),
-                    'required': item.get('required', True),
-                    'status': 'pending',
-                    'checked_by': None,
-                    'checked_at': None,
-                    'notes': '',
-                    'document': None
-                })
-            application.save()
-            application.refresh_from_db()
+        # Ensure all checklist items are in compliance_status
+        checklist_names = {item['name'] for item in checklist}
+        existing_names = {item['name'] for item in application.compliance_status}
+        for item in checklist:
+            name = item.get('name', '')
+            if not name or name in existing_names:
+                continue
+            generated_id = f"compliance-{slugify(name)}"
+            application.compliance_status.append({
+                'id': generated_id,
+                'name': name,
+                'description': item.get('description', ''),
+                'required': item.get('required', True),
+                'requires_document': item.get('requires_document', True),
+                'status': 'pending',
+                'checked_by': None,
+                'checked_at': None,
+                'notes': '',
+                'document': [],  # Initialize as list to support multiple documents
+                'metadata': {}
+            })
+        application.save()
+        application.refresh_from_db()
 
-        # Validate files and names
-        files = request.FILES.getlist('documents')
-        if not files:
-            return Response({"detail": "No documents provided."}, status=status.HTTP_400_BAD_REQUEST)
-        if len(files) != len(names):
-            return Response({"detail": "Number of documents must match number of names."}, status=status.HTTP_400_BAD_REQUEST)
+        # If no compliance checklist, return success
+        if not checklist:
+            return Response({
+                "detail": "No compliance items required for this requisition.",
+                "compliance_status": application.compliance_status
+            }, status=status.HTTP_200_OK)
 
-        # Map compliance item names to their generated IDs
-        compliance_checklist = {item['name']: item['id'] for item in application.compliance_status}
+        # Map compliance item names to their details
+        compliance_checklist = {item['name']: item for item in application.compliance_status}
 
+        # Validate provided names against checklist
         for name in names:
-            if name not in compliance_checklist:
-                return Response({"detail": f"Invalid compliance item name: {name}. Must match checklist."}, status=status.HTTP_400_BAD_REQUEST)
+            if name not in checklist_names:
+                return Response({"detail": f"Invalid compliance item name: {name}. Must match checklist."}, 
+                               status=status.HTTP_400_BAD_REQUEST)
 
-        # Collect additional fields from request.data (excluding reserved fields)
+        # Collect additional fields (excluding reserved fields)
         reserved_fields = {'unique_link', 'email', 'names', 'documents'}
         additional_fields = {}
         for key in request.data:
@@ -1926,64 +1822,95 @@ class ApplicantComplianceUploadView(APIView):
                 additional_fields[key] = value
         logger.info(f"Additional fields: {additional_fields}")
 
-        # Upload files and prepare document data
+        # Group files by compliance item name
         documents_data = []
+        metadata_data = []
         storage_type = getattr(settings, 'STORAGE_TYPE', 'supabase').lower()
 
-        for file, name in zip(files, names):
-            file_ext = os.path.splitext(file.name)[1]
-            filename = f"{uuid.uuid4()}{file_ext}"
-            folder_path = f"compliance_documents/{timezone.now().strftime('%Y/%m/%d')}"
-            file_path = f"{folder_path}/{filename}"
-            content_type = mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
+        # Create a mapping of names to their corresponding files
+        name_to_files = {}
+        for i, name in enumerate(names):
+            if i < len(files):
+                if name not in name_to_files:
+                    name_to_files[name] = []
+                name_to_files[name].append(files[i])
+            else:
+                # No file for this name, treat as metadata
+                metadata_data.append({
+                    'doc_id': compliance_checklist[name]['id'],
+                    'name': name,
+                    'metadata': additional_fields
+                })
 
-            try:
-                public_url = upload_file_dynamic(file, file_path, content_type, storage_type)
-                doc_data = {
-                    'file_url': public_url,
-                    'uploaded_at': timezone.now().isoformat(),
-                    'doc_id': compliance_checklist[name],
-                    'name': name
-                }
-                documents_data.append(doc_data)
-            except Exception as e:
-                logger.error(f"Failed to upload document for {name}: {str(e)}")
-                return Response({"detail": f"Failed to upload document: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        # Upload documents for each name
+        for name, file_list in name_to_files.items():
+            item = compliance_checklist[name]
+            for file in file_list:
+                file_ext = os.path.splitext(file.name)[1]
+                filename = f"{uuid.uuid4()}{file_ext}"
+                folder_path = f"compliance_documents/{timezone.now().strftime('%Y/%m/%d')}"
+                file_path = f"{folder_path}/{filename}"
+                content_type = mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
 
-        # Update compliance status - this is the key fix
+                try:
+                    public_url = upload_file_dynamic(file, file_path, content_type, storage_type)
+                    documents_data.append({
+                        'file_url': public_url,
+                        'uploaded_at': timezone.now().isoformat(),
+                        'doc_id': item['id'],
+                        'name': name
+                    })
+                except Exception as e:
+                    logger.error(f"Failed to upload document for {name}: {str(e)}")
+                    return Response({"detail": f"Failed to upload document: {str(e)}"}, 
+                                   status=status.HTTP_400_BAD_REQUEST)
+
+        # Update compliance status
         updated_compliance_status = []
-        
         for item in application.compliance_status:
-            # Check if this item is being updated
             item_updated = False
-            for doc in documents_data:
-                if item['id'] == doc['doc_id']:
-                    # Create a new item with all the updates
+            # Collect all documents for this item
+            item_documents = [doc for doc in documents_data if doc['doc_id'] == item['id']]
+            if item_documents:
+                updated_item = {
+                    'id': item['id'],
+                    'name': item['name'],
+                    'description': item.get('description', ''),
+                    'required': item.get('required', True),
+                    'requires_document': item.get('requires_document', True),
+                    'status': 'uploaded',
+                    'checked_by': item.get('checked_by'),
+                    'checked_at': item.get('checked_at'),
+                    'notes': '',
+                    'document': [{'file_url': doc['file_url'], 'uploaded_at': doc['uploaded_at']} for doc in item_documents],
+                    'metadata': item.get('metadata', {})
+                }
+                updated_compliance_status.append(updated_item)
+                item_updated = True
+                logger.info(f"Updated compliance item {item['id']} with {len(item_documents)} document(s)")
+            
+            # Check for metadata updates
+            for meta in metadata_data:
+                if item['id'] == meta['doc_id']:
                     updated_item = {
                         'id': item['id'],
                         'name': item['name'],
                         'description': item.get('description', ''),
                         'required': item.get('required', True),
-                        'status': 'uploaded',
+                        'requires_document': item.get('requires_document', True),
+                        'status': 'submitted',
                         'checked_by': item.get('checked_by'),
                         'checked_at': item.get('checked_at'),
                         'notes': '',
-                        'document': {
-                            'file_url': doc['file_url'],
-                            'uploaded_at': doc['uploaded_at']
-                        }
+                        'document': item.get('document', []),  # Preserve existing documents
+                        'metadata': meta['metadata']
                     }
-                    
-                    # Add all additional fields to the top level of this compliance item
-                    for key, value in additional_fields.items():
-                        updated_item[key] = value
-                    
                     updated_compliance_status.append(updated_item)
                     item_updated = True
-                    logger.info(f"Updated compliance item {item['id']}: {updated_item}")
+                    logger.info(f"Updated compliance item {item['id']} with metadata")
                     break
-            
-            # If this item wasn't updated, keep it as is
+
+            # If not updated, keep the item as is
             if not item_updated:
                 updated_compliance_status.append(item)
 
@@ -1994,9 +1921,8 @@ class ApplicantComplianceUploadView(APIView):
 
         # Refresh the instance to get the latest data
         application.refresh_from_db()
-        
-        # Return the actual compliance_status from the database
+
         return Response({
-            "detail": "Compliance documents uploaded successfully.",
+            "detail": "Compliance items processed successfully.",
             "compliance_status": application.compliance_status
         }, status=status.HTTP_200_OK)

@@ -1,38 +1,35 @@
 from django.db import models
 from django.utils.translation import gettext as _
 from django.core.exceptions import ValidationError
-from groups.models import Group
-from users.models import UserActivity, UserActivity
+from activitylog.models import ActivityLog
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('forum')
 
 class Forum(models.Model):
+    id = models.AutoField(primary_key=True)
+    tenant_id = models.CharField(max_length=36, blank=False, null=False)  # Store Tenant ID
+    tenant_name = models.CharField(max_length=255, blank=True, null=True, help_text="Tenant name for reference")
     title = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
-    allowed_groups = models.ManyToManyField(
-        Group,
-        related_name='forums',
-        blank=True,
-        help_text="Groups that can access this forum"
-    )
+    group_ids = models.JSONField(default=list, blank=True)  # Store Group IDs from auth-service
     is_active = models.BooleanField(default=True)
+    created_by_id = models.CharField(max_length=36, blank=True, null=True)  # Store User ID from auth-service
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        UserActivity,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='created_forums'
-    )
 
     class Meta:
         ordering = ['title']
         verbose_name = _('Forum')
         verbose_name_plural = _('Forums')
+        indexes = [
+            models.Index(fields=['tenant_id', 'is_active'], name='idx_forum_tenant_active'),
+            models.Index(fields=['created_by_id', 'created_at'], name='idx_forum_creator_created'),
+            
+        ]
 
     def __str__(self):
-        return self.title
+        return f"{self.title} (Tenant: {self.tenant_id})"
 
     def clean(self):
         if not self.title:
@@ -42,75 +39,71 @@ class Forum(models.Model):
         created = not self.pk
         self.full_clean()
         super().save(*args, **kwargs)
-
         activity_type = 'forum_created' if created else 'forum_updated'
-        UserActivity.objects.create(
+        ActivityLog.objects.create(
+            tenant_id=self.tenant_id,
+            tenant_name=self.tenant_name,
+            user_id=self.created_by_id,
             activity_type=activity_type,
-            user=self.created_by,
             details=f'Forum "{self.title}" was {"created" if created else "updated"}',
             status='success'
         )
+        logger.info(f"Forum {self.id} {'created' if created else 'updated'} for tenant {self.tenant_id} by user {self.created_by_id}")
 
     def delete(self, *args, **kwargs):
-        UserActivity.objects.create(
+        ActivityLog.objects.create(
+            tenant_id=self.tenant_id,
+            tenant_name=self.tenant_name,
+            user_id=self.created_by_id,
             activity_type='forum_deleted',
-            user=self.created_by,
             details=f'Forum "{self.title}" was deleted',
-            status='system'
+            status='success'
         )
+        logger.info(f"Forum {self.id} deleted for tenant {self.tenant_id} by user {self.created_by_id}")
         super().delete(*args, **kwargs)
 
 class ForumPost(models.Model):
+    id = models.AutoField(primary_key=True)
+    tenant_id = models.CharField(max_length=36, blank=False, null=False)  # Store Tenant ID
+    tenant_name = models.CharField(max_length=255, blank=True, null=True, help_text="Tenant name for reference")
     forum = models.ForeignKey(
         Forum,
         on_delete=models.CASCADE,
         related_name='posts'
     )
-    author = models.ForeignKey(
-        UserActivity,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='forum_posts'
-    )
+    author_id = models.CharField(max_length=36, blank=True, null=True)  # Store User ID from auth-service
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_approved = models.BooleanField(default=False)
     moderated_at = models.DateTimeField(null=True, blank=True)
-    moderated_by = models.ForeignKey(
-        UserActivity,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='moderated_posts'
-    )
+    moderated_by_id = models.CharField(max_length=36, blank=True, null=True)  # Store User ID from auth-service
 
     class Meta:
         ordering = ['-created_at']
         verbose_name = _('Forum Post')
         verbose_name_plural = _('Forum Posts')
+        indexes = [
+            models.Index(fields=['tenant_id', 'is_approved'], name='idx_forumpost_tenant_approved'),
+            models.Index(fields=['author_id', 'created_at'], name='idx_forumpost_author_created'),
+        ]
 
     def __str__(self):
-        return f"Post in {self.forum.title} by {self.author.email if self.author else 'Deleted User'}"
+        return f"Post in {self.forum.title} by {self.author_id or 'Deleted User'} (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
         created = not self.pk
         super().save(*args, **kwargs)
-
         if created:
-            UserActivity.objects.create(
+            ActivityLog.objects.create(
+                tenant_id=self.tenant_id,
+                tenant_name=self.tenant_name,
+                user_id=self.author_id,
                 activity_type='forum_post_created',
-                user=self.author,
                 details=f'Created post in forum "{self.forum.title}"',
                 status='success'
             )
-
-from django.db import models
-from django.utils.translation import gettext as _
-from users.models import CustomUser, UserActivity
-import logging
-
-logger = logging.getLogger(__name__)
+            logger.info(f"ForumPost {self.id} created for tenant {self.tenant_id} by user {self.author_id}")
 
 class ModerationQueue(models.Model):
     STATUS_CHOICES = (
@@ -119,25 +112,17 @@ class ModerationQueue(models.Model):
         ('rejected', 'Rejected'),
     )
 
+    id = models.AutoField(primary_key=True)
+    tenant_id = models.CharField(max_length=36, blank=False, null=False)  # Store Tenant ID
+    tenant_name = models.CharField(max_length=255, blank=True, null=True, help_text="Tenant name for reference")
     content_type = models.CharField(max_length=100)  # e.g., 'forum_post', 'comment'
     content_id = models.PositiveIntegerField()
     content = models.TextField()
-    reported_by = models.ForeignKey(
-        UserActivity,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='reported_items'
-    )
+    reported_by_id = models.CharField(max_length=36, blank=True, null=True)  # Store User ID from auth-service
     reason = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     moderation_notes = models.TextField(blank=True)
-    moderated_by = models.ForeignKey(
-        UserActivity,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='moderated_items'
-    )
+    moderated_by_id = models.CharField(max_length=36, blank=True, null=True)  # Store User ID from auth-service
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -145,25 +130,35 @@ class ModerationQueue(models.Model):
         ordering = ['-created_at']
         verbose_name = _('Moderation Queue')
         verbose_name_plural = _('Moderation Queues')
+        indexes = [
+            models.Index(fields=['tenant_id', 'status'], name='idx_moderation_tenant_status'),
+            models.Index(fields=['reported_by_id', 'created_at'], name='idx_mod_rep_cr'),
+
+        ]
 
     def __str__(self):
-        return f"{self.content_type} {self.content_id} - {self.status}"
+        return f"{self.content_type} {self.content_id} - {self.status} (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
         created = not self.pk
         super().save(*args, **kwargs)
-
         if created:
-            UserActivity.objects.create(
+            ActivityLog.objects.create(
+                tenant_id=self.tenant_id,
+                tenant_name=self.tenant_name,
+                user_id=self.reported_by_id,
                 activity_type='moderation_item_created',
-                user=self.reported_by,
                 details=f'Reported {self.content_type} {self.content_id}',
                 status='success'
             )
+            logger.info(f"ModerationQueue {self.id} created for tenant {self.tenant_id} by user {self.reported_by_id}")
         elif self.status != 'pending':
-            UserActivity.objects.create(
+            ActivityLog.objects.create(
+                tenant_id=self.tenant_id,
+                tenant_name=self.tenant_name,
+                user_id=self.moderated_by_id,
                 activity_type='moderation_item_updated',
-                user=self.moderated_by,
                 details=f'Moderated {self.content_type} {self.content_id} as {self.status}',
                 status='success'
             )
+            logger.info(f"ModerationQueue {self.id} updated for tenant {self.tenant_id} by user {self.moderated_by_id}")

@@ -25,7 +25,6 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.models import UserActivity, CustomUser
 from utils.storage import get_storage_service
 from rest_framework.decorators import api_view, permission_classes
 
@@ -248,6 +247,8 @@ class CategoryViewSet(TenantBaseView, viewsets.ModelViewSet):
     def get_permissions(self):
         return [IsAdminUser()] if self.action in ['create', 'update', 'partial_update', 'destroy'] else [IsAuthenticated()]
 
+
+
 class CourseViewSet(TenantBaseView, viewsets.ModelViewSet):
     """Manage courses for a tenant with enrollment and FAQ counts."""
     serializer_class = CourseSerializer
@@ -306,7 +307,6 @@ class CourseViewSet(TenantBaseView, viewsets.ModelViewSet):
                 )
         return Response(serializer.data)
 
-# ...existing code...
     def destroy(self, request, *args, **kwargs):
         tenant = request.tenant
         with tenant_context(tenant), transaction.atomic():
@@ -324,24 +324,7 @@ class CourseViewSet(TenantBaseView, viewsets.ModelViewSet):
             )
             logger.info(f"[{tenant.schema_name}] Course deleted: {instance.title}")
         return Response(status=status.HTTP_204_NO_CONTENT)
-# ...existing code...
-    # def destroy(self, request, *args, **kwargs):
-    #     tenant = request.tenant
-    #     with tenant_context(tenant), transaction.atomic():
-    #         instance = self.get_object()
-    #         # Delete associated files
-    #         storage_service = get_storage_service()
-    #         if instance.thumbnail:
-    #             storage_service.delete_file(instance.thumbnail)
-    #         instance.delete()
-    #         UserActivity.objects.create(
-    #             user=request.user,
-    #             activity_type='course_deleted',
-    #             details=f'Course "{instance.title}" deleted',
-    #             status='success'
-    #         )
-    #         logger.info(f"[{tenant.schema_name}] Course deleted: {instance.title}")
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
 
     @action(detail=False, methods=['get'])
     def most_popular(self, request):
@@ -411,8 +394,8 @@ class CourseViewSet(TenantBaseView, viewsets.ModelViewSet):
             logger.info(f"[{tenant.schema_name}] Listed courses with {response.data['total_all_enrollments']} total enrollments")
             return response
 
-    def get_permissions(self):
-        return [IsAdminUser()] if self.action in ['create', 'update', 'partial_update', 'destroy', 'assign_instructor', 'update_instructor_assignment', 'remove_instructor'] else [IsAuthenticated()]
+    # def get_permissions(self):
+    #     return [IsAdminUser()] if self.action in ['create', 'update', 'partial_update', 'destroy', 'assign_instructor', 'update_instructor_assignment', 'remove_instructor'] else [IsAuthenticated()]
 
     @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])
     def assign_instructor(self, request, pk=None):
@@ -486,6 +469,8 @@ class CourseViewSet(TenantBaseView, viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"[{tenant.schema_name}] Error removing instructor: {str(e)}", exc_info=True)
             return Response({"detail": "Error removing instructor"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 class ModuleViewSet(TenantBaseView, viewsets.ModelViewSet):
     """Manage modules for a tenant, scoped to courses."""

@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (PublicPublishedJobRequisitionsView,PublicCloseJobRequisitionView,PublicPublishedRequisitionsByTenantView,
     JobRequisitionListCreateView,MyJobRequisitionListView, JobRequisitionDetailView,PublishedJobRequisitionListView,
     JobRequisitionBulkDeleteView,SoftDeletedJobRequisitionsView, RecoverSoftDeletedJobRequisitionsView,
-    PermanentDeleteJobRequisitionsView,JobRequisitionByLinkView,ComplianceItemView,VideoSessionViewSet,
+    PermanentDeleteJobRequisitionsView,JobRequisitionByLinkView,ComplianceItemView,VideoSessionViewSet,PublicCloseJobRequisitionBatchView,
     RequestListCreateView, RequestDetailView, UserRequestsListView, CustomJobRequisitionByLinkView
 )
 from . import websocket
@@ -19,12 +19,13 @@ urlpatterns = [
     path('', include(router.urls)),  # Include DRF router URLs for video-sessions
     path('requisitions-per-user/', MyJobRequisitionListView.as_view(), name='my-requisition-list'), 
     path('requisitions/', JobRequisitionListCreateView.as_view(), name='requisition-list-create'),
+     path('requisitions/bulk-create/', JobRequisitionListCreateView.as_view(), name='requisition-bulk-create'), 
     path('requisitions/published/requisition/', PublishedJobRequisitionListView.as_view(), name='published-requisitions'),  
     path('requisitions/public/published/', PublicPublishedJobRequisitionsView.as_view(), name='public-published-requisitions'),
 
     path('requisitions/public/published/<str:tenant_unique_id>/', PublicPublishedRequisitionsByTenantView.as_view(),name='public-tenant-published-requisitions'),
 
-    # path('requisitions/public/close/<str:job_requisition_id>/', PublicCloseJobRequisitionView.as_view(), name='public-close-requisition'),
+    path('requisitions/public/close/<str:job_requisition_id>/', PublicCloseJobRequisitionView.as_view(), name='public-close-requisition'),
 
     # urls.py
     path('requisitions/public/close/batch/', PublicCloseJobRequisitionBatchView.as_view(), name='public-close-requisition-batch'),

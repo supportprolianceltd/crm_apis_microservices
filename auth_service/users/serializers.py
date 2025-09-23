@@ -992,7 +992,7 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
         status = validated_data.pop('status', None)
         validated_data.pop('tenant', None)  # Remove tenant to avoid duplicate argument
 
-        from django_tenants.utils import tenant_context
+        
         with tenant_context(tenant):
             user = CustomUser.objects.create_user(
                 email=email,  # Explicitly pass email

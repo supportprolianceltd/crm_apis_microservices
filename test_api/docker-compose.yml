@@ -1,7 +1,9 @@
+# lms-service/docker-compose.yml
 services:
   lms-db:
     image: postgres:15
     container_name: lms_db
+    restart: always
     environment:
       POSTGRES_DB: multi_tenant_lms
       POSTGRES_USER: postgres
@@ -23,6 +25,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: lms_app
+    restart: on-failure
     env_file:
       - .env
     environment:
@@ -34,7 +37,7 @@ services:
       - FRONTEND_URL=http://localhost:5173
     ports:
       - "8004:8004"
-    command: gunicorn --bind 0.0.0.0:8004 lumina_care.wsgi:application
+    command: gunicorn --bind 0.0.0.0:8004 complete_lms.wsgi:application
     depends_on:
       lms-db:
         condition: service_healthy
@@ -44,20 +47,25 @@ services:
       - auth_service_default
     mem_limit: 2g
 
-  lms-consumer:
+  lms_consumer:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: lms_consumer
+    restart: on-failure
     env_file:
       - .env
     environment:
       - DATABASE_URL=postgres://postgres:qwerty@lms-db:5432/multi_tenant_lms
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-    command: python kafka_consumer.py
+    entrypoint: ["/app/consumer-entrypoint.sh"]
     depends_on:
-      - lms-db
-      - redis
+      lms-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_healthy
     networks:
       - auth_service_default
     mem_limit: 1g
@@ -65,8 +73,48 @@ services:
   redis:
     image: redis:6.2
     container_name: lms_redis
+    restart: always
     ports:
-      - "6379:6379"
+      - "6382:6379"
+    networks:
+      - auth_service_default
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: lms_kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+      KAFKA_SUPER_USERS: User:lms_consumer;User:auth-service
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD", "/opt/kafka/bin/kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - auth_service_default
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: lms_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181 | grep imok"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - auth_service_default
 

@@ -182,35 +182,57 @@ LOGGING = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-MICROSERVICE_URLS = {
-    "auth_service": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "applications-engine": env.str("JOB_APPLICATIONS_URL", default="http://job-applications:8003"),
-    "talent-engine": env.str("TALENT_ENGINE_URL", default="http://talent-engine:8002"),
-    "messaging": env.str("MESSAGING_URL", default="http://messaging:3500"),
-    "token": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
-    "token/refresh": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
-    "token/validate": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
-    "login": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
-    "verify-2fa": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
-    "docs": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
-    "doc": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
-    "user": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),
-    "tenant": env.str("AUTH_SERVICE_URL", default="http://auth-service:80001"),  # <--- Add this line
-    "token": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "public-key": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "token/refresh": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "token/validate": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "login": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "logout": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "verify-2fa": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "docs": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "doc": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "user": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
-    "tenant": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+# MICROSERVICE_URLS = {
+#     "auth_service": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "applications-engine": env.str("JOB_APPLICATIONS_URL", default="http://job-applications:8003"),
+#     "talent-engine": env.str("TALENT_ENGINE_URL", default="http://talent-engine:8002"),
+#     "messaging": env.str("MESSAGING_URL", default="http://messaging:3500"),
+#     "lms": env.str("LMS_APP_URL", default="http://lms-app:8004"),
+#     "token": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "token/refresh": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "token/validate": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "login": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "verify-2fa": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "docs": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "doc": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "user": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "tenant": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),  # <--- Add this line
+#     "token": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "public-key": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "token/refresh": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "token/validate": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "login": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "logout": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "verify-2fa": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "docs": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "doc": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "user": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "tenant": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
 
-    "jitsi": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+#     "jitsi": env.str("AUTH_SERVICE_URL", default="http://auth-service:8001"),
+# }
+
+AUTH_SERVICE_URL = env.str("AUTH_SERVICE_URL", default="http://auth-service:8001")
+APPLICATIONS_ENGINE_URL = env.str("JOB_APPLICATIONS_URL", default="http://job-applications:8003")
+TALENT_ENGINE_URL = env.str("TALENT_ENGINE_URL", default="http://talent-engine:8002")
+MESSAGING_URL = env.str("MESSAGING_URL", default="http://messaging:3500")
+LMS_APP_URL = env.str("LMS_APP_URL", default="http://lms-app:8004")
+
+MICROSERVICE_URLS = {
+    "auth_service": AUTH_SERVICE_URL,
+    "applications-engine": APPLICATIONS_ENGINE_URL,
+    "talent-engine": TALENT_ENGINE_URL,
+    "messaging": MESSAGING_URL,
+    "lms": LMS_APP_URL,
 }
 
+# Add multiple keys that all map to AUTH_SERVICE_URL
+AUTH_ROUTES = [
+    "token", "token/refresh", "token/validate", "login", "logout",
+    "verify-2fa", "docs", "doc", "user", "tenant", "public-key", "jitsi"
+]
+
+MICROSERVICE_URLS.update({route: AUTH_SERVICE_URL for route in AUTH_ROUTES})
 
 
 # docker exec -it api_gateway python manage.py check
@@ -223,3 +245,5 @@ CORS_ALLOWED_ORIGINS = [
     "https://crm-frontend-react.vercel.app",
     "http://localhost:8000",
 ]
+
+

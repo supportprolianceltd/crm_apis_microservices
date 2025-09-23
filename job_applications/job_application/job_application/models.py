@@ -16,6 +16,7 @@ class JobApplication(models.Model):
         ('shortlisted', 'Shortlisted'),
         ('rejected', 'Rejected'),
         ('hired', 'Hired'),
+        ('complaince_completed', 'Complaince_Completed'),
     ]
     SCREENING_STATUS_CHOICES = [
         ('pending', 'Pending'),

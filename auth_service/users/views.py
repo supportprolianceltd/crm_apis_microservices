@@ -1826,6 +1826,7 @@ class DocumentListCreateView(APIView):
     def post(self, request):
         try:
             serializer = DocumentSerializer(data=request.data, context={'request': request})
+            logger.info(f"{request.data}")
             if serializer.is_valid():
                 document = serializer.save()
                 logger.info(f"Document created: {document.title} for tenant {serializer.validated_data['tenant_id']}")

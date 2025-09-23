@@ -1,9 +1,16 @@
-# # docker rm -f $(docker ps -aq) && \
-# # docker rmi -f $(docker images -aq) && \
-# # docker volume rm -f $(docker volume ls -q) && \
-# # docker network prune -f
+# docker rm -f $(docker ps -aq) && \
+# docker rmi -f $(docker images -aq) && \
+# docker volume rm -f $(docker volume ls -q) && \
+# docker network prune -f
+# docker builder prune -f
 
 
+
+
+
+
+# [
+  
 #     {
    
 #       "title": "Account Officer",
@@ -47,7 +54,7 @@
 #       "requested_date": "2025-09-15",
 #       "created_at": "2025-09-15T14:56:23.651490Z",
 #       "updated_at": "2025-09-18T11:05:28.298005Z",
-#       "approval_workflow": {},
+#       "approval_workflow": {}
 #     },
 #     {
 #       "title": "Product Tester",
@@ -67,7 +74,7 @@
 #       "comment": "okkk",
 #       "responsibilities": [],
 #       "documents_required": [],
-#       "compliance_checklist": [],
+#       "compliance_checklist": []
 #     },
 #     {
 #       "title": "Registered Nurse (Home Care)",
@@ -126,7 +133,7 @@
 #             "approver_id": "user-hr-manager"
 #           }
 #         ]
-#       },
+#       }
 #     },
 #     {
 #       "title": "Data Scientist",
@@ -194,7 +201,7 @@
 #             "approver_role": "CTO"
 #           }
 #         ]
-#       },
+#       }
 #     },
 #     {
       
@@ -213,7 +220,7 @@
 #       "reason": "Need an experienced designer",
 #       "responsibilities": [],
 #       "documents_required": [],
-#       "compliance_checklist": [],
+#       "compliance_checklist": []
 #     },
 #     {
 #       "title": "Senior Frontend Developer",
@@ -302,3 +309,5 @@
 #       }
 #     }
   
+  
+#   ]

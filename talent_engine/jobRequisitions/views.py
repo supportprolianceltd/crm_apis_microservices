@@ -41,7 +41,7 @@ from .models import (
     VideoSession,
     Participant,
 )
-from .serializers import JobRequisitionSerializer, ComplianceItemSerializer,VideoSessionSerializer, ParticipantSerializer, RequestSerializer, PublicJobRequisitionSerializer
+from .serializers import JobRequisitionSerializer, ComplianceItemSerializer,VideoSessionSerializer, JobRequisitionBulkCreateSerializer, ParticipantSerializer, RequestSerializer, PublicJobRequisitionSerializer
 from .permissions import IsMicroserviceAuthenticated
 
 
@@ -139,26 +139,26 @@ class PublicPublishedRequisitionsByTenantView(APIView):
             return Response({"detail": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# class PublicCloseJobRequisitionView(APIView):
-#     permission_classes = []  # No authentication required
+class PublicCloseJobRequisitionView(APIView):
+    permission_classes = []  # No authentication required
 
-#     def post(self, request, job_requisition_id):
-#         try:
-#             job_req = JobRequisition.active_objects.get(id=job_requisition_id)
-#             job_req.status = 'closed'
-#             job_req.save(update_fields=['status', 'updated_at'])
-#             logger.info(f"JobRequisition {job_requisition_id} status changed to closed (public endpoint)")
-#             return Response({
-#                 "detail": f"Job requisition {job_requisition_id} status changed to closed.",
-#                 "id": job_requisition_id,
-#                 "status": job_req.status
-#             }, status=status.HTTP_200_OK)
-#         except JobRequisition.DoesNotExist:
-#             logger.warning(f"JobRequisition {job_requisition_id} not found for public close")
-#             return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
-#         except Exception as e:
-#             logger.error(f"Error closing job requisition {job_requisition_id}: {str(e)}")
-#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def post(self, request, job_requisition_id):
+        try:
+            job_req = JobRequisition.active_objects.get(id=job_requisition_id)
+            job_req.status = 'closed'
+            job_req.save(update_fields=['status', 'updated_at'])
+            logger.info(f"JobRequisition {job_requisition_id} status changed to closed (public endpoint)")
+            return Response({
+                "detail": f"Job requisition {job_requisition_id} status changed to closed.",
+                "id": job_requisition_id,
+                "status": job_req.status
+            }, status=status.HTTP_200_OK)
+        except JobRequisition.DoesNotExist:
+            logger.warning(f"JobRequisition {job_requisition_id} not found for public close")
+            return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error closing job requisition {job_requisition_id}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                          
 # views.py
 class PublicCloseJobRequisitionBatchView(APIView):
@@ -270,13 +270,66 @@ class PublishedJobRequisitionListView(generics.ListAPIView):
         return queryset
     
 
+# class JobRequisitionListCreateView(generics.ListCreateAPIView):
+#     serializer_class = JobRequisitionSerializer
+#     pagination_class = CustomPagination
+#     # permission_classes removed; rely on custom JWT middleware
+#     filter_backends = [DjangoFilterBackend, SearchFilter]
+#     filterset_fields = ['status', 'role']
+#     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
+
+#     def get_queryset(self):
+#         if getattr(self, "swagger_fake_view", False):
+#             return JobRequisition.objects.none()
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('branch')
+#         queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
+#         if role == 'recruiter' and branch:
+#             queryset = queryset.filter(branch=branch)
+#         return queryset
+    
+#         #Send notification to admin when job requisition is created
+    
+#     def perform_create(self, serializer):
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
+#         user_id = str(jwt_payload.get('user', {}).get('id')) if jwt_payload.get('user', {}).get('id') is not None else None
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')
+#         if not tenant_id or not user_id:
+#             logger.error("Missing tenant_unique_id or user_id in JWT payload")
+#             raise serializers.ValidationError("Missing tenant_unique_id or user_id in token.")
+#         serializer.save(
+#             tenant_id=tenant_id,
+#             requested_by_id=user_id,
+#             branch=branch if role == 'recruiter' and branch else None
+#         )
+#         logger.info(f"Job requisition created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
+
 class JobRequisitionListCreateView(generics.ListCreateAPIView):
     serializer_class = JobRequisitionSerializer
     pagination_class = CustomPagination
-    # permission_classes removed; rely on custom JWT middleware
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['status', 'role']
     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
+
+    def get_serializer_class(self):
+        """
+        Use different serializer for bulk create operations
+        """
+        if self.request.method == 'POST' and self.request.path.endswith('/bulk-create/'):
+            return JobRequisitionBulkCreateSerializer
+        return JobRequisitionSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        """
+        Override to handle bulk create with many=True
+        """
+        if self.request.method == 'POST' and self.request.path.endswith('/bulk-create/'):
+            kwargs['many'] = True
+        return super().get_serializer(*args, **kwargs)
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
@@ -289,9 +342,55 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
         if role == 'recruiter' and branch:
             queryset = queryset.filter(branch=branch)
         return queryset
-    
-        #Send notification to admin when job requisition is created
-    
+
+    def create(self, request, *args, **kwargs):
+        """
+        Handle both single and bulk create based on the endpoint
+        """
+        if request.path.endswith('/bulk-create/'):
+            return self.bulk_create(request, *args, **kwargs)
+        return super().create(request, *args, **kwargs)
+
+    def bulk_create(self, request, *args, **kwargs):
+        """
+        Custom bulk create method
+        """
+        # Ensure the data is a list
+        if not isinstance(request.data, list):
+            return Response(
+                {"error": "Request data must be a list of job requisitions"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = self.get_serializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            # Save the data - this will call the create method with many=True
+            created_instances = serializer.save()
+            
+            # Serialize the response using the main serializer
+            response_serializer = JobRequisitionSerializer(
+                created_instances, 
+                many=True, 
+                context=self.context
+            )
+            
+            headers = self.get_success_headers(serializer.data)
+            return Response(
+                response_serializer.data, 
+                status=status.HTTP_201_CREATED, 
+                headers=headers
+            )
+        except Exception as e:
+            logger.error(f"Bulk create failed: {str(e)}")
+            return Response(
+                {"error": "Failed to create requisitions in bulk", "details": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    # Remove the perform_bulk_create method since the serializer handles it now
+
+    # Keep your existing perform_create for single creation
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
@@ -307,7 +406,6 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
             branch=branch if role == 'recruiter' and branch else None
         )
         logger.info(f"Job requisition created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
-
 
 class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = JobRequisitionSerializer

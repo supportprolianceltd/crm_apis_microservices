@@ -2,9 +2,8 @@ from django.db import models
 from django.utils import timezone
 import logging
 import uuid
-
-
 logger = logging.getLogger('job_applications')
+
 
 class ActiveApplicationsManager(models.Manager):
     def get_queryset(self):
@@ -21,6 +20,7 @@ class JobApplication(models.Model):
         ('hired', 'Hired'),
         ('rejected', 'Rejected'),
         ('withdrawn', 'Withdrawn'),
+        ('compliance_completed', 'Compliance Completed'),
     ]
     STAGE_CHOICES = [
         ('application', 'Application'),
@@ -29,6 +29,7 @@ class JobApplication(models.Model):
         ('offer', 'Offer'),
         ('hired', 'Hired'),
         ('rejected', 'Rejected'),
+        ('compliance_completed', 'Compliance Completed'),
     ]
     SOURCE_CHOICES = [
         ('career_site', 'Career Site'),

@@ -25,6 +25,8 @@ def get_tenant_id_from_jwt(request):
         raise ValidationError("Invalid JWT token.")
 
 
+
+    
 class ComplianceItemSerializer(serializers.Serializer):
     id = serializers.UUIDField(required=False, default=uuid.uuid4)
     name = serializers.CharField(max_length=255)
@@ -94,8 +96,7 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             'requested_by_id', 'created_by_id', 'updated_by_id', 'approved_by_id', 'requested_date', 'is_deleted',
             'created_at', 'updated_at', 'branch_name', 'last_compliance_check', 'checked_by'
         ]
-
-
+       
 
     def get_advert_banner_url(self, obj):
         storage_type = getattr(settings, 'STORAGE_TYPE', 'local').lower()
@@ -423,6 +424,113 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
 
 
 
+class JobRequisitionBulkCreateSerializer(serializers.Serializer):
+    """
+    Bulk create serializer for NEW job requisitions only
+    """
+    # Only include fields that should be set by the user for NEW creations
+    title = serializers.CharField(max_length=255)
+    job_type = serializers.ChoiceField(choices=JobRequisition.JOB_TYPE_CHOICES, default='full_time')
+    position_type = serializers.ChoiceField(choices=JobRequisition.POSITION_TYPE_CHOICES, default='permanent')
+    location_type = serializers.ChoiceField(choices=JobRequisition.LOCATION_TYPE_CHOICES, default='on_site')
+    job_description = serializers.CharField(allow_blank=True, required=False, default='')
+    requirements = serializers.ListField(child=serializers.CharField(), required=False, default=list)
+    number_of_candidates = serializers.IntegerField(allow_null=True, required=False)
+    urgency_level = serializers.ChoiceField(choices=JobRequisition.URGENCY_LEVEL_CHOICES, default='medium')
+    
+    # Add other fields that you want to allow in bulk creation
+    company_name = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+    company_address = serializers.CharField(allow_blank=True, required=False, default='')
+    job_location = serializers.CharField(allow_blank=True, required=False, default='')
+    salary_range = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+    qualification_requirement = serializers.CharField(allow_blank=True, required=False, default='')
+    experience_requirement = serializers.CharField(allow_blank=True, required=False, default='')
+    knowledge_requirement = serializers.CharField(allow_blank=True, required=False, default='')
+    reason = serializers.CharField(allow_blank=True, required=False, default='')
+    comment = serializers.CharField(allow_blank=True, required=False, default='')
+    deadline_date = serializers.DateField(allow_null=True, required=False)
+    start_date = serializers.DateField(allow_null=True, required=False)
+    responsibilities = serializers.ListField(child=serializers.CharField(), required=False, default=list)
+    documents_required = serializers.ListField(child=serializers.CharField(), required=False, default=list)
+    compliance_checklist = serializers.ListField(child=serializers.DictField(), required=False, default=list)
+
+    # Status field for new requisitions (default to 'draft' or 'pending')
+    status = serializers.ChoiceField(choices=JobRequisition.STATUS_CHOICES, default='draft')
+    role = serializers.ChoiceField(choices=JobRequisition.ROLE_CHOICES, default='staff')
+
+    def create(self, validated_data_list):
+        """
+        Handle bulk creation of NEW job requisitions only
+        """
+        # When many=True, validated_data is a list of dictionaries
+        if not isinstance(validated_data_list, list):
+            validated_data_list = [validated_data_list]
+        
+        jwt_payload = self.context.get('request').jwt_payload if self.context.get('request') else {}
+        tenant_id = jwt_payload.get('tenant_unique_id')
+        user_id = jwt_payload.get('user', {}).get('id')
+        role = jwt_payload.get('role')
+        branch = jwt_payload.get('user', {}).get('branch')
+
+        if not tenant_id or not user_id:
+            raise serializers.ValidationError("Missing tenant_unique_id or user_id in token.")
+
+        requisitions = []
+
+        for item_data in validated_data_list:
+            # Remove any fields that should be auto-generated
+            # Don't include id, unique_link, created_at, updated_at, etc.
+            requisition_data = {
+                'title': item_data.get('title'),
+                'job_type': item_data.get('job_type', 'full_time'),
+                'position_type': item_data.get('position_type', 'permanent'),
+                'location_type': item_data.get('location_type', 'on_site'),
+                'job_description': item_data.get('job_description', ''),
+                'requirements': item_data.get('requirements', []),
+                'number_of_candidates': item_data.get('number_of_candidates'),
+                'urgency_level': item_data.get('urgency_level', 'medium'),
+                'company_name': item_data.get('company_name', ''),
+                'company_address': item_data.get('company_address', ''),
+                'job_location': item_data.get('job_location', ''),
+                'salary_range': item_data.get('salary_range', ''),
+                'qualification_requirement': item_data.get('qualification_requirement', ''),
+                'experience_requirement': item_data.get('experience_requirement', ''),
+                'knowledge_requirement': item_data.get('knowledge_requirement', ''),
+                'reason': item_data.get('reason', ''),
+                'comment': item_data.get('comment', ''),
+                'deadline_date': item_data.get('deadline_date'),
+                'start_date': item_data.get('start_date'),
+                'responsibilities': item_data.get('responsibilities', []),
+                'documents_required': item_data.get('documents_required', []),
+                'compliance_checklist': item_data.get('compliance_checklist', []),
+                'status': item_data.get('status', 'draft'),
+                'role': item_data.get('role', 'staff'),
+                'tenant_id': tenant_id,
+                'requested_by_id': user_id,
+                'branch_id': branch if role == 'recruiter' and branch else None
+            }
+            
+            # Create the requisition instance (ID will be auto-generated in save())
+            requisition = JobRequisition(**requisition_data)
+            requisitions.append(requisition)
+
+        # Save each requisition individually to trigger the save() method
+        # This ensures IDs, unique_links, and codes are generated properly
+        created_requisitions = []
+        for requisition in requisitions:
+            try:
+                requisition.save()  # This will generate the ID and other auto fields
+                created_requisitions.append(requisition)
+            except Exception as e:
+                logger.error(f"Failed to create requisition {requisition.title}: {str(e)}")
+                # Continue with other requisitions even if one fails
+
+        if not created_requisitions:
+            raise serializers.ValidationError("Failed to create any requisitions")
+
+        return created_requisitions
+
+
 class ParticipantSerializer(serializers.ModelSerializer):
     user_id = serializers.CharField(max_length=36, read_only=True)
     candidate_email = serializers.EmailField(read_only=True)
@@ -650,4 +758,3 @@ class PublicJobRequisitionSerializer(serializers.ModelSerializer):
             'id', 'requisition_number', 'job_requisition_code', 'job_application_code',
              'is_deleted', 
         ]
-

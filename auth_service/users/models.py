@@ -936,26 +936,21 @@ class BlacklistedToken(models.Model):
 
 
 
-
 class Document(models.Model):
     tenant_id = models.CharField(max_length=255, blank=True, null=True)
     title = models.CharField(max_length=255)
-    file_url = models.URLField(null=True, blank=True)  # Store the public URL from storage
-    file_path = models.CharField(max_length=255, null=True, blank=True)  # Store the storage path
-    file_type = models.CharField(max_length=50, null=True, blank=True)  # e.g., pdf, docx
-    file_size = models.BigIntegerField(null=True, blank=True)  # Size in bytes
-    version = models.CharField(max_length=10, default='v01')  # Version like v01, v02
-    uploaded_by_id = models.CharField(max_length=36, blank=True, null=True)  # Store CustomUser ID
-    updated_by_id = models.CharField(max_length=36, blank=True, null=True)  # Store CustomUser ID
+    file_url = models.URLField(null=True, blank=True)
+    file_path = models.CharField(max_length=255, null=True, blank=True)
+    file_type = models.CharField(max_length=50, null=True, blank=True)
+    file_size = models.BigIntegerField(null=True, blank=True)
+    version = models.CharField(max_length=10, default='v01')
+    uploaded_by_id = models.CharField(max_length=36, blank=True, null=True)
+    updated_by_id = models.CharField(max_length=36, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)  # Track last update time
-    expiring_date = models.DateField(null=True, blank=True)  # Optional expiration date
-    status = models.CharField(
-        max_length=20,
-        choices=[('active', 'Active'), ('expired', 'Expired')],
-        default='active'
-    )
-    document_number = models.CharField(max_length=20, unique=True, blank=True)  # Auto-generated like DOC-0001
+    updated_at = models.DateTimeField(auto_now=True)
+    expiring_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=[('active', 'Active'), ('expired', 'Expired')], default='active')
+    document_number = models.CharField(max_length=20, unique=True, blank=True)
 
     class Meta:
         unique_together = ('tenant_id', 'title', 'version')
@@ -964,16 +959,26 @@ class Document(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        # Auto-generate document_number if not set
         if not self.document_number:
-            
-            # Note: This assumes tenant_id can resolve to a tenant object for django-tenants
-            # If not using django-tenants, modify this logic
-            with tenant_context(self.tenant_id):
+            tenant = None
+            if self.tenant_id:
+                try:
+                    # Fetch by tenant_unique_id
+                    tenant = Tenant.objects.get(unique_id=self.tenant_id)
+                except Tenant.DoesNotExist:
+                    tenant = None
+
+            if tenant:
+                # Use tenant context for your multi-tenancy
+                with tenant_context(tenant):
+                    last_doc = Document.objects.filter(tenant_id=self.tenant_id).count() + 1
+                    self.document_number = f"DOC-{str(last_doc).zfill(4)}"
+            else:
+                # Fallback if tenant not found
                 last_doc = Document.objects.filter(tenant_id=self.tenant_id).count() + 1
                 self.document_number = f"DOC-{str(last_doc).zfill(4)}"
-        
-        # Set status based on expiring_date
+
+        # Set status
         if self.expiring_date and self.expiring_date < timezone.now().date():
             self.status = 'expired'
         else:

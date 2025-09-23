@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5434:5432"
+      - "5444:5432"
     volumes:
       - messaging_postgres_data:/var/lib/postgresql/data
     healthcheck:

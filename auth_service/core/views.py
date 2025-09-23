@@ -36,10 +36,6 @@ logger = logging.getLogger(__name__)
 
 
 
-
-
-
-
 class CustomPagination(PageNumberPagination):
     page_size = 20
 
