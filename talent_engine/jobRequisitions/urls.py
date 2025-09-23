@@ -2,7 +2,7 @@ from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 from .views import (PublicPublishedJobRequisitionsView,PublicCloseJobRequisitionView,PublicPublishedRequisitionsByTenantView,
     JobRequisitionListCreateView,MyJobRequisitionListView, JobRequisitionDetailView,PublishedJobRequisitionListView,
-    JobRequisitionBulkDeleteView,SoftDeletedJobRequisitionsView, RecoverSoftDeletedJobRequisitionsView,
+    JobRequisitionBulkDeleteView,SoftDeletedJobRequisitionsView, RecoverSoftDeletedJobRequisitionsView,IncrementJobApplicationsCountView,
     PermanentDeleteJobRequisitionsView,JobRequisitionByLinkView,ComplianceItemView,VideoSessionViewSet,PublicCloseJobRequisitionBatchView,
     RequestListCreateView, RequestDetailView, UserRequestsListView, CustomJobRequisitionByLinkView
 )
@@ -39,6 +39,14 @@ urlpatterns = [
     path('requisitions/unique_link/<str:unique_link>/', CustomJobRequisitionByLinkView.as_view(), name='custom-requisition-by-link'),
     path('requisitions/<str:job_requisition_id>/compliance-items/', ComplianceItemView.as_view(), name='compliance-item-create'),
     path('requisitions/<str:job_requisition_id>/compliance-items/<str:item_id>/', ComplianceItemView.as_view(), name='compliance-item-detail'),
+
+
+
+    path('requisitions/public/update-applications/<str:unique_link>/', IncrementJobApplicationsCountView.as_view(), name='update-applications-count'),
+
+
+
+
     # Requests CRUD endpoints
     path('requests/', RequestListCreateView.as_view(), name='request-list-create'),
     path('requests/<uuid:id>/', RequestDetailView.as_view(), name='request-detail'),

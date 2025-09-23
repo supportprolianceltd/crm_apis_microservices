@@ -1,4 +1,4 @@
-# auth-service/docker-compose.yml
+version: '3.8'
 
 services:
   db:
@@ -27,7 +27,7 @@ services:
     container_name: auth-service
     ports:
       - "8001:8001"
-    .env_file:
+    env_file:                # ✅ Corrected key
       - ./.env
     depends_on:
       db:
@@ -84,9 +84,3 @@ volumes:
 networks:
   auth_service_default:
     external: true
-
-
-
-
-
-

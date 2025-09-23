@@ -6128,3 +6128,6 @@
 2025-09-23 16:59:20,933 INFO gateway Incoming request content type: application/json
 2025-09-23 16:59:20,935 INFO gateway Raw body size: 10559 bytes
 2025-09-23 16:59:21,544 INFO gateway METHOD: POST | PATH: /api/user/users/bulk-create/ | STATUS: 400 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/bulk-create/
+2025-09-23 18:28:05,159 INFO gateway Incoming request content type: application/json
+2025-09-23 18:28:05,178 INFO gateway Raw body size: 62 bytes
+2025-09-23 18:28:06,196 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 404 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/

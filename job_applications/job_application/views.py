@@ -782,6 +782,119 @@ class ResumeScreeningView(APIView):
                 "suggestion": "An unexpected error occurred. Please try again or contact support."
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+# class JobApplicationCreatePublicView(generics.CreateAPIView):
+#     serializer_class = PublicJobApplicationSerializer
+#     parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+#     def create(self, request, *args, **kwargs):
+#         unique_link = request.data.get('unique_link') or request.data.get('job_requisition_unique_link')
+#         if not unique_link:
+#             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # ✅ Extract tenant_id from UUID-style prefix (first 5 segments)
+#         try:
+#             parts = unique_link.split('-')
+#             if len(parts) < 5:
+#                 logger.warning(f"Invalid unique_link format: {unique_link}")
+#                 return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+#             tenant_id = '-'.join(parts[:5])
+#         except Exception as e:
+#             logger.error(f"Error extracting tenant_id from link: {str(e)}")
+#             return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # ✅ Fetch job requisition from Talent Engine
+#         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+#         try:
+#             resp = requests.get(requisition_url)
+#             logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
+#             if resp.status_code != 200:
+#                 try:
+#                     error_detail = resp.json().get('detail', 'Invalid job requisition.')
+#                 except Exception:
+#                     error_detail = 'Invalid job requisition.'
+#                 return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+#             job_requisition = resp.json()
+#         except Exception as e:
+#             logger.error(f"Error fetching job requisition: {str(e)}")
+#             return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
+
+#         # ✅ Prepare payload
+#         payload = dict(request.data.items())
+#         payload['job_requisition_id'] = job_requisition['id']
+#         payload['tenant_id'] = tenant_id
+
+#         # ✅ Extract documents from multipart form
+#         documents = []
+#         i = 0
+#         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
+#             documents.append({
+#                 'document_type': request.data.get(f'documents[{i}][document_type]'),
+#                 'file': request.FILES.get(f'documents[{i}][file]')
+#             })
+#             i += 1
+#         if documents:
+#             payload['documents'] = documents
+
+#         logger.info(f"Full POST payload: {payload}")
+
+#         # ✅ Validate serializer
+#         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
+#         if not serializer.is_valid():
+#             logger.error(f"Validation errors: {serializer.errors}")
+#             return Response({
+#                 "detail": "Validation error",
+#                 "errors": serializer.errors
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
+#         # ✅ Prevent duplicate application by email for same requisition
+#         email = payload.get('email')
+#         job_requisition_id = job_requisition['id']
+#         if JobApplication.objects.filter(email=email, job_requisition_id=job_requisition_id).exists():
+#             logger.warning(f"Duplicate application attempt by email: {email} for requisition: {job_requisition_id}")
+#             return Response({
+#                 "detail": "You have already applied for this job"
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
+#         # ✅ Save
+#         self.perform_create(serializer)
+
+#         # ✅ Publish to Kafka
+#         try:
+#             producer = KafkaProducer(
+#                 bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+#                 value_serializer=lambda v: json.dumps(v).encode('utf-8')
+#             )
+#             kafka_data = {
+#                 "tenant_id": tenant_id,
+#                 "job_requisition_id": job_requisition['id'],
+#                 "event": "job_application_created"
+#             }
+#             producer.send('job_application_events', kafka_data)
+#             producer.flush()
+#             logger.info(f"Published Kafka job application event for requisition {job_requisition['id']}")
+#         except Exception as e:
+#             logger.error(f"Kafka publish error: {str(e)}")
+
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+import logging
+import requests
+from django.conf import settings
+from django.db import transaction
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework import generics
+from .models import JobApplication
+from .serializers import PublicJobApplicationSerializer
+from kafka import KafkaProducer
+import json
+
+logger = logging.getLogger('talent_engine')
+
 class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -791,7 +904,7 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
         if not unique_link:
             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ✅ Extract tenant_id from UUID-style prefix (first 5 segments)
+        # Extract tenant_id from UUID-style prefix (first 5 segments)
         try:
             parts = unique_link.split('-')
             if len(parts) < 5:
@@ -802,7 +915,7 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
             logger.error(f"Error extracting tenant_id from link: {str(e)}")
             return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ✅ Fetch job requisition from Talent Engine
+        # Fetch job requisition from Talent Engine
         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
         try:
             resp = requests.get(requisition_url)
@@ -818,12 +931,12 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
             logger.error(f"Error fetching job requisition: {str(e)}")
             return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
 
-        # ✅ Prepare payload
+        # Prepare payload
         payload = dict(request.data.items())
         payload['job_requisition_id'] = job_requisition['id']
         payload['tenant_id'] = tenant_id
 
-        # ✅ Extract documents from multipart form
+        # Extract documents from multipart form
         documents = []
         i = 0
         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
@@ -837,7 +950,7 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
 
         logger.info(f"Full POST payload: {payload}")
 
-        # ✅ Validate serializer
+        # Validate serializer
         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
         if not serializer.is_valid():
             logger.error(f"Validation errors: {serializer.errors}")
@@ -846,7 +959,7 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
                 "errors": serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # ✅ Prevent duplicate application by email for same requisition
+        # Prevent duplicate application by email for same requisition
         email = payload.get('email')
         job_requisition_id = job_requisition['id']
         if JobApplication.objects.filter(email=email, job_requisition_id=job_requisition_id).exists():
@@ -855,10 +968,23 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
                 "detail": "You have already applied for this job"
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # ✅ Save
+        # Save the application
         self.perform_create(serializer)
 
-        # ✅ Publish to Kafka
+        # Increment num_of_applications by calling the public endpoint
+        increment_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/public/update-applications/{unique_link}/"
+        try:
+            resp = requests.post(increment_url)
+            if resp.status_code != 200:
+                logger.warning(f"Failed to increment num_of_applications for unique_link {unique_link}: {resp.status_code}, {resp.text}")
+                # Continue despite failure to ensure application creation succeeds
+            else:
+                logger.info(f"Successfully incremented num_of_applications for unique_link {unique_link}")
+        except Exception as e:
+            logger.error(f"Error calling increment endpoint for unique_link {unique_link}: {str(e)}")
+            # Continue despite failure to ensure application creation succeeds
+
+        # Publish to Kafka
         try:
             producer = KafkaProducer(
                 bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
@@ -876,6 +1002,7 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
             logger.error(f"Kafka publish error: {str(e)}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
 
 
 class JobApplicationListCreateView(generics.ListCreateAPIView):
@@ -910,6 +1037,8 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
     def check_permissions(self, request):
         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
         return super().check_permissions(request)
+
+
 
 
 class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):

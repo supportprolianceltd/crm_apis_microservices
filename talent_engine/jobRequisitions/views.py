@@ -41,7 +41,7 @@ from .models import (
     VideoSession,
     Participant,
 )
-from .serializers import JobRequisitionSerializer, ComplianceItemSerializer,VideoSessionSerializer, JobRequisitionBulkCreateSerializer, ParticipantSerializer, RequestSerializer, PublicJobRequisitionSerializer
+from .serializers import JobRequisitionSerializer,  ComplianceItemSerializer,VideoSessionSerializer, JobRequisitionBulkCreateSerializer, ParticipantSerializer, RequestSerializer, PublicJobRequisitionSerializer
 from .permissions import IsMicroserviceAuthenticated
 
 
@@ -406,6 +406,63 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
             branch=branch if role == 'recruiter' and branch else None
         )
         logger.info(f"Job requisition created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
+
+
+
+
+
+
+logger = logging.getLogger('talent_engine')
+
+class IncrementJobApplicationsCountView(APIView):
+    permission_classes = []  # Public endpoint, no authentication required
+
+    def post(self, request, unique_link):
+        """
+        Increment the num_of_applications field by 1 for a JobRequisition identified by unique_link.
+        No payload is required or accepted.
+        """
+        try:
+            # Extract tenant_id from unique_link (first 5 segments, UUID format)
+            parts = unique_link.split('-')
+            if len(parts) < 5:
+                logger.warning(f"Invalid unique_link format: {unique_link}")
+                return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+            tenant_id = '-'.join(parts[:5])
+
+            # Fetch JobRequisition by unique_link
+            try:
+                job_requisition = JobRequisition.active_objects.get(
+                    unique_link=unique_link,
+                    tenant_id=tenant_id,
+                    publish_status=True,
+                    is_deleted=False
+                )
+            except JobRequisition.DoesNotExist:
+                logger.warning(f"JobRequisition with unique_link {unique_link} not found or not published")
+                return Response({"detail": "Job requisition not found or not published."}, status=status.HTTP_404_NOT_FOUND)
+
+            # Check for unexpected payload
+            if request.data:
+                logger.warning(f"Unexpected payload provided for {unique_link}: {request.data}")
+                return Response({"detail": "No payload is required for this endpoint."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Increment num_of_applications
+            with transaction.atomic():
+                job_requisition.num_of_applications = (job_requisition.num_of_applications or 0) + 1
+                job_requisition.save(update_fields=['num_of_applications', 'updated_at'])
+                logger.info(f"Incremented num_of_applications to {job_requisition.num_of_applications} for JobRequisition {job_requisition.id} (unique_link: {unique_link})")
+
+            # Serialize response
+            serializer = PublicJobRequisitionSerializer(job_requisition)
+            return Response({
+                "detail": f"Incremented num_of_applications to {job_requisition.num_of_applications}",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Error incrementing num_of_applications for unique_link {unique_link}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = JobRequisitionSerializer

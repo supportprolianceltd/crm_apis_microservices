@@ -376,3 +376,8 @@ notifications_app/generated/prisma
 !*/logs/*.log
 !auth_service.log
 auth_service/logs
+
+
+
+# docker compose build --no-cache
+# docker compose up -d

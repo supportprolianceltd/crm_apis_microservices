@@ -17,7 +17,9 @@ public_paths = ['/api/docs/', '/api/schema/', '/api/health/',
                 '/api/talent-engine/requisitions/by-link/',
                 '/api/talent-engine/requisitions/unique_link/',
                 '/api/talent-engine/requisitions/public/published/',
-                '/api/talent-engine/requisitions/public/close/']
+                '/api/talent-engine/requisitions/public/close/',
+                '/api/talent-engine/requisitions/public/update-applications/'
+                ]
 
 
 
