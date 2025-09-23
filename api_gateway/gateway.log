@@ -6131,3 +6131,57 @@
 2025-09-23 18:28:05,159 INFO gateway Incoming request content type: application/json
 2025-09-23 18:28:05,178 INFO gateway Raw body size: 62 bytes
 2025-09-23 18:28:06,196 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 404 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-23 19:19:58,457 INFO gateway Incoming request content type: application/json
+2025-09-23 19:19:58,459 INFO gateway Raw body size: 62 bytes
+2025-09-23 19:19:58,537 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 404 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-23 19:23:24,206 INFO gateway Incoming request content type: application/json
+2025-09-23 19:23:24,207 INFO gateway Raw body size: 62 bytes
+2025-09-23 19:23:31,472 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-23 19:23:53,871 INFO gateway Incoming request content type: application/json
+2025-09-23 19:23:53,872 INFO gateway Raw body size: 357 bytes
+2025-09-23 19:23:53,912 INFO gateway METHOD: GET | PATH: /api/user/users/1/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/1/
+2025-09-23 19:23:58,923 INFO gateway Incoming request content type: application/json
+2025-09-23 19:23:58,924 INFO gateway Raw body size: 357 bytes
+2025-09-23 19:23:59,010 INFO gateway METHOD: PATCH | PATH: /api/user/users/1/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/1/
+2025-09-23 19:24:02,104 INFO gateway Incoming request content type: application/json
+2025-09-23 19:24:02,104 INFO gateway Raw body size: 357 bytes
+2025-09-23 19:24:02,199 INFO gateway METHOD: PATCH | PATH: /api/user/users/2/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/user/users/2/
+2025-09-23 19:25:26,807 INFO gateway Incoming request content type: application/json
+2025-09-23 19:25:26,882 INFO gateway Raw body size: 1912 bytes
+2025-09-23 19:25:27,183 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 401 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-23 19:25:29,249 INFO gateway Incoming request content type: application/json
+2025-09-23 19:25:29,250 INFO gateway Raw body size: 62 bytes
+2025-09-23 19:25:38,198 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-23 19:25:52,075 INFO gateway Incoming request content type: application/json
+2025-09-23 19:25:52,077 INFO gateway Raw body size: 1912 bytes
+2025-09-23 19:25:55,742 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-23 19:25:57,600 INFO gateway Incoming request content type: application/json
+2025-09-23 19:25:57,601 INFO gateway Raw body size: 1912 bytes
+2025-09-23 19:25:58,786 INFO gateway METHOD: POST | PATH: /api/talent-engine/requisitions/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-23 19:26:11,707 INFO gateway Incoming request content type: application/json
+2025-09-23 19:26:11,708 INFO gateway Raw body size: 881 bytes
+2025-09-23 19:26:12,445 INFO gateway METHOD: POST | PATH: /api/talent-engine/requisitions/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-23 19:26:25,637 INFO gateway Incoming request content type: application/json
+2025-09-23 19:26:25,637 INFO gateway Raw body size: 2579 bytes
+2025-09-23 19:26:25,785 INFO gateway METHOD: POST | PATH: /api/talent-engine/requisitions/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-23 19:26:37,129 INFO gateway Incoming request content type: application/json
+2025-09-23 19:26:37,132 INFO gateway Raw body size: 2561 bytes
+2025-09-23 19:26:41,873 INFO gateway METHOD: POST | PATH: /api/talent-engine/requisitions/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-23 19:26:51,916 INFO gateway Incoming request content type: application/json
+2025-09-23 19:26:51,925 INFO gateway Raw body size: 718 bytes
+2025-09-23 19:26:52,668 INFO gateway METHOD: POST | PATH: /api/talent-engine/requisitions/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-23 19:27:03,256 INFO gateway Incoming request content type: application/json
+2025-09-23 19:27:03,257 INFO gateway Raw body size: 2781 bytes
+2025-09-23 19:27:03,843 INFO gateway METHOD: POST | PATH: /api/talent-engine/requisitions/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-23 19:28:42,549 INFO gateway Incoming request content type: application/json
+2025-09-23 19:28:42,553 INFO gateway Raw body size: 2781 bytes
+2025-09-23 19:28:42,722 INFO gateway METHOD: POST | PATH: /api/talent-engine/requisitions/public/update-applications/22802a33-9bdb-4401-892c-84bf0b42f1db-PRO-senior-frontend-developer-7569fc06/ | STATUS: 404 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/public/update-applications/22802a33-9bdb-4401-892c-84bf0b42f1db-PRO-senior-frontend-developer-7569fc06/
+2025-09-23 19:29:00,119 INFO gateway Incoming request content type: application/json
+2025-09-23 19:29:00,121 INFO gateway Raw body size: 2781 bytes
+2025-09-23 19:29:02,218 INFO gateway METHOD: GET | PATH: /api/talent-engine/requisitions/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/
+2025-09-23 19:29:31,622 INFO gateway Incoming request content type: application/json
+2025-09-23 19:29:31,623 INFO gateway Raw body size: 134 bytes
+2025-09-23 19:29:31,647 INFO gateway METHOD: PUT | PATH: /api/talent-engine/requisitions/public/update-applications/22802a33-9bdb-4401-892c-84bf0b42f1db-PRO-registered-nurse-home-care-442ee260/ | STATUS: 405 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/public/update-applications/22802a33-9bdb-4401-892c-84bf0b42f1db-PRO-registered-nurse-home-care-442ee260/
+2025-09-23 19:29:41,194 INFO gateway Incoming request content type: 
+2025-09-23 19:29:41,194 INFO gateway Raw body size: 0 bytes
+2025-09-23 19:29:41,241 INFO gateway METHOD: POST | PATH: /api/talent-engine/requisitions/public/update-applications/22802a33-9bdb-4401-892c-84bf0b42f1db-PRO-registered-nurse-home-care-442ee260/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/public/update-applications/22802a33-9bdb-4401-892c-84bf0b42f1db-PRO-registered-nurse-home-care-442ee260/
