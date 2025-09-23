@@ -1,76 +1,55 @@
 import json
-from auth_service.authentication import RS256TenantJWTAuthentication
-import jwt
-import uuid
-import random
 import logging
-import requests
+import random
+import uuid
 from datetime import datetime, timedelta
+
+import jwt
+import requests
+from core.models import Tenant
 from django.conf import settings
+from django.contrib.auth import authenticate, get_user_model
 from django.core.cache import cache
 from django.db import connection
 from django.utils import timezone
-from django.contrib.auth import get_user_model, authenticate
-from rest_framework import serializers, status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from kafka import KafkaProducer
-import requests
-import uuid
 from django.utils.timezone import now
-from django.conf import settings
-
 from django_tenants.utils import tenant_context
-from core.models import Tenant
-from users.models import CustomUser, UserProfile, BlacklistedToken, RSAKeyPair, UserActivity,BlockedIP
-from users.serializers import CustomUserSerializer
-from auth_service.utils.jwt_rsa import issue_rsa_jwt, decode_rsa_jwt, blacklist_refresh_token
 from jose import jwk
+from kafka import KafkaProducer
+from rest_framework import serializers, status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.serializers import (
+    TokenObtainPairSerializer,
+    TokenRefreshSerializer,
+)
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from users.models import (
+    BlacklistedToken,
+    BlockedIP,
+    CustomUser,
+    RSAKeyPair,
+    UserActivity,
+    UserProfile,
+)
+from users.serializers import (
+    CustomTokenSerializer,
+    CustomUserMinimalSerializer,
+    CustomUserSerializer,
+)
+
+from auth_service.authentication import RS256TenantJWTAuthentication
+from auth_service.utils.jwt_rsa import (
+    blacklist_refresh_token,
+    decode_rsa_jwt,
+    issue_rsa_jwt,
+)
+
 logger = logging.getLogger(__name__)
 
-class UserProfileMinimalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = [
-            "id",
-            "user",
-            "employee_id",
-            "access_duration",
-            "system_access_rostering",
-            "system_access_hr",
-            "system_access_recruitment",
-            "system_access_training",
-            "system_access_finance",
-            "system_access_compliance",
-            "system_access_co_superadmin",
-            "system_access_asset_management"
-        ]
-
-class CustomUserMinimalSerializer(serializers.ModelSerializer):
-    profile = UserProfileMinimalSerializer(read_only=True)
-
-    class Meta:
-        model = CustomUser
-        fields = [
-            "id",
-            "email",
-            "username",
-            "first_name",
-            "last_name",
-            "role",
-            "job_role",
-            "tenant",
-            "branch",
-            "status",
-            "is_locked",
-            "has_accepted_terms",
-            "profile"
-        ]
 
 class TokenValidateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -84,12 +63,12 @@ class TokenValidateView(APIView):
             with tenant_context(tenant):
                 user_data = CustomUserSerializer(user).data
                 response_data = {
-                    'status': 'success',
-                    'user': user_data,
-                    'tenant_id': str(tenant.id),
-                    'tenant_organizational_id': str(tenant.organizational_id),
-                    'tenant_unique_id': str(tenant.unique_id),
-                    'tenant_schema': tenant.schema_name
+                    "status": "success",
+                    "user": user_data,
+                    "tenant_id": str(tenant.id),
+                    "tenant_organizational_id": str(tenant.organizational_id),
+                    "tenant_unique_id": str(tenant.unique_id),
+                    "tenant_schema": tenant.schema_name,
                 }
                 # logger.info(f"TokenValidateView response: {response_data}")
                 logger.info("Token validation successful")
@@ -97,10 +76,7 @@ class TokenValidateView(APIView):
         except Exception as e:
             logger.error(f"Token validation failed: {str(e)}")
             logger.info("Token validation unsuccessful")
-            response_data = {
-                'status': 'error',
-                'message': 'Invalid or expired token.'
-            }
+            response_data = {"status": "error", "message": "Invalid or expired token."}
             # logger.info(f"TokenValidateView response: {response_data}")
             return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -167,14 +143,13 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
 
     #             notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
     #             logger.info(f"➡️ POST to {notifications_url} with payload: {event_payload}")
-                
+
     #             response = requests.post(notifications_url, json=event_payload, timeout=5)
-                
+
     #             logger.info(f"✅ Notification sent. Status: {response.status_code}, Response: {response.text}")
 
     #         except Exception as e:
     #             logger.warning(f"[❌ Notification Error] Failed to send login event: {str(e)}")
-
 
     #         if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
     #             UserActivity.objects.create(
@@ -245,26 +220,23 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         print("🔥🔥🔥 validate() from CustomTokenSerializer called!")
 
-        ip_address = self.context['request'].META.get('REMOTE_ADDR')
-        user_agent = self.context['request'].META.get('HTTP_USER_AGENT', '')
-        tenant = self.context['request'].tenant
+        ip_address = self.context["request"].META.get("REMOTE_ADDR")
+        user_agent = self.context["request"].META.get("HTTP_USER_AGENT", "")
+        tenant = self.context["request"].tenant
 
         with tenant_context(tenant):
-            user = authenticate(
-                email=attrs.get("email"),
-                password=attrs.get("password")
-            )
+            user = authenticate(email=attrs.get("email"), password=attrs.get("password"))
 
             if not user:
                 UserActivity.objects.create(
                     user=None,
                     tenant=tenant,
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': 'Invalid credentials'},
+                    details={"reason": "Invalid credentials"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=False
+                    success=False,
                 )
                 raise serializers.ValidationError("Invalid credentials")
 
@@ -272,12 +244,12 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': 'Account locked or suspended'},
+                    details={"reason": "Account locked or suspended"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=False
+                    success=False,
                 )
                 raise serializers.ValidationError("Account is locked or suspended")
 
@@ -285,12 +257,12 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': 'IP address blocked'},
+                    details={"reason": "IP address blocked"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=False
+                    success=False,
                 )
                 raise serializers.ValidationError("This IP address is blocked")
 
@@ -299,12 +271,12 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
             UserActivity.objects.create(
                 user=user,
                 tenant=tenant,
-                action='login',
+                action="login",
                 performed_by=None,
                 details={},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=True
+                success=True,
             )
 
             # ✅ SEND NOTIFICATION EVENT AFTER LOGIN SUCCESS
@@ -316,15 +288,15 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
                         "event_type": "user.login.succeeded",
                         "event_id": str(uuid.uuid4()),
                         "created_at": timezone.now().isoformat(),
-                        "source": "auth-service"
+                        "source": "auth-service",
                     },
                     "data": {
                         "user_email": user.email,
                         "ip_address": ip_address,
                         "timestamp": timezone.now().isoformat(),
                         "user_id": str(user.id),
-                        "user_agent": user_agent
-                    }
+                        "user_agent": user_agent,
+                    },
                 }
 
                 notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
@@ -392,19 +364,19 @@ class CustomTokenRefreshView(APIView):
 
     def post(self, request):
         refresh_token = request.data.get("refresh")
-        ip_address = request.META.get('REMOTE_ADDR')
-        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        ip_address = request.META.get("REMOTE_ADDR")
+        user_agent = request.META.get("HTTP_USER_AGENT", "")
 
         if not refresh_token:
             UserActivity.objects.create(
                 user=None,
                 tenant=Tenant.objects.first(),  # Fallback tenant
-                action='login',
+                action="login",
                 performed_by=None,
-                details={'reason': 'No refresh token provided'},
+                details={"reason": "No refresh token provided"},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=False
+                success=False,
             )
             return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -413,12 +385,12 @@ class CustomTokenRefreshView(APIView):
                 UserActivity.objects.create(
                     user=None,
                     tenant=Tenant.objects.first(),
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': 'Invalid token type'},
+                    details={"reason": "Invalid token type"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=False
+                    success=False,
                 )
                 return Response({"detail": "Invalid token type."}, status=status.HTTP_400_BAD_REQUEST)
             jti = payload.get("jti")
@@ -426,12 +398,12 @@ class CustomTokenRefreshView(APIView):
                 UserActivity.objects.create(
                     user=None,
                     tenant=Tenant.objects.first(),
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': 'Token blacklisted'},
+                    details={"reason": "Token blacklisted"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=False
+                    success=False,
                 )
                 return Response({"detail": "Token blacklisted."}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -444,12 +416,12 @@ class CustomTokenRefreshView(APIView):
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': 'Token refresh'},
+                    details={"reason": "Token refresh"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=True
+                    success=True,
                 )
                 new_refresh_jti = str(uuid.uuid4())
                 refresh_payload = {
@@ -475,20 +447,17 @@ class CustomTokenRefreshView(APIView):
                 }
                 access_token = issue_rsa_jwt(access_payload, user.tenant)
 
-                return Response({
-                    "access": access_token,
-                    "refresh": new_refresh_token
-                })
+                return Response({"access": access_token, "refresh": new_refresh_token})
         except Exception as e:
             UserActivity.objects.create(
                 user=None,
                 tenant=Tenant.objects.first(),
-                action='login',
+                action="login",
                 performed_by=None,
-                details={'reason': f"Token refresh failed: {str(e)}"},
+                details={"reason": f"Token refresh failed: {str(e)}"},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=False
+                success=False,
             )
             return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -498,25 +467,25 @@ class LoginWith2FAView(TokenObtainPairView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        ip_address = request.META.get('REMOTE_ADDR')
-        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        ip_address = request.META.get("REMOTE_ADDR")
+        user_agent = request.META.get("HTTP_USER_AGENT", "")
         tenant = getattr(request, "tenant", None)
 
         if not tenant:
             UserActivity.objects.create(
                 user=None,
                 tenant=Tenant.objects.first(),
-                action='login',
+                action="login",
                 performed_by=None,
-                details={'reason': 'Tenant not found'},
+                details={"reason": "Tenant not found"},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=False
+                success=False,
             )
             return Response({"detail": "Tenant not found."}, status=status.HTTP_400_BAD_REQUEST)
 
         with tenant_context(tenant):
-            serializer = self.get_serializer(data=request.data, context={'request': request})
+            serializer = self.get_serializer(data=request.data, context={"request": request})
             try:
                 serializer.is_valid(raise_exception=True)
             except serializers.ValidationError as e:
@@ -524,26 +493,26 @@ class LoginWith2FAView(TokenObtainPairView):
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': f"Invalid credentials: {str(e)}"},
+                    details={"reason": f"Invalid credentials: {str(e)}"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=False
+                    success=False,
                 )
                 return Response(e.detail, status=status.HTTP_401_UNAUTHORIZED)
 
             user = serializer.user
-            if user.is_locked or user.status == 'suspended' or not user.is_active:
+            if user.is_locked or user.status == "suspended" or not user.is_active:
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': 'Account locked or suspended'},
+                    details={"reason": "Account locked or suspended"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=False
+                    success=False,
                 )
                 return Response({"detail": "Account is locked or suspended."}, status=status.HTTP_403_FORBIDDEN)
 
@@ -551,12 +520,12 @@ class LoginWith2FAView(TokenObtainPairView):
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': 'IP address blocked'},
+                    details={"reason": "IP address blocked"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=False
+                    success=False,
                 )
                 return Response({"detail": "This IP address is blocked."}, status=status.HTTP_403_FORBIDDEN)
 
@@ -569,15 +538,15 @@ class LoginWith2FAView(TokenObtainPairView):
                     "2fa_method": "email",
                     "ip_address": ip_address,
                     "user_agent": user_agent,
-                    "expires_in_seconds": 300
+                    "expires_in_seconds": 300,
                 },
                 "metadata": {
                     "event_id": f"evt-{uuid.uuid4()}",
                     "event_type": "auth.2fa.code.requested",
                     "created_at": datetime.utcnow().isoformat() + "Z",
                     "source": "auth-service",
-                    "tenant_id": str(getattr(tenant, "id", "unknown"))
-                }
+                    "tenant_id": str(getattr(tenant, "id", "unknown")),
+                },
             }
             try:
                 requests.post(settings.NOTIFICATIONS_EVENT_URL, json=event_payload, timeout=3)
@@ -587,36 +556,35 @@ class LoginWith2FAView(TokenObtainPairView):
             UserActivity.objects.create(
                 user=user,
                 tenant=tenant,
-                action='login',
+                action="login",
                 performed_by=None,
-                details={'reason': '2FA code sent'},
+                details={"reason": "2FA code sent"},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=False
+                success=False,
             )
-            return Response({
-                "detail": "2FA code sent to your email.",
-                "2fa_code": code
-            }, status=200)
+            return Response({"detail": "2FA code sent to your email.", "2fa_code": code}, status=200)
+
 
 class Verify2FAView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get("email")
         code = request.data.get("2fa_code")
-        ip_address = request.META.get('REMOTE_ADDR')
-        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        ip_address = request.META.get("REMOTE_ADDR")
+        user_agent = request.META.get("HTTP_USER_AGENT", "")
         tenant = getattr(request, "tenant", None)
         if not tenant:
             UserActivity.objects.create(
                 user=None,
                 tenant=Tenant.objects.first(),
-                action='login',
+                action="login",
                 performed_by=None,
-                details={'reason': 'Tenant not found'},
+                details={"reason": "Tenant not found"},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=False
+                success=False,
             )
             return Response({"detail": "Tenant not found."}, status=400)
         with tenant_context(tenant):
@@ -625,12 +593,12 @@ class Verify2FAView(APIView):
                 UserActivity.objects.create(
                     user=None,
                     tenant=tenant,
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': 'Invalid user'},
+                    details={"reason": "Invalid user"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=False
+                    success=False,
                 )
                 return Response({"detail": "Invalid user."}, status=400)
             cached_code = cache.get(f"2fa_{user.id}")
@@ -638,25 +606,25 @@ class Verify2FAView(APIView):
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
-                    action='login',
+                    action="login",
                     performed_by=None,
-                    details={'reason': 'Invalid or expired 2FA code'},
+                    details={"reason": "Invalid or expired 2FA code"},
                     ip_address=ip_address,
                     user_agent=user_agent,
-                    success=False
+                    success=False,
                 )
                 return Response({"detail": "Invalid or expired 2FA code."}, status=400)
-            
+
             user.reset_login_attempts()
             UserActivity.objects.create(
                 user=user,
                 tenant=tenant,
-                action='login',
+                action="login",
                 performed_by=None,
-                details={'reason': '2FA verified'},
+                details={"reason": "2FA verified"},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=True
+                success=True,
             )
             refresh = RefreshToken.for_user(user)
             access = refresh.access_token
@@ -666,30 +634,31 @@ class Verify2FAView(APIView):
                 "tenant_id": user.tenant.id,
                 "tenant_schema": user.tenant.schema_name,
                 "user": CustomUserMinimalSerializer(user).data,
-                "has_accepted_terms": user.has_accepted_terms
+                "has_accepted_terms": user.has_accepted_terms,
             }
             cache.delete(f"2fa_{user.id}")
             return Response(data, status=200)
+
 
 class LogoutView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         refresh_token = request.data.get("refresh")
-        ip_address = request.META.get('REMOTE_ADDR')
-        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        ip_address = request.META.get("REMOTE_ADDR")
+        user_agent = request.META.get("HTTP_USER_AGENT", "")
         tenant = getattr(request, "tenant", Tenant.objects.first())
 
         if not refresh_token:
             UserActivity.objects.create(
                 user=None,
                 tenant=tenant,
-                action='logout',
+                action="logout",
                 performed_by=None,
-                details={'reason': 'No refresh token provided'},
+                details={"reason": "No refresh token provided"},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=False
+                success=False,
             )
             return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -697,32 +666,33 @@ class LogoutView(APIView):
             UserActivity.objects.create(
                 user=None,
                 tenant=tenant,
-                action='logout',
+                action="logout",
                 performed_by=None,
                 details={},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=True
+                success=True,
             )
             return Response({"detail": "Logged out successfully."})
         except Exception as e:
             UserActivity.objects.create(
                 user=None,
                 tenant=tenant,
-                action='logout',
+                action="logout",
                 performed_by=None,
-                details={'reason': str(e)},
+                details={"reason": str(e)},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=False
+                success=False,
             )
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PublicKeyView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, kid):
-        tenant_id = request.query_params.get('tenant_id')
+        tenant_id = request.query_params.get("tenant_id")
         if not tenant_id:
             logger.error("No tenant_id provided in query params")
             return Response({"error": "tenant_id is required"}, status=400)
@@ -740,6 +710,7 @@ class PublicKeyView(APIView):
         except RSAKeyPair.DoesNotExist:
             logger.error(f"No RSAKeyPair found for kid={kid} in schema={tenant.schema_name}")
             return Response({"error": "Keypair not found"}, status=404)
+
 
 # class JWKSView(APIView):
 #     permission_classes = [AllowAny]
@@ -768,33 +739,33 @@ class JWKSView(APIView):
         for tenant in tenants:
             with tenant_context(tenant):
                 for keypair in RSAKeyPair.objects.filter(active=True):
-                    rsa_key = jwk.construct(keypair.public_key_pem, algorithm='RS256')
+                    rsa_key = jwk.construct(keypair.public_key_pem, algorithm="RS256")
                     pub_jwk = rsa_key.to_dict()
-                    pub_jwk['kid'] = keypair.kid
-                    pub_jwk['use'] = 'sig'
-                    pub_jwk['alg'] = 'RS256'
+                    pub_jwk["kid"] = keypair.kid
+                    pub_jwk["use"] = "sig"
+                    pub_jwk["alg"] = "RS256"
                     jwks["keys"].append(pub_jwk)
         return Response(jwks)
 
-        
+
 class JitsiTokenView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        room = request.data.get('room')
-        moderator = request.data.get('moderator', True)
-        ip_address = request.META.get('REMOTE_ADDR')
-        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        room = request.data.get("room")
+        moderator = request.data.get("moderator", True)
+        ip_address = request.META.get("REMOTE_ADDR")
+        user_agent = request.META.get("HTTP_USER_AGENT", "")
         if not room:
             UserActivity.objects.create(
                 user=request.user,
                 tenant=request.tenant,
-                action='jitsi_token',
+                action="jitsi_token",
                 performed_by=None,
-                details={'reason': 'Room name required'},
+                details={"reason": "Room name required"},
                 ip_address=ip_address,
                 user_agent=user_agent,
-                success=False
+                success=False,
             )
             return Response({"error": "Room name required"}, status=400)
         user = request.user
@@ -813,18 +784,18 @@ class JitsiTokenView(APIView):
             "aud": "jitsi",
             # "exp": int((timezone.now() + timedelta(hours=1)).timestamp()),
             # In JitsiTokenView.post
-            "exp": int((timezone.now() + timedelta(days=7)).timestamp()), # Extend to 7 days
+            "exp": int((timezone.now() + timedelta(days=7)).timestamp()),  # Extend to 7 days
             "iat": int(timezone.now().timestamp()),
         }
         token = issue_rsa_jwt(payload, tenant)
         UserActivity.objects.create(
             user=user,
             tenant=tenant,
-            action='jitsi_token',
+            action="jitsi_token",
             performed_by=None,
-            details={'room': room},
+            details={"room": room},
             ip_address=ip_address,
             user_agent=user_agent,
-            success=True
+            success=True,
         )
         return Response({"token": token})
