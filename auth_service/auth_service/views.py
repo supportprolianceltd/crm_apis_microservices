@@ -12,7 +12,6 @@ from django.contrib.auth import authenticate, get_user_model
 from django.core.cache import cache
 from django.db import connection
 from django.utils import timezone
-from django.utils.timezone import now
 from django_tenants.utils import tenant_context
 from jose import jwk
 from kafka import KafkaProducer
@@ -20,13 +19,11 @@ from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import (
-    TokenObtainPairSerializer,
-    TokenRefreshSerializer,
+    TokenObtainPairSerializer
 )
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from users.models import (
     BlacklistedToken,
     BlockedIP,
@@ -36,7 +33,7 @@ from users.models import (
     UserProfile,
 )
 from users.serializers import (
-    CustomTokenSerializer,
+    # CustomTokenSerializer,
     CustomUserMinimalSerializer,
     CustomUserSerializer,
 )
@@ -85,137 +82,6 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         return super().get_token(user)
-
-    # def validate(self, attrs):
-    #     ip_address = self.context['request'].META.get('REMOTE_ADDR')
-    #     user_agent = self.context['request'].META.get('HTTP_USER_AGENT', '')
-    #     tenant = self.context['request'].tenant
-
-    #     with tenant_context(tenant):
-    #         user = authenticate(
-    #             email=attrs.get("email"),
-    #             password=attrs.get("password")
-    #         )
-    #         if not user:
-    #             UserActivity.objects.create(
-    #                 user=None,
-    #                 tenant=tenant,
-    #                 action='login',
-    #                 performed_by=None,
-    #                 details={'reason': 'Invalid credentials'},
-    #                 ip_address=ip_address,
-    #                 user_agent=user_agent,
-    #                 success=False
-    #             )
-    #             raise serializers.ValidationError("Invalid credentials")
-
-    #         if user.is_locked or not user.is_active:
-    #             UserActivity.objects.create(
-    #                 user=user,
-    #                 tenant=tenant,
-    #                 action='login',
-    #                 performed_by=None,
-    #                 details={'reason': 'Account locked or suspended'},
-    #                 ip_address=ip_address,
-    #                 user_agent=user_agent,
-    #                 success=False
-    #             )
-    #             raise serializers.ValidationError("Account is locked or suspended")
-
-    #         logger.info("📤 Sending login success event to notifications service")
-
-    #         try:
-    #             event_payload = {
-    #                 "metadata": {
-    #                     "tenant_id": str(tenant.unique_id),
-    #                     "event_type": "user.login.succeeded",
-    #                     "event_id": str(uuid.uuid4()),
-    #                     "created_at": now().isoformat(),
-    #                     "source": "auth-service"
-    #                 },
-    #                 "data": {
-    #                     "user_email": user.email,
-    #                     "ip": ip_address,
-    #                     "time": now().isoformat(),
-    #                     "user_id": str(user.id)
-    #                 }
-    #             }
-
-    #             notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-    #             logger.info(f"➡️ POST to {notifications_url} with payload: {event_payload}")
-
-    #             response = requests.post(notifications_url, json=event_payload, timeout=5)
-
-    #             logger.info(f"✅ Notification sent. Status: {response.status_code}, Response: {response.text}")
-
-    #         except Exception as e:
-    #             logger.warning(f"[❌ Notification Error] Failed to send login event: {str(e)}")
-
-    #         if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
-    #             UserActivity.objects.create(
-    #                 user=user,
-    #                 tenant=tenant,
-    #                 action='login',
-    #                 performed_by=None,
-    #                 details={'reason': 'IP address blocked'},
-    #                 ip_address=ip_address,
-    #                 user_agent=user_agent,
-    #                 success=False
-    #             )
-    #             raise serializers.ValidationError("This IP address is blocked")
-
-    #         user.reset_login_attempts()
-    #         UserActivity.objects.create(
-    #             user=user,
-    #             tenant=tenant,
-    #             action='login',
-    #             performed_by=None,
-    #             details={},
-    #             ip_address=ip_address,
-    #             user_agent=user_agent,
-    #             success=True
-    #         )
-
-    #         access_payload = {
-    #             "jti": str(uuid.uuid4()),
-    #             "sub": user.email,
-    #             "role": user.role,
-    #             "status": user.status,
-    #             "tenant_id": user.tenant.id,
-    #             "tenant_organizational_id": str(tenant.organizational_id),
-    #             "tenant_unique_id": str(tenant.unique_id),
-    #             "tenant_schema": user.tenant.schema_name,
-    #             "has_accepted_terms": user.has_accepted_terms,
-    #             "user": CustomUserMinimalSerializer(user).data,
-    #             "email": user.email,
-    #             "type": "access",
-    #             "exp": (timezone.now() + timedelta(minutes=15)).timestamp(),
-    #         }
-    #         access_token = issue_rsa_jwt(access_payload, user.tenant)
-
-    #         refresh_jti = str(uuid.uuid4())
-    #         refresh_payload = {
-    #             "jti": refresh_jti,
-    #             "sub": user.email,
-    #             "tenant_id": user.tenant.id,
-    #             "tenant_organizational_id": str(user.tenant.organizational_id),
-    #             "tenant_unique_id": str(user.tenant.unique_id),
-    #             "type": "refresh",
-    #             "exp": (timezone.now() + timedelta(days=7)).timestamp(),
-    #         }
-    #         refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
-
-    #         data = {
-    #             "access": access_token,
-    #             "refresh": refresh_token,
-    #             "tenant_id": user.tenant.id,
-    #             "tenant_organizational_id": str(user.tenant.organizational_id),
-    #             "tenant_unique_id": str(user.tenant.unique_id),
-    #             "tenant_schema": user.tenant.schema_name,
-    #             "user": CustomUserMinimalSerializer(user).data,
-    #             "has_accepted_terms": user.has_accepted_terms,
-    #         }
-    #         return data
 
     def validate(self, attrs):
         print("🔥🔥🔥 validate() from CustomTokenSerializer called!")
@@ -359,8 +225,112 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenSerializer
 
 
+# class CustomTokenRefreshView(APIView):
+#     permission_classes = [AllowAny]
+
+#     def post(self, request):
+#         refresh_token = request.data.get("refresh")
+#         ip_address = request.META.get("REMOTE_ADDR")
+#         user_agent = request.META.get("HTTP_USER_AGENT", "")
+
+#         if not refresh_token:
+#             UserActivity.objects.create(
+#                 user=None,
+#                 tenant=Tenant.objects.first(),  # Fallback tenant
+#                 action="login",
+#                 performed_by=None,
+#                 details={"reason": "No refresh token provided"},
+#                 ip_address=ip_address,
+#                 user_agent=user_agent,
+#                 success=False,
+#             )
+#             return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
+#         try:
+#             payload = decode_rsa_jwt(refresh_token)
+#             if payload.get("type") != "refresh":
+#                 UserActivity.objects.create(
+#                     user=None,
+#                     tenant=Tenant.objects.first(),
+#                     action="login",
+#                     performed_by=None,
+#                     details={"reason": "Invalid token type"},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=False,
+#                 )
+#                 return Response({"detail": "Invalid token type."}, status=status.HTTP_400_BAD_REQUEST)
+#             jti = payload.get("jti")
+#             if BlacklistedToken.objects.filter(jti=jti).exists():
+#                 UserActivity.objects.create(
+#                     user=None,
+#                     tenant=Tenant.objects.first(),
+#                     action="login",
+#                     performed_by=None,
+#                     details={"reason": "Token blacklisted"},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=False,
+#                 )
+#                 return Response({"detail": "Token blacklisted."}, status=status.HTTP_401_UNAUTHORIZED)
+
+#             exp = datetime.fromtimestamp(payload["exp"])
+#             BlacklistedToken.objects.create(jti=jti, expires_at=exp)
+
+#             user = get_user_model().objects.get(email=payload["sub"])
+#             tenant = user.tenant
+#             with tenant_context(tenant):
+#                 UserActivity.objects.create(
+#                     user=user,
+#                     tenant=tenant,
+#                     action="login",
+#                     performed_by=None,
+#                     details={"reason": "Token refresh"},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=True,
+#                 )
+#                 new_refresh_jti = str(uuid.uuid4())
+#                 refresh_payload = {
+#                     "jti": new_refresh_jti,
+#                     "sub": user.email,
+#                     "tenant_id": user.tenant.id,
+#                     "type": "refresh",
+#                     "exp": (timezone.now() + timedelta(days=7)).timestamp(),
+#                 }
+#                 new_refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
+
+#                 access_payload = {
+#                     "jti": str(uuid.uuid4()),
+#                     "sub": user.email,
+#                     "role": user.role,
+#                     "tenant_id": user.tenant.id,
+#                     "tenant_schema": user.tenant.schema_name,
+#                     "has_accepted_terms": user.has_accepted_terms,
+#                     "user": CustomUserMinimalSerializer(user).data,
+#                     "email": user.email,
+#                     "type": "access",
+#                     "exp": (timezone.now() + timedelta(minutes=15)).timestamp(),
+#                 }
+#                 access_token = issue_rsa_jwt(access_payload, user.tenant)
+
+#                 return Response({"access": access_token, "refresh": new_refresh_token})
+#         except Exception as e:
+#             UserActivity.objects.create(
+#                 user=None,
+#                 tenant=Tenant.objects.first(),
+#                 action="login",
+#                 performed_by=None,
+#                 details={"reason": f"Token refresh failed: {str(e)}"},
+#                 ip_address=ip_address,
+#                 user_agent=user_agent,
+#                 success=False,
+#             )
+#             return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+
+
 class CustomTokenRefreshView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []  # Add this line to disable authentication
 
     def post(self, request):
         refresh_token = request.data.get("refresh")
@@ -370,8 +340,8 @@ class CustomTokenRefreshView(APIView):
         if not refresh_token:
             UserActivity.objects.create(
                 user=None,
-                tenant=Tenant.objects.first(),  # Fallback tenant
-                action="login",
+                tenant=Tenant.objects.first(),
+                action="refresh_token",
                 performed_by=None,
                 details={"reason": "No refresh token provided"},
                 ip_address=ip_address,
@@ -379,65 +349,101 @@ class CustomTokenRefreshView(APIView):
                 success=False,
             )
             return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            payload = decode_rsa_jwt(refresh_token)
-            if payload.get("type") != "refresh":
+            # Decode token without verification to extract tenant_id
+            unverified_payload = jwt.decode(refresh_token, options={"verify_signature": False})
+            tenant_id = unverified_payload.get("tenant_id")
+            if not tenant_id:
                 UserActivity.objects.create(
                     user=None,
                     tenant=Tenant.objects.first(),
-                    action="login",
+                    action="refresh_token",
                     performed_by=None,
-                    details={"reason": "Invalid token type"},
+                    details={"reason": "Tenant ID missing in token payload"},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"detail": "Invalid token type."}, status=status.HTTP_400_BAD_REQUEST)
-            jti = payload.get("jti")
-            if BlacklistedToken.objects.filter(jti=jti).exists():
+                return Response({"detail": "Tenant ID missing in token payload."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Fetch tenant and verify schema
+            try:
+                tenant = Tenant.objects.get(id=tenant_id)
+                logger.info(f"Fetched tenant: id={tenant_id}, schema_name={tenant.schema_name}")
+            except Tenant.DoesNotExist:
                 UserActivity.objects.create(
                     user=None,
                     tenant=Tenant.objects.first(),
-                    action="login",
+                    action="refresh_token",
                     performed_by=None,
-                    details={"reason": "Token blacklisted"},
+                    details={"reason": f"Tenant not found for tenant_id: {tenant_id}"},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"detail": "Token blacklisted."}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"detail": f"Tenant not found for tenant_id: {tenant_id}."}, status=status.HTTP_400_BAD_REQUEST)
 
-            exp = datetime.fromtimestamp(payload["exp"])
-            BlacklistedToken.objects.create(jti=jti, expires_at=exp)
-
-            user = get_user_model().objects.get(email=payload["sub"])
-            tenant = user.tenant
+            # Set tenant context and log current schema
             with tenant_context(tenant):
+                logger.info(f"Current schema: {connection.schema_name}")
+                # Validate and decode refresh token
+                payload = decode_rsa_jwt(refresh_token)
+                if payload.get("type") != "refresh":
+                    UserActivity.objects.create(
+                        user=None,
+                        tenant=tenant,
+                        action="refresh_token",
+                        performed_by=None,
+                        details={"reason": "Invalid token type"},
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        success=False,
+                    )
+                    return Response({"detail": "Invalid token type."}, status=status.HTTP_400_BAD_REQUEST)
+
+                jti = payload.get("jti")
+                if BlacklistedToken.objects.filter(jti=jti).exists():
+                    UserActivity.objects.create(
+                        user=None,
+                        tenant=tenant,
+                        action="refresh_token",
+                        performed_by=None,
+                        details={"reason": "Token blacklisted"},
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        success=False,
+                    )
+                    return Response({"detail": "Token blacklisted."}, status=status.HTTP_401_UNAUTHORIZED)
+
+                # Blacklist the used refresh token
+                exp = datetime.fromtimestamp(payload["exp"])
+                BlacklistedToken.objects.create(jti=jti, expires_at=exp)
+
+                # Retrieve user
+                user = get_user_model().objects.get(email=payload["sub"])
+
+                # Log successful refresh activity
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
-                    action="login",
+                    action="refresh_token",
                     performed_by=None,
-                    details={"reason": "Token refresh"},
+                    details={"reason": "Token refresh successful"},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=True,
                 )
-                new_refresh_jti = str(uuid.uuid4())
-                refresh_payload = {
-                    "jti": new_refresh_jti,
-                    "sub": user.email,
-                    "tenant_id": user.tenant.id,
-                    "type": "refresh",
-                    "exp": (timezone.now() + timedelta(days=7)).timestamp(),
-                }
-                new_refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
 
+                # Issue new access token (matching CustomTokenSerializer)
                 access_payload = {
                     "jti": str(uuid.uuid4()),
                     "sub": user.email,
                     "role": user.role,
+                    "status": user.status,
                     "tenant_id": user.tenant.id,
+                    "tenant_organizational_id": str(tenant.organizational_id),
+                    "tenant_unique_id": str(tenant.unique_id),
                     "tenant_schema": user.tenant.schema_name,
                     "has_accepted_terms": user.has_accepted_terms,
                     "user": CustomUserMinimalSerializer(user).data,
@@ -447,12 +453,35 @@ class CustomTokenRefreshView(APIView):
                 }
                 access_token = issue_rsa_jwt(access_payload, user.tenant)
 
-                return Response({"access": access_token, "refresh": new_refresh_token})
+                # Issue new refresh token
+                new_refresh_jti = str(uuid.uuid4())
+                refresh_payload = {
+                    "jti": new_refresh_jti,
+                    "sub": user.email,
+                    "tenant_id": user.tenant.id,
+                    "tenant_organizational_id": str(tenant.organizational_id),
+                    "tenant_unique_id": str(tenant.unique_id),
+                    "type": "refresh",
+                    "exp": (timezone.now() + timedelta(days=7)).timestamp(),
+                }
+                new_refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
+
+                return Response({
+                    "access": access_token,
+                    "refresh": new_refresh_token,
+                    "tenant_id": user.tenant.id,
+                    "tenant_organizational_id": str(tenant.organizational_id),
+                    "tenant_unique_id": str(tenant.unique_id),
+                    "tenant_schema": user.tenant.schema_name,
+                    "user": CustomUserMinimalSerializer(user).data,
+                    "has_accepted_terms": user.has_accepted_terms,
+                }, status=status.HTTP_200_OK)
+
         except Exception as e:
             UserActivity.objects.create(
                 user=None,
                 tenant=Tenant.objects.first(),
-                action="login",
+                action="refresh_token",
                 performed_by=None,
                 details={"reason": f"Token refresh failed: {str(e)}"},
                 ip_address=ip_address,

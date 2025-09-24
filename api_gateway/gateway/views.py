@@ -1,31 +1,10 @@
 import logging
 import requests
-
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django_ratelimit.decorators import ratelimit
 from django.shortcuts import render
-
-logger = logging.getLogger('gateway')
-
-AUTH_PREFIXES = {"token", "user", "tenant"}
-PUBLIC_PATHS = [
-    "applications-engine/applications/parse-resume/autofill/",
-    "/api/talent-engine/requisitions/by-link/",
-    "/api/talent-engine/requisitions/unique_link/",
-    "/api/talent-engine/requisitions/public/published/",
-    "/api/talent-engine/requisitions/public/close/",
-    "/api/applications-engine/apply-jobs/",
-    "/api/applications-engine/applications/code/",
-]
-
-import logging
-import requests
-from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
-from django_ratelimit.decorators import ratelimit
 from django.utils.encoding import force_str
 import re
 
@@ -38,7 +17,7 @@ PUBLIC_PATHS = [
     "/api/talent-engine/requisitions/unique_link/",
     "/api/talent-engine/requisitions/public/published/",
     "/api/talent-engine/requisitions/public/close/",
-    "/api/talent-engine/requisitions/public/update-applications/"
+    "/api/talent-engine/requisitions/public/update-applications/",
     "/api/applications-engine/apply-jobs/",
     "/api/applications-engine/applications/code/",
     "/api/applications-engine/applications/applicant/upload/",
@@ -49,7 +28,6 @@ PUBLIC_PATHS = [
 @ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def api_gateway_view(request, path):
     try:
-
         # Support multi-segment prefixes (e.g., talent-engine, applications-engine, messaging)
         segments = path.split('/')
         if len(segments) >= 2 and segments[0] in {"talent-engine", "applications-engine", "messaging", "lms"}:
@@ -59,21 +37,22 @@ def api_gateway_view(request, path):
             prefix = segments[0]
             sub_path = '/'.join(segments[1:])
 
-
-        segments = path.split('/')
-        prefix = segments[0]
-        sub_path = '/'.join(segments[1:])
-
         base_url = settings.MICROSERVICE_URLS.get(prefix)
 
         if not base_url:
             logger.error(f"No route found for /api/{prefix}/")
             return JsonResponse({"error": f"No route found for /api/{prefix}/"}, status=404)
 
-        forward_url = f"{base_url}/api/{prefix}/{sub_path}"
+        # forward_url = f"{base_url}/api/{prefix}/{sub_path}"
+        if prefix == "notifications":
+            forward_url = f"{base_url}/{sub_path}"
+        else:
+            forward_url = f"{base_url}/api/{prefix}/{sub_path}"
+
         is_public = any(path.startswith(public) for public in PUBLIC_PATHS)
 
         excluded_headers = {"host", "content-length"}
+        
         if is_public:
             excluded_headers.add("authorization")
 
@@ -101,7 +80,7 @@ def api_gateway_view(request, path):
                 body_str = force_str(body[:10000])  # Peek into body, limit to first 10KB for safety
                 file_fields = re.findall(r'Content-Disposition: form-data; name="([^"]+)"(?:; filename="([^"]+)")?', body_str)
                 if file_fields:
-                    logger.info(f"Detected file fcdields in multipart body: {[(f[0], f[1]) for f in file_fields if f[1]]}")
+                    logger.info(f"Detected file fields in multipart body: {[(f[0], f[1]) for f in file_fields if f[1]]}")
                 else:
                     logger.info("No file indicators found in multipart body.")
             except Exception as e:
@@ -132,7 +111,7 @@ def api_gateway_view(request, path):
         )
 
         return HttpResponse(
-            response.content,
+            content=response.content,
             status=response.status_code,
             content_type=response.headers.get("Content-Type", "application/json")
         )
@@ -154,11 +133,9 @@ def api_gateway_view(request, path):
             "suggestion": "An unexpected error occurred in the gateway. Please contact support."
         }, status=500)
 
-
 def multi_docs_view(request):
     return render(request, 'docs.html', {
         'auth_docs_url': f"{settings.MICROSERVICE_URLS['auth_service']}/api/docs/",
         'applications_docs_url': f"{settings.MICROSERVICE_URLS['applications-engine']}/api/docs/",
         'talent_docs_url': f"{settings.MICROSERVICE_URLS['talent-engine']}/api/docs/",
     })
-       

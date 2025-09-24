@@ -3,8 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     UserViewSet, TermsAndConditionsView, PasswordResetRequestView, PasswordResetConfirmView, DocumentDetailView, DocumentListCreateView,
     UserPasswordRegenerateView, ClientViewSet, AdminUserCreateView, UserCreateView, RSAKeyPairCreateView,
-    UserBranchUpdateView, TenantUsersListView, BranchUsersListView, UserSessionViewSet, DocumentAcknowledgeView,
-    LoginAttemptViewSet, BlockedIPViewSet, UserActivityViewSet, jwks_view, protected_view, GroupViewSet
+    UserBranchUpdateView, TenantUsersListView, BranchUsersListView, UserSessionViewSet,
+    LoginAttemptViewSet, BlockedIPViewSet, UserActivityViewSet, jwks_view, protected_view, GroupViewSet, DocumentVersionListView
 )
 
 
@@ -35,5 +35,6 @@ urlpatterns = [
 
     path('documents/', DocumentListCreateView.as_view(), name='document-list-create'),
     path('documents/<int:id>/', DocumentDetailView.as_view(), name='document-detail'),
-    path('documents/<int:document_id>/acknowledge/', DocumentAcknowledgeView.as_view(), name='document-acknowledge'),
+   # path('documents/<int:document_id>/acknowledge/', DocumentAcknowledgeView.as_view(), name='document-acknowledge'),
+    path('documents/<int:document_id>/versions/', DocumentVersionListView.as_view(), name='document-versions'),
 ]

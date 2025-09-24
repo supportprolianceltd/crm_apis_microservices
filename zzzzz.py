@@ -10,11 +10,6 @@
 # docker compose up -d
 
 
-
-
-
-
-
 [
   
     {

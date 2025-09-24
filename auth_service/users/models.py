@@ -931,82 +931,43 @@ class BlacklistedToken(models.Model):
     expires_at = models.DateTimeField()
 
 
-# docker compose exec auth-service python manage.py makemigrations users
-# docker compose exec auth-service python manage.py migrate
-
-
-
 class Document(models.Model):
     tenant_id = models.CharField(max_length=255, blank=True, null=True)
     title = models.CharField(max_length=255)
-    file_url = models.URLField(null=True, blank=True)
-    file_path = models.CharField(max_length=255, null=True, blank=True)
-    file_type = models.CharField(max_length=50, null=True, blank=True)
-    file_size = models.BigIntegerField(null=True, blank=True)
-    version = models.CharField(max_length=10, default='v01')
-    uploaded_by_id = models.CharField(max_length=36, blank=True, null=True)
-    updated_by_id = models.CharField(max_length=36, blank=True, null=True)
+    file_url = models.URLField(max_length=500, blank=True, null=True)
+    file_path = models.CharField(max_length=500, blank=True, null=True)
+    file_type = models.CharField(max_length=100, blank=True, null=True)
+    file_size = models.BigIntegerField(blank=True, null=True)
+    version = models.IntegerField(default=1)
+    uploaded_by_id = models.CharField(max_length=255, blank=True, null=True)
+    updated_by_id = models.CharField(max_length=255, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    expiring_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=[('active', 'Active'), ('expired', 'Expired')], default='active')
-    document_number = models.CharField(max_length=20, unique=True, blank=True)
+    expiring_date = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=50, default="active")
+    document_number = models.CharField(max_length=100, unique=True, blank=True, null=True)
 
     class Meta:
-        unique_together = ('tenant_id', 'title', 'version')
-        indexes = [
-            models.Index(fields=['tenant_id', 'document_number'], name='idx_doc_tenant_number'),
-        ]
+        unique_together = ('tenant_id', 'document_number')
 
-    def save(self, *args, **kwargs):
-        if not self.document_number:
-            tenant = None
-            if self.tenant_id:
-                try:
-                    # Fetch by tenant_unique_id
-                    tenant = Tenant.objects.get(unique_id=self.tenant_id)
-                except Tenant.DoesNotExist:
-                    tenant = None
-
-            if tenant:
-                # Use tenant context for your multi-tenancy
-                with tenant_context(tenant):
-                    last_doc = Document.objects.filter(tenant_id=self.tenant_id).count() + 1
-                    self.document_number = f"DOC-{str(last_doc).zfill(4)}"
-            else:
-                # Fallback if tenant not found
-                last_doc = Document.objects.filter(tenant_id=self.tenant_id).count() + 1
-                self.document_number = f"DOC-{str(last_doc).zfill(4)}"
-
-        # Set status
-        if self.expiring_date and self.expiring_date < timezone.now().date():
-            self.status = 'expired'
-        else:
-            self.status = 'active'
-
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.document_number} - {self.title} ({self.version})"
-
-
-class DocumentAcknowledgment(models.Model):
-    document = models.ForeignKey('Document', on_delete=models.CASCADE, related_name='acknowledgments')
-    user_id = models.CharField(max_length=36, blank=True, null=True)  # Store CustomUser ID
-    acknowledged_at = models.DateTimeField(auto_now_add=True)
-    tenant_id = models.CharField(max_length=255, blank=True, null=True)
-
+class DocumentVersion(models.Model):
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='versions')
+    version = models.IntegerField()
+    file_url = models.URLField(max_length=500)
+    file_path = models.CharField(max_length=500)
+    file_type = models.CharField(max_length=100)
+    file_size = models.BigIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by_id = models.CharField(max_length=255)
 
     class Meta:
-        unique_together = ('document', 'user_id')
-        indexes = [
-            models.Index(fields=['tenant_id', 'user_id'], name='idx_ack_tenant_user'),
-        ]
+        unique_together = ('document', 'version')
 
-    def __str__(self):
-        return f"User {self.user_id} acknowledged {self.document.title}"
-
-
+# class DocumentAcknowledgment(models.Model):
+#     document = models.ForeignKey(Document, on_delete=models.CASCADE)
+#     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+#     # tenant = models.ForeignKey('core.Tenant', on_delete=models.CASCADE)
+#     acknowledged_at = models.DateTimeField(auto_now_add=True)
 
 
 class Group(models.Model):

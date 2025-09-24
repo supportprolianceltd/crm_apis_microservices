@@ -46,8 +46,6 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import RSAKeyPair
 
-# Utility Functions
-from utils.supabase import upload_file_dynamic
 
 from auth_service.utils.jwt_rsa import issue_rsa_jwt, validate_rsa_jwt
 
@@ -60,7 +58,6 @@ from .models import (
     ClientProfile,
     CustomUser,
     Document,
-    DocumentAcknowledgment,
     DrivingRiskAssessment,
     EducationDetail,
     EmploymentDetail,
@@ -88,7 +85,6 @@ from .serializers import (
     ClientProfileSerializer,
     CustomUserListSerializer,
     CustomUserSerializer,
-    DocumentAcknowledgmentSerializer,
     DocumentSerializer,
     GroupMembershipSerializer,
     GroupSerializer,
@@ -148,7 +144,6 @@ from users.serializers import (
     ClientCreateSerializer,
     ClientDetailSerializer,
     ClientProfileSerializer,
-    CustomTokenSerializer,
     CustomUserListSerializer,
     CustomUserSerializer,
     PasswordResetConfirmSerializer,
@@ -1939,8 +1934,9 @@ class RSAKeyPairCreateView(APIView):
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
 class DocumentListCreateView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
         try:
@@ -1967,7 +1963,6 @@ class DocumentListCreateView(APIView):
             logger.error(f"Error creating document: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 class DocumentDetailView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
@@ -1992,7 +1987,7 @@ class DocumentDetailView(APIView):
             serializer = DocumentSerializer(document, data=request.data, partial=True, context={"request": request})
             if serializer.is_valid():
                 serializer.save()
-                logger.info(f"Document updated: {document.title} for tenant {tenant_id}")
+                logger.info(f"Document updated: {document.title} for tenant {tenant_id}, version {document.version}")
                 return Response(serializer.data, status=status.HTTP_200_OK)
             logger.error(f"Validation error for tenant {tenant_id}: {serializer.errors}")
             return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -2017,33 +2012,50 @@ class DocumentDetailView(APIView):
             logger.error(f"Error deleting document for tenant {tenant_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class DocumentVersionListView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
-class DocumentAcknowledgeView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, document_id):
-        tenant = request.user.tenant
+    def get(self, request, document_id):
         try:
-            with tenant_context(tenant):
-                document = Document.objects.get(id=document_id, tenant=tenant)
-                if DocumentAcknowledgment.objects.filter(document=document, user=request.user).exists():
-                    return Response(
-                        {"detail": "You have already acknowledged this document"}, status=status.HTTP_400_BAD_REQUEST
-                    )
-                acknowledgment = DocumentAcknowledgment.objects.create(
-                    document=document, user=request.user, tenant=tenant
-                )
-                serializer = DocumentAcknowledgmentSerializer(acknowledgment)
-                logger.info(
-                    f"Document {document.title} acknowledged by {request.user.username} in tenant {tenant.schema_name}"
-                )
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            tenant_id = get_tenant_id_from_jwt(request)
+            document = Document.objects.get(id=document_id, tenant_id=tenant_id)
+            versions = DocumentVersion.objects.filter(document=document)
+            serializer = DocumentVersionSerializer(versions, many=True, context={"request": request})
+            logger.info(f"Retrieved {versions.count()} versions for document {document.title} in tenant {tenant_id}")
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant.schema_name}")
+            logger.error(f"Document not found for tenant {tenant_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error acknowledging document for tenant {tenant.schema_name}: {str(e)}")
+            logger.error(f"Error retrieving versions for document {document_id} in tenant {tenant_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# class DocumentAcknowledgeView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def post(self, request, document_id):
+#         tenant = request.user.tenant
+#         try:
+#             with tenant_context(tenant):
+#                 document = Document.objects.get(id=document_id, tenant=tenant)
+#                 if DocumentAcknowledgment.objects.filter(document=document, user=request.user).exists():
+#                     return Response(
+#                         {"detail": "You have already acknowledged this document"}, status=status.HTTP_400_BAD_REQUEST
+#                     )
+#                 acknowledgment = DocumentAcknowledgment.objects.create(
+#                     document=document, user=request.user, tenant=tenant
+#                 )
+#                 serializer = DocumentAcknowledgmentSerializer(acknowledgment)
+#                 logger.info(
+#                     f"Document {document.title} acknowledged by {request.user.username} in tenant {tenant.schema_name}"
+#                 )
+#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         except Document.DoesNotExist:
+#             logger.error(f"Document not found for tenant {tenant.schema_name}")
+#             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             logger.error(f"Error acknowledging document for tenant {tenant.schema_name}: {str(e)}")
+#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class GroupViewSet(viewsets.ModelViewSet):

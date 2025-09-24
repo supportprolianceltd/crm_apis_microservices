@@ -6185,3 +6185,72 @@
 2025-09-23 19:29:41,194 INFO gateway Incoming request content type: 
 2025-09-23 19:29:41,194 INFO gateway Raw body size: 0 bytes
 2025-09-23 19:29:41,241 INFO gateway METHOD: POST | PATH: /api/talent-engine/requisitions/public/update-applications/22802a33-9bdb-4401-892c-84bf0b42f1db-PRO-registered-nurse-home-care-442ee260/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://talent-engine:8002/api/talent-engine/requisitions/public/update-applications/22802a33-9bdb-4401-892c-84bf0b42f1db-PRO-registered-nurse-home-care-442ee260/
+2025-09-24 08:45:21,779 INFO gateway Incoming request content type: application/json
+2025-09-24 08:45:21,785 INFO gateway Raw body size: 62 bytes
+2025-09-24 08:45:25,843 ERROR gateway Connection error on /api/token/: HTTPConnectionPool(host='auth-service', port=8001): Max retries exceeded with url: /api/token/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x7e07dacbe0d0>: Failed to resolve 'auth-service' ([Errno -5] No address associated with hostname)"))
+2025-09-24 08:59:56,640 INFO gateway Incoming request content type: application/json
+2025-09-24 08:59:56,641 INFO gateway Raw body size: 62 bytes
+2025-09-24 08:59:59,057 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-24 09:00:14,977 INFO gateway Incoming request content type: application/json
+2025-09-24 09:00:14,977 INFO gateway Raw body size: 576 bytes
+2025-09-24 09:00:15,021 INFO gateway METHOD: GET | PATH: /api/tenant/tenants/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/tenants/
+2025-09-24 09:00:43,397 INFO gateway Incoming request content type: application/json
+2025-09-24 09:00:43,398 INFO gateway Raw body size: 2 bytes
+2025-09-24 09:00:43,432 INFO gateway METHOD: GET | PATH: /api/tenant/tenants/11f9c89e-8622-4ca9-b630-59c66db42562/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/tenants/11f9c89e-8622-4ca9-b630-59c66db42562/
+2025-09-24 09:02:27,243 INFO gateway Incoming request content type: application/json
+2025-09-24 09:02:27,244 INFO gateway Raw body size: 51 bytes
+2025-09-24 09:02:34,430 INFO gateway METHOD: POST | PATH: /api/tenant/tenants/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/tenants/
+2025-09-24 09:35:22,429 INFO gateway Incoming request content type: application/json
+2025-09-24 09:35:22,430 INFO gateway Raw body size: 62 bytes
+2025-09-24 09:35:24,099 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-24 09:35:44,014 INFO gateway Incoming request content type: application/json
+2025-09-24 09:35:44,015 INFO gateway Raw body size: 58 bytes
+2025-09-24 09:35:49,408 INFO gateway METHOD: POST | PATH: /api/tenant/tenants/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/tenants/
+2025-09-24 09:38:38,806 INFO gateway Incoming request content type: application/json
+2025-09-24 09:38:38,806 INFO gateway Raw body size: 58 bytes
+2025-09-24 09:38:43,294 INFO gateway METHOD: POST | PATH: /api/tenant/tenants/ | STATUS: 201 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/tenants/
+2025-09-24 09:40:56,720 INFO gateway Incoming request content type: application/json
+2025-09-24 09:40:56,721 INFO gateway Raw body size: 62 bytes
+2025-09-24 09:40:58,105 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-24 10:11:42,702 INFO gateway Incoming request content type: application/json
+2025-09-24 10:11:42,703 INFO gateway Raw body size: 792 bytes
+2025-09-24 10:11:42,914 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-24 10:18:51,395 INFO gateway Incoming request content type: application/json
+2025-09-24 10:18:51,396 INFO gateway Raw body size: 62 bytes
+2025-09-24 10:18:54,483 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-24 10:19:08,749 INFO gateway Incoming request content type: application/json
+2025-09-24 10:19:08,750 INFO gateway Raw body size: 58 bytes
+2025-09-24 10:19:08,794 INFO gateway METHOD: GET | PATH: /api/tenant/tenants/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/tenant/tenants/
+2025-09-24 10:19:28,115 INFO gateway Incoming request content type: application/json
+2025-09-24 10:19:28,115 INFO gateway Raw body size: 792 bytes
+2025-09-24 10:19:28,189 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-24 10:21:33,367 INFO gateway Incoming request content type: application/json
+2025-09-24 10:21:33,368 INFO gateway Raw body size: 62 bytes
+2025-09-24 10:21:35,788 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-24 10:21:51,000 INFO gateway Incoming request content type: application/json
+2025-09-24 10:21:51,001 INFO gateway Raw body size: 790 bytes
+2025-09-24 10:21:51,078 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-24 10:36:45,648 INFO gateway Incoming request content type: application/json
+2025-09-24 10:36:45,649 INFO gateway Raw body size: 62 bytes
+2025-09-24 10:36:47,786 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-24 10:37:03,192 INFO gateway Incoming request content type: application/json
+2025-09-24 10:37:03,193 INFO gateway Raw body size: 792 bytes
+2025-09-24 10:37:03,288 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-24 10:51:39,540 INFO gateway Incoming request content type: application/json
+2025-09-24 10:51:39,541 INFO gateway Raw body size: 792 bytes
+2025-09-24 10:51:40,772 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-24 10:52:37,283 INFO gateway Incoming request content type: application/json
+2025-09-24 10:52:37,284 INFO gateway Raw body size: 62 bytes
+2025-09-24 10:52:37,992 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-24 10:52:51,044 INFO gateway Incoming request content type: application/json
+2025-09-24 10:52:51,045 INFO gateway Raw body size: 792 bytes
+2025-09-24 10:52:51,119 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-24 10:55:45,562 INFO gateway Incoming request content type: application/json
+2025-09-24 10:55:45,565 INFO gateway Raw body size: 62 bytes
+2025-09-24 10:55:48,131 INFO gateway METHOD: POST | PATH: /api/token/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/
+2025-09-24 10:56:07,267 INFO gateway Incoming request content type: application/json
+2025-09-24 10:56:07,267 INFO gateway Raw body size: 792 bytes
+2025-09-24 10:56:07,354 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 500 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/
+2025-09-24 11:05:49,349 INFO gateway Incoming request content type: application/json
+2025-09-24 11:05:49,350 INFO gateway Raw body size: 792 bytes
+2025-09-24 11:05:50,940 INFO gateway METHOD: POST | PATH: /api/token/refresh/ | STATUS: 200 | IP: 172.18.0.1 | FORWARDED TO: http://auth-service:8001/api/token/refresh/

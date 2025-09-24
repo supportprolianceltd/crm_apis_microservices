@@ -48,7 +48,7 @@ from .models import (
 logger = logging.getLogger(__name__)
 from rest_framework.exceptions import ValidationError
 
-from .models import Document, DocumentAcknowledgment
+from .models import Document, DocumentVersion
 
 
 def get_tenant_id_from_jwt(request):
@@ -1460,21 +1460,53 @@ class ClientCreateSerializer(serializers.ModelSerializer):
             return user
 
 
-class DocumentAcknowledgmentSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()  # Display username
-    acknowledged_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+
+class DocumentVersionSerializer(serializers.ModelSerializer):
+    created_by = serializers.SerializerMethodField()
 
     class Meta:
-        model = DocumentAcknowledgment
-        fields = ["id", "user", "acknowledged_at"]
-        read_only_fields = ["id", "acknowledged_at"]
+        model = DocumentVersion
+        fields = ['version', 'file_url', 'file_path', 'file_type', 'file_size', 'created_at', 'created_by']
+        read_only_fields = ['version', 'file_url', 'file_path', 'file_type', 'file_size', 'created_at', 'created_by']
 
+    @extend_schema_field(
+        {
+            "type": "object",
+            "properties": {
+                "email": {"type": "string"},
+                "first_name": {"type": "string"},
+                "last_name": {"type": "string"},
+                "job_role": {"type": "string"},
+            },
+        }
+    )
+    def get_created_by(self, obj):
+        if obj.created_by_id:
+            try:
+                user_response = requests.get(
+                    f"{settings.AUTH_SERVICE_URL}/api/user/users/{obj.created_by_id}/",
+                    headers={
+                        "Authorization": f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'
+                    },
+                )
+                if user_response.status_code == 200:
+                    user_data = user_response.json()
+                    return {
+                        "email": user_data.get("email", ""),
+                        "first_name": user_data.get("first_name", ""),
+                        "last_name": user_data.get("last_name", ""),
+                        "job_role": user_data.get("job_role", ""),
+                    }
+                logger.error(f"Failed to fetch user {obj.created_by_id} from auth_service")
+            except Exception as e:
+                logger.error(f"Error fetching created_by {obj.created_by_id}: {str(e)}")
+        return None
 
 class DocumentSerializer(serializers.ModelSerializer):
     uploaded_by = serializers.SerializerMethodField()
     updated_by = serializers.SerializerMethodField()
     tenant_domain = serializers.SerializerMethodField()
-    file = serializers.FileField(required=False, allow_null=True)  # Add file field for uploads
+    file = serializers.FileField(required=False, allow_null=True)
 
     class Meta:
         model = Document
@@ -1510,6 +1542,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             "document_number",
             "file_url",
             "file_path",
+            "version",
         ]
 
     @extend_schema_field(
@@ -1607,7 +1640,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         tenant_id = get_tenant_id_from_jwt(self.context["request"])
-        data["tenant_id"] = tenant_id  # Inject tenant_id
+        data["tenant_id"] = tenant_id
         if "uploaded_by_id" in data:
             user_response = requests.get(
                 f'{settings.AUTH_SERVICE_URL}/api/user/users/{data["uploaded_by_id"]}/',
@@ -1639,96 +1672,133 @@ class DocumentSerializer(serializers.ModelSerializer):
 
         if file:
             logger.info(f"Uploading document file: {file.name}")
+            file_name = f"{file.name.rsplit('.', 1)[0]}_v1.{file.name.rsplit('.', 1)[1]}" if '.' in file.name else f"{file.name}_v1"
             url = upload_file_dynamic(
-                file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
+                file, file_name, content_type=getattr(file, "content_type", "application/octet-stream")
             )
             validated_data["file_url"] = url
-            validated_data["file_path"] = url  # Assuming file_path stores the same URL
+            validated_data["file_path"] = url
             validated_data["file_type"] = getattr(file, "content_type", "application/octet-stream")
             validated_data["file_size"] = file.size
             logger.info(f"Document file uploaded: {url}")
 
-        return super().create(validated_data)
+        document = super().create(validated_data)
+        if file:
+            DocumentVersion.objects.create(
+                document=document,
+                version=1,
+                file_url=validated_data["file_url"],
+                file_path=validated_data["file_path"],
+                file_type=validated_data["file_type"],
+                file_size=validated_data["file_size"],
+                created_by_id=validated_data["uploaded_by_id"],
+            )
+        return document
 
     def update(self, instance, validated_data):
         file = validated_data.pop("file", None)
         validated_data["updated_by_id"] = str(self.context["request"].user.id)
 
-        if file:
-            logger.info(f"Updating document file: {file.name}")
-            url = upload_file_dynamic(
-                file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
-            )
-            validated_data["file_url"] = url
-            validated_data["file_path"] = url  # Assuming file_path stores the same URL
-            validated_data["file_type"] = getattr(file, "content_type", "application/octet-stream")
-            validated_data["file_size"] = file.size
-            logger.info(f"Document file updated: {url}")
-
-        return super().update(instance, validated_data)
-
-
-class DocumentAcknowledgmentSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
-
-    class Meta:
-        model = DocumentAcknowledgment
-        fields = ["id", "document", "user_id", "user", "acknowledged_at", "tenant_id"]
-        read_only_fields = ["id", "user_id", "acknowledged_at", "tenant_id"]
-
-    @extend_schema_field(
-        {
-            "type": "object",
-            "properties": {
-                "email": {"type": "string"},
-                "first_name": {"type": "string"},
-                "last_name": {"type": "string"},
-                "job_role": {"type": "string"},
-            },
-        }
-    )
-    def get_user(self, obj):
-        if obj.user_id:
-            try:
-                user_response = requests.get(
-                    f"{settings.AUTH_SERVICE_URL}/api/user/users/{obj.user_id}/",
-                    headers={
-                        "Authorization": f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'
-                    },
+        with transaction.atomic():
+            if file:
+                # Save the current version to DocumentVersion
+                DocumentVersion.objects.create(
+                    document=instance,
+                    version=instance.version,
+                    file_url=instance.file_url,
+                    file_path=instance.file_path,
+                    file_type=instance.file_type,
+                    file_size=instance.file_size,
+                    created_by_id=instance.updated_by_id or instance.uploaded_by_id,
                 )
-                if user_response.status_code == 200:
-                    user_data = user_response.json()
-                    return {
-                        "email": user_data.get("email", ""),
-                        "first_name": user_data.get("first_name", ""),
-                        "last_name": user_data.get("last_name", ""),
-                        "job_role": user_data.get("job_role", ""),
-                    }
-                logger.error(f"Failed to fetch user {obj.user_id} from auth_service")
-            except Exception as e:
-                logger.error(f"Error fetching user {obj.user_id}: {str(e)}")
-        return None
+                # Increment version
+                instance.version += 1
+                validated_data["version"] = instance.version
+                # Upload new file
+                file_name = f"{file.name.rsplit('.', 1)[0]}_v{instance.version}.{file.name.rsplit('.', 1)[1]}" if '.' in file.name else f"{file.name}_v{instance.version}"
+                url = upload_file_dynamic(
+                    file, file_name, content_type=getattr(file, "content_type", "application/octet-stream")
+                )
+                validated_data["file_url"] = url
+                validated_data["file_path"] = url
+                validated_data["file_type"] = getattr(file, "content_type", "application/octet-stream")
+                validated_data["file_size"] = file.size
+                logger.info(f"Document file updated: {url}")
 
-    def validate(self, data):
-        tenant_id = get_tenant_id_from_jwt(self.context["request"])
-        data["tenant_id"] = tenant_id
-        if "user_id" in data:
-            user_response = requests.get(
-                f'{settings.AUTH_SERVICE_URL}/api/user/users/{data["user_id"]}/',
-                headers={"Authorization": self.context["request"].META.get("HTTP_AUTHORIZATION", "")},
-            )
-            if user_response.status_code != 200:
-                raise serializers.ValidationError({"user_id": "Invalid user ID."})
-            user_data = user_response.json()
-            if user_data.get("tenant_id") != tenant_id:
-                raise serializers.ValidationError({"user_id": "User does not belong to this tenant."})
-        return data
+            instance = super().update(instance, validated_data)
+            if file:
+                DocumentVersion.objects.create(
+                    document=instance,
+                    version=instance.version,
+                    file_url=validated_data["file_url"],
+                    file_path=validated_data["file_path"],
+                    file_type=validated_data["file_type"],
+                    file_size=validated_data["file_size"],
+                    created_by_id=validated_data["updated_by_id"],
+                )
+        return instance
 
-    def create(self, validated_data):
-        tenant_id = get_tenant_id_from_jwt(self.context["request"])
-        validated_data["tenant_id"] = str(tenant_id)
-        validated_data["user_id"] = self.context["request"].user.id  # Set from authenticated user
-        return super().create(validated_data)
+# class DocumentAcknowledgmentSerializer(serializers.ModelSerializer):
+#     user = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = DocumentAcknowledgment
+#         fields = ["id", "document", "user_id", "user", "acknowledged_at", "tenant_id"]
+#         read_only_fields = ["id", "user_id", "acknowledged_at", "tenant_id"]
+
+#     @extend_schema_field(
+#         {
+#             "type": "object",
+#             "properties": {
+#                 "email": {"type": "string"},
+#                 "first_name": {"type": "string"},
+#                 "last_name": {"type": "string"},
+#                 "job_role": {"type": "string"},
+#             },
+#         }
+#     )
+#     def get_user(self, obj):
+#         if obj.user_id:
+#             try:
+#                 user_response = requests.get(
+#                     f"{settings.AUTH_SERVICE_URL}/api/user/users/{obj.user_id}/",
+#                     headers={
+#                         "Authorization": f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'
+#                     },
+#                 )
+#                 if user_response.status_code == 200:
+#                     user_data = user_response.json()
+#                     return {
+#                         "email": user_data.get("email", ""),
+#                         "first_name": user_data.get("first_name", ""),
+#                         "last_name": user_data.get("last_name", ""),
+#                         "job_role": user_data.get("job_role", ""),
+#                     }
+#                 logger.error(f"Failed to fetch user {obj.user_id} from auth_service")
+#             except Exception as e:
+#                 logger.error(f"Error fetching user {obj.user_id}: {str(e)}")
+#         return None
+
+#     def validate(self, data):
+#         tenant_id = get_tenant_id_from_jwt(self.context["request"])
+#         data["tenant_id"] = tenant_id
+#         if "user_id" in data:
+#             user_response = requests.get(
+#                 f'{settings.AUTH_SERVICE_URL}/api/user/users/{data["user_id"]}/',
+#                 headers={"Authorization": self.context["request"].META.get("HTTP_AUTHORIZATION", "")},
+#             )
+#             if user_response.status_code != 200:
+#                 raise serializers.ValidationError({"user_id": "Invalid user ID."})
+#             user_data = user_response.json()
+#             if user_data.get("tenant_id") != tenant_id:
+#                 raise serializers.ValidationError({"user_id": "User does not belong to this tenant."})
+#         return data
+
+#     def create(self, validated_data):
+#         tenant_id = get_tenant_id_from_jwt(self.context["request"])
+#         validated_data["tenant_id"] = str(tenant_id)
+#         validated_data["user_id"] = self.context["request"].user.id
+#         return super().create(validated_data)
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -1819,106 +1889,106 @@ class CustomUserMinimalSerializer(serializers.ModelSerializer):
         ]
 
 
-class CustomTokenSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        return super().get_token(user)
+# class CustomTokenSerializer(TokenObtainPairSerializer):
+#     @classmethod
+#     def get_token(cls, user):
+#         return super().get_token(user)
 
-    def validate(self, attrs):
-        ip_address = self.context["request"].META.get("REMOTE_ADDR")
-        user_agent = self.context["request"].META.get("HTTP_USER_AGENT", "")
-        tenant = self.context["request"].tenant
+#     def validate(self, attrs):
+#         ip_address = self.context["request"].META.get("REMOTE_ADDR")
+#         user_agent = self.context["request"].META.get("HTTP_USER_AGENT", "")
+#         tenant = self.context["request"].tenant
 
-        with tenant_context(tenant):
-            user = authenticate(email=attrs.get("email"), password=attrs.get("password"))
-            if not user:
-                UserActivity.objects.create(
-                    user=None,
-                    tenant=tenant,
-                    action="login",
-                    performed_by=None,
-                    details={"reason": "Invalid credentials"},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
-                )
-                raise serializers.ValidationError("Invalid credentials")
+#         with tenant_context(tenant):
+#             user = authenticate(email=attrs.get("email"), password=attrs.get("password"))
+#             if not user:
+#                 UserActivity.objects.create(
+#                     user=None,
+#                     tenant=tenant,
+#                     action="login",
+#                     performed_by=None,
+#                     details={"reason": "Invalid credentials"},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=False,
+#                 )
+#                 raise serializers.ValidationError("Invalid credentials")
 
-            if user.is_locked or not user.is_active:
-                UserActivity.objects.create(
-                    user=user,
-                    tenant=tenant,
-                    action="login",
-                    performed_by=None,
-                    details={"reason": "Account locked or suspended"},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
-                )
-                raise serializers.ValidationError("Account is locked or suspended")
+#             if user.is_locked or not user.is_active:
+#                 UserActivity.objects.create(
+#                     user=user,
+#                     tenant=tenant,
+#                     action="login",
+#                     performed_by=None,
+#                     details={"reason": "Account locked or suspended"},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=False,
+#                 )
+#                 raise serializers.ValidationError("Account is locked or suspended")
 
-            if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
-                UserActivity.objects.create(
-                    user=user,
-                    tenant=tenant,
-                    action="login",
-                    performed_by=None,
-                    details={"reason": "IP address blocked"},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
-                )
-                raise serializers.ValidationError("This IP address is blocked")
+#             if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+#                 UserActivity.objects.create(
+#                     user=user,
+#                     tenant=tenant,
+#                     action="login",
+#                     performed_by=None,
+#                     details={"reason": "IP address blocked"},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=False,
+#                 )
+#                 raise serializers.ValidationError("This IP address is blocked")
 
-            user.reset_login_attempts()
-            UserActivity.objects.create(
-                user=user,
-                tenant=tenant,
-                action="login",
-                performed_by=None,
-                details={},
-                ip_address=ip_address,
-                user_agent=user_agent,
-                success=True,
-            )
+#             user.reset_login_attempts()
+#             UserActivity.objects.create(
+#                 user=user,
+#                 tenant=tenant,
+#                 action="login",
+#                 performed_by=None,
+#                 details={},
+#                 ip_address=ip_address,
+#                 user_agent=user_agent,
+#                 success=True,
+#             )
 
-            access_payload = {
-                "jti": str(uuid.uuid4()),
-                "sub": user.email,
-                "role": user.role,
-                "status": user.status,
-                "tenant_id": user.tenant.id,
-                "tenant_organizational_id": str(tenant.organizational_id),
-                "tenant_unique_id": str(tenant.unique_id),
-                "tenant_schema": user.tenant.schema_name,
-                "has_accepted_terms": user.has_accepted_terms,
-                "user": CustomUserMinimalSerializer(user).data,
-                "email": user.email,
-                "type": "access",
-                "exp": (timezone.now() + timedelta(minutes=15)).timestamp(),
-            }
-            access_token = issue_rsa_jwt(access_payload, user.tenant)
+#             access_payload = {
+#                 "jti": str(uuid.uuid4()),
+#                 "sub": user.email,
+#                 "role": user.role,
+#                 "status": user.status,
+#                 "tenant_id": user.tenant.id,
+#                 "tenant_organizational_id": str(tenant.organizational_id),
+#                 "tenant_unique_id": str(tenant.unique_id),
+#                 "tenant_schema": user.tenant.schema_name,
+#                 "has_accepted_terms": user.has_accepted_terms,
+#                 "user": CustomUserMinimalSerializer(user).data,
+#                 "email": user.email,
+#                 "type": "access",
+#                 "exp": (timezone.now() + timedelta(minutes=15)).timestamp(),
+#             }
+#             access_token = issue_rsa_jwt(access_payload, user.tenant)
 
-            refresh_jti = str(uuid.uuid4())
-            refresh_payload = {
-                "jti": refresh_jti,
-                "sub": user.email,
-                "tenant_id": user.tenant.id,
-                "tenant_organizational_id": str(user.tenant.organizational_id),
-                "tenant_unique_id": str(user.tenant.unique_id),
-                "type": "refresh",
-                "exp": (timezone.now() + timedelta(days=7)).timestamp(),
-            }
-            refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
+#             refresh_jti = str(uuid.uuid4())
+#             refresh_payload = {
+#                 "jti": refresh_jti,
+#                 "sub": user.email,
+#                 "tenant_id": user.tenant.id,
+#                 "tenant_organizational_id": str(user.tenant.organizational_id),
+#                 "tenant_unique_id": str(user.tenant.unique_id),
+#                 "type": "refresh",
+#                 "exp": (timezone.now() + timedelta(days=7)).timestamp(),
+#             }
+#             refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
 
-            data = {
-                "access": access_token,
-                "refresh": refresh_token,
-                "tenant_id": user.tenant.id,
-                "tenant_organizational_id": str(user.tenant.organizational_id),
-                "tenant_unique_id": str(user.tenant.unique_id),
-                "tenant_schema": user.tenant.schema_name,
-                "user": CustomUserMinimalSerializer(user).data,
-                "has_accepted_terms": user.has_accepted_terms,
-            }
-            return data
+#             data = {
+#                 "access": access_token,
+#                 "refresh": refresh_token,
+#                 "tenant_id": user.tenant.id,
+#                 "tenant_organizational_id": str(user.tenant.organizational_id),
+#                 "tenant_unique_id": str(user.tenant.unique_id),
+#                 "tenant_schema": user.tenant.schema_name,
+#                 "user": CustomUserMinimalSerializer(user).data,
+#                 "has_accepted_terms": user.has_accepted_terms,
+#             }
+#             return data

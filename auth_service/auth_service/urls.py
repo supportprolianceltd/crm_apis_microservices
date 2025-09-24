@@ -1,7 +1,6 @@
 # lumina_care/urls.py
 from django.urls import path, include
 from django.http import JsonResponse
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from .views import (
     CustomTokenObtainPairView, CustomTokenRefreshView, JWKSView, JitsiTokenView, TokenValidateView,
