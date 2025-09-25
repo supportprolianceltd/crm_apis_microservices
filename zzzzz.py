@@ -8,7 +8,7 @@
 # docker compose down --volumes
 # docker compose build --no-cache
 # docker compose up -d
-
+# https://server1.prolianceltd.com/api/notifications/templates?tenantId=3987293d-a4a2-47c9-a6f0-a5cbe6f6f6ac
 
 [
   
