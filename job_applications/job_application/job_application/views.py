@@ -401,7 +401,7 @@ class ResumeScreeningView(APIView):
                         shortlisted_app['job_requisition_id'] = job_requisition['id']
                         shortlisted_app['status'] = 'shortlisted'
                         employment_gaps = shortlisted_app.get('employment_gaps', [])
-                        event_type = "job.application.shortlisted.gaps" if employment_gaps else "job.application.shortlisted"
+                        event_type = "candidate.shortlisted.gaps" if employment_gaps else "candidate.shortlisted"
                         send_screening_notification(
                             shortlisted_app,
                             tenant_id,
@@ -419,7 +419,7 @@ class ResumeScreeningView(APIView):
                         "status": "rejected",
                         "score": getattr(app, "screening_score", None)
                     }
-                    send_screening_notification(rejected_app, tenant_id, event_type="job.application.rejected")
+                    send_screening_notification(rejected_app, tenant_id, event_type="candidate.rejected")
 
             return Response({
                 "detail": f"Screened {len(shortlisted)} applications using '{document_type}', shortlisted {len(final_shortlisted)} candidates.",

@@ -277,7 +277,7 @@ def screen_resumes_task(self, job_requisition_id, document_type, num_candidates,
                     shortlisted_app['job_requisition_id'] = job_requisition['id']
                     shortlisted_app['status'] = 'shortlisted'
                     employment_gaps = shortlisted_app.get('employment_gaps', [])
-                    event_type = "job_application.shortlisted.gaps" if employment_gaps else "job_application.shortlisted"
+                    event_type = "candidate.shortlisted.gaps" if employment_gaps else "candidate.shortlisted"
                     tenant_id = applications_data_map.get(app_id_str, {}).get('tenant_id')
                     send_screening_notification(
                         shortlisted_app,
@@ -296,7 +296,7 @@ def screen_resumes_task(self, job_requisition_id, document_type, num_candidates,
                     "status": "rejected",
                     "score": getattr(app, "screening_score", None)
                 }
-                send_screening_notification(rejected_app, tenant_id=tenant_id, event_type="job_application.rejected")
+                send_screening_notification(rejected_app, tenant_id=tenant_id, event_type="candidate.rejected")
 
         logger.info(f"Screening complete for job requisition {job_requisition_id}")
 

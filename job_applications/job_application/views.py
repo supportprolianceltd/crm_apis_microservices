@@ -145,325 +145,10 @@ class ResumeParseView(APIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# class ResumeScreeningView(APIView):
-#     serializer_class = SimpleMessageSerializer
-#     parser_classes = [JSONParser, MultiPartParser, FormParser]
-
-#     def post(self, request, job_requisition_id):
-#         try:
-#             jwt_payload = getattr(request, 'jwt_payload', {})
-#             tenant_id = self.request.jwt_payload.get('tenant_unique_id')
-#             role = jwt_payload.get('role')
-#             branch = jwt_payload.get('user', {}).get('branch')
-
-#             document_type = request.data.get('document_type')
-#             applications_data = request.data.get('applications', [])
-#             num_candidates = request.data.get('number_of_candidates')
-#             try:
-#                 num_candidates = int(num_candidates)
-#             except (TypeError, ValueError):
-#                 num_candidates = 0
-
-#             job_requisition = get_job_requisition_by_id(job_requisition_id, request)
-#             if not job_requisition:
-#                 return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
-
-#             if not document_type:
-#                 return Response({"detail": "Document type is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#             document_type_lower = document_type.lower()
-#             allowed_docs = [doc.lower() for doc in (job_requisition.get('documents_required') or [])]
-#             if document_type_lower not in allowed_docs and document_type_lower not in ['resume', 'curriculum vitae (cv)']:
-#                 return Response({"detail": f"Invalid document type: {document_type}"}, status=status.HTTP_400_BAD_REQUEST)
-
-#             # Filter applications by tenant and branch
-#             if not applications_data:
-#                 applications = JobApplication.active_objects.filter(
-#                     job_requisition_id=job_requisition_id,
-#                     tenant_id=tenant_id,
-#                     resume_status=True
-#                 )
-#             else:
-#                 application_ids = [app['application_id'] for app in applications_data]
-#                 applications = JobApplication.active_objects.filter(
-#                     job_requisition_id=job_requisition_id,
-#                     tenant_id=tenant_id,
-#                     id__in=application_ids,
-#                     resume_status=True
-#                 )
-
-#             logger.info(f"Screening {applications.count()} applications: {[str(app.id) for app in applications]}")
-#             if not applications.exists():
-#                 logger.warning("No applications with resume_status=True found for provided IDs and filters.")
-#                 return Response({"detail": "No applications with resumes found.", "documentType": document_type}, status=status.HTTP_400_BAD_REQUEST)
-
-#             if role == 'recruiter' and branch:
-#                 applications = applications.filter(branch=branch)
-#             elif branch:
-#                 applications = applications.filter(branch=branch)
-
-#             def download_resume(app, app_data, document_type_lower):
-#                 try:
-#                     if app_data and 'file_url' in app_data:
-#                         file_url = app_data['file_url']
-#                     else:
-#                         cv_doc = next(
-#                             (doc for doc in app.documents if doc['document_type'].lower() == document_type_lower),
-#                             None
-#                         )
-#                         if not cv_doc:
-#                             app.screening_status = 'failed'
-#                             app.screening_score = 0.0
-#                             app.save()
-#                             return {
-#                                 "app": app,
-#                                 "success": False,
-#                                 "error": f"No {document_type} document found",
-#                             }
-#                         file_url = cv_doc['file_url']
-
-#                     logger.info(f"About to download file for app {app.id}: {file_url}")
-#                     start_download = time.time()
-#                     headers = {"Authorization": f"Bearer {settings.SUPABASE_KEY}"}
-#                     try:
-#                         response = requests.get(file_url, headers=headers, timeout=10)
-#                     except requests.exceptions.Timeout:
-#                         app.screening_status = 'failed'
-#                         app.screening_score = 0.0
-#                         app.save()
-#                         return {
-#                             "app": app,
-#                             "success": False,
-#                             "error": f"Resume download timed out after 10 seconds for {file_url}",
-#                         }
-#                     except requests.exceptions.RequestException as e:
-#                         app.screening_status = 'failed'
-#                         app.screening_score = 0.0
-#                         app.save()
-#                         return {
-#                             "app": app,
-#                             "success": False,
-#                             "error": f"Resume download error: {str(e)}",
-#                         }
-#                     download_time = time.time() - start_download
-#                     file_size = len(response.content)
-#                     logger.info(f"Downloaded file for app {app.id} in {download_time:.2f}s, size: {file_size} bytes")
-#                     if response.status_code != 200:
-#                         app.screening_status = 'failed'
-#                         app.screening_score = 0.0
-#                         app.save()
-#                         return {
-#                             "app": app,
-#                             "success": False,
-#                             "error": f"Failed to download resume from {file_url}, status code: {response.status_code}",
-#                         }
-
-#                     content_type = response.headers.get('content-type', '')
-#                     file_ext = mimetypes.guess_extension(content_type) or os.path.splitext(file_url)[1] or '.pdf'
-#                     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=file_ext)
-#                     temp_file.write(response.content)
-#                     temp_file.close()
-#                     temp_file_path = temp_file.name
-#                     logger.info(f"Finished download for app {app.id}")
-#                     return {
-#                         "app": app,
-#                         "success": True,
-#                         "temp_file_path": temp_file_path,
-#                         "file_url": file_url,
-#                     }
-#                 except Exception as e:
-#                     logger.error(f"Download failed for app {app.id}: {str(e)}")
-#                     app.screening_status = 'failed'
-#                     app.screening_score = 0.0
-#                     app.save()
-#                     return {
-#                         "app": app,
-#                         "success": False,
-#                         "error": f"Download error for file: {str(e)}",
-#                     }
-
-#             # Step 1: Parallel download all files
-#             download_results = []
-#             applications_list = list(applications)
-#             applications_data_map = {str(a['application_id']): a for a in applications_data}
-#             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-#                 future_to_app = {
-#                     executor.submit(
-#                         download_resume,
-#                         app,
-#                         applications_data_map.get(str(app.id)),
-#                         document_type_lower
-#                     ): app for app in applications_list
-#                 }
-#                 for future in concurrent.futures.as_completed(future_to_app):
-#                     result = future.result()
-#                     download_results.append(result)
-
-#             # Step 2: Parallel parse and screen only successfully downloaded files
-#             job_requirements = (
-#                 (job_requisition.get('job_description') or '') + ' ' +
-#                 (job_requisition.get('qualification_requirement') or '') + ' ' +
-#                 (job_requisition.get('experience_requirement') or '') + ' ' +
-#                 (job_requisition.get('knowledge_requirement') or '')
-#             ).strip()
-
-#             def parse_and_screen(result, job_requirements):
-#                 app = result["app"]
-#                 if not result["success"]:
-#                     error_msg = result["error"]
-#                     if "timed out" in error_msg.lower():
-#                         error_msg = f"Resume parsing or download timed out. Please try again or check the file."
-#                     return {
-#                         "application_id": str(app.id),
-#                         "full_name": app.full_name,
-#                         "email": app.email,
-#                         "error": error_msg,
-#                         "success": False
-#                     }
-#                 temp_file_path = result["temp_file_path"]
-#                 file_url = result.get("file_url", "")
-#                 try:
-#                     logger.info(f"About to parse resume for app {app.id}")
-#                     start_parse = time.time()
-#                     resume_text = parse_resume(temp_file_path)
-#                     parse_time = time.time() - start_parse
-#                     logger.info(f"Finished parsing resume for app {app.id} in {parse_time:.2f}s")
-#                     logger.debug(f"Resume text sample for app {app.id}: {resume_text[:200] if resume_text else 'No text'}")
-#                     if temp_file_path and os.path.exists(temp_file_path):
-#                         os.unlink(temp_file_path)
-#                     if not resume_text:
-#                         app.screening_status = 'failed'
-#                         app.screening_score = 0.0
-#                         app.save()
-#                         return {
-#                             "application_id": str(app.id),
-#                             "full_name": app.full_name,
-#                             "email": app.email,
-#                             "error": f"Failed to parse resume for file: {file_url}",
-#                             "success": False
-#                         }
-#                     score = screen_resume(resume_text, job_requirements)
-#                     resume_data = extract_resume_fields(resume_text)
-#                     employment_gaps = resume_data.get("employment_gaps", [])
-#                     app.screening_status = 'processed'
-#                     app.screening_score = score
-#                     app.employment_gaps = employment_gaps
-#                     app.save()
-#                     return {
-#                         "application_id": str(app.id),
-#                         "full_name": app.full_name,
-#                         "email": app.email,
-#                         "score": score,
-#                         "screening_status": app.screening_status,
-#                         "employment_gaps": employment_gaps,
-#                         "success": True
-#                     }
-#                 except Exception as e:
-#                     logger.error(f"Parsing failed for app {app.id}: {str(e)}")
-#                     app.screening_status = 'failed'
-#                     app.screening_score = 0.0
-#                     app.save()
-#                     if temp_file_path and os.path.exists(temp_file_path):
-#                         os.unlink(temp_file_path)
-#                     return {
-#                         "application_id": str(app.id),
-#                         "full_name": app.full_name,
-#                         "email": app.email,
-#                         "error": f"Screening error for file: {file_url} - {str(e)}",
-#                         "success": False
-#                     }
-
-#             results = []
-#             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-#                 future_to_result = {
-#                     executor.submit(parse_and_screen, result, job_requirements): result for result in download_results
-#                 }
-#                 for future in concurrent.futures.as_completed(future_to_result):
-#                     results.append(future.result())
-
-#             # Separate successful and failed applications
-#             shortlisted = [r for r in results if r.get("success")]
-#             failed_applications = [r for r in results if not r.get("success")]
-
-#             if not shortlisted and failed_applications:
-#                 return Response({
-#                     "detail": "All resume screenings failed.",
-#                     "failed_applications": failed_applications,
-#                     "document_type": document_type
-#                 }, status=status.HTTP_400_BAD_REQUEST)
-
-#             shortlisted.sort(key=lambda x: x['score'], reverse=True)
-#             final_shortlisted = shortlisted[:num_candidates]
-#             shortlisted_ids = {item['application_id'] for item in final_shortlisted}
-
-#             for app in applications:
-#                 app_id_str = str(app.id)
-#                 if app_id_str in shortlisted_ids:
-#                     app.status = 'shortlisted'
-#                     app.save()
-#                     shortlisted_app = next((item for item in final_shortlisted if item['application_id'] == app_id_str), None)
-#                     if shortlisted_app:
-#                         shortlisted_app['job_requisition_id'] = job_requisition['id']
-#                         shortlisted_app['status'] = 'shortlisted'
-#                         employment_gaps = shortlisted_app.get('employment_gaps', [])
-#                         event_type = "job_application.shortlisted.gaps" if employment_gaps else "job_application.shortlisted"
-#                         send_screening_notification(
-#                             shortlisted_app,
-#                             tenant_id,
-#                             event_type=event_type,
-#                             employment_gaps=employment_gaps
-#                         )
-#                 else:
-#                     app.status = 'rejected'
-#                     app.save()
-#                     rejected_app = {
-#                         "application_id": app_id_str,
-#                         "full_name": app.full_name,
-#                         "email": app.email,
-#                         "job_requisition_id": job_requisition['id'],
-#                         "status": "rejected",
-#                         "score": getattr(app, "screening_score", None)
-#                     }
-#                     send_screening_notification(rejected_app, tenant_id, event_type="job_application.rejected")
-
-#             return Response({
-#                 "detail": f"Screened {len(shortlisted)} applications using '{document_type}', shortlisted {len(final_shortlisted)} candidates.",
-#                 "shortlisted_candidates": final_shortlisted,
-#                 "failed_applications": failed_applications,
-#                 "number_of_candidates": num_candidates,
-#                 "document_type": document_type
-#             }, status=status.HTTP_200_OK)
-
-#         except requests.exceptions.Timeout as e:
-#             logger.error(f"Gateway timeout during resume screening: {str(e)}")
-#             return Response({
-#                 "error": "Resume screening timed out",
-#                 "details": str(e),
-#                 "suggestion": "The operation took too long to complete. Please try again later or reduce the number of applications."
-#             }, status=status.HTTP_504_GATEWAY_TIMEOUT)
-#         except requests.exceptions.ConnectionError as e:
-#             logger.error(f"Connection error during resume screening: {str(e)}")
-#             return Response({
-#                 "error": "Unable to connect to resume screening service",
-#                 "details": str(e),
-#                 "suggestion": "Please check your network connection or contact support."
-#             }, status=status.HTTP_502_BAD_GATEWAY)
-#         except requests.exceptions.RequestException as e:
-#             logger.error(f"Gateway error during resume screening: {str(e)}")
-#             return Response({
-#                 "error": "Resume screening gateway error",
-#                 "details": str(e),
-#                 "suggestion": "There was a network or service error. Please check your connection or contact support if the issue persists."
-#             }, status=status.HTTP_502_BAD_GATEWAY)
-#         except Exception as e:
-#             logger.exception(f"Error screening resumes for JobRequisition {job_requisition_id}: {str(e)}")
-#             return Response({
-#                 "error": "Internal server error during resume screening",
-#                 "details": str(e),
-#                 "suggestion": "An unexpected error occurred. Please try again or contact support."
-#             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 #FOR LARGER FILES USE MULTI-THREADED FOR THIS FOR  APPLICATIONS UP TO A THOUSAND
+
+
 class ResumeScreeningView(APIView):
     """
     Resume screening endpoint that downloads and parses CVs for job applications.
@@ -748,7 +433,7 @@ class ResumeScreeningView(APIView):
                         shortlisted_app['job_requisition_id'] = job_requisition['id']
                         shortlisted_app['status'] = 'shortlisted'
                         employment_gaps = shortlisted_app.get('employment_gaps', [])
-                        event_type = "job_application.shortlisted.gaps" if employment_gaps else "job_application.shortlisted"
+                        event_type = "candidate.shortlisted.gaps" if employment_gaps else "candidate.shortlisted"
                         send_screening_notification(
                             shortlisted_app,
                             tenant_id,
@@ -766,7 +451,7 @@ class ResumeScreeningView(APIView):
                         "status": "rejected",
                         "score": getattr(app, "screening_score", None)
                     }
-                    send_screening_notification(rejected_app, tenant_id, event_type="job_application.rejected")
+                    send_screening_notification(rejected_app, tenant_id, event_type="candidate.rejected")
 
             return Response({
                 "detail": f"Screened {len(shortlisted)} applications using '{document_type}', shortlisted {len(final_shortlisted)} candidates.",
@@ -1341,6 +1026,7 @@ class SoftDeletedJobApplicationsView(generics.ListAPIView):
         return queryset.order_by('-created_at')
 
 
+
 class RecoverSoftDeletedJobApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer 
     def get_permissions(self):
@@ -1440,7 +1126,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
                 send_screening_notification(
                     notification_payload,
                     tenant_id=tenant_id,
-                    event_type="job_application.schedule.created"
+                    event_type="interview.schedule"
                 )
                 logger.info(f"Schedule creation notification sent for schedule {schedule.id}, job application {schedule.job_application_id}")
         except Exception as e:
@@ -1515,7 +1201,7 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
                     send_screening_notification(
                         notification_payload,
                         tenant_id=instance.tenant_id,
-                        event_type="job_application.schedule.updated"
+                        event_type="interview.schedule"
                     )
                     logger.info(f"Schedule update notification sent for schedule {instance.id}, job application {instance.job_application_id}")
             except Exception as e:

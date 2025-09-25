@@ -12,6 +12,9 @@ def send_screening_notification(applicant, tenant_id, event_type, source="job-ap
     with robust logging and error handling like in CustomTokenSerializer.
     """
     try:
+        # print("event_type") 
+        # print(event_type) 
+        # print("event_type") 
         event_payload = {
             "metadata": {
                 "tenant_id": str(tenant_id),
