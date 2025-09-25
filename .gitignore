@@ -331,6 +331,7 @@ notifications_app/.gitignore
 docker-jitsi-meet/.gitignore
 
 # Ignore notifications_app patterns
+notifications_app/
 notifications_app/dist/
 notifications_app/node_modules/
 notifications_app/build/

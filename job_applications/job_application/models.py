@@ -32,6 +32,7 @@ class JobApplication(models.Model):
         ('hired', 'Hired'),
         ('rejected', 'Rejected'),
         ('compliance_completed', 'Compliance Completed'),
+         ('onboarded', 'Onboarded'),
     ]
     SOURCE_CHOICES = [
         ('career_site', 'Career Site'),

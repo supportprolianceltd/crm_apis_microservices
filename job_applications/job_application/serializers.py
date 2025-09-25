@@ -578,6 +578,8 @@ class JobApplicationSerializer(serializers.ModelSerializer):
 #             validated_data['cancellation_reason'] = None
 #         return super().update(instance, validated_data)
 
+
+
 class ScheduleSerializer(serializers.ModelSerializer):
     job_application_id = serializers.CharField()
     branch_id = serializers.CharField(allow_null=True, required=False)
@@ -606,6 +608,33 @@ class ScheduleSerializer(serializers.ModelSerializer):
             logger.error(f"Error fetching candidate name for {obj.job_application_id}: {str(e)}")
         return None
 
+    # def get_scheduled_by(self, obj):
+    #     if obj.scheduled_by_id:
+    #         try:
+    #             auth_header = self.context["request"].headers.get("Authorization", "")
+    #             logger.info(f"Fetching user data for scheduled_by_id: {obj.scheduled_by_id}")
+    #             user_response = requests.get(
+    #                 f'{settings.AUTH_SERVICE_URL}/api/user/users/{obj.scheduled_by_id}/',
+    #                 headers={'Authorization': auth_header},
+    #                 timeout=5
+    #             )
+    #             if user_response.status_code == 200:
+    #                 user_data = user_response.json()
+    #                 logger.info(f"User data fetched: {user_data}")
+    #                 return {
+    #                     'id': user_data.get('id', ''),
+    #                     'email': user_data.get('email', ''),
+    #                     'first_name': user_data.get('first_name', ''),
+    #                     'last_name': user_data.get('last_name', '')
+    #                 }
+    #             logger.error(f"Failed to fetch user {obj.scheduled_by_id} from auth_service: {user_response.status_code} {user_response.text}")
+    #         except Exception as e:
+    #             logger.error(f"Error fetching scheduled_by {obj.scheduled_by_id}: {str(e)}")
+    #     else:
+    #         logger.warning(f"No scheduled_by_id provided for schedule {obj.id}")
+    #     return None
+
+
     def get_scheduled_by(self, obj):
         if obj.scheduled_by_id:
             try:
@@ -614,7 +643,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
                 user_response = requests.get(
                     f'{settings.AUTH_SERVICE_URL}/api/user/users/{obj.scheduled_by_id}/',
                     headers={'Authorization': auth_header},
-                    timeout=5
+                    timeout=5  # Consider increasing to 10 if auth is slow
                 )
                 if user_response.status_code == 200:
                     user_data = user_response.json()
@@ -625,12 +654,20 @@ class ScheduleSerializer(serializers.ModelSerializer):
                         'first_name': user_data.get('first_name', ''),
                         'last_name': user_data.get('last_name', '')
                     }
-                logger.error(f"Failed to fetch user {obj.scheduled_by_id} from auth_service: {user_response.status_code} {user_response.text}")
+                else:
+                    logger.warning(f"Auth service returned {user_response.status_code} for user {obj.scheduled_by_id}")
+                    return None  # Or return {'id': obj.scheduled_by_id, 'name': 'Unknown'}
+            except requests.exceptions.Timeout:
+                logger.error(f"Timeout fetching user {obj.scheduled_by_id} from auth_service")
+                return None
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Request error fetching user {obj.scheduled_by_id}: {str(e)}")
+                return None
             except Exception as e:
-                logger.error(f"Error fetching scheduled_by {obj.scheduled_by_id}: {str(e)}")
-        else:
-            logger.warning(f"No scheduled_by_id provided for schedule {obj.id}")
+                logger.error(f"Unexpected error in get_scheduled_by for {obj.scheduled_by_id}: {str(e)}")
+                return None
         return None
+
 
     def validate_timezone(self, value):
         if value not in pytz.all_timezones:
@@ -713,7 +750,10 @@ class ScheduleSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+
+
 class SimpleMessageSerializer(serializers.Serializer):
     detail = serializers.CharField()
+
 
 

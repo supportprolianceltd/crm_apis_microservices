@@ -97,13 +97,12 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='arts')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='admin',
-        email='support@artstraining.co.uk',
+        username='info',
+        email='info@artstraining.co.uk',
         password='qwerty',
         role='admin',
-        first_name='Friday',
-        last_name='Sunday',
-        job_role='Care Cordinator',
+        first_name='Bianka',
+        last_name='Jones Admin Officer',
         tenant=tenant
     )
 

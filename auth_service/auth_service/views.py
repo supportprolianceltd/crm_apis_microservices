@@ -191,7 +191,7 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
                 "user": CustomUserMinimalSerializer(user).data,
                 "email": user.email,
                 "type": "access",
-                "exp": (timezone.now() + timedelta(minutes=15)).timestamp(),
+                "exp": (timezone.now() + timedelta(minutes=180)).timestamp(),
             }
             access_token = issue_rsa_jwt(access_payload, user.tenant)
 

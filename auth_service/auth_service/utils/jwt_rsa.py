@@ -7,7 +7,7 @@ import datetime
 from jwt import InvalidTokenError, ExpiredSignatureError, InvalidSignatureError
 
 DEFAULT_ALGORITHM = "RS256"
-DEFAULT_EXP_SECONDS = 3600  # 1 hour
+DEFAULT_EXP_SECONDS = 10800  # 1 hour
 
 def generate_rsa_keypair(key_size: int = 2048):
     private_key = rsa.generate_private_key(

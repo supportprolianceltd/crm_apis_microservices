@@ -1295,70 +1295,7 @@ class ClientProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClientProfile
-        fields = [
-            "id",
-            "user",
-            "client_id",
-            # Personal Information
-            "contact_number",
-            "gender",
-            "dob",
-            "nationality",
-            "address",
-            "town",
-            "zip_code",
-            "marital_status",
-            "photo",
-            # Next of Kin
-            "next_of_kin_name",
-            "next_of_kin_relationship",
-            "next_of_kin_address",
-            "next_of_kin_phone",
-            "next_of_kin_email",
-            # Care Requirements
-            "care_plan",
-            "care_tasks",
-            "care_type",
-            "special_needs",
-            "preferred_carer_gender",
-            "language_preference",
-            "preferred_care_times",
-            "frequency_of_care",
-            "flexibility",
-            # Administrative & Compliance
-            "funding_type",
-            "care_package_start_date",
-            "care_package_review_date",
-            "preferred_carers",
-            "status",
-            "compliance",
-            "last_visit",
-            # Company Info
-            "company_name",
-            "contact_person_name",
-            "contact_person_title",
-            "contact_person_department",
-            "contact_email",
-            "contact_phone",
-            "company_address",
-            # Client Profile Info
-            "industry",
-            "business_type",
-            "client_type",
-            # Order and Payment Information
-            "order_history",
-            "payment_terms",
-            "credit_limit",
-            "credit_utilization",
-            "payment_history",
-            # Communication and Feedback
-            "communication_preferences",
-            "feedback",
-            "complaints",
-            # Additional Information
-            "special_requirements",
-            "notes",
-        ]
+        fields = "__all__"
 
         read_only_fields = ["id", "user", "client_id"]
 

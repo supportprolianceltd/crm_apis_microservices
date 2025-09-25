@@ -94,7 +94,7 @@ def api_gateway_view(request, path):
                 headers=headers,
                 data=body,
                 params=request.GET,
-                timeout=30
+                timeout=60
             )
         else:
             response = requests.request(
@@ -102,7 +102,7 @@ def api_gateway_view(request, path):
                 url=forward_url,
                 headers=headers,
                 params=request.GET,
-                timeout=30
+                timeout=60
             )
 
         logger.info(

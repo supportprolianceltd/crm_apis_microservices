@@ -258,6 +258,6 @@ CELERY_ENABLE_UTC = True
 CELERY_BEAT_SCHEDULE = {
     'auto-screen-all-applications-at-midnight': {
         'task': 'job_application.tasks.auto_screen_all_applications',
-        'schedule': crontab(hour=23, minute=0),  # Runs daily at 23:00 UTC
+        'schedule': crontab(hour=10, minute=45),  # Runs daily at 23:00 UTC
     },
 }

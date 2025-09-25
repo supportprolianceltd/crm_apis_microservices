@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 import json
 import time
@@ -8,8 +9,9 @@ import tempfile
 import requests
 import concurrent.futures
 from urllib import request
+
 from kafka import KafkaProducer
-import re 
+
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
@@ -23,9 +25,7 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework.pagination import PageNumberPagination
 
 from job_application.models import JobApplication, Schedule
-from utils.screen import parse_resume, screen_resume, extract_resume_fields
-from utils.email_utils import send_screening_notification
-from utils.supabase import upload_file_dynamic
+from .models import JobApplication  # If needed locally
 from .serializers import (
     JobApplicationSerializer,
     ScheduleSerializer,
@@ -34,8 +34,12 @@ from .serializers import (
     PublicJobApplicationSerializer
 )
 
-import logging
+from utils.screen import parse_resume, screen_resume, extract_resume_fields
+from utils.email_utils import send_screening_notification
+from utils.supabase import upload_file_dynamic
+
 logger = logging.getLogger('job_applications')
+
 
 
 def get_job_requisition_by_id(job_requisition_id, request):
@@ -141,7 +145,6 @@ class ResumeParseView(APIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# FOR LARGER FILES USE MULTI-THREADED FOR THIS FOR  APPLICATIONS UP TO A THOUSAND
 # class ResumeScreeningView(APIView):
 #     serializer_class = SimpleMessageSerializer
 #     parser_classes = [JSONParser, MultiPartParser, FormParser]
@@ -150,7 +153,6 @@ class ResumeParseView(APIView):
 #         try:
 #             jwt_payload = getattr(request, 'jwt_payload', {})
 #             tenant_id = self.request.jwt_payload.get('tenant_unique_id')
-#             #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
 #             role = jwt_payload.get('role')
 #             branch = jwt_payload.get('user', {}).get('branch')
 
@@ -308,7 +310,6 @@ class ResumeParseView(APIView):
 #             def parse_and_screen(result, job_requirements):
 #                 app = result["app"]
 #                 if not result["success"]:
-#                     # If the error is a timeout, return a specific message
 #                     error_msg = result["error"]
 #                     if "timed out" in error_msg.lower():
 #                         error_msg = f"Resume parsing or download timed out. Please try again or check the file."
@@ -327,7 +328,6 @@ class ResumeParseView(APIView):
 #                     resume_text = parse_resume(temp_file_path)
 #                     parse_time = time.time() - start_parse
 #                     logger.info(f"Finished parsing resume for app {app.id} in {parse_time:.2f}s")
-#                     logger.info(f"Extracted text length for app {app.id}: {len(resume_text) if resume_text else 0}")
 #                     logger.debug(f"Resume text sample for app {app.id}: {resume_text[:200] if resume_text else 'No text'}")
 #                     if temp_file_path and os.path.exists(temp_file_path):
 #                         os.unlink(temp_file_path)
@@ -406,7 +406,7 @@ class ResumeParseView(APIView):
 #                         shortlisted_app['job_requisition_id'] = job_requisition['id']
 #                         shortlisted_app['status'] = 'shortlisted'
 #                         employment_gaps = shortlisted_app.get('employment_gaps', [])
-#                         event_type = "job.application.shortlisted.gaps" if employment_gaps else "job.application.shortlisted"
+#                         event_type = "job_application.shortlisted.gaps" if employment_gaps else "job_application.shortlisted"
 #                         send_screening_notification(
 #                             shortlisted_app,
 #                             tenant_id,
@@ -424,7 +424,7 @@ class ResumeParseView(APIView):
 #                         "status": "rejected",
 #                         "score": getattr(app, "screening_score", None)
 #                     }
-#                     send_screening_notification(rejected_app, tenant_id, event_type="job.application.rejected")
+#                     send_screening_notification(rejected_app, tenant_id, event_type="job_application.rejected")
 
 #             return Response({
 #                 "detail": f"Screened {len(shortlisted)} applications using '{document_type}', shortlisted {len(final_shortlisted)} candidates.",
@@ -463,8 +463,19 @@ class ResumeParseView(APIView):
 #                 "suggestion": "An unexpected error occurred. Please try again or contact support."
 #             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
+#FOR LARGER FILES USE MULTI-THREADED FOR THIS FOR  APPLICATIONS UP TO A THOUSAND
 class ResumeScreeningView(APIView):
+    """
+    Resume screening endpoint that downloads and parses CVs for job applications.
+    
+    IMPLEMENTATION NOTES:
+    - Downloads resumes in parallel (5 threads) from storage
+    - Parses and screens resumes concurrently (5 threads) 
+    - FOR LARGER FILES: Uses multi-threaded processing for applications up to a thousand
+    - Two-stage pipeline: download → parse/screen
+    - Automatic cleanup of temporary files
+    - Timeout handling for both download (10s) and parsing (30s)
+    """
     serializer_class = SimpleMessageSerializer
     parser_classes = [JSONParser, MultiPartParser, FormParser]
 
@@ -553,7 +564,7 @@ class ResumeScreeningView(APIView):
                         return {
                             "app": app,
                             "success": False,
-                            "error": f"Resume download timed out after 10 seconds for {file_url}",
+                            "error": f"Resume download timed out after 10 seconds for application {app.id}",
                         }
                     except requests.exceptions.RequestException as e:
                         app.screening_status = 'failed'
@@ -562,7 +573,7 @@ class ResumeScreeningView(APIView):
                         return {
                             "app": app,
                             "success": False,
-                            "error": f"Resume download error: {str(e)}",
+                            "error": f"Resume download error for application {app.id}: {str(e)}",
                         }
                     download_time = time.time() - start_download
                     file_size = len(response.content)
@@ -574,7 +585,7 @@ class ResumeScreeningView(APIView):
                         return {
                             "app": app,
                             "success": False,
-                            "error": f"Failed to download resume from {file_url}, status code: {response.status_code}",
+                            "error": f"Failed to download resume for application {app.id}, status code: {response.status_code}",
                         }
 
                     content_type = response.headers.get('content-type', '')
@@ -598,7 +609,7 @@ class ResumeScreeningView(APIView):
                     return {
                         "app": app,
                         "success": False,
-                        "error": f"Download error for file: {str(e)}",
+                        "error": f"Unexpected download error for application {app.id}: {str(e)}",
                     }
 
             # Step 1: Parallel download all files
@@ -630,8 +641,6 @@ class ResumeScreeningView(APIView):
                 app = result["app"]
                 if not result["success"]:
                     error_msg = result["error"]
-                    if "timed out" in error_msg.lower():
-                        error_msg = f"Resume parsing or download timed out. Please try again or check the file."
                     return {
                         "application_id": str(app.id),
                         "full_name": app.full_name,
@@ -658,7 +667,7 @@ class ResumeScreeningView(APIView):
                             "application_id": str(app.id),
                             "full_name": app.full_name,
                             "email": app.email,
-                            "error": f"Failed to parse resume for file: {file_url}",
+                            "error": f"Failed to parse resume for application {app.id}",
                             "success": False
                         }
                     score = screen_resume(resume_text, job_requirements)
@@ -677,6 +686,20 @@ class ResumeScreeningView(APIView):
                         "employment_gaps": employment_gaps,
                         "success": True
                     }
+                except TimeoutError as e:
+                    logger.error(f"Parsing timed out for app {app.id}: {str(e)}")
+                    app.screening_status = 'failed'
+                    app.screening_score = 0.0
+                    app.save()
+                    if temp_file_path and os.path.exists(temp_file_path):
+                        os.unlink(temp_file_path)
+                    return {
+                        "application_id": str(app.id),
+                        "full_name": app.full_name,
+                        "email": app.email,
+                        "error": f"Resume parsing timed out after 30 seconds for application {app.id}",
+                        "success": False
+                    }
                 except Exception as e:
                     logger.error(f"Parsing failed for app {app.id}: {str(e)}")
                     app.screening_status = 'failed'
@@ -688,7 +711,7 @@ class ResumeScreeningView(APIView):
                         "application_id": str(app.id),
                         "full_name": app.full_name,
                         "email": app.email,
-                        "error": f"Screening error for file: {file_url} - {str(e)}",
+                        "error": f"Unexpected parsing error for application {app.id}: {str(e)}",
                         "success": False
                     }
 
@@ -754,11 +777,18 @@ class ResumeScreeningView(APIView):
             }, status=status.HTTP_200_OK)
 
         except requests.exceptions.Timeout as e:
-            logger.error(f"Gateway timeout during resume screening: {str(e)}")
+            logger.error(f"Download timeout during resume screening: {str(e)}")
             return Response({
-                "error": "Resume screening timed out",
+                "error": f"Resume download timed out after 10 seconds",
                 "details": str(e),
-                "suggestion": "The operation took too long to complete. Please try again later or reduce the number of applications."
+                "suggestion": "The file download took too long. Please check the file URL or try again later."
+            }, status=status.HTTP_504_GATEWAY_TIMEOUT)
+        except TimeoutError as e:
+            logger.error(f"Parsing timeout during resume screening: {str(e)}")
+            return Response({
+                "error": f"Resume parsing timed out after 30 seconds",
+                "details": str(e),
+                "suggestion": "Resume parsing took too long. Please try again or check the file format."
             }, status=status.HTTP_504_GATEWAY_TIMEOUT)
         except requests.exceptions.ConnectionError as e:
             logger.error(f"Connection error during resume screening: {str(e)}")
@@ -775,125 +805,13 @@ class ResumeScreeningView(APIView):
                 "suggestion": "There was a network or service error. Please check your connection or contact support if the issue persists."
             }, status=status.HTTP_502_BAD_GATEWAY)
         except Exception as e:
-            logger.exception(f"Error screening resumes for JobRequisition {job_requisition_id}: {str(e)}")
+            logger.exception(f"Unexpected error screening resumes for JobRequisition {job_requisition_id}: {str(e)}")
             return Response({
-                "error": "Internal server error during resume screening",
+                "error": "Unexpected error during resume screening",
                 "details": str(e),
                 "suggestion": "An unexpected error occurred. Please try again or contact support."
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-
-# class JobApplicationCreatePublicView(generics.CreateAPIView):
-#     serializer_class = PublicJobApplicationSerializer
-#     parser_classes = (MultiPartParser, FormParser, JSONParser)
-
-#     def create(self, request, *args, **kwargs):
-#         unique_link = request.data.get('unique_link') or request.data.get('job_requisition_unique_link')
-#         if not unique_link:
-#             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # ✅ Extract tenant_id from UUID-style prefix (first 5 segments)
-#         try:
-#             parts = unique_link.split('-')
-#             if len(parts) < 5:
-#                 logger.warning(f"Invalid unique_link format: {unique_link}")
-#                 return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
-#             tenant_id = '-'.join(parts[:5])
-#         except Exception as e:
-#             logger.error(f"Error extracting tenant_id from link: {str(e)}")
-#             return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # ✅ Fetch job requisition from Talent Engine
-#         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
-#         try:
-#             resp = requests.get(requisition_url)
-#             logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
-#             if resp.status_code != 200:
-#                 try:
-#                     error_detail = resp.json().get('detail', 'Invalid job requisition.')
-#                 except Exception:
-#                     error_detail = 'Invalid job requisition.'
-#                 return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
-#             job_requisition = resp.json()
-#         except Exception as e:
-#             logger.error(f"Error fetching job requisition: {str(e)}")
-#             return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
-
-#         # ✅ Prepare payload
-#         payload = dict(request.data.items())
-#         payload['job_requisition_id'] = job_requisition['id']
-#         payload['tenant_id'] = tenant_id
-
-#         # ✅ Extract documents from multipart form
-#         documents = []
-#         i = 0
-#         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
-#             documents.append({
-#                 'document_type': request.data.get(f'documents[{i}][document_type]'),
-#                 'file': request.FILES.get(f'documents[{i}][file]')
-#             })
-#             i += 1
-#         if documents:
-#             payload['documents'] = documents
-
-#         logger.info(f"Full POST payload: {payload}")
-
-#         # ✅ Validate serializer
-#         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
-#         if not serializer.is_valid():
-#             logger.error(f"Validation errors: {serializer.errors}")
-#             return Response({
-#                 "detail": "Validation error",
-#                 "errors": serializer.errors
-#             }, status=status.HTTP_400_BAD_REQUEST)
-
-#         # ✅ Prevent duplicate application by email for same requisition
-#         email = payload.get('email')
-#         job_requisition_id = job_requisition['id']
-#         if JobApplication.objects.filter(email=email, job_requisition_id=job_requisition_id).exists():
-#             logger.warning(f"Duplicate application attempt by email: {email} for requisition: {job_requisition_id}")
-#             return Response({
-#                 "detail": "You have already applied for this job"
-#             }, status=status.HTTP_400_BAD_REQUEST)
-
-#         # ✅ Save
-#         self.perform_create(serializer)
-
-#         # ✅ Publish to Kafka
-#         try:
-#             producer = KafkaProducer(
-#                 bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
-#                 value_serializer=lambda v: json.dumps(v).encode('utf-8')
-#             )
-#             kafka_data = {
-#                 "tenant_id": tenant_id,
-#                 "job_requisition_id": job_requisition['id'],
-#                 "event": "job_application_created"
-#             }
-#             producer.send('job_application_events', kafka_data)
-#             producer.flush()
-#             logger.info(f"Published Kafka job application event for requisition {job_requisition['id']}")
-#         except Exception as e:
-#             logger.error(f"Kafka publish error: {str(e)}")
-
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-import logging
-import requests
-from django.conf import settings
-from django.db import transaction
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework import generics
-from .models import JobApplication
-from .serializers import PublicJobApplicationSerializer
-from kafka import KafkaProducer
-import json
-
-logger = logging.getLogger('talent_engine')
 
 class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
@@ -1004,7 +922,6 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 
-
 class JobApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = JobApplicationSerializer
     pagination_class = CustomPagination
@@ -1037,8 +954,6 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
     def check_permissions(self, request):
         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
         return super().check_permissions(request)
-
-
 
 
 class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):

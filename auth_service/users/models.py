@@ -736,22 +736,48 @@ class ClientProfile(models.Model):
     client_id = models.CharField(max_length=15, null=True, blank=True)
     
     # Personal Information (beyond what's in CustomUser)
+    title = models.CharField(max_length=20, choices=[('Mr', 'Mr'), ('Mrs', 'Mrs'), ('Miss', 'Miss'), ('Dr', 'Dr')], blank=True, null=True)
     contact_number = models.CharField(max_length=20, blank=True, null=True)
-    gender = models.CharField(
+    gender_identity = models.CharField(
         max_length=20,
         choices=[
             ('Male', 'Male'),
             ('Female', 'Female'),
             ('Non-Binary', 'Non-Binary'),
+            ('Other', 'Other'),
             ('Prefer not to say', 'Prefer not to say'),
         ],
         blank=True,
         null=True
     )
-    dob = models.DateField(blank=True, null=True)
+  
+    preferred_pronouns = models.CharField(max_length=20, blank=True, null=True)
+    preferred_name = models.CharField(max_length=100, blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+
+    nhis_number = models.CharField(max_length=50, blank=True, null=True)
     nationality = models.CharField(max_length=100, blank=True, null=True)
     #state_of_origin = models.CharField(max_length=100, blank=True, null=True)
-    address = models.CharField(max_length=255, blank=True, null=True)
+    # address = models.CharField(max_length=255, blank=True, null=True)
+
+    # Address
+    address_line = models.CharField(max_length=255, blank=True, null=True)
+    town = models.CharField(max_length=100, blank=True, null=True)
+    county = models.CharField(max_length=100,blank=True, null=True)
+    postcode = models.CharField(max_length=20, blank=True, null=True)
+    type_of_residence = models.CharField(
+        max_length=50,
+        choices=[
+            ('private_home', 'Private Home'),
+            ('care_home', 'Care Home'),
+            ('assisted_living', 'Assisted Living'),
+            ('sheltered', 'Sheltered Housing'),
+        ],
+        default='private_home'
+    )
+
+
+
     town = models.CharField(max_length=100, blank=True, null=True)
     zip_code = models.CharField(max_length=20, blank=True, null=True)
     marital_status = models.CharField(
@@ -767,14 +793,50 @@ class ClientProfile(models.Model):
         null=True
     )
     photo = models.ImageField(upload_to='client_photos/', max_length=255, blank=True, null=True)
-    
+    contact_number = models.CharField(max_length=20, blank=True, null=True)
+    alt_contact_number = models.CharField(max_length=20, blank=True, null=True)
+
+    # Primary Contact
+    primary_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    primary_contact_phone = models.CharField(max_length=100, blank=True, null=True)
+    primary_contact_email = models.CharField(max_length=100, blank=True, null=True)
+   
+
+    # Secondary Contact
+    secondary_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    secondary_contact_phone = models.CharField(max_length=100, blank=True, null=True)
+    secondary_contact_email = models.CharField(max_length=100, blank=True, null=True)
+
+
+    # Preferred Communication Method
+    communication_preference = models.CharField(
+        max_length=20,
+        choices=[
+            ('phone_call', 'Phone Call'),
+            ('sms', 'SMS'),
+            ('email', 'Email')
+        ],
+        default='phone_call'
+    )
+
+
+    # Living Situation
+    lives_alone = models.BooleanField(default=True)
+    co_residents = models.TextField(blank=True, null=True)  # Optional description if not living alone
+    key_safe_instructions = models.TextField(blank=True, null=True)
+
+
     # Next of Kin
-    next_of_kin_name = models.CharField(max_length=255, blank=True, null=True)
+    next_of_kin_full_name = models.CharField(max_length=255, blank=True, null=True)
     next_of_kin_relationship = models.CharField(max_length=100, blank=True, null=True)
     next_of_kin_address = models.CharField(max_length=255, blank=True, null=True)
+    next_of_kin_contact_number = models.CharField(max_length=20, blank=True, null=True)
+    next_of_kin_alt_contact_number = models.CharField(max_length=20, blank=True, null=True)
+    next_of_kin_town = models.CharField(max_length=100, blank=True, null=True)
     next_of_kin_phone = models.CharField(max_length=20, blank=True, null=True)
     next_of_kin_email = models.EmailField(blank=True, null=True)
-    
+
+     
     # Care Requirements
     care_plan = models.CharField(max_length=100, blank=True, null=True)  # e.g., 'Single Handed Call'
     care_tasks = models.TextField(blank=True, null=True)  # Comma-separated or free text, e.g., 'Meal Preparation'
@@ -906,6 +968,12 @@ class ClientProfile(models.Model):
 
         super().save(*args, **kwargs)
 
+
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True,  null=True)
+
+    # def __str__(self):
+    #     return f"{self.first_name} {self.last_name}"
 
 
 
