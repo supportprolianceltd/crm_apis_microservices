@@ -1,4 +1,5 @@
-# lms-service/docker-compose.yml
+version: '3.8'
+
 services:
   lms-db:
     image: postgres:15
@@ -91,11 +92,8 @@ services:
       KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
       KAFKA_SUPER_USERS: User:lms_consumer;User:auth-service
-    depends_on:
-      zookeeper:
-        condition: service_healthy
     ports:
-      - "9092:9092"
+      - "9093:9092"
     healthcheck:
       test: ["CMD", "/opt/kafka/bin/kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
       interval: 5s
@@ -104,19 +102,19 @@ services:
     networks:
       - auth_service_default
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: lms_zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    healthcheck:
-      test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181 | grep imok"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - auth_service_default
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:7.5.0
+  #   container_name: zookeeper
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #   healthcheck:
+  #     test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181 | grep imok"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - auth_service_default
 
 volumes:
   lms_db_data:

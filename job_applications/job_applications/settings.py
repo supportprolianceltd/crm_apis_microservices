@@ -253,6 +253,15 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC' #GMT = Lagos/Africa Time - 1
 CELERY_ENABLE_UTC = True
+# settings.py - Add these Celery settings
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 100
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_TIME_LIMIT = 7200  # 2 hours max
+CELERY_TASK_SOFT_TIME_LIMIT = 3600  # 1 hour soft limit
+
+# Increase timeouts for large file processing
+REQUESTS_TIMEOUT = 30
 
 # Celery Beat Schedule
 CELERY_BEAT_SCHEDULE = {

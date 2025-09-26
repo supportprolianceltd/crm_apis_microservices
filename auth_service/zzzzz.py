@@ -113,13 +113,13 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='dappa',
-        email='david.dappa@prolianceltd.com',
+        username='support',
+        email='support@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='David',
-        last_name='Dappa',
-        job_role=' Frontend developer',
+        first_name='Daniel',
+        last_name='Finland',
+        job_role=' Backend developer',
         tenant=tenant
     )
 
@@ -192,7 +192,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='arts')
+tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(

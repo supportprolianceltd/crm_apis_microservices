@@ -1287,74 +1287,40 @@ class UserSessionSerializer(serializers.ModelSerializer):
         fields = ["id", "login_time", "logout_time", "duration", "date", "ip_address", "user_agent"]
 
 
-# class ClientProfileSerializer(serializers.ModelSerializer):
-#     preferred_carers = serializers.PrimaryKeyRelatedField(
-#         many=True, queryset=CustomUser.objects.filter(role="carer"), required=False
-#     )
-#     photo = serializers.ImageField(required=False, allow_null=True)
-
-#     class Meta:
-#         model = ClientProfile
-#         fields = "__all__"
-
-#         read_only_fields = ["id", "user", "client_id"]
-
-#     def create(self, validated_data):
-#         photo = validated_data.pop("photo", None)
-#         preferred_carers = validated_data.pop("preferred_carers", [])
-#         client_profile = super().create(validated_data)
-#         if photo:
-#             from utils.supabase import upload_file_dynamic
-
-#             url = upload_file_dynamic(
-#                 photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
-#             )
-#             client_profile.photo = url
-#         client_profile.preferred_carers.set(preferred_carers)
-#         client_profile.save()
-#         return client_profile
-
-#     def update(self, instance, validated_data):
-#         photo = validated_data.pop("photo", None)
-#         preferred_carers = validated_data.pop("preferred_carers", None)
-#         instance = super().update(instance, validated_data)
-#         if photo:
-#             from utils.supabase import upload_file_dynamic
-
-#             url = upload_file_dynamic(
-#                 photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
-#             )
-#             instance.photo = url
-#         if preferred_carers is not None:
-#             instance.preferred_carers.set(preferred_carers)
-#         instance.save()
-#         return instance
-
 class ClientProfileSerializer(serializers.ModelSerializer):
     preferred_carers = serializers.PrimaryKeyRelatedField(
         many=True, queryset=CustomUser.objects.filter(role="carer"), required=False
     )
-    photo = serializers.ImageField(required=False, allow_null=True)
-    photo_url = serializers.CharField(max_length=1024,required=False, allow_blank=True, allow_null=True
-)
-
+    photo = serializers.ImageField(required=False, allow_null=True, write_only=True)
+    photo_url = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True, read_only=True)
 
     class Meta:
         model = ClientProfile
         fields = "__all__"
         read_only_fields = ["id", "user", "client_id"]
 
+    def validate(self, data):
+        logger.info(f"Validating ClientProfileSerializer data: {data}")
+        return super().validate(data)
+
     def create(self, validated_data):
         photo = validated_data.pop("photo", None)
         preferred_carers = validated_data.pop("preferred_carers", [])
         client_profile = super().create(validated_data)
-        if photo:
+        if photo and hasattr(photo, "name"):
             logger.info(f"Uploading client photo: {photo.name}")
-            url = upload_file_dynamic(
-                photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
-            )
-            client_profile.photo_url = url  # Set photo_url instead of photo
-            logger.info(f"Client photo uploaded: {url}")
+            try:
+                url = upload_file_dynamic(
+                    photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
+                )
+                client_profile.photo_url = url
+                logger.info(f"Client photo uploaded: {url}")
+            except Exception as e:
+                logger.error(f"Failed to upload client photo: {str(e)}")
+                raise serializers.ValidationError(f"Failed to upload photo: {str(e)}")
+        else:
+            logger.info("No photo provided for client profile, setting photo_url to None")
+            client_profile.photo_url = None
         client_profile.preferred_carers.set(preferred_carers)
         client_profile.save()
         return client_profile
@@ -1363,13 +1329,20 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         photo = validated_data.pop("photo", None)
         preferred_carers = validated_data.pop("preferred_carers", None)
         instance = super().update(instance, validated_data)
-        if photo:
+        if photo and hasattr(photo, "name"):
             logger.info(f"Updating client photo: {photo.name}")
-            url = upload_file_dynamic(
-                photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
-            )
-            instance.photo_url = url  # Set photo_url instead of photo
-            logger.info(f"Client photo updated: {url}")
+            try:
+                url = upload_file_dynamic(
+                    photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
+                )
+                instance.photo_url = url
+                logger.info(f"Client photo updated: {url}")
+            except Exception as e:
+                logger.error(f"Failed to update client photo: {str(e)}")
+                raise serializers.ValidationError(f"Failed to update photo: {str(e)}")
+        elif photo is None:
+            logger.info("No photo provided for update, keeping existing photo_url")
+            instance.photo_url = getattr(instance, "photo_url", None)
         if preferred_carers is not None:
             instance.preferred_carers.set(preferred_carers)
         instance.save()
@@ -1439,6 +1412,7 @@ class ClientCreateSerializer(serializers.ModelSerializer):
             )
             ClientProfile.objects.create(user=user, **profile_data)
             return user
+
 
 
 
@@ -1718,6 +1692,7 @@ class DocumentSerializer(serializers.ModelSerializer):
                     created_by_id=validated_data["updated_by_id"],
                 )
         return instance
+
 
 # class DocumentAcknowledgmentSerializer(serializers.ModelSerializer):
 #     user = serializers.SerializerMethodField()

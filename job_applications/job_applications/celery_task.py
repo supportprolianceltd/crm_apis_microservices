@@ -199,3 +199,6 @@ def screen_resumes_task(job_requisition_id, document_type, num_candidates, appli
             logger.warning(f"Failed to close job requisition {job_requisition_id}: {close_resp.text}")
     except Exception as e:
         logger.error(f"Error closing job requisition {job_requisition_id} via public endpoint: {str(e)}")
+
+
+

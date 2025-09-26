@@ -6,9 +6,20 @@ import secrets
 import string
 import uuid
 from datetime import datetime, timedelta
-
+import requests
 # Third-Party
 import jwt
+import urllib.parse
+from rest_framework import generics, status
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from django_tenants.utils import tenant_context, get_public_schema_name
+from .models import CustomUser, PasswordResetToken
+from .serializers import PasswordResetRequestSerializer
+import logging
+import uuid
+from django.utils import timezone
+
 
 # Core Models
 from core.models import Branch, Domain, Tenant, TenantConfig
@@ -257,466 +268,341 @@ class UserPasswordRegenerateView(APIView):
 #     )
 
 
+
+
 class PasswordResetRequestView(generics.GenericAPIView):
     serializer_class = PasswordResetRequestSerializer
     permission_classes = [AllowAny]
 
-    def get_tenant(self, request):
-        try:
-            tenant = request.tenant
-            if not tenant:
-                logger.error("No tenant associated with the request")
-                raise serializers.ValidationError("Tenant not found.")
-            return tenant
-        except Exception as e:
-            logger.error(f"Error extracting tenant: {str(e)}")
-            raise serializers.ValidationError(f"Error extracting tenant: {str(e)}")
-
     def post(self, request, *args, **kwargs):
+        logger.info(f"Processing password reset request with data: {request.data}")
+
+        # Validate serializer
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if not serializer.is_valid():
+            logger.error(f"Serializer validation failed: {serializer.errors}")
+            return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data["email"]
+        ip_address = request.META.get("REMOTE_ADDR")
+        user_agent = request.META.get("HTTP_USER_AGENT", "")
+        logger.info(f"Processing password reset for email: {email}")
+
+        # Extract tenant using email domain
         try:
-            tenant = self.get_tenant(request)
+            email_domain = email.split('@')[1]
+            logger.debug(f"Email domain: {email_domain}")
+            domain = Domain.objects.filter(domain=email_domain).first()
+            if not domain:
+                logger.error(f"No domain found for email domain: {email_domain}")
+                UserActivity.objects.create(
+                    user=None,
+                    tenant=Tenant.objects.first(),
+                    action="password_reset_request",
+                    performed_by=None,
+                    details={"reason": f"No tenant found for email domain: {email_domain}"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False,
+                )
+                return Response({"error": f"No tenant found for email domain: {email_domain}"}, status=status.HTTP_404_NOT_FOUND)
 
-            serializer = self.get_serializer(data=request.data, context={"request": request})
-            if not serializer.is_valid():
-                logger.error(f"Validation failed for password reset request: {serializer.errors}")
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-            email = serializer.validated_data["email"]
-
-            with tenant_context(tenant):
-                try:
-                    user = CustomUser.objects.get(email=email, tenant=tenant)
-                except CustomUser.DoesNotExist:
-                    logger.error(f"User with email {email} not found for tenant {tenant.schema_name}")
-                    return Response(
-                        {"detail": f"No user found with email '{email}'."}, status=status.HTTP_404_NOT_FOUND
-                    )
-
-                # Validate email configuration
-                required_email_fields = [
-                    "email_host",
-                    "email_port",
-                    "email_host_user",
-                    "email_host_password",
-                    "default_from_email",
-                ]
-                missing_fields = [field for field in required_email_fields if not getattr(tenant, field)]
-
-                if missing_fields:
-                    logger.error(
-                        f"Missing email configuration fields for tenant {tenant.schema_name}: {missing_fields}"
-                    )
-                    return Response(
-                        {"detail": f"Missing email configuration: {', '.join(missing_fields)}"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
-                # Generate reset token
-                with transaction.atomic():
-                    token = str(uuid.uuid4())
-                    expires_at = timezone.now() + timedelta(hours=1)  # Token valid for 1 hour
-                    PasswordResetToken.objects.create(user=user, tenant=tenant, token=token, expires_at=expires_at)
-
-                    # Get email template
-                    try:
-                        config = TenantConfig.objects.get(tenant=tenant)
-                        email_template = config.email_templates.get("passwordReset", {})
-                        template_content = email_template.get("content", "")
-                        is_auto_sent = email_template.get("is_auto_sent", True)
-                    except TenantConfig.DoesNotExist:
-                        logger.warning(f"TenantConfig not found for tenant {tenant.schema_name}")
-                        template_content = (
-                            "Hello [User Name],\n\n"
-                            "You have requested to reset your password for [Company]. "
-                            "Please use the following link to reset your password:\n\n"
-                            "[Reset Link]\n\n"
-                            "This link will expire in 1 hour.\n\n"
-                            "Best regards,\n[Your Name]"
-                        )
-                        is_auto_sent = True
-
-                    # Prepare email content
-                    reset_link = (
-                        f"{settings.WEB_PAGE_URL}{reverse('password_reset_confirm')}?token={token}&email={email}"
-                    )
-
-                    placeholders = {
-                        "[User Name]": user.get_full_name() or user.username,
-                        "[Company]": tenant.name,
-                        "[Reset Link]": reset_link,
-                        "[Your Name]": tenant.name,
-                        "[your.email@proliance.com]": tenant.default_from_email,
-                    }
-
-                    email_body = template_content
-                    for placeholder, value in placeholders.items():
-                        email_body = email_body.replace(placeholder, str(value))
-
-                    # Send email
-                    if is_auto_sent or not is_auto_sent:
-                        try:
-                            email_connection = configure_email_backend(tenant)
-                            email_subject = f"Password Reset Request for {email}"
-                            email = EmailMessage(
-                                subject=email_subject,
-                                body=email_body,
-                                from_email=tenant.default_from_email,
-                                to=[user.email],
-                                connection=email_connection,
-                            )
-                            email.send(fail_silently=False)
-                        except Exception as email_error:
-                            logger.exception(
-                                f"Failed to send password reset email to {user.email}: {str(email_error)}"
-                            )
-                            return Response(
-                                {
-                                    "detail": "Failed to send password reset email due to invalid email configuration.",
-                                    "error": str(email_error),
-                                    "suggestion": "Please check the email settings in the tenant configuration.",
-                                },
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            )
-
-            return Response(
-                {"detail": "Password reset email sent successfully.", "token": token}, status=status.HTTP_200_OK
+            tenant = domain.tenant
+            logger.info(f"Found tenant: {tenant.schema_name} for email domain: {email_domain}")
+        except (ValueError, IndexError) as e:
+            logger.error(f"Invalid email format: {email}, error: {str(e)}")
+            UserActivity.objects.create(
+                user=None,
+                tenant=Tenant.objects.first(),
+                action="password_reset_request",
+                performed_by=None,
+                details={"reason": f"Invalid email format: {str(e)}"},
+                ip_address=ip_address,
+                user_agent=user_agent,
+                success=False,
             )
+            return Response({"error": "Invalid email format"}, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception as e:
-            logger.exception(
-                f"Error processing password reset for tenant {tenant.schema_name if tenant else 'unknown'}: {str(e)}"
+        # Perform DB operations in the tenant schema
+        with tenant_context(tenant):
+            try:
+                user = CustomUser.objects.get(email=email, tenant=tenant)
+            except CustomUser.DoesNotExist:
+                logger.warning(f"No user found with email {email} in tenant {tenant.schema_name}")
+                UserActivity.objects.create(
+                    user=None,
+                    tenant=tenant,
+                    action="password_reset_request",
+                    performed_by=None,
+                    details={"reason": f"No user found with email {email}"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False,
+                )
+                return Response({"error": "No user found with this email"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Check if user is locked or suspended
+            if user.is_locked or user.status == "suspended" or not user.is_active:
+                logger.warning(f"User {email} is locked or suspended in tenant {tenant.schema_name}")
+                UserActivity.objects.create(
+                    user=user,
+                    tenant=tenant,
+                    action="password_reset_request",
+                    performed_by=None,
+                    details={"reason": "Account locked or suspended"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False,
+                )
+                return Response({"error": "Account is locked or suspended"}, status=status.HTTP_403_FORBIDDEN)
+
+            # Check if IP is blocked
+            if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+                logger.warning(f"IP {ip_address} is blocked for tenant {tenant.schema_name}")
+                UserActivity.objects.create(
+                    user=user,
+                    tenant=tenant,
+                    action="password_reset_request",
+                    performed_by=None,
+                    details={"reason": "IP address blocked"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False,
+                )
+                return Response({"error": "This IP address is blocked"}, status=status.HTTP_403_FORBIDDEN)
+
+            # Create password reset token
+            token = str(uuid.uuid4())
+            expires_at = timezone.now() + timedelta(hours=1)
+            PasswordResetToken.objects.create(
+                user=user,
+                tenant=tenant,
+                token=token,
+                expires_at=expires_at
             )
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.info(f"Password reset token created for user {email} in tenant {tenant.schema_name}")
+
+            # Send notification to external service
+            event_payload = {
+                "metadata": {
+                    "event_id": str(uuid.uuid4()),
+                    "event_type": "user.password.reset.requested",
+                    "event_version": "1.0",
+                    "created_at": timezone.now().isoformat(),   
+                    "source": "auth-service",
+                    "tenant_id": str(tenant.unique_id),
+                },
+                "data": {
+                    "user_email": user.email,
+                    "user_name": f"{user.first_name} {user.last_name}",
+                    "reset_link": token,
+                    "ip_address": ip_address,
+                    "user_agent": user_agent,
+                    "user_id": user.id,
+                    "expires_at": expires_at.isoformat(),
+                },
+            }
+            try:
+                url = urllib.parse.urljoin(settings.NOTIFICATIONS_SERVICE_URL.rstrip('/') + '/', 'events/')
+
+                response = requests.post(
+                    url,
+                    json=event_payload,
+                    timeout=5
+                )
+                response.raise_for_status()
+                logger.info(f"Notification sent for password reset: {user.email}, Status: {response.status_code}")
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Failed to send password reset notification for {user.email}: {str(e)}")
+
+            # # Log activity
+            # UserActivity.objects.create(
+            #     user=user,
+            #     tenant=tenant,
+            #     action="password_reset_request",
+            #     performed_by=None,
+            #     details={"token": token},
+            #     ip_address=ip_address,
+            #     user_agent=user_agent,
+            #     success=True,
+            # )
+
+        return Response(
+            {
+                "detail": "Password reset token generated successfully.",
+                "tenant_schema": tenant.schema_name,
+                "email": email
+            },
+            status=status.HTTP_200_OK
+        )
+
 
 
 class PasswordResetConfirmView(generics.GenericAPIView):
     serializer_class = PasswordResetConfirmSerializer
     permission_classes = [AllowAny]
 
-    def get_tenant(self, request):
-        try:
-            tenant = request.tenant
-            if not tenant:
-                logger.error("No tenant associated with the request")
-                raise serializers.ValidationError("Tenant not found.")
-            return tenant
-        except Exception as e:
-            logger.error(f"Error extracting tenant: {str(e)}")
-            raise serializers.ValidationError(f"Error extracting tenant: {str(e)}")
-
     def post(self, request, *args, **kwargs):
+        logger.info(f"Processing password reset confirmation with data: {request.data}")
+        
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if not serializer.is_valid():
+            logger.error(f"Validation failed for password reset confirmation: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        token = serializer.validated_data["token"]
+        new_password = serializer.validated_data["new_password"]
+        ip_address = request.META.get("REMOTE_ADDR")
+        user_agent = request.META.get("HTTP_USER_AGENT", "")
+
+        # The middleware has already set the tenant based on the token
+        tenant = request.tenant
+        logger.info(f"Processing password reset confirmation in tenant: {tenant.schema_name}")
+
         try:
-            tenant = self.get_tenant(request)
-            serializer = self.get_serializer(data=request.data, context={"request": request})
-            if not serializer.is_valid():
-                logger.error(f"Validation failed for password reset confirmation: {serializer.errors}")
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Token already used?
+            reset_token = PasswordResetToken.objects.select_related('user').filter(token=token).first()
+            if not reset_token:
+                logger.warning(f"Invalid token {token} in schema {tenant.schema_name}")
+                UserActivity.objects.create(
+                    user=None,
+                    tenant=tenant,
+                    action="password_reset_confirm",
+                    performed_by=None,
+                    details={"reason": "Invalid token"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False,
+                )
+                return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
 
-            token = serializer.validated_data["token"]
-            new_password = serializer.validated_data["new_password"]
+            if reset_token.used:
+                logger.warning(f"Token {token} already used in schema {tenant.schema_name}")
+                UserActivity.objects.create(
+                    user=reset_token.user,
+                    tenant=tenant,
+                    action="password_reset_confirm",
+                    performed_by=None,
+                    details={"reason": "Token already used"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False,
+                )
+                return Response({"detail": "This token has already been used."}, status=status.HTTP_400_BAD_REQUEST)
 
-            with tenant_context(tenant):
+            # Token expired?
+            if reset_token.expires_at < timezone.now():
+                logger.warning(f"Token {token} expired in schema {tenant.schema_name}")
+                UserActivity.objects.create(
+                    user=reset_token.user,
+                    tenant=tenant,
+                    action="password_reset_confirm",
+                    performed_by=None,
+                    details={"reason": "Token expired"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False,
+                )
+                return Response({"detail": "This token has expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+            user = reset_token.user
+
+            # Additional user checks
+            if user.is_locked or user.status == "suspended" or not user.is_active:
+                logger.warning(f"User {user.email} is locked or suspended in tenant {tenant.schema_name}")
+                UserActivity.objects.create(
+                    user=user,
+                    tenant=tenant,
+                    action="password_reset_confirm",
+                    performed_by=None,
+                    details={"reason": "Account locked or suspended"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False,
+                )
+                return Response({"detail": "Account is locked or suspended."}, status=status.HTTP_403_FORBIDDEN)
+
+            with transaction.atomic():
+                user.set_password(new_password)
+                user.last_password_reset = timezone.now()
+                user.save()
+
+                reset_token.used = True
+                reset_token.save()
+
+                logger.info(f"Password reset successful for user {user.email} in tenant {tenant.schema_name}")
+
+                # Send notification to external service
+                event_payload = {
+                    "metadata": {
+                        "tenant_id": str(tenant.unique_id),
+                        "event_type": "auth.password_reset.confirmed",
+                        "event_id": str(uuid.uuid4()),
+                        "created_at": timezone.now().isoformat(),
+                        "source": "auth-service",
+                    },
+                    "data": {
+                        "user_email": user.email,
+                        "ip_address": ip_address,
+                        "user_agent": user_agent,
+                        "timestamp": timezone.now().isoformat(),
+                    },
+                }
                 try:
-                    reset_token = PasswordResetToken.objects.get(token=token, tenant=tenant)
-                    if reset_token.used:
-                        logger.error(f"Token {token} already used for tenant {tenant.schema_name}")
-                        return Response(
-                            {"detail": "This token has already been used."}, status=status.HTTP_400_BAD_REQUEST
-                        )
-                    if reset_token.expires_at < timezone.now():
-                        logger.error(f"Token {token} expired for tenant {tenant.schema_name}")
-                        return Response({"detail": "This token has expired."}, status=status.HTTP_400_BAD_REQUEST)
+                    response = requests.post(
+                        settings.NOTIFICATIONS_EVENT_URL,
+                        json=event_payload,
+                        timeout=5
+                    )
+                    response.raise_for_status()
+                    logger.info(f"Notification sent for password reset confirmation: {user.email}, Status: {response.status_code}")
+                except requests.exceptions.RequestException as e:
+                    logger.error(f"Failed to send password reset confirmation notification for {user.email}: {str(e)}")
 
-                    user = reset_token.user
-                    with transaction.atomic():
-                        user.set_password(new_password)
-                        user.last_password_reset = timezone.now()  # Update timestamp
-                        user.save()
-                        reset_token.used = True
-                        reset_token.save()
-                        logger.info(
-                            f"Password reset successfully for user {user.email} in tenant {tenant.schema_name}"
-                        )
+                # Log successful activity
+                UserActivity.objects.create(
+                    user=user,
+                    tenant=tenant,
+                    action="password_reset_confirm",
+                    performed_by=None,
+                    details={},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=True,
+                )
 
-                    return Response({"detail": "Password reset successfully."}, status=status.HTTP_200_OK)
-
-                except PasswordResetToken.DoesNotExist:
-                    logger.error(f"Invalid token {token} for tenant {tenant.schema_name}")
-                    return Response({"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Password reset successfully."}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.exception(
-                f"Error confirming password reset for tenant {tenant.schema_name if tenant else 'unknown'}: {str(e)}"
+            logger.exception(f"Error during password reset confirmation in schema {tenant.schema_name}: {str(e)}")
+            UserActivity.objects.create(
+                user=None,
+                tenant=tenant,
+                action="password_reset_confirm",
+                performed_by=None,
+                details={"reason": f"Internal error: {str(e)}"},
+                ip_address=ip_address,
+                user_agent=user_agent,
+                success=False,
             )
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Password reset failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# class UserViewSet(ModelViewSet):
-#     queryset = CustomUser.objects.all()
-#     permission_classes = [IsAuthenticated]
-#     pagination_class = CustomPagination
-
-#     def get_base_queryset(self):
-#         """DRY helper for tenant-filtered queryset with role-based access."""
-#         tenant = self.request.user.tenant
-#         user = self.request.user
-#         with tenant_context(tenant):
-#             base_qs = CustomUser.objects.filter(tenant=tenant)
-#             if not (user.is_superuser or user.role == 'admin'):
-#                 if user.role == 'team_manager':
-#                     pass  # All users in tenant
-#                 elif user.role == 'recruiter' and user.branch:
-#                     base_qs = base_qs.filter(branch=user.branch)
-#                 else:
-#                     base_qs = base_qs.filter(id=user.id)  # Self only
-#             return base_qs
-
-#     def get_queryset(self):
-#         """Optimized queryset: Minimal for lists, full prefetch for details."""
-#         base_qs = self.get_base_queryset()
-#         if self.action == 'list':
-#             # Light: select_related for basic profile, no deep nests
-#             return base_qs.select_related('profile', 'tenant', 'branch')
-#         # Full prefetch for retrieve/update/detail
-#         return base_qs.prefetch_related(
-#             'profile__professional_qualifications',
-#             'profile__employment_details',
-#             'profile__education_details',
-#             'profile__reference_checks',
-#             'profile__proof_of_address',
-#             'profile__insurance_verifications',
-#             'profile__driving_risk_assessments',
-#             'profile__legal_work_eligibilities',
-#             'profile__other_user_documents',
-#         )
-
-#     def get_serializer_class(self):
-#         if self.action == 'list':
-#             return CustomUserListSerializer  # Light for lists
-#         if self.action in ['create', 'update', 'partial_update']:
-#             return UserCreateSerializer
-#         if self.action in ['lock', 'unlock', 'suspend', 'activate']:
-#             return UserAccountActionSerializer
-#         if self.action == 'impersonate':
-#             return UserImpersonateSerializer
-#         return CustomUserSerializer  # Full for retrieve
-
-#     def perform_create(self, serializer):
-#         tenant = self.request.user.tenant
-#         if self.request.user.role != 'admin' and not self.request.user.is_superuser:
-#             raise serializers.ValidationError("Only admins or superusers can create users.")
-#         with tenant_context(tenant):
-#             serializer.save()
-
-
-#     def update(self, request, *args, **kwargs):
-#         tenant = request.user.tenant
-#         user = request.user
-#         logger.info(f"Raw PATCH request data for tenant {tenant.schema_name}: {dict(request.data)}")
-#         logger.info(f"FILES in request: {dict(request.FILES)}")
-#         with tenant_context(tenant):
-#             instance = self.get_object()
-#             if not (user.is_superuser or user.role == 'admin' or user.id == instance.id):
-#                 raise PermissionDenied("You do not have permission to update this user.")
-#             serializer = self.get_serializer(instance, data=request.data, partial=True)
-#             try:
-#                 serializer.is_valid(raise_exception=True)
-#                 logger.info(f"Validated data for user {instance.email}: {serializer.validated_data}")
-#             except serializers.ValidationError as e:
-#                 logger.error(f"Serializer errors for user {instance.email}: {serializer.errors}")
-#                 raise
-#             self.perform_update(serializer)
-#             logger.info(f"User {instance.email} updated by {user.email} in tenant {tenant.schema_name}")
-#             return Response(serializer.data)
-
-
-#     def destroy(self, request, *args, **kwargs):
-#         tenant = request.user.tenant
-#         user = request.user
-#         with tenant_context(tenant):
-#             instance = self.get_object()
-#             if not (user.is_superuser or user.role == 'admin'):
-#                 raise PermissionDenied("You do not have permission to delete users.")
-#             self.perform_destroy(instance)
-#             logger.info(f"User {instance.email} deleted by {user.email} in tenant {tenant.schema_name}")
-#             return Response(status=204)
-
-#     @action(detail=True, methods=['post'], url_path='lock')
-#     def lock(self, request, pk=None):
-#         tenant = request.user.tenant
-#         with tenant_context(tenant):
-#             instance = self.get_object()
-#             if request.data:  # Optional validation if data provided
-#                 serializer = self.get_serializer(data=request.data, context={'request': request, 'user': instance})
-#                 serializer.is_valid(raise_exception=True)
-#             instance.lock_account(reason=request.data.get('reason', 'Manual lock'))
-#             UserActivity.objects.create(
-#                 user=instance,
-#                 tenant=tenant,
-#                 action='account_lock',
-#                 performed_by=request.user,
-#                 details={'reason': 'Manual lock'},
-#                 ip_address=request.META.get('REMOTE_ADDR'),
-#                 user_agent=request.META.get('HTTP_USER_AGENT', ''),
-#                 success=True
-#             )
-#             logger.info(f"User {instance.email} locked by {request.user.email} in tenant {tenant.schema_name}")
-#             return Response({
-#                 "status": "success",
-#                 "message": f"User {instance.email} account locked successfully."
-#             }, status=200)
-
-#     @action(detail=True, methods=['post'], url_path='unlock')
-#     def unlock(self, request, pk=None):
-#         tenant = request.user.tenant
-#         with tenant_context(tenant):
-#             instance = self.get_object()
-#             if request.data:
-#                 serializer = self.get_serializer(data=request.data, context={'request': request, 'user': instance})
-#                 serializer.is_valid(raise_exception=True)
-#             instance.unlock_account()
-#             UserActivity.objects.create(
-#                 user=instance,
-#                 tenant=tenant,
-#                 action='account_unlock',
-#                 performed_by=request.user,
-#                 details={},
-#                 ip_address=request.META.get('REMOTE_ADDR'),
-#                 user_agent=request.META.get('HTTP_USER_AGENT', ''),
-#                 success=True
-#             )
-#             logger.info(f"User {instance.email} unlocked by {request.user.email} in tenant {tenant.schema_name}")
-#             return Response({
-#                 "status": "success",
-#                 "message": f"User {instance.email} account unlocked successfully."
-#             }, status=200)
-
-#     @action(detail=True, methods=['post'], url_path='suspend')
-#     def suspend(self, request, pk=None):
-#         tenant = request.user.tenant
-#         with tenant_context(tenant):
-#             instance = self.get_object()
-#             if request.data:
-#                 serializer = self.get_serializer(data=request.data, context={'request': request, 'user': instance})
-#                 serializer.is_valid(raise_exception=True)
-#             instance.suspend_account()
-#             UserActivity.objects.create(
-#                 user=instance,
-#                 tenant=tenant,
-#                 action='account_suspend',
-#                 performed_by=request.user,
-#                 details={},
-#                 ip_address=request.META.get('REMOTE_ADDR'),
-#                 user_agent=request.META.get('HTTP_USER_AGENT', ''),
-#                 success=True
-#             )
-#             logger.info(f"User {instance.email} suspended by {request.user.email} in tenant {tenant.schema_name}")
-#             return Response({
-#                 "status": "success",
-#                 "message": f"User {instance.email} account suspended successfully."
-#             }, status=200)
-
-#     @action(detail=True, methods=['post'], url_path='activate')
-#     def activate(self, request, pk=None):
-#         tenant = request.user.tenant
-#         with tenant_context(tenant):
-#             instance = self.get_object()
-#             if request.data:
-#                 serializer = self.get_serializer(data=request.data, context={'request': request, 'user': instance})
-#                 serializer.is_valid(raise_exception=True)
-#             instance.activate_account()
-#             UserActivity.objects.create(
-#                 user=instance,
-#                 tenant=tenant,
-#                 action='account_activate',
-#                 performed_by=request.user,
-#                 details={},
-#                 ip_address=request.META.get('REMOTE_ADDR'),
-#                 user_agent=request.META.get('HTTP_USER_AGENT', ''),
-#                 success=True
-#             )
-#             logger.info(f"User {instance.email} activated by {request.user.email} in tenant {tenant.schema_name}")
-#             return Response({
-#                 "status": "success",
-#                 "message": f"User {instance.email} account activated successfully."
-#             }, status=200)
-
-#     @action(detail=True, methods=['post'], url_path='impersonate')
-#     def impersonate(self, request, pk=None):
-#         tenant = request.user.tenant
-#         with tenant_context(tenant):
-#             target_user = self.get_object()
-#             if request.data:
-#                 serializer = self.get_serializer(data=request.data, context={'request': request, 'user': target_user})
-#                 serializer.is_valid(raise_exception=True)
-
-#             try:
-#                 access_payload = {
-#                     "jti": str(uuid.uuid4()),
-#                     "sub": target_user.email,
-#                     "role": target_user.role,
-#                     "tenant_id": target_user.tenant.id,
-#                     "tenant_schema": target_user.tenant.schema_name,
-#                     "has_accepted_terms": target_user.has_accepted_terms,
-#                     "user": CustomUserMinimalSerializer(target_user).data,
-#                     "email": target_user.email,
-#                     "type": "access",
-#                     "exp": int((timezone.now() + timedelta(minutes=15)).timestamp()),  # Verified: ~1757598718 for Sep 11, 2025
-#                     "impersonated_by": request.user.email
-#                 }
-#                 access_token = issue_rsa_jwt(access_payload, target_user.tenant)
-
-#                 refresh_jti = str(uuid.uuid4())
-#                 refresh_payload = {
-#                     "jti": refresh_jti,
-#                     "sub": target_user.email,
-#                     "tenant_id": target_user.tenant.id,
-#                     "type": "refresh",
-#                     "exp": int((timezone.now() + timedelta(minutes=30)).timestamp()),
-#                     "impersonated_by": request.user.email
-#                 }
-#                 refresh_token = issue_rsa_jwt(refresh_payload, target_user.tenant)
-
-#                 UserActivity.objects.create(
-#                     user=target_user,
-#                     tenant=tenant,
-#                     action='impersonation',
-#                     performed_by=request.user,
-#                     details={'access_jti': access_payload['jti'], 'refresh_jti': refresh_jti},
-#                     ip_address=request.META.get('REMOTE_ADDR'),
-#                     user_agent=request.META.get('HTTP_USER_AGENT', ''),
-#                     success=True
-#                 )
-
-#                 logger.info(f"User {target_user.email} impersonated by {request.user.email} in tenant {tenant.schema_name}")
-#                 return Response({
-#                     "status": "success",
-#                     "message": f"Impersonation token generated for {target_user.email}",
-#                     "access": access_token,
-#                     "refresh": refresh_token,
-#                     "tenant_id": target_user.tenant.id,
-#                     "tenant_schema": target_user.tenant.schema_name,
-#                     "user": CustomUserMinimalSerializer(target_user).data
-#                 }, status=200)
-#             except Exception as e:
-#                 logger.error(f"Impersonation failed for {target_user.email}: {str(e)}")
-#                 raise serializers.ValidationError(f"Failed to generate impersonation tokens: {str(e)}")
-
-
-class UserViewSet(ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPagination
 
     def get_base_queryset(self):
-        """DRY helper for tenant-filtered queryset with role-based access."""
+        """DRY helper for tenant-filtered queryset with role-based access, excluding clients."""
         tenant = self.request.user.tenant
         user = self.request.user
         with tenant_context(tenant):
-            base_qs = CustomUser.objects.filter(tenant=tenant)
+            # Exclude users with role='client' to separate them from CustomUser list
+            base_qs = CustomUser.objects.filter(tenant=tenant).exclude(role='client')
             if not (user.is_superuser or user.role == "admin"):
                 if user.role == "team_manager":
-                    pass  # All users in tenant
+                    pass  # All non-client users in tenant
                 elif user.role == "recruiter" and user.branch:
                     base_qs = base_qs.filter(branch=user.branch)
                 else:
@@ -980,6 +866,15 @@ class UserViewSet(ModelViewSet):
         with tenant_context(tenant):
             with transaction.atomic():
                 for index, user_data in enumerate(data):
+                    # Ensure role is not 'client' for UserViewSet
+                    if user_data.get("role") == "client":
+                        logger.error(f"Cannot create client user at index {index} via UserViewSet")
+                        errors.append({
+                            "index": index,
+                            "email": user_data.get("email", "unknown"),
+                            "errors": {"role": "Client users cannot be created via this endpoint."}
+                        })
+                        continue
                     serializer = UserCreateSerializer(data=user_data, context={"request": request})
                     try:
                         serializer.is_valid(raise_exception=True)
@@ -1011,6 +906,316 @@ class UserViewSet(ModelViewSet):
         }
         status_code = status.HTTP_201_CREATED if results else status.HTTP_400_BAD_REQUEST
         return Response(response_data, status=status_code)
+
+
+# class UserViewSet(ModelViewSet):
+#     queryset = CustomUser.objects.all()
+#     permission_classes = [IsAuthenticated]
+#     pagination_class = CustomPagination
+
+#     def get_base_queryset(self):
+#         """DRY helper for tenant-filtered queryset with role-based access."""
+#         tenant = self.request.user.tenant
+#         user = self.request.user
+#         with tenant_context(tenant):
+#             base_qs = CustomUser.objects.filter(tenant=tenant)
+#             if not (user.is_superuser or user.role == "admin"):
+#                 if user.role == "team_manager":
+#                     pass  # All users in tenant
+#                 elif user.role == "recruiter" and user.branch:
+#                     base_qs = base_qs.filter(branch=user.branch)
+#                 else:
+#                     base_qs = base_qs.filter(id=user.id)  # Self only
+#             return base_qs
+
+#     def get_queryset(self):
+#         """Optimized queryset: Minimal for lists, full prefetch for details."""
+#         base_qs = self.get_base_queryset()
+#         if self.action == "list":
+#             # Light: select_related for basic profile, no deep nests
+#             return base_qs.select_related("profile", "tenant", "branch")
+#         # Full prefetch for retrieve/update/detail
+#         return base_qs.prefetch_related(
+#             "profile__professional_qualifications",
+#             "profile__employment_details",
+#             "profile__education_details",
+#             "profile__reference_checks",
+#             "profile__proof_of_address",
+#             "profile__insurance_verifications",
+#             "profile__driving_risk_assessments",
+#             "profile__legal_work_eligibilities",
+#             "profile__other_user_documents",
+#         )
+
+#     def get_serializer_class(self):
+#         if self.action == "list":
+#             return CustomUserListSerializer  # Light for lists
+#         if self.action in ["create", "update", "partial_update", "bulk_create"]:
+#             return UserCreateSerializer
+#         if self.action in ["lock", "unlock", "suspend", "activate"]:
+#             return UserAccountActionSerializer
+#         if self.action == "impersonate":
+#             return UserImpersonateSerializer
+#         return CustomUserSerializer  # Full for retrieve
+
+#     def perform_create(self, serializer):
+#         tenant = self.request.user.tenant
+#         if self.request.user.role != "admin" and not self.request.user.is_superuser:
+#             raise ValidationError("Only admins or superusers can create users.")
+#         with tenant_context(tenant):
+#             serializer.save()
+
+#     def update(self, request, *args, **kwargs):
+#         tenant = request.user.tenant
+#         user = request.user
+#         logger.info(f"Raw PATCH request data for tenant {tenant.schema_name}: {dict(request.data)}")
+#         logger.info(f"FILES in request: {dict(request.FILES)}")
+#         with tenant_context(tenant):
+#             instance = self.get_object()
+#             if not (user.is_superuser or user.role == "admin" or user.id == instance.id):
+#                 raise PermissionDenied("You do not have permission to update this user.")
+#             serializer = self.get_serializer(instance, data=request.data, partial=True)
+#             try:
+#                 serializer.is_valid(raise_exception=True)
+#                 logger.info(f"Validated data for user {instance.email}: {serializer.validated_data}")
+#             except ValidationError as e:
+#                 logger.error(f"Serializer errors for user {instance.email}: {serializer.errors}")
+#                 raise
+#             self.perform_update(serializer)
+#             logger.info(f"User {instance.email} updated by {user.email} in tenant {tenant.schema_name}")
+#             return Response(serializer.data)
+
+#     def destroy(self, request, *args, **kwargs):
+#         tenant = request.user.tenant
+#         user = request.user
+#         with tenant_context(tenant):
+#             instance = self.get_object()
+#             if not (user.is_superuser or user.role == "admin"):
+#                 raise PermissionDenied("You do not have permission to delete users.")
+#             self.perform_destroy(instance)
+#             logger.info(f"User {instance.email} deleted by {user.email} in tenant {tenant.schema_name}")
+#             return Response(status=204)
+
+#     @action(detail=True, methods=["post"], url_path="lock")
+#     def lock(self, request, pk=None):
+#         tenant = request.user.tenant
+#         with tenant_context(tenant):
+#             instance = self.get_object()
+#             if request.data:  # Optional validation if data provided
+#                 serializer = self.get_serializer(data=request.data, context={"request": request, "user": instance})
+#                 serializer.is_valid(raise_exception=True)
+#             instance.lock_account(reason=request.data.get("reason", "Manual lock"))
+#             UserActivity.objects.create(
+#                 user=instance,
+#                 tenant=tenant,
+#                 action="account_lock",
+#                 performed_by=request.user,
+#                 details={"reason": "Manual lock"},
+#                 ip_address=request.META.get("REMOTE_ADDR"),
+#                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
+#                 success=True,
+#             )
+#             logger.info(f"User {instance.email} locked by {request.user.email} in tenant {tenant.schema_name}")
+#             return Response(
+#                 {"status": "success", "message": f"User {instance.email} account locked successfully."}, status=200
+#             )
+
+#     @action(detail=True, methods=["post"], url_path="unlock")
+#     def unlock(self, request, pk=None):
+#         tenant = request.user.tenant
+#         with tenant_context(tenant):
+#             instance = self.get_object()
+#             if request.data:
+#                 serializer = self.get_serializer(data=request.data, context={"request": request, "user": instance})
+#                 serializer.is_valid(raise_exception=True)
+#             instance.unlock_account()
+#             UserActivity.objects.create(
+#                 user=instance,
+#                 tenant=tenant,
+#                 action="account_unlock",
+#                 performed_by=request.user,
+#                 details={},
+#                 ip_address=request.META.get("REMOTE_ADDR"),
+#                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
+#                 success=True,
+#             )
+#             logger.info(f"User {instance.email} unlocked by {request.user.email} in tenant {tenant.schema_name}")
+#             return Response(
+#                 {"status": "success", "message": f"User {instance.email} account unlocked successfully."}, status=200
+#             )
+
+#     @action(detail=True, methods=["post"], url_path="suspend")
+#     def suspend(self, request, pk=None):
+#         tenant = request.user.tenant
+#         with tenant_context(tenant):
+#             instance = self.get_object()
+#             if request.data:
+#                 serializer = self.get_serializer(data=request.data, context={"request": request, "user": instance})
+#                 serializer.is_valid(raise_exception=True)
+#             instance.suspend_account()
+#             UserActivity.objects.create(
+#                 user=instance,
+#                 tenant=tenant,
+#                 action="account_suspend",
+#                 performed_by=request.user,
+#                 details={},
+#                 ip_address=request.META.get("REMOTE_ADDR"),
+#                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
+#                 success=True,
+#             )
+#             logger.info(f"User {instance.email} suspended by {request.user.email} in tenant {tenant.schema_name}")
+#             return Response(
+#                 {"status": "success", "message": f"User {instance.email} account suspended successfully."}, status=200
+#             )
+
+#     @action(detail=True, methods=["post"], url_path="activate")
+#     def activate(self, request, pk=None):
+#         tenant = request.user.tenant
+#         with tenant_context(tenant):
+#             instance = self.get_object()
+#             if request.data:
+#                 serializer = self.get_serializer(data=request.data, context={"request": request, "user": instance})
+#                 serializer.is_valid(raise_exception=True)
+#             instance.activate_account()
+#             UserActivity.objects.create(
+#                 user=instance,
+#                 tenant=tenant,
+#                 action="account_activate",
+#                 performed_by=request.user,
+#                 details={},
+#                 ip_address=request.META.get("REMOTE_ADDR"),
+#                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
+#                 success=True,
+#             )
+#             logger.info(f"User {instance.email} activated by {request.user.email} in tenant {tenant.schema_name}")
+#             return Response(
+#                 {"status": "success", "message": f"User {instance.email} account activated successfully."}, status=200
+#             )
+
+#     @action(detail=True, methods=["post"], url_path="impersonate")
+#     def impersonate(self, request, pk=None):
+#         tenant = request.user.tenant
+#         with tenant_context(tenant):
+#             target_user = self.get_object()
+#             if request.data:
+#                 serializer = self.get_serializer(data=request.data, context={"request": request, "user": target_user})
+#                 serializer.is_valid(raise_exception=True)
+
+#             try:
+#                 access_payload = {
+#                     "jti": str(uuid.uuid4()),
+#                     "sub": target_user.email,
+#                     "role": target_user.role,
+#                     "tenant_id": target_user.tenant.id,
+#                     "tenant_schema": target_user.tenant.schema_name,
+#                     "has_accepted_terms": target_user.has_accepted_terms,
+#                     "user": CustomUserMinimalSerializer(target_user).data,
+#                     "email": target_user.email,
+#                     "type": "access",
+#                     "exp": int((timezone.now() + timedelta(minutes=15)).timestamp()),
+#                     "impersonated_by": request.user.email,
+#                 }
+#                 access_token = issue_rsa_jwt(access_payload, target_user.tenant)
+
+#                 refresh_jti = str(uuid.uuid4())
+#                 refresh_payload = {
+#                     "jti": refresh_jti,
+#                     "sub": target_user.email,
+#                     "tenant_id": target_user.tenant.id,
+#                     "type": "refresh",
+#                     "exp": int((timezone.now() + timedelta(minutes=30)).timestamp()),
+#                     "impersonated_by": request.user.email,
+#                 }
+#                 refresh_token = issue_rsa_jwt(refresh_payload, target_user.tenant)
+
+#                 UserActivity.objects.create(
+#                     user=target_user,
+#                     tenant=tenant,
+#                     action="impersonation",
+#                     performed_by=request.user,
+#                     details={"access_jti": access_payload["jti"], "refresh_jti": refresh_jti},
+#                     ip_address=request.META.get("REMOTE_ADDR"),
+#                     user_agent=request.META.get("HTTP_USER_AGENT", ""),
+#                     success=True,
+#                 )
+
+#                 logger.info(
+#                     f"User {target_user.email} impersonated by {request.user.email} in tenant {tenant.schema_name}"
+#                 )
+#                 return Response(
+#                     {
+#                         "status": "success",
+#                         "message": f"Impersonation token generated for {target_user.email}",
+#                         "access": access_token,
+#                         "refresh": refresh_token,
+#                         "tenant_id": target_user.tenant.id,
+#                         "tenant_schema": target_user.tenant.schema_name,
+#                         "user": CustomUserMinimalSerializer(target_user).data,
+#                     },
+#                     status=200,
+#                 )
+#             except Exception as e:
+#                 logger.error(f"Impersonation failed for {target_user.email}: {str(e)}")
+#                 raise ValidationError(f"Failed to generate impersonation tokens: {str(e)}")
+
+#     @action(detail=False, methods=["post"], url_path="bulk-create")
+#     def bulk_create(self, request):
+#         """
+#         Bulk create users with their profiles.
+#         Payload: List of user objects, each with email, password, first_name, last_name, and optional fields.
+#         """
+#         tenant = self.request.user.tenant
+#         user = self.request.user
+
+#         # Check permissions
+#         if not (user.is_superuser or user.role == "admin"):
+#             logger.warning(
+#                 f"User {user.email} attempted bulk create without permission in tenant {tenant.schema_name}"
+#             )
+#             raise PermissionDenied("Only admins or superusers can create users.")
+
+#         # Expect a list of user data
+#         data = request.data
+#         if not isinstance(data, list):
+#             logger.error("Bulk create payload must be a list of user objects")
+#             raise ValidationError({"detail": "Payload must be a list of user objects"})
+
+#         results = []
+#         errors = []
+#         with tenant_context(tenant):
+#             with transaction.atomic():
+#                 for index, user_data in enumerate(data):
+#                     serializer = UserCreateSerializer(data=user_data, context={"request": request})
+#                     try:
+#                         serializer.is_valid(raise_exception=True)
+#                         user = serializer.save()
+#                         logger.info(f"Created user {user.email} in tenant {tenant.schema_name} during bulk create")
+#                         results.append(
+#                             {
+#                                 "status": "success",
+#                                 "email": user.email,
+#                                 "id": user.id,
+#                                 "data": CustomUserSerializer(user).data,
+#                             }
+#                         )
+#                     except ValidationError as e:
+#                         logger.error(f"Failed to create user at index {index}: {str(e)}")
+#                         errors.append({"index": index, "email": user_data.get("email", "unknown"), "errors": e.detail})
+
+#         # Log the overall result
+#         logger.info(
+#             f"Bulk create completed in tenant {tenant.schema_name}: {len(results)} succeeded, {len(errors)} failed"
+#         )
+
+#         # Prepare response
+#         response_data = {
+#             "status": "partial_success" if errors else "success",
+#             "created": results,
+#             "errors": errors,
+#             "message": f"Created {len(results)} users, {len(errors)} failed",
+#         }
+#         status_code = status.HTTP_201_CREATED if results else status.HTTP_400_BAD_REQUEST
+#         return Response(response_data, status=status_code)
 
 
 class LoginAttemptViewSet(viewsets.ReadOnlyModelViewSet):
