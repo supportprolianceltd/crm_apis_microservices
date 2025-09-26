@@ -76,16 +76,16 @@ if not Tenant.objects.filter(schema_name='netwiver').exists():
 from core.models import Tenant
 from users.models import CustomUser
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='netwiver')
+tenant = Tenant.objects.get(schema_name='arts')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
         username='ekeneonwon',
-        email='support@netwiver.com',
+        email='support@artstraining.co.uk',
         password='qwerty',
         role='admin',
-        first_name='Ekene-onwon',
-        last_name='Abrahamn',
-        job_role='Backend Developer',
+        first_name='Ikenga',
+        last_name='Odili',
+        job_role='Admin Desk',
         tenant=tenant
     )
 
@@ -114,12 +114,12 @@ tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
         username='dappa',
-        email='support@prolianceltd.com',
+        email='david.dappa@prolianceltd.com',
         password='qwerty',
         role='admin',
         first_name='David',
-        last_name='Daniel',
-        job_role='Project Manager',
+        last_name='Dappa',
+        job_role=' Frontend developer',
         tenant=tenant
     )
 
@@ -134,7 +134,7 @@ tenant = Tenant.objects.get(schema_name='proliance')
 # Enter tenant context
 with tenant_context(tenant):
     try:
-        user = CustomUser.objects.get(email='tonna.ezugwu@prolianceltd.com')
+        user = CustomUser.objects.get(email='support@prolianceltd.com')
         user.delete()
         print("User deleted successfully.")
     except CustomUser.DoesNotExist:
@@ -192,7 +192,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='netwiver')
+tenant = Tenant.objects.get(schema_name='arts')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(

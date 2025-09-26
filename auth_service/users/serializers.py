@@ -1287,16 +1287,61 @@ class UserSessionSerializer(serializers.ModelSerializer):
         fields = ["id", "login_time", "logout_time", "duration", "date", "ip_address", "user_agent"]
 
 
+# class ClientProfileSerializer(serializers.ModelSerializer):
+#     preferred_carers = serializers.PrimaryKeyRelatedField(
+#         many=True, queryset=CustomUser.objects.filter(role="carer"), required=False
+#     )
+#     photo = serializers.ImageField(required=False, allow_null=True)
+
+#     class Meta:
+#         model = ClientProfile
+#         fields = "__all__"
+
+#         read_only_fields = ["id", "user", "client_id"]
+
+#     def create(self, validated_data):
+#         photo = validated_data.pop("photo", None)
+#         preferred_carers = validated_data.pop("preferred_carers", [])
+#         client_profile = super().create(validated_data)
+#         if photo:
+#             from utils.supabase import upload_file_dynamic
+
+#             url = upload_file_dynamic(
+#                 photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
+#             )
+#             client_profile.photo = url
+#         client_profile.preferred_carers.set(preferred_carers)
+#         client_profile.save()
+#         return client_profile
+
+#     def update(self, instance, validated_data):
+#         photo = validated_data.pop("photo", None)
+#         preferred_carers = validated_data.pop("preferred_carers", None)
+#         instance = super().update(instance, validated_data)
+#         if photo:
+#             from utils.supabase import upload_file_dynamic
+
+#             url = upload_file_dynamic(
+#                 photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
+#             )
+#             instance.photo = url
+#         if preferred_carers is not None:
+#             instance.preferred_carers.set(preferred_carers)
+#         instance.save()
+#         return instance
+
 class ClientProfileSerializer(serializers.ModelSerializer):
     preferred_carers = serializers.PrimaryKeyRelatedField(
         many=True, queryset=CustomUser.objects.filter(role="carer"), required=False
     )
     photo = serializers.ImageField(required=False, allow_null=True)
+    photo_url = serializers.CharField(max_length=1024,required=False, allow_blank=True, allow_null=True
+)
+
 
     class Meta:
         model = ClientProfile
         fields = "__all__"
-
         read_only_fields = ["id", "user", "client_id"]
 
     def create(self, validated_data):
@@ -1304,12 +1349,12 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         preferred_carers = validated_data.pop("preferred_carers", [])
         client_profile = super().create(validated_data)
         if photo:
-            from utils.supabase import upload_file_dynamic
-
+            logger.info(f"Uploading client photo: {photo.name}")
             url = upload_file_dynamic(
                 photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
             )
-            client_profile.photo = url
+            client_profile.photo_url = url  # Set photo_url instead of photo
+            logger.info(f"Client photo uploaded: {url}")
         client_profile.preferred_carers.set(preferred_carers)
         client_profile.save()
         return client_profile
@@ -1319,17 +1364,16 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         preferred_carers = validated_data.pop("preferred_carers", None)
         instance = super().update(instance, validated_data)
         if photo:
-            from utils.supabase import upload_file_dynamic
-
+            logger.info(f"Updating client photo: {photo.name}")
             url = upload_file_dynamic(
                 photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
             )
-            instance.photo = url
+            instance.photo_url = url  # Set photo_url instead of photo
+            logger.info(f"Client photo updated: {url}")
         if preferred_carers is not None:
             instance.preferred_carers.set(preferred_carers)
         instance.save()
         return instance
-
 
 class ClientDetailSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer()

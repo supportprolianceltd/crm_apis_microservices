@@ -4,7 +4,7 @@
 # docker network prune -f
 # docker builder prune -f
 
-
+# auth_service_default
 # docker compose down --volumes
 # docker compose build --no-cache
 # docker compose up -d

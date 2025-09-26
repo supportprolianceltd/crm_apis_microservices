@@ -792,7 +792,10 @@ class ClientProfile(models.Model):
         blank=True,
         null=True
     )
+ 
     photo = models.ImageField(upload_to='client_photos/', max_length=255, blank=True, null=True)
+    photo_url = models.CharField(max_length=1024, blank=True, null=True)
+    
     contact_number = models.CharField(max_length=20, blank=True, null=True)
     alt_contact_number = models.CharField(max_length=20, blank=True, null=True)
 
