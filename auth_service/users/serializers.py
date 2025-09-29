@@ -645,73 +645,163 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         return profile
 
+    # def update(self, instance, validated_data):
+    #     logger.info(f"Updating UserProfile instance {instance.id} with validated data: {validated_data}")
+    #     nested_fields = [
+    #         ("professional_qualifications", ProfessionalQualificationSerializer, "professional_qualifications"),
+    #         ("employment_details", EmploymentDetailSerializer, "employment_details"),
+    #         ("education_details", EducationDetailSerializer, "education_details"),
+    #         ("reference_checks", ReferenceCheckSerializer, "reference_checks"),
+    #         ("proof_of_address", ProofOfAddressSerializer, "proof_of_address"),
+    #         ("insurance_verifications", InsuranceVerificationSerializer, "insurance_verifications"),
+    #         ("driving_risk_assessments", DrivingRiskAssessmentSerializer, "driving_risk_assessments"),
+    #         ("legal_work_eligibilities", LegalWorkEligibilitySerializer, "legal_work_eligibilities"),
+    #         ("other_user_documents", OtherUserDocumentsSerializer, "other_user_documents"),
+    #     ]
+    #     nested_data = {field: validated_data.pop(field, None) for field, _, _ in nested_fields}
+
+    #     image_fields = [
+    #         ("profile_image", "profile_image_url"),
+    #         ("drivers_licence_image1", "drivers_licence_image1_url"),
+    #         ("drivers_licence_image2", "drivers_licence_image2_url"),
+    #         ("Right_to_Work_file", "Right_to_Work_file_url"),
+    #         ("dbs_certificate", "dbs_certificate_url"),
+    #         ("dbs_update_file", "dbs_update_file_url"),
+    #     ]
+    #     for field, url_field in image_fields:
+    #         file = validated_data.pop(field, None)
+    #         if file and hasattr(file, "name"):
+    #             logger.info(f"Uploading {field}: {file.name}")
+    #             try:
+    #                 url = upload_file_dynamic(
+    #                     file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
+    #                 )
+    #                 validated_data[url_field] = url
+    #                 logger.info(f"{field} uploaded: {url}")
+    #             except Exception as e:
+    #                 logger.error(f"Failed to upload {field}: {str(e)}")
+    #                 raise serializers.ValidationError(f"Failed to upload {field}: {str(e)}")
+    #         else:
+    #             logger.info(f"No file provided for {field}, keeping existing {url_field}")
+    #             validated_data[url_field] = getattr(instance, url_field, None)
+
+    #     updated_instance = super().update(instance, validated_data)
+
+    #     for field, serializer_class, related_name in nested_fields:
+    #         items = nested_data[field]
+    #         if items is not None:  # Only update if provided
+    #             if items:  # Non-empty array
+    #                 getattr(updated_instance, related_name).all().delete()
+    #                 serializer = serializer_class(data=items, many=True, context=self.context)
+    #                 if serializer.is_valid():
+    #                     try:
+    #                         serializer.save(user_profile=updated_instance)
+    #                         logger.info(f"Updated {len(items)} {field} for profile {updated_instance.id}")
+    #                     except Exception as e:
+    #                         logger.error(f"Failed to save {field} for profile {updated_instance.id}: {str(e)}")
+    #                         logger.error(f"Problematic data: {items}")
+    #                         raise serializers.ValidationError(f"Failed to save {field}: {str(e)}")
+    #                 else:
+    #                     logger.error(f"Validation failed for {field}: {serializer.errors}")
+    #                     raise serializers.ValidationError({field: serializer.errors})
+    #             else:
+    #                 logger.info(f"Empty {field} provided - clearing existing")
+    #                 getattr(updated_instance, related_name).all().delete()
+    #         else:
+    #             logger.info(f"No update for {field} - keeping existing")
+
+    #     return updated_instance
     def update(self, instance, validated_data):
         logger.info(f"Updating UserProfile instance {instance.id} with validated data: {validated_data}")
-        nested_fields = [
-            ("professional_qualifications", ProfessionalQualificationSerializer, "professional_qualifications"),
-            ("employment_details", EmploymentDetailSerializer, "employment_details"),
-            ("education_details", EducationDetailSerializer, "education_details"),
-            ("reference_checks", ReferenceCheckSerializer, "reference_checks"),
-            ("proof_of_address", ProofOfAddressSerializer, "proof_of_address"),
-            ("insurance_verifications", InsuranceVerificationSerializer, "insurance_verifications"),
-            ("driving_risk_assessments", DrivingRiskAssessmentSerializer, "driving_risk_assessments"),
-            ("legal_work_eligibilities", LegalWorkEligibilitySerializer, "legal_work_eligibilities"),
-            ("other_user_documents", OtherUserDocumentsSerializer, "other_user_documents"),
-        ]
-        nested_data = {field: validated_data.pop(field, None) for field, _, _ in nested_fields}
+        with transaction.atomic():
+            nested_fields = [
+                ("professional_qualifications", ProfessionalQualificationSerializer, "professional_qualifications"),
+                ("employment_details", EmploymentDetailSerializer, "employment_details"),
+                ("education_details", EducationDetailSerializer, "education_details"),
+                ("reference_checks", ReferenceCheckSerializer, "reference_checks"),
+                ("proof_of_address", ProofOfAddressSerializer, "proof_of_address"),
+                ("insurance_verifications", InsuranceVerificationSerializer, "insurance_verifications"),
+                ("driving_risk_assessments", DrivingRiskAssessmentSerializer, "driving_risk_assessments"),
+                ("legal_work_eligibilities", LegalWorkEligibilitySerializer, "legal_work_eligibilities"),
+                ("other_user_documents", OtherUserDocumentsSerializer, "other_user_documents"),
+            ]
+            nested_data = {field: validated_data.pop(field, None) for field, _, _ in nested_fields}
 
-        image_fields = [
-            ("profile_image", "profile_image_url"),
-            ("drivers_licence_image1", "drivers_licence_image1_url"),
-            ("drivers_licence_image2", "drivers_licence_image2_url"),
-            ("Right_to_Work_file", "Right_to_Work_file_url"),
-            ("dbs_certificate", "dbs_certificate_url"),
-            ("dbs_update_file", "dbs_update_file_url"),
-        ]
-        for field, url_field in image_fields:
-            file = validated_data.pop(field, None)
-            if file and hasattr(file, "name"):
-                logger.info(f"Uploading {field}: {file.name}")
-                try:
-                    url = upload_file_dynamic(
-                        file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
-                    )
-                    validated_data[url_field] = url
-                    logger.info(f"{field} uploaded: {url}")
-                except Exception as e:
-                    logger.error(f"Failed to upload {field}: {str(e)}")
-                    raise serializers.ValidationError(f"Failed to upload {field}: {str(e)}")
-            else:
-                logger.info(f"No file provided for {field}, keeping existing {url_field}")
-                validated_data[url_field] = getattr(instance, url_field, None)
-
-        updated_instance = super().update(instance, validated_data)
-
-        for field, serializer_class, related_name in nested_fields:
-            items = nested_data[field]
-            if items is not None:  # Only update if provided
-                if items:  # Non-empty array
-                    getattr(updated_instance, related_name).all().delete()
-                    serializer = serializer_class(data=items, many=True, context=self.context)
-                    if serializer.is_valid():
-                        try:
-                            serializer.save(user_profile=updated_instance)
-                            logger.info(f"Updated {len(items)} {field} for profile {updated_instance.id}")
-                        except Exception as e:
-                            logger.error(f"Failed to save {field} for profile {updated_instance.id}: {str(e)}")
-                            logger.error(f"Problematic data: {items}")
-                            raise serializers.ValidationError(f"Failed to save {field}: {str(e)}")
-                    else:
-                        logger.error(f"Validation failed for {field}: {serializer.errors}")
-                        raise serializers.ValidationError({field: serializer.errors})
+            image_fields = [
+                ("profile_image", "profile_image_url"),
+                ("drivers_licence_image1", "drivers_licence_image1_url"),
+                ("drivers_licence_image2", "drivers_licence_image2_url"),
+                ("Right_to_Work_file", "Right_to_Work_file_url"),
+                ("dbs_certificate", "dbs_certificate_url"),
+                ("dbs_update_file", "dbs_update_file_url"),
+            ]
+            for field, url_field in image_fields:
+                file = validated_data.pop(field, None)
+                if file and hasattr(file, "name"):
+                    logger.info(f"Uploading {field}: {file.name}")
+                    try:
+                        url = upload_file_dynamic(
+                            file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
+                        )
+                        validated_data[url_field] = url
+                        logger.info(f"{field} uploaded: {url}")
+                    except Exception as e:
+                        logger.error(f"Failed to update {field}: {str(e)}")
+                        raise serializers.ValidationError(f"Failed to upload {field}: {str(e)}")
                 else:
-                    logger.info(f"Empty {field} provided - clearing existing")
-                    getattr(updated_instance, related_name).all().delete()
-            else:
-                logger.info(f"No update for {field} - keeping existing")
+                    logger.info(f"No file provided for {field}, keeping existing {url_field}")
+                    validated_data[url_field] = getattr(instance, url_field, None)
 
-        return updated_instance
+            updated_instance = super().update(instance, validated_data)
 
+            for field, serializer_class, related_name in nested_fields:
+                items = nested_data[field]
+                if items is not None:  # Only process if field is provided
+                    existing_items = {item.id: item for item in getattr(updated_instance, related_name).all()}
+                    sent_ids = set()
+
+                    if items:  # Non-empty array
+                        serializer = serializer_class(data=items, many=True, context=self.context)
+                        if serializer.is_valid():
+                            for item_data in items:
+                                item_id = item_data.get("id")
+                                if item_id and item_id in existing_items:
+                                    # Update existing item
+                                    item = existing_items[item_id]
+                                    item_serializer = serializer_class(item, data=item_data, partial=True, context=self.context)
+                                    if item_serializer.is_valid():
+                                        item_serializer.save()
+                                        logger.info(f"Updated {field} item {item_id} for profile {updated_instance.id}")
+                                        sent_ids.add(item_id)
+                                    else:
+                                        logger.error(f"Validation failed for {field} item {item_id}: {item_serializer.errors}")
+                                        raise serializers.ValidationError({field: item_serializer.errors})
+                                else:
+                                    # Create new item
+                                    item_serializer = serializer_class(data=item_data, context=self.context)
+                                    if item_serializer.is_valid():
+                                        item_serializer.save(user_profile=updated_instance)
+                                        logger.info(f"Created new {field} item for profile {updated_instance.id}")
+                                    else:
+                                        logger.error(f"Validation failed for new {field} item: {item_serializer.errors}")
+                                        raise serializers.ValidationError({field: item_serializer.errors})
+                        else:
+                            logger.error(f"Validation failed for {field}: {serializer.errors}")
+                            raise serializers.ValidationError({field: serializer.errors})
+
+                        # Optionally delete items not included in the request
+                        # for item_id in set(existing_items) - sent_ids:
+                        #     existing_items[item_id].delete()
+                        #     logger.info(f"Deleted {field} item {item_id} for profile {updated_instance.id}")
+                    else:
+                        logger.info(f"Empty {field} provided - no changes made")
+                        # Optionally clear all items if an empty array is sent
+                        # getattr(updated_instance, related_name).all().delete()
+                        # logger.info(f"Cleared all {field} for profile {updated_instance.id}")
+                else:
+                    logger.info(f"No update for {field} - keeping existing")
+
+            return updated_instance
 
 class UserCreateSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=True)

@@ -9,6 +9,7 @@ class ActiveApplicationsManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
 
+
 class JobApplication(models.Model):
     STATUS_CHOICES = [
         ('new', 'New'),
@@ -20,9 +21,7 @@ class JobApplication(models.Model):
         ('hired', 'Hired'),
         ('rejected', 'Rejected'),
         ('withdrawn', 'Withdrawn'),
-        ('withdrawn', 'Withdrawn'),
         ('onboarded', 'Onboarded'),
-
     ]
     STAGE_CHOICES = [
         ('application', 'Application'),
@@ -32,7 +31,7 @@ class JobApplication(models.Model):
         ('hired', 'Hired'),
         ('rejected', 'Rejected'),
         ('compliance_completed', 'Compliance Completed'),
-         ('onboarded', 'Onboarded'),
+        ('onboarded', 'Onboarded'),
     ]
     SOURCE_CHOICES = [
         ('career_site', 'Career Site'),
@@ -54,9 +53,7 @@ class JobApplication(models.Model):
     branch_id = models.CharField(max_length=36, null=True, blank=True)
 
     # Candidate info
-    # first_name = models.CharField(max_length=100, blank=True, null=True)
-    # last_name = models.CharField(max_length=100, blank=True, null=True)
-    full_name = models.CharField(max_length=255, blank=True, null=True)  # Optional, can be auto-filled
+    full_name = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(max_length=255, blank=False, null=False)
     phone = models.CharField(max_length=50, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
@@ -68,11 +65,12 @@ class JobApplication(models.Model):
 
     # Application meta
     source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default='career_site')
-    referred_by = models.CharField(max_length=36, blank=True, null=True)  # Employee UUID
+    referred_by = models.CharField(max_length=36, blank=True, null=True)
 
     application_date = models.DateTimeField(default=timezone.now)
     current_stage = models.CharField(max_length=20, choices=STAGE_CHOICES, default='application')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    hired_by = models.JSONField(default=dict, blank=True, null=True)  # New field to store hiring user details
 
     # AI vetting
     ai_vetting_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
@@ -120,12 +118,10 @@ class JobApplication(models.Model):
         return f"{self.email} {self.full_name} - {self.job_requisition_id} ({self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        is_new = not self.pk
         if not self.id:
-            import uuid
             self.id = str(uuid.uuid4())
         if not self.full_name:
-            self.full_name = f"{self.first_name} {self.last_name}"
+            self.full_name = f"{self.first_name} {self.last_name}" if hasattr(self, 'first_name') else None
         super().save(*args, **kwargs)
 
     def soft_delete(self):
@@ -140,15 +136,11 @@ class JobApplication(models.Model):
             self.save()
             logger.info(f"JobApplication {self.id} restored for tenant {self.tenant_id}")
 
-
     def get_resume_url(self):
-        # Find resume document in self.documents
         for doc in self.documents:
             if doc.get('document_type', '').lower() in ['resume', 'curriculum vitae (cv)']:
                 return doc.get('file_url')
         return None
-
-
 
 class Schedule(models.Model):
     STATUS_CHOICES = [

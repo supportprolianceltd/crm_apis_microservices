@@ -569,6 +569,8 @@ class ProfessionalQualification(models.Model):
     class Meta:
         verbose_name_plural = "Professional Qualifications"
 
+
+
 class EmploymentDetail(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='employment_details')
     job_role = models.CharField(max_length=255)

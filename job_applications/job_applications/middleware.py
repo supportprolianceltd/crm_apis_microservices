@@ -9,14 +9,7 @@ from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger('job_applications')
 
-# public_paths = [
-#     '/api/docs/',
-#     '/api/schema/',
-#     '/api/health/',
-#     '/api/applications-engine/applications/parse-resume/autofill/',  # <-- Fix here
-#     '/api/applications-engine/apply-jobs/',
-#     '/api/applications-engine/applications/code/', 
-# ]
+
 public_paths = [
     '/api/docs/',
     '/api/schema/',
@@ -124,11 +117,6 @@ class CustomTenantSchemaMiddleware(MiddlewareMixin):
         self.get_response = get_response
 
     def __call__(self, request):
-        # logger.info("Entering CustomTenantSchemaMiddleware")
-        # logger.info(f"Incoming request path: {request.path}")
-        # logger.info(f"Authorization header: {request.META.get('HTTP_AUTHORIZATION')}")
-
-        # Handle public endpoints
 
         if any(request.path.startswith(path) for path in public_paths):
             connection.set_schema_to_public()
@@ -163,11 +151,6 @@ class CustomTenantSchemaMiddleware(MiddlewareMixin):
         self.get_response = get_response
 
     def __call__(self, request):
-        # logger.info("Entering CustomTenantSchemaMiddleware")  # <-- Added logging
-        # logger.info(f"Incoming request path: {request.path}")
-        # logger.info(f"Authorization header: {request.headers.get('HTTP_AUTHORIZATION')}")
-        
-
         # Handle public endpoints
       
         if any(request.path.startswith(path) for path in public_paths):
@@ -214,5 +197,3 @@ class CustomTenantSchemaMiddleware(MiddlewareMixin):
             return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
 
         return self.get_response(request)
-    
-    

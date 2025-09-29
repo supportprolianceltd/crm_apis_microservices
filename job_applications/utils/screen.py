@@ -1,5 +1,6 @@
+ 
 #utils/screen.py
-# 
+#
 import logging
 import os
 import re
@@ -59,7 +60,7 @@ def get_sentence_transformer_model():
 def get_resume_ner_pipeline():
     """Lazily load the NER pipeline with proper caching."""
     global _resume_ner_tokenizer, _resume_ner_model, _resume_ner_pipeline
-    
+
     if _resume_ner_pipeline is None:
         try:
             with _model_lock:
@@ -80,7 +81,7 @@ def get_resume_ner_pipeline():
             logger.exception(f"Failed to load NER model: {str(e)}")
             # Create a simple fallback pipeline
             _resume_ner_pipeline = lambda x: []
-    
+
     return _resume_ner_pipeline
 
 def simple_ner_fallback(text):
@@ -92,11 +93,11 @@ def simple_ner_fallback(text):
         line = line.strip()
         if re.match(name_pattern, line) and len(line.split()) <= 4:
             names.append(line)
-    
+
     # Extract emails and phones with regex
     email_match = re.search(r'[\w\.-]+@[\w\.-]+', text)
     phone_match = re.search(r'(\+?\d{1,3}[\s-]?)?(\(?\d{3}\)?[\s-]?)?\d{3}[\s-]?\d{4}', text)
-    
+
     return [
         {'entity_group': 'PER', 'word': name} for name in names[:1]
     ] + (
@@ -161,7 +162,7 @@ def timeout(seconds=30, error_message="Function call timed out"):
         def wrapper(*args, **kwargs):
             def handle_timeout(signum, frame):
                 raise TimeoutError(error_message)
-            
+
             # Set the signal handler and a alarm
             signal.signal(signal.SIGALRM, handle_timeout)
             signal.alarm(seconds)
@@ -197,7 +198,7 @@ def parse_resume(file_path):
         # Get file extension
         _, ext = os.path.splitext(file_path)
         ext = ext.lower()
-        
+
         if ext == '.pdf':
             # Try text extraction first
             try:
@@ -209,7 +210,7 @@ def parse_resume(file_path):
                 except Exception as e:
                     logger.error(f"pdfplumber failed: {str(e)}")
                     text = ""
-                
+
                 # If pdfplumber failed or extracted little text, try pdfminer
                 if not text or len(text.strip()) < 100:
                     logger.info("Trying pdfminer as fallback")
@@ -219,12 +220,12 @@ def parse_resume(file_path):
                     except Exception as e:
                         logger.error(f"pdfminer also failed: {str(e)}")
                         text = ""
-                
+
                 # If still no text, try OCR
                 if not text or len(text.strip()) < 100:
                     logger.info("Text extraction failed, trying OCR")
                     text = extract_text_with_ocr(file_path)
-                
+
             except Exception as e:
                 logger.error(f"PDF parsing failed: {str(e)}")
                 text = ""
@@ -242,12 +243,12 @@ def parse_resume(file_path):
 
         text = clean_resume_text(text)
         logger.info(f"Final cleaned text length: {len(text)}")
-        
+
         if text:
             logger.debug(f"Sample of extracted text: {text[:500]}")
         else:
             logger.warning("No text could be extracted from the resume")
-            
+
         return text
     except Exception as e:
         logger.exception(f"Error parsing resume {file_path}: {str(e)}")
@@ -270,18 +271,18 @@ def extract_text_with_ocr(file_path):
                             text += ocr_text + "\n"
                         except Exception as e:
                             logger.error(f"OCR failed for image on page {page_num}: {str(e)}")
-                
+
                 # Also try to extract any text that might be there
                 page_text = page.extract_text() or ""
                 text += page_text + "\n"
-        
+
         logger.info(f"OCR extracted {len(text)} characters")
         return text
     except Exception as e:
         logger.error(f"OCR extraction failed: {str(e)}")
         return ""
-    
-    
+
+
 
 def parse_job_date(date_str):
     """Parse job dates with robust handling of formatting variations."""
@@ -291,11 +292,11 @@ def parse_job_date(date_str):
         date_str = re.sub(r'[📝•\-*]\s*', '', date_str)  # Remove emojis/bullets
         date_str = re.sub(r'\*\*', '', date_str)  # Remove bold markers
         date_str = date_str.replace('–', '-').replace('—', '-').strip()
-        
+
         # Handle present/future dates
         if "present" in date_str.lower():
             return datetime.now()
-        
+
         parsed_date = parse_date(date_str, fuzzy=True)
         return parsed_date
     except Exception as e:
@@ -306,7 +307,7 @@ def extract_experience_entries(resume_text):
     """Extract experience entries with improved structure handling."""
     experience = []
     gap_titles = "Career Break|Gap|Employment Gap|Sabbatical|Leave|Break"
-    
+
     # 1. First detect explicit gaps
     gap_pattern = re.compile(
         rf'\(?(?P<title>{gap_titles})\s*:\s*'
@@ -314,7 +315,7 @@ def extract_experience_entries(resume_text):
         r'(?P<end>(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}|Present)\s*\)?',
         re.IGNORECASE | re.MULTILINE
     )
-    
+
     gap_matches = gap_pattern.finditer(resume_text)
     for m in gap_matches:
         entry = {
@@ -326,43 +327,43 @@ def extract_experience_entries(resume_text):
         }
         logger.debug(f"Matched gap entry (regex): {entry}")
         experience.append(entry)
-    
+
     # 2. Improved job detection with markdown awareness
     job_pattern = re.compile(
-        r'(?P<title>^#{1,3}\s*.+?$|^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s*(?:[A-Z]{2,}|Manager|Engineer|Analyst|Specialist)\b)', 
+        r'(?P<title>^#{1,3}\s*.+?$|^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s*(?:[A-Z]{2,}|Manager|Engineer|Analyst|Specialist)\b)',
         re.IGNORECASE | re.MULTILINE
     )
-    
+
     # Find all potential job title markers
     matches = list(job_pattern.finditer(resume_text))
     for i, m in enumerate(matches):
         title = re.sub(r'^#{1,3}\s*', '', m.group('title')).strip()
-        
+
         # Skip if title matches gap pattern
         if re.search(rf'\b({gap_titles})\b', title, re.IGNORECASE):
             continue
-            
+
         # Look for company in next 1-3 lines
         company = "Unknown"
         start_date = ""
         end_date = ""
-        
+
         # Search in subsequent lines
         next_lines = resume_text[m.end():].split('\n')[:5]
         for line in next_lines:
             line = line.strip()
-            
+
             # Detect company (italic or plain text)
             if not company or company == "Unknown":  # Allow updating if "Unknown"
                 company_match = re.search(r'(\*[^*]+\*)|([A-Z][a-z]+(?:\s+[A-Za-z]+)*)', line)
                 if company_match:
                     company = re.sub(r'\*', '', company_match.group(0)).strip()
-                
+
             # Detect date range (with flexible formatting)
             date_match = re.search(
                 r'(\d{4}\s*[–\-]\s*(?:Present|\d{4}))|'
                 r'((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}\s*[–\-]\s*(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}|Present)',
-                line, 
+                line,
                 re.IGNORECASE
             )
             if date_match and not start_date:
@@ -374,12 +375,12 @@ def extract_experience_entries(resume_text):
                 else:
                     start_date = dates
                     end_date = "Present"
-                    
+
                 # Clean date strings
                 start_date = start_date.strip()
                 end_date = end_date.strip()
                 break
-                
+
         # Create entry if dates found
         if start_date:
             entry = {
@@ -393,7 +394,7 @@ def extract_experience_entries(resume_text):
             if not any(e["title"] == entry["title"] and e["start"] == entry["start"] for e in experience):
                 logger.debug(f"Matched job entry: {title} at {company} ({start_date} - {end_date})")
                 experience.append(entry)
-    
+
     # 3. Add fallback: Find date ranges anywhere in text
     date_range_pattern = re.compile(
         r'(\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}\s*[–\-]\s*(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}\b)|'
@@ -401,20 +402,20 @@ def extract_experience_entries(resume_text):
         r'(\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}\s*[–\-]\s*Present\b)',
         re.IGNORECASE
     )
-    
+
     for match in date_range_pattern.finditer(resume_text):
         date_range = match.group(0)
         if '–' in date_range:
             start_date, end_date = date_range.split('–', 1)
         else:
             start_date, end_date = date_range.split('-', 1)
-        
+
         # Find nearest preceding text as title
         context_start = max(0, match.start() - 100)
         context = resume_text[context_start:match.start()]
         title_match = re.search(r'([^\n]{5,50})\n*$', context)
         title = title_match.group(1).strip() if title_match else "Unknown Position"
-        
+
         # Create entry if not already captured
         if not any(e["start"] == start_date.strip() for e in experience):
             entry = {
@@ -425,7 +426,7 @@ def extract_experience_entries(resume_text):
                 "is_gap": False
             }
             experience.append(entry)
-    
+
     return experience
 
 
@@ -469,7 +470,7 @@ def extract_resume_fields(resume_text, resume_filename=None):
     """
     try:
         logger.info(f"Extracting fields from resume text of length: {len(resume_text)}")
-        
+
         extracted_data = {
             "full_name": "",
             "email": "",

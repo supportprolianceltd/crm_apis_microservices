@@ -45,14 +45,9 @@ urlpatterns = [
 
     path('applications/parse-resume/autofill/', ResumeParseView.as_view(), name='resume-parse'),
 
-    
-    # path('requisitions/<str:job_requisition_id>/screen-resumes/', ResumeScreeningView.as_view(), name='resume-screening'),
-
-
         
     path('requisitions/<str:job_requisition_id>/screen-resumes/', ResumeScreeningView.as_view(), name='resume-screening'),
     path('requisitions/screening/task-status/<str:task_id>/', ScreeningTaskStatusView.as_view(), name='screening-task-status'),
-
 
 
     path('published-requisitions-with-shortlisted/', PublishedJobRequisitionsWithShortlistedApplicationsView.as_view(), name='published-requisitions-with-shortlisted'),

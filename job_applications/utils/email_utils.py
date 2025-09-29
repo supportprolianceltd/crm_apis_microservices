@@ -66,6 +66,9 @@ def send_screening_notification(applicant, tenant_id, event_type, source="job-ap
     Send a screening notification event to the notification microservice,
     with robust logging and error handling like in CustomTokenSerializer.
     """
+    # print("applicant")
+    # print(applicant)
+    # print("applicant")
     try:
         event_payload = {
             "metadata": {
@@ -76,7 +79,7 @@ def send_screening_notification(applicant, tenant_id, event_type, source="job-ap
                 "source": source
             },
             "data": {
-                "user_email": applicant.get("email"),
+                "email": applicant.get("email"),
                 "full_name": applicant.get("full_name"),
                 "application_id": applicant.get("application_id"),
                 "job_requisition_id": applicant.get("job_requisition_id"),

@@ -1,0 +1,157 @@
+
+version: '3.8'
+
+services:
+  app:
+    container_name: app
+    build: .
+    ports:
+      - "3001:3001"  # Host:3001 → Container:3001
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/notifications
+      PORT: 3001
+    networks:
+      - auth_service_default
+
+  db:
+    container_name: notifications_db
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: notifications
+    ports:
+      - "5440:5432"  # Host:5440 → Container:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notifications"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - auth_service_default
+
+  redis:
+    container_name: redis
+    image: redis:7
+    restart: always
+    ports:
+      - "6380:6379"
+    networks:
+      - auth_service_default
+
+volumes:
+  db_data:
+
+networks:
+  auth_service_default:
+    external: true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install all dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy Prisma schema and source code
+COPY prisma ./prisma
+COPY . .
+
+# Generate Prisma client and run migrations (for production DB, set envs as needed)
+RUN npx prisma generate
+RUN npx prisma migrate deploy || echo "Migrations may fail in builder if DB is not available, that's OK for CI/CD."
+
+# Build the app
+RUN npm run build
+
+
+
+# ----------------------
+# Production image
+# ----------------------
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install Postgres client for pg_isready
+RUN apk add --no-cache postgresql-client
+
+# Copy package.json and install only production deps
+COPY package*.json ./
+RUN npm install
+
+# Copy built code and generated Prisma client from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/prisma ./prisma
+
+# Copy wait-for-postgres script and setup.js
+COPY wait-for-postgres.sh ./
+COPY setup.js ./
+
+EXPOSE 3000
+
+# Make wait-for-postgres.sh executable
+RUN chmod +x wait-for-postgres.sh
+
+# Use wait-for-postgres.sh to wait for DB before running setup.js
+ENTRYPOINT ["./wait-for-postgres.sh", "db:5432", "node", "setup.js"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DATABASE_URL=postgres://postgres:postgres@db:5432/notifications
+REDIS_HOST=redis
+REDIS_PORT=6379
+NODE_ENV=development
+PORT=3001
+
+#SMPT from email
+EMAIL_FROM=""
+
+#SMPT user
+ETHEREAL_USER=
+
+#SMPT password
+ETHEREAL_PASS=

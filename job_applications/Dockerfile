@@ -13,10 +13,12 @@ RUN apt-get update && apt-get install -y \
     netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install Python dependencies including spacy first
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install pytesseract pillow
+RUN pip install --no-cache-dir spacy && \
+    python -m spacy download en_core_web_sm && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install pytesseract pillow
 
 # Pre-download ML models during build
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"

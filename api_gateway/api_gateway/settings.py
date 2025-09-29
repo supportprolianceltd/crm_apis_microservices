@@ -138,7 +138,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://crm-frontend-react.vercel.app",
     "http://localhost:8000",
+
 ]
+
+# Make sure these are set
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = ['*']
 
 # Microservice URLs from .env
 AUTH_SERVICE_URL = env.str("AUTH_SERVICE_URL", default="http://auth-service:8001")
