@@ -56,6 +56,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
 ])
 # ======================== Database ========================
 # Celery Configuration# Increase database timeouts
+# job_applications/settings.py
 DATABASES = {
     'default': {
         'ENGINE': 'django_tenants.postgresql_backend',
@@ -64,16 +65,21 @@ DATABASES = {
         'PASSWORD': env('DB_PASSWORD', default=''),
         'HOST': env('DB_HOST', default='localhost'),
         'PORT': env('DB_PORT', default='5432'),
-        'CONN_MAX_AGE': 600,  # Increased to 10 minutes
+        'CONN_MAX_AGE': 60,  # Reduce from 600 to 60
         'OPTIONS': {
-            'connect_timeout': 30,
+            'connect_timeout': 10,
             'keepalives': 1,
             'keepalives_idle': 30,
             'keepalives_interval': 10,
             'keepalives_count': 5,
+        },
+        # Add connection health checks
+        'TEST': {
+            'NAME': 'test_talent_db',
         }
     }
 }
+
 
 
 
@@ -98,16 +104,31 @@ INSTALLED_APPS = [
 
 # ======================== Middleware ========================
 
+# MIDDLEWARE = [
+#     'corsheaders.middleware.CorsMiddleware',
+#     'django.middleware.security.SecurityMiddleware',
+#     'django.contrib.sessions.middleware.SessionMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+#     'django.middleware.csrf.CsrfViewMiddleware',
+#     'job_applications.middleware.MicroserviceRS256JWTMiddleware',
+#     'job_applications.middleware.CustomTenantSchemaMiddleware',
+#     'django.contrib.messages.middleware.MessageMiddleware',
+#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+# ]
+
+# Add database connection middleware
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    # Your custom middleware
     'job_applications.middleware.MicroserviceRS256JWTMiddleware',
     'job_applications.middleware.CustomTenantSchemaMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Add this for database connection management
+    'django.middleware.common.CommonMiddleware',
 ]
 
 

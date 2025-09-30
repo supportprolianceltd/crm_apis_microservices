@@ -21,9 +21,7 @@ ALLOWED_HOSTS = env.list(
     "ALLOWED_HOSTS", default=["localhost", "127.0.0.1", "auth_service", "http://localhost:9090", "*"]
 )
 NOTIFICATIONS_SERVICE_URL = env("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
-# Application Definition
 
-# Middleware
 MIDDLEWARE = [
     "auth_service.middleware.CustomTenantMiddleware",  # Tenant resolution
     "corsheaders.middleware.CorsMiddleware",

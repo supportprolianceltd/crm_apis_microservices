@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   job-applications:
     build:
@@ -28,7 +26,7 @@ services:
       - SUPABASE_KEY=${SUPABASE_KEY}
       - SUPABASE_BUCKET=luminacaremedia
       - STORAGE_TYPE=supabase
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      # Remove KAFKA_BOOTSTRAP_SERVERS since Kafka service doesn't exist
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,https://crm-frontend-react.vercel.app,http://localhost:8000
       - CELERY_BROKER_URL=redis://job_app_redis:6379/0
       - CELERY_RESULT_BACKEND=redis://job_app_redis:6379/0
@@ -39,7 +37,7 @@ services:
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
     command: >
-      sh -c "/app/wait-for-it.sh kafka:9092 -t 60 -- 
+      sh -c "/app/wait-for-it.sh job_app_postgres:5432 -t 60 -- 
              gunicorn job_applications.wsgi:application --bind 0.0.0.0:8003 --workers=1 --timeout 300"
     depends_on:
       job_app_postgres:

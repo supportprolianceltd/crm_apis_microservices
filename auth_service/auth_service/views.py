@@ -48,6 +48,83 @@ from auth_service.utils.jwt_rsa import (
 logger = logging.getLogger(__name__)
 
 
+# class TokenValidateView(APIView):
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = [RS256TenantJWTAuthentication]
+
+#     def get(self, request):
+#         logger.info(f"TokenValidateView request payload: {request.headers}")
+#         try:
+#             user = request.user
+#             tenant = getattr(request, "tenant", None)
+#             with tenant_context(tenant):
+#                 user_data = CustomUserSerializer(user).data
+#                 response_data = {
+#                     "status": "success",
+#                     "user": user_data,
+#                     "tenant_id": str(tenant.id),
+#                     "tenant_organizational_id": str(tenant.organizational_id),
+#                     "tenant_unique_id": str(tenant.unique_id),
+#                     "tenant_schema": tenant.schema_name,
+#                 }
+#                 # logger.info(f"TokenValidateView response: {response_data}")
+#                 logger.info("Token validation successful")
+#                 return Response(response_data, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             logger.error(f"Token validation failed: {str(e)}")
+#             logger.info("Token validation unsuccessful")
+#             response_data = {"status": "error", "message": "Invalid or expired token."}
+#             # logger.info(f"TokenValidateView response: {response_data}")
+#             return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
+
+# In your auth service - add better error handling
+# class TokenValidateView(APIView):
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = [RS256TenantJWTAuthentication]
+
+#     def get(self, request):
+#         logger.info(f"TokenValidateView request payload: {request.headers}")
+#         try:
+#             # Add request source checking
+#             forwarded_by_gateway = request.headers.get('X-Gateway-Request-ID')
+#             if not forwarded_by_gateway:
+#                 logger.warning("Token validation request not from gateway")
+#                 return Response({
+#                     "status": "error", 
+#                     "message": "Invalid request source"
+#                 }, status=status.HTTP_400_BAD_REQUEST)
+                
+#             user = request.user
+#             tenant = getattr(request, "tenant", None)
+            
+#             if not tenant:
+#                 return Response({
+#                     "status": "error", 
+#                     "message": "Tenant context missing"
+#                 }, status=status.HTTP_400_BAD_REQUEST)
+                
+#             with tenant_context(tenant):
+#                 user_data = CustomUserSerializer(user).data
+#                 response_data = {
+#                     "status": "success",
+#                     "user": user_data,
+#                     "tenant_id": str(tenant.id),
+#                     "tenant_organizational_id": str(tenant.organizational_id),
+#                     "tenant_unique_id": str(tenant.unique_id),
+#                     "tenant_schema": tenant.schema_name,
+#                 }
+#                 logger.info("Token validation successful")
+#                 return Response(response_data, status=status.HTTP_200_OK)
+                
+#         except Exception as e:
+#             logger.error(f"Token validation failed: {str(e)}")
+#             # Return more specific error information
+#             return Response({
+#                 "status": "error", 
+#                 "message": "Token validation failed",
+#                 "code": "TOKEN_INVALID"
+#             }, status=status.HTTP_401_UNAUTHORIZED)
+
 class TokenValidateView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [RS256TenantJWTAuthentication]
@@ -55,8 +132,24 @@ class TokenValidateView(APIView):
     def get(self, request):
         logger.info(f"TokenValidateView request payload: {request.headers}")
         try:
+            # TEMPORARILY COMMENT THIS OUT FOR DEVELOPMENT
+            # forwarded_by_gateway = request.headers.get('X-Gateway-Request-ID')
+            # if not forwarded_by_gateway:
+            #     logger.warning("Token validation request not from gateway")
+            #     return Response({
+            #         "status": "error", 
+            #         "message": "Invalid request source"
+            #     }, status=status.HTTP_400_BAD_REQUEST)
+                
             user = request.user
             tenant = getattr(request, "tenant", None)
+            
+            if not tenant:
+                return Response({
+                    "status": "error", 
+                    "message": "Tenant context missing"
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
             with tenant_context(tenant):
                 user_data = CustomUserSerializer(user).data
                 response_data = {
@@ -67,17 +160,18 @@ class TokenValidateView(APIView):
                     "tenant_unique_id": str(tenant.unique_id),
                     "tenant_schema": tenant.schema_name,
                 }
-                # logger.info(f"TokenValidateView response: {response_data}")
                 logger.info("Token validation successful")
                 return Response(response_data, status=status.HTTP_200_OK)
+                
         except Exception as e:
             logger.error(f"Token validation failed: {str(e)}")
-            logger.info("Token validation unsuccessful")
-            response_data = {"status": "error", "message": "Invalid or expired token."}
-            # logger.info(f"TokenValidateView response: {response_data}")
-            return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
-
-
+            return Response({
+                "status": "error", 
+                "message": "Token validation failed",
+                "code": "TOKEN_INVALID"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        
 class CustomTokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):

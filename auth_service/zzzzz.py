@@ -31,14 +31,14 @@ with tenant_context(tenant):
 
 
 from core.models import Tenant, Domain
-if not Tenant.objects.filter(schema_name='arts').exists():
+if not Tenant.objects.filter(schema_name='auth').exists():
     tenant = Tenant.objects.create(
-        name='arts',
-        schema_name='arts',
+        name='auth',
+        schema_name='auth',
     )
     tenant.auto_create_schema = False
     tenant.save()
-    Domain.objects.create(tenant=tenant, domain='artstraining.co.uk', is_primary=True)
+    Domain.objects.create(tenant=tenant, domain='auth-service', is_primary=True)
 
 from core.models import Tenant, Domain
 if not Tenant.objects.filter(schema_name='auth-service').exists():

@@ -73,11 +73,5 @@ urlpatterns = [
 
     path('health/', HealthCheckView.as_view(), name='health-check'),
 
+
 ]
-
-
-
-
-
-
-
