@@ -716,6 +716,8 @@ class TenantViewSet(viewsets.ModelViewSet):
             serializer.save()
         return Response(serializer.data)
 
+
+
 class PublicTenantInfoView(APIView):
     permission_classes = [AllowAny]
 

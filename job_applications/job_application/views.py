@@ -1222,6 +1222,9 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
         return super().check_permissions(request)
 
+
+
+
 class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = JobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -1271,6 +1274,8 @@ class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
         except Exception as e:
             logger.exception(f"Error deleting job application: {str(e)}")
             return Response({"detail": str(e)}, status=500)
+
+
 
 class JobApplicationBulkDeleteView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -1705,6 +1710,8 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             logger.error(f"Failed to send schedule creation notification for schedule {schedule.id}: {str(e)}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ScheduleSerializer

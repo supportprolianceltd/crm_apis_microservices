@@ -495,6 +495,8 @@ class PublicJobApplicationSerializer(serializers.ModelSerializer):
             ]
         return data
 
+
+
 class JobApplicationSerializer(serializers.ModelSerializer):
     documents = DocumentSerializer(many=True, required=False)
     compliance_status = ComplianceStatusSerializer(many=True, required=False)
@@ -662,6 +664,8 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         return data
 
 
+
+
 class ScheduleSerializer(serializers.ModelSerializer):
     job_application_id = serializers.CharField()
     branch_id = serializers.CharField(allow_null=True, required=False)
@@ -789,6 +793,8 @@ class ScheduleSerializer(serializers.ModelSerializer):
         if validated_data.get('status') != 'cancelled':
             validated_data['cancellation_reason'] = None
         return super().update(instance, validated_data)
+    
+
     
 class SimpleMessageSerializer(serializers.Serializer):
     detail = serializers.CharField()
