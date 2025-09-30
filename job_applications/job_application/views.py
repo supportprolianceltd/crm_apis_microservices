@@ -64,6 +64,10 @@ from utils.screen import (
 )
 from utils.email_utils import send_screening_notification
 from utils.supabase import upload_file_dynamic
+from django.http import JsonResponse
+from django.views import View
+from datetime import datetime
+
 
 # Logger
 logger = logging.getLogger('job_applications')
@@ -107,6 +111,18 @@ def get_tenant_by_id(tenant_id, request):
 def chunk_list(lst, chunk_size):
     for i in range(0, len(lst), chunk_size):
         yield lst[i:i + chunk_size]
+
+
+
+class HealthCheckView(View):
+    def get(self, request):
+        health_data = {
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "service": "job-applications",
+            "version": "1.0.0"
+        }
+        return JsonResponse(health_data)
 
 
 class CustomPagination(PageNumberPagination):
@@ -169,6 +185,498 @@ class ResumeParseView(APIView):
             logger.exception(f"Error parsing resume: {str(e)} | Request data: {request.data}, FILES: {request.FILES}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# class ResumeScreeningView(APIView):
+#     serializer_class = SimpleMessageSerializer
+#     parser_classes = [JSONParser, MultiPartParser, FormParser]
+
+#     # Constants
+#     MAX_FILE_SIZE = 50 * 1024 * 1024
+#     MAX_SYNC_PROCESSING = 50
+#     MAX_WORKERS = 10
+
+#     def post(self, request, job_requisition_id):
+#         try:
+#             jwt_payload = getattr(request, 'jwt_payload', {})
+#             tenant_id = jwt_payload.get('tenant_unique_id')
+#             role = jwt_payload.get('role')
+#             branch = jwt_payload.get('user', {}).get('branch')
+
+#             document_type = request.data.get('document_type')
+#             applications_data = request.data.get('applications', [])
+#             num_candidates = request.data.get('number_of_candidates', 0)
+            
+#             try:
+#                 num_candidates = int(num_candidates)
+#             except (TypeError, ValueError):
+#                 num_candidates = 0
+
+#             job_requisition = get_job_requisition_by_id(job_requisition_id, request)
+#             if not job_requisition:
+#                 return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
+
+#             if not document_type:
+#                 return Response({"detail": "Document type is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+#             document_type_lower = document_type.lower()
+#             allowed_docs = [doc.lower() for doc in (job_requisition.get('documents_required') or [])]
+#             allowed_docs.extend(['resume', 'curriculum vitae (cv)', 'cv'])
+#             if document_type_lower not in allowed_docs:
+#                 return Response({"detail": f"Invalid document type: {document_type}"}, status=status.HTTP_400_BAD_REQUEST)
+
+#             # Fetch all applications if none provided
+#             if not applications_data:
+#                 applications = JobApplication.active_objects.filter(
+#                     job_requisition_id=job_requisition_id,
+#                     tenant_id=tenant_id,
+#                     resume_status=True
+#                 )
+#                 paginator = Paginator(applications, 20)
+#                 applications_data = []
+#                 for page_num in paginator.page_range:
+#                     page = paginator.page(page_num)
+#                     applications_data.extend([{"application_id": str(app.id)} for app in page])
+#                 logger.info(f"Fetched {len(applications_data)} applications from database")
+
+#             logger.info(f"Screening {len(applications_data)} applications")
+
+#             # Process synchronously for small batches, asynchronously for large
+#             if len(applications_data) <= self.MAX_SYNC_PROCESSING:
+#                 return self._process_synchronously(
+#                     request, job_requisition_id, job_requisition, tenant_id, 
+#                     role, branch, document_type, applications_data, num_candidates
+#                 )
+            
+#             task = process_large_resume_batch.delay(
+#                 job_requisition_id=job_requisition_id,
+#                 tenant_id=tenant_id,
+#                 document_type=document_type,
+#                 applications_data=applications_data,
+#                 num_candidates=num_candidates,
+#                 role=role,
+#                 branch=branch,
+#                 authorization_header=request.META.get('HTTP_AUTHORIZATION', '')
+#             )
+            
+#             return Response({
+#                 "detail": f"Started processing {len(applications_data)} applications asynchronously",
+#                 "task_id": task.id,
+#                 "status_endpoint": f"{settings.JOB_APPLICATIONS_URL}/api/applications-engine/applications/requisitions/screening/task-status/{task.id}/",
+#             }, status=status.HTTP_202_ACCEPTED)
+
+#         except Exception as e:
+#             logger.exception(f"Error initiating resume screening: {str(e)}")
+#             return Response({
+#                 "error": "Failed to initiate screening",
+#                 "details": str(e)
+#             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#     def _process_synchronously(self, request, job_requisition_id, job_requisition, tenant_id, 
+#                              role, branch, document_type, applications_data, num_candidates):
+#         try:
+#             document_type_lower = document_type.lower()
+            
+#             # Filter applications
+#             if not applications_data:
+#                 applications = JobApplication.active_objects.filter(
+#                     job_requisition_id=job_requisition_id,
+#                     tenant_id=tenant_id,
+#                     resume_status=True
+#                 )
+#             else:
+#                 application_ids = [app['application_id'] for app in applications_data]
+#                 applications = JobApplication.active_objects.filter(
+#                     job_requisition_id=job_requisition_id,
+#                     tenant_id=tenant_id,
+#                     id__in=application_ids,
+#                     resume_status=True
+#                 )
+
+#             if role == 'recruiter' and branch:
+#                 applications = applications.filter(branch=branch)
+#             elif branch:
+#                 applications = applications.filter(branch=branch)
+
+#             applications_list = list(applications)
+#             applications_data_map = {str(a['application_id']): a for a in applications_data}
+
+#             # Download resumes
+#             download_results = []
+#             with ThreadPoolExecutor(max_workers=self.MAX_WORKERS) as executor:
+#                 future_to_app = {
+#                     executor.submit(
+#                         self._download_resume,
+#                         app,
+#                         applications_data_map.get(str(app.id)),
+#                         document_type_lower
+#                     ): app for app in applications_list
+#                 }
+#                 for future in concurrent.futures.as_completed(future_to_app):
+#                     download_results.append(future.result())
+
+#             # Process screening
+#             job_requirements = self._get_job_requirements(job_requisition)
+#             results = []
+            
+#             with ThreadPoolExecutor(max_workers=self.MAX_WORKERS) as executor:
+#                 future_to_result = {
+#                     executor.submit(
+#                         self._parse_and_screen,
+#                         result, 
+#                         job_requirements,
+#                         document_type
+#                     ): result for result in download_results
+#                 }
+#                 for future in concurrent.futures.as_completed(future_to_result):
+#                     results.append(future.result())
+
+#             # Process results and send emails
+#             final_response = self._process_screening_results(
+#                 results, applications_list, job_requisition, num_candidates, tenant_id
+#             )
+            
+#             return Response(final_response, status=status.HTTP_200_OK)
+
+#         except Exception as e:
+#             logger.exception(f"Synchronous processing failed: {str(e)}")
+#             return Response({
+#                 "error": "Synchronous processing failed",
+#                 "details": str(e)
+#             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#     def _download_resume(self, app, app_data, document_type_lower):
+#         try:
+#             if app_data and 'file_url' in app_data:
+#                 file_url = app_data['file_url']
+#                 compression = app_data.get('compression')
+#                 original_name = app_data.get('original_name', 'resume.pdf')
+#             else:
+#                 cv_doc = next(
+#                     (doc for doc in app.documents if doc['document_type'].lower() == document_type_lower),
+#                     None
+#                 )
+#                 if not cv_doc:
+#                     app.screening_status = 'failed'
+#                     app.screening_score = 0.0
+#                     app.save()
+#                     return {
+#                         "app": app,
+#                         "success": False,
+#                         "error": f"No {document_type_lower} document found",
+#                     }
+#                 file_url = cv_doc['file_url']
+#                 compression = cv_doc.get('compression')
+#                 original_name = cv_doc.get('original_name', 'resume.pdf')
+
+#             headers = {"Authorization": f"Bearer {settings.SUPABASE_KEY}"}
+#             response = requests.get(file_url, headers=headers, timeout=30, stream=True)
+#             logger.info(f"Download response for app {app.id}: status={response.status_code}")
+            
+#             if response.status_code != 200:
+#                 app.screening_status = 'failed'
+#                 app.screening_score = 0.0
+#                 app.save()
+#                 return {
+#                     "app": app,
+#                     "success": False,
+#                     "error": f"Failed to download resume, status: {response.status_code}",
+#                 }
+
+#             file_content = response.content
+#             content_type = response.headers.get('content-type', '')
+            
+#             # Check file size
+#             if len(file_content) > self.MAX_FILE_SIZE:
+#                 logger.error(f"File too large for app {app.id}: {len(file_content)} bytes")
+#                 app.screening_status = 'failed'
+#                 app.screening_score = 0.0
+#                 app.save()
+#                 return {
+#                     "app": app,
+#                     "success": False,
+#                     "error": f"File too large ({len(file_content)} bytes)",
+#                 }
+
+#             # Enhanced compression handling
+#             file_content = self._handle_compression(file_content, compression, file_url, original_name, app.id)
+#             if file_content is None:
+#                 app.screening_status = 'failed'
+#                 app.screening_score = 0.0
+#                 app.save()
+#                 return {
+#                     "app": app,
+#                     "success": False,
+#                     "error": "Failed to decompress file",
+#                 }
+
+#             file_ext = mimetypes.guess_extension(content_type) or '.pdf'
+#             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=file_ext)
+#             temp_file.write(file_content)
+#             temp_file.close()
+            
+#             return {
+#                 "app": app,
+#                 "success": True,
+#                 "temp_file_path": temp_file.name,
+#                 "file_url": file_url,
+#                 "original_name": original_name
+#             }
+            
+#         except Exception as e:
+#             logger.error(f"Download failed for app {app.id}: {str(e)}")
+#             app.screening_status = 'failed'
+#             app.screening_score = 0.0
+#             app.save()
+#             return {
+#                 "app": app,
+#                 "success": False,
+#                 "error": f"Download error: {str(e)}",
+#             }
+
+#     def _handle_compression(self, file_content, compression, file_url, original_name, app_id):
+#         """Handle various compression formats"""
+#         try:
+#             # Detect compression from magic numbers if not explicitly provided
+#             if not compression:
+#                 compression = self._detect_compression_format(file_content)
+            
+#             # GZIP compression
+#             if compression == 'gzip' or file_url.endswith('.gz'):
+#                 try:
+#                     decompressed = gzip.decompress(file_content)
+#                     logger.info(f"Successfully decompressed GZIP file for app {app_id}")
+#                     return decompressed
+#                 except Exception as e:
+#                     logger.warning(f"GZIP decompression failed for app {app_id}: {str(e)}")
+#                     # Try to detect if it's actually compressed
+#                     if file_content[:2] == b'\x1f\x8b':  # GZIP magic number
+#                         raise Exception("File appears to be GZIP but decompression failed")
+#                     # Otherwise, assume it's not actually compressed
+#                     return file_content
+            
+#             # ZIP compression
+#             elif compression == 'zip' or file_url.endswith('.zip'):
+#                 try:
+#                     with zipfile.ZipFile(io.BytesIO(file_content)) as zip_file:
+#                         # Try to find a resume file in the zip
+#                         resume_files = []
+#                         for name in zip_file.namelist():
+#                             if any(ext in name.lower() for ext in ['.pdf', '.doc', '.docx', '.txt', '.rtf']):
+#                                 resume_files.append(name)
+                        
+#                         if resume_files:
+#                             # Prefer PDF files, then Word, then others
+#                             for preferred_ext in ['.pdf', '.docx', '.doc', '.txt', '.rtf']:
+#                                 for name in resume_files:
+#                                     if name.lower().endswith(preferred_ext):
+#                                         with zip_file.open(name) as f:
+#                                             content = f.read()
+#                                             logger.info(f"Extracted {name} from ZIP for app {app_id}")
+#                                             return content
+                            
+#                             # Fallback to first resume file
+#                             with zip_file.open(resume_files[0]) as f:
+#                                 content = f.read()
+#                                 logger.info(f"Extracted first resume file {resume_files[0]} from ZIP for app {app_id}")
+#                                 return content
+#                         else:
+#                             # If no obvious resume file found, use the first file
+#                             if zip_file.namelist():
+#                                 with zip_file.open(zip_file.namelist()[0]) as f:
+#                                     content = f.read()
+#                                     logger.info(f"Extracted first file {zip_file.namelist()[0]} from ZIP for app {app_id}")
+#                                     return content
+#                             else:
+#                                 raise Exception("ZIP file is empty")
+#                 except Exception as e:
+#                     logger.error(f"ZIP decompression failed for app {app_id}: {str(e)}")
+#                     return None
+            
+#             # BZIP2 compression
+#             elif compression == 'bzip2' or (file_content[:3] == b'BZh'):
+#                 try:
+#                     import bz2
+#                     decompressed = bz2.decompress(file_content)
+#                     logger.info(f"Successfully decompressed BZIP2 file for app {app_id}")
+#                     return decompressed
+#                 except Exception as e:
+#                     logger.error(f"BZIP2 decompression failed for app {app_id}: {str(e)}")
+#                     return None
+            
+#             # No compression or unknown format
+#             else:
+#                 return file_content
+                
+#         except Exception as e:
+#             logger.error(f"Compression handling failed for app {app_id}: {str(e)}")
+#             return None
+
+#     def _detect_compression_format(self, file_content):
+#         """Detect compression format from magic numbers"""
+#         if len(file_content) < 4:
+#             return None
+            
+#         magic_numbers = {
+#             b'\x1f\x8b': 'gzip',
+#             b'PK\x03\x04': 'zip',
+#             b'BZh': 'bzip2',
+#             b'\xfd7zXZ': 'xz',
+#             b'\x50\x4b\x03\x04': 'zip',  # Another ZIP signature
+#             b'\x50\x4b\x05\x06': 'zip',  # Empty ZIP
+#             b'\x50\x4b\x07\x08': 'zip',  # Spanned ZIP
+#         }
+        
+#         for magic, format_name in magic_numbers.items():
+#             if file_content.startswith(magic):
+#                 return format_name
+        
+#         return None
+
+#     def _get_job_requirements(self, job_requisition):
+#         return (
+#             (job_requisition.get('job_description') or '') + ' ' +
+#             (job_requisition.get('qualification_requirement') or '') + ' ' +
+#             (job_requisition.get('experience_requirement') or '') + ' ' +
+#             (job_requisition.get('knowledge_requirement') or '')
+#         ).strip()
+
+#     def _parse_and_screen(self, result, job_requirements, document_type):
+#         app = result["app"]
+#         if not result["success"]:
+#             # Enhanced error reporting for compression issues
+#             error_msg = result["error"]
+#             if any(term in error_msg.lower() for term in ['compress', 'decompress', 'gzip', 'zip']):
+#                 error_msg = f"Compression error: {error_msg}"
+                
+#             return {
+#                 "application_id": str(app.id),
+#                 "full_name": app.full_name,
+#                 "email": app.email,
+#                 "error": error_msg,
+#                 "success": False
+#             }
+
+#         temp_file_path = result["temp_file_path"]
+#         original_name = result.get("original_name", "")
+#         try:
+#             resume_text = parse_resume(temp_file_path)
+            
+#             if temp_file_path and os.path.exists(temp_file_path):
+#                 os.unlink(temp_file_path)
+                
+#             if not resume_text:
+#                 app.screening_status = 'failed'
+#                 app.screening_score = 0.0
+#                 app.save()
+#                 return {
+#                     "application_id": str(app.id),
+#                     "full_name": app.full_name,
+#                     "email": app.email,
+#                     "error": f"Failed to parse resume",
+#                     "success": False
+#                 }
+
+#             score = screen_resume(resume_text, job_requirements)
+#             resume_data = extract_resume_fields(resume_text, original_name)
+#             employment_gaps = resume_data.get("employment_gaps", [])
+            
+#             app.screening_status = 'processed'
+#             app.screening_score = score
+#             app.employment_gaps = employment_gaps
+#             app.save()
+            
+#             return {
+#                 "application_id": str(app.id),
+#                 "full_name": app.full_name,
+#                 "email": app.email,
+#                 "score": score,
+#                 "screening_status": app.screening_status,
+#                 "employment_gaps": employment_gaps,
+#                 "success": True
+#             }
+            
+#         except Exception as e:
+#             logger.error(f"Processing failed for app {app.id}: {str(e)}")
+#             app.screening_status = 'failed'
+#             app.screening_score = 0.0
+#             app.save()
+#             if temp_file_path and os.path.exists(temp_file_path):
+#                 os.unlink(temp_file_path)
+#             return {
+#                 "application_id": str(app.id),
+#                 "full_name": app.full_name,
+#                 "email": app.email,
+#                 "error": f"Processing error: {str(e)}",
+#                 "success": False
+#             }
+
+#     def _process_screening_results(self, results, applications, job_requisition, num_candidates, tenant_id):
+#         shortlisted = [r for r in results if r.get("success")]
+#         failed_applications = [r for r in results if not r.get("success")]
+
+#         if not shortlisted and failed_applications:
+#             return {
+#                 "detail": "All resume screenings failed.",
+#                 "failed_applications": failed_applications,
+#                 "document_type": "resume"
+#             }
+
+#         shortlisted.sort(key=lambda x: x['score'], reverse=True)
+#         final_shortlisted = shortlisted[:num_candidates] if num_candidates > 0 else shortlisted
+#         shortlisted_ids = {item['application_id'] for item in final_shortlisted}
+
+#         # Update application statuses and send emails
+#         for app in applications:
+#             app_id_str = str(app.id)
+#             if app_id_str in shortlisted_ids:
+#                 app.status = 'shortlisted'
+#                 app.save()
+#                 shortlisted_app = next((item for item in final_shortlisted if item['application_id'] == app_id_str), None)
+#                 if shortlisted_app:
+#                     applicant_data = {
+#                         "email": shortlisted_app['email'],
+#                         "full_name": shortlisted_app['full_name'],
+#                         "application_id": shortlisted_app['application_id'],
+#                         "job_requisition_id": job_requisition['id'],
+#                         "status": "shortlisted",
+#                         "score": shortlisted_app.get('score')
+#                     }
+                    
+#                     employment_gaps = shortlisted_app.get('employment_gaps', [])
+#                     event_type = "candidate.shortlisted.gaps" if employment_gaps else "candidate.shortlisted"
+                    
+#                     send_screening_notification(
+#                         applicant=applicant_data,
+#                         tenant_id=tenant_id,
+#                         event_type=event_type,
+#                         employment_gaps=employment_gaps
+#                     )
+#             else:
+#                 app.status = 'rejected'
+#                 app.save()
+                
+#                 rejected_app = {
+#                     "email": app.email,
+#                     "full_name": app.full_name,
+#                     "application_id": app_id_str,
+#                     "job_requisition_id": job_requisition['id'],
+#                     "status": "rejected",
+#                     "score": getattr(app, "screening_score", None)
+#                 }
+                
+#                 send_screening_notification(
+#                     applicant=rejected_app, 
+#                     tenant_id=tenant_id, 
+#                     event_type="candidate.rejected"
+#                 )
+
+#         return {
+#             "detail": f"Screened {len(shortlisted)} applications, shortlisted {len(final_shortlisted)} candidates.",
+#             "shortlisted_candidates": final_shortlisted,
+#             "failed_applications": failed_applications,
+#             "number_of_candidates": num_candidates,
+#             "document_type": "resume"
+#         }
+
 
 class ResumeScreeningView(APIView):
     serializer_class = SimpleMessageSerializer
@@ -180,25 +688,34 @@ class ResumeScreeningView(APIView):
     MAX_WORKERS = 10
 
     def post(self, request, job_requisition_id):
+        """
+        Screen resumes for a job requisition
+        Can process synchronously for small batches or asynchronously for large batches
+        """
         try:
+            # Extract JWT payload from middleware
             jwt_payload = getattr(request, 'jwt_payload', {})
             tenant_id = jwt_payload.get('tenant_unique_id')
             role = jwt_payload.get('role')
             branch = jwt_payload.get('user', {}).get('branch')
 
+            # Parse request data
             document_type = request.data.get('document_type')
             applications_data = request.data.get('applications', [])
             num_candidates = request.data.get('number_of_candidates', 0)
             
+            # Validate number of candidates
             try:
                 num_candidates = int(num_candidates)
             except (TypeError, ValueError):
                 num_candidates = 0
 
+            # Get job requisition
             job_requisition = get_job_requisition_by_id(job_requisition_id, request)
             if not job_requisition:
                 return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
 
+            # Validate document type
             if not document_type:
                 return Response({"detail": "Document type is required."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -215,14 +732,14 @@ class ResumeScreeningView(APIView):
                     tenant_id=tenant_id,
                     resume_status=True
                 )
-                paginator = Paginator(applications, 50)
+                paginator = Paginator(applications, 20)
                 applications_data = []
                 for page_num in paginator.page_range:
                     page = paginator.page(page_num)
                     applications_data.extend([{"application_id": str(app.id)} for app in page])
-                logger.info(f"Fetched {len(applications_data)} applications from database")
+                print(f"Fetched {len(applications_data)} applications from database")
 
-            logger.info(f"Screening {len(applications_data)} applications")
+            print(f"Screening {len(applications_data)} applications")
 
             # Process synchronously for small batches, asynchronously for large
             if len(applications_data) <= self.MAX_SYNC_PROCESSING:
@@ -231,6 +748,7 @@ class ResumeScreeningView(APIView):
                     role, branch, document_type, applications_data, num_candidates
                 )
             
+            # Process large batches asynchronously
             task = process_large_resume_batch.delay(
                 job_requisition_id=job_requisition_id,
                 tenant_id=tenant_id,
@@ -245,11 +763,11 @@ class ResumeScreeningView(APIView):
             return Response({
                 "detail": f"Started processing {len(applications_data)} applications asynchronously",
                 "task_id": task.id,
-                "status_endpoint": f"{settings.JOB_APPLICATIONS_URL}/api/applications-engine/applications/requisitions/screening/task-status/{task.id}/",
+                "status_endpoint": f"/api/applications-engine/applications/requisitions/screening/task-status/{task.id}/",
             }, status=status.HTTP_202_ACCEPTED)
 
         except Exception as e:
-            logger.exception(f"Error initiating resume screening: {str(e)}")
+            print(f"Error initiating resume screening: {str(e)}")
             return Response({
                 "error": "Failed to initiate screening",
                 "details": str(e)
@@ -257,10 +775,13 @@ class ResumeScreeningView(APIView):
 
     def _process_synchronously(self, request, job_requisition_id, job_requisition, tenant_id, 
                              role, branch, document_type, applications_data, num_candidates):
+        """
+        Process resume screening synchronously for small batches
+        """
         try:
             document_type_lower = document_type.lower()
             
-            # Filter applications
+            # Filter applications based on provided data or fetch all
             if not applications_data:
                 applications = JobApplication.active_objects.filter(
                     job_requisition_id=job_requisition_id,
@@ -276,15 +797,16 @@ class ResumeScreeningView(APIView):
                     resume_status=True
                 )
 
+            # Apply role-based filtering
             if role == 'recruiter' and branch:
                 applications = applications.filter(branch=branch)
             elif branch:
                 applications = applications.filter(branch=branch)
 
             applications_list = list(applications)
-            applications_data_map = {str(a['application_id']): a for a in applications_data}
+            applications_data_map = {str(app['application_id']): app for app in applications_data}
 
-            # Download resumes
+            # Download resumes using thread pool
             download_results = []
             with ThreadPoolExecutor(max_workers=self.MAX_WORKERS) as executor:
                 future_to_app = {
@@ -298,7 +820,7 @@ class ResumeScreeningView(APIView):
                 for future in concurrent.futures.as_completed(future_to_app):
                     download_results.append(future.result())
 
-            # Process screening
+            # Process screening with job requirements
             job_requirements = self._get_job_requirements(job_requisition)
             results = []
             
@@ -322,19 +844,24 @@ class ResumeScreeningView(APIView):
             return Response(final_response, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.exception(f"Synchronous processing failed: {str(e)}")
+            print(f"Synchronous processing failed: {str(e)}")
             return Response({
                 "error": "Synchronous processing failed",
                 "details": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def _download_resume(self, app, app_data, document_type_lower):
+        """
+        Download and decompress resume file
+        """
         try:
+            # Get file information from app_data or application documents
             if app_data and 'file_url' in app_data:
                 file_url = app_data['file_url']
                 compression = app_data.get('compression')
                 original_name = app_data.get('original_name', 'resume.pdf')
             else:
+                # Find the document in application documents
                 cv_doc = next(
                     (doc for doc in app.documents if doc['document_type'].lower() == document_type_lower),
                     None
@@ -352,9 +879,10 @@ class ResumeScreeningView(APIView):
                 compression = cv_doc.get('compression')
                 original_name = cv_doc.get('original_name', 'resume.pdf')
 
-            headers = {"Authorization": f"Bearer {settings.SUPABASE_KEY}"}
-            response = requests.get(file_url, headers=headers, timeout=30, stream=True)
-            logger.info(f"Download response for app {app.id}: status={response.status_code}")
+            # Download file from storage
+            headers = {"Authorization": f"Bearer {os.environ.get('SUPABASE_KEY', '')}"}
+            response = requests.get(file_url, headers=headers, timeout=60, stream=True)
+            print(f"Download response for app {app.id}: status={response.status_code}")
             
             if response.status_code != 200:
                 app.screening_status = 'failed'
@@ -366,12 +894,14 @@ class ResumeScreeningView(APIView):
                     "error": f"Failed to download resume, status: {response.status_code}",
                 }
 
-            file_content = response.content
-            content_type = response.headers.get('content-type', '')
-            
+            # Stream download to avoid memory issues
+            file_content = b''
+            for chunk in response.iter_content(chunk_size=8192):
+                file_content += chunk
+                
             # Check file size
             if len(file_content) > self.MAX_FILE_SIZE:
-                logger.error(f"File too large for app {app.id}: {len(file_content)} bytes")
+                print(f"File too large for app {app.id}: {len(file_content)} bytes")
                 app.screening_status = 'failed'
                 app.screening_score = 0.0
                 app.save()
@@ -381,7 +911,7 @@ class ResumeScreeningView(APIView):
                     "error": f"File too large ({len(file_content)} bytes)",
                 }
 
-            # Enhanced compression handling
+            # Handle compression
             file_content = self._handle_compression(file_content, compression, file_url, original_name, app.id)
             if file_content is None:
                 app.screening_status = 'failed'
@@ -393,6 +923,8 @@ class ResumeScreeningView(APIView):
                     "error": "Failed to decompress file",
                 }
 
+            # Create temporary file
+            content_type = response.headers.get('content-type', '')
             file_ext = mimetypes.guess_extension(content_type) or '.pdf'
             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=file_ext)
             temp_file.write(file_content)
@@ -406,8 +938,18 @@ class ResumeScreeningView(APIView):
                 "original_name": original_name
             }
             
+        except requests.exceptions.Timeout:
+            print(f"Download timeout for app {app.id}")
+            app.screening_status = 'failed'
+            app.screening_score = 0.0
+            app.save()
+            return {
+                "app": app,
+                "success": False,
+                "error": "Download timeout",
+            }
         except Exception as e:
-            logger.error(f"Download failed for app {app.id}: {str(e)}")
+            print(f"Download failed for app {app.id}: {str(e)}")
             app.screening_status = 'failed'
             app.screening_score = 0.0
             app.save()
@@ -418,7 +960,9 @@ class ResumeScreeningView(APIView):
             }
 
     def _handle_compression(self, file_content, compression, file_url, original_name, app_id):
-        """Handle various compression formats"""
+        """
+        Handle various compression formats
+        """
         try:
             # Detect compression from magic numbers if not explicitly provided
             if not compression:
@@ -428,10 +972,10 @@ class ResumeScreeningView(APIView):
             if compression == 'gzip' or file_url.endswith('.gz'):
                 try:
                     decompressed = gzip.decompress(file_content)
-                    logger.info(f"Successfully decompressed GZIP file for app {app_id}")
+                    print(f"Successfully decompressed GZIP file for app {app_id}")
                     return decompressed
                 except Exception as e:
-                    logger.warning(f"GZIP decompression failed for app {app_id}: {str(e)}")
+                    print(f"GZIP decompression failed for app {app_id}: {str(e)}")
                     # Try to detect if it's actually compressed
                     if file_content[:2] == b'\x1f\x8b':  # GZIP magic number
                         raise Exception("File appears to be GZIP but decompression failed")
@@ -455,25 +999,25 @@ class ResumeScreeningView(APIView):
                                     if name.lower().endswith(preferred_ext):
                                         with zip_file.open(name) as f:
                                             content = f.read()
-                                            logger.info(f"Extracted {name} from ZIP for app {app_id}")
+                                            print(f"Extracted {name} from ZIP for app {app_id}")
                                             return content
                             
                             # Fallback to first resume file
                             with zip_file.open(resume_files[0]) as f:
                                 content = f.read()
-                                logger.info(f"Extracted first resume file {resume_files[0]} from ZIP for app {app_id}")
+                                print(f"Extracted first resume file {resume_files[0]} from ZIP for app {app_id}")
                                 return content
                         else:
                             # If no obvious resume file found, use the first file
                             if zip_file.namelist():
                                 with zip_file.open(zip_file.namelist()[0]) as f:
                                     content = f.read()
-                                    logger.info(f"Extracted first file {zip_file.namelist()[0]} from ZIP for app {app_id}")
+                                    print(f"Extracted first file {zip_file.namelist()[0]} from ZIP for app {app_id}")
                                     return content
                             else:
                                 raise Exception("ZIP file is empty")
                 except Exception as e:
-                    logger.error(f"ZIP decompression failed for app {app_id}: {str(e)}")
+                    print(f"ZIP decompression failed for app {app_id}: {str(e)}")
                     return None
             
             # BZIP2 compression
@@ -481,10 +1025,10 @@ class ResumeScreeningView(APIView):
                 try:
                     import bz2
                     decompressed = bz2.decompress(file_content)
-                    logger.info(f"Successfully decompressed BZIP2 file for app {app_id}")
+                    print(f"Successfully decompressed BZIP2 file for app {app_id}")
                     return decompressed
                 except Exception as e:
-                    logger.error(f"BZIP2 decompression failed for app {app_id}: {str(e)}")
+                    print(f"BZIP2 decompression failed for app {app_id}: {str(e)}")
                     return None
             
             # No compression or unknown format
@@ -492,11 +1036,13 @@ class ResumeScreeningView(APIView):
                 return file_content
                 
         except Exception as e:
-            logger.error(f"Compression handling failed for app {app_id}: {str(e)}")
+            print(f"Compression handling failed for app {app_id}: {str(e)}")
             return None
 
     def _detect_compression_format(self, file_content):
-        """Detect compression format from magic numbers"""
+        """
+        Detect compression format from magic numbers
+        """
         if len(file_content) < 4:
             return None
             
@@ -517,6 +1063,9 @@ class ResumeScreeningView(APIView):
         return None
 
     def _get_job_requirements(self, job_requisition):
+        """
+        Extract job requirements from requisition data
+        """
         return (
             (job_requisition.get('job_description') or '') + ' ' +
             (job_requisition.get('qualification_requirement') or '') + ' ' +
@@ -525,6 +1074,9 @@ class ResumeScreeningView(APIView):
         ).strip()
 
     def _parse_and_screen(self, result, job_requirements, document_type):
+        """
+        Parse resume and screen against job requirements
+        """
         app = result["app"]
         if not result["success"]:
             # Enhanced error reporting for compression issues
@@ -543,8 +1095,10 @@ class ResumeScreeningView(APIView):
         temp_file_path = result["temp_file_path"]
         original_name = result.get("original_name", "")
         try:
+            # Parse resume text
             resume_text = parse_resume(temp_file_path)
             
+            # Clean up temporary file
             if temp_file_path and os.path.exists(temp_file_path):
                 os.unlink(temp_file_path)
                 
@@ -560,10 +1114,12 @@ class ResumeScreeningView(APIView):
                     "success": False
                 }
 
+            # Screen resume and extract fields
             score = screen_resume(resume_text, job_requirements)
             resume_data = extract_resume_fields(resume_text, original_name)
             employment_gaps = resume_data.get("employment_gaps", [])
             
+            # Update application with screening results
             app.screening_status = 'processed'
             app.screening_score = score
             app.employment_gaps = employment_gaps
@@ -580,10 +1136,11 @@ class ResumeScreeningView(APIView):
             }
             
         except Exception as e:
-            logger.error(f"Processing failed for app {app.id}: {str(e)}")
+            print(f"Processing failed for app {app.id}: {str(e)}")
             app.screening_status = 'failed'
             app.screening_score = 0.0
             app.save()
+            # Clean up temporary file in case of error
             if temp_file_path and os.path.exists(temp_file_path):
                 os.unlink(temp_file_path)
             return {
@@ -595,9 +1152,13 @@ class ResumeScreeningView(APIView):
             }
 
     def _process_screening_results(self, results, applications, job_requisition, num_candidates, tenant_id):
+        """
+        Process screening results and send notifications
+        """
         shortlisted = [r for r in results if r.get("success")]
         failed_applications = [r for r in results if not r.get("success")]
 
+        # Handle case where all screenings failed
         if not shortlisted and failed_applications:
             return {
                 "detail": "All resume screenings failed.",
@@ -605,6 +1166,7 @@ class ResumeScreeningView(APIView):
                 "document_type": "resume"
             }
 
+        # Sort by score and select top candidates
         shortlisted.sort(key=lambda x: x['score'], reverse=True)
         final_shortlisted = shortlisted[:num_candidates] if num_candidates > 0 else shortlisted
         shortlisted_ids = {item['application_id'] for item in final_shortlisted}
@@ -613,8 +1175,11 @@ class ResumeScreeningView(APIView):
         for app in applications:
             app_id_str = str(app.id)
             if app_id_str in shortlisted_ids:
+                # Update to shortlisted
                 app.status = 'shortlisted'
                 app.save()
+                
+                # Find shortlisted application data
                 shortlisted_app = next((item for item in final_shortlisted if item['application_id'] == app_id_str), None)
                 if shortlisted_app:
                     applicant_data = {
@@ -626,6 +1191,7 @@ class ResumeScreeningView(APIView):
                         "score": shortlisted_app.get('score')
                     }
                     
+                    # Send notification with employment gaps info if any
                     employment_gaps = shortlisted_app.get('employment_gaps', [])
                     event_type = "candidate.shortlisted.gaps" if employment_gaps else "candidate.shortlisted"
                     
@@ -636,9 +1202,11 @@ class ResumeScreeningView(APIView):
                         employment_gaps=employment_gaps
                     )
             else:
+                # Update to rejected
                 app.status = 'rejected'
                 app.save()
                 
+                # Send rejection notification
                 rejected_app = {
                     "email": app.email,
                     "full_name": app.full_name,
@@ -664,7 +1232,9 @@ class ResumeScreeningView(APIView):
 
 
 class ScreeningTaskStatusView(APIView):
-    """Check status of async screening tasks"""
+    """
+    Check status of async screening tasks
+    """
     
     def get(self, request, task_id):
         task_result = AsyncResult(task_id)
@@ -682,6 +1252,7 @@ class ScreeningTaskStatusView(APIView):
                 response_data['error'] = str(task_result.result)
         
         return Response(response_data)
+    
 
 
 class JobApplicationCreatePublicView(generics.CreateAPIView):
@@ -839,7 +1410,6 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
             logger.error(f"Kafka publish error: {str(e)}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 class JobApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = JobApplicationSerializer
@@ -1287,6 +1857,8 @@ class PermanentDeleteJobApplicationsView(APIView):
         return Response({"detail": f"Successfully permanently deleted {deleted_count} application(s)."}, status=status.HTTP_200_OK)
 
 
+
+
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
     pagination_class = CustomPagination
@@ -1355,7 +1927,6 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             logger.error(f"Failed to send schedule creation notification for schedule {schedule.id}: {str(e)}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ScheduleSerializer
@@ -1443,6 +2014,8 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
 class ScheduleBulkDeleteView(APIView):
     serializer_class = SimpleMessageSerializer 
     # permission_classes = [IsAuthenticated]
@@ -1473,7 +2046,6 @@ class ScheduleBulkDeleteView(APIView):
             for schedule in schedules:
                 schedule.soft_delete()
         return Response({"detail": f"Successfully soft-deleted {schedules.count()} schedule(s)."}, status=status.HTTP_200_OK)
-
 
 class SoftDeletedSchedulesView(generics.ListAPIView):
     serializer_class = ScheduleSerializer
@@ -1667,6 +2239,8 @@ class PermanentDeleteSchedulesView(APIView):
 #             "compliance_item": next((item for item in serializer.data['compliance_status'] if str(item['id']) == str(item_id)), None)
 #         }, status=status.HTTP_200_OK)
 
+
+
 class ComplianceStatusUpdateView(APIView):
     permission_classes = [AllowAny]  # Temporary for testing; replace with IsAuthenticated in production
     parser_classes = [JSONParser]
@@ -1773,6 +2347,9 @@ class ComplianceStatusUpdateView(APIView):
             "detail": "Compliance status updated successfully.",
             "compliance_item": next((item for item in serializer.data['compliance_status'] if str(item['id']) == str(item_id)), None)
         }, status=status.HTTP_200_OK)
+
+
+
 
 class ApplicantComplianceUploadView(APIView):
     permission_classes = [AllowAny]

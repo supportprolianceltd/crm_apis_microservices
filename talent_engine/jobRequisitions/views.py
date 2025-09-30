@@ -67,6 +67,30 @@ def get_tenant_id_from_jwt(request):
         raise ValidationError('Invalid JWT token.')
 
 
+
+def get_user_data_from_jwt(request):
+    """Extract user data from JWT payload."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise serializers.ValidationError("No valid Bearer token provided.")
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, options={"verify_signature": False})
+        user_data = payload.get("user", {})
+        return {
+            'email': user_data.get('email', ''),
+            'first_name': user_data.get('first_name', ''),
+            'last_name': user_data.get('last_name', ''),
+            'job_role': user_data.get('job_role', ''),
+            'id': user_data.get('id', None)
+        }
+    except Exception as e:
+        logger.error(f"Failed to decode JWT for user data: {str(e)}")
+        raise serializers.ValidationError("Invalid JWT token for user data.")
+    
+    
+
+
 class CustomPagination(PageNumberPagination):
     page_size = 20
 
@@ -269,44 +293,6 @@ class PublishedJobRequisitionListView(generics.ListAPIView):
             queryset = queryset.filter(branch=branch)
         return queryset
     
-
-# class JobRequisitionListCreateView(generics.ListCreateAPIView):
-#     serializer_class = JobRequisitionSerializer
-#     pagination_class = CustomPagination
-#     # permission_classes removed; rely on custom JWT middleware
-#     filter_backends = [DjangoFilterBackend, SearchFilter]
-#     filterset_fields = ['status', 'role']
-#     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
-
-#     def get_queryset(self):
-#         if getattr(self, "swagger_fake_view", False):
-#             return JobRequisition.objects.none()
-#         jwt_payload = getattr(self.request, 'jwt_payload', {})
-#         tenant_id = jwt_payload.get('tenant_unique_id')
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('branch')
-#         queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
-#         if role == 'recruiter' and branch:
-#             queryset = queryset.filter(branch=branch)
-#         return queryset
-    
-#         #Send notification to admin when job requisition is created
-    
-#     def perform_create(self, serializer):
-#         jwt_payload = getattr(self.request, 'jwt_payload', {})
-#         tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
-#         user_id = str(jwt_payload.get('user', {}).get('id')) if jwt_payload.get('user', {}).get('id') is not None else None
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')
-#         if not tenant_id or not user_id:
-#             logger.error("Missing tenant_unique_id or user_id in JWT payload")
-#             raise serializers.ValidationError("Missing tenant_unique_id or user_id in token.")
-#         serializer.save(
-#             tenant_id=tenant_id,
-#             requested_by_id=user_id,
-#             branch=branch if role == 'recruiter' and branch else None
-#         )
-#         logger.info(f"Job requisition created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
 
 class JobRequisitionListCreateView(generics.ListCreateAPIView):
     serializer_class = JobRequisitionSerializer
@@ -1020,9 +1006,8 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
 
 class RequestListCreateView(generics.ListCreateAPIView):
     serializer_class = RequestSerializer
-    # permission_classes removed; rely on custom JWT middleware
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['request_type', 'status']  # Removed 'branch' if not a model field
+    filterset_fields = ['request_type', 'status']
     search_fields = ['title', 'description', 'requested_by__email']
 
     def get_queryset(self):
@@ -1031,28 +1016,33 @@ class RequestListCreateView(generics.ListCreateAPIView):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
+        branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
         if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch=branch)
+            queryset = queryset.filter(branch_id=branch)
         return queryset
 
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
-        user_id = jwt_payload.get('user_id')
+        user_id = jwt_payload.get('user', {}).get('id')  # Fixed: get user id from user object
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
+        branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
+        
+        if not user_id:
+            logger.error(f"User ID not found in JWT payload: {jwt_payload}")
+            raise serializers.ValidationError("User ID not found in token")
+        
         serializer.save(
             tenant_id=tenant_id,
             requested_by_id=user_id,
-            branch=branch if role == 'recruiter' and branch else None
+            branch_id=branch if role == 'recruiter' and branch else None
         )
         logger.info(f"Request created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
 
+
 class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RequestSerializer
-    # permission_classes removed; rely on custom JWT middleware
     lookup_field = 'id'
 
     def get_queryset(self):
@@ -1061,32 +1051,77 @@ class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
+        branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
         if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch=branch)
+            queryset = queryset.filter(branch_id=branch)
         return queryset
+
+
+    def perform_update(self, serializer):
+        jwt_payload = getattr(self.request, 'jwt_payload', {})
+        user_id = jwt_payload.get('user', {}).get('id')
+        user_data = jwt_payload.get('user', {})
+        status = serializer.validated_data.get('status')
+        
+        if not user_id:
+            logger.error(f"User ID not found in JWT payload during update: {jwt_payload}")
+            raise serializers.ValidationError("User ID not found in token")
+        
+        approved_by_details = {
+            'email': user_data.get('email', ''),
+            'first_name': user_data.get('first_name', ''),
+            'last_name': user_data.get('last_name', ''),
+            'job_role': user_data.get('job_role', '')
+        }
+        
+        if status == 'approved':
+            logger.info(f"Setting approved_by_details for request {serializer.instance.id}: {approved_by_details}")
+            serializer.save(
+                approved_by_id=user_id,
+                approved_by_details=approved_by_details
+            )
+            logger.info(f"Request {serializer.instance.id} approved by user {user_id}")
+        else:
+            serializer.save(approved_by_details=approved_by_details if serializer.instance.approved_by_id else {})
+            logger.info(f"Request {serializer.instance.id} updated by user {user_id}")
+
 
     def perform_destroy(self, instance):
         instance.soft_delete()
         logger.info(f"Request soft-deleted: {instance.title} for tenant {instance.tenant_id}")
 
+
+
+
 class UserRequestsListView(generics.ListAPIView):
     serializer_class = RequestSerializer
-    # permission_classes removed; rely on custom JWT middleware
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['request_type', 'status']  # Removed 'branch' if not a model field
+    filterset_fields = ['request_type', 'status']
     search_fields = ['title', 'description']
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return Request.objects.none()
+        
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
-        user_id = jwt_payload.get('user_id')
+        user_id = jwt_payload.get('user', {}).get('id')  # Fixed: get user id from user object
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
-        queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False, requested_by_id=user_id)
+        branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
+
+        # Validate JWT payload
+        if not tenant_id or not user_id:
+            logger.error(f"Missing tenant_id or user_id in JWT payload: {jwt_payload}")
+            raise serializers.ValidationError({"detail": "Authentication credentials incomplete."})
+
+        queryset = Request.objects.filter(
+            tenant_id=tenant_id,
+            is_deleted=False,
+            requested_by_id=user_id
+        )
         if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch=branch)
+            queryset = queryset.filter(branch_id=branch)
+        
+        logger.debug(f"Queryset for user {user_id} in tenant {tenant_id}: {queryset.count()} requests")
         return queryset

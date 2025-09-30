@@ -26,6 +26,26 @@ def get_tenant_id_from_jwt(request):
 
 
 
+def get_user_data_from_jwt(request):
+    """Extract user data from JWT payload."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise serializers.ValidationError("No valid Bearer token provided.")
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, options={"verify_signature": False})
+        user_data = payload.get("user", {})
+        return {
+            'email': user_data.get('email', ''),
+            'first_name': user_data.get('first_name', ''),
+            'last_name': user_data.get('last_name', ''),
+            'job_role': user_data.get('job_role', ''),
+            'id': user_data.get('id', None)
+        }
+    except Exception as e:
+        logger.error(f"Failed to decode JWT for user data: {str(e)}")
+        raise serializers.ValidationError("Invalid JWT token for user data.")
+    
     
 class ComplianceItemSerializer(serializers.Serializer):
     id = serializers.UUIDField(required=False, default=uuid.uuid4)
@@ -667,80 +687,123 @@ class VideoSessionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"tenant_id": "Tenant ID mismatch."})
         return data
 
+
+
 class RequestSerializer(serializers.ModelSerializer):
     tenant_id = serializers.CharField(max_length=36, read_only=True)
     branch_id = serializers.CharField(max_length=36, allow_null=True, required=False)
     requested_by_id = serializers.CharField(max_length=36, read_only=True)
+    approved_by_id = serializers.CharField(max_length=36, read_only=True)
     requested_by = serializers.SerializerMethodField()
+    approved_by = serializers.SerializerMethodField()
     branch_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Request
         fields = [
-            'id', 'tenant_id', 'branch_id', 'branch_name', 'requested_by', 'requested_by_id', 'request_type', 'title',
-            'description', 'status', 'details', 'comment', 'created_at', 'updated_at', 'is_deleted'
+            'id', 'tenant_id', 'branch_id', 'branch_name', 'requested_by', 'requested_by_id',
+            'approved_by', 'approved_by_id', 'request_type', 'title', 'description', 'status',
+            'details', 'comment', 'created_at', 'updated_at', 'is_deleted'
         ]
-        read_only_fields = ['id', 'tenant_id', 'requested_by_id', 'created_at', 'updated_at', 'is_deleted', 'branch_name']
+        read_only_fields = [
+            'id', 'tenant_id', 'requested_by_id', 'approved_by_id', 'created_at',
+            'updated_at', 'is_deleted', 'branch_name'
+        ]
 
-    @extend_schema_field({
-        'type': 'object',
-        'properties': {
-            'email': {'type': 'string'},
-            'first_name': {'type': 'string'},
-            'last_name': {'type': 'string'}
-        }
-    })
+
+
     def get_requested_by(self, obj):
-        if obj.requested_by_id:
+        if not obj.requested_by_id:
+            logger.warning(f"No requested_by_id for request {obj.id}")
+            return None
+
+        try:
+            jwt_payload = getattr(self.context['request'], 'jwt_payload', {})
+            current_user_id = jwt_payload.get('user', {}).get('id')
+            
+            if str(current_user_id) == str(obj.requested_by_id):
+                user_data = jwt_payload.get('user', {})
+                logger.info(f"Using JWT payload for requested_by {obj.requested_by_id}")
+                return {
+                    'email': user_data.get('email', ''),
+                    'first_name': user_data.get('first_name', ''),
+                    'last_name': user_data.get('last_name', ''),
+                    'job_role': user_data.get('job_role', '')
+                }
+            
+            # Fallback to database if user is not the current user
+            from .models import CustomUser  # Adjust import as needed
             try:
-                user_response = requests.get(
-                    f'{settings.AUTH_SERVICE_URL}/api/user/users/{obj.requested_by_id}/',
-                    headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-                )
-                if user_response.status_code == 200:
-                    user_data = user_response.json()
-                    return {
-                        'email': user_data.get('email', ''),
-                        'first_name': user_data.get('first_name', ''),
-                        'last_name': user_data.get('last_name', '')
-                    }
-                logger.error(f"Failed to fetch user {obj.requested_by_id} from auth_service")
-            except Exception as e:
-                logger.error(f"Error fetching requested_by {obj.requested_by_id}: {str(e)}")
+                user = CustomUser.objects.get(id=obj.requested_by_id, tenant_id=jwt_payload.get('tenant_unique_id'))
+                logger.info(f"Using database for requested_by {obj.requested_by_id}")
+                return {
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'job_role': user.job_role
+                }
+            except CustomUser.DoesNotExist:
+                logger.warning(f"User {obj.requested_by_id} not found in database")
+                return None
+        except Exception as e:
+            logger.error(f"Error fetching requested_by {obj.requested_by_id}: {str(e)}")
+            return None
+
+    def get_approved_by(self, obj):
+        """Get approved by user details from stored data"""
+        if obj.approved_by_id and obj.approved_by_details:
+            return {
+                'email': obj.approved_by_details.get('email', ''),
+                'first_name': obj.approved_by_details.get('first_name', ''),
+                'last_name': obj.approved_by_details.get('last_name', '')
+            }
         return None
 
-    @extend_schema_field(str)
     def get_branch_name(self, obj):
+        """Get branch name from auth service"""
         if obj.branch_id:
             try:
-                branch_response = requests.get(
-                    f'{settings.AUTH_SERVICE_URL}/api/tenant/branches/{obj.branch_id}/',
-                    headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-                )
-                if branch_response.status_code == 200:
-                    return branch_response.json().get('name', '')
-                logger.error(f"Failed to fetch branch {obj.branch_id} from auth_service")
+                auth_header = self.context['request'].META.get('HTTP_AUTHORIZATION', '')
+                if auth_header:
+                    branch_response = requests.get(
+                        f'{settings.AUTH_SERVICE_URL}/api/tenant/branches/{obj.branch_id}/',
+                        headers={'Authorization': auth_header},
+                        timeout=5
+                    )
+                    if branch_response.status_code == 200:
+                        return branch_response.json().get('name', '')
             except Exception as e:
                 logger.error(f"Error fetching branch name for {obj.branch_id}: {str(e)}")
         return None
 
     def validate(self, data):
-        tenant_id = self.context['request'].tenant_id
-        if data.get('tenant_id', tenant_id) != tenant_id:
-            raise serializers.ValidationError({"tenant_id": "Tenant ID mismatch."})
+        """Validate tenant and branch"""
+        jwt_payload = getattr(self.context['request'], 'jwt_payload', {})
+        tenant_id = jwt_payload.get('tenant_unique_id')
+        
+        if not tenant_id:
+            raise serializers.ValidationError({"tenant_id": "Tenant ID not found in request."})
+        
+        # Validate branch if provided
         if data.get('branch_id'):
-            branch_response = requests.get(
-                f'{settings.AUTH_SERVICE_URL}/api/tenant/branches/{data["branch_id"]}/',
-                headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-            )
-            if branch_response.status_code != 200:
-                raise serializers.ValidationError({"branch_id": "Invalid branch ID."})
-            branch_data = branch_response.json()
-            if branch_data['tenant_id'] != tenant_id:
-                raise serializers.ValidationError({"branch_id": "Branch does not belong to this tenant."})
+            try:
+                auth_header = self.context['request'].META.get('HTTP_AUTHORIZATION', '')
+                if auth_header:
+                    branch_response = requests.get(
+                        f'{settings.AUTH_SERVICE_URL}/api/tenant/branches/{data["branch_id"]}/',
+                        headers={'Authorization': auth_header},
+                        timeout=5
+                    )
+                    if branch_response.status_code != 200:
+                        raise serializers.ValidationError({"branch_id": "Invalid branch ID."})
+                    
+                    branch_data = branch_response.json()
+                    if branch_data.get('tenant_id') != tenant_id:
+                        raise serializers.ValidationError({"branch_id": "Branch does not belong to this tenant."})
+            except requests.RequestException:
+                raise serializers.ValidationError({"branch_id": "Unable to validate branch."})
+        
         return data
-
-
 
 # talent_engine/serializers.py
 class PublicJobRequisitionSerializer(serializers.ModelSerializer):

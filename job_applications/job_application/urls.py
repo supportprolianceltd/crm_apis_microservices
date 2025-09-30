@@ -6,7 +6,7 @@ from .views import (
     JobApplicationCreatePublicView,
                     
     JobApplicationListCreateView,JobApplicationDetailView,JobApplicationBulkDeleteView,SoftDeletedJobApplicationsView,
-    RecoverSoftDeletedJobApplicationsView,PermanentDeleteJobApplicationsView,ComplianceStatusUpdateView,
+    RecoverSoftDeletedJobApplicationsView,PermanentDeleteJobApplicationsView,ComplianceStatusUpdateView,HealthCheckView,
     ScheduleListCreateView, ScheduleDetailView, ScheduleBulkDeleteView, SoftDeletedSchedulesView,ScreeningTaskStatusView,
     RecoverSoftDeletedSchedulesView,PermanentDeleteSchedulesView,JobApplicationWithSchedulesView,ComplianceStatusUpdateView,
     ResumeParseView, JobApplicationsByRequisitionView, PublishedJobRequisitionsWithShortlistedApplicationsView,
@@ -69,6 +69,9 @@ urlpatterns = [
     
     # Published Requisitions with Shortlisted Applications
     path('published-requisitions-with-shortlisted/', PublishedJobRequisitionsWithShortlistedApplicationsView.as_view(), name='published-requisitions-with-shortlisted'),
+
+
+    path('health/', HealthCheckView.as_view(), name='health-check'),
 
 ]
 

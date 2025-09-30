@@ -336,13 +336,13 @@ class Participant(models.Model):
             logger.info(f"Participant created for session {self.session.id}")
 
 
+
 class Request(models.Model):
     REQUEST_TYPE_CHOICES = [
         ('material', 'Material Request'),
         ('leave', 'Leave Request'),
     ]
     STATUS_CHOICES = [
-
         ('pending', 'Pending'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
@@ -354,6 +354,8 @@ class Request(models.Model):
     tenant_id = models.CharField(max_length=36, blank=False, null=False)  # Reference Tenant ID
     branch_id = models.CharField(max_length=36, null=True, blank=True)  # Reference Branch ID
     requested_by_id = models.CharField(max_length=36, null=True, blank=True)  # Reference CustomUser ID
+    approved_by_id = models.CharField(max_length=36, null=True, blank=True)  # Reference CustomUser ID for approver
+    approved_by_details = models.JSONField(default=dict, blank=True, null=True, help_text="Details of the user who approved the request")
     request_type = models.CharField(max_length=20, choices=REQUEST_TYPE_CHOICES)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -391,12 +393,10 @@ class Request(models.Model):
                 'tenant_id': self.tenant_id,
                 'branch_id': self.branch_id,
                 'requested_by_id': self.requested_by_id,
+                'approved_by_id': self.approved_by_id,
                 'request_type': self.request_type,
                 'title': self.title,
                 'action': 'created'
             })
             producer.flush()
             logger.info(f"Request {self.id} created for tenant {self.tenant_id}")
-
-
-

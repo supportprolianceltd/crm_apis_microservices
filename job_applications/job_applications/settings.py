@@ -55,7 +55,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
     "localhost", "127.0.0.1", "job_applications", "0.0.0.0", "http://localhost:9090","*", "job_applications:8001"
 ])
 # ======================== Database ========================
-
+# Celery Configuration# Increase database timeouts
 DATABASES = {
     'default': {
         'ENGINE': 'django_tenants.postgresql_backend',
@@ -64,8 +64,14 @@ DATABASES = {
         'PASSWORD': env('DB_PASSWORD', default=''),
         'HOST': env('DB_HOST', default='localhost'),
         'PORT': env('DB_PORT', default='5432'),
-        'CONN_MAX_AGE': 300,  # Reduce to 5 minutes
-        'CONN_HEALTH_CHECKS': True,  # Enable health checks
+        'CONN_MAX_AGE': 600,  # Increased to 10 minutes
+        'OPTIONS': {
+            'connect_timeout': 30,
+            'keepalives': 1,
+            'keepalives_idle': 30,
+            'keepalives_interval': 10,
+            'keepalives_count': 5,
+        }
     }
 }
 
@@ -247,23 +253,7 @@ USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Celery Configuration
-CELERY_BROKER_URL = 'redis://job_app_redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://job_app_redis:6379/0'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC' #GMT = Lagos/Africa Time - 1
-CELERY_ENABLE_UTC = True
-# settings.py - Add these Celery settings
-CELERY_WORKER_MAX_TASKS_PER_CHILD = 100
-CELERY_WORKER_PREFETCH_MULTIPLIER = 1
-CELERY_TASK_ACKS_LATE = True
-CELERY_TASK_TIME_LIMIT = 7200  # 2 hours max
-CELERY_TASK_SOFT_TIME_LIMIT = 3600  # 1 hour soft limit
 
-# Increase timeouts for large file processing
-REQUESTS_TIMEOUT = 30
 
 # Celery Beat Schedule
 CELERY_BEAT_SCHEDULE = {

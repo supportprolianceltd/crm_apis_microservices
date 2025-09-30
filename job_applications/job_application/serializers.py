@@ -661,7 +661,6 @@ class JobApplicationSerializer(serializers.ModelSerializer):
             ]
         return data
 
-    
 
 class ScheduleSerializer(serializers.ModelSerializer):
     job_application_id = serializers.CharField()
@@ -791,8 +790,6 @@ class ScheduleSerializer(serializers.ModelSerializer):
             validated_data['cancellation_reason'] = None
         return super().update(instance, validated_data)
     
-
-
 class SimpleMessageSerializer(serializers.Serializer):
     detail = serializers.CharField()
 

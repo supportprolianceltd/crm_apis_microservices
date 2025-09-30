@@ -40,7 +40,7 @@ services:
       - ./staticfiles:/app/staticfiles
     command: >
       sh -c "/app/wait-for-it.sh kafka:9092 -t 60 -- 
-             gunicorn job_applications.wsgi:application --bind 0.0.0.0:8003 --workers=1 --timeout 120"
+             gunicorn job_applications.wsgi:application --bind 0.0.0.0:8003 --workers=1 --timeout 300"
     depends_on:
       job_app_postgres:
         condition: service_healthy
@@ -49,7 +49,7 @@ services:
     networks:
       - auth_service_default
     restart: unless-stopped
-    mem_limit: 2g
+    mem_limit: 4g
 
   celery-worker:
     build:

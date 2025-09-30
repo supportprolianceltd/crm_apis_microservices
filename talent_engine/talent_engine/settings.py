@@ -51,6 +51,8 @@ DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
     "localhost", "127.0.0.1", "talent-engine", "0.0.0.0", "*", "talent-engine:8001", "http://localhost:9090"
 ])
+
+
 # ======================== Database ========================
 
 DATABASES = {
@@ -124,6 +126,10 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
+    ],
+    # Ensure consistent URL trailing behavior
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
     ],
 }
 
