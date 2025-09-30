@@ -59,46 +59,28 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
 # job_applications/settings.py
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME', default='job_app_db'),
-        'USER': env('DB_USER', default='postgres'),
-        'PASSWORD': env('DB_PASSWORD', default='password'),
-        'HOST': env('DB_HOST', default='job_app_postgres'),
+        'ENGINE': 'django_tenants.postgresql_backend',
+        'NAME': env('DB_NAME', default=''),
+        'USER': env('DB_USER', default=''),
+        'PASSWORD': env('DB_PASSWORD', default=''),
+        'HOST': env('DB_HOST', default='localhost'),
         'PORT': env('DB_PORT', default='5432'),
-        'CONN_MAX_AGE': 300,  # 5 minutes
+        'CONN_MAX_AGE': 60,  # Reduce from 600 to 60
         'OPTIONS': {
-            'connect_timeout': 30,
+            'connect_timeout': 10,
             'keepalives': 1,
             'keepalives_idle': 30,
             'keepalives_interval': 10,
             'keepalives_count': 5,
         },
+        # Add connection health checks
+        'TEST': {
+            'NAME': 'test_talent_db',
+        }
     }
 }
 
-# Add connection retry wrapper
-import time
-from django.db import connections
-from django.db.utils import OperationalError
 
-def wait_for_db_connection(max_retries=30, wait_seconds=2):
-    """Wait for database to become available"""
-    for i in range(max_retries):
-        try:
-            conn = connections['default']
-            conn.ensure_connection()
-            print("✅ Database connection established")
-            return True
-        except OperationalError as e:
-            if i < max_retries - 1:
-                print(f"⏳ Database not ready, retrying in {wait_seconds}s... ({i+1}/{max_retries})")
-                time.sleep(wait_seconds)
-            else:
-                print(f"❌ Could not connect to database after {max_retries} retries: {e}")
-                raise
-
-# Call this at application startup
-wait_for_db_connection()
 
 
 if not DATABASES['default']['ENGINE']:
@@ -144,7 +126,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     # Your custom middleware
     'job_applications.middleware.MicroserviceRS256JWTMiddleware',
-    'job_applications.middleware.CustomTenantSchemaMiddleware'
+    'job_applications.middleware.CustomTenantSchemaMiddleware',
+    # Add this for database connection management
+    'django.middleware.common.CommonMiddleware',
 ]
 
 
@@ -154,6 +138,17 @@ ROOT_URLCONF = 'job_applications.urls'
 WSGI_APPLICATION = 'job_applications.wsgi.application'
 
 # ======================== REST Framework ========================
+# REST_FRAMEWORK = {
+#     # Use only custom JWT middleware, not DRF JWTAuthentication
+#     'DEFAULT_AUTHENTICATION_CLASSES': (),
+#     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
+#     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+#     'DEFAULT_PARSER_CLASSES': [
+#         'rest_framework.parsers.JSONParser',
+#         'rest_framework.parsers.FormParser',
+#         'rest_framework.parsers.MultiPartParser',
+#     ],
+# }
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (),  # Empty tuple - handled by middleware
@@ -285,8 +280,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CELERY_BEAT_SCHEDULE = {
     'auto-screen-all-applications-at-midnight': {
         'task': 'job_application.tasks.auto_screen_all_applications',
-        'schedule': crontab(hour=18, minute=25),  # Runs daily at 23:00 UTC
+        'schedule': crontab(hour=10, minute=45),  # Runs daily at 23:00 UTC
     },
 }
-
-

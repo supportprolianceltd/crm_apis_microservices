@@ -282,6 +282,8 @@ class ResumeParseView(APIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
 class ResumeScreeningView(APIView):
     """
     Enhanced Resume Screening View with Circuit Breaker and Better Error Handling
@@ -1002,6 +1004,8 @@ class ResumeScreeningView(APIView):
             raise Exception(f"Failed to process screening results: {str(e)}")
 
 
+
+
 class ScreeningTaskStatusView(APIView):
     """
     Enhanced Check status of async screening tasks with circuit breaker
@@ -1221,7 +1225,6 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
     def check_permissions(self, request):
         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
         return super().check_permissions(request)
-
 
 
 
