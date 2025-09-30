@@ -459,7 +459,7 @@ class UserProfile(models.Model):
     next_of_kin_alternate_phone = models.CharField(max_length=15, blank=True)
     relationship_to_next_of_kin = models.CharField(max_length=100, blank=True)
     next_of_kin_email = models.EmailField(blank=True)
-    next_of_kin_town = models.CharField(max_length=15, blank=True)
+    next_of_kin_town = models.CharField(max_length=255, blank=True)
     next_of_kin_zip_code = models.CharField(max_length=20, blank=True, null=True)
 
     # Right to Work (Basic fields here, detailed to LegalWorkEligibility)

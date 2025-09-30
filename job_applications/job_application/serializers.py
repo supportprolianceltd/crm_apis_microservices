@@ -2,7 +2,6 @@ import pytz
 import uuid
 import os
 import mimetypes
-from django.conf import settings
 from django.utils import timezone
 from django.core.validators import URLValidator
 from rest_framework import serializers
@@ -15,7 +14,6 @@ from django.db import IntegrityError
 import pytz
 import logging
 import requests
-from django.conf import settings
 from django.utils import timezone
 from django.core.validators import URLValidator
 from rest_framework import serializers
@@ -26,8 +24,6 @@ import jwt
 logger = logging.getLogger('job_applications')
 
 
-
-logger = logging.getLogger('job_applications')
 
 def get_tenant_id_from_jwt(request):
     auth_header = request.headers.get("Authorization", "")
@@ -707,16 +703,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
                         'first_name': user_data['first_name'],
                         'last_name': user_data['last_name']
                     }
-                # Fallback to database or cached user data if needed
-                from .models import User  # Adjust import based on your project
-                user = User.objects.filter(id=obj.scheduled_by_id).first()
-                if user:
-                    return {
-                        'id': user.id,
-                        'email': user.email,
-                        'first_name': user.first_name,
-                        'last_name': user.last_name
-                    }
+              
                 logger.warning(f"User {obj.scheduled_by_id} not found in local database")
                 return None
             except Exception as e:

@@ -878,7 +878,13 @@ class UserViewSet(viewsets.ModelViewSet):
                 # Define company name (assuming tenant name or a custom field)
                 company_name = tenant.name if hasattr(tenant, 'name') else "Unknown Company"
                 # Define login link (customize as needed)
-                login_link = "https://learn.prolianceltd.com/home/login"
+                login_link = settings.WEB_PAGE_URL
+
+                # print("login_link")
+                # print(login_link)
+                # print("login_link")
+
+                logger.info(f"🎯 {login_link}")
 
                 event_payload = {
                     "metadata": {
@@ -1724,8 +1730,14 @@ class AdminUserCreateView(APIView):
                     # Define company name (assuming tenant name or a custom field)
                     company_name = user.tenant.name if hasattr(user.tenant, 'name') else "Unknown Company"
                     # Define login link (customize as needed)
-                    login_link = "https://learn.prolianceltd.com/home/login"
+                   
 
+                    login_link = settings.WEB_PAGE_URL
+                    print("login_link")
+                    print(login_link)
+                    print("login_link")
+
+                    logger.info(f"🎯 {login_link}")
                     event_payload = {
                         "metadata": {
                             "tenant_id": str(user.tenant.unique_id),
@@ -1740,6 +1752,7 @@ class AdminUserCreateView(APIView):
                             "temp_password": serializer.validated_data.get("password", ""),
                             "login_link": login_link,
                             "timestamp": timezone.now().isoformat(),
+                            "login_link": login_link,
                             "user_agent": user_agent,
                             "user_id": str(user.id),
                         },
