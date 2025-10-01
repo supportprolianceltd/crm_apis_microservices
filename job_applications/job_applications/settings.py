@@ -51,6 +51,19 @@ INSTALLED_APPS = [
 ]
 
 # ======================== Middleware ========================
+# MIDDLEWARE = [
+#     'django.middleware.security.SecurityMiddleware',
+#     'corsheaders.middleware.CorsMiddleware',
+#     'django.contrib.sessions.middleware.SessionMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+#     'django.middleware.csrf.CsrfViewMiddleware',
+#     'django.contrib.auth.middleware.AuthenticationMiddleware',
+#     'django.contrib.messages.middleware.MessageMiddleware',
+#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+#     'job_applications.middleware.MicroserviceRS256JWTMiddleware',
+#     'job_applications.middleware.CustomTenantSchemaMiddleware',
+# ]
+# Add connection health check middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -60,6 +73,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'job_applications.middleware.DatabaseConnectionMiddleware',  # Add this
     'job_applications.middleware.MicroserviceRS256JWTMiddleware',
     'job_applications.middleware.CustomTenantSchemaMiddleware',
 ]
@@ -68,32 +83,25 @@ MIDDLEWARE = [
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
 
 # ======================== Database ========================
-# ======================== Database ========================
-# Celery Configuration# Increase database timeouts
-# job_applications/settings.py
+# In your settings.py
 DATABASES = {
     'default': {
-        'ENGINE': 'django_tenants.postgresql_backend',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('DB_NAME', default=''),
         'USER': env('DB_USER', default=''),
         'PASSWORD': env('DB_PASSWORD', default=''),
         'HOST': env('DB_HOST', default='localhost'),
         'PORT': env('DB_PORT', default='5432'),
-        'CONN_MAX_AGE': 60,  # Reduce from 600 to 60
+        'CONN_MAX_AGE': 0,  # Set to 0 to disable persistent connections
         'OPTIONS': {
-            'connect_timeout': 10,
+            'connect_timeout': 30,
             'keepalives': 1,
             'keepalives_idle': 30,
             'keepalives_interval': 10,
             'keepalives_count': 5,
         },
-        # Add connection health checks
-        'TEST': {
-            'NAME': 'test_talent_db',
-        }
     }
 }
-
 
 
 

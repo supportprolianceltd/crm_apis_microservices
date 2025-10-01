@@ -1191,35 +1191,51 @@ class JobApplicationWithSchedulesView(APIView):
         logger.info(f"Retrieved job application for email {email} and tenant {tenant_id}")
         return Response(response_data, status=status.HTTP_200_OK)
 
+
+
 class JobApplicationsByRequisitionView(generics.ListAPIView):
     serializer_class = JobApplicationSerializer
     pagination_class = CustomPagination
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-    # permission_classes = [IsAuthenticated]
-    def get_permissions(self):
-        return [AllowAny()]  # Temporary for testing
     
+    def get_permissions(self):
+        return [AllowAny()]
+
     def get_queryset(self):
-        jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = jwt_payload.get('tenant_unique_id')  # Use this consistently
-        role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')
-        job_requisition_id = self.kwargs['job_requisition_id']
-        
-        queryset = JobApplication.active_objects.filter(job_requisition_id=job_requisition_id)
-        
-        if not tenant_id:
-            logger.error("No tenant_id in token")
+        try:
+            # Close any stale connections first
+            from django.db import close_old_connections
+            close_old_connections()
+            
+            jwt_payload = getattr(self.request, 'jwt_payload', {})
+            tenant_id = jwt_payload.get('tenant_unique_id')
+            role = jwt_payload.get('role')
+            branch = jwt_payload.get('user', {}).get('branch')
+            job_requisition_id = self.kwargs['job_requisition_id']
+            
+            if not tenant_id:
+                logger.error("No tenant_id in token")
+                return JobApplication.active_objects.none()
+            
+            # Create a fresh queryset
+            queryset = JobApplication.active_objects.filter(
+                job_requisition_id=job_requisition_id,
+                tenant_id=tenant_id
+            )
+            
+            if role == 'recruiter' and branch:
+                queryset = queryset.filter(branch=branch)
+            elif branch:
+                queryset = queryset.filter(branch=branch)
+            
+            return queryset.order_by('-created_at')
+            
+        except Exception as e:
+            logger.error(f"Error in get_queryset: {str(e)}")
+            # Return empty queryset on error
             return JobApplication.active_objects.none()
-        
-        queryset = queryset.filter(tenant_id=tenant_id)
-        
-        if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch=branch)
-        elif branch:
-            queryset = queryset.filter(branch=branch)
-        
-        return queryset.order_by('-created_at')
+
+
 
 class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer

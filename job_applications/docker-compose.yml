@@ -131,6 +131,7 @@ services:
       - auth_service_default
     restart: unless-stopped
 
+
   # job_app_postgres:
   #   image: postgres:15-alpine
   #   container_name: job_app_postgres
@@ -146,12 +147,13 @@ services:
   #     - ./init.sql:/docker-entrypoint-initdb.d/init.sql
   #   healthcheck:
   #     test: ["CMD-SHELL", "pg_isready -U postgres -d job_app_db"]
-  #     interval: 5s
+  #     interval: 10s
   #     timeout: 5s
-  #     retries: 5
+  #     retries: 10
+  #     start_period: 30s
+  #   restart: unless-stopped
   #   networks:
   #     - auth_service_default
-  #   restart: unless-stopped
 
   job_app_postgres:
     image: postgres:15-alpine
@@ -161,20 +163,22 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - TZ=UTC
+      - POSTGRES_TIMEOUT=300  # Add this
     ports:
       - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d job_app_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d job_app_db -t 30"]
       interval: 10s
-      timeout: 5s
+      timeout: 30s
       retries: 10
-      start_period: 30s
+      start_period: 40s
     restart: unless-stopped
     networks:
       - auth_service_default
+
 
 networks:
   auth_service_default:

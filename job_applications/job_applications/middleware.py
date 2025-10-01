@@ -1,11 +1,12 @@
 import logging
-from django.db import connection
-from django.http import JsonResponse
 from rest_framework.exceptions import AuthenticationFailed
 import jwt
 import requests
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
+import logging
+from django.db import close_old_connections, connection
+from django.http import JsonResponse
 
 logger = logging.getLogger('job_applications')
 
@@ -44,6 +45,43 @@ class SimpleUser:
 
     def get_username(self):
         return self.username
+
+
+
+
+
+class DatabaseConnectionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Close any stale connections before processing the request
+        close_old_connections()
+        
+        # Verify connection is alive
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+        except Exception as e:
+            logger.error(f"Database connection verification failed: {str(e)}")
+            # Try to close and reopen connection
+            connection.close()
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT 1")
+            except Exception as e2:
+                logger.error(f"Failed to reestablish database connection: {str(e2)}")
+                return JsonResponse(
+                    {"detail": "Database connection unavailable"}, 
+                    status=503
+                )
+        
+        response = self.get_response(request)
+        
+        # Close connections after response to prevent connection leaks
+        close_old_connections()
+        
+        return response
 
 
 class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
