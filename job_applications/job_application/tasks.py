@@ -193,8 +193,16 @@ def process_resume_chunk(self, job_requisition_id, tenant_id, document_type,
 
         # Step 2: Batch score resumes
         if resume_texts:
+            # Concatenate requirements into a single string for compatibility with screen_resume_batch
+            job_desc = (
+                f"{job_requirements.get('description', '')} "
+                f"{job_requirements.get('qualifications', '')} "
+                f"{job_requirements.get('experience', '')} "
+                f"{job_requirements.get('skills', '')}"
+            ).strip()
+            
             # Use the updated screen_resume function that handles batch processing
-            scores = screen_resume_batch(resume_texts, job_requirements)
+            scores = screen_resume_batch(resume_texts, job_desc)
             
             # Min-max normalization
             import numpy as np
@@ -215,17 +223,20 @@ def process_resume_chunk(self, job_requisition_id, tenant_id, document_type,
 
         # Step 3: Update applications with scores
         applications_map = {str(app.id): app for app in applications_list}
-        for result in results:
-            app = applications_map.get(result['application_id'])
-            if app and result['success']:
-                app.screening_status = 'processed'
-                app.screening_score = result['score']
-                app.employment_gaps = result['employment_gaps']
-                app.save()
-            elif app:
-                app.screening_status = 'failed'
-                app.screening_score = 0.0
-                app.save()
+        with transaction.atomic():
+            for result in results:
+                app = applications_map.get(result['application_id'])
+                if app and result['success']:
+                    app.screening_status = 'processed'
+                    app.screening_score = result['score']
+                    app.employment_gaps = result['employment_gaps']
+                    app.save(update_fields=['screening_status', 'screening_score', 'employment_gaps'])
+                    logger.info(f"Updated screening for app {app.id}: score={result['score']}, status=processed")
+                elif app:
+                    app.screening_status = 'failed'
+                    app.screening_score = 0.0
+                    app.save(update_fields=['screening_status', 'screening_score'])
+                    logger.info(f"Updated screening for app {app.id}: status=failed, score=0.0")
             
             # Clean up temporary file
             if result.get('temp_file_path') and os.path.exists(result['temp_file_path']):
@@ -261,7 +272,7 @@ def process_resume_chunk(self, job_requisition_id, tenant_id, document_type,
         logger.error(f"Chunk {chunk_index} processing failed: {str(e)}")
         raise self.retry(exc=e, countdown=30)
     
-    
+     
 def _download_and_parse_resume(application_id, full_name, email, file_url, compression, original_name, document_type_lower):
     try:
         headers = {"Authorization": f"Bearer {settings.SUPABASE_KEY}"}
@@ -380,6 +391,28 @@ def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_
     except Exception as e:
         logger.error(f"Result aggregation failed: {str(e)}")
         raise self.retry(exc=e, countdown=30)
+
+def _append_status_history(app, new_status, automated=True, changed_by=None, reason='Status update'):
+    """
+    Helper function to append status change to history.
+    """
+    if app.status != new_status:
+        history_entry = {
+            'status': new_status,
+            'timestamp': timezone.now().isoformat(),
+            'automated': automated,
+            'reason': reason
+        }
+        if automated:
+            history_entry['changed_by'] = {'system': 'resume_screening'}
+        else:
+            history_entry['changed_by'] = changed_by or {}
+        
+        if app.status_history:
+            app.status_history.append(history_entry)
+        else:
+            app.status_history = [history_entry]
+
 def _update_applications_and_send_emails(shortlisted_candidates, job_requisition_id, tenant_id, job_requisition):
     try:
         shortlisted_ids = {item['application_id'] for item in shortlisted_candidates}
@@ -392,8 +425,10 @@ def _update_applications_and_send_emails(shortlisted_candidates, job_requisition
             for app in applications:
                 app_id_str = str(app.id)
                 if app_id_str in shortlisted_ids:
-                    app.status = 'shortlisted'
-                    app.save()
+                    new_status = 'shortlisted'
+                    _append_status_history(app, new_status, automated=True, reason='Automated by resume screening')
+                    app.status = new_status
+                    app.save(update_fields=['status', 'status_history'])
                     shortlisted_app = next(
                         (item for item in shortlisted_candidates if item['application_id'] == app_id_str), 
                         None
@@ -429,8 +464,10 @@ def _update_applications_and_send_emails(shortlisted_candidates, job_requisition
                                 employment_gaps=employment_gaps
                             )
                 else:
-                    app.status = 'rejected'
-                    app.save()
+                    new_status = 'rejected'
+                    _append_status_history(app, new_status, automated=True, reason='Automated by resume screening')
+                    app.status = new_status
+                    app.save(update_fields=['status', 'status_history'])
                     applicant_data = {
                         "email": app.email,
                         "full_name": app.full_name,

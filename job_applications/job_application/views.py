@@ -47,11 +47,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 # Project Models
 from job_application.models import JobApplication, Schedule
-from job_application.tasks import process_large_resume_batch
 from .tasks import (
-    aggregate_screening_results,
-    process_large_resume_batch,
-    process_resume_chunk
+    process_large_resume_batch
 )
 # Project Serializers
 from .serializers import (
@@ -281,6 +278,7 @@ class ResumeParseView(APIView):
 
 
 
+
 class ResumeScreeningView(APIView):
     """
     Enhanced Resume Screening View with Circuit Breaker and Better Error Handling
@@ -323,7 +321,6 @@ class ResumeScreeningView(APIView):
 
             # Parse request data
             document_type = request.data.get('document_type')
-            applications_data = request.data.get('applications', [])
             num_candidates = request.data.get('number_of_candidates', 0)
             
             # Validate number of candidates
@@ -360,16 +357,15 @@ class ResumeScreeningView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Fetch applications if none provided
+            # Always fetch applications from database
+            applications_data = self._fetch_applications_from_db(
+                job_requisition_id, tenant_id, role, branch
+            )
             if not applications_data:
-                applications_data = self._fetch_applications_from_db(
-                    job_requisition_id, tenant_id, role, branch
+                return Response(
+                    {"detail": "No applications found for screening."},
+                    status=status.HTTP_404_NOT_FOUND
                 )
-                if not applications_data:
-                    return Response(
-                        {"detail": "No applications found for screening."},
-                        status=status.HTTP_404_NOT_FOUND
-                    )
 
             logger.info(f"Initiating resume screening for {len(applications_data)} applications")
 
@@ -934,9 +930,11 @@ class ResumeScreeningView(APIView):
                 app_id_str = str(app.id)
                 if app_id_str in shortlisted_ids:
                     # Update to shortlisted
+                    new_status = 'shortlisted'
+                    _append_status_history(app, new_status, automated=True, reason='Automated by resume screening')
                     with transaction.atomic():
-                        app.status = 'shortlisted'
-                        app.save()
+                        app.status = new_status
+                        app.save(update_fields=['status', 'status_history'])
                     
                     # Find shortlisted application data
                     shortlisted_app = next((item for item in final_shortlisted if item['application_id'] == app_id_str), None)
@@ -965,9 +963,11 @@ class ResumeScreeningView(APIView):
                             logger.error(f"Failed to send notification for app {app_id_str}: {str(e)}")
                 else:
                     # Update to rejected
+                    new_status = 'rejected'
+                    _append_status_history(app, new_status, automated=True, reason='Automated by resume screening')
                     with transaction.atomic():
-                        app.status = 'rejected'
-                        app.save()
+                        app.status = new_status
+                        app.save(update_fields=['status', 'status_history'])
                     
                     # Send rejection notification
                     rejected_app = {
@@ -999,9 +999,6 @@ class ResumeScreeningView(APIView):
         except Exception as e:
             logger.error(f"Error processing screening results: {str(e)}")
             raise Exception(f"Failed to process screening results: {str(e)}")
-
-
-
 
 class ScreeningTaskStatusView(APIView):
     """

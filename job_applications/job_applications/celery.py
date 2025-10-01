@@ -62,3 +62,5 @@ def patched_split_domain_port(host):
     return host, port
 
 django.http.request.split_domain_port = patched_split_domain_port
+
+
