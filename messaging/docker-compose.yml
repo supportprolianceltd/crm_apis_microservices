@@ -48,6 +48,20 @@ services:
     networks:
       - auth_service_default
 
+  tester:
+    build: .
+    container_name: messaging_tester
+    ports:
+      - "3501:3501"
+    env_file:
+      - ./.env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: ["node", "server-tester.js"]
+    networks:
+      - auth_service_default
+
 networks:
   auth_service_default:
     external: true

@@ -17,8 +17,8 @@ model Tenant {
   id        Int       @id @default(autoincrement())
   name      String
   schema    String    @unique
-  users     User[]
-  chats     Chat[]
+  users     User[]    @relation("TenantUsers")
+  chats     Chat[]    @relation("TenantChats")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -33,9 +33,9 @@ model User {
   lastName      String?
   role          String?
   tenantId      Int
-  tenant        Tenant         @relation(fields: [tenantId], references: [id])
-  chats         UsersOnChats[]
-  messages      Message[]
+  tenant        Tenant         @relation("TenantUsers", fields: [tenantId], references: [id])
+  chats         UsersOnChats[] @relation("UserChats")
+  messages      Message[]      @relation("UserMessages")
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -45,25 +45,20 @@ model Chat {
   name        String?
   type        ChatType      @default(DIRECT) 
   avatar      String?       
-  users       UsersOnChats[]
-  messages    Message[]
-  lastMessageId String?     
-  lastMessage  Message?     @relation("ChatLastMessage", fields: [lastMessageId], references: [id])
+  users       UsersOnChats[] @relation("ChatUsers")
+  messages    Message[]      @relation("ChatMessages")
+  lastMessageId String?     // Simple foreign key reference (no relation needed)
   tenantId    Int?          
-  tenant      Tenant?       @relation(fields: [tenantId], references: [id]) 
+  tenant      Tenant?       @relation("TenantChats", fields: [tenantId], references: [id]) 
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
 
-enum ChatType {
-  DIRECT
-  GROUP
-}
 
 model UsersOnChats {
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation("UserChats", fields: [userId], references: [id])
   userId      Int
-  chat        Chat     @relation(fields: [chatId], references: [id])
+  chat        Chat     @relation("ChatUsers", fields: [chatId], references: [id])
   chatId      String
   assignedAt  DateTime @default(now())
   leftAt      DateTime? 
@@ -77,13 +72,18 @@ model Message {
   id        String   @id @default(cuid())
   content   String
   chatId    String
-  chat      Chat     @relation(fields: [chatId], references: [id])
+  chat      Chat     @relation("ChatMessages", fields: [chatId], references: [id])
   authorId  Int
-  author    User     @relation(fields: [authorId], references: [id])
+  author    User     @relation("UserMessages", fields: [authorId], references: [id])
   status    MessageStatus @default(SENT)
   readAt    DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum ChatType {
+  DIRECT
+  GROUP
 }
 
 enum MessageStatus {
