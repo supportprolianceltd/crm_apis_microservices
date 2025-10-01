@@ -117,15 +117,114 @@ export const ChatService = {
     return chat;
   },
 
-  // Send a message
-  async sendMessage(chatId, senderId, content) {
+  // Create user from auth service if they don't exist locally
+  async createUserFromAuthService(userId, tenantId) {
+    try {
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (existingUser) {
+        return existingUser;
+      }
+
+      // Fetch user from auth service
+      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:8000';
+      const response = await fetch(`${authServiceUrl}/api/user/users/${userId}/`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.AUTH_SERVICE_TOKEN || ''}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user from auth service: ${response.status}`);
+      }
+
+      const userData = await response.json();
+
+      // Validate that user belongs to the same tenant
+      if (userData.tenant_id !== tenantId) {
+        throw new Error("User does not belong to this tenant");
+      }
+
+      // Create user in messaging database
+      const newUser = await prisma.user.create({
+        data: {
+          id: userId,
+          email: userData.email,
+          username: userData.username,
+          firstName: userData.first_name || userData.firstName,
+          lastName: userData.last_name || userData.lastName,
+          role: userData.role,
+          status: userData.status || 'ACTIVE',
+          tenantId: tenantId,
+          online: false,
+          lastSeen: new Date(),
+          hasAcceptedTerms: userData.has_accepted_terms || false,
+        },
+      });
+
+      return newUser;
+    } catch (error) {
+      console.error("Error creating user from auth service:", error);
+      throw new Error(`Failed to create user: ${error.message}`);
+    }
+  },
+
+  // Enhanced send message with user creation
+  async sendMessageToUser(recipientId, senderId, content, tenantId) {
     return prisma.$transaction(async (tx) => {
+      // Ensure recipient exists (create from auth service if needed)
+      let recipient = await tx.user.findUnique({
+        where: { id: recipientId },
+      });
+
+      if (!recipient) {
+        // Try to create user from auth service
+        try {
+          recipient = await this.createUserFromAuthService(recipientId, tenantId);
+        } catch (error) {
+          throw new Error(`Recipient not found and could not be created: ${error.message}`);
+        }
+      }
+
+      // Get or create direct chat
+      let chat = await tx.chat.findFirst({
+        where: {
+          type: "DIRECT",
+          users: {
+            every: {
+              userId: { in: [senderId, recipientId] },
+              leftAt: null,
+            },
+          },
+          ...(tenantId ? { tenantId } : {}),
+        },
+      });
+
+      if (!chat) {
+        chat = await tx.chat.create({
+          data: {
+            type: "DIRECT",
+            tenantId,
+            users: {
+              create: [
+                { userId: senderId, role: "MEMBER" },
+                { userId: recipientId, role: "MEMBER" },
+              ],
+            },
+          },
+        });
+      }
+
       // Create message
       const message = await tx.message.create({
         data: {
           content,
-          chat: { connect: { id: chatId } },
-          author: { connect: { id: senderId } },
+          chatId: chat.id,
+          authorId: senderId,
           status: "DELIVERED",
         },
         include: {
@@ -143,9 +242,9 @@ export const ChatService = {
 
       // Update chat's last message
       await tx.chat.update({
-        where: { id: chatId },
+        where: { id: chat.id },
         data: {
-          lastMessage: { connect: { id: message.id } },
+          lastMessageId: message.id,
           updatedAt: new Date(),
         },
       });
@@ -153,7 +252,7 @@ export const ChatService = {
       // Update unread counters for other participants
       await tx.usersOnChats.updateMany({
         where: {
-          chatId,
+          chatId: chat.id,
           userId: { not: senderId },
           leftAt: null,
         },
@@ -164,7 +263,7 @@ export const ChatService = {
 
       // Get updated chat with participants
       const updatedChat = await tx.chat.findUnique({
-        where: { id: chatId },
+        where: { id: chat.id },
         include: {
           users: {
             where: { leftAt: null },
@@ -186,33 +285,315 @@ export const ChatService = {
     });
   },
 
-  // Mark messages as read
-  async markMessagesAsRead(chatId, userId, messageId) {
-    return prisma.$transaction([
-      // Update message status
-      prisma.message.updateMany({
+  // Send message to user by email (for cases where we don't have user ID)
+  async sendMessageToUserByEmail(recipientEmail, senderId, content, tenantId) {
+    return prisma.$transaction(async (tx) => {
+      // Find recipient by email in the same tenant
+      let recipient = await tx.user.findFirst({
         where: {
-          id: messageId,
-          chatId,
-          authorId: { not: userId },
-          status: { not: "READ" },
+          email: recipientEmail,
+          ...(tenantId ? { tenantId } : {}),
         },
+      });
+
+      if (!recipient) {
+        // Try to create user from auth service by email
+        try {
+          // First, we need to get the user ID from auth service using email
+          const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:8000';
+
+          // Search for user by email in auth service (you might need to add this endpoint)
+          const searchResponse = await fetch(`${authServiceUrl}/api/user/users/?email=${encodeURIComponent(recipientEmail)}`, {
+            headers: {
+              'Authorization': `Bearer ${process.env.AUTH_SERVICE_TOKEN || ''}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (searchResponse.ok) {
+            const users = await searchResponse.json();
+            if (users.length > 0) {
+              const authUser = users[0];
+              recipient = await this.createUserFromAuthService(authUser.id, tenantId);
+            }
+          }
+
+          if (!recipient) {
+            throw new Error(`Recipient with email ${recipientEmail} not found`);
+          }
+        } catch (error) {
+          throw new Error(`Recipient not found: ${error.message}`);
+        }
+      }
+
+      // Use the existing sendMessageToUser logic
+      return this.sendMessageToUser(recipient.id, senderId, content, tenantId);
+    });
+  },
+
+  // Get messages with pagination
+  async getMessages(chatId, userId, options = {}) {
+    const { limit = 50, offset = 0, before } = options;
+
+    // Verify user has access to chat
+    const chat = await prisma.chat.findFirst({
+      where: {
+        id: chatId,
+        users: {
+          some: {
+            userId,
+            leftAt: null,
+          },
+        },
+      },
+    });
+
+    if (!chat) {
+      throw new Error("Chat not found or access denied");
+    }
+
+    const messages = await prisma.message.findMany({
+      where: {
+        chatId,
+        ...(before && { createdAt: { lt: new Date(before) } }),
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: limit,
+      skip: offset,
+    });
+
+    return {
+      messages: messages.reverse(), // Return in chronological order
+      hasMore: messages.length === limit,
+      total: await prisma.message.count({ where: { chatId } }),
+    };
+  },
+
+  // Search messages in a chat
+  async searchMessages(chatId, userId, query, options = {}) {
+    const { limit = 20, offset = 0 } = options;
+
+    // Verify user has access to chat
+    const chat = await prisma.chat.findFirst({
+      where: {
+        id: chatId,
+        users: {
+          some: {
+            userId,
+            leftAt: null,
+          },
+        },
+      },
+    });
+
+    if (!chat) {
+      throw new Error("Chat not found or access denied");
+    }
+
+    const messages = await prisma.message.findMany({
+      where: {
+        chatId,
+        content: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: limit,
+      skip: offset,
+    });
+
+    return {
+      messages: messages.reverse(),
+      query,
+      hasMore: messages.length === limit,
+    };
+  },
+
+  // Leave a chat
+  async leaveChat(chatId, userId) {
+    return prisma.usersOnChats.updateMany({
+      where: {
+        chatId,
+        userId,
+        leftAt: null,
+      },
+      data: {
+        leftAt: new Date(),
+      },
+    });
+  },
+
+  // Archive a chat (soft delete for user)
+  async archiveChat(chatId, userId) {
+    return prisma.usersOnChats.updateMany({
+      where: {
+        chatId,
+        userId,
+        leftAt: null,
+      },
+      data: {
+        archivedAt: new Date(),
+      },
+    });
+  },
+
+  // Add reaction to message
+  async addReaction(messageId, userId, emoji) {
+    // Check if reaction already exists
+    const existingReaction = await prisma.messageReaction.findFirst({
+      where: {
+        messageId,
+        userId,
+        emoji,
+      },
+    });
+
+    if (existingReaction) {
+      // Remove reaction if it exists (toggle)
+      await prisma.messageReaction.delete({
+        where: { id: existingReaction.id },
+      });
+      return { action: "removed", emoji };
+    } else {
+      // Add new reaction
+      await prisma.messageReaction.create({
         data: {
-          status: "READ",
-          readAt: new Date(),
-        },
-      }),
-      // Reset unread counter
-      prisma.usersOnChats.updateMany({
-        where: {
-          chatId,
+          messageId,
           userId,
-          leftAt: null,
+          emoji,
         },
+      });
+      return { action: "added", emoji };
+    }
+  },
+
+  // Get message reactions
+  async getMessageReactions(messageId) {
+    const reactions = await prisma.messageReaction.findMany({
+      where: { messageId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    // Group by emoji
+    const groupedReactions = reactions.reduce((acc, reaction) => {
+      if (!acc[reaction.emoji]) {
+        acc[reaction.emoji] = [];
+      }
+      acc[reaction.emoji].push(reaction.user);
+      return acc;
+    }, {});
+
+    return groupedReactions;
+  },
+
+  // Edit message (only by author)
+  async editMessage(messageId, userId, newContent) {
+    const message = await prisma.message.findUnique({
+      where: { id: messageId },
+    });
+
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    if (message.authorId !== userId) {
+      throw new Error("Only message author can edit");
+    }
+
+    // Check if message is too old (optional - 24 hours)
+    const messageAge = Date.now() - new Date(message.createdAt).getTime();
+    const maxEditAge = 24 * 60 * 60 * 1000; // 24 hours
+
+    if (messageAge > maxEditAge) {
+      throw new Error("Message too old to edit");
+    }
+
+    return prisma.message.update({
+      where: { id: messageId },
+      data: {
+        content: newContent,
+        editedAt: new Date(),
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+  },
+
+  // Delete message (soft delete or hard delete)
+  async deleteMessage(messageId, userId, hardDelete = false) {
+    const message = await prisma.message.findUnique({
+      where: { id: messageId },
+    });
+
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    if (message.authorId !== userId) {
+      throw new Error("Only message author can delete");
+    }
+
+    if (hardDelete) {
+      // Completely remove message
+      await prisma.message.delete({
+        where: { id: messageId },
+      });
+    } else {
+      // Soft delete - mark as deleted
+      await prisma.message.update({
+        where: { id: messageId },
         data: {
-          unreadCount: 0,
+          deletedAt: new Date(),
+          content: "[Message deleted]",
         },
-      }),
-    ]);
+      });
+    }
+
+    return { success: true, hardDelete };
   },
 };

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Messaging System Tester</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .auth-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .auth-section h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .token-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+
+        .token-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .connection-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ffc107;
+        }
+
+        .status-dot.connected {
+            background: #28a745;
+        }
+
+        .status-dot.disconnected {
+            background: #dc3545;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 25px;
+        }
+
+        .panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .event-controls {
+            margin-bottom: 20px;
+        }
+
+        .event-selector {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .payload-editor {
+            width: 100%;
+            height: 200px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        .send-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .output-area {
+            flex: 1;
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+        }
+
+        .log-entry.sent {
+            background: rgba(102, 126, 234, 0.1);
+            border-left-color: #667eea;
+        }
+
+        .log-entry.received {
+            background: rgba(56, 178, 172, 0.1);
+            border-left-color: #38b2ac;
+        }
+
+        .log-entry.error {
+            background: rgba(245, 101, 101, 0.1);
+            border-left-color: #e53e3e;
+        }
+
+        .log-timestamp {
+            color: #a0aec0;
+            font-size: 11px;
+        }
+
+        .log-content {
+            margin-top: 4px;
+        }
+
+        .event-templates {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .event-templates h4 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .template-btn {
+            padding: 8px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-btn:hover {
+            background: #5a6fd8;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Socket.IO Messaging System Tester</h1>
+            <p>Test all socket events with real-time responses</p>
+        </div>
+
+        <div class="auth-section">
+            <h3>🔐 Authentication</h3>
+            <input type="text" class="token-input" id="tokenInput" placeholder="Enter JWT token (Bearer token)" />
+            <div class="connection-controls">
+                <button class="btn btn-primary" id="connectBtn">Connect</button>
+                <button class="btn btn-danger" id="disconnectBtn" disabled>Disconnect</button>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot disconnected" id="statusDot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </div>
+
+        <div class="event-templates">
+            <h4>📋 Event Templates</h4>
+            <div class="template-grid">
+                <button class="template-btn" onclick="loadTemplate('authenticate')">Authenticate</button>
+                <button class="template-btn" onclick="loadTemplate('online')">Go Online</button>
+                <button class="template-btn" onclick="loadTemplate('get_users')">Get Users</button>
+                <button class="template-btn" onclick="loadTemplate('get_online_status')">Get Online Status</button>
+                <button class="template-btn" onclick="loadTemplate('get_chats')">Get Chats</button>
+                <button class="template-btn" onclick="loadTemplate('send_message_to_user')">Send Message to User</button>
+                <button class="template-btn" onclick="loadTemplate('send_message')">Send Message</button>
+                <button class="template-btn" onclick="loadTemplate('mark_as_read')">Mark as Read</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h3>📤 Send Event</h3>
+                <div class="event-controls">
+                    <select class="event-selector" id="eventSelector">
+                        <option value="authenticate">authenticate</option>
+                        <option value="online">online</option>
+                        <option value="get_users" selected>get_users</option>
+                        <option value="get_online_status">get_online_status</option>
+                        <option value="get_chats">get_chats</option>
+                        <option value="get_or_create_chat">get_or_create_chat</option>
+                        <option value="send_message">send_message</option>
+                        <option value="send_message_to_user">send_message_to_user</option>
+                        <option value="mark_as_read">mark_as_read</option>
+                    </select>
+                    <textarea class="payload-editor" id="payloadEditor">{
+  "data": {}
+}</textarea>
+                    <div class="send-controls">
+                        <button class="btn btn-primary" id="sendBtn">Send Event</button>
+                        <button class="btn btn-success" id="formatBtn">Format JSON</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>📥 Responses & Events</h3>
+                <div class="output-area" id="outputArea"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SocketTester {
+            constructor() {
+                this.socket = null;
+                this.isConnected = false;
+                this.eventCounter = 0;
+
+                this.initializeElements();
+                this.bindEvents();
+                this.setupSocketEventListeners();
+            }
+
+            initializeElements() {
+                this.tokenInput = document.getElementById('tokenInput');
+                this.connectBtn = document.getElementById('connectBtn');
+                this.disconnectBtn = document.getElementById('disconnectBtn');
+                this.statusDot = document.getElementById('statusDot');
+                this.statusText = document.getElementById('statusText');
+                this.eventSelector = document.getElementById('eventSelector');
+                this.payloadEditor = document.getElementById('payloadEditor');
+                this.sendBtn = document.getElementById('sendBtn');
+                this.formatBtn = document.getElementById('formatBtn');
+                this.outputArea = document.getElementById('outputArea');
+            }
+
+            bindEvents() {
+                this.connectBtn.addEventListener('click', () => this.connect());
+                this.disconnectBtn.addEventListener('click', () => this.disconnect());
+                this.sendBtn.addEventListener('click', () => this.sendEvent());
+                this.formatBtn.addEventListener('click', () => this.formatJSON());
+
+                // Auto-save token to localStorage
+                this.tokenInput.addEventListener('input', (e) => {
+                    localStorage.setItem('socketToken', e.target.value);
+                });
+
+                this.eventSelector.addEventListener('change', () => {
+                    this.loadTemplate(this.eventSelector.value);
+                });
+            }
+
+            connect() {
+                const token = this.tokenInput.value.trim();
+
+                if (!token) {
+                    this.log('❌ Error: Please enter a JWT token', 'error');
+                    return;
+                }
+
+                try {
+                    // Connect to Socket.IO with token in auth
+                    this.socket = io('http://localhost:3500', {
+                        auth: {
+                            token: token
+                        },
+                        transports: ['websocket']
+                    });
+
+                    this.log('🔌 Connecting to Socket.IO server...', 'sent');
+
+                    this.socket.on('connect', () => {
+                        this.setConnected(true);
+                        this.log('✅ Connected to Socket.IO server', 'received');
+                    });
+
+                    this.socket.on('disconnect', () => {
+                        this.setConnected(false);
+                        this.log('❌ Disconnected from Socket.IO server', 'error');
+                    });
+
+                    this.socket.on('connect_error', (error) => {
+                        this.setConnected(false);
+                        this.log(`❌ Connection error: ${error.message}`, 'error');
+                    });
+
+                } catch (error) {
+                    this.log(`❌ Connection failed: ${error.message}`, 'error');
+                }
+            }
+
+            disconnect() {
+                if (this.socket) {
+                    this.socket.disconnect();
+                    this.setConnected(false);
+                    this.log('🔌 Disconnected by user', 'sent');
+                }
+            }
+
+            setConnected(connected) {
+                this.isConnected = connected;
+
+                if (connected) {
+                    this.statusDot.className = 'status-dot connected';
+                    this.statusText.textContent = 'Connected';
+                    this.connectBtn.disabled = true;
+                    this.disconnectBtn.disabled = false;
+                } else {
+                    this.statusDot.className = 'status-dot disconnected';
+                    this.statusText.textContent = 'Disconnected';
+                    this.connectBtn.disabled = false;
+                    this.disconnectBtn.disabled = true;
+                }
+            }
+
+            sendEvent() {
+                if (!this.isConnected || !this.socket) {
+                    this.log('❌ Error: Not connected to server', 'error');
+                    return;
+                }
+
+                const eventName = this.eventSelector.value;
+                let payload;
+
+                try {
+                    payload = JSON.parse(this.payloadEditor.value);
+                } catch (error) {
+                    this.log(`❌ Invalid JSON payload: ${error.message}`, 'error');
+                    return;
+                }
+
+                this.log(`📤 Sending event: ${eventName}`, 'sent');
+                this.log(`Payload: ${JSON.stringify(payload, null, 2)}`, 'sent');
+
+                // Socket events expect data directly, not wrapped in { data: ... }
+                if (payload.callback) {
+                    // Use callback for response
+                    this.socket.emit(eventName, payload, (response) => {
+                        this.log(`📥 Response for ${eventName}:`, 'received');
+                        this.log(JSON.stringify(response, null, 2), 'received');
+                    });
+                } else {
+                    // Emit without callback - most events don't use callbacks
+                    this.socket.emit(eventName, payload);
+                }
+            }
+
+            formatJSON() {
+                try {
+                    const parsed = JSON.parse(this.payloadEditor.value);
+                    this.payloadEditor.value = JSON.stringify(parsed, null, 2);
+                } catch (error) {
+                    this.log(`❌ Invalid JSON: ${error.message}`, 'error');
+                }
+            }
+
+            setupSocketEventListeners() {
+                // Listen for all socket events and log them
+                const eventNames = [
+                    'authenticated', 'user_status_change', 'new_message', 'messages_read',
+                    'get_users_response', 'get_users_error',
+                    'get_online_status_response', 'get_online_status_error',
+                    'get_chats_response', 'get_chats_error',
+                    'send_message_response', 'send_message_error',
+                    'send_message_to_user_response', 'send_message_to_user_error',
+                    'mark_as_read_response', 'mark_as_read_error'
+                ];
+
+                eventNames.forEach(eventName => {
+                    if (this.socket) {
+                        this.socket.on(eventName, (data) => {
+                            this.log(`📥 Received event: ${eventName}`, 'received');
+                            this.log(JSON.stringify(data, null, 2), 'received');
+                        });
+                    }
+                });
+            }
+
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry ${type}`;
+
+                logEntry.innerHTML = `
+                    <div class="log-timestamp">${timestamp}</div>
+                    <div class="log-content">${message}</div>
+                `;
+
+                this.outputArea.appendChild(logEntry);
+                this.outputArea.scrollTop = this.outputArea.scrollHeight;
+
+                // Keep only last 100 entries
+                while (this.outputArea.children.length > 100) {
+                    this.outputArea.removeChild(this.outputArea.firstChild);
+                }
+            }
+
+            loadTemplate(eventName) {
+                const templates = {
+                    authenticate: {
+                        token: "your-jwt-token-here"
+                    },
+                    online: {},
+                    get_users: {},
+                    get_online_status: {
+                        userId: "target-user-id"
+                    },
+                    get_chats: {},
+                    send_message_to_user: {
+                        recipientEmail: "colleague@company.com",
+                        content: "Hello from the test interface!"
+                    },
+                    send_message: {
+                        chatId: "existing-chat-id",
+                        content: "Hello from chat!"
+                    },
+                    mark_as_read: {
+                        chatId: "chat-id",
+                        messageIds: ["message-id-1", "message-id-2"]
+                    }
+                };
+
+                const template = templates[eventName];
+                if (template) {
+                    this.eventSelector.value = eventName;
+                    this.payloadEditor.value = JSON.stringify(template, null, 2);
+                }
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SocketTester();
+        });
+
+        // Make loadTemplate available globally for template buttons
+        window.loadTemplate = function(eventName) {
+            const tester = window.socketTester;
+            if (tester) {
+                tester.loadTemplate(eventName);
+            }
+        };
+    </script>
+</body>
+</html>

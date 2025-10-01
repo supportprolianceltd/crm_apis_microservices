@@ -52,7 +52,6 @@ app.use("/api/v1", apiRoutes);
 
 // Initialize WebSocket
 initializeSocket(io);
-io.use(socketAuth);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

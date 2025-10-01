@@ -3,13 +3,14 @@ import { ChatService } from "../services/chatService.js";
 
 export const setupChatSubscribers = (io, socket) => {
   // Get all chats for the current user
-  const getChats = async (callback) => {
+  const getChats = async (data, callback) => {
     try {
       const userId = socket.user?.id;
       const tenantId = socket.tenant?.id;
 
       if (!userId) {
-        return callback({ status: "error", message: "User not authenticated" });
+        const errorMsg = { status: "error", message: "User not authenticated" };
+        return callback ? callback(errorMsg) : socket.emit("get_chats_error", errorMsg);
       }
 
       const chats = await ChatService.getUserChats(userId, tenantId);
@@ -39,10 +40,20 @@ export const setupChatSubscribers = (io, socket) => {
         };
       });
 
-      callback({ status: "success", data: formattedChats });
+      const successMsg = { status: "success", data: formattedChats };
+      if (callback) {
+        callback(successMsg);
+      } else {
+        socket.emit("get_chats_response", successMsg);
+      }
     } catch (error) {
       console.error("Error in getChats:", error);
-      callback({ status: "error", message: error.message });
+      const errorMsg = { status: "error", message: error.message };
+      if (callback) {
+        callback(errorMsg);
+      } else {
+        socket.emit("get_chats_error", errorMsg);
+      }
     }
   };
 
@@ -53,7 +64,8 @@ export const setupChatSubscribers = (io, socket) => {
       const tenantId = socket.tenant?.id;
 
       if (!userId) {
-        throw new Error("User not authenticated");
+        const errorMsg = { status: "error", message: "User not authenticated" };
+        return callback ? callback(errorMsg) : socket.emit("get_or_create_chat_error", errorMsg);
       }
 
       const chat = await ChatService.getOrCreateDirectChat(
@@ -62,10 +74,20 @@ export const setupChatSubscribers = (io, socket) => {
         tenantId
       );
 
-      callback({ status: "success", data: chat });
+      const successMsg = { status: "success", data: chat };
+      if (callback) {
+        callback(successMsg);
+      } else {
+        socket.emit("get_or_create_chat_response", successMsg);
+      }
     } catch (error) {
       console.error("Error in getOrCreateDirectChat:", error);
-      callback({ status: "error", message: error.message });
+      const errorMsg = { status: "error", message: error.message };
+      if (callback) {
+        callback(errorMsg);
+      } else {
+        socket.emit("get_or_create_chat_error", errorMsg);
+      }
     }
   };
 
