@@ -61,6 +61,26 @@ services:
       - auth_service_default
     command: sh -c "./wait-for-it.sh kafka:9092 -- python consumer.py"
 
+
+
+  # talent_postgres:
+  #   image: postgres:15
+  #   container_name: talent_postgres
+  #   environment:
+  #     POSTGRES_DB: talent_db
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: password
+  #   volumes:
+  #     - talent_postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5433:5432"
+  #   networks:
+  #     - auth_service_default
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres -d talent_db"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
   talent_postgres:
     image: postgres:15
     container_name: talent_postgres
@@ -68,6 +88,7 @@ services:
       POSTGRES_DB: talent_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+      POSTGRES_TIMEOUT: 300  # Add this
     volumes:
       - talent_postgres_data:/var/lib/postgresql/data
     ports:
@@ -75,10 +96,13 @@ services:
     networks:
       - auth_service_default
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d talent_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U postgres -d talent_db -t 30"]
+      interval: 10s
+      timeout: 30s
+      retries: 10
+      start_period: 40s
+    restart: unless-stopped
+
 
 volumes:
   talent_postgres_data:

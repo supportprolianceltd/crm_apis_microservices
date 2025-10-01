@@ -55,17 +55,27 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
 
 # ======================== Database ========================
 
+# In your talent_engine/settings.py
 DATABASES = {
     'default': {
-        'ENGINE': env('DB_ENGINE', default='django.db.backends.postgresql'),
+        'ENGINE': 'django_tenants.postgresql_backend',
         'NAME': env('DB_NAME', default=''),
         'USER': env('DB_USER', default=''),
         'PASSWORD': env('DB_PASSWORD', default=''),
         'HOST': env('DB_HOST', default='localhost'),
         'PORT': env('DB_PORT', default='5432'),
-        'CONN_MAX_AGE': 60,
+        'CONN_MAX_AGE': 0,  # Set to 0 to disable persistent connections
+        'OPTIONS': {
+            'connect_timeout': 30,
+            'keepalives': 1,
+            'keepalives_idle': 30,
+            'keepalives_interval': 10,
+            'keepalives_count': 5,
+        },
     }
 }
+
+
 
 if not DATABASES['default']['ENGINE']:
     raise ImproperlyConfigured("DATABASES['default']['ENGINE'] must be set.")
@@ -86,19 +96,9 @@ INSTALLED_APPS = [
 ]
 
 # ======================== Middleware ========================
-# MIDDLEWARE = [
-#     'talent_engine.middleware.MicroserviceRS256JWTMiddleware',
-#     'talent_engine.middleware.CustomTenantSchemaMiddleware',
-#     'corsheaders.middleware.CorsMiddleware',  # must be first for CORS
-#     'django.middleware.security.SecurityMiddleware',
-#     'django.contrib.sessions.middleware.SessionMiddleware',
-#     'django.middleware.common.CommonMiddleware',
-#     'django.middleware.csrf.CsrfViewMiddleware',
-#     'django.contrib.auth.middleware.AuthenticationMiddleware',
-#     'django.contrib.messages.middleware.MessageMiddleware',
-#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-# ]
+# Add connection health check middleware
 MIDDLEWARE = [
+    'talent_engine.middleware.DatabaseConnectionMiddleware',  # Add this FIRST
     'talent_engine.middleware.MicroserviceRS256JWTMiddleware',
     'talent_engine.middleware.CustomTenantSchemaMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -106,10 +106,21 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    # Remove 'django.contrib.auth.middleware.AuthenticationMiddleware'
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+# MIDDLEWARE = [
+#     'talent_engine.middleware.MicroserviceRS256JWTMiddleware',
+#     'talent_engine.middleware.CustomTenantSchemaMiddleware',
+#     'corsheaders.middleware.CorsMiddleware',
+#     'django.middleware.security.SecurityMiddleware',
+#     'django.contrib.sessions.middleware.SessionMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+#     'django.middleware.csrf.CsrfViewMiddleware',
+#     # Remove 'django.contrib.auth.middleware.AuthenticationMiddleware'
+#     'django.contrib.messages.middleware.MessageMiddleware',
+#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+# ]
 
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
 

@@ -7,11 +7,12 @@ from django.utils.deprecation import MiddlewareMixin
 from rest_framework.exceptions import AuthenticationFailed
 from django.http import JsonResponse
 from django.db import connection
+import logging
+from django.db import close_old_connections, connection
 
 logger = logging.getLogger('talent_engine')
 
 from django.contrib.auth.models import AnonymousUser
-from rest_framework.exceptions import AuthenticationFailed
 
 public_paths = ['/api/docs/', '/api/schema/', '/api/health/',  
                 '/api/talent-engine/requisitions/by-link/',
@@ -38,6 +39,44 @@ class SimpleUser:
 
     def __str__(self):
         return self.username or self.email
+
+
+
+
+
+class DatabaseConnectionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Close any stale connections before processing the request
+        close_old_connections()
+        
+        # Verify connection is alive
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+        except Exception as e:
+            logger.error(f"Database connection verification failed: {str(e)}")
+            # Try to close and reopen connection
+            connection.close()
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT 1")
+            except Exception as e2:
+                logger.error(f"Failed to reestablish database connection: {str(e2)}")
+                return JsonResponse(
+                    {"detail": "Database connection unavailable"}, 
+                    status=503
+                )
+        
+        response = self.get_response(request)
+        
+        # Close connections after response to prevent connection leaks
+        close_old_connections()
+        
+        return response
+    
 
 
 class MicroserviceRS256JWTMiddleware(MiddlewareMixin):

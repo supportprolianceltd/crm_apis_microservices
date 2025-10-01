@@ -86,7 +86,7 @@ AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
 # In your settings.py
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django_tenants.postgresql_backend',
         'NAME': env('DB_NAME', default=''),
         'USER': env('DB_USER', default=''),
         'PASSWORD': env('DB_PASSWORD', default=''),

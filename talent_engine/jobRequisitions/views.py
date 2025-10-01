@@ -8,6 +8,7 @@ from rest_framework import status
 from .models import JobRequisition
 import logging
 import requests
+from django.db import close_old_connections
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -54,6 +55,28 @@ from .serializers import PublicJobRequisitionSerializer
 import logging
 
 logger = logging.getLogger('talent_engine')
+
+from django.db import close_old_connections, connection
+
+def ensure_db_connection():
+    """Ensure database connection is alive"""
+    try:
+        close_old_connections()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        return True
+    except Exception as e:
+        logger.error(f"Database connection failed: {str(e)}")
+        # Try to reconnect
+        connection.close()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+            return True
+        except Exception as e2:
+            logger.error(f"Database reconnection failed: {str(e2)}")
+            return False
+        
 
 def get_tenant_id_from_jwt(request):
     auth_header = request.headers.get('Authorization', '')
@@ -255,6 +278,10 @@ class MyJobRequisitionListView(generics.ListCreateAPIView):
     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
 
     def get_queryset(self):
+        if not ensure_db_connection():
+            logger.error("Database connection unavailable")
+            return JobRequisition.active_objects.none()
+            
         if getattr(self, "swagger_fake_view", False):
             return JobRequisition.objects.none()
         jwt_payload = getattr(self.request, 'jwt_payload', {})
@@ -272,6 +299,7 @@ class MyJobRequisitionListView(generics.ListCreateAPIView):
     
 
 
+
 class PublishedJobRequisitionListView(generics.ListAPIView):
     serializer_class = JobRequisitionSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
@@ -279,6 +307,10 @@ class PublishedJobRequisitionListView(generics.ListAPIView):
     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
 
     def get_queryset(self):
+        if not ensure_db_connection():
+            logger.error("Database connection unavailable")
+            return JobRequisition.active_objects.none()
+            
         if getattr(self, "swagger_fake_view", False):
             return JobRequisition.objects.none()
         jwt_payload = getattr(self.request, 'jwt_payload', {})
@@ -301,6 +333,36 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
     filterset_fields = ['status', 'role']
     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
 
+    def get_queryset(self):
+        try:
+            # Close any stale connections first
+            close_old_connections()
+            
+            if getattr(self, "swagger_fake_view", False):
+                return JobRequisition.objects.none()
+                
+            jwt_payload = getattr(self.request, 'jwt_payload', {})
+            tenant_id = jwt_payload.get('tenant_unique_id')
+            role = jwt_payload.get('role')
+            branch = jwt_payload.get('branch')
+            
+            if not tenant_id:
+                logger.error("No tenant_id in token")
+                return JobRequisition.active_objects.none()
+            
+            # Create a fresh queryset
+            queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
+            
+            if role == 'recruiter' and branch:
+                queryset = queryset.filter(branch=branch)
+                
+            return queryset
+            
+        except Exception as e:
+            logger.error(f"Error in get_queryset: {str(e)}")
+            # Return empty queryset on error
+            return JobRequisition.active_objects.none()
+
     def get_serializer_class(self):
         """
         Use different serializer for bulk create operations
@@ -317,17 +379,17 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
             kwargs['many'] = True
         return super().get_serializer(*args, **kwargs)
 
-    def get_queryset(self):
-        if getattr(self, "swagger_fake_view", False):
-            return JobRequisition.objects.none()
-        jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = jwt_payload.get('tenant_unique_id')
-        role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
-        queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
-        if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch=branch)
-        return queryset
+    # def get_queryset(self):
+    #     if getattr(self, "swagger_fake_view", False):
+    #         return JobRequisition.objects.none()
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('branch')
+    #     queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     return queryset
 
     def create(self, request, *args, **kwargs):
         """
@@ -450,14 +512,19 @@ class IncrementJobApplicationsCountView(APIView):
             logger.error(f"Error incrementing num_of_applications for unique_link {unique_link}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = JobRequisitionSerializer
-    # permission_classes removed; rely on custom JWT middleware
     lookup_field = 'id'
 
     def get_queryset(self):
+        if not ensure_db_connection():
+            logger.error("Database connection unavailable")
+            return JobRequisition.active_objects.none()
+            
         if getattr(self, "swagger_fake_view", False):
             return JobRequisition.objects.none()
+            
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
@@ -479,6 +546,42 @@ class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
         tenant_id = jwt_payload.get('tenant_unique_id')
         instance.soft_delete()
         logger.info(f"Job requisition soft-deleted: {instance.title} for tenant {tenant_id}")
+
+
+
+
+
+# class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     serializer_class = JobRequisitionSerializer
+#     # permission_classes removed; rely on custom JWT middleware
+#     lookup_field = 'id'
+
+#     def get_queryset(self):
+#         if getattr(self, "swagger_fake_view", False):
+#             return JobRequisition.objects.none()
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('branch')
+#         queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
+#         if role == 'recruiter' and branch:
+#             queryset = queryset.filter(branch=branch)
+#         return queryset
+
+#     def perform_update(self, serializer):
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#         user_id = jwt_payload.get('user_id')
+#         serializer.save(tenant_id=tenant_id, updated_by_id=user_id)
+#         logger.info(f"Job requisition updated: {serializer.instance.title} for tenant {tenant_id} by user {user_id}")
+
+#     def perform_destroy(self, instance):
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#         instance.soft_delete()
+#         logger.info(f"Job requisition soft-deleted: {instance.title} for tenant {tenant_id}")
+
+
 
 
 class JobRequisitionByLinkView(generics.RetrieveAPIView):
