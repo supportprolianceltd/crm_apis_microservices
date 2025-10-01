@@ -189,6 +189,30 @@ import pytesseract
 from PIL import Image
 import io
 
+def screen_resume_batch(resume_texts, job_requirements):
+    """Compute similarity scores between multiple resumes and job description."""
+    try:
+        if not resume_texts or not job_requirements:
+            logger.warning(f"Empty input: resume_texts={bool(resume_texts)}, job_requirements={bool(job_requirements)}")
+            return [0.0] * len(resume_texts)
+
+        model = get_sentence_transformer_model()
+        resume_embs = model.encode(resume_texts, convert_to_tensor=True)
+        jd_emb = model.encode(job_requirements, convert_to_tensor=True)
+        
+        # Calculate cosine similarity for each resume
+        scores = []
+        for resume_emb in resume_embs:
+            score = util.pytorch_cos_sim(resume_emb, jd_emb).item()
+            scores.append(round(score * 100, 2))
+            
+        return scores
+    except Exception as e:
+        logger.exception(f"Error batch screening resumes: {str(e)}")
+        return [0.0] * len(resume_texts)
+    
+    
+
 def parse_resume(file_path):
     """Parse resume from a local file and extract text with OCR fallback."""
     try:

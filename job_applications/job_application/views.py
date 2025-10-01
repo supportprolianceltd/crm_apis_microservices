@@ -73,7 +73,37 @@ from utils.supabase import upload_file_dynamic
 from django.http import JsonResponse
 from django.views import View
 from datetime import datetime
+import os
+import tempfile
+import mimetypes
+import io
+import gzip
+import zipfile
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
+import requests
+from django.db import transaction, connection
+from django.db.models import Q
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from celery.result import AsyncResult
+import logging
 
+from .models import JobApplication
+from .serializers import SimpleMessageSerializer
+from utils.screen import (
+    parse_resume, 
+    screen_resume, 
+    extract_resume_fields
+)
+from utils.email_utils import (
+    send_screening_notification
+)
+from .tasks import process_large_resume_batch
+
+logger = logging.getLogger(__name__)
 
 # Logger
 logger = logging.getLogger('job_applications')
@@ -133,39 +163,6 @@ class HealthCheckView(View):
 
 class CustomPagination(PageNumberPagination):
     page_size = 20
-
-
-import os
-import tempfile
-import mimetypes
-import io
-import gzip
-import zipfile
-import concurrent.futures
-from concurrent.futures import ThreadPoolExecutor
-import requests
-from django.db import transaction, connection
-from django.db.models import Q
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
-from celery.result import AsyncResult
-import logging
-
-from .models import JobApplication
-from .serializers import SimpleMessageSerializer
-from utils.screen import (
-    parse_resume, 
-    screen_resume, 
-    extract_resume_fields
-)
-from utils.email_utils import (
-    send_screening_notification
-)
-from .tasks import process_large_resume_batch
-
-logger = logging.getLogger(__name__)
 
 
 class CircuitBreaker:
@@ -1035,6 +1032,8 @@ class ScreeningTaskStatusView(APIView):
                 'error': 'Failed to check task status',
                 'details': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 class JobApplicationCreatePublicView(generics.CreateAPIView):

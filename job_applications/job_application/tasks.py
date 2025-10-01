@@ -14,8 +14,9 @@ from django.db import transaction
 from django.utils import timezone
 import concurrent.futures
 from job_application.models import JobApplication
-from utils.screen import parse_resume, screen_resume, extract_resume_fields
 
+from utils.screen import parse_resume, screen_resume, extract_resume_fields, screen_resume_batch
+from utils.email_utils import send_screening_notification
 logger = logging.getLogger('job_applications')
 
 def get_job_requisition_by_id(job_requisition_id, authorization_header=""):
@@ -130,115 +131,147 @@ def process_resume_chunk(self, job_requisition_id, tenant_id, document_type,
         temp_file_paths = []
         document_type_lower = document_type.lower()
         
+        # Build file info for each application
+        file_infos = []
+        for app in applications_list:
+            app_data = applications_data_map.get(str(app.id))
+            if app_data and 'file_url' in app_data:
+                file_url = app_data['file_url']
+                compression = app_data.get('compression')
+                original_name = app_data.get('original_name', 'resume.pdf')
+            else:
+                cv_doc = next(
+                    (doc for doc in app.documents if doc['document_type'].lower() == document_type_lower),
+                    None
+                )
+                if cv_doc:
+                    file_url = cv_doc['file_url']
+                    compression = cv_doc.get('compression')
+                    original_name = cv_doc.get('original_name', 'resume.pdf')
+                else:
+                    file_url = None
+
+            if file_url:
+                file_infos.append({
+                    "application_id": str(app.id),
+                    "full_name": app.full_name,
+                    "email": app.email,
+                    "file_url": file_url,
+                    "compression": compression,
+                    "original_name": original_name
+                })
+            else:
+                # If no file URL, create failed result
+                results.append({
+                    "application_id": str(app.id),
+                    "full_name": app.full_name,
+                    "email": app.email,
+                    "error": f"No {document_type_lower} document found",
+                    "success": False
+                })
+
         # Step 1: Download and parse resumes in parallel
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            future_to_app = {
+            future_to_info = {
                 executor.submit(
                     _download_and_parse_resume,
-                    app, 
-                    applications_data_map.get(str(app.id)),
+                    file_info["application_id"],
+                    file_info["full_name"],
+                    file_info["email"],
+                    file_info["file_url"],
+                    file_info["compression"],
+                    file_info["original_name"],
                     document_type_lower
-                ): app for app in applications_list
+                ): file_info for file_info in file_infos
             }
-            for future in concurrent.futures.as_completed(future_to_app):
+            for future in concurrent.futures.as_completed(future_to_info):
                 result = future.result()
-                if result['success']:
-                    resume_texts.append(result['resume_text'])
-                    temp_file_paths.append(result['temp_file_path'])
+                if result["success"]:
+                    resume_texts.append(result["resume_text"])
+                    temp_file_paths.append(result["temp_file_path"])
                 results.append(result)
 
         # Step 2: Batch score resumes
         if resume_texts:
-            scores, explanations = screen_resume(
-                resume_texts=resume_texts,
-                job_requirements=job_requirements
-            )
-            # Min-max normalization
-            scores = np.array(scores)
-            min_score, max_score = scores.min(), scores.max()
-            if max_score > min_score:
-                normalized_scores = (scores - min_score) / (max_score - min_score) * 100
-            else:
-                normalized_scores = scores * 100  # Avoid division by zero
+            # Use the updated screen_resume function that handles batch processing
+            scores = screen_resume_batch(resume_texts, job_requirements)
             
-            # Update results with scores and explanations
+            # Min-max normalization
+            import numpy as np
+            scores_array = np.array(scores)
+            min_score, max_score = scores_array.min(), scores_array.max()
+            if max_score > min_score:
+                normalized_scores = (scores_array - min_score) / (max_score - min_score) * 100
+            else:
+                normalized_scores = scores_array * 100  # Avoid division by zero
+            
+            # Update results with scores
             success_idx = 0
-            for i, result in enumerate(results):
+            for result in results:
                 if result['success']:
                     result['score'] = round(float(normalized_scores[success_idx]), 2)
                     result['screening_status'] = 'processed'
-                    result['explanation'] = explanations[success_idx]
                     success_idx += 1
 
-        # Step 3: Update applications with scores and explanations
-        for result, temp_file_path in zip(results, temp_file_paths + [None] * (len(results) - len(temp_file_paths))):
-            app = result['app']
-            if result['success']:
+        # Step 3: Update applications with scores
+        applications_map = {str(app.id): app for app in applications_list}
+        for result in results:
+            app = applications_map.get(result['application_id'])
+            if app and result['success']:
                 app.screening_status = 'processed'
                 app.screening_score = result['score']
-                app.ai_vetting_notes = {'keywords': result['explanation']}
                 app.employment_gaps = result['employment_gaps']
-            else:
+                app.save()
+            elif app:
                 app.screening_status = 'failed'
                 app.screening_score = 0.0
-                app.ai_vetting_notes = {'error': result['error']}
-            app.save()
+                app.save()
             
             # Clean up temporary file
-            if temp_file_path and os.path.exists(temp_file_path):
-                os.unlink(temp_file_path)
+            if result.get('temp_file_path') and os.path.exists(result['temp_file_path']):
+                os.unlink(result['temp_file_path'])
+
+        # Return only serializable data
+        serializable_results = []
+        for result in results:
+            serializable_result = {
+                "application_id": result["application_id"],
+                "full_name": result["full_name"],
+                "email": result["email"],
+                "success": result["success"]
+            }
+            if result["success"]:
+                serializable_result.update({
+                    "score": result.get("score", 0),
+                    "screening_status": result.get("screening_status", "processed"),
+                    "employment_gaps": result.get("employment_gaps", [])
+                })
+            else:
+                serializable_result["error"] = result.get("error", "Unknown error")
+            
+            serializable_results.append(serializable_result)
 
         return {
             'chunk_index': chunk_index,
-            'results': results,
+            'results': serializable_results,
             'processed_count': len(results)
         }
         
     except Exception as e:
         logger.error(f"Chunk {chunk_index} processing failed: {str(e)}")
         raise self.retry(exc=e, countdown=30)
-
-def _download_and_parse_resume(app, app_data, document_type_lower):
-    """Download and parse a single resume, returning text for batch scoring"""
+    
+    
+def _download_and_parse_resume(application_id, full_name, email, file_url, compression, original_name, document_type_lower):
     try:
-        # Download resume
-        if app_data and 'file_url' in app_data:
-            file_url = app_data['file_url']
-            compression = app_data.get('compression')
-            original_name = app_data.get('original_name', 'resume.pdf')
-        else:
-            cv_doc = next(
-                (doc for doc in app.documents if doc['document_type'].lower() == document_type_lower),
-                None
-            )
-            if not cv_doc:
-                app.screening_status = 'failed'
-                app.screening_score = 0.0
-                app.save()
-                return {
-                    "app": app,
-                    "application_id": str(app.id),
-                    "full_name": app.full_name,
-                    "email": app.email,
-                    "error": f"No {document_type_lower} document found",
-                    "success": False
-                }
-            file_url = cv_doc['file_url']
-            compression = cv_doc.get('compression')
-            original_name = cv_doc.get('original_name', 'resume.pdf')
-
         headers = {"Authorization": f"Bearer {settings.SUPABASE_KEY}"}
         response = requests.get(file_url, headers=headers, timeout=30)
         
         if response.status_code != 200:
-            app.screening_status = 'failed'
-            app.screening_score = 0.0
-            app.save()
             return {
-                "app": app,
-                "application_id": str(app.id),
-                "full_name": app.full_name,
-                "email": app.email,
+                "application_id": application_id,
+                "full_name": full_name,
+                "email": email,
                 "error": f"Download failed: HTTP {response.status_code}",
                 "success": False
             }
@@ -252,15 +285,10 @@ def _download_and_parse_resume(app, app_data, document_type_lower):
                 file_content = gzip.decompress(file_content)
                 content_type = mimetypes.guess_type(original_name)[0] or 'application/pdf'
             except Exception as e:
-                logger.error(f"Decompression failed for app {app.id}: {str(e)}")
-                app.screening_status = 'failed'
-                app.screening_score = 0.0
-                app.save()
                 return {
-                    "app": app,
-                    "application_id": str(app.id),
-                    "full_name": app.full_name,
-                    "email": app.email,
+                    "application_id": application_id,
+                    "full_name": full_name,
+                    "email": email,
                     "error": f"Decompression error: {str(e)}",
                     "success": False
                 }
@@ -272,18 +300,14 @@ def _download_and_parse_resume(app, app_data, document_type_lower):
         temp_file.close()
         temp_file_path = temp_file.name
 
-        # Parse resume
-        resume_text = parse_resume(temp_file_path, is_compressed=False, original_name=original_name)
+        # Parse resume - REMOVE is_compressed parameter
+        resume_text = parse_resume(temp_file_path)
         
         if not resume_text:
-            app.screening_status = 'failed'
-            app.screening_score = 0.0
-            app.save()
             return {
-                "app": app,
-                "application_id": str(app.id),
-                "full_name": app.full_name,
-                "email": app.email,
+                "application_id": application_id,
+                "full_name": full_name,
+                "email": email,
                 "error": "Failed to parse resume",
                 "success": False
             }
@@ -293,10 +317,9 @@ def _download_and_parse_resume(app, app_data, document_type_lower):
         employment_gaps = resume_data.get("employment_gaps", [])
         
         return {
-            "app": app,
-            "application_id": str(app.id),
-            "full_name": app.full_name,
-            "email": app.email,
+            "application_id": application_id,
+            "full_name": full_name,
+            "email": email,
             "resume_text": resume_text,
             "employment_gaps": employment_gaps,
             "temp_file_path": temp_file_path,
@@ -304,24 +327,20 @@ def _download_and_parse_resume(app, app_data, document_type_lower):
         }
         
     except Exception as e:
-        logger.error(f"Application {app.id} processing failed: {str(e)}")
-        app.screening_status = 'failed'
-        app.screening_score = 0.0
-        app.save()
         return {
-            "app": app,
-            "application_id": str(app.id),
-            "full_name": app.full_name,
-            "email": app.email,
+            "application_id": application_id,
+            "full_name": full_name,
+            "email": email,
             "error": f"Processing error: {str(e)}",
             "success": False
         }
+
 
 @shared_task(bind=True, max_retries=2, soft_time_limit=1800, time_limit=3600)
 def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, 
                               num_candidates, document_type, authorization_header=""):
     """
-    Aggregate results from all chunks, update statuses, and send email notifications using original function
+    Aggregate results from all chunks, update statuses, and send email notifications
     """
     try:
         all_results = []
@@ -361,13 +380,9 @@ def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_
     except Exception as e:
         logger.error(f"Result aggregation failed: {str(e)}")
         raise self.retry(exc=e, countdown=30)
-
 def _update_applications_and_send_emails(shortlisted_candidates, job_requisition_id, tenant_id, job_requisition):
-    """Update application statuses and send email notifications using original function"""
     try:
         shortlisted_ids = {item['application_id'] for item in shortlisted_candidates}
-        
-        # Get all applications for this requisition
         applications = JobApplication.active_objects.filter(
             job_requisition_id=job_requisition_id,
             tenant_id=tenant_id
@@ -377,17 +392,13 @@ def _update_applications_and_send_emails(shortlisted_candidates, job_requisition
             for app in applications:
                 app_id_str = str(app.id)
                 if app_id_str in shortlisted_ids:
-                    # Update to shortlisted
                     app.status = 'shortlisted'
                     app.save()
-                    
-                    # Find the shortlisted candidate data
                     shortlisted_app = next(
                         (item for item in shortlisted_candidates if item['application_id'] == app_id_str), 
                         None
                     )
                     if shortlisted_app:
-                        # Prepare applicant data for email
                         applicant_data = {
                             "email": shortlisted_app['email'],
                             "full_name": shortlisted_app['full_name'],
@@ -397,24 +408,29 @@ def _update_applications_and_send_emails(shortlisted_candidates, job_requisition
                             "score": shortlisted_app.get('score'),
                             "explanation": shortlisted_app.get('explanation')
                         }
-                        
                         employment_gaps = shortlisted_app.get('employment_gaps', [])
                         event_type = "candidate.shortlisted.gaps" if employment_gaps else "candidate.shortlisted"
-                        
-                        # Send shortlisted notification email
-                        send_screening_notification(
-                            applicant=applicant_data,
-                            tenant_id=tenant_id,
-                            event_type=event_type,
-                            employment_gaps=employment_gaps
-                        )
-                        logger.info(f"Sent shortlisted email to {shortlisted_app['email']}")
+                        try:
+                            send_screening_notification(
+                                applicant=applicant_data,
+                                tenant_id=tenant_id,
+                                event_type=event_type,
+                                employment_gaps=employment_gaps
+                            )
+                            logger.info(f"Sent shortlisted email to {shortlisted_app['email']}")
+                        except Exception as e:
+                            logger.warning(f"Retrying notification for {shortlisted_app['email']} due to: {str(e)}")
+                            # Retry once after a delay
+                            time.sleep(5)
+                            send_screening_notification(
+                                applicant=applicant_data,
+                                tenant_id=tenant_id,
+                                event_type=event_type,
+                                employment_gaps=employment_gaps
+                            )
                 else:
-                    # Update to rejected
                     app.status = 'rejected'
                     app.save()
-                    
-                    # Prepare applicant data for email
                     applicant_data = {
                         "email": app.email,
                         "full_name": app.full_name,
@@ -423,15 +439,21 @@ def _update_applications_and_send_emails(shortlisted_candidates, job_requisition
                         "status": "rejected",
                         "score": getattr(app, "screening_score", None)
                     }
-                    
-                    # Send rejection notification email
-                    send_screening_notification(
-                        applicant=applicant_data,
-                        tenant_id=tenant_id,
-                        event_type="candidate.rejected"
-                    )
-                    logger.info(f"Sent rejection email to {app.email}")
-                    
+                    try:
+                        send_screening_notification(
+                            applicant=applicant_data,
+                            tenant_id=tenant_id,
+                            event_type="candidate.rejected"
+                        )
+                        logger.info(f"Sent rejection email to {app.email}")
+                    except Exception as e:
+                        logger.warning(f"Retrying notification for {app.email} due to: {str(e)}")
+                        time.sleep(5)
+                        send_screening_notification(
+                            applicant=applicant_data,
+                            tenant_id=tenant_id,
+                            event_type="candidate.rejected"
+                        )
     except Exception as e:
         logger.error(f"Error updating applications and sending emails: {str(e)}")
         raise
