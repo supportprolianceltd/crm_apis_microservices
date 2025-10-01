@@ -1198,23 +1198,27 @@ class JobApplicationsByRequisitionView(generics.ListAPIView):
     # permission_classes = [IsAuthenticated]
     def get_permissions(self):
         return [AllowAny()]  # Temporary for testing
-
+    
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
-        tenant_id = self.request.jwt_payload.get('tenant_unique_id')
-        #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        tenant_id = jwt_payload.get('tenant_unique_id')  # Use this consistently
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         job_requisition_id = self.kwargs['job_requisition_id']
+        
         queryset = JobApplication.active_objects.filter(job_requisition_id=job_requisition_id)
+        
         if not tenant_id:
             logger.error("No tenant_id in token")
             return JobApplication.active_objects.none()
+        
         queryset = queryset.filter(tenant_id=tenant_id)
+        
         if role == 'recruiter' and branch:
             queryset = queryset.filter(branch=branch)
         elif branch:
             queryset = queryset.filter(branch=branch)
+        
         return queryset.order_by('-created_at')
 
 class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):

@@ -747,3 +747,15 @@ def xstarmap(task, it):
 2025-10-01 10:57:14,371 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
 2025-10-01 10:57:14,396 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/ec0a7ddc-5934-4207-b9d2-b82fbe654829/ HTTP/1.1" 200 428
 2025-10-01 10:57:14,397 [INFO] job_applications: Set schema to: proliance
+2025-10-01 11:09:04,778 [INFO] job_applications: Starting large batch processing for 22 applications
+2025-10-01 11:09:04,829 [ERROR] job_applications: Large batch processing failed: Job requisition not found
+2025-10-01 11:09:04,830 [WARNING] job_applications: ================================================================================
+2025-10-01 11:09:04,831 [WARNING] job_applications: 💥 ASYNCHRONOUS BATCH SCREENING FAILED 💥
+2025-10-01 11:09:04,832 [WARNING] job_applications: ⏱️  TOTAL ELAPSED TIME: 0.05 SECONDS
+2025-10-01 11:09:04,833 [WARNING] job_applications: ================================================================================
+2025-10-01 11:10:10,302 [INFO] job_applications: Starting large batch processing for 22 applications
+2025-10-01 11:10:10,336 [ERROR] job_applications: Large batch processing failed: Job requisition not found
+2025-10-01 11:10:10,337 [WARNING] job_applications: ================================================================================
+2025-10-01 11:10:10,338 [WARNING] job_applications: 💥 ASYNCHRONOUS BATCH SCREENING FAILED 💥
+2025-10-01 11:10:10,339 [WARNING] job_applications: ⏱️  TOTAL ELAPSED TIME: 0.03 SECONDS
+2025-10-01 11:10:10,340 [WARNING] job_applications: ================================================================================
