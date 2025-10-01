@@ -120,6 +120,8 @@ class CustomUser(AbstractUser):
         ('admin', 'Admin'),
         ('co-admin', 'Co-Admin'),
         ('hr', 'HR'),
+        ('staff', 'Staff'),
+        ('user', 'User'),
         ('carer', 'Carer'),
         ('client', 'Client'),
         ('family', 'Family'),

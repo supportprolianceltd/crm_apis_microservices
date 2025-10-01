@@ -11,6 +11,7 @@ class ActiveApplicationsManager(models.Manager):
 
 
 
+
 class JobApplication(models.Model):
     STATUS_CHOICES = [
         ('new', 'New'),
@@ -80,7 +81,7 @@ class JobApplication(models.Model):
     ai_vetting_notes = models.JSONField(default=dict, blank=True)
 
     # Screening & tags
-    screening_status = models.CharField(max_length=20, choices=SCREENING_STATUS_CHOICES, default='pending')
+    screening_status = models.JSONField(default=list, blank=True)  # Single array of a single dictionary; updates override previous entry
     screening_score = models.FloatField(null=True, blank=True)
     screening_questions = models.JSONField(default=list, blank=True)
     tags = models.JSONField(default=list, blank=True)
@@ -175,8 +176,11 @@ class JobApplication(models.Model):
         else:
             logger.debug(f"No status change for app {self.id}: already {new_status}")
             return False
-    
-    
+
+
+
+
+
 class Schedule(models.Model):
     STATUS_CHOICES = [
         ('scheduled', 'Scheduled'),

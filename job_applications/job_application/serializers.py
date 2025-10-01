@@ -666,7 +666,6 @@ class PublicJobApplicationSerializer(serializers.ModelSerializer):
 
 
 
-
 class JobApplicationSerializer(serializers.ModelSerializer):
     documents = DocumentSerializer(many=True, required=False)
     compliance_status = ComplianceStatusSerializer(many=True, required=False)
@@ -747,6 +746,7 @@ class JobApplicationSerializer(serializers.ModelSerializer):
             })
         validated_data['documents'] = documents
         validated_data['status_history'] = []  # Initialize empty history
+        validated_data['screening_status'] = [{'status': 'pending', 'updated_at': timezone.now().isoformat()}]  # Initialize as single array of single dict
 
         application = JobApplication.objects.create(**validated_data)
 
@@ -856,6 +856,8 @@ class JobApplicationSerializer(serializers.ModelSerializer):
                 } for item in data['compliance_status']
             ]
         return data
+
+
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
