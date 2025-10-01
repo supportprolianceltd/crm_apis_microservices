@@ -16,9 +16,11 @@ COPY . .
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Make port 3000 available to the world outside this container
+# Make ports available to the world outside this container
 EXPOSE 3500
+EXPOSE 3501
 
 # Define the command to run the app
 # Run migrations and then start the application
 CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+

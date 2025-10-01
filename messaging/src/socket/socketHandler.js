@@ -13,6 +13,12 @@ export const initializeSocket = (io) => {
     console.log("🔐 Socket user:", socket.user);
     console.log("🏢 Socket tenant:", socket.tenant);
 
+    // Join tenant room for broadcasting
+    if (socket.tenant?.id) {
+      socket.join(`tenant:${socket.tenant.id}`);
+      console.log(`📍 Joined tenant room: tenant:${socket.tenant.id}`);
+    }
+
     // Set up all subscribers after authentication
     const cleanupSubscribers = setupSubscribers(io, socket);
     console.log("✅ Subscribers setup completed");

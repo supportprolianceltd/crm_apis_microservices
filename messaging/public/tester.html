@@ -306,6 +306,7 @@
                 <button class="template-btn" onclick="loadTemplate('send_message_to_user')">Send Message to User</button>
                 <button class="template-btn" onclick="loadTemplate('send_message')">Send Message</button>
                 <button class="template-btn" onclick="loadTemplate('mark_as_read')">Mark as Read</button>
+                <button class="template-btn" onclick="loadTemplate('get_messages')">Get Messages</button>
             </div>
         </div>
 
@@ -316,10 +317,11 @@
                     <select class="event-selector" id="eventSelector">
                         <option value="authenticate">authenticate</option>
                         <option value="online">online</option>
-                        <option value="get_users" selected>get_users</option>
+                        <option value="get_users">get_users</option>
                         <option value="get_online_status">get_online_status</option>
                         <option value="get_chats">get_chats</option>
                         <option value="get_or_create_chat">get_or_create_chat</option>
+                        <option value="get_messages">get_messages</option>
                         <option value="send_message">send_message</option>
                         <option value="send_message_to_user">send_message_to_user</option>
                         <option value="mark_as_read">mark_as_read</option>
@@ -346,11 +348,9 @@
             constructor() {
                 this.socket = null;
                 this.isConnected = false;
-                this.eventCounter = 0;
 
                 this.initializeElements();
                 this.bindEvents();
-                this.setupSocketEventListeners();
             }
 
             initializeElements() {
@@ -404,6 +404,13 @@
                     this.socket.on('connect', () => {
                         this.setConnected(true);
                         this.log('✅ Connected to Socket.IO server', 'received');
+                        
+                        // Set up event listeners after connection
+                        this.setupSocketEventListeners();
+                        
+                        // Automatically send 'online' event after connecting
+                        this.log('📤 Sending online event...', 'sent');
+                        this.socket.emit('online', {});
                     });
 
                     this.socket.on('disconnect', () => {
@@ -490,9 +497,12 @@
                 // Listen for all socket events and log them
                 const eventNames = [
                     'authenticated', 'user_status_change', 'new_message', 'messages_read',
+                    'online_response', 'online_error',
                     'get_users_response', 'get_users_error',
                     'get_online_status_response', 'get_online_status_error',
                     'get_chats_response', 'get_chats_error',
+                    'get_or_create_chat_response', 'get_or_create_chat_error',
+                    'get_messages_response', 'get_messages_error',
                     'send_message_response', 'send_message_error',
                     'send_message_to_user_response', 'send_message_to_user_error',
                     'mark_as_read_response', 'mark_as_read_error'
@@ -506,6 +516,17 @@
                         });
                     }
                 });
+
+                // Catch-all listener for any events not in the list
+                if (this.socket) {
+                    this.socket.onAny((eventName, ...args) => {
+                        // Only log if not already in our event list
+                        if (!eventNames.includes(eventName)) {
+                            this.log(`📥 Received unlisted event: ${eventName}`, 'received');
+                            this.log(JSON.stringify(args, null, 2), 'received');
+                        }
+                    });
+                }
             }
 
             log(message, type = 'info') {
@@ -535,11 +556,18 @@
                     online: {},
                     get_users: {},
                     get_online_status: {
-                        userId: "target-user-id"
+                        userId: 7
                     },
-                    get_chats: {},
+                    get_or_create_chat: {
+                        participantId: 7
+                    },
+                    get_messages: {
+                        chatId: "your-chat-id",
+                        limit: 50,
+                        offset: 0
+                    },
                     send_message_to_user: {
-                        recipientEmail: "colleague@company.com",
+                        recipientId: 7,
                         content: "Hello from the test interface!"
                     },
                     send_message: {

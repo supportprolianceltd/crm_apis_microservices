@@ -29,7 +29,6 @@ export const ChatService = {
             },
           },
         },
-        lastMessage: true,
         _count: {
           select: {
             messages: {
