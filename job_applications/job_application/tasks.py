@@ -377,6 +377,9 @@ def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_
             final_shortlisted, job_requisition_id, tenant_id, job_requisition
         )
         
+
+
+
         result_data = {
             "detail": f"Screened {total_processed} applications using '{document_type}', shortlisted {len(final_shortlisted)} candidates.",
             "shortlisted_candidates": final_shortlisted,
@@ -412,7 +415,6 @@ def _append_status_history(app, new_status, automated=True, changed_by=None, rea
             app.status_history.append(history_entry)
         else:
             app.status_history = [history_entry]
-
 def _update_applications_and_send_emails(shortlisted_candidates, job_requisition_id, tenant_id, job_requisition):
     try:
         shortlisted_ids = {item['application_id'] for item in shortlisted_candidates}
@@ -426,9 +428,10 @@ def _update_applications_and_send_emails(shortlisted_candidates, job_requisition
                 app_id_str = str(app.id)
                 if app_id_str in shortlisted_ids:
                     new_status = 'shortlisted'
-                    _append_status_history(app, new_status, automated=True, reason='Automated by resume screening')
+                    app.append_status_history(new_status, automated=True, reason='Automated by resume screening')
                     app.status = new_status
-                    app.save(update_fields=['status', 'status_history'])
+                    app.current_stage = 'screening'  # Sync stage after screening
+                    app.save(update_fields=['status', 'current_stage', 'status_history'])
                     shortlisted_app = next(
                         (item for item in shortlisted_candidates if item['application_id'] == app_id_str), 
                         None
@@ -455,7 +458,6 @@ def _update_applications_and_send_emails(shortlisted_candidates, job_requisition
                             logger.info(f"Sent shortlisted email to {shortlisted_app['email']}")
                         except Exception as e:
                             logger.warning(f"Retrying notification for {shortlisted_app['email']} due to: {str(e)}")
-                            # Retry once after a delay
                             time.sleep(5)
                             send_screening_notification(
                                 applicant=applicant_data,
@@ -465,9 +467,10 @@ def _update_applications_and_send_emails(shortlisted_candidates, job_requisition
                             )
                 else:
                     new_status = 'rejected'
-                    _append_status_history(app, new_status, automated=True, reason='Automated by resume screening')
+                    app.append_status_history(new_status, automated=True, reason='Automated by resume screening')
                     app.status = new_status
-                    app.save(update_fields=['status', 'status_history'])
+                    app.current_stage = 'screening'  # Sync stage after screening
+                    app.save(update_fields=['status', 'current_stage', 'status_history'])
                     applicant_data = {
                         "email": app.email,
                         "full_name": app.full_name,

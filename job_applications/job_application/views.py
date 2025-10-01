@@ -905,7 +905,6 @@ class ResumeScreeningView(APIView):
                 "error": f"Processing error: {str(e)}",
                 "success": False
             }
-
     def _process_screening_results(self, results, applications, job_requisition, num_candidates, tenant_id):
         """Process screening results and send notifications with transaction safety"""
         try:
@@ -931,10 +930,11 @@ class ResumeScreeningView(APIView):
                 if app_id_str in shortlisted_ids:
                     # Update to shortlisted
                     new_status = 'shortlisted'
-                    _append_status_history(app, new_status, automated=True, reason='Automated by resume screening')
+                    app.append_status_history(new_status, automated=True, reason='Automated by resume screening')
                     with transaction.atomic():
                         app.status = new_status
-                        app.save(update_fields=['status', 'status_history'])
+                        app.current_stage = 'screening'  # Sync stage after screening
+                        app.save(update_fields=['status', 'current_stage', 'status_history'])
                     
                     # Find shortlisted application data
                     shortlisted_app = next((item for item in final_shortlisted if item['application_id'] == app_id_str), None)
@@ -964,10 +964,11 @@ class ResumeScreeningView(APIView):
                 else:
                     # Update to rejected
                     new_status = 'rejected'
-                    _append_status_history(app, new_status, automated=True, reason='Automated by resume screening')
+                    app.append_status_history(new_status, automated=True, reason='Automated by resume screening')
                     with transaction.atomic():
                         app.status = new_status
-                        app.save(update_fields=['status', 'status_history'])
+                        app.current_stage = 'screening'  # Sync stage after screening
+                        app.save(update_fields=['status', 'current_stage', 'status_history'])
                     
                     # Send rejection notification
                     rejected_app = {
@@ -999,6 +1000,7 @@ class ResumeScreeningView(APIView):
         except Exception as e:
             logger.error(f"Error processing screening results: {str(e)}")
             raise Exception(f"Failed to process screening results: {str(e)}")
+
 
 class ScreeningTaskStatusView(APIView):
     """
