@@ -1463,8 +1463,6 @@ class PermanentDeleteJobApplicationsView(APIView):
         return Response({"detail": f"Successfully permanently deleted {deleted_count} application(s)."}, status=status.HTTP_200_OK)
 
 
-
-
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
     pagination_class = CustomPagination
@@ -1533,7 +1531,6 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             logger.error(f"Failed to send schedule creation notification for schedule {schedule.id}: {str(e)}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 
 class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -1622,38 +1619,76 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# class ScheduleBulkDeleteView(APIView):
+#     serializer_class = SimpleMessageSerializer 
+#     # permission_classes = [IsAuthenticated]
+#     def get_permissions(self):
+#         return [AllowAny()]  # Temporary for testing
 
+
+#     def post(self, request):
+#         jwt_payload = getattr(request, 'jwt_payload', {})
+#         #tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+#         tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')
+#         ids = request.data.get('ids', [])
+#         if not ids:
+#             return Response({"detail": "No schedule IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+#         schedules = Schedule.active_objects.filter(id__in=ids)
+#         if not tenant_id:
+#             return Response({"detail": "No tenant_id in token."}, status=status.HTTP_400_BAD_REQUEST)
+#         schedules = schedules.filter(tenant_id=tenant_id)
+#         if role == 'recruiter' and branch:
+#             schedules = schedules.filter(branch=branch)
+#         elif branch:
+#             schedules = schedules.filter(branch=branch)
+#         if not schedules.exists():
+#             return Response({"detail": "No schedules found."}, status=status.HTTP_404_NOT_FOUND)
+#         with transaction.atomic():
+#             for schedule in schedules:
+#                 schedule.soft_delete()
+#         return Response({"detail": f"Successfully soft-deleted {schedules.count()} schedule(s)."}, status=status.HTTP_200_OK)
 
 class ScheduleBulkDeleteView(APIView):
     serializer_class = SimpleMessageSerializer 
     # permission_classes = [IsAuthenticated]
+    
     def get_permissions(self):
         return [AllowAny()]  # Temporary for testing
 
-
     def post(self, request):
         jwt_payload = getattr(request, 'jwt_payload', {})
-        #tenant_id = self.request.jwt_payload.get('tenant_unique_id')
-        tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+        # FIX: Use request.jwt_payload instead of self.request.jwt_payload
+        tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
+        
         ids = request.data.get('ids', [])
         if not ids:
             return Response({"detail": "No schedule IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+        
         schedules = Schedule.active_objects.filter(id__in=ids)
+        
         if not tenant_id:
             return Response({"detail": "No tenant_id in token."}, status=status.HTTP_400_BAD_REQUEST)
+        
         schedules = schedules.filter(tenant_id=tenant_id)
+        
         if role == 'recruiter' and branch:
             schedules = schedules.filter(branch=branch)
         elif branch:
             schedules = schedules.filter(branch=branch)
+            
         if not schedules.exists():
             return Response({"detail": "No schedules found."}, status=status.HTTP_404_NOT_FOUND)
+        
         with transaction.atomic():
             for schedule in schedules:
                 schedule.soft_delete()
+                
         return Response({"detail": f"Successfully soft-deleted {schedules.count()} schedule(s)."}, status=status.HTTP_200_OK)
+
 
 class SoftDeletedSchedulesView(generics.ListAPIView):
     serializer_class = ScheduleSerializer
@@ -1955,8 +1990,6 @@ class ComplianceStatusUpdateView(APIView):
             "detail": "Compliance status updated successfully.",
             "compliance_item": next((item for item in serializer.data['compliance_status'] if str(item['id']) == str(item_id)), None)
         }, status=status.HTTP_200_OK)
-
-
 
 
 class ApplicantComplianceUploadView(APIView):

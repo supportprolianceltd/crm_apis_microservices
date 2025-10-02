@@ -337,11 +337,80 @@ class Participant(models.Model):
 
 
 
+# class Request(models.Model):
+#     REQUEST_TYPE_CHOICES = [
+#         ('material', 'Material Request'),
+#         ('leave', 'Leave Request'),
+#     ]
+#     STATUS_CHOICES = [
+#         ('pending', 'Pending'),
+#         ('approved', 'Approved'),
+#         ('rejected', 'Rejected'),
+#         ('cancelled', 'Cancelled'),
+#         ('completed', 'Completed'),
+#     ]
+
+#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+#     tenant_id = models.CharField(max_length=36, blank=False, null=False)  # Reference Tenant ID
+#     branch_id = models.CharField(max_length=36, null=True, blank=True)  # Reference Branch ID
+#     requested_by_id = models.CharField(max_length=36, null=True, blank=True)  # Reference CustomUser ID
+#     approved_by_id = models.CharField(max_length=36, null=True, blank=True)  # Reference CustomUser ID for approver
+#     approved_by_details = models.JSONField(default=dict, blank=True, null=True, help_text="Details of the user who approved the request")
+#     request_type = models.CharField(max_length=20, choices=REQUEST_TYPE_CHOICES)
+#     title = models.CharField(max_length=255)
+#     description = models.TextField(blank=True, null=True)
+#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+#     details = models.JSONField(default=dict, blank=True, help_text="Extra details specific to the request type")
+#     comment = models.TextField(blank=True, null=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#     is_deleted = models.BooleanField(default=False)
+
+#     class Meta:
+#         db_table = 'crm_request'
+#         ordering = ['-created_at']
+
+#     def __str__(self):
+#         return f"{self.get_request_type_display()} by {self.requested_by_id or 'Unknown'} ({self.status})"
+
+#     def soft_delete(self):
+#         self.is_deleted = True
+#         self.save()
+#         logger.info(f"Request {self.id} soft-deleted for tenant {self.tenant_id}")
+
+#     def restore(self):
+#         self.is_deleted = False
+#         self.save()
+#         logger.info(f"Request {self.id} restored for tenant {self.tenant_id}")
+
+#     def save(self, *args, **kwargs):
+#         is_new = self._state.adding
+#         super().save(*args, **kwargs)
+#         if is_new:
+#             producer = KafkaProducer(bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS, value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+#             producer.send('request-events', {
+#                 'id': str(self.id),
+#                 'tenant_id': self.tenant_id,
+#                 'branch_id': self.branch_id,
+#                 'requested_by_id': self.requested_by_id,
+#                 'approved_by_id': self.approved_by_id,
+#                 'request_type': self.request_type,
+#                 'title': self.title,
+#                 'action': 'created'
+#             })
+#             producer.flush()
+#             logger.info(f"Request {self.id} created for tenant {self.tenant_id}")
+
+
+
+
 class Request(models.Model):
     REQUEST_TYPE_CHOICES = [
         ('material', 'Material Request'),
         ('leave', 'Leave Request'),
+        ('service', 'Service Request'),
     ]
+    
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
@@ -350,18 +419,95 @@ class Request(models.Model):
         ('completed', 'Completed'),
     ]
 
+    # Material Request Choices
+    MATERIAL_TYPE_CHOICES = [
+        ('ppe', 'PPE'),
+        ('consumables', 'Consumables'),
+        ('equipment', 'Equipment'),
+        ('others', 'Others'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+    ]
+
+    # Leave Request Choices
+    LEAVE_CATEGORY_CHOICES = [
+        ('annual', 'Annual'),
+        ('casual', 'Casual'),
+        ('sick', 'Sick'),
+        ('study', 'Study'),
+        ('others', 'Others'),
+    ]
+    
+    REGION_CHOICES = [
+        ('abroad', 'Abroad'),
+        ('local', 'Local'),
+    ]
+
+    # Service Request Choices
+    SERVICE_TYPE_CHOICES = [
+        ('logistics', 'Logistics (e.g., transportation, storage)'),
+        ('training', 'Training (e.g., workshops, courses)'),
+        ('maintenance', 'Maintenance (e.g., equipment, facilities)'),
+        ('it_support', 'IT Support (e.g., hardware, software)'),
+        ('administrative_support', 'Administrative Support (e.g., documentation, supplies)'),
+        ('other', 'Other (please specify)'),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant_id = models.CharField(max_length=36, blank=False, null=False)  # Reference Tenant ID
-    branch_id = models.CharField(max_length=36, null=True, blank=True)  # Reference Branch ID
-    requested_by_id = models.CharField(max_length=36, null=True, blank=True)  # Reference CustomUser ID
-    approved_by_id = models.CharField(max_length=36, null=True, blank=True)  # Reference CustomUser ID for approver
+    tenant_id = models.CharField(max_length=36, blank=False, null=False)
+    branch_id = models.CharField(max_length=36, null=True, blank=True)
+    requested_by_id = models.CharField(max_length=36, null=True, blank=True)
+    approved_by_id = models.CharField(max_length=36, null=True, blank=True)
     approved_by_details = models.JSONField(default=dict, blank=True, null=True, help_text="Details of the user who approved the request")
+    
+    # Basic request info
     request_type = models.CharField(max_length=20, choices=REQUEST_TYPE_CHOICES)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    details = models.JSONField(default=dict, blank=True, help_text="Extra details specific to the request type")
     comment = models.TextField(blank=True, null=True)
+    
+    # File attachments
+    supporting_document = models.FileField(upload_to='request_documents/', blank=True, null=True)
+    supporting_document_url = models.CharField(max_length=1024, blank=True, null=True)
+    additional_attachment = models.FileField(upload_to='request_attachments/', blank=True, null=True)
+    additional_attachment_url = models.CharField(max_length=1024, blank=True, null=True)
+    
+    # Material Request Fields
+    item_name = models.CharField(max_length=255, blank=True, null=True)
+    material_type = models.CharField(max_length=20, choices=MATERIAL_TYPE_CHOICES, blank=True, null=True)
+    request_id = models.CharField(max_length=50, blank=True, null=True, unique=True)
+    item_specification = models.TextField(blank=True, null=True)
+    quantity_needed = models.IntegerField(blank=True, null=True)
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, blank=True, null=True)
+    reason_for_request = models.TextField(blank=True, null=True)
+    needed_date = models.DateField(blank=True, null=True)
+    
+    # Leave Request Fields
+    leave_category = models.CharField(max_length=20, choices=LEAVE_CATEGORY_CHOICES, blank=True, null=True)
+    number_of_days = models.IntegerField(blank=True, null=True)
+    start_date = models.DateField(blank=True, null=True)
+    resumption_date = models.DateField(blank=True, null=True)
+    region_of_stay = models.CharField(max_length=20, choices=REGION_CHOICES, blank=True, null=True)
+    address_during_leave = models.TextField(blank=True, null=True)
+    contact_phone_number = models.CharField(max_length=20, blank=True, null=True)
+    additional_information = models.TextField(blank=True, null=True)
+    
+    # Service Request Fields
+    service_type = models.CharField(max_length=30, choices=SERVICE_TYPE_CHOICES, blank=True, null=True)
+    service_description = models.TextField(blank=True, null=True)
+    priority_level = models.CharField(max_length=20, choices=PRIORITY_CHOICES, blank=True, null=True)
+    desired_completion_date = models.DateField(blank=True, null=True)
+    requester_name = models.CharField(max_length=255, blank=True, null=True)
+    requester_department = models.CharField(max_length=255, blank=True, null=True)
+    requester_contact_info = models.TextField(blank=True, null=True)
+    special_instructions = models.TextField(blank=True, null=True)
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
@@ -369,34 +515,74 @@ class Request(models.Model):
     class Meta:
         db_table = 'crm_request'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['request_type', 'status']),
+            models.Index(fields=['tenant_id', 'created_at']),
+            models.Index(fields=['request_id']),
+        ]
 
     def __str__(self):
-        return f"{self.get_request_type_display()} by {self.requested_by_id or 'Unknown'} ({self.status})"
+        return f"{self.get_request_type_display()} - {self.title} ({self.status})"
+
+    def save(self, *args, **kwargs):
+        # Generate request ID if not provided for material requests
+        if self.request_type == 'material' and not self.request_id:
+            self.request_id = self._generate_request_id()
+        
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+        
+        if is_new:
+            self._send_kafka_event('created')
+
+    def _generate_request_id(self):
+        """Generate unique request ID for material requests"""
+        prefix = "MAT"
+        timestamp = timezone.now().strftime('%Y%m%d')
+        last_request = Request.objects.filter(
+            request_type='material',
+            request_id__startswith=f"{prefix}-{timestamp}"
+        ).order_by('-created_at').first()
+        
+        if last_request and last_request.request_id:
+            try:
+                last_number = int(last_request.request_id.split('-')[-1])
+                next_number = last_number + 1
+            except (ValueError, IndexError):
+                next_number = 1
+        else:
+            next_number = 1
+            
+        return f"{prefix}-{timestamp}-{next_number:04d}"
+
+    def _send_kafka_event(self, action):
+        """Send Kafka event for request creation"""
+        try:
+            producer = KafkaProducer(
+                bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS, 
+                value_serializer=lambda v: json.dumps(v).encode('utf-8')
+            )
+            producer.send('request-events', {
+                'id': str(self.id),
+                'tenant_id': self.tenant_id,
+                'branch_id': self.branch_id,
+                'requested_by_id': self.requested_by_id,
+                'request_type': self.request_type,
+                'title': self.title,
+                'action': action
+            })
+            producer.flush()
+            logger.info(f"Request {self.id} {action} for tenant {self.tenant_id}")
+        except Exception as e:
+            logger.error(f"Failed to send Kafka event for request {self.id}: {str(e)}")
 
     def soft_delete(self):
         self.is_deleted = True
         self.save()
+        self._send_kafka_event('deleted')
         logger.info(f"Request {self.id} soft-deleted for tenant {self.tenant_id}")
 
     def restore(self):
         self.is_deleted = False
         self.save()
         logger.info(f"Request {self.id} restored for tenant {self.tenant_id}")
-
-    def save(self, *args, **kwargs):
-        is_new = self._state.adding
-        super().save(*args, **kwargs)
-        if is_new:
-            producer = KafkaProducer(bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS, value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-            producer.send('request-events', {
-                'id': str(self.id),
-                'tenant_id': self.tenant_id,
-                'branch_id': self.branch_id,
-                'requested_by_id': self.requested_by_id,
-                'approved_by_id': self.approved_by_id,
-                'request_type': self.request_type,
-                'title': self.title,
-                'action': 'created'
-            })
-            producer.flush()
-            logger.info(f"Request {self.id} created for tenant {self.tenant_id}")

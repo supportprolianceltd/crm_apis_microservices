@@ -404,6 +404,16 @@ class UserActivity(models.Model):
 
 
 class UserProfile(models.Model):
+
+    SALARY_RATE_CHOICES = [
+    ('hourly', 'Hourly'),
+    ('daily', 'Daily'),
+    ('weekly', 'Weekly'),
+    ('bi_weekly', 'Bi-Weekly'),
+    ('monthly', 'Monthly'),
+    ('annual', 'Annual'),
+    ]
+        
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
     work_phone = models.CharField(max_length=20, blank=True, null=True)
     personal_phone = models.CharField(max_length=20, blank=True, null=True)
@@ -412,9 +422,21 @@ class UserProfile(models.Model):
     street = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     state = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
     zip_code = models.CharField(max_length=20, blank=True, null=True)
     department = models.CharField(max_length=100, blank=True, null=True)
     # modules = models.ManyToManyField(Module, blank=True)
+
+
+    # Add the salary rate field
+    salary_rate = models.CharField(
+        max_length=20, 
+        choices=SALARY_RATE_CHOICES, 
+        blank=True, 
+        null=True,
+        help_text="How often the user wants to be paid"
+    )
+
 
     # ID and Documents
     employee_id = models.CharField(max_length=15, null=True, blank=True)

@@ -1107,30 +1107,76 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Session not found or inactive'}, status=status.HTTP_404_NOT_FOUND)
 
 
+
+
+# class RequestListCreateView(generics.ListCreateAPIView):
+#     serializer_class = RequestSerializer
+#     filter_backends = [DjangoFilterBackend, SearchFilter]
+#     filterset_fields = ['request_type', 'status']
+#     search_fields = ['title', 'description', 'requested_by__email']
+
+#     def get_queryset(self):
+#         if getattr(self, "swagger_fake_view", False):
+#             return Request.objects.none()
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
+#         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
+#         if role == 'recruiter' and branch:
+#             queryset = queryset.filter(branch_id=branch)
+#         return queryset
+
+#     def perform_create(self, serializer):
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#         user_id = jwt_payload.get('user', {}).get('id')  # Fixed: get user id from user object
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
+        
+#         if not user_id:
+#             logger.error(f"User ID not found in JWT payload: {jwt_payload}")
+#             raise serializers.ValidationError("User ID not found in token")
+        
+#         serializer.save(
+#             tenant_id=tenant_id,
+#             requested_by_id=user_id,
+#             branch_id=branch if role == 'recruiter' and branch else None
+#         )
+#         logger.info(f"Request created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
+
+
+
 class RequestListCreateView(generics.ListCreateAPIView):
     serializer_class = RequestSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['request_type', 'status']
-    search_fields = ['title', 'description', 'requested_by__email']
+    filterset_fields = ['request_type', 'status', 'priority', 'material_type', 'leave_category', 'service_type']
+    search_fields = ['title', 'description', 'item_name', 'requester_name']
+    ordering_fields = ['created_at', 'needed_date', 'desired_completion_date', 'priority']
+    ordering = ['-created_at']
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return Request.objects.none()
+            
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
+        branch = jwt_payload.get('user', {}).get('branch')
+        
         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
+        
         if role == 'recruiter' and branch:
             queryset = queryset.filter(branch_id=branch)
+            
         return queryset
 
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
-        user_id = jwt_payload.get('user', {}).get('id')  # Fixed: get user id from user object
+        user_id = jwt_payload.get('user', {}).get('id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
+        branch = jwt_payload.get('user', {}).get('branch')
         
         if not user_id:
             logger.error(f"User ID not found in JWT payload: {jwt_payload}")
@@ -1141,7 +1187,9 @@ class RequestListCreateView(generics.ListCreateAPIView):
             requested_by_id=user_id,
             branch_id=branch if role == 'recruiter' and branch else None
         )
-        logger.info(f"Request created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
+
+
+
 
 
 class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):

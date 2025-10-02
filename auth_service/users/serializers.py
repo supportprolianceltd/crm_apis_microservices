@@ -411,6 +411,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user",
+             "salary_rate",  # Add the new field here
             "work_phone",
             "personal_phone",
             "gender",
@@ -418,6 +419,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "street",
             "city",
             "state",
+            "country",
             "zip_code",
             "department",
             "employee_id",
@@ -497,6 +499,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             field: {"required": False, "allow_null": True}
             for field in [
+                "salary_rate",  # Add to extra_kwargs
                 "drivers_licence_date_issue",
                 "drivers_licence_expiry_date",
                 "drivers_licence_country_of_issue",
@@ -511,6 +514,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 "street",
                 "city",
                 "state",
+                "country",
                 "zip_code",
                 "department",
                 "marital_status",
@@ -802,6 +806,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
                     logger.info(f"No update for {field} - keeping existing")
 
             return updated_instance
+
+
 
 class UserCreateSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=True)

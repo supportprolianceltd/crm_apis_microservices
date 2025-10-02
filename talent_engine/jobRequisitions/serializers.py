@@ -689,6 +689,7 @@ class VideoSessionSerializer(serializers.ModelSerializer):
 
 
 
+
 class RequestSerializer(serializers.ModelSerializer):
     tenant_id = serializers.CharField(max_length=36, read_only=True)
     branch_id = serializers.CharField(max_length=36, allow_null=True, required=False)
@@ -697,24 +698,46 @@ class RequestSerializer(serializers.ModelSerializer):
     requested_by = serializers.SerializerMethodField()
     approved_by = serializers.SerializerMethodField()
     branch_name = serializers.SerializerMethodField()
+    
+    # File fields for dynamic handling
+    supporting_document = serializers.FileField(write_only=True, required=False, allow_null=True)
+    supporting_document_url = serializers.CharField(read_only=True)
+    additional_attachment = serializers.FileField(write_only=True, required=False, allow_null=True)
+    additional_attachment_url = serializers.CharField(read_only=True)
 
     class Meta:
         model = Request
         fields = [
             'id', 'tenant_id', 'branch_id', 'branch_name', 'requested_by', 'requested_by_id',
             'approved_by', 'approved_by_id', 'request_type', 'title', 'description', 'status',
-            'details', 'comment', 'created_at', 'updated_at', 'is_deleted'
+            'comment', 'created_at', 'updated_at', 'is_deleted',
+            
+            # File attachments
+            'supporting_document', 'supporting_document_url',
+            'additional_attachment', 'additional_attachment_url',
+            
+            # Material Request Fields
+            'item_name', 'material_type', 'request_id', 'item_specification',
+            'quantity_needed', 'priority', 'reason_for_request', 'needed_date',
+            
+            # Leave Request Fields
+            'leave_category', 'number_of_days', 'start_date', 'resumption_date',
+            'region_of_stay', 'address_during_leave', 'contact_phone_number',
+            'additional_information',
+            
+            # Service Request Fields
+            'service_type', 'service_description', 'priority_level',
+            'desired_completion_date', 'requester_name', 'requester_department',
+            'requester_contact_info', 'special_instructions'
         ]
         read_only_fields = [
             'id', 'tenant_id', 'requested_by_id', 'approved_by_id', 'created_at',
-            'updated_at', 'is_deleted', 'branch_name'
+            'updated_at', 'is_deleted', 'branch_name', 'request_id',
+            'supporting_document_url', 'additional_attachment_url'
         ]
-
-
 
     def get_requested_by(self, obj):
         if not obj.requested_by_id:
-            logger.warning(f"No requested_by_id for request {obj.id}")
             return None
 
         try:
@@ -723,7 +746,6 @@ class RequestSerializer(serializers.ModelSerializer):
             
             if str(current_user_id) == str(obj.requested_by_id):
                 user_data = jwt_payload.get('user', {})
-                logger.info(f"Using JWT payload for requested_by {obj.requested_by_id}")
                 return {
                     'email': user_data.get('email', ''),
                     'first_name': user_data.get('first_name', ''),
@@ -732,10 +754,9 @@ class RequestSerializer(serializers.ModelSerializer):
                 }
             
             # Fallback to database if user is not the current user
-            from .models import CustomUser  # Adjust import as needed
+            from .models import CustomUser
             try:
                 user = CustomUser.objects.get(id=obj.requested_by_id, tenant_id=jwt_payload.get('tenant_unique_id'))
-                logger.info(f"Using database for requested_by {obj.requested_by_id}")
                 return {
                     'email': user.email,
                     'first_name': user.first_name,
@@ -750,7 +771,6 @@ class RequestSerializer(serializers.ModelSerializer):
             return None
 
     def get_approved_by(self, obj):
-        """Get approved by user details from stored data"""
         if obj.approved_by_id and obj.approved_by_details:
             return {
                 'email': obj.approved_by_details.get('email', ''),
@@ -760,7 +780,6 @@ class RequestSerializer(serializers.ModelSerializer):
         return None
 
     def get_branch_name(self, obj):
-        """Get branch name from auth service"""
         if obj.branch_id:
             try:
                 auth_header = self.context['request'].META.get('HTTP_AUTHORIZATION', '')
@@ -777,7 +796,6 @@ class RequestSerializer(serializers.ModelSerializer):
         return None
 
     def validate(self, data):
-        """Validate tenant and branch"""
         jwt_payload = getattr(self.context['request'], 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         
@@ -803,7 +821,122 @@ class RequestSerializer(serializers.ModelSerializer):
             except requests.RequestException:
                 raise serializers.ValidationError({"branch_id": "Unable to validate branch."})
         
+        # Request type specific validations
+        request_type = data.get('request_type')
+        
+        if request_type == 'material':
+            if not data.get('item_name'):
+                raise serializers.ValidationError({"item_name": "Item name is required for material requests."})
+            if not data.get('quantity_needed') or data['quantity_needed'] <= 0:
+                raise serializers.ValidationError({"quantity_needed": "Valid quantity is required for material requests."})
+        
+        elif request_type == 'leave':
+            if not data.get('start_date'):
+                raise serializers.ValidationError({"start_date": "Start date is required for leave requests."})
+            if not data.get('resumption_date'):
+                raise serializers.ValidationError({"resumption_date": "Resumption date is required for leave requests."})
+            if data.get('start_date') and data.get('resumption_date'):
+                if data['start_date'] >= data['resumption_date']:
+                    raise serializers.ValidationError({"resumption_date": "Resumption date must be after start date."})
+        
+        elif request_type == 'service':
+            if not data.get('service_description'):
+                raise serializers.ValidationError({"service_description": "Description is required for service requests."})
+        
         return data
+
+    # def create(self, validated_data):
+    #     jwt_payload = getattr(self.context['request'], 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     user_id = jwt_payload.get('user', {}).get('id')
+        
+    #     if not user_id:
+    #         raise serializers.ValidationError("User ID not found in token")
+        
+    #     # Handle file uploads
+    #     supporting_document = validated_data.pop('supporting_document', None)
+    #     additional_attachment = validated_data.pop('additional_attachment', None)
+        
+    #     # Create request instance
+    #     instance = Request.objects.create(
+    #         tenant_id=tenant_id,
+    #         requested_by_id=user_id,
+    #         **validated_data
+    #     )
+        
+    #     # Handle file uploads after instance creation
+    #     self._handle_file_upload(instance, 'supporting_document', supporting_document)
+    #     self._handle_file_upload(instance, 'additional_attachment', additional_attachment)
+        
+    #     logger.info(f"Request created: {instance.title} for tenant {tenant_id} by user {user_id}")
+    #     return instance
+
+
+    def create(self, validated_data):
+        jwt_payload = getattr(self.context['request'], 'jwt_payload', {})
+        
+        # Handle file uploads
+        supporting_document = validated_data.pop('supporting_document', None)
+        additional_attachment = validated_data.pop('additional_attachment', None)
+        
+        # Create request instance - DON'T pass tenant_id and requested_by_id again
+        # They are already in validated_data from the view
+        instance = Request.objects.create(**validated_data)
+        
+        # Handle file uploads after instance creation
+        self._handle_file_upload(instance, 'supporting_document', supporting_document)
+        self._handle_file_upload(instance, 'additional_attachment', additional_attachment)
+        
+        logger.info(f"Request created: {instance.title} for tenant {instance.tenant_id} by user {instance.requested_by_id}")
+        return instance
+
+
+    def update(self, instance, validated_data):
+        # Handle file uploads for update
+        supporting_document = validated_data.pop('supporting_document', None)
+        additional_attachment = validated_data.pop('additional_attachment', None)
+        
+        # Update instance
+        instance = super().update(instance, validated_data)
+        
+        # Handle file uploads
+        if supporting_document is not None:
+            self._handle_file_upload(instance, 'supporting_document', supporting_document)
+        if additional_attachment is not None:
+            self._handle_file_upload(instance, 'additional_attachment', additional_attachment)
+        
+        return instance
+
+    def _handle_file_upload(self, instance, field_name, file):
+        """Handle dynamic file upload similar to JobRequisition"""
+        if file:
+            from utils.storage import get_storage_service
+            import uuid
+            
+            ext = file.name.split('.')[-1]
+            file_name = f"request_{field_name}/{instance.tenant_id}/{instance.id}_{uuid.uuid4()}.{ext}"
+            content_type = getattr(file, 'content_type', 'application/octet-stream')
+            storage_type = getattr(settings, 'STORAGE_TYPE', 'local').lower()
+            
+            if storage_type == 'local':
+                getattr(instance, field_name).save(file_name, file, save=True)
+            else:
+                storage = get_storage_service(storage_type)
+                upload_success = storage.upload_file(file, file_name, content_type)
+                if not upload_success:
+                    raise serializers.ValidationError({field_name: f"Failed to upload {field_name}."})
+                
+                public_url = storage.get_public_url(file_name)
+                url_field = f"{field_name}_url"
+                setattr(instance, url_field, public_url)
+                
+                # Clear the FileField for remote storage
+                setattr(instance, field_name, None)
+                instance.save(update_fields=[field_name, url_field])
+
+                
+
+
 
 # talent_engine/serializers.py
 class PublicJobRequisitionSerializer(serializers.ModelSerializer):
