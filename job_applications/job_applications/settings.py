@@ -283,7 +283,7 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {
     'daily-background-cv-vetting-at-midnight': {
         'task': 'job_application.tasks.daily_background_cv_vetting',
-        'schedule': crontab(hour=18, minute=48),  # Midnight UTC
+        'schedule': crontab(hour=0, minute=0),  # Midnight UTC
     },
     # Keep existing if needed, but update the auto-screen one if conflicting
     # 'auto-screen-all-applications-at-midnight': { ... }  # Comment out or remove if replacing
