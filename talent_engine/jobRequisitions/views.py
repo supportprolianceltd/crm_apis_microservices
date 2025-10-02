@@ -111,7 +111,6 @@ def get_user_data_from_jwt(request):
         logger.error(f"Failed to decode JWT for user data: {str(e)}")
         raise serializers.ValidationError("Invalid JWT token for user data.")
     
-    
 
 
 class CustomPagination(PageNumberPagination):
@@ -135,6 +134,23 @@ class PublicPublishedJobRequisitionsView(APIView):
             "results": serializer.data
         }, status=status.HTTP_200_OK)  
 
+class PublicUpcomingJobRequisitionsView(APIView):
+    permission_classes = []  # No authentication required
+    pagination_class = CustomPagination
+
+    def get(self, request):
+        today = timezone.now().date()
+        queryset = JobRequisition.active_objects.filter(
+            publish_status=True,
+            is_deleted=False,
+            deadline_date__gte=today  # Includes today and future dates
+        )
+        serializer = PublicJobRequisitionSerializer(queryset, many=True)
+        logger.info(f"Upcoming (including today) public requisitions fetched: {queryset.count()}")
+        return Response({
+            "count": queryset.count(),
+            "results": serializer.data
+        }, status=status.HTTP_200_OK)
 
 
 class PublicPublishedRequisitionsByTenantView(APIView):
@@ -457,10 +473,6 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
 
 
 
-
-
-
-logger = logging.getLogger('talent_engine')
 
 class IncrementJobApplicationsCountView(APIView):
     permission_classes = []  # Public endpoint, no authentication required

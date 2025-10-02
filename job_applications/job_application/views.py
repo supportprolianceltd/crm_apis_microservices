@@ -98,7 +98,7 @@ from utils.screen import (
 from utils.email_utils import (
     send_screening_notification
 )
-from .tasks import process_large_resume_batch
+from .tasks import process_large_resume_batch, _append_status_history, send_notification_task
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +146,26 @@ def chunk_list(lst, chunk_size):
         yield lst[i:i + chunk_size]
 
 
+
+
+class GlobalApplicationsByRequisitionView(APIView):
+    """
+    Internal view to fetch all applications for a requisition (cross-tenant, for future use).
+    No auth required.
+    """
+    permission_classes = []
+
+    def get(self, request, job_requisition_id):
+        applications = JobApplication.active_objects.filter(
+            job_requisition_id=job_requisition_id,
+            resume_status=True
+        )
+        serializer = JobApplicationSerializer(applications, many=True)
+        return Response({
+            "count": applications.count(),
+            "results": serializer.data
+        }, status=status.HTTP_200_OK)
+    
 
 class HealthCheckView(View):
     def get(self, request):
@@ -535,11 +555,17 @@ class ResumeScreeningView(APIView):
             total_time = total_end_time - total_start_time
             
             # Enhanced visible logging for total time
+            # Enhanced visible logging for total time
             logger.warning("=" * 80)
             logger.warning(f"🚀 SYNCHRONOUS SCREENING COMPLETED 🚀")
             logger.warning(f"📊 TOTAL TIME FOR {len(applications_list)} APPLICATIONS: {total_time:.2f} SECONDS")
             logger.warning(f"⏱️  AVERAGE PER APPLICATION: {total_time / len(applications_list):.2f} SECONDS" if applications_list else "⏱️  AVERAGE PER APPLICATION: N/A")
-            logger.warning(f"📈 PER-APP TIMINGS SUMMARY: MIN={min(per_app_timings):.2f}s, MAX={max(per_app_timings):.2f}s, AVG={sum(per_app_timings)/len(per_app_timings):.2f}s" if per_app_timings else "📈 PER-APP TIMINGS SUMMARY: No successful vetting")
+
+            if per_app_timings:
+                times = [t['total_seconds'] for t in per_app_timings]
+                logger.warning(f"📈 PER-APP TIMINGS SUMMARY: MIN={min(times):.2f}s, MAX={max(times):.2f}s, AVG={sum(times)/len(times):.2f}s")
+            else:
+                logger.warning("📈 PER-APP TIMINGS SUMMARY: No successful vetting")
             logger.warning("=" * 80)
             
             # Add timing to response
@@ -1110,6 +1136,8 @@ class JobApplicationBulkDeleteView(APIView):
             logger.error(f"Bulk soft delete failed: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
 class JobApplicationWithSchedulesView(APIView):
     """
     Retrieve a job application and its schedules using email and unique_link query params.
@@ -1335,6 +1363,8 @@ class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
         response_data.sort(key=lambda x: x['job_requisition'].get('created_at', ''), reverse=True)
         return Response(response_data, status=status.HTTP_200_OK)
 
+
+
 class PublishedPublicJobRequisitionsWithShortlistedApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer 
     # permission_classes = [AllowAny]
@@ -1394,6 +1424,8 @@ class PublishedPublicJobRequisitionsWithShortlistedApplicationsView(APIView):
             })
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
 
 class TimezoneChoicesView(APIView):
     serializer_class = SimpleMessageSerializer 

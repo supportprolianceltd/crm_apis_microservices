@@ -269,6 +269,7 @@ PUBLIC_PATHS = [
     "talent-engine/requisitions/unique_link/",
     "talent-engine/requisitions/public/published/",
     "talent-engine/requisitions/public/close/",
+    "talent-engine/requisitions/upcoming/public/jobs",
     "talent-engine/requisitions/public/update-applications/",
     "applications-engine/apply-jobs/",
     "applications-engine/applications/code/",

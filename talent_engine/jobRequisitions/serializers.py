@@ -948,7 +948,7 @@ class PublicJobRequisitionSerializer(serializers.ModelSerializer):
             'job_description', 'requirements', 'qualification_requirement', 'experience_requirement',
             'knowledge_requirement', 'urgency_level', 'reason', 'deadline_date', 'num_of_applications',
             'start_date', 'responsibilities',  'advert_banner', 'publish_status','compliance_checklist',
-            'approval_workflow', 'current_approval_stage', 'approval_date', 'time_to_fill_days'
+            'approval_workflow', 'current_approval_stage', 'approval_date', 'time_to_fill_days', 'number_of_candidates'
         ]
         read_only_fields = [
             'id', 'requisition_number', 'job_requisition_code', 'job_application_code',

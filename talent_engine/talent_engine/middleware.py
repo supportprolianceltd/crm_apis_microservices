@@ -14,14 +14,27 @@ logger = logging.getLogger('talent_engine')
 
 from django.contrib.auth.models import AnonymousUser
 
-public_paths = ['/api/docs/', '/api/schema/', '/api/health/',  
-                '/api/talent-engine/requisitions/by-link/',
-                '/api/talent-engine/requisitions/unique_link/',
-                '/api/talent-engine/requisitions/public/published/',
-                '/api/talent-engine/requisitions/public/close/',
-                '/api/talent-engine/requisitions/public/update-applications/'
-                ]
+# public_paths = ['/api/docs/', '/api/schema/', '/api/health/',  
+#                 '/api/talent-engine/requisitions/by-link/',
+#                 '/api/talent-engine/requisitions/unique_link/',
+#                 '/api/talent-engine/requisitions/public/published/',
+#                 '/api/talent-engine/requisitions/public/close/',
+#                 '/api/talent-engine/requisitions/upcoming/public/jobs',
+#                 '/api/talent-engine/requisitions/public/update-applications/'
+#                 ]
 
+
+public_paths = [
+    '/api/docs/',
+    '/api/schema/',
+    '/api/health/',
+    '/api/talent-engine/requisitions/by-link',
+    '/api/talent-engine/requisitions/unique_link',
+    '/api/talent-engine/requisitions/public/published',
+    '/api/talent-engine/requisitions/public/close',
+    '/api/talent-engine/requisitions/upcoming/public/jobs',
+    '/api/talent-engine/requisitions/public/update-applications'
+]
 
 
 class SimpleUser:
@@ -131,10 +144,51 @@ class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
             return JsonResponse({'error': f'JWT error: {str(e)}'}, status=401)
 
 
+# class CustomTenantSchemaMiddleware:
+#     """
+#     Middleware to switch DB schema based on tenant_schema in JWT or request data.
+#     No local tenant model required!
+#     """
+#     def __init__(self, get_response):
+#         self.get_response = get_response
+
+#     def __call__(self, request):
+#         logger.info(f"Incoming request path: {request.path}")
+#         logger.info(f"Authorization header: {request.META.get('HTTP_AUTHORIZATION')}")
+
+#         # Step 1: Handle public endpoints
+       
+#         if any(request.path.startswith(path) for path in public_paths):
+#             connection.set_schema_to_public()
+#             logger.info("Set public schema for public endpoint")
+#             return self.get_response(request)
+
+#         # Step 2: Extract tenant_schema from JWT payload (set by JWT middleware)
+#         jwt_payload = getattr(request, 'jwt_payload', None)
+#         tenant_schema = None
+#         if jwt_payload:
+#             tenant_schema = jwt_payload.get('tenant_schema')
+#         # Optionally, fallback to request.data or query params if needed
+
+#         if not tenant_schema:
+#             logger.error("Tenant schema missing in JWT or request.")
+#             return JsonResponse({'error': 'Tenant schema missing from token'}, status=403)
+
+#         # Step 3: Switch schema
+#         try:
+#             connection.set_schema(tenant_schema)
+#             logger.info(f"Set schema to: {tenant_schema}")
+#         except Exception as e:
+#             logger.error(f"Schema switch failed: {str(e)}")
+#             return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
+
+#         return self.get_response(request)
+
+
 class CustomTenantSchemaMiddleware:
     """
     Middleware to switch DB schema based on tenant_schema in JWT or request data.
-    No local tenant model required!
+    Handles public endpoints without JWT tokens.
     """
     def __init__(self, get_response):
         self.get_response = get_response
@@ -143,32 +197,40 @@ class CustomTenantSchemaMiddleware:
         logger.info(f"Incoming request path: {request.path}")
         logger.info(f"Authorization header: {request.META.get('HTTP_AUTHORIZATION')}")
 
-        # Step 1: Handle public endpoints
-       
+        # Step 1: Handle public endpoints - set to public schema and proceed
         if any(request.path.startswith(path) for path in public_paths):
-            connection.set_schema_to_public()
-            logger.info("Set public schema for public endpoint")
-            return self.get_response(request)
+            try:
+                connection.set_schema_to_public()
+                logger.info("Set public schema for public endpoint")
+                response = self.get_response(request)
+                # Ensure we reset connection after response
+                connection.set_schema_to_public()
+                return response
+            except Exception as e:
+                logger.error(f"Schema switch failed for public endpoint: {str(e)}")
+                return JsonResponse({'error': 'Database configuration error'}, status=500)
 
-        # Step 2: Extract tenant_schema from JWT payload (set by JWT middleware)
+        # Step 2: For non-public endpoints, extract tenant_schema from JWT payload
         jwt_payload = getattr(request, 'jwt_payload', None)
         tenant_schema = None
+        
         if jwt_payload:
             tenant_schema = jwt_payload.get('tenant_schema')
-        # Optionally, fallback to request.data or query params if needed
+            logger.info(f"Found tenant_schema in JWT: {tenant_schema}")
 
         if not tenant_schema:
             logger.error("Tenant schema missing in JWT or request.")
             return JsonResponse({'error': 'Tenant schema missing from token'}, status=403)
 
-        # Step 3: Switch schema
+        # Step 3: Switch schema for tenant-specific requests
         try:
             connection.set_schema(tenant_schema)
             logger.info(f"Set schema to: {tenant_schema}")
+            response = self.get_response(request)
+            # Reset to public schema after processing
+            connection.set_schema_to_public()
+            return response
         except Exception as e:
             logger.error(f"Schema switch failed: {str(e)}")
+            connection.set_schema_to_public()  # Ensure reset on error
             return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
-
-        return self.get_response(request)
-
-

@@ -270,11 +270,23 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
+# CELERY_BEAT_SCHEDULE = {
+#     'auto-screen-all-applications-at-midnight': {
+#         'task': 'job_application.tasks.auto_screen_all_applications',
+#         'schedule': crontab(hour=10, minute=45),
+#     },
+# }
+
+# job_applications/settings.py
+# Update the CELERY_BEAT_SCHEDULE to add the new task. Replace the existing one.
+
 CELERY_BEAT_SCHEDULE = {
-    'auto-screen-all-applications-at-midnight': {
-        'task': 'job_application.tasks.auto_screen_all_applications',
-        'schedule': crontab(hour=10, minute=45),
+    'daily-background-cv-vetting-at-midnight': {
+        'task': 'job_application.tasks.daily_background_cv_vetting',
+        'schedule': crontab(hour=18, minute=48),  # Midnight UTC
     },
+    # Keep existing if needed, but update the auto-screen one if conflicting
+    # 'auto-screen-all-applications-at-midnight': { ... }  # Comment out or remove if replacing
 }
 
 # ======================== Defaults ========================

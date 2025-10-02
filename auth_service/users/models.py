@@ -165,7 +165,7 @@ class CustomUser(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLES, default='carer')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     permission_levels = models.JSONField(default=list, blank=True)
-    job_role = models.CharField(max_length=255, blank=True, null=True, default='staff')
+    job_role = models.CharField(max_length=255, blank=True, null=True, default='user')
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, null=True)
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
     has_accepted_terms = models.BooleanField(default=False, help_text="Indicates if the user has accepted the terms and conditions.")

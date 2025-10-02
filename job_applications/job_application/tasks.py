@@ -1,33 +1,429 @@
 import os
 import time
+import tempfile
 import logging
+import mimetypes
 import numpy as np
+import requests
+import concurrent.futures
+
 from celery import shared_task, group, chord
 from celery.result import allow_join_result
+
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
-import requests
-import concurrent.futures
-from job_application.models import JobApplication
 
-from utils.screen import screen_resume, screen_resume_batch
+from .models import JobApplication  # Fixed import (was .models)
+from utils.screen import (
+    screen_resume,
+    screen_resume_batch,
+    parse_resume,
+    extract_resume_fields
+)
 from utils.email_utils import send_screening_notification
+
 logger = logging.getLogger('job_applications')
 
 
-from celery import shared_task
-from django.conf import settings
-from job_application.models import JobApplication
-from utils.screen import parse_resume, screen_resume, extract_resume_fields
-from utils.email_utils import send_screening_notification
-import requests
-import mimetypes
-import tempfile
-import os
-import logging
+def _append_status_history(app, new_status, automated=True, reason='Status update'):
+    """
+    Helper: Append status change to history (from original codebase).
+    """
+    if app.status != new_status:
+        history_entry = {
+            'status': new_status,
+            'timestamp': timezone.now().isoformat(),
+            'automated': automated,
+            'reason': reason
+        }
+        if automated:
+            history_entry['changed_by'] = {'system': 'daily_background_vetting'}
+        
+        if app.status_history:
+            app.status_history.append(history_entry)
+        else:
+            app.status_history = [history_entry]
 
-logger = logging.getLogger('job_applications')
+def _update_applications_without_notifications(shortlisted_candidates, job_requisition_id, num_candidates):
+    """
+    Adapted from _update_applications_and_queue_emails: Update statuses/history, but NO emails/notifications.
+    """
+    try:
+        shortlisted_ids = {item['application_id'] for item in shortlisted_candidates}
+        applications = JobApplication.active_objects.filter(job_requisition_id=job_requisition_id)
+        
+        with transaction.atomic():
+            for app in applications:
+                app_id_str = str(app.id)
+                new_status = None
+                if app_id_str in shortlisted_ids:
+                    new_status = 'shortlisted'
+                    _append_status_history(app, new_status, automated=True, reason='Automated by daily background vetting')
+                    logger.info(f"Shortlisted app {app_id_str} (score: {app.screening_score})")
+                else:
+                    new_status = 'rejected'
+                    _append_status_history(app, new_status, automated=True, reason='Automated by daily background vetting')
+                    logger.info(f"Rejected app {app_id_str} (score: {app.screening_score})")
+                
+                if new_status:
+                    app.status = new_status
+                    app.current_stage = 'screening'
+                    app.save(update_fields=['status', 'current_stage', 'status_history'])
+        
+        logger.info(f"Updated statuses for {len(shortlisted_candidates)} shortlisted / {applications.count() - len(shortlisted_candidates)} rejected")
+        
+    except Exception as e:
+        logger.error(f"Error updating application statuses: {str(e)}")
+        raise
+
+def _fetch_all_open_requisitions():
+    """
+    Fetch all open published requisitions via API (global, cross-tenant).
+    Uses /upcoming/public/jobs/ endpoint (your working URL) and handles pagination.
+    """
+    all_requisitions = []
+    next_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/upcoming/public/jobs/"
+    headers = {}  # Public endpoint, no auth needed
+
+    while next_url:
+        try:
+            resp = requests.get(next_url, headers=headers, timeout=30)
+            if resp.status_code != 200:
+                logger.error(f"Failed to fetch upcoming requisitions: {resp.status_code} - {resp.text}")
+                break
+            
+            data = resp.json()
+            results = data.get('results', [])
+            all_requisitions.extend(results)
+            
+            next_url = data.get('next')
+            logger.info(f"Fetched {len(results)} requisitions from page; next: {bool(next_url)}")
+        except Exception as e:
+            logger.error(f"Error fetching requisitions page: {str(e)}")
+            break
+    
+    # Filter for deadline ahead (already handled by endpoint, but double-check)
+    today = timezone.now().date()
+    filtered_requisitions = [
+        req for req in all_requisitions
+        if req.get('is_deleted', False) is False and req.get('deadline_date') and 
+        timezone.datetime.strptime(req['deadline_date'], '%Y-%m-%d').date() >= today
+    ]
+    
+    logger.info(f"Total open requisitions fetched: {len(filtered_requisitions)}")
+    return filtered_requisitions
+
+@shared_task
+def daily_background_cv_vetting():
+    """
+    Daily background task: Full re-screening with status updates (shortlist/reject) across all open requisitions/tenants.
+    Overrides prior results. No notifications.
+    """
+    task_start_time = time.perf_counter()
+    logger.info("🚀 Starting daily background CV vetting with full workflow")
+    
+    try:
+        # Step 1: Fetch open requisitions via public API (full details included)
+        open_requisitions = _fetch_all_open_requisitions()
+        
+        if not open_requisitions:
+            logger.info("No open requisitions found")
+            return {"processed_requisitions": 0, "total_applications_vetted": 0}
+        
+        results = {
+            "processed_requisitions": 0,
+            "total_applications_vetted": 0,
+            "shortlisted_count": 0,
+            "rejected_count": 0
+        }
+        
+        for req in open_requisitions:
+            req_id = req['id']
+            logger.info(f"Processing requisition {req_id}")
+            
+            # Step 2: Fetch applications (global, cross-tenant)
+            applications = JobApplication.active_objects.filter(
+                job_requisition_id=req_id,
+                resume_status=True
+            ).iterator()
+            
+            applications_list = list(applications)
+            app_count = len(applications_list)
+            logger.info(f"Found {app_count} applications with resumes for {req_id}")
+            
+            if not applications_list:
+                logger.info(f"No applications for {req_id}, skipping")
+                continue
+            
+            applications_data = [
+                {"application_id": str(app.id), "full_name": app.full_name, "email": app.email}
+                for app in applications_list
+            ]
+            
+            # Step 3: Job requirements (from list response—no detail fetch needed)
+            job_requirements = (
+                f"{req.get('job_description', '')} "
+                f"{req.get('qualification_requirement', '')} "
+                f"{req.get('experience_requirement', '')} "
+                f"{req.get('knowledge_requirement', '')}"
+            ).strip()
+            
+            logger.info(f"Extracted requirements length for {req_id}: {len(job_requirements)} chars")
+            
+            if not job_requirements:
+                logger.warning(f"No requirements for {req_id}, skipping")
+                continue
+            
+            # num_candidates from req (default 5)
+            num_candidates = req.get('number_of_candidates', 5)
+            
+            # Step 4: Vetting batch
+            task = process_vetting_batch.delay(
+                req_id, job_requirements, applications_data, num_candidates
+            )
+            with allow_join_result():
+                vetting_result = task.get(timeout=1800)
+            
+            # Step 5: Update statuses (no notifs)
+            shortlisted_candidates = vetting_result.get('shortlisted_candidates', [])
+            _update_applications_without_notifications(shortlisted_candidates, req_id, num_candidates)
+            
+            # Aggregate
+            results["processed_requisitions"] += 1
+            results["total_applications_vetted"] += app_count
+            results["shortlisted_count"] += len(shortlisted_candidates)
+            results["rejected_count"] += app_count - len(shortlisted_candidates)
+            
+            logger.info(f"Req {req_id}: {len(shortlisted_candidates)} shortlisted from {app_count}")
+        
+        task_end_time = time.perf_counter()
+        total_time = task_end_time - task_start_time
+        results["total_time_seconds"] = round(total_time, 2)
+        logger.info(f"📊 Daily vetting summary: {results}")
+        return results
+        
+    except Exception as e:
+        logger.error(f"Daily vetting failed: {str(e)}", exc_info=True)
+        return {"status": "error", "detail": str(e)}
+
+
+
+# @shared_task(bind=True, max_retries=3, soft_time_limit=1800, time_limit=3600)
+# def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+#     """
+#     Updated: Score, normalize, return shortlisted for status updates. No notifs.
+#     """
+#     batch_start_time = time.perf_counter()
+#     try:
+#         logger.info(f"Vetting batch: {len(applications_data)} apps for req {job_requisition_id}")
+        
+#         application_ids = [app['application_id'] for app in applications_data]
+#         applications = JobApplication.active_objects.filter(id__in=application_ids, resume_status=True)
+#         applications_list = list(applications)
+#         applications_map = {str(app.id): app for app in applications_list}
+        
+#         resume_texts = []
+#         raw_results = []
+#         for app_data in applications_data:
+#             app = applications_map.get(app_data['application_id'])
+#             if not app:
+#                 continue
+            
+#             resume_text = (
+#                 f"{app.qualification or ''} "
+#                 f"{app.experience or ''} "
+#                 f"{app.knowledge_skill or ''} "
+#                 f"{app.cover_letter or ''}"
+#             ).strip()
+            
+#             if resume_text:
+#                 resume_texts.append(resume_text)
+#                 raw_results.append({
+#                     "application_id": app_data['application_id'],
+#                     "full_name": app_data['full_name'],
+#                     "email": app_data['email'],
+#                     "resume_text": resume_text,
+#                     "employment_gaps": getattr(app, 'employment_gaps', []),
+#                     "success": True,
+#                     "app_obj": app  # Temp for update
+#                 })
+#             else:
+#                 raw_results.append({
+#                     "application_id": app_data['application_id'],
+#                     "full_name": app_data['full_name'],
+#                     "email": app_data['email'],
+#                     "error": "No resume data",
+#                     "success": False,
+#                     "app_obj": app
+#                 })
+        
+#         # Score and override
+#         shortlisted_candidates = []
+#         if resume_texts:
+#             scores = screen_resume_batch(resume_texts, job_requirements)
+#             scores_array = np.array(scores)
+#             min_score, max_score = scores_array.min(), scores_array.max()
+#             if max_score > min_score:
+#                 normalized_scores = (scores_array - min_score) / (max_score - min_score) * 100
+#             else:
+#                 normalized_scores = scores_array * 100
+            
+#             success_idx = 0
+#             now = timezone.now().isoformat()
+#             with transaction.atomic():
+#                 for result in raw_results:
+#                     if result['success']:
+#                         score = round(float(normalized_scores[success_idx]), 2)
+#                         app = result['app_obj']
+#                         app.screening_status = [{'status': 'processed', 'score': score, 'updated_at': now}]
+#                         app.screening_score = score
+#                         if not result['employment_gaps']:
+#                             resume_data = extract_resume_fields(result['resume_text'])
+#                             app.employment_gaps = resume_data.get("employment_gaps", [])
+#                         app.save(update_fields=['screening_status', 'screening_score', 'employment_gaps'])
+                        
+#                         result['score'] = score
+#                         success_idx += 1
+#                         logger.info(f"Vetted {result['application_id']}: score={score}")
+#                     else:
+#                         app = result['app_obj']
+#                         if app:
+#                             app.screening_status = [{'status': 'failed', 'score': 0.0, 'updated_at': now, 'error': result.get('error') }]
+#                             app.screening_score = 0.0
+#                             app.save(update_fields=['screening_status', 'screening_score'])
+#                         result['score'] = 0.0
+#                         logger.warning(f"Vetting failed for {result['application_id']}: {result.get('error')}")
+            
+#             # Sort successful and select top
+#             successful = [r for r in raw_results if r['success']]
+#             successful.sort(key=lambda x: x['score'], reverse=True)
+#             shortlisted_candidates = successful[:num_candidates]
+        
+#         batch_end_time = time.perf_counter()
+#         batch_time = batch_end_time - batch_start_time
+        
+#         logger.info(f"Vetting complete: {len(shortlisted_candidates)} shortlisted in {batch_time:.2f}s")
+        
+#         return {
+#             "shortlisted_candidates": shortlisted_candidates,
+#             "vetted_count": len(raw_results),
+#             "batch_time_seconds": round(batch_time, 2)
+#         }
+        
+#     except Exception as e:
+#         logger.error(f"Vetting batch failed: {str(e)}")
+#         raise self.retry(exc=e, countdown=60 ** self.request.retries)
+@shared_task(bind=True, max_retries=3, soft_time_limit=1800, time_limit=3600)
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    """
+    Updated: Score, normalize, return shortlisted for status updates. No notifs.
+    """
+    batch_start_time = time.perf_counter()
+    try:
+        logger.info(f"Vetting batch: {len(applications_data)} apps for req {job_requisition_id} (reqs len: {len(job_requirements)})")
+        
+        application_ids = [app['application_id'] for app in applications_data]
+        applications = JobApplication.active_objects.filter(id__in=application_ids, resume_status=True)
+        applications_list = list(applications)
+        applications_map = {str(app.id): app for app in applications_list}
+        
+        resume_texts = []
+        raw_results = []
+        for app_data in applications_data:
+            app = applications_map.get(app_data['application_id'])
+            if not app:
+                continue
+            
+            resume_text = (
+                f"{app.qualification or ''} "
+                f"{app.experience or ''} "
+                f"{app.knowledge_skill or ''} "
+                f"{app.cover_letter or ''}"
+            ).strip()
+            
+            if resume_text:
+                resume_texts.append(resume_text)
+                raw_results.append({
+                    "application_id": app_data['application_id'],
+                    "full_name": app_data['full_name'],
+                    "email": app_data['email'],
+                    "resume_text": resume_text,
+                    "employment_gaps": getattr(app, 'employment_gaps', []),
+                    "success": True,
+                    "app_obj": app  # Temp for update—will strip later
+                })
+            else:
+                raw_results.append({
+                    "application_id": app_data['application_id'],
+                    "full_name": app_data['full_name'],
+                    "email": app_data['email'],
+                    "error": "No resume data",
+                    "success": False,
+                    "app_obj": app
+                })
+        
+        # Score and override
+        shortlisted_candidates = []
+        if resume_texts:
+            scores = screen_resume_batch(resume_texts, job_requirements)
+            logger.info(f"Raw scores for {len(scores)} texts: {scores[:3]}...")  # Sample log
+            scores_array = np.array(scores)
+            min_score, max_score = scores_array.min(), scores_array.max()
+            if max_score > min_score:
+                normalized_scores = (scores_array - min_score) / (max_score - min_score) * 100
+            else:
+                normalized_scores = scores_array * 100
+            
+            success_idx = 0
+            now = timezone.now().isoformat()
+            with transaction.atomic():
+                for result in raw_results:
+                    if result['success']:
+                        score = round(float(normalized_scores[success_idx]), 2)
+                        app = result['app_obj']
+                        app.screening_status = [{'status': 'processed', 'score': score, 'updated_at': now}]
+                        app.screening_score = score
+                        if not result['employment_gaps']:
+                            resume_data = extract_resume_fields(result['resume_text'])
+                            app.employment_gaps = resume_data.get("employment_gaps", [])
+                        app.save(update_fields=['screening_status', 'screening_score', 'employment_gaps'])
+                        
+                        result['score'] = score
+                        success_idx += 1
+                        logger.info(f"Vetted {result['application_id']}: score={score}")
+                    else:
+                        app = result['app_obj']
+                        if app:
+                            app.screening_status = [{'status': 'failed', 'score': 0.0, 'updated_at': now, 'error': result.get('error') }]
+                            app.screening_score = 0.0
+                            app.save(update_fields=['screening_status', 'screening_score'])
+                        result['score'] = 0.0
+                        logger.warning(f"Vetting failed for {result['application_id']}: {result.get('error')}")
+            
+            # Sort successful and select top
+            successful = [r for r in raw_results if r['success']]
+            successful.sort(key=lambda x: x['score'], reverse=True)
+            shortlisted_candidates = successful[:num_candidates]
+        
+        # Strip non-serializable 'app_obj' before return (Celery JSON issue)
+        for result in raw_results:
+            result.pop('app_obj', None)  # Safe remove
+        
+        batch_end_time = time.perf_counter()
+        batch_time = batch_end_time - batch_start_time
+        
+        logger.info(f"Vetting complete: {len(shortlisted_candidates)} shortlisted in {batch_time:.2f}s")
+        
+        return {
+            "shortlisted_candidates": shortlisted_candidates,  # Now serializable
+            "vetted_count": len(raw_results),
+            "batch_time_seconds": round(batch_time, 2)
+        }
+        
+    except Exception as e:
+        logger.error(f"Vetting batch failed: {str(e)}")
+        raise self.retry(exc=e, countdown=60 ** self.request.retries)
 
 @shared_task
 def auto_screen_all_applications():

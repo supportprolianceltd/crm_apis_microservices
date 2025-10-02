@@ -1444,6 +1444,31 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+# class ClientDetailSerializer(serializers.ModelSerializer):
+#     profile = ClientProfileSerializer()
+
+#     class Meta:
+#         model = CustomUser
+#         fields = ["id", "email", "first_name", "last_name", "role", "job_role", "branch", "profile"]
+#         read_only_fields = ["id", "role"]
+
+#     def to_representation(self, instance):
+#         data = super().to_representation(instance)
+#         if instance.client_profile:
+#             data["profile"] = ClientProfileSerializer(instance.client_profile).data
+#         else:
+#             data["profile"] = None
+#         return data
+
+#     def update(self, instance, validated_data):
+#         profile_data = validated_data.pop("profile", {})
+#         instance = super().update(instance, validated_data)
+#         if instance.client_profile:
+#             profile_serializer = ClientProfileSerializer(instance.client_profile, data=profile_data, partial=True)
+#             profile_serializer.is_valid(raise_exception=True)
+#             profile_serializer.save()
+#         return instance
+
 class ClientDetailSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer()
 
@@ -1451,6 +1476,64 @@ class ClientDetailSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ["id", "email", "first_name", "last_name", "role", "job_role", "branch", "profile"]
         read_only_fields = ["id", "role"]
+
+    def to_internal_value(self, data):
+        """
+        Custom parsing for multipart/form-data to handle nested 'profile' fields and files.
+        Supports both simple nested (e.g., profile[photo]) and deeper nested (e.g., profile[preferred_carers][0]).
+        """
+        logger.info(f"Raw payload in ClientDetailSerializer: {dict(data) if hasattr(data, 'dict') else data}")
+        mutable_data = {}
+        profile_data = {}
+
+        if hasattr(data, "getlist"):  # Multipart/form-data case
+            # Initialize nested arrays (e.g., preferred_carers)
+            nested_arrays = ["preferred_carers"]  # Add more if needed (e.g., for future many=True fields)
+            for field in nested_arrays:
+                profile_data[field] = []
+
+            for key in data:
+                if key.startswith("profile[") and key.endswith("]"):
+                    # Handle profile-prefixed fields
+                    if "][" in key:
+                        # Deeper nested: e.g., profile[preferred_carers][0]
+                        parts = key.split("[")
+                        field_name = parts[1][:-1]  # e.g., "preferred_carers"
+                        index_str = parts[2][:-1]   # e.g., "0"
+                        if len(parts) > 3:
+                            sub_field = parts[3][:-1]  # e.g., sub-sub-field
+                            index = int(index_str)
+
+                            # Ensure list is long enough
+                            while len(profile_data.get(field_name, [])) <= index:
+                                profile_data[field_name].append({})
+
+                            # Add value (file or text)
+                            if key in self.context["request"].FILES:
+                                profile_data[field_name][index][sub_field] = self.context["request"].FILES[key]
+                            else:
+                                profile_data[field_name][index][sub_field] = data.get(key)
+                        else:
+                            # Handle edge cases if needed
+                            pass
+                    else:
+                        # Simple nested: e.g., profile[photo]
+                        field_name = key[len("profile[") : -1]
+                        if key in self.context["request"].FILES:
+                            profile_data[field_name] = self.context["request"].FILES[key]
+                        else:
+                            profile_data[field_name] = data.get(key)
+                else:
+                    # Top-level fields (e.g., email, first_name)
+                    mutable_data[key] = data.get(key)
+        else:
+            # JSON case (no files)
+            mutable_data = dict(data)
+            profile_data = mutable_data.get("profile", {})
+
+        logger.info(f"Parsed profile data: {profile_data}")
+        mutable_data["profile"] = profile_data
+        return super().to_internal_value(mutable_data)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -1468,7 +1551,7 @@ class ClientDetailSerializer(serializers.ModelSerializer):
             profile_serializer.is_valid(raise_exception=True)
             profile_serializer.save()
         return instance
-
+    
 
 class ClientCreateSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer(required=True)
@@ -1485,6 +1568,28 @@ class ClientCreateSerializer(serializers.ModelSerializer):
             "last_name": {"required": True},
             "role": {"default": "client"},
         }
+    # def create(self, validated_data):
+    #     profile_data = validated_data.pop("profile")
+    #     branch = validated_data.pop("branch", None)
+    #     tenant = self.context["request"].user.tenant
+    #     password = validated_data.pop("password")
+
+    #     # Ensure JSON fields are dict/list
+    #     for field in ["order_history", "payment_history", "feedback", "complaints", "preferred_care_times"]:
+    #         if field in profile_data and isinstance(profile_data[field], str):
+    #             import json
+
+    #             try:
+    #                 profile_data[field] = json.loads(profile_data[field])
+    #             except Exception:
+    #                 profile_data[field] = {}
+
+    #     with tenant_context(tenant):
+    #         user = CustomUser.objects.create_user(
+    #             **validated_data, tenant=tenant, branch=branch, is_active=True, password=password
+    #         )
+    #         ClientProfile.objects.create(user=user, **profile_data)
+    #         return user
 
     def create(self, validated_data):
         profile_data = validated_data.pop("profile")
@@ -1492,11 +1597,10 @@ class ClientCreateSerializer(serializers.ModelSerializer):
         tenant = self.context["request"].user.tenant
         password = validated_data.pop("password")
 
-        # Ensure JSON fields are dict/list
+        # Handle JSON fields
         for field in ["order_history", "payment_history", "feedback", "complaints", "preferred_care_times"]:
             if field in profile_data and isinstance(profile_data[field], str):
                 import json
-
                 try:
                     profile_data[field] = json.loads(profile_data[field])
                 except Exception:
@@ -1506,11 +1610,12 @@ class ClientCreateSerializer(serializers.ModelSerializer):
             user = CustomUser.objects.create_user(
                 **validated_data, tenant=tenant, branch=branch, is_active=True, password=password
             )
-            ClientProfile.objects.create(user=user, **profile_data)
+            # Use serializer for upload handling
+            profile_serializer = ClientProfileSerializer(data=profile_data, context=self.context)
+            profile_serializer.is_valid(raise_exception=True)
+            profile_serializer.save(user=user)
             return user
-
-
-
+    
 
 class DocumentVersionSerializer(serializers.ModelSerializer):
     created_by = serializers.SerializerMethodField()

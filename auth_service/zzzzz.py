@@ -19,6 +19,36 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
+        username='tonna',
+        email='tonna.ezugwu@prolianceltd.com',
+        password='qwerty',
+        role='admin',
+        first_name='Tonna',
+        last_name='Ezugwu',
+        job_role='Project Manager',
+        tenant=tenant
+    )
+
+
+from django_tenants.utils import tenant_context
+tenant = Tenant.objects.get(schema_name='proliance')
+with tenant_context(tenant):
+    CustomUser.objects.create_superuser(
+        username='tonna',
+        email='prince.godson@prolianceltd.com',
+        password='qwerty',
+        role='admin',
+        first_name='Prince',
+        last_name='Godson',
+        job_role='Frontend Developer',
+        tenant=tenant
+    )
+
+
+from django_tenants.utils import tenant_context
+tenant = Tenant.objects.get(schema_name='proliance')
+with tenant_context(tenant):
+    CustomUser.objects.create_superuser(
         username='david',
         email='david.dappa@prolianceltd.com',
         password='qwerty',
@@ -29,6 +59,19 @@ with tenant_context(tenant):
         tenant=tenant
     )
 
+from django_tenants.utils import tenant_context
+tenant = Tenant.objects.get(schema_name='proliance')
+with tenant_context(tenant):
+    CustomUser.objects.create_superuser(
+        username='support',
+        email='support@prolianceltd.com',
+        password='qwerty',
+        role='admin',
+        first_name='Gauis',
+        last_name='Julius',
+        job_role='Backend Developer',
+        tenant=tenant
+    )
 
 from core.models import Tenant, Domain
 if not Tenant.objects.filter(schema_name='auth').exists():
@@ -94,7 +137,7 @@ with tenant_context(tenant):
 from core.models import Tenant
 from users.models import CustomUser
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='arts')
+tenant = Tenant.objects.get(schema_name='netwiver')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
         username='info',
