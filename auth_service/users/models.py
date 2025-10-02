@@ -156,6 +156,14 @@ class CustomUser(AbstractUser):
         ('disable', 'Disable'),
     )
 
+
+    id = models.UUIDField(
+            primary_key=True,
+            default=uuid.uuid4,
+            editable=False,
+            unique=True  # Redundant for PK but explicit for clarity.
+        )
+    
     last_password_reset = models.DateTimeField(null=True, blank=True)
     username = models.CharField(max_length=150, blank=True, null=True, unique=False)
     email = models.EmailField(_('email address'), unique=True)
@@ -398,8 +406,6 @@ class UserActivity(models.Model):
 
     def __str__(self):
         return f"{self.action} {'success' if self.success else 'failed' if self.success is False else ''} for {self.user.email if self.user else 'unknown'} at {self.timestamp}"
-
-
 
 
 

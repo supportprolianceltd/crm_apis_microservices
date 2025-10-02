@@ -19,13 +19,13 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='david',
-        email='david.dappa@prolianceltd.com',
+        username='tonna',
+        email='tonna.ezugwu@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='David',
-        last_name='Dappa',
-        job_role='Frontend Developer',
+        first_name='Tonna',
+        last_name='Ezugwu',
+        job_role='Project Manager',
         tenant=tenant
     )
 
