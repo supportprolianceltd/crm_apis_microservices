@@ -18,6 +18,23 @@ services:
     networks:
       - auth_service_default
 
+  redis:
+    image: redis:7-alpine
+    container_name: auth_redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+ 
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - auth_service_default
+    depends_on:
+      - db
+
   auth-service:
     build:
       context: .
@@ -29,6 +46,8 @@ services:
       - ./.env
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - .:/app
@@ -78,6 +97,8 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
+
 
 networks:
   auth_service_default:

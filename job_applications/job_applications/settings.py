@@ -297,3 +297,8 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ROOT_URLCONF = 'job_applications.urls'
 WSGI_APPLICATION = 'job_applications.wsgi.application'
+
+
+
+
+

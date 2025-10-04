@@ -220,6 +220,11 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": False,
         },
+        'cache': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         "utils.supabase": {
             "handlers": ["file", "console"],
             "level": "DEBUG",
@@ -268,6 +273,39 @@ SPECTACULAR_SETTINGS = {
         }
     },
 }
+
+
+# Caching Configuration
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": env("REDIS_URL", default="redis://redis:6379/0"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {"max_connections": 20},
+            "SOCKET_CONNECT_TIMEOUT": 5,
+            "SOCKET_TIMEOUT": 5,
+            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+            "SOCKET_KEEPALIVE": True,
+            "SOCKET_KEEPALIVE_OPTIONS": {
+                "tcp_keepalive": True,
+                "tcp_keepalive_idle": 60,
+                "tcp_keepalive_intvl": 10,
+                "tcp_keepalive_probes": 3,
+            },
+        },
+        "KEY_PREFIX": "authservice:v1:",
+        "DEFAULT_TIMEOUT": 300,
+    }
+}
+
+
+# Cache-enabled flag for feature toggle
+CACHE_ENABLED = env.bool("CACHE_ENABLED", default=True)
+
+# Multi-tenant cache prefix helper (use in code)
+TENANT_CACHE_PREFIX = "tenant:{}:"  # e.g., "tenant:example_user:"
+
 
 
 # sudo nano /etc/nginx/nginx.conf

@@ -23,18 +23,18 @@ services:
   redis:
     image: redis:7-alpine
     container_name: messaging_redis
-    ports:
-      - "6380:6379"
+    # ports:
+    #   - "6381:6379"
     volumes:
       - redis_data:/data
     networks:
       - auth_service_default
 
-  websocket:
+  messaging:
     build: .
-    container_name: messaging_websocket
+    container_name: messaging
     ports:
-      - "3500:3500"
+      - "3500:3000"
     env_file:
       - ./.env
     volumes:
@@ -69,3 +69,7 @@ networks:
 volumes:
   messaging_postgres_data:
   redis_data:
+
+
+
+

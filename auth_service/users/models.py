@@ -1,13 +1,5 @@
-#users.models
+# users/models.py (full corrected version - remove/avoid serializers import in models)
 
-from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-from core.models import Tenant, Module, Branch
-from django.db.models import Max
-from django.db import models
-from core.models import Tenant
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils import timezone
@@ -17,34 +9,7 @@ from django.db.models import Max
 import uuid
 import logging
 from django_tenants.utils import tenant_context
-from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-from core.models import Tenant, Module, Branch
-from django.db.models import Max
-import uuid
-import logging
-
-
-
-
-logger = logging.getLogger('users')
-
-def generate_kid():
-    return uuid.uuid4().hex
-
-def today():
-    return timezone.now().date()
-from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-from core.models import Tenant, Module, Branch
-from django.db.models import Max
-import uuid
-import logging
-
+from django.utils.timezone import now
 logger = logging.getLogger('users')
 
 def generate_kid():
@@ -54,45 +19,6 @@ def today():
     return timezone.now().date()
 
 
-logger = logging.getLogger('users')
-
-def generate_kid():
-    return uuid.uuid4().hex
-
-def today():
-    return timezone.now().date()
-
-from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-from core.models import Tenant, Module, Branch
-from django.db.models import Max
-import uuid
-import logging
-
-logger = logging.getLogger('users')
-
-def generate_kid():
-    return uuid.uuid4().hex
-
-def today():
-    return timezone.now().date()
-from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-from core.models import Tenant, Module, Branch
-import uuid
-import logging
-
-logger = logging.getLogger('users')
-
-def generate_kid():
-    return uuid.uuid4().hex
-
-def today():
-    return timezone.now().date()
 
 class CustomUserManager(UserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -113,11 +39,29 @@ class CustomUserManager(UserManager):
         extra_fields.setdefault('is_active', True)
         return self.create_user(email, password, **extra_fields)
 
-
+    def get_by_email(self, email, tenant):
+        """Cached user lookup by email in tenant."""
+        from auth_service.utils.cache import get_cache_key, get_from_cache, set_to_cache
+        from auth_service.serializers import CustomUserMinimalSerializer  # Lazy import here if needed, but avoid in models
+        key = get_cache_key(tenant.schema_name, 'customuser', email)
+        user_data = get_from_cache(key)
+        if user_data is None:
+            with tenant_context(tenant):
+                user = self.filter(email=email, tenant=tenant).first()
+                if user:
+                    user_data = CustomUserMinimalSerializer(user).data
+                    set_to_cache(key, user_data, timeout=900)  # 15 min
+                    return user
+                return None
+        # Reconstruct user from cached data if needed (minimal; full query for safety)
+        with tenant_context(tenant):
+            user = self.filter(email=email, tenant=tenant).first()
+            return user
 
 class CustomUser(AbstractUser):
     ROLES = (
         ('admin', 'Admin'),
+        ('root-admin', 'Root-Admin'),
         ('co-admin', 'Co-Admin'),
         ('hr', 'HR'),
         ('staff', 'Staff'),
@@ -155,7 +99,6 @@ class CustomUser(AbstractUser):
         ('enable', 'Enable'),
         ('disable', 'Disable'),
     )
-
 
     last_password_reset = models.DateTimeField(null=True, blank=True)
     username = models.CharField(max_length=150, blank=True, null=True, unique=False)
@@ -220,7 +163,6 @@ class CustomUser(AbstractUser):
         self.login_attempts = 0
         self.save()
         logger.info(f"Login attempts reset for user {self.email} in tenant {self.tenant.schema_name}")
-
 
     def calculate_completion_percentage(self):
         """
@@ -343,8 +285,6 @@ class CustomUser(AbstractUser):
         return round(completed_weight / total_weight * 100, 2) if total_weight > 0 else 0
 
 
-
-
 class BlockedIP(models.Model):
     ip_address = models.GenericIPAddressField(unique=True)
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
@@ -399,7 +339,6 @@ class UserActivity(models.Model):
 
     def __str__(self):
         return f"{self.action} {'success' if self.success else 'failed' if self.success is False else ''} for {self.user.email if self.user else 'unknown'} at {self.timestamp}"
-
 
 
 class UserProfile(models.Model):
@@ -581,8 +520,6 @@ class UserProfile(models.Model):
         super().save(*args, **kwargs)
 
 
-
-
 class ProfessionalQualification(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='professional_qualifications')
     name = models.CharField(max_length=255)
@@ -593,7 +530,6 @@ class ProfessionalQualification(models.Model):
         verbose_name_plural = "Professional Qualifications"
 
 
-
 class EmploymentDetail(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='employment_details')
     job_role = models.CharField(max_length=255)
@@ -601,12 +537,14 @@ class EmploymentDetail(models.Model):
     department = models.CharField(max_length=100)
     work_email = models.EmailField()
     employment_type = models.CharField(max_length=50, choices=[('Full Time', 'Full Time'), ('Part Time', 'Part Time'), ('Contract', 'Contract')])
-    employment_start_date = models.DateField(default=today)
-    employment_end_date = models.DateField(null=True, blank=True)
-    probation_end_date = models.DateField(null=True, blank=True)
+
+    employment_start_date = models.DateTimeField(default=now)
+    employment_end_date = models.DateTimeField(null=True, blank=True)
+    probation_end_date = models.DateTimeField(null=True, blank=True)
+
     line_manager = models.CharField(max_length=255, null=True, blank=True)
     currency = models.CharField(max_length=100, null=True, blank=True)
-    salary = models.DecimalField(max_digits=10, decimal_places=2)
+    salary = models.DecimalField(max_digits=20, decimal_places=2)
     working_days = models.CharField(max_length=100, null=True, blank=True)
     maximum_working_hours = models.PositiveIntegerField(null=True, blank=True)
 
@@ -714,9 +652,6 @@ class OtherUserDocuments(models.Model):
         verbose_name = "User Document"
         verbose_name_plural = "User Documents"
 
-
-
-
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
@@ -749,12 +684,6 @@ class UserSession(models.Model):
 
     def __str__(self):
         return f"{self.user.email} | {self.date} | {self.login_time} - {self.logout_time}"
-    
-
-
-
-
-
 
 class ClientProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='client_profile')
@@ -1004,7 +933,32 @@ class ClientProfile(models.Model):
     #     return f"{self.first_name} {self.last_name}"
 
 
+# class RSAKeyPair(models.Model):
+#     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='rsa_keys')
+#     kid = models.CharField(max_length=64, unique=True, default=generate_kid)
+#     private_key_pem = models.TextField()  # PEM encoded private key
+#     public_key_pem = models.TextField()   # PEM encoded public key
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)  # <-- Add this
+#     active = models.BooleanField(default=True)
 
+
+#     @classmethod
+#     def get_active_by_kid(cls, kid, tenant):
+#         """Cached active keypair lookup."""
+#         from auth_service.utils.cache import get_cache_key, get_from_cache, set_to_cache
+#         key = get_cache_key(tenant.schema_name, 'rsakey', kid)
+#         keypair = get_from_cache(key)
+#         if keypair is None:
+#             with tenant_context(tenant):
+#                 keypair = cls.objects.filter(kid=kid, active=True, tenant=tenant).first()
+#                 if keypair:
+#                     # Cache public_key_pem only for security
+#                     set_to_cache(key, keypair.public_key_pem, timeout=3600)  # 1 hour
+#         return keypair
+
+#     def __str__(self):
+#         return f"RSAKeyPair(kid={self.kid}, tenant={self.tenant_id}, active={self.active})"
 
 
 class RSAKeyPair(models.Model):
@@ -1013,12 +967,30 @@ class RSAKeyPair(models.Model):
     private_key_pem = models.TextField()  # PEM encoded private key
     public_key_pem = models.TextField()   # PEM encoded public key
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)  # <-- Add this
+    updated_at = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
+
+    @classmethod
+    def get_active_by_kid(cls, kid, tenant):
+        """Cached active keypair lookup."""
+        from auth_service.utils.cache import get_cache_key, get_from_cache, set_to_cache
+        key = get_cache_key(tenant.schema_name, 'rsakey', kid)
+        keypair_data = get_from_cache(key)
+        if keypair_data is None:
+            with tenant_context(tenant):
+                keypair = cls.objects.filter(kid=kid, active=True, tenant=tenant).first()
+                if keypair:
+                    # Cache public_key_pem only for security
+                    set_to_cache(key, keypair.public_key_pem, timeout=3600)  # 1 hour
+                    return keypair
+                return None
+        # If cached, reconstruct minimal (but for key, just return the PEM string)
+        with tenant_context(tenant):
+            keypair = cls.objects.filter(kid=kid, active=True, tenant=tenant).first()
+            return keypair  # Full query for safety
 
     def __str__(self):
         return f"RSAKeyPair(kid={self.kid}, tenant={self.tenant_id}, active={self.active})"
-
 
 
 class BlacklistedToken(models.Model):

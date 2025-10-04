@@ -1161,6 +1161,7 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
 
 class RequestListCreateView(generics.ListCreateAPIView):
     serializer_class = RequestSerializer
+    pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['request_type', 'status', 'priority', 'material_type', 'leave_category', 'service_type']
     search_fields = ['title', 'description', 'item_name', 'requester_name']
@@ -1258,6 +1259,7 @@ class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class UserRequestsListView(generics.ListAPIView):
+    pagination_class = CustomPagination
     serializer_class = RequestSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['request_type', 'status']

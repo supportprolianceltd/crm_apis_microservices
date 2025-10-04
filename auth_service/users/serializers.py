@@ -18,8 +18,8 @@ from django.utils import timezone
 from django_tenants.utils import tenant_context
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from utils.supabase import upload_file_dynamic
+import logging
 
 from auth_service.utils.jwt_rsa import issue_rsa_jwt
 

@@ -237,7 +237,7 @@ CORS_ALLOW_CREDENTIALS = True
 AUTH_SERVICE_URL = env.str("AUTH_SERVICE_URL", default="http://auth-service:8001")
 APPLICATIONS_ENGINE_URL = env.str("JOB_APPLICATIONS_URL", default="http://job-applications:8003")
 TALENT_ENGINE_URL = env.str("TALENT_ENGINE_URL", default="http://talent-engine:8002")
-MESSAGING_URL = env.str("MESSAGING_URL", default="http://messaging:3500")
+MESSAGING_URL = env.str("MESSAGING_URL", default="http://messaging:3000")
 LMS_APP_URL = env.str("LMS_APP_URL", default="http://lms-app:8004")
 NOTIFICATIONS_SERVICE_URL = env.str("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
 

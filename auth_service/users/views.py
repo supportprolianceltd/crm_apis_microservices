@@ -1,7 +1,6 @@
 # Standard Library
 import base64
 import json
-import logging
 import secrets
 import string
 import uuid
@@ -41,6 +40,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 # Core App Models
 from core.models import Branch, Domain, Tenant, TenantConfig
+import logging
 
 # Users App - Models
 from users.models import CustomUser  # Used here for separate specific import
@@ -104,6 +104,7 @@ from .serializers import (
 
 # Auth Service Utils
 from auth_service.utils.jwt_rsa import issue_rsa_jwt, validate_rsa_jwt
+from auth_service.utils.cache import get_cache_key, delete_cache_key, delete_tenant_cache
 
 # Auth Service Serializers
 from auth_service.views import CustomUserMinimalSerializer
@@ -117,7 +118,7 @@ logger = logging.getLogger("users")
 
 
 class CustomPagination(PageNumberPagination):
-    page_size = 20
+    page_size = 50
 
 
 class TermsAndConditionsView(APIView):
@@ -508,6 +509,9 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 #                     base_qs = base_qs.filter(id=user.id)  # Self only
 #             return base_qs
 
+
+
+
 #     def get_queryset(self):
 #         """Optimized queryset: Minimal for lists, full prefetch for details."""
 #         base_qs = self.get_base_queryset()
@@ -527,6 +531,9 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 #             "profile__other_user_documents",
 #         )
 
+
+
+
 #     def get_serializer_class(self):
 #         if self.action == "list":
 #             return CustomUserListSerializer  # Light for lists
@@ -540,10 +547,62 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 
 #     def perform_create(self, serializer):
 #         tenant = self.request.user.tenant
+#         user = self.request.user
 #         if self.request.user.role != "admin" and not self.request.user.is_superuser:
 #             raise ValidationError("Only admins or superusers can create users.")
 #         with tenant_context(tenant):
-#             serializer.save()
+#             user = serializer.save()
+#             logger.info(f"User created: {user.email} (ID: {user.id}) for tenant {tenant.schema_name}")
+
+#             # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
+#             logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
+#             try:
+#                 # Generate a unique event ID in the format 'evt-<uuid>'
+#                 event_id = f"evt-{str(uuid.uuid4())[:8]}"
+#                 # Get user agent from request
+#                 user_agent = self.request.META.get("HTTP_USER_AGENT", "Unknown")
+#                 # Define company name (assuming tenant name or a custom field)
+#                 company_name = tenant.name if hasattr(tenant, 'name') else "Unknown Company"
+#                 # Define login link (customize as needed)
+#                 login_link = settings.WEB_PAGE_URL
+
+#                 # print("login_link")
+#                 # print(login_link)
+#                 # print("login_link")
+
+#                 logger.info(f"🎯 {login_link}")
+
+#                 event_payload = {
+#                     "metadata": {
+#                         "tenant_id": str(tenant.unique_id),
+#                         "event_type": "user.account.created",
+#                         "event_id": event_id,
+#                         "created_at": timezone.now().isoformat(),
+#                         "source": "auth-service",
+#                     },
+#                     "data": {
+#                         "user_email": user.email,
+#                         "company_name": company_name,
+#                         "temp_password": serializer.validated_data.get("password", ""),
+#                         "login_link": login_link,
+#                         "timestamp": timezone.now().isoformat(),
+#                         "user_agent": user_agent,
+#                         "user_id": str(user.id),
+#                     },
+#                 }
+
+#                 notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
+#                 safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
+#                 logger.info(f"➡️ POST to {notifications_url} with payload: {safe_payload}")
+
+#                 response = requests.post(notifications_url, json=event_payload, timeout=5)
+#                 response.raise_for_status()  # Raise if status != 200
+#                 logger.info(f"✅ Notification sent for {user.email}. Status: {response.status_code}, Response: {response.text}")
+
+#             except requests.exceptions.RequestException as e:
+#                 logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user.email}: {str(e)}")
+#             except Exception as e:
+#                 logger.error(f"[❌ Notification Exception] Unexpected error for {user.email}: {str(e)}")
 
 #     def update(self, request, *args, **kwargs):
 #         tenant = request.user.tenant
@@ -674,7 +733,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 
 #     @action(detail=True, methods=["post"], url_path="impersonate")
 #     def impersonate(self, request, pk=None):
-#         tenant = request.user.tenant
+#         tenant = self.request.user.tenant
 #         with tenant_context(tenant):
 #             target_user = self.get_object()
 #             if request.data:
@@ -779,6 +838,51 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 #                         serializer.is_valid(raise_exception=True)
 #                         user = serializer.save()
 #                         logger.info(f"Created user {user.email} in tenant {tenant.schema_name} during bulk create")
+
+#                         # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
+#                         logger.info(f"🎯 Sending user creation event for {user.email} to notification service.")
+#                         try:
+#                             # Generate a unique event ID in the format 'evt-<uuid>'
+#                             event_id = f"evt-{str(uuid.uuid4())[:8]}"
+#                             # Get user agent from request
+#                             user_agent = request.META.get("HTTP_USER_AGENT", "Unknown")
+#                             # Define company name (assuming tenant name or a custom field)
+#                             company_name = tenant.name if hasattr(tenant, 'name') else "Unknown Company"
+#                             # Define login link (customize as needed)
+#                             login_link = "https://learn.prolianceltd.com/home/login"
+
+#                             event_payload = {
+#                                 "metadata": {
+#                                     "tenant_id": str(tenant.unique_id),
+#                                     "event_type": "user.account.created",
+#                                     "event_id": event_id,
+#                                     "created_at": timezone.now().isoformat(),
+#                                     "source": "auth-service",
+#                                 },
+#                                 "data": {
+#                                     "user_email": user.email,
+#                                     "company_name": company_name,
+#                                     "temp_password": serializer.validated_data.get("password", ""),
+#                                     "login_link": login_link,
+#                                     "timestamp": timezone.now().isoformat(),
+#                                     "user_agent": user_agent,
+#                                     "user_id": str(user.id),
+#                                 },
+#                             }
+
+#                             notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
+#                             safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
+#                             logger.info(f"➡️ POST to {notifications_url} with payload: {safe_payload}")
+
+#                             response = requests.post(notifications_url, json=event_payload, timeout=5)
+#                             response.raise_for_status()  # Raise if status != 200
+#                             logger.info(f"✅ Notification sent for {user.email}. Status: {response.status_code}, Response: {response.text}")
+
+#                         except requests.exceptions.RequestException as e:
+#                             logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user.email}: {str(e)}")
+#                         except Exception as e:
+#                             logger.error(f"[❌ Notification Exception] Unexpected error for {user.email}: {str(e)}")
+
 #                         results.append(
 #                             {
 #                                 "status": "success",
@@ -807,7 +911,6 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 #         return Response(response_data, status=status_code)
 
 
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     permission_classes = [IsAuthenticated]
@@ -832,6 +935,57 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Optimized queryset: Minimal for lists, full prefetch for details."""
         base_qs = self.get_base_queryset()
+        tenant_schema = self.request.tenant.schema_name
+        if self.action in ['list', 'retrieve'] and settings.CACHE_ENABLED:
+            from auth_service.utils.cache import get_cache_key, get_from_cache, set_to_cache
+            from django.core import serializers  # For JSON serialization if needed
+            cache_key = get_cache_key(tenant_schema, f'users_{self.action}')
+            cached_data = get_from_cache(cache_key)
+            if cached_data is not None:
+                # For list: Return a mock QS from cached IDs (simple; for full, deserialize)
+                if self.action == 'list':
+                    # Cache stores list of IDs; reconstruct minimal QS
+                    ids = cached_data.get('ids', [])
+                    return base_qs.filter(id__in=ids)
+                # For retrieve: Cache full serialized data, but return instance
+                elif self.action == 'retrieve':
+                    pk = self.kwargs.get('pk')
+                    # if pk in cached_data:
+                    #     # Return the object from cache if exact match
+                    #     instance_data = cached_data[pk]
+                    #     # Reconstruct instance (simplified; use from_db_value or similar in prod)
+                    #     instance = CustomUser(**instance_data)
+                    #     return base_qs.filter(id=pk)  # Still query for full object, but cache hit logged
+
+                    if pk in cached_data:
+                        return base_qs.filter(id=pk)
+
+            # On miss, build QS and cache serialized version
+            if self.action == "list":
+                # Light: select_related for basic profile, no deep nests
+                qs = base_qs.select_related("profile", "tenant", "branch")
+                serialized_qs = list(qs.values('id', 'email', 'first_name', 'last_name', 'role'))  # Minimal
+                set_to_cache(cache_key, {'ids': [item['id'] for item in serialized_qs]}, timeout=300)
+                return qs
+            # Full prefetch for retrieve/update/detail
+            qs = base_qs.prefetch_related(
+                "profile__professional_qualifications",
+                "profile__employment_details",
+                "profile__education_details",
+                "profile__reference_checks",
+                "profile__proof_of_address",
+                "profile__insurance_verifications",
+                "profile__driving_risk_assessments",
+                "profile__legal_work_eligibilities",
+                "profile__other_user_documents",
+            )
+            if self.action == 'retrieve':
+                pk = self.kwargs.get('pk')
+                instance = qs.get(pk=pk)
+                from .serializers import CustomUserSerializer
+                serialized = CustomUserSerializer(instance).data
+                set_to_cache(cache_key, {pk: serialized}, timeout=600)
+            return qs
         if self.action == "list":
             # Light: select_related for basic profile, no deep nests
             return base_qs.select_related("profile", "tenant", "branch")
@@ -865,8 +1019,12 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.request.user.role != "admin" and not self.request.user.is_superuser:
             raise ValidationError("Only admins or superusers can create users.")
         with tenant_context(tenant):
-            user = serializer.save()
-            logger.info(f"User created: {user.email} (ID: {user.id}) for tenant {tenant.schema_name}")
+            user_obj = serializer.save()
+            logger.info(f"User created: {user_obj.email} (ID: {user_obj.id}) for tenant {tenant.schema_name}")
+
+            # Invalidate user list cache on create
+            from auth_service.utils.cache import delete_tenant_cache
+            delete_tenant_cache(tenant.schema_name, 'users_list')
 
             # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
             logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
@@ -895,13 +1053,13 @@ class UserViewSet(viewsets.ModelViewSet):
                         "source": "auth-service",
                     },
                     "data": {
-                        "user_email": user.email,
+                        "user_email": user_obj.email,
                         "company_name": company_name,
                         "temp_password": serializer.validated_data.get("password", ""),
                         "login_link": login_link,
                         "timestamp": timezone.now().isoformat(),
                         "user_agent": user_agent,
-                        "user_id": str(user.id),
+                        "user_id": str(user_obj.id),
                     },
                 }
 
@@ -911,12 +1069,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
                 response = requests.post(notifications_url, json=event_payload, timeout=5)
                 response.raise_for_status()  # Raise if status != 200
-                logger.info(f"✅ Notification sent for {user.email}. Status: {response.status_code}, Response: {response.text}")
+                logger.info(f"✅ Notification sent for {user_obj.email}. Status: {response.status_code}, Response: {response.text}")
 
             except requests.exceptions.RequestException as e:
-                logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user.email}: {str(e)}")
+                logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}: {str(e)}")
             except Exception as e:
-                logger.error(f"[❌ Notification Exception] Unexpected error for {user.email}: {str(e)}")
+                logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
 
     def update(self, request, *args, **kwargs):
         tenant = request.user.tenant
@@ -935,6 +1093,11 @@ class UserViewSet(viewsets.ModelViewSet):
                 logger.error(f"Serializer errors for user {instance.email}: {serializer.errors}")
                 raise
             self.perform_update(serializer)
+            # Invalidate caches on update
+            from auth_service.utils.cache import delete_cache_key
+            user_key = get_cache_key(tenant.schema_name, 'customuser', instance.email)
+            delete_cache_key(user_key)
+            delete_tenant_cache(tenant.schema_name, 'users_list')
             logger.info(f"User {instance.email} updated by {user.email} in tenant {tenant.schema_name}")
             return Response(serializer.data)
 
@@ -946,6 +1109,9 @@ class UserViewSet(viewsets.ModelViewSet):
             if not (user.is_superuser or user.role == "admin"):
                 raise PermissionDenied("You do not have permission to delete users.")
             self.perform_destroy(instance)
+            # Invalidate on delete
+            from auth_service.utils.cache import delete_tenant_cache
+            delete_tenant_cache(tenant.schema_name, 'users_list')
             logger.info(f"User {instance.email} deleted by {user.email} in tenant {tenant.schema_name}")
             return Response(status=204)
 
@@ -968,6 +1134,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
                 success=True,
             )
+            # Invalidate user cache on lock
+            from auth_service.utils.cache import delete_cache_key
+            user_key = get_cache_key(tenant.schema_name, 'customuser', instance.email)
+            delete_cache_key(user_key)
             logger.info(f"User {instance.email} locked by {request.user.email} in tenant {tenant.schema_name}")
             return Response(
                 {"status": "success", "message": f"User {instance.email} account locked successfully."}, status=200
@@ -992,6 +1162,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
                 success=True,
             )
+            # Invalidate user cache on unlock
+            from auth_service.utils.cache import delete_cache_key
+            user_key = get_cache_key(tenant.schema_name, 'customuser', instance.email)
+            delete_cache_key(user_key)
             logger.info(f"User {instance.email} unlocked by {request.user.email} in tenant {tenant.schema_name}")
             return Response(
                 {"status": "success", "message": f"User {instance.email} account unlocked successfully."}, status=200
@@ -1016,6 +1190,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
                 success=True,
             )
+            # Invalidate user cache on suspend
+            from auth_service.utils.cache import delete_cache_key
+            user_key = get_cache_key(tenant.schema_name, 'customuser', instance.email)
+            delete_cache_key(user_key)
             logger.info(f"User {instance.email} suspended by {request.user.email} in tenant {tenant.schema_name}")
             return Response(
                 {"status": "success", "message": f"User {instance.email} account suspended successfully."}, status=200
@@ -1040,6 +1218,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
                 success=True,
             )
+            # Invalidate user cache on activate
+            from auth_service.utils.cache import delete_cache_key
+            user_key = get_cache_key(tenant.schema_name, 'customuser', instance.email)
+            delete_cache_key(user_key)
             logger.info(f"User {instance.email} activated by {request.user.email} in tenant {tenant.schema_name}")
             return Response(
                 {"status": "success", "message": f"User {instance.email} account activated successfully."}, status=200
@@ -1150,11 +1332,15 @@ class UserViewSet(viewsets.ModelViewSet):
                     serializer = UserCreateSerializer(data=user_data, context={"request": request})
                     try:
                         serializer.is_valid(raise_exception=True)
-                        user = serializer.save()
-                        logger.info(f"Created user {user.email} in tenant {tenant.schema_name} during bulk create")
+                        user_obj = serializer.save()
+                        logger.info(f"Created user {user_obj.email} in tenant {tenant.schema_name} during bulk create")
+
+                        # Invalidate list cache on bulk create
+                        from auth_service.utils.cache import delete_tenant_cache
+                        delete_tenant_cache(tenant.schema_name, 'users_list')
 
                         # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
-                        logger.info(f"🎯 Sending user creation event for {user.email} to notification service.")
+                        logger.info(f"🎯 Sending user creation event for {user_obj.email} to notification service.")
                         try:
                             # Generate a unique event ID in the format 'evt-<uuid>'
                             event_id = f"evt-{str(uuid.uuid4())[:8]}"
@@ -1174,13 +1360,13 @@ class UserViewSet(viewsets.ModelViewSet):
                                     "source": "auth-service",
                                 },
                                 "data": {
-                                    "user_email": user.email,
+                                    "user_email": user_obj.email,
                                     "company_name": company_name,
                                     "temp_password": serializer.validated_data.get("password", ""),
                                     "login_link": login_link,
                                     "timestamp": timezone.now().isoformat(),
                                     "user_agent": user_agent,
-                                    "user_id": str(user.id),
+                                    "user_id": str(user_obj.id),
                                 },
                             }
 
@@ -1190,19 +1376,19 @@ class UserViewSet(viewsets.ModelViewSet):
 
                             response = requests.post(notifications_url, json=event_payload, timeout=5)
                             response.raise_for_status()  # Raise if status != 200
-                            logger.info(f"✅ Notification sent for {user.email}. Status: {response.status_code}, Response: {response.text}")
+                            logger.info(f"✅ Notification sent for {user_obj.email}. Status: {response.status_code}, Response: {response.text}")
 
                         except requests.exceptions.RequestException as e:
-                            logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user.email}: {str(e)}")
+                            logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}: {str(e)}")
                         except Exception as e:
-                            logger.error(f"[❌ Notification Exception] Unexpected error for {user.email}: {str(e)}")
+                            logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
 
                         results.append(
                             {
                                 "status": "success",
-                                "email": user.email,
-                                "id": user.id,
-                                "data": CustomUserSerializer(user).data,
+                                "email": user_obj.email,
+                                "id": user_obj.id,
+                                "data": CustomUserSerializer(user_obj).data,
                             }
                         )
                     except ValidationError as e:
@@ -1223,7 +1409,7 @@ class UserViewSet(viewsets.ModelViewSet):
         }
         status_code = status.HTTP_201_CREATED if results else status.HTTP_400_BAD_REQUEST
         return Response(response_data, status=status_code)
-
+    
 
 class LoginAttemptViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = UserActivity.objects.filter(action="login")
@@ -1387,7 +1573,6 @@ class UserPasswordRegenerateView(generics.GenericAPIView):
 
 
 
-
 # class UserCreateView(APIView):
 #     permission_classes = [IsAdminUser]
 
@@ -1431,85 +1616,87 @@ class UserPasswordRegenerateView(generics.GenericAPIView):
 #         return Response({"status": "error", "message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserCreateView(APIView):
-    permission_classes = [IsAdminUser]
+# class UserCreateView(APIView):
+#     permission_classes = [IsAdminUser]
 
-    def post(self, request):
-        logger.debug(f"User creation request for tenant {request.user.tenant.schema_name}: {dict(request.data)}")
-        serializer = UserCreateSerializer(data=request.data, context={"request": request})
-        if serializer.is_valid():
-            try:
-                user = serializer.save()
-                refresh = RefreshToken.for_user(user)
-                logger.info(f"User created: {user.email} (ID: {user.id}) for tenant {user.tenant.schema_name}")
+#     def post(self, request):
+#         logger.debug(f"User creation request for tenant {request.user.tenant.schema_name}: {dict(request.data)}")
+#         serializer = UserCreateSerializer(data=request.data, context={"request": request})
+#         if serializer.is_valid():
+#             try:
+#                 user = serializer.save()
+#                 refresh = RefreshToken.for_user(user)
+#                 logger.info(f"User created: {user.email} (ID: {user.id}) for tenant {user.tenant.schema_name}")
 
-                # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
-                logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
-                try:
-                    event_payload = {
-                        "metadata": {
-                            "tenant_id": str(user.tenant.unique_id),
-                            "event_type": "user.creation.succeeded",
-                            "event_id": str(uuid.uuid4()),
-                            "created_at": timezone.now().isoformat(),
-                            "source": "auth-service",
-                        },
-                        "data": {
-                            "user_email": user.email,
-                            "user_id": str(user.id),
-                            "timestamp": timezone.now().isoformat(),
-                            "tenant_organizational_id": str(user.tenant.organizational_id),
-                            "tenant_unique_id": str(user.tenant.unique_id),
-                            "tenant_schema": user.tenant.schema_name,
-                            "first_name": user.first_name or "",
-                            "last_name": user.last_name or "",
-                            "role": user.role,
-                            "password": serializer.validated_data.get("password", ""),  # Include original password
-                        },
-                    }
+#                 # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
+#                 logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
+#                 try:
+#                     event_payload = {
+#                         "metadata": {
+#                             "tenant_id": str(user.tenant.unique_id),
+#                             "event_type": "user.creation.succeeded",
+#                             "event_id": str(uuid.uuid4()),
+#                             "created_at": timezone.now().isoformat(),
+#                             "source": "auth-service",
+#                         },
+#                         "data": {
+#                             "user_email": user.email,
+#                             "user_id": str(user.id),
+#                             "timestamp": timezone.now().isoformat(),
+#                             "tenant_organizational_id": str(user.tenant.organizational_id),
+#                             "tenant_unique_id": str(user.tenant.unique_id),
+#                             "tenant_schema": user.tenant.schema_name,
+#                             "first_name": user.first_name or "",
+#                             "last_name": user.last_name or "",
+#                             "role": user.role,
+#                             "password": serializer.validated_data.get("password", ""),  # Include original password
+#                         },
+#                     }
 
-                    notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-                    logger.info(f"➡️ POST to {notifications_url} with payload: {event_payload}")
+#                     notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
+#                     logger.info(f"➡️ POST to {notifications_url} with payload: {event_payload}")
 
-                    response = requests.post(notifications_url, json=event_payload, timeout=5)
-                    response.raise_for_status()  # Raise if status != 200
-                    logger.info(f"✅ Notification sent. Status: {response.status_code}, Response: {response.text}")
+#                     response = requests.post(notifications_url, json=event_payload, timeout=5)
+#                     response.raise_for_status()  # Raise if status != 200
+#                     logger.info(f"✅ Notification sent. Status: {response.status_code}, Response: {response.text}")
 
-                except requests.exceptions.RequestException as e:
-                    logger.warning(f"[❌ Notification Error] Failed to send user creation event: {str(e)}")
-                except Exception as e:
-                    logger.error(f"[❌ Notification Exception] Unexpected error: {str(e)}")
+#                 except requests.exceptions.RequestException as e:
+#                     logger.warning(f"[❌ Notification Error] Failed to send user creation event: {str(e)}")
+#                 except Exception as e:
+#                     logger.error(f"[❌ Notification Exception] Unexpected error: {str(e)}")
 
-                return Response(
-                    {
-                        "status": "success",
-                        "message": f"User {user.email} created successfully.",
-                        "data": {
-                            "id": user.id,
-                            "username": user.username,
-                            "email": user.email,
-                            "first_name": user.first_name,
-                            "last_name": user.last_name,
-                            "role": user.role,
-                            "job_role": user.job_role,
-                            "dashboard": user.dashboard,
-                            "access_level": user.access_level,
-                            "status": user.status,
-                            "two_factor": user.two_factor,
-                            "tenant_id": user.tenant.id,
-                            "tenant_schema": user.tenant.schema_name,
-                            "branch": user.branch.name if user.branch else None,
-                            "refresh": str(refresh),
-                            "access": str(refresh.access_token),
-                        },
-                    },
-                    status=status.HTTP_201_CREATED,
-                )
-            except Exception as e:
-                logger.error(f"Error creating user for tenant {request.user.tenant.schema_name}: {str(e)}")
-                return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        logger.error(f"Validation error for tenant {request.user.tenant.schema_name}: {serializer.errors}")
-        return Response({"status": "error", "message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+#                 return Response(
+#                     {
+#                         "status": "success",
+#                         "message": f"User {user.email} created successfully.",
+#                         "data": {
+#                             "id": user.id,
+#                             "username": user.username,
+#                             "email": user.email,
+#                             "first_name": user.first_name,
+#                             "last_name": user.last_name,
+#                             "role": user.role,
+#                             "job_role": user.job_role,
+#                             "dashboard": user.dashboard,
+#                             "access_level": user.access_level,
+#                             "status": user.status,
+#                             "two_factor": user.two_factor,
+#                             "tenant_id": user.tenant.id,
+#                             "tenant_schema": user.tenant.schema_name,
+#                             "branch": user.branch.name if user.branch else None,
+#                             "refresh": str(refresh),
+#                             "access": str(refresh.access_token),
+#                         },
+#                     },
+#                     status=status.HTTP_201_CREATED,
+#                 )
+#             except Exception as e:
+#                 logger.error(f"Error creating user for tenant {request.user.tenant.schema_name}: {str(e)}")
+#                 return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         logger.error(f"Validation error for tenant {request.user.tenant.schema_name}: {serializer.errors}")
+#         return Response({"status": "error", "message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class GenericDetailView(APIView):
@@ -1669,8 +1856,6 @@ class OtherUserDocumentsView(GenericDetailView):
     model_name = "Other User Document"
 
 
-
-
 # class AdminUserCreateView(APIView):
 #     permission_classes = [IsAdminUser]
 
@@ -1705,8 +1890,6 @@ class OtherUserDocumentsView(GenericDetailView):
 #                 return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 #         logger.error(f"Validation error: {serializer.errors}")
 #         return Response({"status": "error", "message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 class AdminUserCreateView(APIView):
