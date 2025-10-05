@@ -18386,3 +18386,1207 @@ def process_vetting_batch(self, job_requisition_id, job_requirements, applicatio
 2025-10-04 14:37:34,241 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
 2025-10-04 14:37:34,294 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
 2025-10-04 14:37:34,297 [INFO] job_applications: Set schema to: proliance
+2025-10-04 15:44:55,083 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-04 15:44:55,086 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:44:55,088 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:44:55,555 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-04 15:44:55,566 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:44:55,569 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:44:55,643 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-04 15:44:55,657 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:44:55,663 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:45:24,923 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-10-04 15:45:24,926 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-10-04 15:45:24,927 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-10-04 15:45:24,929 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-10-04 15:45:24,929 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-10-04 15:45:24,932 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-10-04 15:45:24,932 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-10-04 15:45:24,935 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-10-04 15:45:24,935 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-10-04 15:45:24,937 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-10-04 15:45:24,937 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-10-04 15:45:24,940 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-10-04 15:45:24,940 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-10-04 15:45:24,943 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-10-04 15:45:24,945 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-10-04 15:45:24,946 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-10-04 15:45:24,948 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-10-04 15:45:24,949 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-10-04 15:45:24,956 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-10-04 15:45:24,959 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-10-04 15:45:24,963 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-10-04 15:45:24,964 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-10-04 15:45:24,966 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-10-04 15:45:24,967 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-10-04 15:45:24,970 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-10-04 15:45:24,969 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-10-04 15:45:24,973 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-10-04 15:45:24,973 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-10-04 15:45:24,975 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-10-04 15:45:24,976 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-10-04 15:45:24,978 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-10-04 15:45:24,979 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-10-04 15:45:24,982 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-10-04 15:45:24,982 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-10-04 15:48:29,821 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-04 15:48:29,824 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:48:29,840 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:48:30,612 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-04 15:48:30,627 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:48:30,633 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:48:31,289 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-04 15:48:31,296 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:48:31,298 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-04 15:48:47,290 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-10-04 15:48:47,293 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-10-04 15:48:47,296 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-10-04 15:48:47,299 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-10-04 15:48:47,301 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-10-04 15:48:47,304 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-10-04 15:48:47,306 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-10-04 15:48:47,309 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-10-04 15:48:47,312 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-10-04 15:48:47,315 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-10-04 15:48:47,317 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-10-04 15:48:47,320 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-10-04 15:48:47,322 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-10-04 15:48:47,325 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-10-04 15:48:47,328 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-10-04 15:48:47,330 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-10-04 15:48:47,332 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-10-04 15:48:47,421 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-10-04 15:48:47,424 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-10-04 15:48:47,427 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-10-04 15:48:47,430 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-10-04 15:48:47,432 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-10-04 15:48:47,435 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-10-04 15:48:47,438 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-10-04 15:48:47,440 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-10-04 15:48:47,442 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-10-04 15:48:47,445 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-10-04 15:48:47,448 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-10-04 15:48:47,450 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-10-04 15:48:47,453 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-10-04 15:48:47,456 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-10-04 15:48:47,459 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-10-04 15:48:47,461 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-10-04 15:48:47,464 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-10-05 08:36:55,692 [INFO] job_applications: 🚀 Starting daily background CV vetting with full workflow
+2025-10-05 08:36:57,447 [INFO] job_applications: Fetched 3 requisitions from page; next: False
+2025-10-05 08:36:57,454 [INFO] job_applications: Total open requisitions fetched: 3
+2025-10-05 08:36:57,457 [INFO] job_applications: Processing requisition PRO-0001
+2025-10-05 08:36:57,632 [INFO] job_applications: Found 6 applications with resumes for PRO-0001
+2025-10-05 08:36:57,635 [INFO] job_applications: Extracted requirements length for PRO-0001: 331 chars
+2025-10-05 08:36:57,750 [INFO] job_applications: Vetting batch: 6 apps for req PRO-0001 (reqs len: 331)
+2025-10-05 08:40:52,229 [INFO] job_applications: Loaded SentenceTransformer model on CPU
+2025-10-05 08:40:52,863 [INFO] job_applications: Raw scores for 6 texts: [16.57, 10.7, 10.98]...
+2025-10-05 08:40:52,874 [INFO] job_applications: Extracting fields from resume text of length: 181
+2025-10-05 08:40:52,882 [WARNING] job_applications: Could not extract full name.
+2025-10-05 08:40:52,889 [INFO] job_applications: Found qualifications: B.Sc, M.Sc
+2025-10-05 08:40:52,894 [INFO] job_applications: Final extracted data: {'full_name': '', 'email': '', 'phone': '', 'qualification': 'B.Sc, M.Sc', 'experience': [], 'knowledge_skill': '', 'employment_gaps': []}
+2025-10-05 08:40:52,951 [INFO] job_applications: Vetted ad2cb4f7-8b7c-4853-b4a4-3f371fd0733b: score=100.0
+2025-10-05 08:40:52,954 [INFO] job_applications: Extracting fields from resume text of length: 253
+2025-10-05 08:40:52,957 [INFO] job_applications: Found full name from text: Data Pipeline
+2025-10-05 08:40:52,959 [INFO] job_applications: Found experience: ['4 years of experience']
+2025-10-05 08:40:52,962 [INFO] job_applications: Final extracted data: {'full_name': 'Data Pipeline', 'email': '', 'phone': '', 'qualification': '', 'experience': ['4 years of experience'], 'knowledge_skill': '', 'employment_gaps': []}
+2025-10-05 08:40:52,969 [INFO] job_applications: Vetted 0ab2bce2-0be0-4d1f-a131-0c1d65454505: score=0.0
+2025-10-05 08:40:52,972 [INFO] job_applications: Extracting fields from resume text of length: 243
+2025-10-05 08:40:52,975 [INFO] job_applications: Found full name from text: Data Pipeline
+2025-10-05 08:40:52,979 [INFO] job_applications: Found qualifications: B.Sc
+2025-10-05 08:40:52,981 [INFO] job_applications: Found experience: ['4 years of experience']
+2025-10-05 08:40:52,984 [INFO] job_applications: Final extracted data: {'full_name': 'Data Pipeline', 'email': '', 'phone': '', 'qualification': 'B.Sc', 'experience': ['4 years of experience'], 'knowledge_skill': '', 'employment_gaps': []}
+2025-10-05 08:40:52,991 [INFO] job_applications: Vetted 67f45360-520a-40a1-9332-c76095049687: score=4.77
+2025-10-05 08:40:52,994 [INFO] job_applications: Extracting fields from resume text of length: 267
+2025-10-05 08:40:52,998 [INFO] job_applications: Found full name from text: Data Pipeline
+2025-10-05 08:40:53,002 [INFO] job_applications: Found qualifications: B.Sc
+2025-10-05 08:40:53,005 [INFO] job_applications: Final extracted data: {'full_name': 'Data Pipeline', 'email': '', 'phone': '', 'qualification': 'B.Sc', 'experience': [], 'knowledge_skill': '', 'employment_gaps': []}
+2025-10-05 08:40:53,012 [INFO] job_applications: Vetted 721d3361-3331-45b9-9623-4f302a272ece: score=63.37
+2025-10-05 08:40:53,015 [INFO] job_applications: Extracting fields from resume text of length: 277
+2025-10-05 08:40:53,018 [INFO] job_applications: Found full name from text: Data Pipeline
+2025-10-05 08:40:53,021 [INFO] job_applications: Final extracted data: {'full_name': 'Data Pipeline', 'email': '', 'phone': '', 'qualification': '', 'experience': [], 'knowledge_skill': '', 'employment_gaps': []}
+2025-10-05 08:40:53,034 [INFO] job_applications: Vetted 07bbc5cf-72ef-4a2a-badc-e07e427a6c90: score=50.43
+2025-10-05 08:40:53,037 [INFO] job_applications: Extracting fields from resume text of length: 255
+2025-10-05 08:40:53,040 [INFO] job_applications: Found full name from text: Data Pipeline
+2025-10-05 08:40:53,043 [INFO] job_applications: Found experience: ['4 years of experience']
+2025-10-05 08:40:53,045 [INFO] job_applications: Final extracted data: {'full_name': 'Data Pipeline', 'email': '', 'phone': '', 'qualification': '', 'experience': ['4 years of experience'], 'knowledge_skill': '', 'employment_gaps': []}
+2025-10-05 08:40:53,052 [INFO] job_applications: Vetted 9eaed726-f6d9-4b4f-b05e-1b70d62fef19: score=35.78
+2025-10-05 08:40:53,063 [INFO] job_applications: Vetting complete: 2 shortlisted in 234.95s
+2025-10-05 08:40:53,121 [INFO] job_applications: Shortlisted app ad2cb4f7-8b7c-4853-b4a4-3f371fd0733b (score: 100.0)
+2025-10-05 08:40:53,138 [INFO] job_applications: Rejected app 07bbc5cf-72ef-4a2a-badc-e07e427a6c90 (score: 50.43)
+2025-10-05 08:40:53,144 [INFO] job_applications: Rejected app 0ab2bce2-0be0-4d1f-a131-0c1d65454505 (score: 0.0)
+2025-10-05 08:40:53,150 [INFO] job_applications: Rejected app 67f45360-520a-40a1-9332-c76095049687 (score: 4.77)
+2025-10-05 08:40:53,157 [INFO] job_applications: Shortlisted app 721d3361-3331-45b9-9623-4f302a272ece (score: 63.37)
+2025-10-05 08:40:53,163 [INFO] job_applications: Rejected app 9eaed726-f6d9-4b4f-b05e-1b70d62fef19 (score: 35.78)
+2025-10-05 08:40:53,173 [INFO] job_applications: Updated statuses for 2 shortlisted / 4 rejected
+2025-10-05 08:40:53,176 [INFO] job_applications: Req PRO-0001: 2 shortlisted from 6
+2025-10-05 08:40:53,178 [INFO] job_applications: Processing requisition PRO-0002
+2025-10-05 08:40:53,187 [INFO] job_applications: Found 0 applications with resumes for PRO-0002
+2025-10-05 08:40:53,190 [INFO] job_applications: No applications for PRO-0002, skipping
+2025-10-05 08:40:53,192 [INFO] job_applications: Processing requisition PRO-0003
+2025-10-05 08:40:53,200 [INFO] job_applications: Found 0 applications with resumes for PRO-0003
+2025-10-05 08:40:53,203 [INFO] job_applications: No applications for PRO-0003, skipping
+2025-10-05 08:40:53,206 [INFO] job_applications: 📊 Daily vetting summary: {'processed_requisitions': 1, 'total_applications_vetted': 6, 'shortlisted_count': 2, 'rejected_count': 4, 'total_time_seconds': 237.16}
+2025-10-05 10:41:41,448 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-05 10:41:41,453 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-05 10:41:41,462 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-05 10:41:41,515 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-05 10:41:41,523 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-05 10:41:41,532 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-05 10:41:41,573 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-05 10:41:41,582 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-05 10:41:41,587 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-05 10:42:12,940 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-10-05 10:42:12,940 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-10-05 10:42:12,943 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-10-05 10:42:12,944 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-10-05 10:42:12,948 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-10-05 10:42:12,948 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-10-05 10:42:12,953 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-10-05 10:42:12,954 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-10-05 10:42:12,959 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-10-05 10:42:12,959 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-10-05 10:42:12,964 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-10-05 10:42:12,964 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-10-05 10:42:12,968 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-10-05 10:42:12,969 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-10-05 10:42:12,975 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-10-05 10:42:12,977 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-10-05 10:42:12,980 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-10-05 10:42:12,981 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-10-05 10:42:12,985 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-10-05 10:42:12,987 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-10-05 10:42:12,991 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-10-05 10:42:12,995 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-10-05 10:42:12,996 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-10-05 10:42:13,001 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-10-05 10:42:13,002 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-10-05 10:42:13,011 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-10-05 10:42:13,013 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-10-05 10:42:13,016 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-10-05 10:42:13,017 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-10-05 10:42:13,022 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-10-05 10:42:13,023 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-10-05 10:42:13,027 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-10-05 10:42:13,027 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-10-05 10:42:13,031 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-10-05 17:11:53,958 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:11:53,971 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:11:54,009 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:11:54,057 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:11:54,098 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:11:54,180 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:11:54,184 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:08,884 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:08,886 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:08,890 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:08,923 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:08,928 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:08,964 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:08,966 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:08,993 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:08,995 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:08,997 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:09,035 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:09,038 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:09,073 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:09,075 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:09,213 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:09,215 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:09,217 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:09,249 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:09,253 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:09,295 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:09,297 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:09,353 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:09,355 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:09,359 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:09,395 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:09,398 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:09,436 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:09,438 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:09,466 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:09,468 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:09,470 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:09,567 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:09,584 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:10,133 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:10,148 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:10,318 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:10,344 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:10,361 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:10,486 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:10,491 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:10,569 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:10,572 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:10,673 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:10,678 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:10,683 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:10,735 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:10,740 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:10,787 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:10,789 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:10,871 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:10,874 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:10,880 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:10,947 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:10,951 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:11,575 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:11,577 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:11,600 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:11,602 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:11,604 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:11,637 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:11,662 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:11,724 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:11,727 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:11,751 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:11,752 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:11,754 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:11,786 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:11,789 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:11,823 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:11,825 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:12:11,868 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:12:11,869 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:12:11,872 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:11,901 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:12:11,904 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:12:11,938 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:12:11,940 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:49,605 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:49,607 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:49,611 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:49,667 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:49,672 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:49,741 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:49,743 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:49,783 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:49,786 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:49,789 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:49,830 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:49,835 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:49,986 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:49,992 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:50,119 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:50,125 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:50,129 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,195 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:50,199 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,277 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:50,280 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:50,313 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:50,315 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:50,318 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,401 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:50,405 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,447 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:50,449 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:50,502 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:50,504 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:50,507 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,549 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:50,553 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,599 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:50,601 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:50,629 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:50,631 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:50,634 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,670 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:50,674 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,718 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:50,721 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:50,749 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:50,752 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:50,756 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,795 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:50,798 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,836 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:50,838 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:50,892 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:50,894 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:50,897 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,934 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:50,938 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:50,979 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:50,981 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:51,042 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:51,043 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:51,046 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:51,087 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:51,091 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:51,129 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:51,132 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:51,166 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:51,168 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:51,172 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:51,217 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:51,220 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:51,256 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:51,258 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:51,289 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:51,290 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:51,293 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:51,322 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:51,325 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:51,359 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:51,361 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:18:51,411 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:18:51,413 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:18:51,416 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:51,453 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:18:51,456 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:18:51,493 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:18:51,495 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:43,566 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:43,568 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:43,573 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:43,626 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:43,634 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:43,677 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:43,679 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:43,718 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:43,719 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:43,722 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:43,760 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:43,764 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:43,824 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:43,827 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:43,906 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:43,908 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:43,911 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:43,977 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:43,981 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,088 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:44,090 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:44,122 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:44,124 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:44,131 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,250 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:44,253 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,300 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:44,302 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:44,367 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:44,369 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:44,372 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,418 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:44,422 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,462 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:44,464 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:44,492 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:44,494 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:44,497 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,532 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:44,535 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,580 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:44,582 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:44,613 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:44,615 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:44,617 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,654 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:44,658 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,700 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:44,703 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:44,755 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:44,757 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:44,761 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,797 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:44,802 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,847 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:44,849 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:44,909 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:44,911 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:44,914 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,947 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:44,950 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:44,989 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:44,991 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:45,017 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:45,019 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:45,022 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:45,059 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:45,062 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:45,101 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:45,104 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:45,130 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:45,132 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:45,134 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:45,171 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:45,175 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:45,215 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:45,217 [INFO] job_applications: Set schema to: proliance
+2025-10-05 17:42:45,266 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 17:42:45,268 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 17:42:45,270 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:45,310 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 17:42:45,313 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 17:42:45,352 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 17:42:45,354 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:53,842 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:53,845 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:53,851 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:53,903 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:53,908 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:53,950 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:53,953 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:54,033 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:54,035 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:54,038 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:54,137 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:54,141 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:54,226 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:54,229 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:54,329 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:54,332 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:54,335 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:54,404 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:54,407 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:54,544 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:54,548 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:54,589 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:54,593 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:54,601 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:54,666 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:54,672 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:54,753 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:54,755 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:54,816 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:54,818 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:54,822 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:54,871 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:54,877 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:54,919 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:54,920 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:54,979 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:54,985 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:54,988 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:55,039 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:55,046 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:55,122 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:55,125 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:55,194 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:55,196 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:55,198 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:55,625 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:55,629 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:55,669 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:55,671 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:55,696 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:55,698 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:55,701 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:55,731 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:55,735 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:55,768 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:55,771 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:55,793 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:55,795 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:55,798 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:55,832 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:55,835 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:55,876 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:55,878 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:55,937 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:55,939 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:55,942 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:55,978 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:55,982 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:56,022 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:56,025 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:56,070 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:56,072 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:56,074 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:56,108 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:56,111 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:56,148 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:56,150 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:07:56,177 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:07:56,179 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:07:56,182 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:56,214 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:07:56,218 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:07:56,253 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:07:56,255 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:29,242 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:29,246 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:29,251 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:29,349 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:29,356 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:29,451 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:29,455 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:29,529 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:29,531 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:29,535 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:29,620 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:29,626 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:29,793 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:29,796 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:30,048 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:30,054 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:30,067 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:30,257 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:30,271 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:30,671 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:30,678 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:30,790 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:30,804 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:30,809 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:30,915 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:30,929 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:31,213 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:31,215 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:31,305 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:31,307 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:31,313 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:31,380 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:31,430 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:31,521 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:31,527 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:31,615 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:31,618 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:31,630 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:31,750 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:31,755 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:31,845 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:31,848 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:31,919 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:31,957 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:32,082 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:32,259 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:32,267 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:32,422 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:32,426 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:32,571 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:32,575 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:32,579 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:32,636 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:32,641 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:32,718 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:32,721 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:32,814 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:32,817 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:32,820 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:32,878 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:32,885 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:32,936 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:32,939 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:32,986 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:32,988 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:32,992 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:33,051 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:33,058 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:33,116 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:33,120 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:33,167 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:33,170 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:33,175 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:33,227 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:33,231 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:33,339 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:33,343 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:12:33,442 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:12:33,445 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:12:33,449 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:33,497 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:12:33,503 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:12:33,559 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:12:33,562 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:25,154 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:25,163 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:25,180 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:25,283 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:25,296 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:25,382 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:25,384 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:25,440 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:25,442 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:25,446 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:25,503 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:25,507 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:25,600 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:25,603 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:25,699 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:25,703 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:25,717 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:25,800 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:25,805 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:25,926 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:25,928 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:25,967 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:25,970 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:25,973 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,119 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:26,123 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,168 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:26,171 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:26,235 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:26,236 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:26,239 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,274 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:26,277 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,313 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:26,316 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:26,345 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:26,348 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:26,352 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,387 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:26,390 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,428 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:26,430 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:26,459 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:26,461 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:26,463 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,504 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:26,507 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,547 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:26,549 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:26,614 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:26,616 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:26,620 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,663 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:26,668 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,706 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:26,708 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:26,773 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:26,775 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:26,778 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,817 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:26,821 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,863 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:26,865 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:26,901 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:26,903 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:26,905 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,939 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:26,942 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:26,987 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:26,989 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:27,020 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:27,022 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:27,025 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:27,059 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:27,062 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:27,100 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:27,102 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:15:27,154 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:15:27,156 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:15:27,159 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:27,193 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:15:27,197 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:15:27,241 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:15:27,243 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:43,840 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:43,843 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:43,848 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:43,925 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:43,932 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:44,035 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:44,038 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:44,099 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:44,100 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:44,103 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:44,216 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:44,219 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:44,292 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:44,295 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:44,390 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:44,393 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:44,396 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:44,435 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:44,439 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:44,514 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:44,517 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:44,561 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:44,563 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:44,566 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:44,658 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:44,662 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:44,712 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:44,716 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:44,784 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:44,788 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:44,793 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:44,879 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:44,884 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,037 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:45,039 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:45,067 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:45,069 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:45,071 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,106 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:45,111 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,153 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:45,156 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:45,184 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:45,186 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:45,189 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,227 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:45,231 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,269 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:45,271 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:45,320 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:45,322 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:45,324 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,360 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:45,363 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,401 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:45,403 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:45,456 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:45,458 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:45,461 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,492 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:45,496 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,532 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:45,534 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:45,558 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:45,560 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:45,563 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,594 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:45,597 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,634 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:45,636 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:45,660 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:45,663 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:45,665 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,699 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:45,702 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,737 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:45,740 [INFO] job_applications: Set schema to: proliance
+2025-10-05 18:27:45,783 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 18:27:45,785 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 18:27:45,787 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,821 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 18:27:45,824 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 18:27:45,863 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 18:27:45,865 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:47,637 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:47,656 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:47,687 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:47,738 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:47,762 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:47,828 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:47,833 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:47,911 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:47,913 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:47,916 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:47,968 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:47,972 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,037 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:48,040 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:48,176 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:48,177 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:48,181 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,215 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:48,218 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,255 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:48,257 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:48,282 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:48,284 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:48,287 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,320 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:48,323 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,360 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:48,362 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:48,385 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:48,387 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:48,390 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,422 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:48,426 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,460 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:48,463 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:48,507 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:48,510 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:48,513 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,545 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:48,549 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,587 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:48,589 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:48,648 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:48,654 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:48,660 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,716 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:48,721 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,788 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:48,791 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:48,832 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:48,835 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:48,839 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,884 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:48,888 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:48,942 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:48,944 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:48,971 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:48,973 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:48,975 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:49,015 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:49,019 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:49,056 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:49,058 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:49,148 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:49,153 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:49,160 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:49,211 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:49,216 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:49,270 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:49,274 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:49,337 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:49,340 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:49,342 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:49,375 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:49,378 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:49,415 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:49,417 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:19:49,451 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:19:49,453 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:19:49,456 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:49,490 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:19:49,494 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:19:49,536 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:19:49,538 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:21:42,525 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:21:42,529 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:21:42,541 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:42,614 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:21:42,630 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:42,732 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:21:42,735 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:21:42,789 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:21:42,792 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:21:42,795 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:42,913 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:21:42,918 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:43,005 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:21:43,008 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:21:43,131 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:21:43,133 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:21:43,139 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:43,217 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:21:43,223 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:43,381 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:21:43,384 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:21:43,433 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:21:43,435 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:21:43,438 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:43,485 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:21:43,489 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:43,541 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:21:43,544 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:21:43,644 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:21:43,646 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:21:43,650 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:43,705 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:21:43,710 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:43,796 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:21:43,800 [INFO] job_applications: Set schema to: proliance
+2025-10-05 19:21:43,859 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-10-05 19:21:43,864 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2
+2025-10-05 19:21:43,868 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:43,933 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/b6af83c064474aca9af6887eec240f90/?tenant_id=2 HTTP/1.1" 200 477
+2025-10-05 19:21:43,940 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-10-05 19:21:44,005 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/bc3048f2-cff9-4565-a8ae-4cec30548f28/ HTTP/1.1" 200 428
+2025-10-05 19:21:44,009 [INFO] job_applications: Set schema to: proliance

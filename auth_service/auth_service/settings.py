@@ -249,6 +249,8 @@ WEB_PAGE_URL = env("WEB_PAGE_URL", default="https://crm-frontend-react.vercel.ap
 
 AUTH_SERVICE_URL = env("AUTH_SERVICE_URL", default="http://auth-service:8001")
 NOTIFICATIONS_EVENT_URL = env("NOTIFICATIONS_EVENT_URL", default="http://app:3000/events/")
+GATEWAY_URL = env("GATEWAY_URL", default="http://localhost:9090")
+
 
 SUPABASE_URL = env("SUPABASE_URL", default="")
 SUPABASE_KEY = env("SUPABASE_KEY", default="")

@@ -178,8 +178,65 @@ class HealthCheckView(View):
         return JsonResponse(health_data)
 
 
+# class CustomPagination(PageNumberPagination):
+#     page_size = 20
+
+
+from rest_framework.pagination import PageNumberPagination
+from django.conf import settings
+from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
+
 class CustomPagination(PageNumberPagination):
-    page_size = 20
+    page_size = 50  # Adjust as needed
+
+    def get_next_link(self):
+        """Override to use gateway base URL."""
+        if not self.page.has_next():
+            return None
+        gateway_url = getattr(settings, 'GATEWAY_URL', None)
+        if not gateway_url:
+            return super().get_next_link()  # Fallback to default
+
+        request = self.request
+        # Build base path from current request (e.g., /api/user/users/)
+        path = request.path
+        # Get query params, update 'page', preserve others
+        query_params = request.query_params.copy()
+        query_params['page'] = self.page.next_page_number()
+        query_string = urlencode(query_params, doseq=True)
+
+        # Reconstruct full URL with gateway scheme/host
+        parsed_gateway = urlparse(gateway_url)
+        full_url = f"{parsed_gateway.scheme}://{parsed_gateway.netloc}{path}?{query_string}"
+        return full_url
+
+    def get_previous_link(self):
+        """Override to use gateway base URL."""
+        if not self.page.has_previous():
+            return None
+        gateway_url = getattr(settings, 'GATEWAY_URL', None)
+        if not gateway_url:
+            return super().get_previous_link()  # Fallback to default
+
+        request = self.request
+        path = request.path
+        query_params = request.query_params.copy()
+        query_params['page'] = self.page.previous_page_number()
+        query_string = urlencode(query_params, doseq=True)
+
+        parsed_gateway = urlparse(gateway_url)
+        full_url = f"{parsed_gateway.scheme}://{parsed_gateway.netloc}{path}?{query_string}"
+        return full_url
+
+    def get_paginated_response(self, data):
+        """Ensure the full response uses overridden links."""
+        response = super().get_paginated_response(data)
+        gateway_url = getattr(settings, 'GATEWAY_URL', None)
+        if gateway_url:
+            response['next'] = self.get_next_link()
+            response['previous'] = self.get_previous_link()
+        return response
+
 
 
 class CircuitBreaker:

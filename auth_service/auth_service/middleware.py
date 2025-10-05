@@ -403,6 +403,7 @@ class CustomTenantMiddleware(TenantMainMiddleware):
             '/api/social/callback/', '/api/admin/create/',
             '/api/applications-engine/applications/parse-resume/application/autofil/',
             '/api/talent-engine/requisitions/by-link/',
+            'api/user/users/all-tenants/'
         ]
 
         # Handle password reset request by email domain (similar to login)

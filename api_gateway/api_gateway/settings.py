@@ -279,6 +279,7 @@ PUBLIC_PATHS = [
     "health",
     "metrics/",
     "circuit-breaker/status/",
+    "api/user/users/all-tenants/",
 ]
 
 # ======================== RATE LIMITING ========================

@@ -23,7 +23,7 @@ services:
     container_name: auth_redis
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
-      - "6379:6379"
+      - "6372:6379"
  
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]

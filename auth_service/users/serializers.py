@@ -1,10 +1,5 @@
 # Standard library
-import json
 import logging
-import mimetypes
-import os
-import re
-import uuid
 from datetime import timedelta
 from typing import Any, Dict
 
@@ -12,7 +7,6 @@ import jwt
 import requests
 from core.models import Branch, Domain
 from django.conf import settings
-from django.contrib.auth import authenticate
 from django.db import transaction
 from django.utils import timezone
 from django_tenants.utils import tenant_context
@@ -21,9 +15,6 @@ from rest_framework import serializers
 from utils.supabase import upload_file_dynamic
 import logging
 
-from auth_service.utils.jwt_rsa import issue_rsa_jwt
-
-# Local App - Models
 from .models import (
     BlockedIP,
     ClientProfile,
@@ -63,12 +54,13 @@ def get_tenant_id_from_jwt(request):
         raise ValidationError("Invalid JWT token.")
 
 
+
 class ProfessionalQualificationSerializer(serializers.ModelSerializer):
     image_file = serializers.FileField(required=False, allow_null=True)
 
     class Meta:
         model = ProfessionalQualification
-        fields = ["id", "name", "image_file"]
+        fields = ["id", "name", "image_file", "image_file_url"]
         read_only_fields = ["id"]
         extra_kwargs = {
             "name": {"required": True},
@@ -82,7 +74,8 @@ class ProfessionalQualificationSerializer(serializers.ModelSerializer):
             url = upload_file_dynamic(
                 image, image.name, content_type=getattr(image, "content_type", "application/octet-stream")
             )
-            validated_data["image_file"] = url
+            validated_data["image_file_url"] = url
+            validated_data["image_file"] = None  # Don't save to ImageField
             logger.info(f"Professional qualification image uploaded: {url}")
         return super().create(validated_data)
 
@@ -93,12 +86,67 @@ class ProfessionalQualificationSerializer(serializers.ModelSerializer):
             url = upload_file_dynamic(
                 image, image.name, content_type=getattr(image, "content_type", "application/octet-stream")
             )
-            validated_data["image_file"] = url
+            validated_data["image_file_url"] = url
+            validated_data["image_file"] = None  # Don't save to ImageField
             logger.info(f"Professional qualification image updated: {url}")
         return super().update(instance, validated_data)
 
     def validate(self, data):
         logger.info(f"Validating ProfessionalQualificationSerializer data: {data}")
+        return super().validate(data)
+
+
+class EducationDetailSerializer(serializers.ModelSerializer):
+    certificate = serializers.FileField(required=False, allow_null=True)
+
+    class Meta:
+        model = EducationDetail
+        fields = ["id", "institution", "highest_qualification", "course_of_study", "start_year", "end_year", "certificate", "certificate_url", "skills"]
+        read_only_fields = ["id"]
+        extra_kwargs = {
+            "institution": {"required": True},
+            "highest_qualification": {"required": True},
+            "course_of_study": {"required": True},
+            "start_year": {"required": True, "min_value": 1900, "max_value": 2100},
+            "end_year": {"required": True, "min_value": 1900, "max_value": 2100},
+            "skills": {"required": True},
+            "certificate": {"required": False, "allow_null": True},
+        }
+
+    def create(self, validated_data):
+        certificate = validated_data.pop("certificate", None)
+        if certificate:
+            logger.info(f"Uploading education certificate: {certificate.name}")
+            url = upload_file_dynamic(
+                certificate,
+                certificate.name,
+                content_type=getattr(certificate, "content_type", "application/octet-stream"),
+            )
+            validated_data["certificate_url"] = url
+            validated_data["certificate"] = None  # Don't save to ImageField
+            logger.info(f"Education certificate uploaded: {url}")
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        certificate = validated_data.pop("certificate", None)
+        if certificate:
+            logger.info(f"Updating education certificate: {certificate.name}")
+            url = upload_file_dynamic(
+                certificate,
+                certificate.name,
+                content_type=getattr(certificate, "content_type", "application/octet-stream"),
+            )
+            validated_data["certificate_url"] = url
+            validated_data["certificate"] = None  # Don't save to ImageField
+            logger.info(f"Education certificate updated: {url}")
+        return super().update(instance, validated_data)
+
+    def validate(self, data):
+        logger.info(f"Validating EducationDetailSerializer data: {data}")
+        start_year = data.get("start_year")
+        end_year = data.get("end_year")
+        if start_year and end_year and start_year > end_year:
+            raise serializers.ValidationError({"start_year": "Start year cannot be greater than end year."})
         return super().validate(data)
 
 
@@ -143,58 +191,6 @@ class ReferenceCheckSerializer(serializers.ModelSerializer):
         return super().validate(data)
 
 
-class EducationDetailSerializer(serializers.ModelSerializer):
-    certificate = serializers.FileField(required=False, allow_null=True)
-
-    class Meta:
-        model = EducationDetail
-        exclude = ["user_profile"]
-        extra_kwargs = {
-            "institution": {"required": True},
-            "highest_qualification": {"required": True},
-            "course_of_study": {"required": True},
-            "start_year": {"required": True, "min_value": 1900, "max_value": 2100},
-            "end_year": {"required": True, "min_value": 1900, "max_value": 2100},
-            "skills": {"required": True},
-            "certificate": {"required": False, "allow_null": True},
-            "uploaded_at": {"required": False, "allow_null": True},
-        }
-
-    def create(self, validated_data):
-        certificate = validated_data.pop("certificate", None)
-        if certificate:
-            logger.info(f"Uploading education certificate: {certificate.name}")
-            url = upload_file_dynamic(
-                certificate,
-                certificate.name,
-                content_type=getattr(certificate, "content_type", "application/octet-stream"),
-            )
-            validated_data["certificate"] = url
-            logger.info(f"Education certificate uploaded: {url}")
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        certificate = validated_data.pop("certificate", None)
-        if certificate:
-            logger.info(f"Updating education certificate: {certificate.name}")
-            url = upload_file_dynamic(
-                certificate,
-                certificate.name,
-                content_type=getattr(certificate, "content_type", "application/octet-stream"),
-            )
-            validated_data["certificate"] = url
-            logger.info(f"Education certificate updated: {url}")
-        return super().update(instance, validated_data)
-
-    def validate(self, data):
-        logger.info(f"Validating EducationDetailSerializer data: {data}")
-        # Additional validation for start_year <= end_year
-        start_year = data.get("start_year")
-        end_year = data.get("end_year")
-        if start_year and end_year and start_year > end_year:
-            raise serializers.ValidationError({"start_year": "Start year cannot be greater than end year."})
-        return super().validate(data)
-
 
 class ProofOfAddressSerializer(serializers.ModelSerializer):
     document = serializers.FileField(required=False, allow_null=True)
@@ -202,7 +198,8 @@ class ProofOfAddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProofOfAddress
-        exclude = ["user_profile"]
+        fields = ["id", "type", "document", "document_url", "issue_date", "nin", "nin_document", "nin_document_url"]
+        read_only_fields = ["id"]
         extra_kwargs = {field: {"required": False, "allow_null": True} for field in ["type", "issue_date", "nin"]}
 
     def create(self, validated_data):
@@ -213,7 +210,8 @@ class ProofOfAddressSerializer(serializers.ModelSerializer):
             url = upload_file_dynamic(
                 document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
             )
-            validated_data["document"] = url
+            validated_data["document_url"] = url
+            validated_data["document"] = None  # Don't save to ImageField
             logger.info(f"Proof of address document uploaded: {url}")
         if nin_document:
             logger.info(f"Uploading proof of address NIN document: {nin_document.name}")
@@ -222,7 +220,8 @@ class ProofOfAddressSerializer(serializers.ModelSerializer):
                 nin_document.name,
                 content_type=getattr(nin_document, "content_type", "application/octet-stream"),
             )
-            validated_data["nin_document"] = url
+            validated_data["nin_document_url"] = url
+            validated_data["nin_document"] = None  # Don't save to ImageField
             logger.info(f"Proof of address NIN document uploaded: {url}")
         return super().create(validated_data)
 
@@ -234,7 +233,8 @@ class ProofOfAddressSerializer(serializers.ModelSerializer):
             url = upload_file_dynamic(
                 document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
             )
-            validated_data["document"] = url
+            validated_data["document_url"] = url
+            validated_data["document"] = None  # Don't save to ImageField
             logger.info(f"Proof of address document updated: {url}")
         if nin_document:
             logger.info(f"Updating proof of address NIN document: {nin_document.name}")
@@ -243,7 +243,8 @@ class ProofOfAddressSerializer(serializers.ModelSerializer):
                 nin_document.name,
                 content_type=getattr(nin_document, "content_type", "application/octet-stream"),
             )
-            validated_data["nin_document"] = url
+            validated_data["nin_document_url"] = url
+            validated_data["nin_document"] = None  # Don't save to ImageField
             logger.info(f"Proof of address NIN document updated: {url}")
         return super().update(instance, validated_data)
 
@@ -253,10 +254,11 @@ class InsuranceVerificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InsuranceVerification
-        exclude = ["user_profile"]
+        fields = ["id", "insurance_type", "document", "document_url", "provider_name", "coverage_start_date", "expiry_date", "phone_number"]
+        read_only_fields = ["id"]
         extra_kwargs = {
             field: {"required": False, "allow_null": True}
-            for field in ["insurance_type", "provider_name", "coverage_start_date", "coverage_end_date"]
+            for field in ["insurance_type", "provider_name", "coverage_start_date", "expiry_date", "phone_number"]
         }
 
     def create(self, validated_data):
@@ -266,7 +268,8 @@ class InsuranceVerificationSerializer(serializers.ModelSerializer):
             url = upload_file_dynamic(
                 document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
             )
-            validated_data["document"] = url
+            validated_data["document_url"] = url
+            validated_data["document"] = None  # Don't save to ImageField
             logger.info(f"Insurance document uploaded: {url}")
         return super().create(validated_data)
 
@@ -277,7 +280,8 @@ class InsuranceVerificationSerializer(serializers.ModelSerializer):
             url = upload_file_dynamic(
                 document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
             )
-            validated_data["document"] = url
+            validated_data["document_url"] = url
+            validated_data["document"] = None  # Don't save to ImageField
             logger.info(f"Insurance document updated: {url}")
         return super().update(instance, validated_data)
 
@@ -287,10 +291,11 @@ class DrivingRiskAssessmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DrivingRiskAssessment
-        exclude = ["user_profile"]
+        fields = ["id", "assessment_date", "fuel_card_usage_compliance", "road_traffic_compliance", "tracker_usage_compliance", "maintenance_schedule_compliance", "additional_notes", "supporting_document", "supporting_document_url"]
+        read_only_fields = ["id"]
         extra_kwargs = {
             field: {"required": False, "allow_null": True}
-            for field in ["assessment_date", "fuel_card_usage_compliance", "road_traffic_compliance"]
+            for field in ["assessment_date", "fuel_card_usage_compliance", "road_traffic_compliance", "tracker_usage_compliance", "maintenance_schedule_compliance", "additional_notes"]
         }
 
     def create(self, validated_data):
@@ -302,7 +307,8 @@ class DrivingRiskAssessmentSerializer(serializers.ModelSerializer):
                 supporting_document.name,
                 content_type=getattr(supporting_document, "content_type", "application/octet-stream"),
             )
-            validated_data["supporting_document"] = url
+            validated_data["supporting_document_url"] = url
+            validated_data["supporting_document"] = None  # Don't save to ImageField
             logger.info(f"Driving risk assessment document uploaded: {url}")
         return super().create(validated_data)
 
@@ -315,7 +321,8 @@ class DrivingRiskAssessmentSerializer(serializers.ModelSerializer):
                 supporting_document.name,
                 content_type=getattr(supporting_document, "content_type", "application/octet-stream"),
             )
-            validated_data["supporting_document"] = url
+            validated_data["supporting_document_url"] = url
+            validated_data["supporting_document"] = None  # Don't save to ImageField
             logger.info(f"Driving risk assessment document updated: {url}")
         return super().update(instance, validated_data)
 
@@ -325,7 +332,8 @@ class LegalWorkEligibilitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LegalWorkEligibility
-        exclude = ["user_profile"]
+        fields = ["id", "evidence_of_right_to_rent", "document", "document_url", "expiry_date", "phone_number"]
+        read_only_fields = ["id"]
         extra_kwargs = {
             field: {"required": False, "allow_null": True}
             for field in ["evidence_of_right_to_rent", "expiry_date", "phone_number"]
@@ -338,7 +346,8 @@ class LegalWorkEligibilitySerializer(serializers.ModelSerializer):
             url = upload_file_dynamic(
                 document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
             )
-            validated_data["document"] = url
+            validated_data["document_url"] = url
+            validated_data["document"] = None  # Don't save to ImageField
             logger.info(f"Legal work eligibility document uploaded: {url}")
         return super().create(validated_data)
 
@@ -349,7 +358,8 @@ class LegalWorkEligibilitySerializer(serializers.ModelSerializer):
             url = upload_file_dynamic(
                 document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
             )
-            validated_data["document"] = url
+            validated_data["document_url"] = url
+            validated_data["document"] = None  # Don't save to ImageField
             logger.info(f"Legal work eligibility document updated: {url}")
         return super().update(instance, validated_data)
 
@@ -361,9 +371,15 @@ class OtherUserDocumentsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OtherUserDocuments
-        # fields = ['id', 'title', 'file', 'uploaded_at', 'branch']
-        exclude = ["user_profile"]
-        read_only_fields = ["id", "uploaded_at"]
+        fields = ["id", "government_id_type", "title", "document_number", "expiry_date", "file", "file_url", "branch"]
+        read_only_fields = ["id"]
+        extra_kwargs = {
+            "government_id_type": {"required": False},
+            "title": {"required": False},
+            "document_number": {"required": False},
+            "expiry_date": {"required": False},
+            "branch": {"required": False},
+        }
 
     def validate_file(self, value):
         if value and not value.name.lower().endswith((".pdf", ".png", ".jpg", ".jpeg")):
@@ -379,7 +395,8 @@ class OtherUserDocumentsSerializer(serializers.ModelSerializer):
             url = upload_file_dynamic(
                 file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
             )
-            validated_data["file"] = url
+            validated_data["file_url"] = url
+            validated_data["file"] = None  # Don't save to ImageField
             logger.info(f"Other user document uploaded: {url}")
         return super().create(validated_data)
 
@@ -390,9 +407,12 @@ class OtherUserDocumentsSerializer(serializers.ModelSerializer):
             url = upload_file_dynamic(
                 file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
             )
-            validated_data["file"] = url
+            validated_data["file_url"] = url
+            validated_data["file"] = None  # Don't save to ImageField
             logger.info(f"Other user document updated: {url}")
         return super().update(instance, validated_data)
+
+
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -411,7 +431,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user",
-             "salary_rate",  # Add the new field here
+            "salary_rate",
             "work_phone",
             "personal_phone",
             "gender",
@@ -499,7 +519,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             field: {"required": False, "allow_null": True}
             for field in [
-                "salary_rate",  # Add to extra_kwargs
+                "salary_rate",
                 "drivers_licence_date_issue",
                 "drivers_licence_expiry_date",
                 "drivers_licence_country_of_issue",
@@ -1444,6 +1464,7 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+
 # class ClientDetailSerializer(serializers.ModelSerializer):
 #     profile = ClientProfileSerializer()
 
@@ -1468,6 +1489,8 @@ class ClientProfileSerializer(serializers.ModelSerializer):
 #             profile_serializer.is_valid(raise_exception=True)
 #             profile_serializer.save()
 #         return instance
+
+
 
 class ClientDetailSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer()

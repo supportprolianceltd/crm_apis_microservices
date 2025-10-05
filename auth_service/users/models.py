@@ -435,7 +435,7 @@ class UserProfile(models.Model):
         ('Visa', 'Visa'),
         ('Work Permit', 'Work Permit')
     ], blank=True)
-    Right_to_Work_share_code = models.CharField(max_length=20, blank=True)
+    Right_to_Work_share_code = models.CharField(max_length=255, blank=True)
     Right_to_Work_document_number = models.CharField(max_length=100, blank=True)
     Right_to_Work_document_expiry_date = models.DateField(null=True, blank=True)
     Right_to_Work_country_of_issue = models.CharField(max_length=100, blank=True)
@@ -520,15 +520,173 @@ class UserProfile(models.Model):
         super().save(*args, **kwargs)
 
 
+# class ProfessionalQualification(models.Model):
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='professional_qualifications')
+#     name = models.CharField(max_length=255)
+#     #image_file = models.ImageField(upload_to='professional_qualifications/', max_length=255, blank=True, null=True)
+#     image_file = models.CharField(max_length=1024, blank=True, null=True)
+#     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         verbose_name_plural = "Professional Qualifications"
+
+
+# class EmploymentDetail(models.Model):
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='employment_details')
+#     job_role = models.CharField(max_length=255)
+#     hierarchy = models.CharField(max_length=100)
+#     department = models.CharField(max_length=100)
+#     work_email = models.EmailField()
+#     employment_type = models.CharField(max_length=50, choices=[('Full Time', 'Full Time'), ('Part Time', 'Part Time'), ('Contract', 'Contract')])
+
+#     employment_start_date = models.DateTimeField(default=now)
+#     employment_end_date = models.DateTimeField(null=True, blank=True)
+#     probation_end_date = models.DateTimeField(null=True, blank=True)
+
+#     line_manager = models.CharField(max_length=255, null=True, blank=True)
+#     currency = models.CharField(max_length=100, null=True, blank=True)
+#     salary = models.DecimalField(max_digits=20, decimal_places=2)
+#     working_days = models.CharField(max_length=100, null=True, blank=True)
+#     maximum_working_hours = models.PositiveIntegerField(null=True, blank=True)
+
+#     class Meta:
+#         verbose_name = "Employment Detail"
+#         verbose_name_plural = "Employment Details"
+
+
+
+# class EducationDetail(models.Model):
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='education_details')
+#     institution = models.CharField(max_length=255)
+#     highest_qualification = models.CharField(max_length=255)
+#     course_of_study = models.CharField(max_length=255)
+#     start_year = models.PositiveIntegerField()
+#     end_year = models.PositiveIntegerField()
+#     certificate = models.ImageField(upload_to='Educational-certificates/', max_length=255, blank=True, null=True)
+#     skills = models.TextField(blank=True)
+#     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         verbose_name = "Education Detail"
+#         verbose_name_plural = "Education Details"
+
+# class ReferenceCheck(models.Model):
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='reference_checks')
+#     name = models.CharField(max_length=255)
+#     phone_number = models.CharField(max_length=15)
+#     email = models.EmailField()
+#     relationship_to_applicant = models.CharField(max_length=100)
+
+#     class Meta:
+#         verbose_name = "Reference Check"
+#         verbose_name_plural = "Reference Checks"
+
+# class ProofOfAddress(models.Model):
+#     TYPE_CHOICES = [
+#         ('utility_bill', 'Utility Bill'),
+#         ('bank_statement', 'Bank Statement'),
+#         ('tenancy_agreement', 'Tenancy Agreement'),
+#     ]
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='proof_of_address')
+#     type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+#     document = models.CharField(max_length=1024, blank=True, null=True)
+#     # document = models.ImageField(upload_to='proof_of_address/', max_length=255, blank=True, null=True)
+#     issue_date = models.DateField(null=True, blank=True)
+#     nin = models.CharField(max_length=20, blank=True, null=True, verbose_name="National Insurance Number (NIN)")
+#     #nin_document = models.ImageField(upload_to='nin_documents/', max_length=255, blank=True, null=True)
+#     nin_document = models.CharField(max_length=1024, blank=True, null=True)
+#     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"{self.user_profile.user.email} - {self.type}"
+
+# class InsuranceVerification(models.Model):
+#     INSURANCE_TYPES = [
+#         ('public_liability', 'Public Liability'),
+#         ('professional_indemnity', 'Professional Indemnity')
+#         # ('employers_liability', 'Employers Liability'),
+#     ]
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='insurance_verifications')
+#     insurance_type = models.CharField(max_length=50, choices=INSURANCE_TYPES)
+#     #document = models.ImageField(upload_to='insurance_documents/', max_length=255, blank=True, null=True)
+#     document = models.CharField(max_length=1024, blank=True, null=True)
+#     provider_name = models.CharField(max_length=255, blank=True, null=True)
+#     coverage_start_date = models.DateField(blank=True, null=True)
+#     expiry_date = models.DateField(blank=True, null=True)
+#     phone_number = models.CharField(max_length=20, blank=True, null=True)
+#     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"{self.user_profile.user.email} - {self.insurance_type}"
+
+# class DrivingRiskAssessment(models.Model):
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='driving_risk_assessments')
+#     assessment_date = models.DateField(blank=True, null=True)
+#     fuel_card_usage_compliance = models.BooleanField(default=False)
+#     road_traffic_compliance = models.BooleanField(default=False)
+#     tracker_usage_compliance = models.BooleanField(default=False)
+#     maintenance_schedule_compliance = models.BooleanField(default=False)
+#     additional_notes = models.TextField(blank=True, null=True)
+#     #supporting_document = models.ImageField(upload_to='driving_risk_docs/', max_length=255, blank=True, null=True)
+#     supporting_document = models.CharField(max_length=1024, blank=True, null=True)
+#     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"{self.user_profile.user.email} - Driving Risk Assessment"
+
+# class LegalWorkEligibility(models.Model):
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='legal_work_eligibilities')
+#     evidence_of_right_to_rent = models.BooleanField(default=False)
+#     # document = models.ImageField(upload_to='legal_work_docs/', max_length=255, blank=True, null=True)
+#     document = models.CharField(max_length=1024, blank=True, null=True)
+#     expiry_date = models.DateField(blank=True, null=True)
+#     phone_number = models.CharField(max_length=20, blank=True, null=True)
+#     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"{self.user_profile.user.email} - Legal & Work Eligibility"
+
+# class OtherUserDocuments(models.Model):
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='other_user_documents')
+#     government_id_type = models.CharField(max_length=100, blank=True)
+#     title = models.CharField(max_length=255, blank=True)
+#     document_number = models.CharField(max_length=20, blank=True)
+#     expiry_date = models.DateField(blank=True, null=True)
+#     # file = models.ImageField(upload_to='other_user_documents', max_length=255, blank=True, null=True)
+#     file = models.CharField(max_length=1024, blank=True, null=True)
+#     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+#     class Meta:
+#         verbose_name = "User Document"
+#         verbose_name_plural = "User Documents"
+
+
 class ProfessionalQualification(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='professional_qualifications')
     name = models.CharField(max_length=255)
     image_file = models.ImageField(upload_to='professional_qualifications/', max_length=255, blank=True, null=True)
+    image_file_url = models.CharField(max_length=1024, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural = "Professional Qualifications"
 
+class EducationDetail(models.Model):
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='education_details')
+    institution = models.CharField(max_length=255)
+    highest_qualification = models.CharField(max_length=255)
+    course_of_study = models.CharField(max_length=255)
+    start_year = models.PositiveIntegerField()
+    end_year = models.PositiveIntegerField()
+    certificate = models.ImageField(upload_to='Educational-certificates/', max_length=255, blank=True, null=True)
+    certificate_url = models.CharField(max_length=1024, blank=True, null=True)
+    skills = models.TextField(blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Education Detail"
+        verbose_name_plural = "Education Details"
 
 class EmploymentDetail(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='employment_details')
@@ -552,20 +710,6 @@ class EmploymentDetail(models.Model):
         verbose_name = "Employment Detail"
         verbose_name_plural = "Employment Details"
 
-class EducationDetail(models.Model):
-    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='education_details')
-    institution = models.CharField(max_length=255)
-    highest_qualification = models.CharField(max_length=255)
-    course_of_study = models.CharField(max_length=255)
-    start_year = models.PositiveIntegerField()
-    end_year = models.PositiveIntegerField()
-    certificate = models.ImageField(upload_to='Educational-certificates/', max_length=255, blank=True, null=True)
-    skills = models.TextField(blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Education Detail"
-        verbose_name_plural = "Education Details"
 
 class ReferenceCheck(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='reference_checks')
@@ -587,9 +731,11 @@ class ProofOfAddress(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='proof_of_address')
     type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     document = models.ImageField(upload_to='proof_of_address/', max_length=255, blank=True, null=True)
+    document_url = models.CharField(max_length=1024, blank=True, null=True)
     issue_date = models.DateField(null=True, blank=True)
     nin = models.CharField(max_length=20, blank=True, null=True, verbose_name="National Insurance Number (NIN)")
     nin_document = models.ImageField(upload_to='nin_documents/', max_length=255, blank=True, null=True)
+    nin_document_url = models.CharField(max_length=1024, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -599,11 +745,11 @@ class InsuranceVerification(models.Model):
     INSURANCE_TYPES = [
         ('public_liability', 'Public Liability'),
         ('professional_indemnity', 'Professional Indemnity')
-        # ('employers_liability', 'Employers Liability'),
     ]
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='insurance_verifications')
     insurance_type = models.CharField(max_length=50, choices=INSURANCE_TYPES)
     document = models.ImageField(upload_to='insurance_documents/', max_length=255, blank=True, null=True)
+    document_url = models.CharField(max_length=1024, blank=True, null=True)
     provider_name = models.CharField(max_length=255, blank=True, null=True)
     coverage_start_date = models.DateField(blank=True, null=True)
     expiry_date = models.DateField(blank=True, null=True)
@@ -622,6 +768,7 @@ class DrivingRiskAssessment(models.Model):
     maintenance_schedule_compliance = models.BooleanField(default=False)
     additional_notes = models.TextField(blank=True, null=True)
     supporting_document = models.ImageField(upload_to='driving_risk_docs/', max_length=255, blank=True, null=True)
+    supporting_document_url = models.CharField(max_length=1024, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -631,6 +778,7 @@ class LegalWorkEligibility(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='legal_work_eligibilities')
     evidence_of_right_to_rent = models.BooleanField(default=False)
     document = models.ImageField(upload_to='legal_work_docs/', max_length=255, blank=True, null=True)
+    document_url = models.CharField(max_length=1024, blank=True, null=True)
     expiry_date = models.DateField(blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -645,12 +793,13 @@ class OtherUserDocuments(models.Model):
     document_number = models.CharField(max_length=20, blank=True)
     expiry_date = models.DateField(blank=True, null=True)
     file = models.ImageField(upload_to='other_user_documents', max_length=255, blank=True, null=True)
+    file_url = models.CharField(max_length=1024, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-
 
     class Meta:
         verbose_name = "User Document"
         verbose_name_plural = "User Documents"
+
 
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
