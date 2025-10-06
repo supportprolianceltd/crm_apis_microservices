@@ -151,7 +151,7 @@ SUPABASE_URL = env('SUPABASE_URL', default='')
 SUPABASE_KEY = env('SUPABASE_KEY', default='')
 SUPABASE_BUCKET = env('SUPABASE_BUCKET', default='luminacaremedia')
 STORAGE_TYPE = env('STORAGE_TYPE', default='supabase')
-GATEWAY_URL = env("GATEWAY_URL", default="http://localhost:9090")
+GATEWAY_URL = env("GATEWAY_URL", default="https://server1.prolianceltd.com")
 
 
 KAFKA_BOOTSTRAP_SERVERS = env('KAFKA_BOOTSTRAP_SERVERS', default='localhost:9092')
