@@ -310,6 +310,11 @@ CACHES = {
 # Cache-enabled flag for feature toggle
 CACHE_ENABLED = env.bool("CACHE_ENABLED", default=True)
 
+
+
+
+
+
 # Multi-tenant cache prefix helper (use in code)
 TENANT_CACHE_PREFIX = "tenant:{}:"  # e.g., "tenant:example_user:"
 
