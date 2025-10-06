@@ -37,6 +37,7 @@ def get_tenant_id_from_jwt(request):
         logger.error(f"Invalid JWT token: {str(e)}")
         raise serializers.ValidationError("Invalid JWT token.")
 
+
 def get_user_data_from_jwt(request):
     """Extract user data from JWT payload."""
     auth_header = request.headers.get("Authorization", "")

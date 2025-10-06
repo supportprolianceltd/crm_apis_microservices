@@ -24,6 +24,7 @@ class JobApplication(models.Model):
         ('rejected', 'Rejected'),
         ('withdrawn', 'Withdrawn'),
         ('onboarded', 'Onboarded'),
+        ('compliance_completed', 'Compliance Completed'),
     ]
     STAGE_CHOICES = [
         ('application', 'Application'),

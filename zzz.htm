@@ -1,0 +1,13 @@
+# Check if the user exists in the tenant
+from core.models import Tenant
+from users.models import CustomUser
+from django_tenants.utils import tenant_context
+
+tenant = Tenant.objects.get(schema_name='proliance')
+with tenant_context(tenant):
+    user = CustomUser.objects.filter(username='ggauis5283').first()
+    print(f"User found: {user}")
+    if user:
+        print(f"Username: {user.username}")
+        print(f"Email: {user.email}")
+        print(f"Password set: {user.password is not None}")

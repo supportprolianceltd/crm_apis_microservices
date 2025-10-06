@@ -76,7 +76,12 @@ INSTALLED_APPS = SHARED_APPS + TENANT_APPS + ["django_extensions"]
 
 # Authentication
 AUTH_USER_MODEL = "users.CustomUser"
-AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+
+# Update AUTHENTICATION_BACKENDS in settings.py
+AUTHENTICATION_BACKENDS = (
+    'auth_service.authentication.UsernameModelBackend',  # New
+    'django.contrib.auth.backends.ModelBackend',  # Existing for email
+)
 
 # REST Framework
 REST_FRAMEWORK = {
@@ -319,3 +324,5 @@ TENANT_CACHE_PREFIX = "tenant:{}:"  # e.g., "tenant:example_user:"
 
 #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 # ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
+
+

@@ -1,5 +1,4 @@
-# users/models.py (full corrected version - remove/avoid serializers import in models)
-
+from django.core.validators import RegexValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils import timezone
@@ -8,6 +7,7 @@ from core.models import Tenant, Module, Branch
 from django.db.models import Max
 import uuid
 import logging
+import random
 from django_tenants.utils import tenant_context
 from django.utils.timezone import now
 logger = logging.getLogger('users')
@@ -18,45 +18,57 @@ def generate_kid():
 def today():
     return timezone.now().date()
 
-
-
 class CustomUserManager(UserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
-        username = extra_fields.pop('username', None) or email
-        return super().create_user(
-            username,
-            email=email,
-            password=password,
-            **extra_fields
-        )
+        username = extra_fields.pop('username', None)
+        
+        # Generate username if not provided
+        if not username:
+            username = self._generate_username(
+                email, 
+                extra_fields.get('first_name'), 
+                extra_fields.get('last_name'),
+                extra_fields.get('tenant')
+            )
+        
+        extra_fields['username'] = username
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def _generate_username(self, email, first_name=None, last_name=None, tenant=None):
+        """Generate unique global username (signals enforce global check)."""
+        if first_name and last_name:
+            initial = first_name[0].lower()
+            last = last_name.lower().replace(' ', '')[:12]  # Limit length
+            base = f"{initial}{last}"
+        else:
+            base = email.split('@')[0][:8]
+            
+        random_digits = ''.join(random.choices('0123456789', k=4))
+        candidate = f"{base}{random_digits}"
+        
+        # Fallback loop (global check happens in signal)
+        counter = 0
+        while counter < 10:
+            # Pre-check in current tenant (for efficiency)
+            if tenant and self.filter(tenant=tenant, username=candidate).exists():
+                random_digits = ''.join(random.choices('0123456789', k=4))
+                candidate = f"{base}{random_digits}"
+                counter += 1
+                continue
+            return candidate
+        raise ValueError("Could not generate unique username after 10 attempts")
 
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
         return self.create_user(email, password, **extra_fields)
-
-    def get_by_email(self, email, tenant):
-        """Cached user lookup by email in tenant."""
-        from auth_service.utils.cache import get_cache_key, get_from_cache, set_to_cache
-        from auth_service.serializers import CustomUserMinimalSerializer  # Lazy import here if needed, but avoid in models
-        key = get_cache_key(tenant.schema_name, 'customuser', email)
-        user_data = get_from_cache(key)
-        if user_data is None:
-            with tenant_context(tenant):
-                user = self.filter(email=email, tenant=tenant).first()
-                if user:
-                    user_data = CustomUserMinimalSerializer(user).data
-                    set_to_cache(key, user_data, timeout=900)  # 15 min
-                    return user
-                return None
-        # Reconstruct user from cached data if needed (minimal; full query for safety)
-        with tenant_context(tenant):
-            user = self.filter(email=email, tenant=tenant).first()
-            return user
 
 class CustomUser(AbstractUser):
     ROLES = (
@@ -78,30 +90,13 @@ class CustomUser(AbstractUser):
         ('team_manager', 'Team Manager'),
     )
 
-    DASHBOARD_TYPES = (
-        ('admin', 'Admin'),
-        ('staff', 'Staff'),
-        ('user', 'User'),
-    )
-
-    ACCESS_LEVELS = (
-        ('full', 'Full Access'),
-        ('limited', 'Limited Access'),
-    )
-
     STATUS_CHOICES = (
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         ('suspended', 'Suspended'),
     )
 
-    TWO_FACTOR_CHOICES = (
-        ('enable', 'Enable'),
-        ('disable', 'Disable'),
-    )
-
-    last_password_reset = models.DateTimeField(null=True, blank=True)
-    username = models.CharField(max_length=150, blank=True, null=True, unique=False)
+    # Remove the duplicate username field - use the one from AbstractUser
     email = models.EmailField(_('email address'), unique=True)
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
@@ -109,14 +104,19 @@ class CustomUser(AbstractUser):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     permission_levels = models.JSONField(default=list, blank=True)
     job_role = models.CharField(max_length=255, blank=True, null=True, default='user')
-    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, null=True)
-    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
-    has_accepted_terms = models.BooleanField(default=False, help_text="Indicates if the user has accepted the terms and conditions.")
-    is_locked = models.BooleanField(default=False, help_text="Indicates if the user account is locked.")
-    login_attempts = models.PositiveIntegerField(default=0, help_text="Number of consecutive failed login attempts.")
+    tenant = models.ForeignKey('core.Tenant', on_delete=models.CASCADE, null=True)
+    branch = models.ForeignKey('core.Branch', on_delete=models.SET_NULL, null=True, blank=True)
+    has_accepted_terms = models.BooleanField(default=False)
+    is_locked = models.BooleanField(default=False)
+    login_attempts = models.PositiveIntegerField(default=0)
+    last_password_reset = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        # REMOVED: unique_together = [('tenant', 'username')]  # Now global via index
+        pass
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']  # Add username to required fields
 
     objects = CustomUserManager()
 
@@ -124,34 +124,29 @@ class CustomUser(AbstractUser):
         return self.email
 
     def lock_account(self, reason="Manual lock"):
-        """Lock the user account with a reason."""
         self.is_locked = True
         self.save()
         logger.info(f"Account locked for user {self.email} in tenant {self.tenant.schema_name}. Reason: {reason}")
 
     def unlock_account(self):
-        """Unlock the user account and reset login attempts."""
         self.is_locked = False
         self.login_attempts = 0
         self.save()
         logger.info(f"Account unlocked for user {self.email} in tenant {self.tenant.schema_name}")
 
     def suspend_account(self):
-        """Suspend the user account."""
         self.status = 'suspended'
         self.is_active = False
         self.save()
         logger.info(f"Account suspended for user {self.email} in tenant {self.tenant.schema_name}")
 
     def activate_account(self):
-        """Activate the user account."""
         self.status = 'active'
         self.is_active = True
         self.save()
         logger.info(f"Account activated for user {self.email} in tenant {self.tenant.schema_name}")
 
     def increment_login_attempts(self):
-        """Increment failed login attempts and lock if threshold reached."""
         self.login_attempts += 1
         if self.login_attempts >= 5:
             self.lock_account(reason="Too many failed login attempts")
@@ -159,7 +154,6 @@ class CustomUser(AbstractUser):
         logger.info(f"Failed login attempt for {self.email}. Attempts: {self.login_attempts}")
 
     def reset_login_attempts(self):
-        """Reset login attempts on successful login."""
         self.login_attempts = 0
         self.save()
         logger.info(f"Login attempts reset for user {self.email} in tenant {self.tenant.schema_name}")
@@ -167,122 +161,116 @@ class CustomUser(AbstractUser):
     def calculate_completion_percentage(self):
         """
         Calculate the completion percentage of the user profile based on filled fields.
+        All fields have equal weight.
         Returns a float between 0 and 100.
         """
-        total_weight = 0
-        completed_weight = 0
+        total_fields = 0
+        completed_fields = 0
 
-        # CustomUser fields (20%)
+        # CustomUser fields
         user_fields = [
-            ('email', 7),
-            ('first_name', 7),
-            ('last_name', 7),
-            ('role', 2),
-            ('job_role', 2),
-            ('has_accepted_terms', 2),
+            'email', 'first_name', 'last_name', 'role', 
+            'job_role', 'has_accepted_terms'
         ]
-        for field, weight in user_fields:
-            total_weight += weight
+        
+        for field in user_fields:
+            total_fields += 1
             if getattr(self, field):
-                completed_weight += weight
+                completed_fields += 1
 
-        # Ensure profile exists
+        # Check if profile exists
         try:
             profile = self.profile
         except UserProfile.DoesNotExist:
-            return round(completed_weight / total_weight * 100, 2) if total_weight > 0 else 0
+            # If no profile exists, calculate percentage based only on user fields
+            return round((completed_fields / total_fields) * 100, 2) if total_fields > 0 else 0
 
-        # UserProfile - Personal Info (20%)
+        # UserProfile - Personal Information fields
         personal_fields = [
-            ('work_phone', 2.5),
-            ('personal_phone', 2.5),
-            ('gender', 2.5),
-            ('dob', 2.5),
-            ('street', 2.5),
-            ('city', 2.5),
-            ('state', 2.5),
-            ('zip_code', 2.5),
-            ('marital_status', 2.5),
+            'work_phone', 'personal_phone', 'gender', 'dob', 
+            'street', 'city', 'state', 'zip_code', 'marital_status'
         ]
-        for field, weight in personal_fields:
-            total_weight += weight
+        
+        for field in personal_fields:
+            total_fields += 1
             if getattr(profile, field):
-                completed_weight += weight
+                completed_fields += 1
 
-        # UserProfile - Next of Kin (10%)
+        # UserProfile - Next of Kin fields
         next_of_kin_fields = [
-            ('next_of_kin', 2.5),
-            ('next_of_kin_phone_number', 2.5),
-            ('relationship_to_next_of_kin', 2.5),
-            ('next_of_kin_email', 2.5),
+            'next_of_kin', 'next_of_kin_phone_number', 
+            'relationship_to_next_of_kin', 'next_of_kin_email'
         ]
-        for field, weight in next_of_kin_fields:
-            total_weight += weight
+        
+        for field in next_of_kin_fields:
+            total_fields += 1
             if getattr(profile, field):
-                completed_weight += weight
+                completed_fields += 1
 
-        # UserProfile - Right to Work (15%)
+        # UserProfile - Right to Work fields
         right_to_work_fields = [
-            ('Right_to_Work_document_type', 3.75),
-            ('Right_to_Work_document_number', 3.75),
-            ('Right_to_Work_document_expiry_date', 3.75),
-            ('Right_to_Work_file', 3.75),
+            'Right_to_Work_document_type', 'Right_to_Work_document_number',
+            'Right_to_Work_document_expiry_date', 'Right_to_Work_file'
         ]
-        for field, weight in right_to_work_fields:
-            total_weight += weight
+        
+        for field in right_to_work_fields:
+            total_fields += 1
             if getattr(profile, field):
-                completed_weight += weight
+                completed_fields += 1
 
-        # UserProfile - DBS Check (10%)
+        # UserProfile - DBS Check fields
         dbs_fields = [
-            ('dbs_type', 2.5),
-            ('dbs_certificate_number', 2.5),
-            ('dbs_issue_date', 2.5),
-            ('dbs_certificate', 2.5),
+            'dbs_type', 'dbs_certificate_number', 
+            'dbs_issue_date', 'dbs_certificate'
         ]
-        for field, weight in dbs_fields:
-            total_weight += weight
+        
+        for field in dbs_fields:
+            total_fields += 1
             if getattr(profile, field):
-                completed_weight += weight
+                completed_fields += 1
 
-        # UserProfile - Bank Details (10%)
+        # UserProfile - Bank Details fields
         bank_fields = [
-            ('bank_name', 2.5),
-            ('account_number', 2.5),
-            ('account_name', 2.5),
-            ('account_type', 2.5),
+            'bank_name', 'account_number', 'account_name', 'account_type'
         ]
-        for field, weight in bank_fields:
-            total_weight += weight
+        
+        for field in bank_fields:
+            total_fields += 1
             if getattr(profile, field):
-                completed_weight += weight
+                completed_fields += 1
 
-        # Related Models (15%)
+        # Related Models - count each as one field if they have at least one entry
         related_models = [
-            ('professional_qualifications', 5),
-            ('employment_details', 5),
-            ('education_details', 5),
-            ('reference_checks', 5),
+            'professional_qualifications', 'employment_details', 
+            'education_details', 'reference_checks'
         ]
-        for field, weight in related_models:
-            total_weight += weight
-            if getattr(profile, field).exists():
-                completed_weight += weight
+        
+        for related_field in related_models:
+            total_fields += 1
+            if getattr(profile, related_field).exists():
+                completed_fields += 1
 
-        # Driver-Specific Fields (10%, only if is_driver=True)
+        # Driver-Specific Fields (only check if user is a driver)
         if profile.is_driver:
             driver_fields = [
-                ('drivers_licence_image1', 2.5),
-                ('drivers_licence_date_issue', 2.5),
-                ('drivers_licence_expiry_date', 2.5),
-                ('drivers_license_insurance_provider', 2.5),
+                'drivers_licence_image1', 'drivers_licence_date_issue',
+                'drivers_licence_expiry_date', 'drivers_license_insurance_provider'
             ]
-            for field, weight in driver_fields:
-                total_weight += weight
+            
+            for field in driver_fields:
+                total_fields += 1
                 if getattr(profile, field):
-                    completed_weight += weight
+                    completed_fields += 1
 
-        return round(completed_weight / total_weight * 100, 2) if total_weight > 0 else 0
+        # Calculate percentage
+        return round((completed_fields / total_fields) * 100, 2) if total_fields > 0 else 0
+
+    # Add this property for easy access
+    @property
+    def profile_completion_percentage(self):
+        """Property to easily access completion percentage."""
+        return self.calculate_completion_percentage()
+
 
 
 class BlockedIP(models.Model):
@@ -381,9 +369,7 @@ class UserProfile(models.Model):
 
     # government_id_type = models.CharField(max_length=50, choices=[('Drivers Licence', 'Drivers Licence')], blank=True)
     marital_status = models.CharField(max_length=50, choices=[('Single', 'Single'), ('Married', 'Married'), ('Divorced', 'Divorced'), ('Widowed', 'Widowed'),  ('Others', 'Others')], blank=True)
-    # id_number = models.CharField(max_length=20, blank=True)
-    # document_number = models.CharField(max_length=20, blank=True)
-    # document_expiry_date = models.DateField(null=True, blank=True)
+  
   
     # Image fields and their corresponding URL fields
     profile_image = models.ImageField(upload_to='profile_image/', max_length=255, blank=True, null=True)
@@ -468,10 +454,47 @@ class UserProfile(models.Model):
 
     # Bank Details
     bank_name = models.CharField(max_length=255, blank=True)
+    currency = models.CharField(max_length=5, blank=True)
     account_number = models.CharField(max_length=20, blank=True)
     account_name = models.CharField(max_length=255, blank=True)
-    account_type = models.CharField(max_length=50, choices=[('Current', 'Current'), ('Savings', 'Savings'), ('Business', 'Business')], blank=True)
+    account_type = models.CharField(max_length=50, choices=[('Current', 'Current'), ('Savings', 'Savings'), ('Business', 'Business'),
+                                                             ('Individual', 'Individual'),('Checking', 'Checking')], blank=True)
 
+
+    country_of_bank_account = models.CharField(max_length=10,choices=[('US', 'United States'), ('UK', 'United Kingdom'), ('Others', 'Others')],
+        blank=True, help_text="Country where the bank account is held")
+
+    # US-specific
+    routing_number = models.CharField(max_length=9,validators=[RegexValidator(r'^\d{9}$')],
+        blank=True,null=True, help_text="US Routing Number (9 digits)")
+ 
+ 
+    ssn_last4 = models.CharField(max_length=4,
+        validators=[RegexValidator(r'^\d{4}$')],
+        blank=True,null=True, help_text="Last 4 digits of SSN (Optional)")
+
+    # UK-specific
+    sort_code = models.CharField(max_length=8,validators=[RegexValidator(r'^\d{2}-?\d{2}-?\d{2}$')],
+        blank=True, null=True,help_text="UK Sort Code (e.g., 12-34-56)"
+    )
+
+    iban = models.CharField(max_length=34,blank=True,null=True,
+        help_text="IBAN (for international transfers)"
+    )
+    bic_swift = models.CharField(max_length=11,blank=True,null=True,
+        help_text="SWIFT/BIC Code"
+    )
+    national_insurance_number = models.CharField(
+        max_length=20,blank=True,null=True,
+        help_text="NI Number (Optional)"
+    )
+
+    # Consent and tracking
+    consent_given = models.BooleanField(default=False)
+    bank_details_submitted_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+
+        
     # Permissions
     access_duration = models.DateField(default=today, blank=True)
     system_access_rostering = models.BooleanField(default=False)
@@ -483,6 +506,7 @@ class UserProfile(models.Model):
     system_access_co_superadmin = models.BooleanField(default=False)
     system_access_asset_management = models.BooleanField(default=False)
     vehicle_type = models.CharField(max_length=50, choices=[('Personal Vehicle', 'Personal Vehicle'), ('Company Vehicle', 'Company Vehicle'), ('Both', 'Both')], blank=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = "User Profile"
@@ -668,6 +692,7 @@ class ProfessionalQualification(models.Model):
     image_file = models.ImageField(upload_to='professional_qualifications/', max_length=255, blank=True, null=True)
     image_file_url = models.CharField(max_length=1024, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "Professional Qualifications"
@@ -683,10 +708,13 @@ class EducationDetail(models.Model):
     certificate_url = models.CharField(max_length=1024, blank=True, null=True)
     skills = models.TextField(blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = "Education Detail"
         verbose_name_plural = "Education Details"
+
+
 
 class EmploymentDetail(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='employment_details')
@@ -705,6 +733,7 @@ class EmploymentDetail(models.Model):
     salary = models.DecimalField(max_digits=20, decimal_places=2)
     working_days = models.CharField(max_length=100, null=True, blank=True)
     maximum_working_hours = models.PositiveIntegerField(null=True, blank=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = "Employment Detail"
@@ -717,10 +746,13 @@ class ReferenceCheck(models.Model):
     phone_number = models.CharField(max_length=15)
     email = models.EmailField()
     relationship_to_applicant = models.CharField(max_length=100)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = "Reference Check"
         verbose_name_plural = "Reference Checks"
+
+
 
 class ProofOfAddress(models.Model):
     TYPE_CHOICES = [
@@ -737,6 +769,7 @@ class ProofOfAddress(models.Model):
     nin_document = models.ImageField(upload_to='nin_documents/', max_length=255, blank=True, null=True)
     nin_document_url = models.CharField(max_length=1024, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user_profile.user.email} - {self.type}"
@@ -755,6 +788,7 @@ class InsuranceVerification(models.Model):
     expiry_date = models.DateField(blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user_profile.user.email} - {self.insurance_type}"
@@ -770,6 +804,7 @@ class DrivingRiskAssessment(models.Model):
     supporting_document = models.ImageField(upload_to='driving_risk_docs/', max_length=255, blank=True, null=True)
     supporting_document_url = models.CharField(max_length=1024, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user_profile.user.email} - Driving Risk Assessment"
@@ -782,6 +817,7 @@ class LegalWorkEligibility(models.Model):
     expiry_date = models.DateField(blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user_profile.user.email} - Legal & Work Eligibility"
@@ -795,6 +831,7 @@ class OtherUserDocuments(models.Model):
     file = models.ImageField(upload_to='other_user_documents', max_length=255, blank=True, null=True)
     file_url = models.CharField(max_length=1024, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = "User Document"
@@ -1038,6 +1075,7 @@ class ClientProfile(models.Model):
     # Additional Information
     special_requirements = models.TextField(null=True, blank=True, help_text="Client's special requirements or requests (e.g., custom packaging)")
     notes = models.TextField(null=True, blank=True, help_text="Additional notes or comments about the client")
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = "Client Profile"
@@ -1118,6 +1156,7 @@ class RSAKeyPair(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     @classmethod
     def get_active_by_kid(cls, kid, tenant):
@@ -1194,6 +1233,7 @@ class Group(models.Model):
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='groups')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         unique_together = ('tenant', 'name')
@@ -1209,6 +1249,7 @@ class GroupMembership(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='group_memberships')
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     joined_at = models.DateTimeField(auto_now_add=True)
+    
 
     class Meta:
         unique_together = ('group', 'user')

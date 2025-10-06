@@ -140,7 +140,6 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='netwiver')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='info',
         email='support@netwiver.com',
         password='qwerty',
         role='admin',
@@ -156,7 +155,6 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='support',
         email='support@prolianceltd.com',
         password='qwerty',
         role='admin',
