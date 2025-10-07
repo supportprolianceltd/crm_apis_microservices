@@ -1230,161 +1230,321 @@ class ScreeningTaskStatusView(APIView):
 
 
 
+# class JobApplicationCreatePublicView(generics.CreateAPIView):
+#     serializer_class = PublicJobApplicationSerializer
+#     parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+#     # def create(self, request, *args, **kwargs):
+#     #     # Normalize list-based fields to strings
+#     #     def normalize_field(value):
+#     #         if isinstance(value, list) and value:
+#     #             return value[0]
+#     #         return value
+
+#     #     unique_link = normalize_field(request.data.get('unique_link') or request.data.get('job_requisition_unique_link'))
+#     #     if not unique_link:
+#     #         logger.warning("Missing job requisition unique link in request")
+#     #         return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
+
+#     #     # Extract tenant_id from unique_link
+#     #     try:
+#     #         parts = unique_link.split('-')
+#     #         if len(parts) < 5:
+#     #             logger.warning(f"Invalid unique_link format: {unique_link}")
+#     #             return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+#     #         tenant_id = '-'.join(parts[:5])
+#     #     except Exception as e:
+#     #         logger.error(f"Error extracting tenant_id from link: {str(e)}")
+#     #         return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+#     #     # Fetch job requisition from Talent Engine
+#     #     requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+#     #     try:
+#     #         resp = requests.get(requisition_url)
+#     #         logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
+#     #         if resp.status_code != 200:
+#     #             try:
+#     #                 error_detail = resp.json().get('detail', 'Invalid job requisition.')
+#     #             except Exception:
+#     #                 error_detail = 'Invalid job requisition.'
+#     #             logger.error(f"Failed to fetch requisition: {error_detail}")
+#     #             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+#     #         job_requisition = resp.json()
+#     #     except Exception as e:
+#     #         logger.error(f"Error fetching job requisition: {str(e)}")
+#     #         return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
+
+#     #     # Prepare payload, normalizing list-based fields
+#     #     payload = {key: normalize_field(value) for key, value in request.data.items()}
+#     #     payload['job_requisition_id'] = job_requisition['id']
+#     #     payload['tenant_id'] = tenant_id
+
+#     #     # Extract and compress documents from multipart form
+#     #     documents = []
+#     #     i = 0
+#     #     while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
+#     #         document_type = normalize_field(request.data.get(f'documents[{i}][document_type]')).lower()
+#     #         file_obj = request.FILES.get(f'documents[{i}][file]')
+#     #         original_name = file_obj.name
+#     #         content_type = file_obj.content_type
+#     #         folder_path = f"application_documents/{timezone.now().strftime('%Y/%m/%d')}"
+#     #         file_name = f"{folder_path}/{uuid.uuid4()}{os.path.splitext(original_name)[1]}"
+
+#     #         # Compress file if it's a resume or CV
+#     #         if document_type in ['resume', 'curriculum vitae (cv)']:
+#     #             try:
+#     #                 file_content = file_obj.read()
+#     #                 compressed_file = io.BytesIO()
+#     #                 with gzip.GzipFile(fileobj=compressed_file, mode='wb') as gz:
+#     #                     gz.write(file_content)
+#     #                 compressed_file.seek(0)
+#     #                 file_name += '.gz'
+#     #                 content_type = 'application/gzip'
+#     #                 compressed_file_obj = InMemoryUploadedFile(
+#     #                     file=compressed_file,
+#     #                     field_name=f'documents[{i}][file]',
+#     #                     name=file_name,
+#     #                     content_type=content_type,
+#     #                     size=len(compressed_file.getvalue()),
+#     #                     charset=None
+#     #                 )
+#     #             except Exception as e:
+#     #                 logger.error(f"Compression failed for file {original_name}: {str(e)}")
+#     #                 return Response({"detail": f"Failed to compress file {original_name}"}, status=status.HTTP_400_BAD_REQUEST)
+#     #         else:
+#     #             compressed_file_obj = file_obj
+#     #             file_name = f"{folder_path}/{uuid.uuid4()}{os.path.splitext(original_name)[1]}"
+
+#     #         # Upload file to storage
+#     #         try:
+#     #             file_url = upload_file_dynamic(compressed_file_obj, file_name, content_type)
+#     #             logger.info(f"Uploaded file {file_name} to {file_url}")
+#     #         except Exception as e:
+#     #             logger.error(f"Upload failed for file {file_name}: {str(e)}")
+#     #             return Response({"detail": f"Failed to upload file {file_name}"}, status=status.HTTP_400_BAD_REQUEST)
+
+#     #         documents.append({
+#     #             'document_type': document_type,
+#     #             'file_url': file_url,
+#     #             'original_name': original_name,
+#     #             'compression': 'gzip' if document_type in ['resume', 'curriculum vitae (cv)'] else None,
+#     #             'uploaded_at': timezone.now().isoformat()
+#     #         })
+#     #         i += 1
+
+#     #     if documents:
+#     #         payload['documents'] = documents
+
+#     #     logger.info(f"Full POST payload: {payload}")
+
+#     #     # Validate serializer
+#     #     serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
+#     #     if not serializer.is_valid():
+#     #         logger.error(f"Validation errors: {serializer.errors}")
+#     #         return Response({
+#     #             "detail": "Validation error",
+#     #             "errors": serializer.errors
+#     #         }, status=status.HTTP_400_BAD_REQUEST)
+
+#     #     # Prevent duplicate application
+#     #     email = payload.get('email')
+#     #     job_requisition_id = job_requisition['id']
+#     #     if JobApplication.objects.filter(email=email, job_requisition_id=job_requisition_id).exists():
+#     #         logger.warning(f"Duplicate application attempt by email: {email} for requisition: {job_requisition_id}")
+#     #         return Response({"detail": "You have already applied for this job"}, status=status.HTTP_400_BAD_REQUEST)
+
+#     #     # Save the application
+#     #     self.perform_create(serializer)
+
+#     #     # Increment num_of_applications
+#     #     increment_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/public/update-applications/{unique_link}/"
+#     #     try:
+#     #         resp = requests.post(increment_url)
+#     #         if resp.status_code != 200:
+#     #             logger.warning(f"Failed to increment num_of_applications for unique_link {unique_link}: {resp.status_code}, {resp.text}")
+#     #         else:
+#     #             logger.info(f"Successfully incremented num_of_applications for unique_link {unique_link}")
+#     #     except Exception as e:
+#     #         logger.error(f"Error calling increment endpoint for unique_link {unique_link}: {str(e)}")
+
+#     #     # Publish to Kafka
+#     #     try:
+#     #         producer = KafkaProducer(
+#     #             bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+#     #             value_serializer=lambda v: json.dumps(v).encode('utf-8')
+#     #         )
+#     #         kafka_data = {
+#     #             "tenant_id": tenant_id,
+#     #             "job_requisition_id": job_requisition['id'],
+#     #             "event": "job_application_created"
+#     #         }
+#     #         producer.send('job_application_events', kafka_data)
+#     #         producer.flush()
+#     #         logger.info(f"Published Kafka job application event for requisition {job_requisition['id']}")
+#     #     except Exception as e:
+#     #         logger.error(f"Kafka publish error: {str(e)}")
+
+#     #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+#     def create(self, request, *args, **kwargs):
+#         # Close any stale connections first
+#         from django.db import close_old_connections
+#         close_old_connections()
+        
+#         # Normalize list-based fields to strings
+#         def normalize_field(value):
+#             if isinstance(value, list) and value:
+#                 return value[0]
+#             return value
+
+#         unique_link = normalize_field(request.data.get('unique_link') or request.data.get('job_requisition_unique_link'))
+#         if not unique_link:
+#             logger.warning("Missing job requisition unique link in request")
+#             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Extract tenant_id from unique_link
+#         try:
+#             parts = unique_link.split('-')
+#             if len(parts) < 5:
+#                 logger.warning(f"Invalid unique_link format: {unique_link}")
+#                 return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+#             tenant_id = '-'.join(parts[:5])
+#         except Exception as e:
+#             logger.error(f"Error extracting tenant_id from link: {str(e)}")
+#             return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Fetch job requisition from Talent Engine
+#         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+#         try:
+#             resp = requests.get(requisition_url)
+#             logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
+#             if resp.status_code != 200:
+#                 try:
+#                     error_detail = resp.json().get('detail', 'Invalid job requisition.')
+#                 except Exception:
+#                     error_detail = 'Invalid job requisition.'
+#                 logger.error(f"Failed to fetch requisition: {error_detail}")
+#                 return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+#             job_requisition = resp.json()
+#         except Exception as e:
+#             logger.error(f"Error fetching job requisition: {str(e)}")
+#             return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
+
+#         # Prepare payload, normalizing list-based fields
+#         payload = {key: normalize_field(value) for key, value in request.data.items()}
+#         payload['job_requisition_id'] = job_requisition['id']
+#         payload['tenant_id'] = tenant_id
+
+#         # Extract and compress documents from multipart form
+#         documents = []
+#         i = 0
+#         while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
+#             document_type = normalize_field(request.data.get(f'documents[{i}][document_type]')).lower()
+#             file_obj = request.FILES.get(f'documents[{i}][file]')
+#             original_name = file_obj.name
+#             content_type = file_obj.content_type
+#             folder_path = f"application_documents/{timezone.now().strftime('%Y/%m/%d')}"
+#             file_name = f"{folder_path}/{uuid.uuid4()}{os.path.splitext(original_name)[1]}"
+
+#             # Compress file if it's a resume or CV
+#             if document_type in ['resume', 'curriculum vitae (cv)']:
+#                 try:
+#                     file_content = file_obj.read()
+#                     compressed_file = io.BytesIO()
+#                     with gzip.GzipFile(fileobj=compressed_file, mode='wb') as gz:
+#                         gz.write(file_content)
+#                     compressed_file.seek(0)
+#                     file_name += '.gz'
+#                     content_type = 'application/gzip'
+#                     compressed_file_obj = InMemoryUploadedFile(
+#                         file=compressed_file,
+#                         field_name=f'documents[{i}][file]',
+#                         name=file_name,
+#                         content_type=content_type,
+#                         size=len(compressed_file.getvalue()),
+#                         charset=None
+#                     )
+#                 except Exception as e:
+#                     logger.error(f"Compression failed for file {original_name}: {str(e)}")
+#                     return Response({"detail": f"Failed to compress file {original_name}"}, status=status.HTTP_400_BAD_REQUEST)
+#             else:
+#                 compressed_file_obj = file_obj
+#                 file_name = f"{folder_path}/{uuid.uuid4()}{os.path.splitext(original_name)[1]}"
+
+#             # Upload file to storage
+#             try:
+#                 file_url = upload_file_dynamic(compressed_file_obj, file_name, content_type)
+#                 logger.info(f"Uploaded file {file_name} to {file_url}")
+#             except Exception as e:
+#                 logger.error(f"Upload failed for file {file_name}: {str(e)}")
+#                 return Response({"detail": f"Failed to upload file {file_name}"}, status=status.HTTP_400_BAD_REQUEST)
+
+#             documents.append({
+#                 'document_type': document_type,
+#                 'file_url': file_url,
+#                 'original_name': original_name,
+#                 'compression': 'gzip' if document_type in ['resume', 'curriculum vitae (cv)'] else None,
+#                 'uploaded_at': timezone.now().isoformat()
+#             })
+#             i += 1
+
+#         if documents:
+#             payload['documents'] = documents
+
+#         logger.info(f"Full POST payload: {payload}")
+
+#         # Validate serializer
+#         serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
+#         if not serializer.is_valid():
+#             logger.error(f"Validation errors: {serializer.errors}")
+#             return Response({
+#                 "detail": "Validation error",
+#                 "errors": serializer.errors
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Prevent duplicate application
+#         email = payload.get('email')
+#         job_requisition_id = job_requisition['id']
+#         if JobApplication.objects.filter(email=email, job_requisition_id=job_requisition_id).exists():
+#             logger.warning(f"Duplicate application attempt by email: {email} for requisition: {job_requisition_id}")
+#             return Response({"detail": "You have already applied for this job"}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Save the application
+#         self.perform_create(serializer)
+
+#         # Increment num_of_applications
+#         increment_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/public/update-applications/{unique_link}/"
+#         try:
+#             resp = requests.post(increment_url)
+#             if resp.status_code != 200:
+#                 logger.warning(f"Failed to increment num_of_applications for unique_link {unique_link}: {resp.status_code}, {resp.text}")
+#             else:
+#                 logger.info(f"Successfully incremented num_of_applications for unique_link {unique_link}")
+#         except Exception as e:
+#             logger.error(f"Error calling increment endpoint for unique_link {unique_link}: {str(e)}")
+
+#         # Publish to Kafka
+#         try:
+#             producer = KafkaProducer(
+#                 bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+#                 value_serializer=lambda v: json.dumps(v).encode('utf-8')
+#             )
+#             kafka_data = {
+#                 "tenant_id": tenant_id,
+#                 "job_requisition_id": job_requisition['id'],
+#                 "event": "job_application_created"
+#             }
+#             producer.send('job_application_events', kafka_data)
+#             producer.flush()
+#             logger.info(f"Published Kafka job application event for requisition {job_requisition['id']}")
+#         except Exception as e:
+#             logger.error(f"Kafka publish error: {str(e)}")
+
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-
-    # def create(self, request, *args, **kwargs):
-    #     # Normalize list-based fields to strings
-    #     def normalize_field(value):
-    #         if isinstance(value, list) and value:
-    #             return value[0]
-    #         return value
-
-    #     unique_link = normalize_field(request.data.get('unique_link') or request.data.get('job_requisition_unique_link'))
-    #     if not unique_link:
-    #         logger.warning("Missing job requisition unique link in request")
-    #         return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
-
-    #     # Extract tenant_id from unique_link
-    #     try:
-    #         parts = unique_link.split('-')
-    #         if len(parts) < 5:
-    #             logger.warning(f"Invalid unique_link format: {unique_link}")
-    #             return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
-    #         tenant_id = '-'.join(parts[:5])
-    #     except Exception as e:
-    #         logger.error(f"Error extracting tenant_id from link: {str(e)}")
-    #         return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
-
-    #     # Fetch job requisition from Talent Engine
-    #     requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
-    #     try:
-    #         resp = requests.get(requisition_url)
-    #         logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
-    #         if resp.status_code != 200:
-    #             try:
-    #                 error_detail = resp.json().get('detail', 'Invalid job requisition.')
-    #             except Exception:
-    #                 error_detail = 'Invalid job requisition.'
-    #             logger.error(f"Failed to fetch requisition: {error_detail}")
-    #             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
-    #         job_requisition = resp.json()
-    #     except Exception as e:
-    #         logger.error(f"Error fetching job requisition: {str(e)}")
-    #         return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
-
-    #     # Prepare payload, normalizing list-based fields
-    #     payload = {key: normalize_field(value) for key, value in request.data.items()}
-    #     payload['job_requisition_id'] = job_requisition['id']
-    #     payload['tenant_id'] = tenant_id
-
-    #     # Extract and compress documents from multipart form
-    #     documents = []
-    #     i = 0
-    #     while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
-    #         document_type = normalize_field(request.data.get(f'documents[{i}][document_type]')).lower()
-    #         file_obj = request.FILES.get(f'documents[{i}][file]')
-    #         original_name = file_obj.name
-    #         content_type = file_obj.content_type
-    #         folder_path = f"application_documents/{timezone.now().strftime('%Y/%m/%d')}"
-    #         file_name = f"{folder_path}/{uuid.uuid4()}{os.path.splitext(original_name)[1]}"
-
-    #         # Compress file if it's a resume or CV
-    #         if document_type in ['resume', 'curriculum vitae (cv)']:
-    #             try:
-    #                 file_content = file_obj.read()
-    #                 compressed_file = io.BytesIO()
-    #                 with gzip.GzipFile(fileobj=compressed_file, mode='wb') as gz:
-    #                     gz.write(file_content)
-    #                 compressed_file.seek(0)
-    #                 file_name += '.gz'
-    #                 content_type = 'application/gzip'
-    #                 compressed_file_obj = InMemoryUploadedFile(
-    #                     file=compressed_file,
-    #                     field_name=f'documents[{i}][file]',
-    #                     name=file_name,
-    #                     content_type=content_type,
-    #                     size=len(compressed_file.getvalue()),
-    #                     charset=None
-    #                 )
-    #             except Exception as e:
-    #                 logger.error(f"Compression failed for file {original_name}: {str(e)}")
-    #                 return Response({"detail": f"Failed to compress file {original_name}"}, status=status.HTTP_400_BAD_REQUEST)
-    #         else:
-    #             compressed_file_obj = file_obj
-    #             file_name = f"{folder_path}/{uuid.uuid4()}{os.path.splitext(original_name)[1]}"
-
-    #         # Upload file to storage
-    #         try:
-    #             file_url = upload_file_dynamic(compressed_file_obj, file_name, content_type)
-    #             logger.info(f"Uploaded file {file_name} to {file_url}")
-    #         except Exception as e:
-    #             logger.error(f"Upload failed for file {file_name}: {str(e)}")
-    #             return Response({"detail": f"Failed to upload file {file_name}"}, status=status.HTTP_400_BAD_REQUEST)
-
-    #         documents.append({
-    #             'document_type': document_type,
-    #             'file_url': file_url,
-    #             'original_name': original_name,
-    #             'compression': 'gzip' if document_type in ['resume', 'curriculum vitae (cv)'] else None,
-    #             'uploaded_at': timezone.now().isoformat()
-    #         })
-    #         i += 1
-
-    #     if documents:
-    #         payload['documents'] = documents
-
-    #     logger.info(f"Full POST payload: {payload}")
-
-    #     # Validate serializer
-    #     serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
-    #     if not serializer.is_valid():
-    #         logger.error(f"Validation errors: {serializer.errors}")
-    #         return Response({
-    #             "detail": "Validation error",
-    #             "errors": serializer.errors
-    #         }, status=status.HTTP_400_BAD_REQUEST)
-
-    #     # Prevent duplicate application
-    #     email = payload.get('email')
-    #     job_requisition_id = job_requisition['id']
-    #     if JobApplication.objects.filter(email=email, job_requisition_id=job_requisition_id).exists():
-    #         logger.warning(f"Duplicate application attempt by email: {email} for requisition: {job_requisition_id}")
-    #         return Response({"detail": "You have already applied for this job"}, status=status.HTTP_400_BAD_REQUEST)
-
-    #     # Save the application
-    #     self.perform_create(serializer)
-
-    #     # Increment num_of_applications
-    #     increment_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/public/update-applications/{unique_link}/"
-    #     try:
-    #         resp = requests.post(increment_url)
-    #         if resp.status_code != 200:
-    #             logger.warning(f"Failed to increment num_of_applications for unique_link {unique_link}: {resp.status_code}, {resp.text}")
-    #         else:
-    #             logger.info(f"Successfully incremented num_of_applications for unique_link {unique_link}")
-    #     except Exception as e:
-    #         logger.error(f"Error calling increment endpoint for unique_link {unique_link}: {str(e)}")
-
-    #     # Publish to Kafka
-    #     try:
-    #         producer = KafkaProducer(
-    #             bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
-    #             value_serializer=lambda v: json.dumps(v).encode('utf-8')
-    #         )
-    #         kafka_data = {
-    #             "tenant_id": tenant_id,
-    #             "job_requisition_id": job_requisition['id'],
-    #             "event": "job_application_created"
-    #         }
-    #         producer.send('job_application_events', kafka_data)
-    #         producer.flush()
-    #         logger.info(f"Published Kafka job application event for requisition {job_requisition['id']}")
-    #     except Exception as e:
-    #         logger.error(f"Kafka publish error: {str(e)}")
-
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def create(self, request, *args, **kwargs):
         # Close any stale connections first
@@ -1511,6 +1671,7 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
 
         # Save the application
         self.perform_create(serializer)
+        job_app = serializer.instance
 
         # Increment num_of_applications
         increment_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/public/update-applications/{unique_link}/"
@@ -1540,7 +1701,30 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
         except Exception as e:
             logger.error(f"Kafka publish error: {str(e)}")
 
+        # Send non-blocking notification for successful application
+        try:
+            notification_payload = {
+                "application_id": str(job_app.id),
+                "full_name": job_app.full_name,
+                "email": job_app.email,
+                "job_requisition_id": str(job_app.job_requisition_id),
+                "job_requisition_title": str(job_app.job_requisition_title),
+                "status": job_app.status,
+                "user_agent": request.META.get('HTTP_USER_AGENT', 'unknown')
+            }
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(
+                    send_screening_notification,
+                    notification_payload,
+                    tenant_id,
+                    "application.submitted"
+                )
+            logger.info(f"Application submission notification queued for job application {job_app.id}")
+        except Exception as e:
+            logger.error(f"Failed to queue application submission notification for job application {job_app.id}: {str(e)}")
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 
 class JobApplicationListCreateView(generics.ListCreateAPIView):
@@ -2465,6 +2649,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
                     "full_name": job_app.full_name,
                     "email": job_app.email,
                     "job_requisition_id": str(job_app.job_requisition_id),
+                    "job_requisition_title": str(job_app.job_requisition_title),
                     "status": schedule.status,
                     "interview_start_date_time": schedule.interview_start_date_time.isoformat(),
                     "interview_end_date_time": schedule.interview_end_date_time.isoformat() if schedule.interview_end_date_time else None,
@@ -2605,6 +2790,7 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
                         "full_name": job_app.full_name,
                         "email": job_app.email,
                         "job_requisition_id": str(job_app.job_requisition_id),
+                        "job_requisition_title": str(job_app.job_requisition_title),
                         "status": instance.status,
                         "interview_start_date_time": instance.interview_start_date_time.isoformat(),
                         "interview_end_date_time": instance.interview_end_date_time.isoformat() if instance.interview_end_date_time else None,
@@ -2716,6 +2902,8 @@ class ScheduleBulkDeleteView(APIView):
                 schedule.soft_delete()
                 
         return Response({"detail": f"Successfully soft-deleted {schedules.count()} schedule(s)."}, status=status.HTTP_200_OK)
+
+
 
 
 class SoftDeletedSchedulesView(generics.ListAPIView):
