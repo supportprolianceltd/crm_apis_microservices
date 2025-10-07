@@ -204,7 +204,9 @@ model CarePlan {
   riskAssessment RiskAssessment?
   personalCare   PersonalCare?
   everydayActivityPlan EverydayActivityPlan?
+  fallsAndMobility FallsAndMobility?
   medicalInfo    MedicalInformation?
+  psychologicalInfo PsychologicalInformation?
   foodHydration  FoodNutritionHydration?
   routine        RoutinePreference?
   cultureValues  CultureValues?
@@ -217,6 +219,7 @@ model CarePlan {
   updatedAt     DateTime            @updatedAt
 
   @@index([tenantId])
+  @@index([tenantId, clientId])
 }
 
 model CarePlanCarer {
@@ -250,6 +253,7 @@ model RiskAssessment {
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
 }
 
 model PersonalCare {
@@ -257,7 +261,7 @@ model PersonalCare {
   tenantId    String
   carePlanId  String   @unique
    // Bathing & Showering
-  bathingAndShowering       String // options: ["Yes, independently", "Yes, With help", "No, Needs full assistance"]
+  bathingAndShowering       BathingAssistance
   oralHygiene               String
    // Personal Appearance
   maintainThemselves        String
@@ -284,13 +288,17 @@ model PersonalCare {
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
 }
 
 model EverydayActivityPlan{
   id         String   @id @default(cuid())
   tenantId    String
   carePlanId  String   @unique
-  preferredDailySchedule String
+  canTheyShop String
+  canTheyCall String
+  canTheyWash String
+  additionalNotes String
   communityAccessNeeds String
   ExerciseandMobilityActivities String
   
@@ -298,6 +306,32 @@ model EverydayActivityPlan{
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model FallsAndMobility{
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  fallenBefore Boolean @default(false)
+  timesFallen Int
+  mobilityLevel MobilityLevel
+  mobilitySupport MobilitySupport
+  otherMobilitySupport String?
+  activeAsTheyLikeToBe String
+  canTransfer String
+  canuseStairs String
+  canTravelAlone String
+  mobilityAdditionalNotes String
+  visionStatus String
+  speechStatus String
+  hearingStatus String
+  sensoryAdditionalNotes String
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
 }
 
 model MedicalInformation {
@@ -310,8 +344,19 @@ model MedicalInformation {
   secondaryAdditionalNotes String
   pastMedicalHistory String
   medicalSupport Boolean @default(false)
-  aboutIt String
-  currentHealthStatus String?
+  breathingDifficulty Boolean @default(false)
+  breathingSupportNeed String
+  useAirWayManagementEquipment Boolean @default(false)
+  specifyAirwayEquipment String?
+  airwayEquipmentRisk String?
+  airWayEquipmentMitigationPlan String
+  haveSkinPressureSores Boolean @default(false)
+  skinPressureConcerningIssues Boolean @default(false)
+  skinAdditionalInformation String?
+  currentHealthStatus String
+
+  raisedSafeGuardingIssue Boolean @default(false)
+  safeGuardingAdditionalInformation String?
   // Relation: one medical info can have many medications
   medications         Medication[]
   primaryDoctor       String
@@ -321,15 +366,16 @@ model MedicalInformation {
   EmergencyCareNotes String
   medicalReportUpload String
   knownAllergies Boolean @default(false)
-  clientAllergies       clientAllergy[]
+  clientAllergies       ClientAllergy[]
 
 
   carePlan     CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
 }
 
-model clientAllergy {
+model ClientAllergy {
   id          String   @id @default(cuid())
   tenantId    String
   medicalInfoId String
@@ -345,6 +391,7 @@ model clientAllergy {
   medicalInfo MedicalInformation @relation(fields: [medicalInfoId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([medicalInfoId])
 }
 
 model Medication {
@@ -359,6 +406,29 @@ model Medication {
   medicalInfo       MedicalInformation @relation(fields: [medicalInfoId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([medicalInfoId])
+}
+
+model PsychologicalInformation{
+  id         String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  healthLevelSatisfaction String
+  healthMotivationalLevel String
+  sleepMood String
+  specifySleepMood String
+  sleepStatus String
+  anyoneWorriedAboutMemory Boolean @default(false)
+  memoryStatus String
+  specifyMemoryStatus String
+  canTheyDoHouseKeeping String
+  houseKeepingSupport Boolean @default(false)
+  houseKeepingAdditionalNotes String
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  @@index([tenantId])
+  @@index([carePlanId])
+
 }
 
 model FoodNutritionHydration {
@@ -366,8 +436,18 @@ model FoodNutritionHydration {
   tenantId    String
   carePlanId  String   @unique
   dietaryRequirements String
+  foodOrDrinkAllergies Boolean @default(false)
+  foodAllergiesSpecification String
+  allergiesImpact String
   favouriteFoods String
   foodTextures String
+  appetiteLevel String
+  swallowingDifficulties String
+  medicationsAffectingSwallowing String
+  specifyMedicationsAffectingSwallowing String
+  canFeedSelf String
+  canPrepareLightMeals String
+  canCookMeals String
   clientFoodGiver String
   mealtimeSupport String
   hydrationSchedule String
@@ -377,6 +457,7 @@ model FoodNutritionHydration {
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
 }
 
 model RoutinePreference {
@@ -391,7 +472,7 @@ model RoutinePreference {
   significantPersonHasLocation Boolean @default(false)
   importantPersonLocationEffects String
   canMaintainOralHygiene String
-  careGiverGenderPreference String
+  careGiverGenderPreference GenderPreference @default(NO_PREFERENCE)
   autonomyPreference String
   dailyRoutine String
   haveSpecificImportantRoutine Boolean @default(false)
@@ -403,6 +484,7 @@ model RoutinePreference {
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
 }
 
 
@@ -414,10 +496,18 @@ model CultureValues {
   ethnicGroup    String
   culturalAccommodation     String
   sexualityandRelationshipPreferences       String
+  sexImpartingCareNeeds String
   preferredLanguage         String
   communicationStyleNeeds   String[] @default([])
   preferredMethodOfCommunication String
   keyFamilyMembers String
+  receivesInformalCare Boolean @default(false)
+  informalCareByWho String?
+  supportMethodByInformalCare String?
+  concernsOnInformalCare String?
+  specifyConcernsOnInformalCare String
+  receivesFormalCare Boolean @default(false)
+  specifyFormalCare String?
   socialGroupAndCommunity String
   emotionalSupportNeeds String[] @default([])
   mentalWellbeingTracking Boolean @default(false)
@@ -425,6 +515,7 @@ model CultureValues {
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
 }
 
 model BodyMap {
@@ -448,6 +539,7 @@ model BodyMap {
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
 }
 
 model MovingHandling {
@@ -480,21 +572,23 @@ model MovingHandling {
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
 }
 
 model IntakeLog{
   id         String   @id @default(cuid())
   tenantId    String
-  hydrationMonitoringId String
+  movingHandlingId String
   date        DateTime
   time        String
   amount      Float
   notes       String?
 
-  MovingHandling MovingHandling @relation(fields: [hydrationMonitoringId], references: [id], onDelete: Cascade)
+  MovingHandling MovingHandling @relation(fields: [movingHandlingId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([date])
+  @@index([movingHandlingId])
 }
 
 model CareRequirements{
@@ -506,6 +600,7 @@ model CareRequirements{
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
 }
 
 model LegalRequirement {
@@ -521,10 +616,12 @@ model LegalRequirement {
   certificateNumber String
   certificateUpload String
   digitalConsentsAndPermissions String[] @default([])
+  consertUpload String
 
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([carePlanId])
 }
 
 // Enums
@@ -573,4 +670,39 @@ enum CarePlanStatus {
   ACTIVE
   INACTIVE
   COMPLETED
+}
+
+enum BathingAssistance {
+  YES_INDEPENDENTLY
+  YES_WITH_HELP
+  NO_NEEDS_FULL_ASSISTANCE
+}
+
+enum MobilityLevel {
+  INDEPENDENT
+  DEPENDENT
+  INDEPENDENT_WITH_AIDS
+  IMMOBILE
+}
+
+enum MobilitySupport {
+  WALKING_STICK
+  WHEELCHAIR
+  NONE
+  OTHERS
+}
+
+enum GenderPreference {
+  NO_PREFERENCE
+  MALE
+  FEMALE
+  NON_BINARY
+  OTHER
+}
+
+enum CommunicationMethod {
+  PHONE
+  EMAIL
+  SMS
+  IN_PERSON
 }
