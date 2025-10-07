@@ -27,14 +27,13 @@ from django.db import connection, models, transaction
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
  # removed tenant_context import
-from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_field
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from utils.fetch_auth_data import fetch_tenants, fetch_branches
 from utils.supabase import upload_file_dynamic
 from rest_framework.pagination import PageNumberPagination
 from .models import (
@@ -123,7 +122,7 @@ from django.conf import settings
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
 class CustomPagination(PageNumberPagination):
-    page_size = 50  # Adjust as needed
+    page_size = 100  # Adjust as needed
 
     def get_next_link(self):
         """Override to use gateway base URL."""
@@ -179,7 +178,26 @@ class PublicPublishedJobRequisitionsView(APIView):
     permission_classes = []  # No authentication required
     pagination_class = CustomPagination
 
+    # def get(self, request):
+    #     today = timezone.now().date()
+    #     queryset = JobRequisition.active_objects.filter(
+    #         publish_status=True,
+    #         is_deleted=False,
+    #         deadline_date=today
+    #     )
+    #     serializer = PublicJobRequisitionSerializer(queryset, many=True)
+    #     logger.info(f"Public requisitions fetched: {queryset.count()}")
+    #     return Response({
+    #         "count": queryset.count(),
+    #         "results": serializer.data
+    #     }, status=status.HTTP_200_OK)  
+
+
     def get(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         today = timezone.now().date()
         queryset = JobRequisition.active_objects.filter(
             publish_status=True,
@@ -191,13 +209,32 @@ class PublicPublishedJobRequisitionsView(APIView):
         return Response({
             "count": queryset.count(),
             "results": serializer.data
-        }, status=status.HTTP_200_OK)  
+        }, status=status.HTTP_200_OK)
+
 
 class PublicUpcomingJobRequisitionsView(APIView):
     permission_classes = []  # No authentication required
     pagination_class = CustomPagination
 
+    # def get(self, request):
+    #     today = timezone.now().date()
+    #     queryset = JobRequisition.active_objects.filter(
+    #         publish_status=True,
+    #         is_deleted=False,
+    #         deadline_date__gte=today  # Includes today and future dates
+    #     )
+    #     serializer = PublicJobRequisitionSerializer(queryset, many=True)
+    #     logger.info(f"Upcoming (including today) public requisitions fetched: {queryset.count()}")
+    #     return Response({
+    #         "count": queryset.count(),
+    #         "results": serializer.data
+    #     }, status=status.HTTP_200_OK)
+
     def get(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         today = timezone.now().date()
         queryset = JobRequisition.active_objects.filter(
             publish_status=True,
@@ -210,7 +247,6 @@ class PublicUpcomingJobRequisitionsView(APIView):
             "count": queryset.count(),
             "results": serializer.data
         }, status=status.HTTP_200_OK)
-
 
 class PublicPublishedRequisitionsByTenantView(APIView):
     permission_classes = []  # Public
@@ -231,7 +267,40 @@ class PublicPublishedRequisitionsByTenantView(APIView):
             logger.error(f"Failed to fetch tenant info from auth-service: {e}")
             return None
 
+    # def get(self, request, tenant_unique_id):
+    #     try:
+    #         today = timezone.now().date()
+
+    #         # Fetch job requisitions for this tenant
+    #         queryset = JobRequisition.active_objects.filter(
+    #             tenant_id=tenant_unique_id,
+    #             publish_status=True,
+    #             status='open',
+    #             is_deleted=False,
+    #             # deadline_date__gte=today
+    #         )
+    #         requisitions_data = PublicJobRequisitionSerializer(queryset, many=True).data
+
+    #         # Fetch tenant metadata from auth-service
+    #         tenant_info = self.get_tenant_info(tenant_unique_id)
+
+    #         logger.info(f"Fetched {len(requisitions_data)} public requisitions for tenant {tenant_unique_id}")
+
+    #         return Response({
+    #             "tenant": tenant_info,
+    #             "count": len(requisitions_data),
+    #             "results": requisitions_data
+    #         }, status=status.HTTP_200_OK)
+
+    #     except Exception as e:
+    #         logger.error(f"Error fetching requisitions for tenant {tenant_unique_id}: {str(e)}")
+    #         return Response({"detail": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def get(self, request, tenant_unique_id):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         try:
             today = timezone.now().date()
 
@@ -259,12 +328,34 @@ class PublicPublishedRequisitionsByTenantView(APIView):
         except Exception as e:
             logger.error(f"Error fetching requisitions for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
+        
+        
 class PublicCloseJobRequisitionView(APIView):
     permission_classes = []  # No authentication required
 
+    # def post(self, request, job_requisition_id):
+    #     try:
+    #         job_req = JobRequisition.active_objects.get(id=job_requisition_id)
+    #         job_req.status = 'closed'
+    #         job_req.save(update_fields=['status', 'updated_at'])
+    #         logger.info(f"JobRequisition {job_requisition_id} status changed to closed (public endpoint)")
+    #         return Response({
+    #             "detail": f"Job requisition {job_requisition_id} status changed to closed.",
+    #             "id": job_requisition_id,
+    #             "status": job_req.status
+    #         }, status=status.HTTP_200_OK)
+    #     except JobRequisition.DoesNotExist:
+    #         logger.warning(f"JobRequisition {job_requisition_id} not found for public close")
+    #         return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
+    #     except Exception as e:
+    #         logger.error(f"Error closing job requisition {job_requisition_id}: {str(e)}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def post(self, request, job_requisition_id):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         try:
             job_req = JobRequisition.active_objects.get(id=job_requisition_id)
             job_req.status = 'closed'
@@ -280,8 +371,7 @@ class PublicCloseJobRequisitionView(APIView):
             return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f"Error closing job requisition {job_requisition_id}: {str(e)}")
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                         
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)                 
 # views.py
 class PublicCloseJobRequisitionBatchView(APIView):
     permission_classes = []  # public endpoint
@@ -315,7 +405,39 @@ class PublicCloseJobRequisitionBatchView(APIView):
 class JobRequisitionBulkDeleteView(generics.GenericAPIView):
     serializer_class = JobRequisitionSerializer
 
+    # def post(self, request):
+    #     ids = request.data.get('ids', [])
+    #     if not ids:
+    #         logger.warning("No IDs provided for bulk soft delete")
+    #         return Response({"detail": "No IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+    #     try:
+    #         jwt_payload = getattr(request, 'jwt_payload', {})
+    #         tenant_id = jwt_payload.get('tenant_unique_id')
+    #         role = jwt_payload.get('role')
+    #         branch = jwt_payload.get('branch')
+    #         if not tenant_id:
+    #             return Response({"detail": "No tenant_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
+    #         queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id, id__in=ids)
+    #         if role == 'recruiter' and branch:
+    #             queryset = queryset.filter(branch=branch)
+    #         # Evaluate queryset before transaction block
+    #         requisitions = list(queryset)
+    #         count = len(requisitions)
+    #         if count == 0:
+    #             logger.warning("No active requisitions found for provided IDs")
+    #             return Response({"detail": "No requisitions found."}, status=status.HTTP_404_NOT_FOUND)
+    #         with transaction.atomic():
+    #             for requisition in requisitions:
+    #                 requisition.soft_delete()
+    #         return Response({"detail": f"Soft-deleted {count} requisition(s)."}, status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         logger.error(f"Bulk soft delete failed: {str(e)}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def post(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         ids = request.data.get('ids', [])
         if not ids:
             logger.warning("No IDs provided for bulk soft delete")
@@ -324,12 +446,10 @@ class JobRequisitionBulkDeleteView(generics.GenericAPIView):
             jwt_payload = getattr(request, 'jwt_payload', {})
             tenant_id = jwt_payload.get('tenant_unique_id')
             role = jwt_payload.get('role')
-            branch = jwt_payload.get('branch')
             if not tenant_id:
                 return Response({"detail": "No tenant_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
             queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id, id__in=ids)
-            if role == 'recruiter' and branch:
-                queryset = queryset.filter(branch=branch)
+           
             # Evaluate queryset before transaction block
             requisitions = list(queryset)
             count = len(requisitions)
@@ -343,7 +463,8 @@ class JobRequisitionBulkDeleteView(generics.GenericAPIView):
         except Exception as e:
             logger.error(f"Bulk soft delete failed: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        
+        
 
 class MyJobRequisitionListView(generics.ListCreateAPIView):
     serializer_class = JobRequisitionSerializer
@@ -352,7 +473,32 @@ class MyJobRequisitionListView(generics.ListCreateAPIView):
     filterset_fields = ['status', 'role']
     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
 
+
+    # def get_queryset(self):
+    #     if not ensure_db_connection():
+    #         logger.error("Database connection unavailable")
+    #         return JobRequisition.active_objects.none()
+            
+    #     if getattr(self, "swagger_fake_view", False):
+    #         return JobRequisition.objects.none()
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
+    #     user_id = str(jwt_payload.get('user', {}).get('id')) if jwt_payload.get('user', {}).get('id') is not None else None
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+    #     queryset = JobRequisition.active_objects.filter(
+    #         tenant_id=tenant_id,
+    #         requested_by_id=user_id
+    #     )
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     return queryset
+    
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         if not ensure_db_connection():
             logger.error("Database connection unavailable")
             return JobRequisition.active_objects.none()
@@ -363,16 +509,12 @@ class MyJobRequisitionListView(generics.ListCreateAPIView):
         tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
         user_id = str(jwt_payload.get('user', {}).get('id')) if jwt_payload.get('user', {}).get('id') is not None else None
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')
         queryset = JobRequisition.active_objects.filter(
             tenant_id=tenant_id,
             requested_by_id=user_id
         )
-        if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch=branch)
+  
         return queryset
-    
-
 
 
 class PublishedJobRequisitionListView(generics.ListAPIView):
@@ -381,7 +523,29 @@ class PublishedJobRequisitionListView(generics.ListAPIView):
     filterset_fields = ['status', 'role']
     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
 
+    # def get_queryset(self):
+    #     if not ensure_db_connection():
+    #         logger.error("Database connection unavailable")
+    #         return JobRequisition.active_objects.none()
+            
+    #     if getattr(self, "swagger_fake_view", False):
+    #         return JobRequisition.objects.none()
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('branch')
+    #     queryset = JobRequisition.active_objects.filter(
+    #         tenant_id=tenant_id,
+    #         publish_status=True
+    #     )
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     return queryset
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         if not ensure_db_connection():
             logger.error("Database connection unavailable")
             return JobRequisition.active_objects.none()
@@ -391,15 +555,142 @@ class PublishedJobRequisitionListView(generics.ListAPIView):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
         queryset = JobRequisition.active_objects.filter(
             tenant_id=tenant_id,
             publish_status=True
         )
-        if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch=branch)
+       
         return queryset
-    
+
+# class JobRequisitionListCreateView(generics.ListCreateAPIView):
+#     serializer_class = JobRequisitionSerializer
+#     pagination_class = CustomPagination
+#     filter_backends = [DjangoFilterBackend, SearchFilter]
+#     filterset_fields = ['status', 'role']
+#     search_fields = ['title', 'status', 'requested_by__email', 'role', 'interview_location']
+
+#     def get_queryset(self):
+#         try:
+#             # Close any stale connections first
+#             close_old_connections()
+            
+#             if getattr(self, "swagger_fake_view", False):
+#                 return JobRequisition.objects.none()
+                
+#             jwt_payload = getattr(self.request, 'jwt_payload', {})
+#             tenant_id = jwt_payload.get('tenant_unique_id')
+#             role = jwt_payload.get('role')
+#             branch = jwt_payload.get('branch')
+            
+#             if not tenant_id:
+#                 logger.error("No tenant_id in token")
+#                 return JobRequisition.active_objects.none()
+            
+#             # Create a fresh queryset
+#             queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
+            
+#             if role == 'recruiter' and branch:
+#                 queryset = queryset.filter(branch=branch)
+                
+#             return queryset
+            
+#         except Exception as e:
+#             logger.error(f"Error in get_queryset: {str(e)}")
+#             # Return empty queryset on error
+#             return JobRequisition.active_objects.none()
+
+#     def get_serializer_class(self):
+#         """
+#         Use different serializer for bulk create operations
+#         """
+#         if self.request.method == 'POST' and self.request.path.endswith('/bulk-create/'):
+#             return JobRequisitionBulkCreateSerializer
+#         return JobRequisitionSerializer
+
+#     def get_serializer(self, *args, **kwargs):
+#         """
+#         Override to handle bulk create with many=True
+#         """
+#         if self.request.method == 'POST' and self.request.path.endswith('/bulk-create/'):
+#             kwargs['many'] = True
+#         return super().get_serializer(*args, **kwargs)
+
+#     # def get_queryset(self):
+#     #     if getattr(self, "swagger_fake_view", False):
+#     #         return JobRequisition.objects.none()
+#     #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+#     #     tenant_id = jwt_payload.get('tenant_unique_id')
+#     #     role = jwt_payload.get('role')
+#     #     branch = jwt_payload.get('branch')
+#     #     queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
+#     #     if role == 'recruiter' and branch:
+#     #         queryset = queryset.filter(branch=branch)
+#     #     return queryset
+
+#     def create(self, request, *args, **kwargs):
+#         """
+#         Handle both single and bulk create based on the endpoint
+#         """
+#         if request.path.endswith('/bulk-create/'):
+#             return self.bulk_create(request, *args, **kwargs)
+#         return super().create(request, *args, **kwargs)
+
+#     def bulk_create(self, request, *args, **kwargs):
+#         """
+#         Custom bulk create method
+#         """
+#         # Ensure the data is a list
+#         if not isinstance(request.data, list):
+#             return Response(
+#                 {"error": "Request data must be a list of job requisitions"},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+        
+#         serializer = self.get_serializer(data=request.data, many=True)
+#         serializer.is_valid(raise_exception=True)
+        
+#         try:
+#             # Save the data - this will call the create method with many=True
+#             created_instances = serializer.save()
+            
+#             # Serialize the response using the main serializer
+#             response_serializer = JobRequisitionSerializer(
+#                 created_instances, 
+#                 many=True, 
+#                 context=self.context
+#             )
+            
+#             headers = self.get_success_headers(serializer.data)
+#             return Response(
+#                 response_serializer.data, 
+#                 status=status.HTTP_201_CREATED, 
+#                 headers=headers
+#             )
+#         except Exception as e:
+#             logger.error(f"Bulk create failed: {str(e)}")
+#             return Response(
+#                 {"error": "Failed to create requisitions in bulk", "details": str(e)},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+#     # Remove the perform_bulk_create method since the serializer handles it now
+
+#     # Keep your existing perform_create for single creation
+#     def perform_create(self, serializer):
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
+#         user_id = str(jwt_payload.get('user', {}).get('id')) if jwt_payload.get('user', {}).get('id') is not None else None
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')
+#         if not tenant_id or not user_id:
+#             logger.error("Missing tenant_unique_id or user_id in JWT payload")
+#             raise serializers.ValidationError("Missing tenant_unique_id or user_id in token.")
+#         serializer.save(
+#             tenant_id=tenant_id,
+#             requested_by_id=user_id,
+#             branch=branch if role == 'recruiter' and branch else None
+#         )
+#         logger.info(f"Job requisition created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
+
 
 class JobRequisitionListCreateView(generics.ListCreateAPIView):
     serializer_class = JobRequisitionSerializer
@@ -411,6 +702,7 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         try:
             # Close any stale connections first
+            from django.db import close_old_connections
             close_old_connections()
             
             if getattr(self, "swagger_fake_view", False):
@@ -419,7 +711,7 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
             jwt_payload = getattr(self.request, 'jwt_payload', {})
             tenant_id = jwt_payload.get('tenant_unique_id')
             role = jwt_payload.get('role')
-            branch = jwt_payload.get('branch')
+           
             
             if not tenant_id:
                 logger.error("No tenant_id in token")
@@ -428,9 +720,7 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
             # Create a fresh queryset
             queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
             
-            if role == 'recruiter' and branch:
-                queryset = queryset.filter(branch=branch)
-                
+      
             return queryset
             
         except Exception as e:
@@ -453,18 +743,6 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
         if self.request.method == 'POST' and self.request.path.endswith('/bulk-create/'):
             kwargs['many'] = True
         return super().get_serializer(*args, **kwargs)
-
-    # def get_queryset(self):
-    #     if getattr(self, "swagger_fake_view", False):
-    #         return JobRequisition.objects.none()
-    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
-    #     tenant_id = jwt_payload.get('tenant_unique_id')
-    #     role = jwt_payload.get('role')
-    #     branch = jwt_payload.get('branch')
-    #     queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
-    #     if role == 'recruiter' and branch:
-    #         queryset = queryset.filter(branch=branch)
-    #     return queryset
 
     def create(self, request, *args, **kwargs):
         """
@@ -511,32 +789,131 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
                 {"error": "Failed to create requisitions in bulk", "details": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
-    # Remove the perform_bulk_create method since the serializer handles it now
 
-    # Keep your existing perform_create for single creation
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
         user_id = str(jwt_payload.get('user', {}).get('id')) if jwt_payload.get('user', {}).get('id') is not None else None
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')
+        user_data = jwt_payload.get('user', {})
+       
+
         if not tenant_id or not user_id:
             logger.error("Missing tenant_unique_id or user_id in JWT payload")
             raise serializers.ValidationError("Missing tenant_unique_id or user_id in token.")
+
+        # Extract user details from JWT (no external call)
+        user_details = {
+            'id': user_data.get('id'),
+            'email': user_data.get('email', ''),
+            'first_name': user_data.get('first_name', ''),
+            'last_name': user_data.get('last_name', ''),
+            'job_role': user_data.get('job_role', '')
+        }
+
+        # Tenant domain from JWT (no external call)
+        tenant_domain = jwt_payload.get('tenant_domain')
+
+      
+
         serializer.save(
             tenant_id=tenant_id,
             requested_by_id=user_id,
-            branch=branch if role == 'recruiter' and branch else None
+            created_by_id=user_id,  # Assume creator = requester
+            requested_by_details=user_details,
+            created_by_details=user_details,
+            updated_by_details=user_details,  # Initial update = create
+            tenant_domain=tenant_domain,
+        
         )
         logger.info(f"Job requisition created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
 
+    def perform_update(self, serializer):
+        jwt_payload = getattr(self.request, 'jwt_payload', {})
+        user_data = jwt_payload.get('user', {})
+        user_id = str(user_data.get('id')) if user_data.get('id') is not None else None
 
+        if not user_id:
+            logger.error("Missing user_id in JWT payload during update")
+            raise serializers.ValidationError("Missing user_id in token.")
+
+        # Extract current user details for update/approval
+        user_details = {
+            'id': user_data.get('id'),
+            'email': user_data.get('email', ''),
+            'first_name': user_data.get('first_name', ''),
+            'last_name': user_data.get('last_name', ''),
+            'job_role': user_data.get('job_role', '')
+        }
+
+        # Check if this update is an approval (status change)
+        validated_data = serializer.validated_data
+        is_approval = 'status' in validated_data and validated_data['status'] == 'approved'
+
+        serializer.save(
+            updated_by_id=user_id,
+            updated_by_details=user_details,
+            approved_by_id=user_id if is_approval else serializer.instance.approved_by_id,
+            approved_by_details=user_details if is_approval else serializer.instance.approved_by_details
+        )
+        logger.info(f"Job requisition updated: {serializer.instance.title} for tenant {serializer.instance.tenant_id} by user {user_id}")
 
 
 class IncrementJobApplicationsCountView(APIView):
     permission_classes = []  # Public endpoint, no authentication required
 
+    # def post(self, request, unique_link):
+    #     """
+    #     Increment the num_of_applications field by 1 for a JobRequisition identified by unique_link.
+    #     No payload is required or accepted.
+    #     """
+    #     try:
+    #         # Extract tenant_id from unique_link (first 5 segments, UUID format)
+    #         parts = unique_link.split('-')
+    #         if len(parts) < 5:
+    #             logger.warning(f"Invalid unique_link format: {unique_link}")
+    #             return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+    #         tenant_id = '-'.join(parts[:5])
+
+    #         # Fetch JobRequisition by unique_link
+    #         try:
+    #             job_requisition = JobRequisition.active_objects.get(
+    #                 unique_link=unique_link,
+    #                 tenant_id=tenant_id,
+    #                 publish_status=True,
+    #                 is_deleted=False
+    #             )
+    #         except JobRequisition.DoesNotExist:
+    #             logger.warning(f"JobRequisition with unique_link {unique_link} not found or not published")
+    #             return Response({"detail": "Job requisition not found or not published."}, status=status.HTTP_404_NOT_FOUND)
+
+    #         # Check for unexpected payload
+    #         if request.data:
+    #             logger.warning(f"Unexpected payload provided for {unique_link}: {request.data}")
+    #             return Response({"detail": "No payload is required for this endpoint."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #         # Increment num_of_applications
+    #         with transaction.atomic():
+    #             job_requisition.num_of_applications = (job_requisition.num_of_applications or 0) + 1
+    #             job_requisition.save(update_fields=['num_of_applications', 'updated_at'])
+    #             logger.info(f"Incremented num_of_applications to {job_requisition.num_of_applications} for JobRequisition {job_requisition.id} (unique_link: {unique_link})")
+
+    #         # Serialize response
+    #         serializer = PublicJobRequisitionSerializer(job_requisition)
+    #         return Response({
+    #             "detail": f"Incremented num_of_applications to {job_requisition.num_of_applications}",
+    #             "data": serializer.data
+    #         }, status=status.HTTP_200_OK)
+
+    #     except Exception as e:
+    #         logger.error(f"Error incrementing num_of_applications for unique_link {unique_link}: {str(e)}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def post(self, request, unique_link):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         """
         Increment the num_of_applications field by 1 for a JobRequisition identified by unique_link.
         No payload is required or accepted.
@@ -582,13 +959,35 @@ class IncrementJobApplicationsCountView(APIView):
         except Exception as e:
             logger.error(f"Error incrementing num_of_applications for unique_link {unique_link}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        
+        
 
 class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = JobRequisitionSerializer
     lookup_field = 'id'
 
+    # def get_queryset(self):
+    #     if not ensure_db_connection():
+    #         logger.error("Database connection unavailable")
+    #         return JobRequisition.active_objects.none()
+            
+    #     if getattr(self, "swagger_fake_view", False):
+    #         return JobRequisition.objects.none()
+            
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('branch')
+    #     queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     return queryset
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         if not ensure_db_connection():
             logger.error("Database connection unavailable")
             return JobRequisition.active_objects.none()
@@ -599,10 +998,9 @@ class JobRequisitionDetailView(generics.RetrieveUpdateDestroyAPIView):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
+     
         queryset = JobRequisition.active_objects.filter(tenant_id=tenant_id)
-        if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch=branch)
+      
         return queryset
 
     def perform_update(self, serializer):
@@ -660,7 +1058,30 @@ class JobRequisitionByLinkView(generics.RetrieveAPIView):
     permission_classes = []
     lookup_field = 'unique_link'
 
+    # def get_queryset(self):
+    #     unique_link = self.kwargs.get('unique_link', '')
+        
+    #     try:
+    #         # Expecting format: tenant_id-prefix-slug-uuid
+    #         parts = unique_link.split('-')
+    #         if len(parts) < 5:
+    #             logger.warning(f"Invalid unique_link format: {unique_link}")
+    #             return JobRequisition.objects.none()
+
+    #         tenant_id = '-'.join(parts[:5])  # UUID (has 5 parts)
+    #         return JobRequisition.active_objects.filter(
+    #             tenant_id=tenant_id,
+    #             publish_status=True
+    #         )
+    #     except Exception as e:
+    #         logger.error(f"Error parsing unique_link or fetching queryset: {str(e)}")
+    #         return JobRequisition.objects.none()
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         unique_link = self.kwargs.get('unique_link', '')
         
         try:
@@ -678,6 +1099,7 @@ class JobRequisitionByLinkView(generics.RetrieveAPIView):
         except Exception as e:
             logger.error(f"Error parsing unique_link or fetching queryset: {str(e)}")
             return JobRequisition.objects.none()
+    
 
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -698,7 +1120,31 @@ class CustomJobRequisitionByLinkView(generics.RetrieveAPIView):
     permission_classes = []
     lookup_field = 'unique_link'
 
+    # def get_queryset(self):
+    #     unique_link = self.kwargs.get('unique_link', '')
+        
+    #     try:
+    #         # Expecting format: tenant_id-prefix-slug-uuid
+    #         parts = unique_link.split('-')
+    #         if len(parts) < 5:
+    #             logger.warning(f"Invalid unique_link format: {unique_link}")
+    #             return JobRequisition.objects.none()
+
+    #         tenant_id = '-'.join(parts[:5])  # UUID (has 5 parts)
+    #         return JobRequisition.active_objects.filter(
+    #             tenant_id=tenant_id,
+    #             publish_status=True
+    #         )
+    #     except Exception as e:
+    #         logger.error(f"Error parsing unique_link or fetching queryset: {str(e)}")
+    #         return JobRequisition.objects.none()
+
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         unique_link = self.kwargs.get('unique_link', '')
         
         try:
@@ -716,6 +1162,7 @@ class CustomJobRequisitionByLinkView(generics.RetrieveAPIView):
         except Exception as e:
             logger.error(f"Error parsing unique_link or fetching queryset: {str(e)}")
             return JobRequisition.objects.none()
+
 
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -735,16 +1182,31 @@ class SoftDeletedJobRequisitionsView(generics.ListAPIView):
     serializer_class = JobRequisitionSerializer
     # permission_classes removed; rely on custom JWT middleware
 
+    # def get_queryset(self):
+    #     if getattr(self, "swagger_fake_view", False):
+    #         return JobRequisition.objects.none()
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('branch')
+    #     queryset = JobRequisition.objects.filter(tenant_id=tenant_id, is_deleted=True)
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     return queryset
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         if getattr(self, "swagger_fake_view", False):
             return JobRequisition.objects.none()
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
+       
         queryset = JobRequisition.objects.filter(tenant_id=tenant_id, is_deleted=True)
-        if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch=branch)
+        
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -764,7 +1226,43 @@ class SoftDeletedJobRequisitionsView(generics.ListAPIView):
 class RecoverSoftDeletedJobRequisitionsView(generics.GenericAPIView):
     serializer_class = JobRequisitionSerializer  # Added serializer_class
 
+    # def post(self, request, *args, **kwargs):
+    #     try:
+    #         ids = request.data.get('ids', [])
+    #         if not ids:
+    #             logger.warning("No requisition IDs provided for recovery")
+    #             return Response({"detail": "No requisition IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+    #         jwt_payload = getattr(request, 'jwt_payload', {})
+    #         tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
+    #         role = jwt_payload.get('role')
+    #         branch = jwt_payload.get('user', {}).get('branch')
+    #         if not tenant_id:
+    #             logger.error("No tenant_unique_id in token")
+    #             return Response({"detail": "No tenant_unique_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
+    #         queryset = JobRequisition.objects.filter(id__in=ids, tenant_id=tenant_id, is_deleted=True)
+    #         if role == 'recruiter' and branch:
+    #             queryset = queryset.filter(branch=branch)
+    #         if not queryset.exists():
+    #             logger.warning(f"No soft-deleted requisitions found for IDs {ids} in tenant {tenant_id}")
+    #             return Response({"detail": "No soft-deleted requisitions found."}, status=status.HTTP_404_NOT_FOUND)
+    #         recovered_count = 0
+    #         with transaction.atomic():
+    #             for requisition in queryset:
+    #                 requisition.restore()
+    #                 recovered_count += 1
+    #         logger.info(f"Successfully recovered {recovered_count} requisitions for tenant {tenant_id}")
+    #         return Response({
+    #             "detail": f"Successfully recovered {recovered_count} requisition(s)."
+    #         }, status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         logger.exception(f"Error during recovery of requisitions: {str(e)}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def post(self, request, *args, **kwargs):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         try:
             ids = request.data.get('ids', [])
             if not ids:
@@ -773,13 +1271,12 @@ class RecoverSoftDeletedJobRequisitionsView(generics.GenericAPIView):
             jwt_payload = getattr(request, 'jwt_payload', {})
             tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
             role = jwt_payload.get('role')
-            branch = jwt_payload.get('user', {}).get('branch')
+          
             if not tenant_id:
                 logger.error("No tenant_unique_id in token")
                 return Response({"detail": "No tenant_unique_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
             queryset = JobRequisition.objects.filter(id__in=ids, tenant_id=tenant_id, is_deleted=True)
-            if role == 'recruiter' and branch:
-                queryset = queryset.filter(branch=branch)
+           
             if not queryset.exists():
                 logger.warning(f"No soft-deleted requisitions found for IDs {ids} in tenant {tenant_id}")
                 return Response({"detail": "No soft-deleted requisitions found."}, status=status.HTTP_404_NOT_FOUND)
@@ -795,12 +1292,43 @@ class RecoverSoftDeletedJobRequisitionsView(generics.GenericAPIView):
         except Exception as e:
             logger.exception(f"Error during recovery of requisitions: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
+    
 class PermanentDeleteJobRequisitionsView(generics.GenericAPIView):
     serializer_class = JobRequisitionSerializer  # Added serializer_class
 
+    # def post(self, request, *args, **kwargs):
+    #     try:
+    #         ids = request.data.get('ids', [])
+    #         if not ids:
+    #             logger.warning("No requisition IDs provided for permanent deletion")
+    #             return Response({"detail": "No requisition IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+    #         jwt_payload = getattr(request, 'jwt_payload', {})
+    #         tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
+    #         role = jwt_payload.get('role')
+    #         branch = jwt_payload.get('user', {}).get('branch')
+    #         if not tenant_id:
+    #             logger.error("No tenant_unique_id in token")
+    #             return Response({"detail": "No tenant_unique_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
+    #         queryset = JobRequisition.objects.filter(id__in=ids, tenant_id=tenant_id, is_deleted=True)
+    #         if role == 'recruiter' and branch:
+    #             queryset = queryset.filter(branch=branch)
+    #         if not queryset.exists():
+    #             logger.warning(f"No soft-deleted requisitions found for IDs {ids} in tenant {tenant_id}")
+    #             return Response({"detail": "No soft-deleted requisitions found."}, status=status.HTTP_404_NOT_FOUND)
+    #         deleted_count = queryset.delete()[0]
+    #         logger.info(f"Successfully permanently deleted {deleted_count} requisitions for tenant {tenant_id}")
+    #         return Response({
+    #             "detail": f"Successfully permanently deleted {deleted_count} requisition(s)."
+    #         }, status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         logger.exception(f"Error during permanent deletion of requisitions: {str(e)}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def post(self, request, *args, **kwargs):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         try:
             ids = request.data.get('ids', [])
             if not ids:
@@ -809,13 +1337,12 @@ class PermanentDeleteJobRequisitionsView(generics.GenericAPIView):
             jwt_payload = getattr(request, 'jwt_payload', {})
             tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
             role = jwt_payload.get('role')
-            branch = jwt_payload.get('user', {}).get('branch')
+          
             if not tenant_id:
                 logger.error("No tenant_unique_id in token")
                 return Response({"detail": "No tenant_unique_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
             queryset = JobRequisition.objects.filter(id__in=ids, tenant_id=tenant_id, is_deleted=True)
-            if role == 'recruiter' and branch:
-                queryset = queryset.filter(branch=branch)
+           
             if not queryset.exists():
                 logger.warning(f"No soft-deleted requisitions found for IDs {ids} in tenant {tenant_id}")
                 return Response({"detail": "No soft-deleted requisitions found."}, status=status.HTTP_404_NOT_FOUND)
@@ -828,13 +1355,48 @@ class PermanentDeleteJobRequisitionsView(generics.GenericAPIView):
             logger.exception(f"Error during permanent deletion of requisitions: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
- 
-
 class ComplianceItemView(APIView):
     serializer_class = ComplianceItemSerializer  # Added serializer_class
     # permission_classes removed; rely on custom JWT middleware
 
+    # def post(self, request, job_requisition_id):
+    #     try:
+    #         tenant_id = get_tenant_id_from_jwt(request)
+    #         try:
+    #             job_requisition = JobRequisition.active_objects.get(id=job_requisition_id, tenant_id=tenant_id)
+    #         except JobRequisition.DoesNotExist:
+    #             logger.error(f"JobRequisition {job_requisition_id} not found for tenant {tenant_id}")
+    #             return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
+    #         if request.user.role == 'recruiter' and request.user.branch and job_requisition.branch != request.user.branch:
+    #             logger.error(f"Unauthorized access to JobRequisition {job_requisition_id} by user {request.user.email}")
+    #             return Response({"detail": "Not authorized to access this requisition."}, status=status.HTTP_403_FORBIDDEN)
+    #         serializer = ComplianceItemSerializer(data=request.data, context={'request': request})
+    #         if serializer.is_valid():
+    #             item_data = serializer.validated_data
+    #             item_data.setdefault('status', 'pending')
+    #             item_data.setdefault('checked_by', None)
+    #             item_data.setdefault('checked_at', None)
+    #             new_item = job_requisition.add_compliance_item(
+    #                 name=item_data['name'],
+    #                 description=item_data.get('description', ''),
+    #                 required=item_data.get('required', True),
+    #                 status=item_data['status'],
+    #                 checked_by=item_data['checked_by'],
+    #                 checked_at=item_data['checked_at']
+    #             )
+    #             logger.info(f"Added compliance item to JobRequisition {job_requisition_id} for tenant {tenant_id}")
+    #             return Response(ComplianceItemSerializer(new_item).data, status=status.HTTP_201_CREATED)
+    #         logger.error(f"Invalid compliance item data for tenant {tenant_id}: {serializer.errors}")
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     except Exception as e:
+    #         logger.exception(f"Error adding compliance item to JobRequisition {job_requisition_id}: {str(e)}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def post(self, request, job_requisition_id):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         try:
             tenant_id = get_tenant_id_from_jwt(request)
             try:
@@ -842,9 +1404,7 @@ class ComplianceItemView(APIView):
             except JobRequisition.DoesNotExist:
                 logger.error(f"JobRequisition {job_requisition_id} not found for tenant {tenant_id}")
                 return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
-            if request.user.role == 'recruiter' and request.user.branch and job_requisition.branch != request.user.branch:
-                logger.error(f"Unauthorized access to JobRequisition {job_requisition_id} by user {request.user.email}")
-                return Response({"detail": "Not authorized to access this requisition."}, status=status.HTTP_403_FORBIDDEN)
+          
             serializer = ComplianceItemSerializer(data=request.data, context={'request': request})
             if serializer.is_valid():
                 item_data = serializer.validated_data
@@ -866,8 +1426,47 @@ class ComplianceItemView(APIView):
         except Exception as e:
             logger.exception(f"Error adding compliance item to JobRequisition {job_requisition_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    # def put(self, request, job_requisition_id, item_id):
+    #     try:
+    #         tenant_id = get_tenant_id_from_jwt(request)
+    #         try:
+    #             job_requisition = JobRequisition.active_objects.get(id=job_requisition_id, tenant_id=tenant_id)
+    #         except JobRequisition.DoesNotExist:
+    #             logger.error(f"JobRequisition {job_requisition_id} not found for tenant {tenant_id}")
+    #             return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
+    #         if request.user.role == 'recruiter' and request.user.branch and job_requisition.branch != request.user.branch:
+    #             logger.error(f"Unauthorized access to JobRequisition {job_requisition_id} by user {request.user.email}")
+    #             return Response({"detail": "Not authorized to access this requisition."}, status=status.HTTP_403_FORBIDDEN)
+    #         serializer = ComplianceItemSerializer(data=request.data, context={'request': request})
+    #         if serializer.is_valid():
+    #             item_data = serializer.validated_data
+    #             updated_item = job_requisition.update_compliance_item(
+    #                 item_id=str(item_id),
+    #                 name=item_data['name'],
+    #                 description=item_data.get('description', ''),
+    #                 required=item_data.get('required', True),
+    #                 status=item_data.get('status', 'pending'),
+    #                 checked_by=item_data.get('checked_by'),
+    #                 checked_at=item_data.get('checked_at')
+    #             )
+    #             logger.info(f"Updated compliance item {item_id} for JobRequisition {job_requisition_id} for tenant {tenant_id}")
+    #             return Response(ComplianceItemSerializer(updated_item).data, status=status.HTTP_200_OK)
+    #         logger.error(f"Invalid compliance item data for tenant {tenant_id}: {serializer.errors}")
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     except ValueError as e:
+    #         logger.error(f"Compliance item {item_id} not found in JobRequisition {job_requisition_id} for tenant {tenant_id}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
+    #     except Exception as e:
+    #         logger.exception(f"Error updating compliance item {item_id} for JobRequisition {job_requisition_id}: {str(e)}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
     def put(self, request, job_requisition_id, item_id):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         try:
             tenant_id = get_tenant_id_from_jwt(request)
             try:
@@ -875,9 +1474,7 @@ class ComplianceItemView(APIView):
             except JobRequisition.DoesNotExist:
                 logger.error(f"JobRequisition {job_requisition_id} not found for tenant {tenant_id}")
                 return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
-            if request.user.role == 'recruiter' and request.user.branch and job_requisition.branch != request.user.branch:
-                logger.error(f"Unauthorized access to JobRequisition {job_requisition_id} by user {request.user.email}")
-                return Response({"detail": "Not authorized to access this requisition."}, status=status.HTTP_403_FORBIDDEN)
+       
             serializer = ComplianceItemSerializer(data=request.data, context={'request': request})
             if serializer.is_valid():
                 item_data = serializer.validated_data
@@ -900,8 +1497,34 @@ class ComplianceItemView(APIView):
         except Exception as e:
             logger.exception(f"Error updating compliance item {item_id} for JobRequisition {job_requisition_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
+    # def delete(self, request, job_requisition_id, item_id):
+    #     try:
+    #         tenant_id = get_tenant_id_from_jwt(request)
+    #         try:
+    #             job_requisition = JobRequisition.active_objects.get(id=job_requisition_id, tenant_id=tenant_id)
+    #         except JobRequisition.DoesNotExist:
+    #             logger.error(f"JobRequisition {job_requisition_id} not found for tenant {tenant_id}")
+    #             return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
+    #         if request.user.role == 'recruiter' and request.user.branch and job_requisition.branch != request.user.branch:
+    #             logger.error(f"Unauthorized access to JobRequisition {job_requisition_id} by user {request.user.email}")
+    #             return Response({"detail": "Not authorized to access this requisition."}, status=status.HTTP_403_FORBIDDEN)
+    #         job_requisition.remove_compliance_item(str(item_id))
+    #         logger.info(f"Deleted compliance item {item_id} from JobRequisition {job_requisition_id} for tenant {tenant_id}")
+    #         return Response(status=status.HTTP_204_NO_CONTENT)
+    #     except ValueError as e:
+    #         logger.error(f"Compliance item {item_id} not found in JobRequisition {job_requisition_id} for tenant {tenant_id}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
+    #     except Exception as e:
+    #         logger.exception(f"Error deleting compliance item {item_id} for JobRequisition {job_requisition_id}: {str(e)}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
     def delete(self, request, job_requisition_id, item_id):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         try:
             tenant_id = get_tenant_id_from_jwt(request)
             try:
@@ -909,9 +1532,7 @@ class ComplianceItemView(APIView):
             except JobRequisition.DoesNotExist:
                 logger.error(f"JobRequisition {job_requisition_id} not found for tenant {tenant_id}")
                 return Response({"detail": "Job requisition not found."}, status=status.HTTP_404_NOT_FOUND)
-            if request.user.role == 'recruiter' and request.user.branch and job_requisition.branch != request.user.branch:
-                logger.error(f"Unauthorized access to JobRequisition {job_requisition_id} by user {request.user.email}")
-                return Response({"detail": "Not authorized to access this requisition."}, status=status.HTTP_403_FORBIDDEN)
+       
             job_requisition.remove_compliance_item(str(item_id))
             logger.info(f"Deleted compliance item {item_id} from JobRequisition {job_requisition_id} for tenant {tenant_id}")
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -933,10 +1554,9 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
+      
         queryset = VideoSession.objects.filter(tenant_id=tenant_id)
-        if role == 'recruiter' and branch:
-            queryset = queryset.filter(job_application__branch=branch)
+       
         return queryset
 
     @extend_schema(
@@ -950,13 +1570,11 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
         jwt_payload = getattr(request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
+      
         session_id = request.data.get('session_id')
         try:
             session = VideoSession.objects.get(id=session_id, is_active=True, tenant_id=tenant_id)
-            if role == 'recruiter' and branch and session.job_application.branch != branch:
-                logger.error(f"Unauthorized access to session {session_id} by recruiter in branch {branch}")
-                return Response({"detail": "Not authorized to access this session."}, status=status.HTTP_403_FORBIDDEN)
+           
             # Placeholder for actual recording logic
             recording_path = f"recordings/{tenant_id}/{session_id}/{uuid.uuid4()}.webm"
             file_data = b"placeholder_recording_data"  # Replace with actual stream data
@@ -990,16 +1608,13 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
         tenant_id = jwt_payload.get('tenant_unique_id')
         user_id = jwt_payload.get('user_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
         session_id = request.data.get('session_id')
         email = request.data.get('email')
         try:
             session = VideoSession.objects.get(id=session_id, is_active=True, tenant_id=tenant_id)
             # Authenticated user flow (by user_id in JWT)
             if user_id:
-                if role == 'recruiter' and branch and session.job_application.branch != branch:
-                    logger.error(f"Unauthorized access to session {session_id} by recruiter in branch {branch}")
-                    return Response({"detail": "Not authorized to access this session."}, status=status.HTTP_403_FORBIDDEN)
+                
                 participant, created = Participant.objects.get_or_create(
                     session=session,
                     user_id=user_id,
@@ -1040,7 +1655,6 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
         tenant_id = jwt_payload.get('tenant_unique_id')
         user_id = jwt_payload.get('user_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
         session_id = request.data.get('session_id')
         try:
             participant = Participant.objects.get(
@@ -1049,9 +1663,7 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
                 user_id=user_id,
                 left_at__isnull=True
             )
-            if role == 'recruiter' and branch and participant.session.job_application.branch != branch:
-                logger.error(f"Unauthorized access to session {session_id} by recruiter in branch {branch}")
-                return Response({"detail": "Not authorized to access this session."}, status=status.HTTP_403_FORBIDDEN)
+           
             participant.left_at = timezone.now()
             participant.save()
             # Check if all participants have left to end the session
@@ -1077,7 +1689,7 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
         tenant_id = jwt_payload.get('tenant_unique_id')
         user_id = jwt_payload.get('user_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
+        
         session_id = request.data.get('session_id')
         mute = request.data.get('mute', False)
         try:
@@ -1087,9 +1699,7 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
                 user_id=user_id,
                 left_at__isnull=True
             )
-            if role == 'recruiter' and branch and participant.session.job_application.branch != branch:
-                logger.error(f"Unauthorized access to session {session_id} by recruiter in branch {branch}")
-                return Response({"detail": "Not authorized to access this session."}, status=status.HTTP_403_FORBIDDEN)
+           
             participant.is_muted = mute
             participant.save()
             logger.info(f"User {user_id} {'muted' if mute else 'unmuted'} in session {session_id} for tenant {tenant_id}")
@@ -1150,16 +1760,13 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
         jwt_payload = getattr(request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('branch')
         session_id = request.data.get('session_id')
         scores = request.data.get('scores')
         notes = request.data.get('notes')
         tags = request.data.get('tags')
         try:
             session = VideoSession.objects.get(id=session_id, is_active=True, tenant_id=tenant_id)
-            if role == 'recruiter' and branch and session.job_application.branch != branch:
-                logger.error(f"Unauthorized access to session {session_id} by recruiter in branch {branch}")
-                return Response({"detail": "Not authorized to access this session."}, status=status.HTTP_403_FORBIDDEN)
+       
             if scores is not None:
                 serializer = VideoSessionSerializer(data={'scores': scores}, partial=True)
                 serializer.is_valid(raise_exception=True)
@@ -1178,144 +1785,6 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Session not found or inactive'}, status=status.HTTP_404_NOT_FOUND)
 
 
-
-
-# class RequestListCreateView(generics.ListCreateAPIView):
-#     serializer_class = RequestSerializer
-#     filter_backends = [DjangoFilterBackend, SearchFilter]
-#     filterset_fields = ['request_type', 'status']
-#     search_fields = ['title', 'description', 'requested_by__email']
-
-#     def get_queryset(self):
-#         if getattr(self, "swagger_fake_view", False):
-#             return Request.objects.none()
-#         jwt_payload = getattr(self.request, 'jwt_payload', {})
-#         tenant_id = jwt_payload.get('tenant_unique_id')
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
-#         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
-#         if role == 'recruiter' and branch:
-#             queryset = queryset.filter(branch_id=branch)
-#         return queryset
-
-#     def perform_create(self, serializer):
-#         jwt_payload = getattr(self.request, 'jwt_payload', {})
-#         tenant_id = jwt_payload.get('tenant_unique_id')
-#         user_id = jwt_payload.get('user', {}).get('id')  # Fixed: get user id from user object
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
-        
-#         if not user_id:
-#             logger.error(f"User ID not found in JWT payload: {jwt_payload}")
-#             raise serializers.ValidationError("User ID not found in token")
-        
-#         serializer.save(
-#             tenant_id=tenant_id,
-#             requested_by_id=user_id,
-#             branch_id=branch if role == 'recruiter' and branch else None
-#         )
-#         logger.info(f"Request created: {serializer.validated_data['title']} for tenant {tenant_id} by user {user_id}")
-
-
-
-# class RequestListCreateView(generics.ListCreateAPIView):
-#     serializer_class = RequestSerializer
-#     pagination_class = CustomPagination
-#     filter_backends = [DjangoFilterBackend, SearchFilter]
-#     filterset_fields = ['request_type', 'status', 'priority', 'material_type', 'leave_category', 'service_type']
-#     search_fields = ['title', 'description', 'item_name', 'requester_name']
-#     ordering_fields = ['created_at', 'needed_date', 'desired_completion_date', 'priority']
-#     ordering = ['-created_at']
-
-#     def get_queryset(self):
-#         if getattr(self, "swagger_fake_view", False):
-#             return Request.objects.none()
-            
-#         jwt_payload = getattr(self.request, 'jwt_payload', {})
-#         tenant_id = jwt_payload.get('tenant_unique_id')
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')
-        
-#         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
-        
-#         if role == 'recruiter' and branch:
-#             queryset = queryset.filter(branch_id=branch)
-            
-#         return queryset
-
-#     def perform_create(self, serializer):
-#         jwt_payload = getattr(self.request, 'jwt_payload', {})
-#         tenant_id = jwt_payload.get('tenant_unique_id')
-#         user_id = jwt_payload.get('user', {}).get('id')
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')
-        
-#         if not user_id:
-#             logger.error(f"User ID not found in JWT payload: {jwt_payload}")
-#             raise serializers.ValidationError("User ID not found in token")
-        
-#         serializer.save(
-#             tenant_id=tenant_id,
-#             requested_by_id=user_id,
-#             branch_id=branch if role == 'recruiter' and branch else None
-#         )
-
-
-
-
-
-# class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     serializer_class = RequestSerializer
-#     lookup_field = 'id'
-
-#     def get_queryset(self):
-#         if getattr(self, "swagger_fake_view", False):
-#             return Request.objects.none()
-#         jwt_payload = getattr(self.request, 'jwt_payload', {})
-#         tenant_id = jwt_payload.get('tenant_unique_id')
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
-#         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
-#         if role == 'recruiter' and branch:
-#             queryset = queryset.filter(branch_id=branch)
-#         return queryset
-
-
-#     def perform_update(self, serializer):
-#         jwt_payload = getattr(self.request, 'jwt_payload', {})
-#         user_id = jwt_payload.get('user', {}).get('id')
-#         user_data = jwt_payload.get('user', {})
-#         status = serializer.validated_data.get('status')
-        
-#         if not user_id:
-#             logger.error(f"User ID not found in JWT payload during update: {jwt_payload}")
-#             raise serializers.ValidationError("User ID not found in token")
-        
-#         approved_by_details = {
-#             'email': user_data.get('email', ''),
-#             'first_name': user_data.get('first_name', ''),
-#             'last_name': user_data.get('last_name', ''),
-#             'job_role': user_data.get('job_role', '')
-#         }
-        
-#         if status == 'approved':
-#             logger.info(f"Setting approved_by_details for request {serializer.instance.id}: {approved_by_details}")
-#             serializer.save(
-#                 approved_by_id=user_id,
-#                 approved_by_details=approved_by_details
-#             )
-#             logger.info(f"Request {serializer.instance.id} approved by user {user_id}")
-#         else:
-#             serializer.save(approved_by_details=approved_by_details if serializer.instance.approved_by_id else {})
-#             logger.info(f"Request {serializer.instance.id} updated by user {user_id}")
-
-
-#     def perform_destroy(self, instance):
-#         instance.soft_delete()
-#         logger.info(f"Request soft-deleted: {instance.title} for tenant {instance.tenant_id}")
-
-
-
 class RequestListCreateView(generics.ListCreateAPIView):
     serializer_class = RequestSerializer
     pagination_class = CustomPagination
@@ -1325,37 +1794,64 @@ class RequestListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['created_at', 'needed_date', 'desired_completion_date', 'priority']
     ordering = ['-created_at']
 
+    # def get_queryset(self):
+    #     if getattr(self, "swagger_fake_view", False):
+    #         return Request.objects.none()
+            
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+        
+    #     queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
+        
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch_id=branch)
+            
+    #     return queryset
+
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         if getattr(self, "swagger_fake_view", False):
             return Request.objects.none()
             
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')
         
         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
         
-        if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch_id=branch)
+  
             
         return queryset
+
 
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         user_id = jwt_payload.get('user', {}).get('id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')
+        user_data = jwt_payload.get('user', {})
         
         if not user_id:
             logger.error(f"User ID not found in JWT payload: {jwt_payload}")
             raise serializers.ValidationError("User ID not found in token")
         
+        requested_by_details = {
+            'email': user_data.get('email', ''),
+            'first_name': user_data.get('first_name', ''),
+            'last_name': user_data.get('last_name', ''),
+            'job_role': user_data.get('job_role', '')
+        }
+        
         serializer.save(
             tenant_id=tenant_id,
             requested_by_id=user_id,
-            branch_id=branch if role == 'recruiter' and branch else None
+            requested_by_details=requested_by_details
         )
 
 
@@ -1363,17 +1859,33 @@ class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RequestSerializer
     lookup_field = 'id'
 
+    # def get_queryset(self):
+    #     if getattr(self, "swagger_fake_view", False):
+    #         return Request.objects.none()
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
+    #     queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch_id=branch)
+    #     return queryset
+
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         if getattr(self, "swagger_fake_view", False):
             return Request.objects.none()
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
-        if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch_id=branch)
+       
         return queryset
+
 
     def perform_update(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
@@ -1424,7 +1936,6 @@ class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 
-
 class UserRequestsListView(generics.ListAPIView):
     pagination_class = CustomPagination
     serializer_class = RequestSerializer
@@ -1433,6 +1944,10 @@ class UserRequestsListView(generics.ListAPIView):
     search_fields = ['title', 'description']
 
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         if getattr(self, "swagger_fake_view", False):
             return Request.objects.none()
         
@@ -1440,7 +1955,6 @@ class UserRequestsListView(generics.ListAPIView):
         tenant_id = jwt_payload.get('tenant_unique_id')
         user_id = jwt_payload.get('user', {}).get('id')  # Fixed: get user id from user object
         role = jwt_payload.get('role')
-        branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
 
         # Validate JWT payload
         if not tenant_id or not user_id:
@@ -1452,8 +1966,33 @@ class UserRequestsListView(generics.ListAPIView):
             is_deleted=False,
             requested_by_id=user_id
         )
-        if role == 'recruiter' and branch:
-            queryset = queryset.filter(branch_id=branch)
         
         logger.debug(f"Queryset for user {user_id} in tenant {tenant_id}: {queryset.count()} requests")
         return queryset
+
+
+    # def get_queryset(self):
+    #     if getattr(self, "swagger_fake_view", False):
+    #         return Request.objects.none()
+        
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     user_id = jwt_payload.get('user', {}).get('id')  # Fixed: get user id from user object
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
+
+    #     # Validate JWT payload
+    #     if not tenant_id or not user_id:
+    #         logger.error(f"Missing tenant_id or user_id in JWT payload: {jwt_payload}")
+    #         raise serializers.ValidationError({"detail": "Authentication credentials incomplete."})
+
+    #     queryset = Request.objects.filter(
+    #         tenant_id=tenant_id,
+    #         is_deleted=False,
+    #         requested_by_id=user_id
+    #     )
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch_id=branch)
+        
+    #     logger.debug(f"Queryset for user {user_id} in tenant {tenant_id}: {queryset.count()} requests")
+    #     return queryset

@@ -156,6 +156,10 @@ class GlobalApplicationsByRequisitionView(APIView):
     permission_classes = []
 
     def get(self, request, job_requisition_id):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         applications = JobApplication.active_objects.filter(
             job_requisition_id=job_requisition_id,
             resume_status=True
@@ -165,6 +169,17 @@ class GlobalApplicationsByRequisitionView(APIView):
             "count": applications.count(),
             "results": serializer.data
         }, status=status.HTTP_200_OK)
+
+    # def get(self, request, job_requisition_id):
+    #     applications = JobApplication.active_objects.filter(
+    #         job_requisition_id=job_requisition_id,
+    #         resume_status=True
+    #     )
+    #     serializer = JobApplicationSerializer(applications, many=True)
+    #     return Response({
+    #         "count": applications.count(),
+    #         "results": serializer.data
+    #     }, status=status.HTTP_200_OK)
     
 
 class HealthCheckView(View):
@@ -459,14 +474,29 @@ class ResumeScreeningView(APIView):
                 "details": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # def _check_database_connection(self):
+    #     """Verify database connection is alive"""
+    #     try:
+    #         with connection.cursor() as cursor:
+    #             cursor.execute("SELECT 1")
+    #     except Exception as e:
+    #         logger.error(f"Database connection error: {str(e)}")
+    #         raise Exception("Database connection unavailable")
+
+
     def _check_database_connection(self):
         """Verify database connection is alive"""
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
         except Exception as e:
             logger.error(f"Database connection error: {str(e)}")
             raise Exception("Database connection unavailable")
+        
 
     def _get_job_requisition_safe(self, job_requisition_id, request):
         """Safely get job requisition with timeout handling"""
@@ -493,8 +523,45 @@ class ResumeScreeningView(APIView):
         
         return {"valid": True}
 
+
+
+    # def _fetch_applications_from_db(self, job_requisition_id, tenant_id, role, branch):
+    #     """Fetch applications from database with role-based filtering"""
+    #     try:
+    #         applications = JobApplication.active_objects.filter(
+    #             job_requisition_id=job_requisition_id,
+    #             tenant_id=tenant_id,
+    #             resume_status=True
+    #         )
+            
+    #         # Apply role-based filtering
+    #         if role == 'recruiter' and branch:
+    #             applications = applications.filter(branch=branch)
+    #         elif branch:
+    #             applications = applications.filter(branch=branch)
+                
+    #         # Use iterator to prevent memory issues with large querysets
+    #         applications_data = []
+    #         for app in applications.iterator():
+    #             applications_data.append({
+    #                 "application_id": str(app.id),
+    #                 "full_name": app.full_name,
+    #                 "email": app.email
+    #             })
+                
+    #         logger.info(f"Fetched {len(applications_data)} applications from database")
+    #         return applications_data
+            
+    #     except Exception as e:
+    #         logger.error(f"Error fetching applications from database: {str(e)}")
+    #         raise Exception(f"Failed to fetch applications: {str(e)}")
+
     def _fetch_applications_from_db(self, job_requisition_id, tenant_id, role, branch):
         """Fetch applications from database with role-based filtering"""
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         try:
             applications = JobApplication.active_objects.filter(
                 job_requisition_id=job_requisition_id,
@@ -523,6 +590,8 @@ class ResumeScreeningView(APIView):
         except Exception as e:
             logger.error(f"Error fetching applications from database: {str(e)}")
             raise Exception(f"Failed to fetch applications: {str(e)}")
+
+            
 
     def _process_asynchronously(self, job_requisition_id, tenant_id, document_type, 
                               applications_data, num_candidates, role, branch, request):
@@ -658,8 +727,38 @@ class ResumeScreeningView(APIView):
                 }
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # def _get_applications_queryset(self, job_requisition_id, tenant_id, role, branch, applications_data):
+    #     """Get applications queryset with proper filtering"""
+    #     if applications_data:
+    #         application_ids = [app['application_id'] for app in applications_data]
+    #         applications = JobApplication.active_objects.filter(
+    #             job_requisition_id=job_requisition_id,
+    #             tenant_id=tenant_id,
+    #             id__in=application_ids,
+    #             resume_status=True
+    #         )
+    #     else:
+    #         applications = JobApplication.active_objects.filter(
+    #             job_requisition_id=job_requisition_id,
+    #             tenant_id=tenant_id,
+    #             resume_status=True
+    #         )
+
+    #     # Apply role-based filtering
+    #     if role == 'recruiter' and branch:
+    #         applications = applications.filter(branch=branch)
+    #     elif branch:
+    #         applications = applications.filter(branch=branch)
+            
+    #     return applications
+
+
     def _get_applications_queryset(self, job_requisition_id, tenant_id, role, branch, applications_data):
         """Get applications queryset with proper filtering"""
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         if applications_data:
             application_ids = [app['application_id'] for app in applications_data]
             applications = JobApplication.active_objects.filter(
@@ -683,6 +782,7 @@ class ResumeScreeningView(APIView):
             
         return applications
 
+
     def _get_job_requirements(self, job_requisition):
         """Extract job requirements from requisition data"""
         return (
@@ -692,8 +792,112 @@ class ResumeScreeningView(APIView):
             (job_requisition.get('knowledge_requirement') or '')
         ).strip()
 
+    # def _screen_from_model_safe(self, app, job_requirements, document_type):
+    #     """Screen resume using model fields with comprehensive error handling"""
+    #     processing_start = time.perf_counter()
+        
+    #     try:
+    #         # Construct resume text from model fields
+    #         resume_text = (
+    #             f"{app.qualification or ''} "
+    #             f"{app.experience or ''} "
+    #             f"{app.knowledge_skill or ''} "
+    #             f"{app.cover_letter or ''}"
+    #         ).strip()
+            
+    #         if not resume_text:
+    #             now = timezone.now().isoformat()
+    #             with transaction.atomic():
+    #                 app.screening_status = [{'status': 'failed', 'score': 0.0, 'updated_at': now, 'error': 'No resume data available in model fields'}]
+    #                 app.screening_score = 0.0
+    #                 app.save(update_fields=['screening_status', 'screening_score'])
+    #             processing_end = time.perf_counter()
+    #             processing_time = processing_end - processing_start
+    #             total_time = processing_time
+    #             total_vetting_time = {
+    #                 "application_id": str(app.id),
+    #                 "total_seconds": round(total_time, 2),
+    #                 "processing_seconds": round(processing_time, 2),
+    #                 "status": "no_data"
+    #             }
+    #             logger.warning(f"📄 NO DATA - App {app.id}: TOTAL {total_time:.2f}s (PROC: {processing_time:.2f}s)")
+    #             return {
+    #                 "application_id": str(app.id),
+    #                 "full_name": app.full_name,
+    #                 "email": app.email,
+    #                 "error": "No resume data available in model fields",
+    #                 "success": False,
+    #                 "total_vetting_time": total_vetting_time
+    #             }
+
+    #         # Screen resume
+    #         score = screen_resume(resume_text, job_requirements)
+    #         employment_gaps = getattr(app, 'employment_gaps', [])
+    #         now = timezone.now().isoformat()
+            
+    #         # Update application with screening results
+    #         with transaction.atomic():
+    #             app.screening_status = [{'status': 'processed', 'score': score, 'updated_at': now}]
+    #             app.screening_score = score
+    #             if not employment_gaps:  # Only set if empty
+    #                 app.employment_gaps = employment_gaps
+    #             app.save(update_fields=['screening_status', 'screening_score', 'employment_gaps'])
+            
+    #         processing_end = time.perf_counter()
+    #         processing_time = processing_end - processing_start
+    #         total_time = processing_time
+    #         total_vetting_time = {
+    #             "application_id": str(app.id),
+    #             "total_seconds": round(total_time, 2),
+    #             "processing_seconds": round(processing_time, 2),
+    #             "status": "success"
+    #         }
+    #         logger.info(f"✅ VETTING SUCCESS - App {app.id} (Score: {score:.1f}): TOTAL {total_time:.2f}s (PROC: {processing_time:.2f}s)")
+            
+    #         return {
+    #             "application_id": str(app.id),
+    #             "full_name": app.full_name,
+    #             "email": app.email,
+    #             "score": score,
+    #             "screening_status": 'processed',
+    #             "employment_gaps": employment_gaps,
+    #             "success": True,
+    #             "total_vetting_time": total_vetting_time
+    #         }
+            
+    #     except Exception as e:
+    #         logger.error(f"Processing failed for app {app.id}: {str(e)}")
+    #         now = timezone.now().isoformat()        
+    #         with transaction.atomic():
+    #             app.screening_status = [{'status': 'failed', 'score': 0.0, 'updated_at': now, 'error': f"Processing error: {str(e)}"}]
+    #             app.screening_score = 0.0
+    #             app.save(update_fields=['screening_status', 'screening_score'])
+    #         processing_end = time.perf_counter()
+    #         processing_time = processing_end - processing_start
+    #         total_time = processing_time
+    #         total_vetting_time = {
+    #             "application_id": str(app.id),
+    #             "total_seconds": round(total_time, 2),
+    #             "processing_seconds": round(processing_time, 2),
+    #             "status": "processing_error"
+    #         }
+    #         logger.warning(f"⚠️  VETTING ERROR - App {app.id} ({str(e)[:50]}...): TOTAL {total_time:.2f}s (PROC: {processing_time:.2f}s)")
+                
+    #         return {
+    #             "application_id": str(app.id),
+    #             "full_name": app.full_name,
+    #             "email": app.email,
+    #             "error": f"Processing error: {str(e)}",
+    #             "success": False,
+    #             "total_vetting_time": total_vetting_time
+    #         }
+        
     def _screen_from_model_safe(self, app, job_requirements, document_type):
         """Screen resume using model fields with comprehensive error handling"""
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         processing_start = time.perf_counter()
         
         try:
@@ -793,8 +997,109 @@ class ResumeScreeningView(APIView):
             }
         
     
+    # def _process_screening_results(self, results, applications, job_requisition, num_candidates, tenant_id):
+    #     """Process screening results and queue notifications with transaction safety"""
+    #     try:
+    #         shortlisted = [r for r in results if r.get("success")]
+    #         failed_applications = [r for r in results if not r.get("success")]
+
+    #         # Handle case where all screenings failed
+    #         if not shortlisted and failed_applications:
+    #             return {
+    #                 "detail": "All resume screenings failed.",
+    #                 "failed_applications": failed_applications,
+    #                 "document_type": "resume",
+    #                 "timing_summary": {
+    #                     "total_screening_time_seconds": 0,
+    #                     "applications_processed": 0,
+    #                     "per_application_timings": []
+    #                 }
+    #             }
+
+    #         # Sort by score and select top candidates
+    #         shortlisted.sort(key=lambda x: x['score'], reverse=True)
+    #         final_shortlisted = shortlisted[:num_candidates] if num_candidates > 0 else shortlisted
+    #         shortlisted_ids = {item['application_id'] for item in final_shortlisted}
+
+    #         # Update application statuses and queue emails
+    #         for app in applications:
+    #             app_id_str = str(app.id)
+    #             if app_id_str in shortlisted_ids:
+    #                 # Update to shortlisted
+    #                 new_status = 'shortlisted'
+    #                 _append_status_history(app, new_status, automated=True, reason='Automated by resume screening')
+    #                 with transaction.atomic():
+    #                     app.status = new_status
+    #                     app.current_stage = 'screening'  # Sync stage after screening
+    #                     app.save(update_fields=['status', 'current_stage', 'status_history'])
+                    
+    #                 # Find shortlisted application data
+    #                 shortlisted_app = next((item for item in final_shortlisted if item['application_id'] == app_id_str), None)
+    #                 if shortlisted_app:
+    #                     applicant_data = {
+    #                         "email": shortlisted_app['email'],
+    #                         "full_name": shortlisted_app['full_name'],
+    #                         "application_id": shortlisted_app['application_id'],
+    #                         "job_requisition_id": job_requisition['id'],
+    #                         "status": "shortlisted",
+    #                         "score": shortlisted_app.get('score')
+    #                     }
+                        
+    #                     # Queue notification with employment gaps info if any
+    #                     employment_gaps = shortlisted_app.get('employment_gaps', [])
+    #                     event_type = "candidate.shortlisted.gaps" if employment_gaps else "candidate.shortlisted"
+                        
+    #                     send_notification_task.delay(
+    #                         applicant_data=applicant_data,
+    #                         tenant_id=tenant_id,
+    #                         event_type=event_type,
+    #                         employment_gaps=employment_gaps
+    #                     )
+    #                     logger.info(f"Queued shortlisted notification for {applicant_data['email']}")
+    #             else:
+    #                 # Update to rejected
+    #                 new_status = 'rejected'
+    #                 _append_status_history(app, new_status, automated=True, reason='Automated by resume screening')
+    #                 with transaction.atomic():
+    #                     app.status = new_status
+    #                     app.current_stage = 'screening'  # Sync stage after screening
+    #                     app.save(update_fields=['status', 'current_stage', 'status_history'])
+                    
+    #                 # Queue rejection notification
+    #                 rejected_app = {
+    #                     "email": app.email,
+    #                     "full_name": app.full_name,
+    #                     "application_id": app_id_str,
+    #                     "job_requisition_id": job_requisition['id'],
+    #                     "status": "rejected",
+    #                     "score": getattr(app, "screening_score", None)
+    #                 }
+                    
+    #                 send_notification_task.delay(
+    #                     applicant_data=rejected_app, 
+    #                     tenant_id=tenant_id, 
+    #                     event_type="candidate.rejected"
+    #                 )
+    #                 logger.info(f"Queued rejection notification for {rejected_app['email']}")
+
+    #         return {
+    #             "detail": f"Screened {len(shortlisted)} applications, shortlisted {len(final_shortlisted)} candidates.",
+    #             "shortlisted_candidates": final_shortlisted,
+    #             "failed_applications": failed_applications,
+    #             "number_of_candidates": num_candidates,
+    #             "document_type": "resume"
+    #         }
+            
+    #     except Exception as e:
+    #         logger.error(f"Error processing screening results: {str(e)}")
+    #         raise Exception(f"Failed to process screening results: {str(e)}")
+
     def _process_screening_results(self, results, applications, job_requisition, num_candidates, tenant_id):
         """Process screening results and queue notifications with transaction safety"""
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         try:
             shortlisted = [r for r in results if r.get("success")]
             failed_applications = [r for r in results if not r.get("success")]
@@ -889,7 +1194,7 @@ class ResumeScreeningView(APIView):
         except Exception as e:
             logger.error(f"Error processing screening results: {str(e)}")
             raise Exception(f"Failed to process screening results: {str(e)}")
-
+        
 
 class ScreeningTaskStatusView(APIView):
     """
@@ -929,7 +1234,163 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
+    # def create(self, request, *args, **kwargs):
+    #     # Normalize list-based fields to strings
+    #     def normalize_field(value):
+    #         if isinstance(value, list) and value:
+    #             return value[0]
+    #         return value
+
+    #     unique_link = normalize_field(request.data.get('unique_link') or request.data.get('job_requisition_unique_link'))
+    #     if not unique_link:
+    #         logger.warning("Missing job requisition unique link in request")
+    #         return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Extract tenant_id from unique_link
+    #     try:
+    #         parts = unique_link.split('-')
+    #         if len(parts) < 5:
+    #             logger.warning(f"Invalid unique_link format: {unique_link}")
+    #             return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+    #         tenant_id = '-'.join(parts[:5])
+    #     except Exception as e:
+    #         logger.error(f"Error extracting tenant_id from link: {str(e)}")
+    #         return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Fetch job requisition from Talent Engine
+    #     requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+    #     try:
+    #         resp = requests.get(requisition_url)
+    #         logger.info(f"Requisition fetch for link: {unique_link}, status: {resp.status_code}")
+    #         if resp.status_code != 200:
+    #             try:
+    #                 error_detail = resp.json().get('detail', 'Invalid job requisition.')
+    #             except Exception:
+    #                 error_detail = 'Invalid job requisition.'
+    #             logger.error(f"Failed to fetch requisition: {error_detail}")
+    #             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+    #         job_requisition = resp.json()
+    #     except Exception as e:
+    #         logger.error(f"Error fetching job requisition: {str(e)}")
+    #         return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
+
+    #     # Prepare payload, normalizing list-based fields
+    #     payload = {key: normalize_field(value) for key, value in request.data.items()}
+    #     payload['job_requisition_id'] = job_requisition['id']
+    #     payload['tenant_id'] = tenant_id
+
+    #     # Extract and compress documents from multipart form
+    #     documents = []
+    #     i = 0
+    #     while f'documents[{i}][document_type]' in request.data and f'documents[{i}][file]' in request.FILES:
+    #         document_type = normalize_field(request.data.get(f'documents[{i}][document_type]')).lower()
+    #         file_obj = request.FILES.get(f'documents[{i}][file]')
+    #         original_name = file_obj.name
+    #         content_type = file_obj.content_type
+    #         folder_path = f"application_documents/{timezone.now().strftime('%Y/%m/%d')}"
+    #         file_name = f"{folder_path}/{uuid.uuid4()}{os.path.splitext(original_name)[1]}"
+
+    #         # Compress file if it's a resume or CV
+    #         if document_type in ['resume', 'curriculum vitae (cv)']:
+    #             try:
+    #                 file_content = file_obj.read()
+    #                 compressed_file = io.BytesIO()
+    #                 with gzip.GzipFile(fileobj=compressed_file, mode='wb') as gz:
+    #                     gz.write(file_content)
+    #                 compressed_file.seek(0)
+    #                 file_name += '.gz'
+    #                 content_type = 'application/gzip'
+    #                 compressed_file_obj = InMemoryUploadedFile(
+    #                     file=compressed_file,
+    #                     field_name=f'documents[{i}][file]',
+    #                     name=file_name,
+    #                     content_type=content_type,
+    #                     size=len(compressed_file.getvalue()),
+    #                     charset=None
+    #                 )
+    #             except Exception as e:
+    #                 logger.error(f"Compression failed for file {original_name}: {str(e)}")
+    #                 return Response({"detail": f"Failed to compress file {original_name}"}, status=status.HTTP_400_BAD_REQUEST)
+    #         else:
+    #             compressed_file_obj = file_obj
+    #             file_name = f"{folder_path}/{uuid.uuid4()}{os.path.splitext(original_name)[1]}"
+
+    #         # Upload file to storage
+    #         try:
+    #             file_url = upload_file_dynamic(compressed_file_obj, file_name, content_type)
+    #             logger.info(f"Uploaded file {file_name} to {file_url}")
+    #         except Exception as e:
+    #             logger.error(f"Upload failed for file {file_name}: {str(e)}")
+    #             return Response({"detail": f"Failed to upload file {file_name}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    #         documents.append({
+    #             'document_type': document_type,
+    #             'file_url': file_url,
+    #             'original_name': original_name,
+    #             'compression': 'gzip' if document_type in ['resume', 'curriculum vitae (cv)'] else None,
+    #             'uploaded_at': timezone.now().isoformat()
+    #         })
+    #         i += 1
+
+    #     if documents:
+    #         payload['documents'] = documents
+
+    #     logger.info(f"Full POST payload: {payload}")
+
+    #     # Validate serializer
+    #     serializer = self.get_serializer(data=payload, context={'request': request, 'job_requisition': job_requisition})
+    #     if not serializer.is_valid():
+    #         logger.error(f"Validation errors: {serializer.errors}")
+    #         return Response({
+    #             "detail": "Validation error",
+    #             "errors": serializer.errors
+    #         }, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Prevent duplicate application
+    #     email = payload.get('email')
+    #     job_requisition_id = job_requisition['id']
+    #     if JobApplication.objects.filter(email=email, job_requisition_id=job_requisition_id).exists():
+    #         logger.warning(f"Duplicate application attempt by email: {email} for requisition: {job_requisition_id}")
+    #         return Response({"detail": "You have already applied for this job"}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Save the application
+    #     self.perform_create(serializer)
+
+    #     # Increment num_of_applications
+    #     increment_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/public/update-applications/{unique_link}/"
+    #     try:
+    #         resp = requests.post(increment_url)
+    #         if resp.status_code != 200:
+    #             logger.warning(f"Failed to increment num_of_applications for unique_link {unique_link}: {resp.status_code}, {resp.text}")
+    #         else:
+    #             logger.info(f"Successfully incremented num_of_applications for unique_link {unique_link}")
+    #     except Exception as e:
+    #         logger.error(f"Error calling increment endpoint for unique_link {unique_link}: {str(e)}")
+
+    #     # Publish to Kafka
+    #     try:
+    #         producer = KafkaProducer(
+    #             bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+    #             value_serializer=lambda v: json.dumps(v).encode('utf-8')
+    #         )
+    #         kafka_data = {
+    #             "tenant_id": tenant_id,
+    #             "job_requisition_id": job_requisition['id'],
+    #             "event": "job_application_created"
+    #         }
+    #         producer.send('job_application_events', kafka_data)
+    #         producer.flush()
+    #         logger.info(f"Published Kafka job application event for requisition {job_requisition['id']}")
+    #     except Exception as e:
+    #         logger.error(f"Kafka publish error: {str(e)}")
+
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def create(self, request, *args, **kwargs):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         # Normalize list-based fields to strings
         def normalize_field(value):
             if isinstance(value, list) and value:
@@ -1093,6 +1554,10 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
         return [AllowAny()]  # TODO: Use IsAuthenticated in production
 
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         request = self.request
         tenant_id = request.jwt_payload.get('tenant_unique_id')
 
@@ -1111,6 +1576,26 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
 
         return queryset.order_by('-created_at')
 
+
+    # def get_queryset(self):
+    #     request = self.request
+    #     tenant_id = request.jwt_payload.get('tenant_unique_id')
+
+    #     if not tenant_id:
+    #         logger.warning("Tenant unique ID not found in token")
+    #         return JobApplication.objects.none()
+
+    #     branch_id = request.query_params.get('branch_id')
+    #     queryset = JobApplication.active_objects.filter(tenant_id=tenant_id)
+
+    #     if branch_id:
+    #         queryset = queryset.filter(branch_id=branch_id)
+
+    #     if hasattr(request.user, 'branch') and request.user.branch and not branch_id:
+    #         queryset = queryset.filter(branch=request.user.branch)
+
+    #     return queryset.order_by('-created_at')
+
     def check_permissions(self, request):
         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
         return super().check_permissions(request)
@@ -1121,7 +1606,27 @@ class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     lookup_field = 'id'
 
+    # def get_queryset(self):
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+    #     queryset = JobApplication.active_objects.all()
+    #     if not tenant_id:
+    #         logger.error("No tenant_id in token")
+    #         return JobApplication.active_objects.none()
+    #     queryset = queryset.filter(tenant_id=tenant_id)
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     elif branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     return queryset.order_by('-created_at')
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
@@ -1136,6 +1641,7 @@ class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
         elif branch:
             queryset = queryset.filter(branch=branch)
         return queryset.order_by('-created_at')
+
 
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -1171,7 +1677,38 @@ class JobApplicationBulkDeleteView(APIView):
     # permission_classes = [IsAuthenticated]
     serializer_class = SimpleMessageSerializer
 
+    # def post(self, request):
+    #     ids = request.data.get('ids', [])
+    #     if not ids:
+    #         return Response({"detail": "No IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+    #     try:
+    #         jwt_payload = getattr(request, 'jwt_payload', {})
+    #         tenant_id = jwt_payload.get('tenant_id')
+    #         role = jwt_payload.get('role')
+    #         branch = jwt_payload.get('branch')
+    #         if not tenant_id:
+    #             return Response({"detail": "No tenant_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
+    #         queryset = JobApplication.active_objects.filter(tenant_id=tenant_id, id__in=ids)
+    #         if role == 'recruiter' and branch:
+    #             queryset = queryset.filter(branch=branch)
+    #         applications = list(queryset)
+    #         count = len(applications)
+    #         if count == 0:
+    #             return Response({"detail": "No applications found."}, status=status.HTTP_404_NOT_FOUND)
+    #         with transaction.atomic():
+    #             for application in applications:
+    #                 application.soft_delete()
+    #         return Response({"detail": f"Soft-deleted {count} application(s)."}, status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         logger.error(f"Bulk soft delete failed: {str(e)}")
+    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
     def post(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         ids = request.data.get('ids', [])
         if not ids:
             return Response({"detail": "No IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
@@ -1196,8 +1733,7 @@ class JobApplicationBulkDeleteView(APIView):
         except Exception as e:
             logger.error(f"Bulk soft delete failed: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
+        
 
 class JobApplicationWithSchedulesView(APIView):
     """
@@ -1208,6 +1744,10 @@ class JobApplicationWithSchedulesView(APIView):
     serializer_class = SimpleMessageSerializer  # Replace if needed
 
     def get(self, request, *args, **kwargs):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         email = kwargs.get('email') 
         unique_link = request.query_params.get('unique_link')
 
@@ -1264,7 +1804,7 @@ class JobApplicationWithSchedulesView(APIView):
             tenant_id=tenant_id,
             job_application_id=job_application.id
         )
- 
+    
         if request.user.is_authenticated and getattr(request.user, 'role', None) == 'recruiter' and getattr(request.user, 'branch', None):
             schedules = schedules.filter(branch=request.user.branch)
 
@@ -1279,6 +1819,80 @@ class JobApplicationWithSchedulesView(APIView):
 
         logger.info(f"Retrieved job application for email {email} and tenant {tenant_id}")
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+    # def get(self, request, *args, **kwargs):
+    #     email = kwargs.get('email') 
+    #     unique_link = request.query_params.get('unique_link')
+
+    #     if not email or not unique_link:
+    #         return Response(
+    #             {"detail": "Both 'email' and 'unique_link' are required."},
+    #             status=status.HTTP_400_BAD_REQUEST
+    #         )
+
+    #     # Extract tenant_id from UUID-style prefix (first 5 segments)
+    #     try:
+    #         parts = unique_link.split('-')
+    #         if len(parts) < 5:
+    #             return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+    #         tenant_id = '-'.join(parts[:5])
+    #     except Exception as e:
+    #         logger.error(f"Error extracting tenant_id from link: {str(e)}")
+    #         return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Fetch job requisition from Talent Engine
+    #     requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+    #     try:
+    #         resp = requests.get(requisition_url)
+    #         if resp.status_code != 200:
+    #             error_detail = resp.json().get('detail', 'Invalid job requisition.') if resp.content else 'Invalid job requisition.'
+    #             return Response({"detail": error_detail}, status=status.HTTP_400_BAD_REQUEST)
+    #         job_requisition = resp.json()
+    #     except Exception as e:
+    #         logger.error(f"Error fetching job requisition: {str(e)}")
+    #         return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
+
+    #     # Fetch job application by email + tenant_id + job requisition
+    #     try:
+    #         job_application = JobApplication.active_objects.get(
+    #             tenant_id=tenant_id,
+    #             email=email,
+    #             job_requisition_id=job_requisition['id']
+    #         )
+    #     except JobApplication.DoesNotExist:
+    #         return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
+    #     except JobApplication.MultipleObjectsReturned:
+    #         return Response({"detail": "Multiple job applications found. Please contact support."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     job_application_serializer = JobApplicationSerializer(job_application)
+
+    #     # Fetch schedules for this application
+    #     # schedules = Schedule.active_objects.filter(
+    #     #     tenant_id=tenant_id,
+    #     #     job_application=job_application
+    #     # )
+
+    #     # Fetch schedules for this application
+    #     schedules = Schedule.active_objects.filter(
+    #         tenant_id=tenant_id,
+    #         job_application_id=job_application.id
+    #     )
+ 
+    #     if request.user.is_authenticated and getattr(request.user, 'role', None) == 'recruiter' and getattr(request.user, 'branch', None):
+    #         schedules = schedules.filter(branch=request.user.branch)
+
+    #     schedule_serializer = ScheduleSerializer(schedules, many=True)
+
+    #     response_data = {
+    #         'job_application': job_application_serializer.data,
+    #         'job_requisition': job_requisition,
+    #         'schedules': schedule_serializer.data,
+    #         'schedule_count': schedules.count()
+    #     }
+
+    #     logger.info(f"Retrieved job application for email {email} and tenant {tenant_id}")
+    #     return Response(response_data, status=status.HTTP_200_OK)
 
 
 
@@ -1330,7 +1944,105 @@ class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer
     # permission_classes = [IsAuthenticated]
 
+    # def get(self, request):
+    #     jwt_payload = getattr(request, 'jwt_payload', {})
+    #     tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+    #     #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+
+    #     if not tenant_id:
+    #         return Response({"detail": "tenant_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # ---------- Fetch paginated results ----------
+    #     all_job_requisitions = []
+    #     next_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/"
+    #     headers = {'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
+    #     params = {'tenant_id': tenant_id, 'publish_status': True}
+
+    #     while next_url:
+    #         try:
+    #             resp = requests.get(next_url, headers=headers, params=params if next_url.endswith('/requisitions/') else {})
+    #             data = resp.json()
+    #         except requests.RequestException as e:
+    #             print(f"Request failed: {e}")
+    #             return Response({"detail": "Error fetching job requisitions."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    #         except ValueError:
+    #             print("Invalid JSON response from requisition service.")
+    #             return Response({"detail": "Invalid response format."}, status=500)
+
+    #         if resp.status_code != 200:
+    #             print(f"Failed to fetch job requisitions: {resp.status_code} - {resp.text}")
+    #             return Response({"detail": "Failed to fetch job requisitions."}, status=resp.status_code)
+
+    #         results = data.get('results', [])
+    #         all_job_requisitions.extend(results)
+    #         next_url = data.get('next')
+
+    #     # ---------- Process requisitions ----------
+    #     response_data = []
+
+    #     for job_requisition in all_job_requisitions:
+    #         if not isinstance(job_requisition, dict):
+    #             print(f"Invalid job requisition: {job_requisition}")
+    #             continue
+
+    #         job_requisition_id = job_requisition.get('id')
+    #         if not job_requisition_id:
+    #             print(f"Missing job requisition ID: {job_requisition}")
+    #             continue
+
+    #         # Fetch shortlisted applications
+    #         applications = JobApplication.active_objects.filter(
+    #             tenant_id=tenant_id,
+    #             job_requisition_id=job_requisition_id,
+    #             status='shortlisted'
+    #         )
+    #         if branch:
+    #             applications = applications.filter(branch=branch)
+
+    #         application_serializer = JobApplicationSerializer(applications, many=True)
+
+    #         # Add schedules to each application
+    #         enhanced_applications = []
+    #         for app_data in application_serializer.data:
+    #             application_id = app_data['id']
+    #             schedules = Schedule.active_objects.filter(
+    #                 tenant_id=tenant_id,
+    #                 job_application_id=application_id
+    #             )
+    #             if branch:
+    #                 schedules = schedules.filter(branch=branch)
+
+    #             schedule_serializer = ScheduleSerializer(schedules, many=True)
+    #             app_data['scheduled'] = schedules.exists()
+    #             app_data['schedules'] = schedule_serializer.data
+    #             enhanced_applications.append(app_data)
+
+    #         # Total applications
+    #         total_applications = JobApplication.active_objects.filter(
+    #             tenant_id=tenant_id,
+    #             job_requisition_id=job_requisition_id
+    #         )
+    #         if branch:
+    #             total_applications = total_applications.filter(branch=branch)
+
+    #         response_data.append({
+    #             'job_requisition': job_requisition,
+    #             'shortlisted_applications': enhanced_applications,
+    #             'shortlisted_count': applications.count(),
+    #             'total_applications': total_applications.count()
+    #         })
+
+    #     # Sort by created_at descending
+    #     response_data.sort(key=lambda x: x['job_requisition'].get('created_at', ''), reverse=True)
+    #     return Response(response_data, status=status.HTTP_200_OK)
+
     def get(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(request, 'jwt_payload', {})
         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
@@ -1430,7 +2142,67 @@ class PublishedPublicJobRequisitionsWithShortlistedApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer 
     # permission_classes = [AllowAny]
 
+    # def get(self, request):
+    #     jwt_payload = getattr(request, 'jwt_payload', {})
+    #     tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+    #     #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+    #     if not tenant_id:
+    #         return Response({"detail": "Missing tenant_id in token."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Fetch tenant via API
+    #     tenant_resp = requests.get(
+    #         f"{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{tenant_id}/",
+    #         headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
+    #     )
+    #     if tenant_resp.status_code != 200:
+    #         return Response({"detail": f"Tenant with id {tenant_id} not found."}, status=tenant_resp.status_code)
+    #     tenant = tenant_resp.json()
+
+    #     # Fetch published job requisitions via API
+    #     params = {'tenant_id': tenant_id, 'publish_status': True}
+    #     if branch:
+    #         params['branch_name'] = branch
+    #     resp = requests.get(
+    #         f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/",
+    #         params=params,
+    #         headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
+    #     )
+    #     if resp.status_code != 200:
+    #         return Response({"detail": "Failed to fetch job requisitions."}, status=resp.status_code)
+    #     job_requisitions = resp.json()
+
+    #     response_data = []
+    #     for job_requisition in job_requisitions:
+    #         applications = JobApplication.active_objects.filter(
+    #             tenant_id=tenant_id,
+    #             job_requisition_id=job_requisition['id'],
+    #             status='shortlisted'
+    #         )
+    #         if role == 'recruiter' and branch:
+    #             applications = applications.filter(branch=branch)
+    #         elif branch:
+    #             applications = applications.filter(branch=branch)
+    #         shortlisted_count = applications.count()
+    #         tenant_data = {
+    #             "logo_url": tenant.get("logo"),
+    #             "about_us": tenant.get("about_us"),
+    #             "title": tenant.get("title"),
+    #         }
+    #         response_data.append({
+    #             'job_requisition': job_requisition,
+    #             'tenant': tenant_data,
+    #             'shortlisted_count': shortlisted_count,
+    #         })
+
+    #     return Response(response_data, status=status.HTTP_200_OK)
+
     def get(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(request, 'jwt_payload', {})
         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
@@ -1502,7 +2274,12 @@ class SoftDeletedJobApplicationsView(generics.ListAPIView):
     serializer_class = JobApplicationSerializer
     # permission_classes = [IsAuthenticated]
 
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
@@ -1519,12 +2296,49 @@ class SoftDeletedJobApplicationsView(generics.ListAPIView):
             queryset = queryset.filter(branch=branch)
         return queryset.order_by('-created_at')
 
+
+    # def get_queryset(self):
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+    #     #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+    #     queryset = JobApplication.objects.filter(is_deleted=True)
+    #     if not tenant_id:
+    #         logger.error("No tenant_id in token")
+    #         return JobApplication.objects.none()
+    #     queryset = queryset.filter(tenant_id=tenant_id)
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     elif branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     return queryset.order_by('-created_at')
+
 class RecoverSoftDeletedJobApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer 
     def get_permissions(self):
         return [AllowAny()]  # Temporary for testing
 
+    # def post(self, request):
+    #     ids = request.data.get('ids', [])
+    #     if not ids:
+    #         return Response({"detail": "No application IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+    #     applications = JobApplication.objects.filter(id__in=ids, is_deleted=True)
+    #     if request.user.is_authenticated and request.user.branch:
+    #         applications = applications.filter(branch=request.user.branch)
+    #     if not applications.exists():
+    #         return Response({"detail": "No soft-deleted applications found."}, status=status.HTTP_404_NOT_FOUND)
+    #     with transaction.atomic():
+    #         for application in applications:
+    #             application.restore()
+    #     return Response({"detail": f"Successfully recovered {applications.count()} application(s)."}, status=status.HTTP_200_OK)
+
+
     def post(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         ids = request.data.get('ids', [])
         if not ids:
             return Response({"detail": "No application IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
@@ -1538,12 +2352,29 @@ class RecoverSoftDeletedJobApplicationsView(APIView):
                 application.restore()
         return Response({"detail": f"Successfully recovered {applications.count()} application(s)."}, status=status.HTTP_200_OK)
 
+
 class PermanentDeleteJobApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer 
     def get_permissions(self):
         return [AllowAny()]  # Temporary for testing
 
+    # def post(self, request):
+    #     ids = request.data.get('ids', [])
+    #     if not ids:
+    #         return Response({"detail": "No application IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+    #     applications = JobApplication.objects.filter(id__in=ids, is_deleted=True)
+    #     if request.user.is_authenticated and request.user.branch:
+    #         applications = applications.filter(branch=request.user.branch)
+    #     if not applications.exists():
+    #         return Response({"detail": "No soft-deleted applications found."}, status=status.HTTP_404_NOT_FOUND)
+    #     deleted_count = applications.delete()[0]
+    #     return Response({"detail": f"Successfully permanently deleted {deleted_count} application(s)."}, status=status.HTTP_200_OK)
+
     def post(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         ids = request.data.get('ids', [])
         if not ids:
             return Response({"detail": "No application IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
@@ -1556,12 +2387,37 @@ class PermanentDeleteJobApplicationsView(APIView):
         return Response({"detail": f"Successfully permanently deleted {deleted_count} application(s)."}, status=status.HTTP_200_OK)
 
 
+
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
     pagination_class = CustomPagination
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
+    # def get_queryset(self):
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+    #     queryset = Schedule.active_objects.all()
+    #     if not tenant_id:
+    #         logger.error("No tenant_id in token")
+    #         return Schedule.active_objects.none()
+    #     queryset = queryset.filter(tenant_id=tenant_id)
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     elif branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     status_param = self.request.query_params.get('status', None)
+    #     if status_param:
+    #         queryset = queryset.filter(status=status_param)
+    #     return queryset.order_by('-created_at')
+
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
@@ -1580,7 +2436,12 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(status=status_param)
         return queryset.order_by('-created_at')
 
+
     def create(self, request, *args, **kwargs):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(request, 'jwt_payload', {})
         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
 
@@ -1625,6 +2486,51 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    # def create(self, request, *args, **kwargs):
+    #     jwt_payload = getattr(request, 'jwt_payload', {})
+    #     tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+
+    #     if not tenant_id:
+    #         logger.error("Tenant schema or ID missing from token")
+    #         return Response({"error": "Tenant schema or ID missing from token"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    #     data = request.data.copy()
+    #     serializer = self.get_serializer(data=data, context={'request': request})
+    #     serializer.is_valid(raise_exception=True)
+    #     schedule = serializer.save()  # Calls create method in serializer
+
+    #     # Send notification after successful schedule creation
+    #     try:
+    #         job_app = JobApplication.objects.filter(id=schedule.job_application_id).first()
+    #         if not job_app:
+    #             logger.error(f"Job application {schedule.job_application_id} not found for schedule {schedule.id}")
+    #         else:
+    #             notification_payload = {
+    #                 "application_id": str(schedule.job_application_id),
+    #                 "full_name": job_app.full_name,
+    #                 "email": job_app.email,
+    #                 "job_requisition_id": str(job_app.job_requisition_id),
+    #                 "status": schedule.status,
+    #                 "interview_start_date_time": schedule.interview_start_date_time.isoformat(),
+    #                 "interview_end_date_time": schedule.interview_end_date_time.isoformat() if schedule.interview_end_date_time else None,
+    #                 "meeting_mode": schedule.meeting_mode,
+    #                 "meeting_link": schedule.meeting_link,
+    #                 "interview_address": schedule.interview_address,
+    #                 "message": schedule.message,
+    #                 "timezone": schedule.timezone,
+    #                 "schedule_id": str(schedule.id)
+    #             }
+    #             send_screening_notification(
+    #                 notification_payload,
+    #                 tenant_id=tenant_id,
+    #                 event_type="interview.scheduled"
+    #             )
+    #             logger.info(f"Schedule creation notification sent for schedule {schedule.id}, job application {schedule.job_application_id}")
+    #     except Exception as e:
+    #         logger.error(f"Failed to send schedule creation notification for schedule {schedule.id}: {str(e)}")
+
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ScheduleSerializer
@@ -1634,7 +2540,28 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_permissions(self):
         return [AllowAny()]  # Temporary for testing
 
+    # def get_queryset(self):
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+    #     queryset = Schedule.active_objects.all()
+    #     if not tenant_id:
+    #         logger.error("No tenant_id in token")
+    #         return Schedule.active_objects.none()
+    #     queryset = queryset.filter(tenant_id=tenant_id)
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     elif branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     return queryset.order_by('-created_at')
+
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = jwt_payload.get('tenant_unique_id')
         role = jwt_payload.get('role')
@@ -1649,6 +2576,7 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
         elif branch:
             queryset = queryset.filter(branch=branch)
         return queryset.order_by('-created_at')
+
 
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -1720,7 +2648,44 @@ class ScheduleBulkDeleteView(APIView):
     def get_permissions(self):
         return [AllowAny()]  # Temporary for testing
 
+    # def post(self, request):
+    #     jwt_payload = getattr(request, 'jwt_payload', {})
+    #     # FIX: Use request.jwt_payload instead of self.request.jwt_payload
+    #     tenant_id = jwt_payload.get('tenant_unique_id')
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+        
+    #     ids = request.data.get('ids', [])
+    #     if not ids:
+    #         return Response({"detail": "No schedule IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+        
+    #     schedules = Schedule.active_objects.filter(id__in=ids)
+        
+    #     if not tenant_id:
+    #         return Response({"detail": "No tenant_id in token."}, status=status.HTTP_400_BAD_REQUEST)
+        
+    #     schedules = schedules.filter(tenant_id=tenant_id)
+        
+    #     if role == 'recruiter' and branch:
+    #         schedules = schedules.filter(branch=branch)
+    #     elif branch:
+    #         schedules = schedules.filter(branch=branch)
+            
+    #     if not schedules.exists():
+    #         return Response({"detail": "No schedules found."}, status=status.HTTP_404_NOT_FOUND)
+        
+    #     with transaction.atomic():
+    #         for schedule in schedules:
+    #             schedule.soft_delete()
+                
+    #     return Response({"detail": f"Successfully soft-deleted {schedules.count()} schedule(s)."}, status=status.HTTP_200_OK)
+
+
     def post(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(request, 'jwt_payload', {})
         # FIX: Use request.jwt_payload instead of self.request.jwt_payload
         tenant_id = jwt_payload.get('tenant_unique_id')
@@ -1759,7 +2724,27 @@ class SoftDeletedSchedulesView(generics.ListAPIView):
     def get_permissions(self):
         return [AllowAny()]  # Temporary for testing
     
+    # def get_queryset(self):
+    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
+    #     tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+    #     #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+    #     queryset = Schedule.objects.filter(is_deleted=True)
+    #     if not tenant_id:
+    #         return Schedule.objects.none()
+    #     queryset = queryset.filter(tenant_id=tenant_id)
+    #     if role == 'recruiter' and branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     elif branch:
+    #         queryset = queryset.filter(branch=branch)
+    #     return queryset.order_by('-created_at')
+
     def get_queryset(self):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
@@ -1775,13 +2760,20 @@ class SoftDeletedSchedulesView(generics.ListAPIView):
             queryset = queryset.filter(branch=branch)
         return queryset.order_by('-created_at')
 
+
+
 class RecoverSoftDeletedSchedulesView(APIView):
     serializer_class = SimpleMessageSerializer 
     # permission_classes = [IsAuthenticated]
     def get_permissions(self):
         return [AllowAny()]  # Temporary for testing
     
+
     def post(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(request, 'jwt_payload', {})
         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
@@ -1805,16 +2797,68 @@ class RecoverSoftDeletedSchedulesView(APIView):
                 schedule.restore()
         return Response({"detail": f"Successfully recovered {schedules.count()} schedule(s)."}, status=status.HTTP_200_OK)
 
+
+    # def post(self, request):
+    #     jwt_payload = getattr(request, 'jwt_payload', {})
+    #     tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+    #     #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+    #     ids = request.data.get('ids', [])
+    #     if not ids:
+    #         return Response({"detail": "No schedule IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+    #     schedules = Schedule.objects.filter(id__in=ids, is_deleted=True)
+    #     if not tenant_id:
+    #         return Response({"detail": "No tenant_id in token."}, status=status.HTTP_400_BAD_REQUEST)
+    #     schedules = schedules.filter(tenant_id=tenant_id)
+    #     if role == 'recruiter' and branch:
+    #         schedules = schedules.filter(branch=branch)
+    #     elif branch:
+    #         schedules = schedules.filter(branch=branch)
+    #     if not schedules.exists():
+    #         return Response({"detail": "No soft-deleted schedules found."}, status=status.HTTP_404_NOT_FOUND)
+    #     with transaction.atomic():
+    #         for schedule in schedules:
+    #             schedule.restore()
+    #     return Response({"detail": f"Successfully recovered {schedules.count()} schedule(s)."}, status=status.HTTP_200_OK)
+
 class PermanentDeleteSchedulesView(APIView):
     serializer_class = SimpleMessageSerializer 
 
     def get_permissions(self):
         return [AllowAny()]  # Temporary for testing
 
+    # def post(self, request):
+    #     jwt_payload = getattr(request, 'jwt_payload', {})
+    #     tenant_id = self.request.jwt_payload.get('tenant_unique_id')
+    #    # tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+    #     role = jwt_payload.get('role')
+    #     branch = jwt_payload.get('user', {}).get('branch')
+    #     ids = request.data.get('ids', [])
+    #     if not ids:
+    #         return Response({"detail": "No schedule IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+    #     schedules = Schedule.objects.filter(id__in=ids, is_deleted=True)
+    #     if not tenant_id:
+    #         return Response({"detail": "No tenant_id in token."}, status=status.HTTP_400_BAD_REQUEST)
+    #     schedules = schedules.filter(tenant_id=tenant_id)
+    #     if role == 'recruiter' and branch:
+    #         schedules = schedules.filter(branch=branch)
+    #     elif branch:
+    #         schedules = schedules.filter(branch=branch)
+    #     if not schedules.exists():
+    #         return Response({"detail": "No soft-deleted schedules found."}, status=status.HTTP_404_NOT_FOUND)
+    #     deleted_count = schedules.delete()[0]
+    #     return Response({"detail": f"Successfully permanently deleted {deleted_count} schedule(s)."}, status=status.HTTP_200_OK)
+
+
     def post(self, request):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(request, 'jwt_payload', {})
         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
-       # tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
+    # tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
         role = jwt_payload.get('role')
         branch = jwt_payload.get('user', {}).get('branch')
         ids = request.data.get('ids', [])
@@ -1833,7 +2877,7 @@ class PermanentDeleteSchedulesView(APIView):
         deleted_count = schedules.delete()[0]
         return Response({"detail": f"Successfully permanently deleted {deleted_count} schedule(s)."}, status=status.HTTP_200_OK)
 
-
+        
 
 # class ComplianceStatusUpdateView(APIView):
 #     permission_classes = [AllowAny]  # Temporary for testing; replace with IsAuthenticated in production
@@ -1947,7 +2991,97 @@ class ComplianceStatusUpdateView(APIView):
     permission_classes = [AllowAny]  # Temporary for testing; replace with IsAuthenticated in production
     parser_classes = [JSONParser]
 
+    # def post(self, request, job_application_id):
+    #     # Extract item_id from request body
+    #     item_id = request.data.get('item_id')
+    #     if not item_id:
+    #         logger.warning("No item_id provided in request data")
+    #         return Response({"detail": "Item ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Extract user data from JWT
+    #     try:
+    #         user_data = get_user_data_from_jwt(request)
+    #         user_id = user_data.get('id')
+    #         branch = user_data.get('branch')  # May be null based on JWT
+    #         checked_by = {
+    #             'email': user_data.get('email', ''),
+    #             'first_name': user_data.get('first_name', ''),
+    #             'last_name': user_data.get('last_name', ''),
+    #             'job_role': user_data.get('job_role', '')
+    #         }
+    #     except Exception as e:
+    #         logger.error(f"Failed to extract user data from JWT: {str(e)}")
+    #         return Response({"detail": "Invalid JWT token for user data."}, status=status.HTTP_401_UNAUTHORIZED)
+
+    #     if not user_id:
+    #         logger.warning("No user.id found in JWT payload for status update")
+    #         return Response({"detail": "Authentication required for status update."}, status=status.HTTP_401_UNAUTHORIZED)
+
+    #     # Validate update data
+    #     update_data = {k: v for k, v in request.data.items() if k != 'item_id'}
+    #     if not update_data or not isinstance(update_data, dict):
+    #         logger.warning("No update data provided or invalid format")
+    #         return Response({"detail": "Update data must be a dictionary with fields to update."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Define valid fields
+    #     valid_fields = ['status', 'notes', 'description', 'required', 'checked_by', 'checked_at']
+    #     invalid_fields = [field for field in update_data if field not in valid_fields]
+    #     if invalid_fields:
+    #         logger.warning(f"Invalid fields provided: {invalid_fields}")
+    #         return Response({"detail": f"Invalid fields: {invalid_fields}. Must be one of {valid_fields}."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Validate status if provided
+    #     if 'status' in update_data and update_data['status'] not in ['pending', 'uploaded', 'accepted', 'rejected']:
+    #         logger.warning(f"Invalid status provided: {update_data['status']}")
+    #         return Response({"detail": "Invalid status. Must be 'pending', 'uploaded', 'accepted', or 'rejected'."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Fetch the job application
+    #     try:
+    #         application = JobApplication.active_objects.get(id=job_application_id)
+    #     except JobApplication.DoesNotExist:
+    #         logger.warning(f"Job application not found: {job_application_id}")
+    #         return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
+
+       
+    #     # Update compliance_status
+    #     updated_compliance_status = application.compliance_status.copy() if application.compliance_status else []
+    #     item_updated = False
+
+    #     for item in updated_compliance_status:
+    #         if str(item.get('id')) == str(item_id):
+    #             # Removed document check to allow status updates regardless of document presence
+    #             # Update all provided fields
+    #             for field_name, field_value in update_data.items():
+    #                 item[field_name] = field_value
+    #             # Set checked_by and checked_at if status is updated
+    #             if 'status' in update_data:
+    #                 item['checked_by'] = checked_by
+    #                 item['checked_at'] = timezone.now().isoformat()
+    #             item_updated = True
+    #             logger.info(f"Updated compliance item {item_id} in application {job_application_id} with fields {list(update_data.keys())}")
+    #             break
+
+    #     if not item_updated:
+    #         logger.warning(f"Compliance item {item_id} not found in application {job_application_id}")
+    #         return Response({"detail": f"Compliance item {item_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    #     # Save the updated application
+    #     with transaction.atomic():
+    #         application.compliance_status = updated_compliance_status
+    #         application.save()
+    #         logger.info(f"Job application {job_application_id} saved with updated compliance status")
+
+    #     serializer = JobApplicationSerializer(application, context={'request': request})
+    #     return Response({
+    #         "detail": "Compliance status updated successfully.",
+    #         "compliance_item": next((item for item in serializer.data['compliance_status'] if str(item['id']) == str(item_id)), None)
+    #     }, status=status.HTTP_200_OK)
+    
     def post(self, request, job_application_id):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         # Extract item_id from request body
         item_id = request.data.get('item_id')
         if not item_id:
@@ -1998,7 +3132,7 @@ class ComplianceStatusUpdateView(APIView):
             logger.warning(f"Job application not found: {job_application_id}")
             return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
 
-       
+    
         # Update compliance_status
         updated_compliance_status = application.compliance_status.copy() if application.compliance_status else []
         item_updated = False
@@ -2032,8 +3166,8 @@ class ComplianceStatusUpdateView(APIView):
             "detail": "Compliance status updated successfully.",
             "compliance_item": next((item for item in serializer.data['compliance_status'] if str(item['id']) == str(item_id)), None)
         }, status=status.HTTP_200_OK)
-    
 
+        
 
 # class ApplicantComplianceUploadView(APIView):
 #     permission_classes = [AllowAny]
@@ -2249,7 +3383,208 @@ class ApplicantComplianceUploadView(APIView):
     def post(self, request, job_application_id):
         return self._handle_upload(request, job_application_id)
 
+    # def _handle_upload(self, request, job_application_id):
+    #     logger.info(f"Request data: {request.data}")
+    #     unique_link = request.data.get('unique_link')
+    #     email = request.data.get('email')
+    #     names = request.data.getlist('names', [])  # List of compliance item names, optional
+    #     files = request.FILES.getlist('documents', [])  # List of uploaded files, optional
+
+    #     # Validate required fields
+    #     if not unique_link:
+    #         return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
+    #     if not email:
+    #         return Response({"detail": "Missing email."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Extract tenant_id from unique_link
+    #     try:
+    #         parts = unique_link.split('-')
+    #         if len(parts) < 6:
+    #             return Response({"detail": "Invalid unique link format."}, status=status.HTTP_400_BAD_REQUEST)
+    #         tenant_id = '-'.join(parts[:5])
+    #     except Exception as e:
+    #         logger.error(f"Error extracting tenant_id from {unique_link}: {str(e)}")
+    #         return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Fetch job requisition
+    #     try:
+    #         requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
+    #         resp = requests.get(requisition_url)
+    #         if resp.status_code != 200:
+    #             return Response({"detail": "Invalid job requisition."}, status=status.HTTP_400_BAD_REQUEST)
+    #         job_requisition = resp.json()
+    #     except Exception as e:
+    #         logger.error(f"Error fetching job requisition: {str(e)}")
+    #         return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
+
+    #     # Retrieve job application
+    #     try:
+    #         application = JobApplication.active_objects.get(
+    #             id=job_application_id,
+    #             tenant_id=tenant_id,
+    #             job_requisition_id=job_requisition['id'],
+    #             email=email
+    #         )
+    #     except JobApplication.DoesNotExist:
+    #         return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    #     checklist = job_requisition.get('compliance_checklist', [])
+    #     checklist_names = {item['name'] for item in checklist}
+
+    #     # If no compliance checklist, return success without saving
+    #     if not checklist:
+    #         return Response({
+    #             "detail": "No compliance items required for this requisition.",
+    #             "compliance_status": application.compliance_status
+    #         }, status=status.HTTP_200_OK)
+
+    #     # Validate provided names against checklist
+    #     for name in names:
+    #         if name not in checklist_names:
+    #             return Response({"detail": f"Invalid compliance item name: {name}. Must match checklist."}, 
+    #                            status=status.HTTP_400_BAD_REQUEST)
+
+    #     # Collect additional fields (excluding reserved fields)
+    #     reserved_fields = {'unique_link', 'email', 'names', 'documents'}
+    #     additional_fields = {}
+    #     for key in request.data:
+    #         if key not in reserved_fields:
+    #             value = request.data.getlist(key)[0] if isinstance(request.data.get(key), list) else request.data.get(key)
+    #             additional_fields[key] = value
+    #     logger.info(f"Additional fields: {additional_fields}")
+
+    #     # Wrap all database operations in a transaction
+    #     with transaction.atomic():
+    #         # Initialize or update compliance_status with checklist items
+    #         compliance_status = list(application.compliance_status) if application.compliance_status else []
+    #         existing_names = {item['name'] for item in compliance_status}
+    #         for item in checklist:
+    #             name = item.get('name', '')
+    #             if not name or name in existing_names:
+    #                 continue
+    #             generated_id = f"compliance-{slugify(name)}"
+    #             compliance_status.append({
+    #                 'id': generated_id,
+    #                 'name': name,
+    #                 'description': item.get('description', ''),
+    #                 'required': item.get('required', True),
+    #                 'requires_document': item.get('requires_document', True),
+    #                 'status': 'pending',
+    #                 'checked_by': None,
+    #                 'checked_at': None,
+    #                 'notes': '',
+    #                 'document': [],  # Initialize as list to support multiple documents
+    #                 'metadata': {}
+    #             })
+    #         application.compliance_status = compliance_status
+    #         application.save()
+
+    #         # Map compliance item names to their details
+    #         compliance_checklist = {item['name']: item for item in compliance_status}
+
+    #         # Group files by compliance item name
+    #         documents_data = []
+    #         storage_type = getattr(settings, 'STORAGE_TYPE', 'supabase').lower()
+
+    #         # Create a mapping of names to their corresponding files
+    #         name_to_files = {}
+    #         for i, name in enumerate(names):
+    #             if i < len(files):
+    #                 if name not in name_to_files:
+    #                     name_to_files[name] = []
+    #                 name_to_files[name].append(files[i])
+
+    #         # Upload documents for each name
+    #         for name, file_list in name_to_files.items():
+    #             item = compliance_checklist[name]
+    #             for file in file_list:
+    #                 file_ext = os.path.splitext(file.name)[1]
+    #                 filename = f"{uuid.uuid4()}{file_ext}"
+    #                 folder_path = f"compliance_documents/{timezone.now().strftime('%Y/%m/%d')}"
+    #                 file_path = f"{folder_path}/{filename}"
+    #                 content_type = mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
+
+    #                 try:
+    #                     public_url = upload_file_dynamic(file, file_path, content_type, storage_type)
+    #                     documents_data.append({
+    #                         'file_url': public_url,
+    #                         'uploaded_at': timezone.now().isoformat(),
+    #                         'doc_id': item['id'],
+    #                         'name': name
+    #                     })
+    #                 except Exception as e:
+    #                     logger.error(f"Failed to upload document for {name}: {str(e)}")
+    #                     raise  # Re-raise to trigger transaction rollback
+
+    #         # Update compliance status
+    #         updated_compliance_status = []
+    #         names_set = set(names)
+    #         for item in compliance_status:
+    #             item_updated = False
+    #             # Collect all documents for this item
+    #             item_documents = [doc for doc in documents_data if doc['doc_id'] == item['id']]
+    #             # Check if this item is in the provided names to apply additional_fields
+    #             if item['name'] in names_set:
+    #                 # Merge existing metadata with new additional_fields
+    #                 existing_metadata = item.get('metadata', {})
+    #                 updated_metadata = {**existing_metadata, **additional_fields}
+    #                 if item_documents:
+    #                     # Document uploaded
+    #                     updated_item = {
+    #                         'id': item['id'],
+    #                         'name': item['name'],
+    #                         'description': item.get('description', ''),
+    #                         'required': item.get('required', True),
+    #                         'requires_document': item.get('requires_document', True),
+    #                         'status': 'uploaded',
+    #                         'checked_by': item.get('checked_by'),
+    #                         'checked_at': item.get('checked_at'),
+    #                         'notes': item.get('notes', ''),
+    #                         'document': [{'file_url': doc['file_url'], 'uploaded_at': doc['uploaded_at']} for doc in item_documents],
+    #                         'metadata': updated_metadata
+    #                     }
+    #                     updated_compliance_status.append(updated_item)
+    #                     item_updated = True
+    #                     logger.info(f"Updated compliance item {item['id']} with {len(item_documents)} document(s) and metadata")
+    #                 else:
+    #                     # No document, treat as metadata submission
+    #                     # Always set to 'submitted' if metadata is present (submit=true)
+    #                     new_status = 'submitted' if 'submit' in updated_metadata else item.get('status', 'pending')
+    #                     updated_item = {
+    #                         'id': item['id'],
+    #                         'name': item['name'],
+    #                         'description': item.get('description', ''),
+    #                         'required': item.get('required', True),
+    #                         'requires_document': item.get('requires_document', True),
+    #                         'status': new_status,
+    #                         'checked_by': item.get('checked_by'),
+    #                         'checked_at': item.get('checked_at'),
+    #                         'notes': item.get('notes', ''),
+    #                         'document': item.get('document', []),
+    #                         'metadata': updated_metadata
+    #                     }
+    #                     updated_compliance_status.append(updated_item)
+    #                     item_updated = True
+    #                     logger.info(f"Updated compliance item {item['id']} with metadata (status set to '{new_status}')")
+                
+    #             # If not updated, keep the item as is
+    #             if not item_updated:
+    #                 updated_compliance_status.append(item)
+
+    #         # Save the updated application
+    #         application.compliance_status = updated_compliance_status
+    #         application.save()
+
+    #     # If we reach here, transaction committed successfully
+    #     return Response({
+    #         "detail": "Compliance items processed successfully.",
+    #         "compliance_status": application.compliance_status
+    #     }, status=status.HTTP_200_OK)
     def _handle_upload(self, request, job_application_id):
+        # Close any stale connections first
+        from django.db import close_old_connections
+        close_old_connections()
+        
         logger.info(f"Request data: {request.data}")
         unique_link = request.data.get('unique_link')
         email = request.data.get('email')
@@ -2308,7 +3643,7 @@ class ApplicantComplianceUploadView(APIView):
         for name in names:
             if name not in checklist_names:
                 return Response({"detail": f"Invalid compliance item name: {name}. Must match checklist."}, 
-                               status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_400_BAD_REQUEST)
 
         # Collect additional fields (excluding reserved fields)
         reserved_fields = {'unique_link', 'email', 'names', 'documents'}
