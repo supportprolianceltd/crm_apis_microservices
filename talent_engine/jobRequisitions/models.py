@@ -457,6 +457,9 @@ class JobRequisition(models.Model):
         logger.info(f"JobRequisition {self.id} approved by user {approver_id} for tenant {self.tenant_id}")
 
 
+
+
+
 class VideoSession(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     job_application_id = models.CharField(max_length=20, blank=False, null=False)  # Reference JobApplication ID from job_applications

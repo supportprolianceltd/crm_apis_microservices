@@ -146,7 +146,7 @@ SPECTACULAR_SETTINGS = {
 AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
 TALENT_ENGINE_URL = env('TALENT_ENGINE_URL', default='http://talent-engine:8002')
 JOB_APPLICATIONS_URL = env('JOB_APPLICATIONS_URL', default='http://job-applications:8003')
-NOTIFICATIONS_SERVICE_URL = env('NOTIFICATIONS_EVENT_URL', default='http://app:3000/events/')
+NOTIFICATIONS_SERVICE_URL = env("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
 SUPABASE_URL = env('SUPABASE_URL', default='')
 SUPABASE_KEY = env('SUPABASE_KEY', default='')
 SUPABASE_BUCKET = env('SUPABASE_BUCKET', default='luminacaremedia')
