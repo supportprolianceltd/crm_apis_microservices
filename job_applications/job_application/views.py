@@ -1943,8 +1943,6 @@ class PermanentDeleteSchedulesView(APIView):
 #         }, status=status.HTTP_200_OK)
 
 
-
-
 class ComplianceStatusUpdateView(APIView):
     permission_classes = [AllowAny]  # Temporary for testing; replace with IsAuthenticated in production
     parser_classes = [JSONParser]
@@ -1993,50 +1991,21 @@ class ComplianceStatusUpdateView(APIView):
             logger.warning(f"Invalid status provided: {update_data['status']}")
             return Response({"detail": "Invalid status. Must be 'pending', 'uploaded', 'accepted', or 'rejected'."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # NEW: Wrap entire DB logic in atomic() + explicit tenant_context to prevent cursor issues
-        try:
-            with transaction.atomic():
-                # Ensure tenant context (from request or middleware)
-                tenant = getattr(request, 'tenant', None)
-                if tenant:
-                    with tenant_context(tenant):
-                        return self._perform_update(job_application_id, item_id, update_data, checked_by, branch, request)
-                else:
-                    logger.error("No tenant context available")
-                    return Response({"detail": "Tenant context missing."}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Transaction failed in ComplianceStatusUpdateView: {str(e)}")
-            if "cursor" in str(e).lower():
-                logger.error("Cursor closed error - check connection pooling or schema switching")
-            return Response({"detail": "Database operation failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def _perform_update(self, job_application_id, item_id, update_data, checked_by, branch, request):
-        # Fetch the job application (now inside atomic)
+        # Fetch the job application
         try:
             application = JobApplication.active_objects.get(id=job_application_id)
         except JobApplication.DoesNotExist:
             logger.warning(f"Job application not found: {job_application_id}")
-            raise JobApplication.DoesNotExist  # Re-raise for atomic rollback
+            return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Check branch authorization if branch is provided
-        if branch and application.branch_id != branch:
-            try:
-                branch_exists = Branch.objects.filter(id=application.branch_id, tenant_id=application.tenant_id).exists()
-                if not branch_exists:
-                    logger.warning(f"Invalid branch {application.branch_id} for application {job_application_id}")
-                    raise PermissionDenied("Invalid branch for this application.")
-                if str(application.branch_id) != str(branch):
-                    logger.warning(f"User not authorized to access application {job_application_id} for branch {branch}")
-                    raise PermissionDenied("Not authorized to access this application.")
-            except ImportError:
-                logger.warning(f"Branch validation skipped: No Branch model available for branch_id {application.branch_id}")
-
+       
         # Update compliance_status
         updated_compliance_status = application.compliance_status.copy() if application.compliance_status else []
         item_updated = False
 
         for item in updated_compliance_status:
             if str(item.get('id')) == str(item_id):
+                # Removed document check to allow status updates regardless of document presence
                 # Update all provided fields
                 for field_name, field_value in update_data.items():
                     item[field_name] = field_value
@@ -2050,18 +2019,20 @@ class ComplianceStatusUpdateView(APIView):
 
         if not item_updated:
             logger.warning(f"Compliance item {item_id} not found in application {job_application_id}")
-            raise ValueError(f"Compliance item {item_id} not found.")
+            return Response({"detail": f"Compliance item {item_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Save the updated application (inside atomic)
-        application.compliance_status = updated_compliance_status
-        application.save()
-        logger.info(f"Job application {job_application_id} saved with updated compliance status")
+        # Save the updated application
+        with transaction.atomic():
+            application.compliance_status = updated_compliance_status
+            application.save()
+            logger.info(f"Job application {job_application_id} saved with updated compliance status")
 
         serializer = JobApplicationSerializer(application, context={'request': request})
         return Response({
             "detail": "Compliance status updated successfully.",
             "compliance_item": next((item for item in serializer.data['compliance_status'] if str(item['id']) == str(item_id)), None)
         }, status=status.HTTP_200_OK)
+    
 
 
 # class ApplicantComplianceUploadView(APIView):
@@ -2271,8 +2242,6 @@ class ComplianceStatusUpdateView(APIView):
 #             "compliance_status": application.compliance_status
 #         }, status=status.HTTP_200_OK)
 
-
-
 class ApplicantComplianceUploadView(APIView):
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -2291,7 +2260,7 @@ class ApplicantComplianceUploadView(APIView):
         if not unique_link:
             return Response({"detail": "Missing job requisition unique link."}, status=status.HTTP_400_BAD_REQUEST)
         if not email:
-            return Response({"detail": "Missing email."}, status=status.HTTP_400_BAD_GATEWAY)
+            return Response({"detail": "Missing email."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Extract tenant_id from unique_link
         try:
@@ -2303,7 +2272,7 @@ class ApplicantComplianceUploadView(APIView):
             logger.error(f"Error extracting tenant_id from {unique_link}: {str(e)}")
             return Response({"detail": "Failed to extract tenant ID."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # NEW: Fetch job requisition OUTSIDE atomic (external call)
+        # Fetch job requisition
         try:
             requisition_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/by-link/{unique_link}/"
             resp = requests.get(requisition_url)
@@ -2314,6 +2283,33 @@ class ApplicantComplianceUploadView(APIView):
             logger.error(f"Error fetching job requisition: {str(e)}")
             return Response({"detail": "Unable to fetch job requisition."}, status=status.HTTP_502_BAD_GATEWAY)
 
+        # Retrieve job application
+        try:
+            application = JobApplication.active_objects.get(
+                id=job_application_id,
+                tenant_id=tenant_id,
+                job_requisition_id=job_requisition['id'],
+                email=email
+            )
+        except JobApplication.DoesNotExist:
+            return Response({"detail": "Job application not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        checklist = job_requisition.get('compliance_checklist', [])
+        checklist_names = {item['name'] for item in checklist}
+
+        # If no compliance checklist, return success without saving
+        if not checklist:
+            return Response({
+                "detail": "No compliance items required for this requisition.",
+                "compliance_status": application.compliance_status
+            }, status=status.HTTP_200_OK)
+
+        # Validate provided names against checklist
+        for name in names:
+            if name not in checklist_names:
+                return Response({"detail": f"Invalid compliance item name: {name}. Must match checklist."}, 
+                               status=status.HTTP_400_BAD_REQUEST)
+
         # Collect additional fields (excluding reserved fields)
         reserved_fields = {'unique_link', 'email', 'names', 'documents'}
         additional_fields = {}
@@ -2323,172 +2319,130 @@ class ApplicantComplianceUploadView(APIView):
                 additional_fields[key] = value
         logger.info(f"Additional fields: {additional_fields}")
 
-        # NEW: Wrap DB + upload logic in atomic() + tenant_context
-        try:
-            with transaction.atomic():
-                # Ensure tenant context
-                tenant = getattr(request, 'tenant', None)
-                # if not tenant or str(tenant.id) != tenant_id:
-                #     # Resolve tenant if mismatch (from tenant_id)
-                #     from core.models import Tenant
-                #     tenant = Tenant.objects.get(id=tenant_id)
-                # with tenant_context(tenant):
-                return self._process_compliance(job_application_id, email, job_requisition, names, files, additional_fields, tenant)
-        except Exception as e:
-            logger.error(f"Transaction failed in ApplicantComplianceUploadView: {str(e)}")
-            if "cursor" in str(e).lower():
-                logger.error("Cursor closed error - check connection pooling or schema switching")
-            return Response({"detail": "Database operation failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Wrap all database operations in a transaction
+        with transaction.atomic():
+            # Initialize or update compliance_status with checklist items
+            compliance_status = list(application.compliance_status) if application.compliance_status else []
+            existing_names = {item['name'] for item in compliance_status}
+            for item in checklist:
+                name = item.get('name', '')
+                if not name or name in existing_names:
+                    continue
+                generated_id = f"compliance-{slugify(name)}"
+                compliance_status.append({
+                    'id': generated_id,
+                    'name': name,
+                    'description': item.get('description', ''),
+                    'required': item.get('required', True),
+                    'requires_document': item.get('requires_document', True),
+                    'status': 'pending',
+                    'checked_by': None,
+                    'checked_at': None,
+                    'notes': '',
+                    'document': [],  # Initialize as list to support multiple documents
+                    'metadata': {}
+                })
+            application.compliance_status = compliance_status
+            application.save()
 
-    def _process_compliance(self, job_application_id, email, job_requisition, names, files, additional_fields, tenant_id):
-        # Retrieve job application (inside atomic)
-        try:
-            application = JobApplication.active_objects.get(
-                id=job_application_id,
-                tenant_id=tenant_id,
-                job_requisition_id=job_requisition['id'],
-                email=email
-            )
-        except JobApplication.DoesNotExist:
-            raise JobApplication.DoesNotExist  # For rollback
+            # Map compliance item names to their details
+            compliance_checklist = {item['name']: item for item in compliance_status}
 
-        # Initialize or update compliance_status with checklist items
-        checklist = job_requisition.get('compliance_checklist', [])
-        if not application.compliance_status or len(application.compliance_status) == 0:
-            application.compliance_status = []
-        # Ensure all checklist items are in compliance_status
-        checklist_names = {item['name'] for item in checklist}
-        existing_names = {item['name'] for item in application.compliance_status}
-        for item in checklist:
-            name = item.get('name', '')
-            if not name or name in existing_names:
-                continue
-            generated_id = f"compliance-{slugify(name)}"
-            application.compliance_status.append({
-                'id': generated_id,
-                'name': name,
-                'description': item.get('description', ''),
-                'required': item.get('required', True),
-                'requires_document': item.get('requires_document', True),
-                'status': 'pending',
-                'checked_by': None,
-                'checked_at': None,
-                'notes': '',
-                'document': [],  # Initialize as list to support multiple documents
-                'metadata': {}
-            })
-        # REMOVED: application.save() here - defer to end
+            # Group files by compliance item name
+            documents_data = []
+            storage_type = getattr(settings, 'STORAGE_TYPE', 'supabase').lower()
 
-        # If no compliance checklist, return success
-        if not checklist:
-            application.save()  # Safe single save
-            return Response({
-                "detail": "No compliance items required for this requisition.",
-                "compliance_status": application.compliance_status
-            }, status=status.HTTP_200_OK)
+            # Create a mapping of names to their corresponding files
+            name_to_files = {}
+            for i, name in enumerate(names):
+                if i < len(files):
+                    if name not in name_to_files:
+                        name_to_files[name] = []
+                    name_to_files[name].append(files[i])
 
-        # Map compliance item names to their details
-        compliance_checklist = {item['name']: item for item in application.compliance_status}
+            # Upload documents for each name
+            for name, file_list in name_to_files.items():
+                item = compliance_checklist[name]
+                for file in file_list:
+                    file_ext = os.path.splitext(file.name)[1]
+                    filename = f"{uuid.uuid4()}{file_ext}"
+                    folder_path = f"compliance_documents/{timezone.now().strftime('%Y/%m/%d')}"
+                    file_path = f"{folder_path}/{filename}"
+                    content_type = mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
 
-        # Validate provided names against checklist
-        for name in names:
-            if name not in checklist_names:
-                raise ValueError(f"Invalid compliance item name: {name}. Must match checklist.")
+                    try:
+                        public_url = upload_file_dynamic(file, file_path, content_type, storage_type)
+                        documents_data.append({
+                            'file_url': public_url,
+                            'uploaded_at': timezone.now().isoformat(),
+                            'doc_id': item['id'],
+                            'name': name
+                        })
+                    except Exception as e:
+                        logger.error(f"Failed to upload document for {name}: {str(e)}")
+                        raise  # Re-raise to trigger transaction rollback
 
-        # Group files by compliance item name
-        documents_data = []
-        storage_type = getattr(settings, 'STORAGE_TYPE', 'supabase').lower()
+            # Update compliance status
+            updated_compliance_status = []
+            names_set = set(names)
+            for item in compliance_status:
+                item_updated = False
+                # Collect all documents for this item
+                item_documents = [doc for doc in documents_data if doc['doc_id'] == item['id']]
+                # Check if this item is in the provided names to apply additional_fields
+                if item['name'] in names_set:
+                    # Merge existing metadata with new additional_fields
+                    existing_metadata = item.get('metadata', {})
+                    updated_metadata = {**existing_metadata, **additional_fields}
+                    if item_documents:
+                        # Document uploaded
+                        updated_item = {
+                            'id': item['id'],
+                            'name': item['name'],
+                            'description': item.get('description', ''),
+                            'required': item.get('required', True),
+                            'requires_document': item.get('requires_document', True),
+                            'status': 'uploaded',
+                            'checked_by': item.get('checked_by'),
+                            'checked_at': item.get('checked_at'),
+                            'notes': item.get('notes', ''),
+                            'document': [{'file_url': doc['file_url'], 'uploaded_at': doc['uploaded_at']} for doc in item_documents],
+                            'metadata': updated_metadata
+                        }
+                        updated_compliance_status.append(updated_item)
+                        item_updated = True
+                        logger.info(f"Updated compliance item {item['id']} with {len(item_documents)} document(s) and metadata")
+                    else:
+                        # No document, treat as metadata submission
+                        # Always set to 'submitted' if metadata is present (submit=true)
+                        new_status = 'submitted' if 'submit' in updated_metadata else item.get('status', 'pending')
+                        updated_item = {
+                            'id': item['id'],
+                            'name': item['name'],
+                            'description': item.get('description', ''),
+                            'required': item.get('required', True),
+                            'requires_document': item.get('requires_document', True),
+                            'status': new_status,
+                            'checked_by': item.get('checked_by'),
+                            'checked_at': item.get('checked_at'),
+                            'notes': item.get('notes', ''),
+                            'document': item.get('document', []),
+                            'metadata': updated_metadata
+                        }
+                        updated_compliance_status.append(updated_item)
+                        item_updated = True
+                        logger.info(f"Updated compliance item {item['id']} with metadata (status set to '{new_status}')")
+                
+                # If not updated, keep the item as is
+                if not item_updated:
+                    updated_compliance_status.append(item)
 
-        # Create a mapping of names to their corresponding files
-        name_to_files = {}
-        for i, name in enumerate(names):
-            if i < len(files):
-                if name not in name_to_files:
-                    name_to_files[name] = []
-                name_to_files[name].append(files[i])
+            # Save the updated application
+            application.compliance_status = updated_compliance_status
+            application.save()
 
-        # Upload documents for each name (inside atomic, but uploads are non-DB)
-        for name, file_list in name_to_files.items():
-            item = compliance_checklist[name]
-            for file in file_list:
-                file_ext = os.path.splitext(file.name)[1]
-                filename = f"{uuid.uuid4()}{file_ext}"
-                folder_path = f"compliance_documents/{timezone.now().strftime('%Y/%m/%d')}"
-                file_path = f"{folder_path}/{filename}"
-                content_type = mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
-
-                try:
-                    public_url = upload_file_dynamic(file, file_path, content_type, storage_type)
-                    documents_data.append({
-                        'file_url': public_url,
-                        'uploaded_at': timezone.now().isoformat(),
-                        'doc_id': item['id'],
-                        'name': name
-                    })
-                except Exception as e:
-                    logger.error(f"Failed to upload document for {name}: {str(e)}")
-                    raise ValueError(f"Failed to upload document: {str(e)}")
-
-        # Update compliance status
-        updated_compliance_status = []
-        for item in application.compliance_status:
-            item_updated = False
-            # Collect all documents for this item
-            item_documents = [doc for doc in documents_data if doc['doc_id'] == item['id']]
-            # Check if this item is in the provided names to apply additional_fields
-            if item['name'] in names:
-                # Merge existing metadata with new additional_fields
-                existing_metadata = item.get('metadata', {})
-                updated_metadata = {**existing_metadata, **additional_fields}
-                if item_documents:
-                    # Document uploaded
-                    updated_item = {
-                        'id': item['id'],
-                        'name': item['name'],
-                        'description': item.get('description', ''),
-                        'required': item.get('required', True),
-                        'requires_document': item.get('requires_document', True),
-                        'status': 'uploaded',
-                        'checked_by': item.get('checked_by'),
-                        'checked_at': item.get('checked_at'),
-                        'notes': item.get('notes', ''),
-                        'document': [{'file_url': doc['file_url'], 'uploaded_at': doc['uploaded_at']} for doc in item_documents],
-                        'metadata': updated_metadata
-                    }
-                    updated_compliance_status.append(updated_item)
-                    item_updated = True
-                    logger.info(f"Updated compliance item {item['id']} with {len(item_documents)} document(s) and metadata")
-                else:
-                    # No document, treat as metadata submission
-                    # Always set to 'submitted' if metadata is present (submit=true)
-                    new_status = 'submitted' if 'submit' in updated_metadata else item.get('status', 'pending')
-                    updated_item = {
-                        'id': item['id'],
-                        'name': item['name'],
-                        'description': item.get('description', ''),
-                        'required': item.get('required', True),
-                        'requires_document': item.get('requires_document', True),
-                        'status': new_status,
-                        'checked_by': item.get('checked_by'),
-                        'checked_at': item.get('checked_at'),
-                        'notes': item.get('notes', ''),
-                        'document': item.get('document', []),
-                        'metadata': updated_metadata
-                    }
-                    updated_compliance_status.append(updated_item)
-                    item_updated = True
-                    logger.info(f"Updated compliance item {item['id']} with metadata (status set to '{new_status}')")
-            
-            # If not updated, keep the item as is
-            if not item_updated:
-                updated_compliance_status.append(item)
-
-        # Save the updated application (single save at end)
-        application.compliance_status = updated_compliance_status
-        application.save()
-        logger.info(f"Job application {job_application_id} saved with updated compliance status")
-
+        # If we reach here, transaction committed successfully
         return Response({
             "detail": "Compliance items processed successfully.",
-            "compliance_status": application.compliance_status  # Use in-memory post-save data
+            "compliance_status": application.compliance_status
         }, status=status.HTTP_200_OK)
