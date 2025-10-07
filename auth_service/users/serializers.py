@@ -2137,12 +2137,12 @@ class ClientCreateSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer(required=True)
     password = serializers.CharField(write_only=True, required=True, min_length=8)
     branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)
-    last_updated_by = serializers.SerializerMethodField()
+    # last_updated_by = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
-        fields = ["id", "email", "password", "first_name", "last_name", "role", "job_role", "profile", "branch", "last_updated_by_id", "last_updated_by"]
-        read_only_fields = ["id", "last_updated_by", "last_updated_by_id"]
+        fields = ["id", "email", "password", "first_name", "last_name", "role", "job_role", "profile", "branch"]
+        read_only_fields = ["id"]
         extra_kwargs = {
             "email": {"required": True},
             "first_name": {"required": True},
