@@ -20,6 +20,7 @@ import { createCarerRoutes } from './routes/carer.routes';
 import { createSyncRoutes } from './routes/sync.routes';
 import { createHealthRoutes } from './routes/health.routes';
 import { createEmailRoutes } from './routes/email.routes';
+import { createCarePlanRoutes } from './routes/careplan.routes';
 import { EmailWorker } from './workers/email.worker';
 
 // Load environment variables
@@ -37,6 +38,7 @@ class RosteringServer {
   private emailWorker: EmailWorker;
   private requestController: RequestController;
   private carerController: CarerController;
+  private carePlanController: any;
 
   constructor() {
     this.app = express();
@@ -60,6 +62,7 @@ class RosteringServer {
       this.matchingService
     );
     this.carerController = new CarerController(this.prisma);
+    this.carePlanController = new (require('./controllers/careplan.controller').CarePlanController)(this.prisma);
 
     this.setupMiddleware();
     this.setupRoutes();
@@ -131,6 +134,7 @@ class RosteringServer {
       this.emailService,
       this.emailWorker
     ));
+    this.app.use('/api/v1/careplans', createCarePlanRoutes(this.carePlanController));
 
     // Root endpoint
     this.app.get('/', (req: Request, res: Response) => {
