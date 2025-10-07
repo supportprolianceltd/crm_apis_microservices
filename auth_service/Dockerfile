@@ -1,3 +1,4 @@
+# Dockerfile
 FROM python:3.11-slim
 WORKDIR /app
 
@@ -17,6 +18,3 @@ RUN chmod +x /entrypoint.sh
 COPY . .
 
 ENTRYPOINT ["/entrypoint.sh"]
-
-
-

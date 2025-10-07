@@ -2,7 +2,8 @@
 import os
 from datetime import timedelta
 from pathlib import Path
-
+# auth_service/settings.py
+from celery.schedules import crontab
 import environ
 from django.utils.translation import gettext_lazy as _
 
@@ -319,6 +320,14 @@ CACHE_ENABLED = env.bool("CACHE_ENABLED", default=True)
 TENANT_CACHE_PREFIX = "tenant:{}:"  # e.g., "tenant:example_user:"
 
 
+
+CELERY_BEAT_SCHEDULE = {
+    # Existing schedules...
+    'daily-check-expiring-documents': {
+        'task': 'users.tasks.check_expiring_documents',
+        'schedule': crontab(hour=0, minute=0),  # Run daily at midnight UTC
+    },
+}
 
 # sudo nano /etc/nginx/nginx.conf
 # sudo nano /etc/nginx/conf.d/crm_api.conf

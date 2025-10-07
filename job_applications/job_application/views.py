@@ -1542,6 +1542,7 @@ class ScreeningTaskStatusView(APIView):
 
 #         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
 class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -2665,7 +2666,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
                     tenant_id=tenant_id,
                     event_type="interview.scheduled"
                 )
-                logger.info(f"Schedule creation notification sent for schedule {schedule.id}, job application {schedule.job_application_id}")
+                logger.info(f"Schedule {notification_payload} creation notification sent for schedule {schedule.id}, job application {schedule.job_application_id}")
         except Exception as e:
             logger.error(f"Failed to send schedule creation notification for schedule {schedule.id}: {str(e)}")
 
@@ -2807,7 +2808,8 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
                         tenant_id=instance.tenant_id,
                         event_type="interview.scheduled"
                     )
-                    logger.info(f"Schedule update notification sent for schedule {instance.id}, job application {instance.job_application_id}")
+                    #logger.info(f"Schedule update notification sent for schedule {instance.id}, job application {instance.job_application_id}")
+                    logger.info(f"Schedule {notification_payload} creation notification sent for schedule {schedule.id}, job application {schedule.job_application_id}")
             except Exception as e:
                 logger.error(f"Failed to send schedule update notification for schedule {instance.id}: {str(e)}")
 
