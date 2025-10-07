@@ -744,10 +744,15 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
             kwargs['many'] = True
         return super().get_serializer(*args, **kwargs)
 
+
     def create(self, request, *args, **kwargs):
         """
         Handle both single and bulk create based on the endpoint
         """
+        # Close any stale connections first (for single create)
+        from django.db import close_old_connections
+        close_old_connections()
+        
         if request.path.endswith('/bulk-create/'):
             return self.bulk_create(request, *args, **kwargs)
         return super().create(request, *args, **kwargs)
@@ -756,6 +761,10 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
         """
         Custom bulk create method
         """
+        # Close any stale connections first (for bulk create)
+        from django.db import close_old_connections
+        close_old_connections()
+        
         # Ensure the data is a list
         if not isinstance(request.data, list):
             return Response(
@@ -790,7 +799,13 @@ class JobRequisitionListCreateView(generics.ListCreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+
+
     def perform_create(self, serializer):
+
+        from django.db import close_old_connections
+        close_old_connections()
+        
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         tenant_id = str(jwt_payload.get('tenant_unique_id')) if jwt_payload.get('tenant_unique_id') is not None else None
         user_id = str(jwt_payload.get('user', {}).get('id')) if jwt_payload.get('user', {}).get('id') is not None else None
