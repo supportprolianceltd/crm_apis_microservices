@@ -1218,6 +1218,104 @@ class VideoSessionViewSet(viewsets.ModelViewSet):
 
 
 
+# class RequestListCreateView(generics.ListCreateAPIView):
+#     serializer_class = RequestSerializer
+#     pagination_class = CustomPagination
+#     filter_backends = [DjangoFilterBackend, SearchFilter]
+#     filterset_fields = ['request_type', 'status', 'priority', 'material_type', 'leave_category', 'service_type']
+#     search_fields = ['title', 'description', 'item_name', 'requester_name']
+#     ordering_fields = ['created_at', 'needed_date', 'desired_completion_date', 'priority']
+#     ordering = ['-created_at']
+
+#     def get_queryset(self):
+#         if getattr(self, "swagger_fake_view", False):
+#             return Request.objects.none()
+            
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')
+        
+#         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
+        
+#         if role == 'recruiter' and branch:
+#             queryset = queryset.filter(branch_id=branch)
+            
+#         return queryset
+
+#     def perform_create(self, serializer):
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#         user_id = jwt_payload.get('user', {}).get('id')
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')
+        
+#         if not user_id:
+#             logger.error(f"User ID not found in JWT payload: {jwt_payload}")
+#             raise serializers.ValidationError("User ID not found in token")
+        
+#         serializer.save(
+#             tenant_id=tenant_id,
+#             requested_by_id=user_id,
+#             branch_id=branch if role == 'recruiter' and branch else None
+#         )
+
+
+
+
+
+# class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     serializer_class = RequestSerializer
+#     lookup_field = 'id'
+
+#     def get_queryset(self):
+#         if getattr(self, "swagger_fake_view", False):
+#             return Request.objects.none()
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         tenant_id = jwt_payload.get('tenant_unique_id')
+#         role = jwt_payload.get('role')
+#         branch = jwt_payload.get('user', {}).get('branch')  # Fixed: get branch from user
+#         queryset = Request.objects.filter(tenant_id=tenant_id, is_deleted=False)
+#         if role == 'recruiter' and branch:
+#             queryset = queryset.filter(branch_id=branch)
+#         return queryset
+
+
+#     def perform_update(self, serializer):
+#         jwt_payload = getattr(self.request, 'jwt_payload', {})
+#         user_id = jwt_payload.get('user', {}).get('id')
+#         user_data = jwt_payload.get('user', {})
+#         status = serializer.validated_data.get('status')
+        
+#         if not user_id:
+#             logger.error(f"User ID not found in JWT payload during update: {jwt_payload}")
+#             raise serializers.ValidationError("User ID not found in token")
+        
+#         approved_by_details = {
+#             'email': user_data.get('email', ''),
+#             'first_name': user_data.get('first_name', ''),
+#             'last_name': user_data.get('last_name', ''),
+#             'job_role': user_data.get('job_role', '')
+#         }
+        
+#         if status == 'approved':
+#             logger.info(f"Setting approved_by_details for request {serializer.instance.id}: {approved_by_details}")
+#             serializer.save(
+#                 approved_by_id=user_id,
+#                 approved_by_details=approved_by_details
+#             )
+#             logger.info(f"Request {serializer.instance.id} approved by user {user_id}")
+#         else:
+#             serializer.save(approved_by_details=approved_by_details if serializer.instance.approved_by_id else {})
+#             logger.info(f"Request {serializer.instance.id} updated by user {user_id}")
+
+
+#     def perform_destroy(self, instance):
+#         instance.soft_delete()
+#         logger.info(f"Request soft-deleted: {instance.title} for tenant {instance.tenant_id}")
+
+
+
 class RequestListCreateView(generics.ListCreateAPIView):
     serializer_class = RequestSerializer
     pagination_class = CustomPagination
@@ -1261,9 +1359,6 @@ class RequestListCreateView(generics.ListCreateAPIView):
         )
 
 
-
-
-
 class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RequestSerializer
     lookup_field = 'id'
@@ -1280,7 +1375,6 @@ class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
             queryset = queryset.filter(branch_id=branch)
         return queryset
 
-
     def perform_update(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', {})
         user_id = jwt_payload.get('user', {}).get('id')
@@ -1291,7 +1385,7 @@ class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
             logger.error(f"User ID not found in JWT payload during update: {jwt_payload}")
             raise serializers.ValidationError("User ID not found in token")
         
-        approved_by_details = {
+        by_details = {
             'email': user_data.get('email', ''),
             'first_name': user_data.get('first_name', ''),
             'last_name': user_data.get('last_name', ''),
@@ -1299,20 +1393,34 @@ class RequestDetailView(generics.RetrieveUpdateDestroyAPIView):
         }
         
         if status == 'approved':
-            logger.info(f"Setting approved_by_details for request {serializer.instance.id}: {approved_by_details}")
+            logger.info(f"Setting approved_by_details for request {serializer.instance.id}: {by_details}")
             serializer.save(
                 approved_by_id=user_id,
-                approved_by_details=approved_by_details
+                approved_by_details=by_details
             )
             logger.info(f"Request {serializer.instance.id} approved by user {user_id}")
+        elif status == 'rejected':
+            logger.info(f"Setting rejected_by_details for request {serializer.instance.id}: {by_details}")
+            serializer.save(
+                rejected_by_id=user_id,
+                rejected_by_details=by_details
+            )
+            logger.info(f"Request {serializer.instance.id} rejected by user {user_id}")
+        elif status == 'cancelled':
+            logger.info(f"Setting cancelled_by_details for request {serializer.instance.id}: {by_details}")
+            serializer.save(
+                cancelled_by_id=user_id,
+                cancelled_by_details=by_details
+            )
+            logger.info(f"Request {serializer.instance.id} cancelled by user {user_id}")
         else:
-            serializer.save(approved_by_details=approved_by_details if serializer.instance.approved_by_id else {})
+            serializer.save()
             logger.info(f"Request {serializer.instance.id} updated by user {user_id}")
-
 
     def perform_destroy(self, instance):
         instance.soft_delete()
         logger.info(f"Request soft-deleted: {instance.title} for tenant {instance.tenant_id}")
+
 
 
 

@@ -403,7 +403,6 @@ class Participant(models.Model):
 
 
 
-
 class Request(models.Model):
     REQUEST_TYPE_CHOICES = [
         ('material', 'Material Request'),
@@ -462,7 +461,11 @@ class Request(models.Model):
     branch_id = models.CharField(max_length=36, null=True, blank=True)
     requested_by_id = models.CharField(max_length=36, null=True, blank=True)
     approved_by_id = models.CharField(max_length=36, null=True, blank=True)
+    cancelled_by_id = models.CharField(max_length=36, null=True, blank=True)
+    rejected_by_id = models.CharField(max_length=36, null=True, blank=True)
     approved_by_details = models.JSONField(default=dict, blank=True, null=True, help_text="Details of the user who approved the request")
+    cancelled_by_details = models.JSONField(default=dict, blank=True, null=True, help_text="Details of the user who cancelled the request")
+    rejected_by_details = models.JSONField(default=dict, blank=True, null=True, help_text="Details of the user who rejected the request")
     
     # Basic request info
     request_type = models.CharField(max_length=20, choices=REQUEST_TYPE_CHOICES)
@@ -525,36 +528,75 @@ class Request(models.Model):
         return f"{self.get_request_type_display()} - {self.title} ({self.status})"
 
     def save(self, *args, **kwargs):
-        # Generate request ID if not provided for material requests
-        if self.request_type == 'material' and not self.request_id:
-            self.request_id = self._generate_request_id()
+        # Generate request ID if not provided for ALL request types
+        if not self.request_id:
+            # Use a while loop to handle potential race conditions
+            max_attempts = 5
+            for attempt in range(max_attempts):
+                try:
+                    self.request_id = self._generate_request_id()
+                    # Test if this ID already exists (race condition protection)
+                    if not Request.objects.filter(request_id=self.request_id).exists():
+                        break
+                    if attempt == max_attempts - 1:
+                        # Last attempt, use a UUID fallback
+                        import uuid
+                        self.request_id = f"{self._get_prefix()}-{uuid.uuid4().hex[:8].upper()}"
+                except Exception as e:
+                    logger.error(f"Error generating request ID on attempt {attempt + 1}: {str(e)}")
+                    if attempt == max_attempts - 1:
+                        import uuid
+                        self.request_id = f"{self._get_prefix()}-{uuid.uuid4().hex[:8].upper()}"
         
         is_new = self._state.adding
-        super().save(*args, **kwargs)
-        
-        if is_new:
-            self._send_kafka_event('created')
+        try:
+            super().save(*args, **kwargs)
+            
+            if is_new:
+                self._send_kafka_event('created')
+        except Exception as e:
+            logger.error(f"Error saving request: {str(e)}")
+            raise
+
+    def _get_prefix(self):
+        """Get prefix for request type"""
+        prefix_map = {
+            'material': 'MAT',
+            'leave': 'LEV', 
+            'service': 'SER',
+        }
+        return prefix_map.get(self.request_type, 'REQ')
 
     def _generate_request_id(self):
-        """Generate unique request ID for material requests"""
-        prefix = "MAT"
+        """Generate unique request ID for all request types"""
+        prefix = self._get_prefix()
         timestamp = timezone.now().strftime('%Y%m%d')
-        last_request = Request.objects.filter(
-            request_type='material',
-            request_id__startswith=f"{prefix}-{timestamp}"
-        ).order_by('-created_at').first()
         
-        if last_request and last_request.request_id:
-            try:
-                last_number = int(last_request.request_id.split('-')[-1])
-                next_number = last_number + 1
-            except (ValueError, IndexError):
-                next_number = 1
-        else:
-            next_number = 1
+        # Use database aggregation to avoid race conditions
+        try:
+            last_request = Request.objects.filter(
+                request_type=self.request_type,
+                request_id__startswith=f"{prefix}-{timestamp}"
+            ).order_by('-created_at').first()
             
-        return f"{prefix}-{timestamp}-{next_number:04d}"
-
+            if last_request and last_request.request_id:
+                try:
+                    last_number = int(last_request.request_id.split('-')[-1])
+                    next_number = last_number + 1
+                except (ValueError, IndexError):
+                    next_number = 1
+            else:
+                next_number = 1
+                
+            return f"{prefix}-{timestamp}-{next_number:04d}"
+        except Exception as e:
+            logger.error(f"Error in _generate_request_id: {str(e)}")
+            # Fallback: use timestamp with random component
+            import random
+            random_suffix = random.randint(1000, 9999)
+            return f"{prefix}-{timestamp}-{random_suffix:04d}"
+        
+        
     def _send_kafka_event(self, action):
         """Send Kafka event for request creation"""
         try:
@@ -581,6 +623,8 @@ class Request(models.Model):
         self.save()
         self._send_kafka_event('deleted')
         logger.info(f"Request {self.id} soft-deleted for tenant {self.tenant_id}")
+
+
 
     def restore(self):
         self.is_deleted = False

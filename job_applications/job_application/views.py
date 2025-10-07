@@ -2328,24 +2328,24 @@ class ApplicantComplianceUploadView(APIView):
             with transaction.atomic():
                 # Ensure tenant context
                 tenant = getattr(request, 'tenant', None)
-                if not tenant or str(tenant.id) != tenant_id:
-                    # Resolve tenant if mismatch (from tenant_id)
-                    from core.models import Tenant
-                    tenant = Tenant.objects.get(id=tenant_id)
-                with tenant_context(tenant):
-                    return self._process_compliance(job_application_id, email, job_requisition, names, files, additional_fields, tenant)
+                # if not tenant or str(tenant.id) != tenant_id:
+                #     # Resolve tenant if mismatch (from tenant_id)
+                #     from core.models import Tenant
+                #     tenant = Tenant.objects.get(id=tenant_id)
+                # with tenant_context(tenant):
+                return self._process_compliance(job_application_id, email, job_requisition, names, files, additional_fields, tenant)
         except Exception as e:
             logger.error(f"Transaction failed in ApplicantComplianceUploadView: {str(e)}")
             if "cursor" in str(e).lower():
                 logger.error("Cursor closed error - check connection pooling or schema switching")
             return Response({"detail": "Database operation failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def _process_compliance(self, job_application_id, email, job_requisition, names, files, additional_fields, tenant):
+    def _process_compliance(self, job_application_id, email, job_requisition, names, files, additional_fields, tenant_id):
         # Retrieve job application (inside atomic)
         try:
             application = JobApplication.active_objects.get(
                 id=job_application_id,
-                tenant_id=tenant.id,
+                tenant_id=tenant_id,
                 job_requisition_id=job_requisition['id'],
                 email=email
             )
