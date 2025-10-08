@@ -329,15 +329,234 @@ class UserActivity(models.Model):
         return f"{self.action} {'success' if self.success else 'failed' if self.success is False else ''} for {self.user.email if self.user else 'unknown'} at {self.timestamp}"
 
 
+# class UserProfile(models.Model):
+
+#     SALARY_RATE_CHOICES = [
+#     ('hourly', 'Hourly'),
+#     ('daily', 'Daily'),
+#     ('weekly', 'Weekly'),
+#     ('bi_weekly', 'Bi-Weekly'),
+#     ('monthly', 'Monthly'),
+#     ('annual', 'Annual'),
+#     ]
+        
+#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
+#     work_phone = models.CharField(max_length=20, blank=True, null=True)
+#     personal_phone = models.CharField(max_length=20, blank=True, null=True)
+#     gender = models.CharField(max_length=20, blank=True, null=True)
+#     dob = models.DateField(blank=True, null=True)
+#     street = models.CharField(max_length=255, blank=True, null=True)
+#     city = models.CharField(max_length=100, blank=True, null=True)
+#     state = models.CharField(max_length=100, blank=True, null=True)
+#     country = models.CharField(max_length=100, blank=True, null=True)
+#     zip_code = models.CharField(max_length=20, blank=True, null=True)
+#     department = models.CharField(max_length=100, blank=True, null=True)
+#     # modules = models.ManyToManyField(Module, blank=True)
+
+
+#     # Add the salary rate field
+#     salary_rate = models.CharField(
+#         max_length=20, 
+#         choices=SALARY_RATE_CHOICES, 
+#         blank=True, 
+#         null=True,
+#         help_text="How often the user wants to be paid"
+#     )
+
+
+#     # ID and Documents
+#     employee_id = models.CharField(max_length=15, null=True, blank=True)
+
+#     # government_id_type = models.CharField(max_length=50, choices=[('Drivers Licence', 'Drivers Licence')], blank=True)
+#     marital_status = models.CharField(max_length=50, choices=[('Single', 'Single'), ('Married', 'Married'), ('Divorced', 'Divorced'), ('Widowed', 'Widowed'),  ('Others', 'Others')], blank=True)
+  
+  
+#     # Image fields and their corresponding URL fields
+#     profile_image = models.ImageField(upload_to='profile_image/', max_length=255, blank=True, null=True)
+#     profile_image_url = models.CharField(max_length=1024, blank=True, null=True)
+
+
+#     # Driving Risk Assessment (B)
+#     is_driver = models.BooleanField(default=False)
+#     type_of_vehicle = models.CharField(max_length=50, blank=True)
+
+#     drivers_licence_image1 = models.ImageField(upload_to='driver_licences/', blank=True, null=True)
+#     drivers_licence_image1_url = models.CharField(max_length=1024, blank=True, null=True)
+
+#     drivers_licence_image2 = models.ImageField(upload_to='driver_licences/',max_length=255, blank=True, null=True)
+#     drivers_licence_image2_url = models.CharField(max_length=1024, blank=True, null=True)
+
+#     drivers_licence_country_of_issue = models.CharField(max_length=100, blank=True)
+#     drivers_licence_date_issue = models.DateField(null=True, blank=True)
+#     drivers_licence_expiry_date = models.DateField(null=True, blank=True)
+#     drivers_license_insurance_provider = models.CharField(max_length=100, blank=True)
+#     drivers_licence_insurance_expiry_date = models.DateField(null=True, blank=True)
+#     drivers_licence_issuing_authority = models.CharField(max_length=100, blank=True)
+#     drivers_licence_policy_number = models.CharField(max_length=100, blank=True)
+
+#     # Care Worker Risk Assessment
+#     assessor_name = models.CharField(max_length=255, blank=True)
+#     manual_handling_risk = models.CharField(max_length=50, choices=[('Low', 'Low')], blank=True)
+#     lone_working_risk = models.CharField(max_length=50, choices=[('Low', 'Low')], blank=True)
+#     infection_risk = models.CharField(max_length=50, choices=[('Low', 'Low')], blank=True)
+
+#     # Personal Information
+#     next_of_kin = models.CharField(max_length=255, blank=True)
+#     next_of_kin_address = models.CharField(max_length=255, blank=True)
+#     next_of_kin_phone_number = models.CharField(max_length=15, blank=True)
+#     next_of_kin_alternate_phone = models.CharField(max_length=15, blank=True)
+#     relationship_to_next_of_kin = models.CharField(max_length=100, blank=True)
+#     next_of_kin_email = models.EmailField(blank=True)
+#     next_of_kin_town = models.CharField(max_length=255, blank=True)
+#     next_of_kin_zip_code = models.CharField(max_length=20, blank=True, null=True)
+
+#     # Right to Work (Basic fields here, detailed to LegalWorkEligibility)
+#     Right_to_Work_status = models.CharField(max_length=100, blank=True)
+#     Right_to_Work_passport_holder = models.CharField(max_length=100, null=True, blank=True)
+#     Right_to_Work_document_type = models.CharField(max_length=100, choices=[
+#         ('Biometric Residence Permit', 'Biometric Residence Permit'), 
+#         ('Passport', 'Passport'), 
+#         ('National ID', 'National ID'),
+#         ('Residence Card', 'Residence Card'),
+#         ('Visa', 'Visa'),
+#         ('Work Permit', 'Work Permit')
+#     ], blank=True)
+#     Right_to_Work_share_code = models.CharField(max_length=255, blank=True)
+#     Right_to_Work_document_number = models.CharField(max_length=100, blank=True)
+#     Right_to_Work_document_expiry_date = models.DateField(null=True, blank=True)
+#     Right_to_Work_country_of_issue = models.CharField(max_length=100, blank=True)
+
+#     Right_to_Work_file = models.ImageField(upload_to='right_to_work/', max_length=255, blank=True, null=True)
+#     Right_to_Work_file_url = models.CharField(max_length=1024, blank=True, null=True)
+    
+#     Right_to_rent_file = models.ImageField(upload_to='right_to_work/', max_length=255, blank=True, null=True)
+#     Right_to_rent_file_url = models.CharField(max_length=1024, blank=True, null=True)
+
+
+#     Right_to_Work_country_of_issue = models.CharField(max_length=100, blank=True)
+#     Right_to_Work_restrictions = models.CharField(max_length=255, blank=True)
+
+#     #DBS CHECK
+#     dbs_type = models.CharField(max_length=100,  blank=True)
+
+#     dbs_certificate = models.ImageField(upload_to='dbs_certificates/', max_length=255, blank=True, null=True)
+#     dbs_certificate_url = models.CharField(max_length=1024, blank=True, null=True)
+
+
+#     dbs_certificate_number = models.CharField(max_length=100, blank=True)
+#     dbs_issue_date = models.DateField(null=True, blank=True)
+
+#     dbs_update_file = models.ImageField(upload_to='dbs_update_service/', max_length=255, blank=True, null=True)
+#     dbs_update_file_url = models.CharField(max_length=1024, blank=True, null=True)
+
+
+#     dbs_update_certificate_number = models.CharField(max_length=100, blank=True)
+#     dbs_update_issue_date = models.DateField(null=True, blank=True)
+
+#     dbs_status_check = models.BooleanField(default=False)
+
+#     # Bank Details
+#     bank_name = models.CharField(max_length=255, blank=True)
+#     currency = models.CharField(max_length=5, blank=True)
+#     account_number = models.CharField(max_length=20, blank=True)
+#     account_name = models.CharField(max_length=255, blank=True)
+#     account_type = models.CharField(max_length=50, choices=[('Current', 'Current'), ('Savings', 'Savings'), ('Business', 'Business'),
+#                                                              ('Individual', 'Individual'),('Checking', 'Checking')], blank=True)
+
+
+#     country_of_bank_account = models.CharField(max_length=10,choices=[('US', 'United States'), ('UK', 'United Kingdom'), ('Others', 'Others')],
+#         blank=True, help_text="Country where the bank account is held")
+
+#     # US-specific
+#     routing_number = models.CharField(max_length=9,validators=[RegexValidator(r'^\d{9}$')],
+#         blank=True,null=True, help_text="US Routing Number (9 digits)")
+ 
+ 
+#     ssn_last4 = models.CharField(max_length=4,
+#         validators=[RegexValidator(r'^\d{4}$')],
+#         blank=True,null=True, help_text="Last 4 digits of SSN (Optional)")
+
+#     # UK-specific
+#     sort_code = models.CharField(max_length=8,validators=[RegexValidator(r'^\d{2}-?\d{2}-?\d{2}$')],
+#         blank=True, null=True,help_text="UK Sort Code (e.g., 12-34-56)"
+#     )
+
+#     iban = models.CharField(max_length=34,blank=True,null=True,
+#         help_text="IBAN (for international transfers)"
+#     )
+#     bic_swift = models.CharField(max_length=11,blank=True,null=True,
+#         help_text="SWIFT/BIC Code"
+#     )
+#     national_insurance_number = models.CharField(
+#         max_length=20,blank=True,null=True,
+#         help_text="NI Number (Optional)"
+#     )
+
+#     # Consent and tracking
+#     consent_given = models.BooleanField(default=False)
+#     bank_details_submitted_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+
+        
+#     # Permissions
+#     access_duration = models.DateField(default=today, blank=True)
+#     system_access_rostering = models.BooleanField(default=False)
+#     system_access_hr = models.BooleanField(default=False)
+#     system_access_recruitment = models.BooleanField(default=False)
+#     system_access_training = models.BooleanField(default=False)
+#     system_access_finance = models.BooleanField(default=False)
+#     system_access_compliance = models.BooleanField(default=False)
+#     system_access_co_superadmin = models.BooleanField(default=False)
+#     system_access_asset_management = models.BooleanField(default=False)
+#     vehicle_type = models.CharField(max_length=50, choices=[('Personal Vehicle', 'Personal Vehicle'), ('Company Vehicle', 'Company Vehicle'), ('Both', 'Both')], blank=True)
+#     last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
+
+#     class Meta:
+#         verbose_name = "User Profile"
+#         verbose_name_plural = "User Profiles"
+
+#         indexes = [
+#             models.Index(fields=['employee_id']),
+#             models.Index(fields=['user']),
+#         ]
+
+#     def save(self, *args, **kwargs):
+#         if not self.employee_id and self.user and self.user.tenant:
+#             tenant = self.user.tenant
+#             tenant_code = tenant.name.strip().upper()[:3]  # e.g., "PRO" from "Proliance"
+
+#             # Get the max employee_id that starts with this tenant code
+#             last_employee = UserProfile.objects.filter(
+#                 user__tenant=tenant,
+#                 employee_id__startswith=tenant_code
+#             ).aggregate(
+#                 max_id=Max('employee_id')
+#             )['max_id']
+
+#             if last_employee:
+#                 try:
+#                     last_number = int(last_employee.split('-')[1])
+#                 except (IndexError, ValueError):
+#                     last_number = 0
+#             else:
+#                 last_number = 0
+
+#             next_number = last_number + 1
+#             self.employee_id = f"{tenant_code}-{next_number:04d}"
+
+#         super().save(*args, **kwargs)
+
+
+
 class UserProfile(models.Model):
 
     SALARY_RATE_CHOICES = [
-    ('hourly', 'Hourly'),
-    ('daily', 'Daily'),
-    ('weekly', 'Weekly'),
-    ('bi_weekly', 'Bi-Weekly'),
-    ('monthly', 'Monthly'),
-    ('annual', 'Annual'),
+        ('hourly', 'Hourly'),
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('bi_weekly', 'Bi-Weekly'),
+        ('monthly', 'Monthly'),
+        ('annual', 'Annual'),
     ]
         
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
@@ -353,7 +572,6 @@ class UserProfile(models.Model):
     department = models.CharField(max_length=100, blank=True, null=True)
     # modules = models.ManyToManyField(Module, blank=True)
 
-
     # Add the salary rate field
     salary_rate = models.CharField(
         max_length=20, 
@@ -363,6 +581,13 @@ class UserProfile(models.Model):
         help_text="How often the user wants to be paid"
     )
 
+    # New availability field
+    availability = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        help_text="Weekly availability schedule as JSON object"
+    )
 
     # ID and Documents
     employee_id = models.CharField(max_length=15, null=True, blank=True)
@@ -370,11 +595,9 @@ class UserProfile(models.Model):
     # government_id_type = models.CharField(max_length=50, choices=[('Drivers Licence', 'Drivers Licence')], blank=True)
     marital_status = models.CharField(max_length=50, choices=[('Single', 'Single'), ('Married', 'Married'), ('Divorced', 'Divorced'), ('Widowed', 'Widowed'),  ('Others', 'Others')], blank=True)
   
-  
     # Image fields and their corresponding URL fields
     profile_image = models.ImageField(upload_to='profile_image/', max_length=255, blank=True, null=True)
     profile_image_url = models.CharField(max_length=1024, blank=True, null=True)
-
 
     # Driving Risk Assessment (B)
     is_driver = models.BooleanField(default=False)
@@ -432,7 +655,6 @@ class UserProfile(models.Model):
     Right_to_rent_file = models.ImageField(upload_to='right_to_work/', max_length=255, blank=True, null=True)
     Right_to_rent_file_url = models.CharField(max_length=1024, blank=True, null=True)
 
-
     Right_to_Work_country_of_issue = models.CharField(max_length=100, blank=True)
     Right_to_Work_restrictions = models.CharField(max_length=255, blank=True)
 
@@ -442,13 +664,11 @@ class UserProfile(models.Model):
     dbs_certificate = models.ImageField(upload_to='dbs_certificates/', max_length=255, blank=True, null=True)
     dbs_certificate_url = models.CharField(max_length=1024, blank=True, null=True)
 
-
     dbs_certificate_number = models.CharField(max_length=100, blank=True)
     dbs_issue_date = models.DateField(null=True, blank=True)
 
     dbs_update_file = models.ImageField(upload_to='dbs_update_service/', max_length=255, blank=True, null=True)
     dbs_update_file_url = models.CharField(max_length=1024, blank=True, null=True)
-
 
     dbs_update_certificate_number = models.CharField(max_length=100, blank=True)
     dbs_update_issue_date = models.DateField(null=True, blank=True)
@@ -463,14 +683,12 @@ class UserProfile(models.Model):
     account_type = models.CharField(max_length=50, choices=[('Current', 'Current'), ('Savings', 'Savings'), ('Business', 'Business'),
                                                              ('Individual', 'Individual'),('Checking', 'Checking')], blank=True)
 
-
     country_of_bank_account = models.CharField(max_length=10,choices=[('US', 'United States'), ('UK', 'United Kingdom'), ('Others', 'Others')],
         blank=True, help_text="Country where the bank account is held")
 
     # US-specific
     routing_number = models.CharField(max_length=9,validators=[RegexValidator(r'^\d{9}$')],
         blank=True,null=True, help_text="US Routing Number (9 digits)")
- 
  
     ssn_last4 = models.CharField(max_length=4,
         validators=[RegexValidator(r'^\d{4}$')],
@@ -496,8 +714,6 @@ class UserProfile(models.Model):
     consent_given = models.BooleanField(default=False)
     bank_details_submitted_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
-
-        
     # Permissions
     access_duration = models.DateField(default=today, blank=True)
     system_access_rostering = models.BooleanField(default=False)
@@ -530,7 +746,7 @@ class UserProfile(models.Model):
                 user__tenant=tenant,
                 employee_id__startswith=tenant_code
             ).aggregate(
-                max_id=Max('employee_id')
+                max_id=models.Max('employee_id')
             )['max_id']
 
             if last_employee:
@@ -1208,7 +1424,6 @@ class BlacklistedToken(models.Model):
     blacklisted_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
 
-
 class Document(models.Model):
     tenant_id = models.CharField(max_length=255, blank=True, null=True)
     title = models.CharField(max_length=255)
@@ -1219,6 +1434,7 @@ class Document(models.Model):
     version = models.IntegerField(default=1)
     uploaded_by_id = models.CharField(max_length=255, blank=True, null=True)
     updated_by_id = models.CharField(max_length=255, blank=True, null=True)
+    last_updated_by_id = models.CharField(max_length=255, blank=True, null=True)  # New field for last updater
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     expiring_date = models.DateTimeField(blank=True, null=True)
@@ -1227,6 +1443,7 @@ class Document(models.Model):
 
     class Meta:
         unique_together = ('tenant_id', 'document_number')
+
 
 class DocumentVersion(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='versions')
@@ -1241,14 +1458,22 @@ class DocumentVersion(models.Model):
     class Meta:
         unique_together = ('document', 'version')
 
+class DocumentAcknowledgment(models.Model):
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='acknowledgments')
+    user_id = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100)  # Stores job_role or role from user at acknowledgment time
+    acknowledged_at = models.DateTimeField(auto_now_add=True)
+    tenant_id = models.CharField(max_length=255)
 
-
-# class DocumentAcknowledgment(models.Model):
-#     document = models.ForeignKey(Document, on_delete=models.CASCADE)
-#     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-#     # tenant = models.ForeignKey('core.Tenant', on_delete=models.CASCADE)
-#     acknowledged_at = models.DateTimeField(auto_now_add=True)
-
+    class Meta:
+        unique_together = ('document', 'user_id', 'tenant_id')
+        indexes = [
+            models.Index(fields=['document', 'tenant_id']),
+            models.Index(fields=['user_id', 'tenant_id']),
+        ]
 
 class Group(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

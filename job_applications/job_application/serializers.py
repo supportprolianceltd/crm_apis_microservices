@@ -976,15 +976,15 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         compliance_status = validated_data.pop('compliance_status', None)
 
         # If job_requisition_id is being updated, validate and set the new title
-        if 'job_requisition_id' in validated_data:
-            job_requisition_id = validated_data['job_requisition_id']
-            tenant_id = instance.tenant_id  # Use existing tenant_id
-            try:
-                from .models import JobRequisition  # Adjust import as needed
-                job_requisition = JobRequisition.objects.get(id=job_requisition_id, tenant_id=tenant_id)
-                validated_data['job_requisition_title'] = job_requisition.title
-            except JobRequisition.DoesNotExist:
-                raise serializers.ValidationError({"job_requisition_id": "Invalid job requisition ID or does not belong to this tenant."})
+        # if 'job_requisition_id' in validated_data:
+        #     job_requisition_id = validated_data['job_requisition_id']
+        #     tenant_id = instance.tenant_id  # Use existing tenant_id
+        #     try:
+        #         from .models import JobRequisition  # Adjust import as needed
+        #         job_requisition = JobRequisition.objects.get(id=job_requisition_id, tenant_id=tenant_id)
+        #         validated_data['job_requisition_title'] = job_requisition.title
+        #     except JobRequisition.DoesNotExist:
+        #         raise serializers.ValidationError({"job_requisition_id": "Invalid job requisition ID or does not belong to this tenant."})
 
         # Check if status is changing and log manual change
         if 'status' in validated_data:
