@@ -69,6 +69,7 @@ from .models import (
     UserSession,
     DocumentVersion,
     DocumentAcknowledgment,
+    DocumentPermission,
 )
 
 # Local App - Serializers
@@ -105,6 +106,7 @@ from .serializers import (
     get_user_data_from_jwt,
     DocumentAcknowledgmentSerializer,
     DocumentVersionSerializer,
+    UserDocumentAccessSerializer,
 )
 
 # Auth Service Utils
@@ -2742,7 +2744,6 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 
-
 class UserDocumentAccessView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
@@ -2771,6 +2772,7 @@ class UserDocumentAccessView(APIView):
         except Exception as e:
             logger.error(f"Error retrieving user document access for tenant {tenant_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class DocumentListCreateView(APIView):
