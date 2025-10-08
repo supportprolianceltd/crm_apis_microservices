@@ -2743,19 +2743,6 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 class UserDocumentAccessView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
@@ -2772,7 +2759,7 @@ class UserDocumentAccessView(APIView):
                 permission = DocumentPermission.objects.get(email=user_identifier, tenant_id=tenant_id)
             # Get all permissions for this user
             permissions = DocumentPermission.objects.filter(
-                models.Q(user_id=permission.user_id) | models.Q(email=permission.email),
+                Q(user_id=permission.user_id) | Q(email=permission.email),
                 tenant_id=tenant_id
             ).select_related('document')
             serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})

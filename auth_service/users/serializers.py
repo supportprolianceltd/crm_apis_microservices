@@ -2790,10 +2790,14 @@ class DocumentSerializer(serializers.ModelSerializer):
     def validate_permissions_write(self, value):
         if value:
             for perm_data in value:
-                if 'user_id' not in perm_data or 'permission_level' not in perm_data:
-                    raise serializers.ValidationError("Each permission must include 'user_id' and 'permission_level'.")
-                if perm_data['permission_level'] not in ['view', 'view_download']:
+                if 'permission_level' not in perm_data:
+                    raise serializers.ValidationError("Each permission must include 'permission_level'.")
+                if perm_data['permission_level'] not in DocumentPermission.PERMISSION_CHOICES:
                     raise serializers.ValidationError("Invalid permission_level. Must be 'view' or 'view_download'.")
+                if ('user_id' not in perm_data or not perm_data['user_id']) and ('email' not in perm_data or not perm_data['email']):
+                    raise serializers.ValidationError("Each permission must include either 'user_id' or 'email'.")
+                if ('user_id' in perm_data and perm_data['user_id']) and ('email' in perm_data and perm_data['email']):
+                    raise serializers.ValidationError("Each permission must include exactly one of 'user_id' or 'email', not both.")
         return value
 
     def validate(self, data):
@@ -2816,18 +2820,44 @@ class DocumentSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"updated_by_id": "Invalid user ID."})
         # Validate permissions_write users belong to tenant
         permissions_write = data.get('permissions_write', [])
+        resolved_permissions = []
         for perm_data in permissions_write:
-            user_id = perm_data['user_id']
-            try:
-                user = CustomUser.objects.get(id=user_id)
-                if str(user.tenant_id) != str(tenant_id):
-                    raise serializers.ValidationError({"permissions_write": f"User {user_id} does not belong to this tenant."})
-            except CustomUser.DoesNotExist:
-                raise serializers.ValidationError({"permissions_write": f"Invalid user ID: {user_id}"})
+            user = None
+            if 'user_id' in perm_data and perm_data['user_id']:
+                try:
+                    user = CustomUser.objects.get(id=perm_data['user_id'])
+                except CustomUser.DoesNotExist:
+                    raise serializers.ValidationError({"permissions_write": f"Invalid user ID: {perm_data['user_id']}"})
+            elif 'email' in perm_data and perm_data['email']:
+                try:
+                    user = CustomUser.objects.get(email=perm_data['email'])
+                except CustomUser.DoesNotExist:
+                    raise serializers.ValidationError({"permissions_write": f"Invalid user email: {perm_data['email']}"})
+            
+            if not user:
+                raise serializers.ValidationError({"permissions_write": "Could not resolve user from provided ID or email."})
+            
+            if str(user.tenant_id) != str(tenant_id):
+                raise serializers.ValidationError({"permissions_write": f"User {perm_data.get('user_id', perm_data.get('email'))} does not belong to this tenant."})
+            
+            # Store resolved user_id and user details for create/update
+            resolved_perm = {
+                'resolved_user_id': str(user.id),
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'role': getattr(user.profile, 'job_role', '') if hasattr(user, 'profile') else '',
+                'permission_level': perm_data['permission_level']
+            }
+            resolved_permissions.append(resolved_perm)
+        
+        # Attach resolved data to validated_data for use in create/update
+        data['resolved_permissions_write'] = resolved_permissions
         return data
 
     def create(self, validated_data):
-        permissions_write = validated_data.pop("permissions_write", [])
+        resolved_permissions = validated_data.pop("resolved_permissions_write", [])
+        permissions_write = validated_data.pop("permissions_write", [])  # Pop original for super()
         file = validated_data.pop("file", None)
         current_user = get_user_data_from_jwt(self.context["request"])  # From token, no API call
         validated_data["tenant_id"] = str(get_tenant_id_from_jwt(self.context["request"]))
@@ -2860,35 +2890,29 @@ class DocumentSerializer(serializers.ModelSerializer):
                 created_by_id=validated_data["uploaded_by_id"],
             )
         
-        # Bulk create permissions
-        if permissions_write:
-            permission_objs = []
-            for perm in permissions_write:
-                try:
-                    user = CustomUser.objects.get(id=perm['user_id'])
-                    permission_objs.append(
-                        DocumentPermission(
-                            document=document,
-                            user_id=perm['user_id'],
-                            email=user.email,
-                            first_name=user.first_name,
-                            last_name=user.last_name,
-                            role=getattr(user.profile, 'job_role', '') if hasattr(user, 'profile') else '',
-                            permission_level=perm['permission_level'],
-                            tenant_id=tenant_id
-                        )
-                    )
-                except CustomUser.DoesNotExist:
-                    # This shouldn't happen due to prior validation, but log
-                    logger.error(f"User {perm['user_id']} not found during permission creation")
-                    continue
+        # Bulk create permissions using resolved data
+        if resolved_permissions:
+            permission_objs = [
+                DocumentPermission(
+                    document=document,
+                    user_id=perm['resolved_user_id'],
+                    email=perm['email'],
+                    first_name=perm['first_name'],
+                    last_name=perm['last_name'],
+                    role=perm['role'],
+                    permission_level=perm['permission_level'],
+                    tenant_id=tenant_id
+                )
+                for perm in resolved_permissions
+            ]
             DocumentPermission.objects.bulk_create(permission_objs)
-            logger.info(f"Bulk created {len(permission_objs)} permissions for document {document.title}")
+            logger.info(f"Bulk created {len(resolved_permissions)} permissions for document {document.title}")
 
         return document
 
     def update(self, instance, validated_data):
-        permissions_write = validated_data.pop("permissions_write", None)
+        resolved_permissions = validated_data.pop("resolved_permissions_write", None)
+        permissions_write = validated_data.pop("permissions_write", None)  # Pop original
         file = validated_data.pop("file", None)
         current_user = get_user_data_from_jwt(self.context["request"])  # From token
         validated_data["updated_by_id"] = str(current_user["id"])
@@ -2897,6 +2921,16 @@ class DocumentSerializer(serializers.ModelSerializer):
 
         with transaction.atomic():
             if file:
+                # Save current version
+                DocumentVersion.objects.create(
+                    document=instance,
+                    version=instance.version,
+                    file_url=instance.file_url,
+                    file_path=instance.file_path,
+                    file_type=instance.file_type,
+                    file_size=instance.file_size,
+                    created_by_id=instance.updated_by_id or instance.uploaded_by_id,
+                )
                 # Increment version
                 instance.version += 1
                 validated_data["version"] = instance.version
@@ -2924,31 +2958,25 @@ class DocumentSerializer(serializers.ModelSerializer):
                 )
             
             # Handle permissions: if provided, replace all (bulk select implies full set)
-            if permissions_write is not None:
+            if resolved_permissions is not None:
                 # Delete existing
                 instance.permissions.filter(tenant_id=tenant_id).delete()
                 # Bulk create new
-                permission_objs = []
-                for perm in permissions_write:
-                    try:
-                        user = CustomUser.objects.get(id=perm['user_id'])
-                        permission_objs.append(
-                            DocumentPermission(
-                                document=instance,
-                                user_id=perm['user_id'],
-                                email=user.email,
-                                first_name=user.first_name,
-                                last_name=user.last_name,
-                                role=getattr(user.profile, 'job_role', '') if hasattr(user, 'profile') else '',
-                                permission_level=perm['permission_level'],
-                                tenant_id=tenant_id
-                            )
-                        )
-                    except CustomUser.DoesNotExist:
-                        logger.error(f"User {perm['user_id']} not found during permission update")
-                        continue
+                permission_objs = [
+                    DocumentPermission(
+                        document=instance,
+                        user_id=perm['resolved_user_id'],
+                        email=perm['email'],
+                        first_name=perm['first_name'],
+                        last_name=perm['last_name'],
+                        role=perm['role'],
+                        permission_level=perm['permission_level'],
+                        tenant_id=tenant_id
+                    )
+                    for perm in resolved_permissions
+                ]
                 DocumentPermission.objects.bulk_create(permission_objs)
-                logger.info(f"Replaced permissions with {len(permission_objs)} new ones for document {instance.title}")
+                logger.info(f"Replaced permissions with {len(resolved_permissions)} new ones for document {instance.title}")
         
         return instance
 

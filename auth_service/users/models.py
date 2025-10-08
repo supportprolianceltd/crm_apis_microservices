@@ -1450,7 +1450,6 @@ class DocumentPermission(models.Model):
         ]
 
 
-
 class Document(models.Model):
     tenant_id = models.CharField(max_length=255, blank=True, null=True)
     title = models.CharField(max_length=255)
@@ -1501,8 +1500,6 @@ class DocumentAcknowledgment(models.Model):
             models.Index(fields=['document', 'tenant_id']),
             models.Index(fields=['user_id', 'tenant_id']),
         ]
-
-
 
 
 class Group(models.Model):
