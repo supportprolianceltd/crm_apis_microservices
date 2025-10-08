@@ -1450,9 +1450,11 @@ class DocumentPermission(models.Model):
         ]
 
 
+
 class Document(models.Model):
     tenant_id = models.CharField(max_length=255, blank=True, null=True)
     title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
     file_url = models.URLField(max_length=500, blank=True, null=True)
     file_path = models.CharField(max_length=500, blank=True, null=True)
     file_type = models.CharField(max_length=100, blank=True, null=True)
@@ -1483,7 +1485,6 @@ class DocumentVersion(models.Model):
     class Meta:
         unique_together = ('document', 'version')
 
-
 class DocumentAcknowledgment(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='acknowledgments')
     user_id = models.CharField(max_length=255)
@@ -1500,6 +1501,8 @@ class DocumentAcknowledgment(models.Model):
             models.Index(fields=['document', 'tenant_id']),
             models.Index(fields=['user_id', 'tenant_id']),
         ]
+
+
 
 
 class Group(models.Model):

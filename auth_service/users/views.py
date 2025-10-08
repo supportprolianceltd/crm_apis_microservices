@@ -2661,6 +2661,131 @@ class RSAKeyPairCreateView(APIView):
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        tenant = self.request.user.tenant
+        return Group.objects.filter(tenant=tenant)
+
+    def perform_create(self, serializer):
+        if not (self.request.user.is_superuser or self.request.user.role == "admin"):
+            raise PermissionDenied("Only admins or superusers can create groups.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        if not (self.request.user.is_superuser or self.request.user.role == "admin"):
+            raise PermissionDenied("Only admins or superusers can update groups.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if not (self.request.user.is_superuser or self.request.user.role == "admin"):
+            raise PermissionDenied("Only admins or superusers can delete groups.")
+        instance.delete()
+
+    @action(detail=True, methods=["get"], url_path="members")
+    def get_members(self, request, pk=None):
+        group = self.get_object()
+        memberships = GroupMembership.objects.filter(group=group, tenant=request.user.tenant)
+        serializer = GroupMembershipSerializer(memberships, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["post"], url_path="add-member")
+    def add_member(self, request, pk=None):
+        if not (request.user.is_superuser or request.user.role == "admin"):
+            raise PermissionDenied("Only admins or superusers can add members to groups.")
+
+        group = self.get_object()
+        user_id = request.data.get("user_id")
+
+        try:
+            with tenant_context(request.user.tenant):
+                user = CustomUser.objects.get(id=user_id, tenant=request.user.tenant)
+                if GroupMembership.objects.filter(group=group, user=user).exists():
+                    return Response(
+                        {"error": "User is already a member of this group."}, status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                membership = GroupMembership.objects.create(group=group, user=user, tenant=request.user.tenant)
+                serializer = GroupMembershipSerializer(membership, context={"request": request})
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"error": "User not found or does not belong to this tenant."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=True, methods=["post"], url_path="remove-member")
+    def remove_member(self, request, pk=None):
+        if not (request.user.is_superuser or request.user.role == "admin"):
+            raise PermissionDenied("Only admins or superusers can remove members from groups.")
+
+        group = self.get_object()
+        user_id = request.data.get("user_id")
+
+        try:
+            with tenant_context(request.user.tenant):
+                membership = GroupMembership.objects.get(group=group, user__id=user_id, tenant=request.user.tenant)
+                membership.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+        except GroupMembership.DoesNotExist:
+            return Response({"error": "User is not a member of this group."}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class UserDocumentAccessView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        user_identifier = request.query_params.get('user_id') or request.query_params.get('email')
+        if not user_identifier:
+            return Response({"detail": "Either 'user_id' or 'email' query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        tenant_id = get_tenant_id_from_jwt(request)
+        try:
+            if request.query_params.get('user_id'):
+                permission = DocumentPermission.objects.get(user_id=user_identifier, tenant_id=tenant_id)
+            else:
+                permission = DocumentPermission.objects.get(email=user_identifier, tenant_id=tenant_id)
+            # Get all permissions for this user
+            permissions = DocumentPermission.objects.filter(
+                models.Q(user_id=permission.user_id) | models.Q(email=permission.email),
+                tenant_id=tenant_id
+            ).select_related('document')
+            serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})
+            logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_id}")
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except DocumentPermission.DoesNotExist:
+            logger.warning(f"No permissions found for user {user_identifier} in tenant {tenant_id}")
+            return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error retrieving user document access for tenant {tenant_id}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class DocumentListCreateView(APIView):
 
     def get(self, request):
@@ -2806,106 +2931,3 @@ class DocumentAcknowledgmentsListView(APIView):
         except Exception as e:
             logger.error(f"Error retrieving acknowledgments for document {document_id} in tenant {tenant_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class UserDocumentAccessView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
-
-    def get(self, request):
-        user_identifier = request.query_params.get('user_id') or request.query_params.get('email')
-        if not user_identifier:
-            return Response({"detail": "Either 'user_id' or 'email' query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        tenant_id = get_tenant_id_from_jwt(request)
-        try:
-            if request.query_params.get('user_id'):
-                permission = DocumentPermission.objects.get(user_id=user_identifier, tenant_id=tenant_id)
-            else:
-                permission = DocumentPermission.objects.get(email=user_identifier, tenant_id=tenant_id)
-            # Get all permissions for this user
-            permissions = DocumentPermission.objects.filter(
-                models.Q(user_id=permission.user_id) | models.Q(email=permission.email),
-                tenant_id=tenant_id
-            ).select_related('document')
-            serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})
-            logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_id}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except DocumentPermission.DoesNotExist:
-            logger.warning(f"No permissions found for user {user_identifier} in tenant {tenant_id}")
-            return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            logger.error(f"Error retrieving user document access for tenant {tenant_id}: {str(e)}")
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-class GroupViewSet(viewsets.ModelViewSet):
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        tenant = self.request.user.tenant
-        return Group.objects.filter(tenant=tenant)
-
-    def perform_create(self, serializer):
-        if not (self.request.user.is_superuser or self.request.user.role == "admin"):
-            raise PermissionDenied("Only admins or superusers can create groups.")
-        serializer.save()
-
-    def perform_update(self, serializer):
-        if not (self.request.user.is_superuser or self.request.user.role == "admin"):
-            raise PermissionDenied("Only admins or superusers can update groups.")
-        serializer.save()
-
-    def perform_destroy(self, instance):
-        if not (self.request.user.is_superuser or self.request.user.role == "admin"):
-            raise PermissionDenied("Only admins or superusers can delete groups.")
-        instance.delete()
-
-    @action(detail=True, methods=["get"], url_path="members")
-    def get_members(self, request, pk=None):
-        group = self.get_object()
-        memberships = GroupMembership.objects.filter(group=group, tenant=request.user.tenant)
-        serializer = GroupMembershipSerializer(memberships, many=True, context={"request": request})
-        return Response(serializer.data)
-
-    @action(detail=True, methods=["post"], url_path="add-member")
-    def add_member(self, request, pk=None):
-        if not (request.user.is_superuser or request.user.role == "admin"):
-            raise PermissionDenied("Only admins or superusers can add members to groups.")
-
-        group = self.get_object()
-        user_id = request.data.get("user_id")
-
-        try:
-            with tenant_context(request.user.tenant):
-                user = CustomUser.objects.get(id=user_id, tenant=request.user.tenant)
-                if GroupMembership.objects.filter(group=group, user=user).exists():
-                    return Response(
-                        {"error": "User is already a member of this group."}, status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                membership = GroupMembership.objects.create(group=group, user=user, tenant=request.user.tenant)
-                serializer = GroupMembershipSerializer(membership, context={"request": request})
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except CustomUser.DoesNotExist:
-            return Response(
-                {"error": "User not found or does not belong to this tenant."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-    @action(detail=True, methods=["post"], url_path="remove-member")
-    def remove_member(self, request, pk=None):
-        if not (request.user.is_superuser or request.user.role == "admin"):
-            raise PermissionDenied("Only admins or superusers can remove members from groups.")
-
-        group = self.get_object()
-        user_id = request.data.get("user_id")
-
-        try:
-            with tenant_context(request.user.tenant):
-                membership = GroupMembership.objects.get(group=group, user__id=user_id, tenant=request.user.tenant)
-                membership.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-        except GroupMembership.DoesNotExist:
-            return Response({"error": "User is not a member of this group."}, status=status.HTTP_404_NOT_FOUND)

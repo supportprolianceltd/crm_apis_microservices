@@ -153,6 +153,7 @@ urlpatterns = [
     
     # Other User Documents endpoints
 
+
     path('documents/', DocumentListCreateView.as_view(), name='document-list-create'),
     path('documents/<int:id>/', DocumentDetailView.as_view(), name='document-detail'),
     path('documents/<int:document_id>/versions/', DocumentVersionListView.as_view(), name='document-versions'),

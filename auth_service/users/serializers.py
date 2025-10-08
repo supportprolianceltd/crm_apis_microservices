@@ -2601,6 +2601,9 @@ class ClientCreateSerializer(serializers.ModelSerializer):
             profile_serializer.save(user=user)
             return user
 
+
+
+
 class DocumentPermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocumentPermission
@@ -2612,6 +2615,8 @@ class DocumentPermissionWriteSerializer(serializers.ModelSerializer):
         model = DocumentPermission
         fields = ["user_id", "permission_level"]
         
+
+
 class DocumentVersionSerializer(serializers.ModelSerializer):
     created_by = serializers.SerializerMethodField()
     # Removed last_updated_by and last_updated_by_id (versions aren't updated)
@@ -2670,6 +2675,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             "tenant_id",
             "tenant_domain",
             "title",
+            "description",
             "file_url",
             "file_path",
             "file_type",
@@ -2891,16 +2897,6 @@ class DocumentSerializer(serializers.ModelSerializer):
 
         with transaction.atomic():
             if file:
-                # Save current version
-                DocumentVersion.objects.create(
-                    document=instance,
-                    version=instance.version,
-                    file_url=instance.file_url,
-                    file_path=instance.file_path,
-                    file_type=instance.file_type,
-                    file_size=instance.file_size,
-                    created_by_id=instance.updated_by_id or instance.uploaded_by_id,
-                )
                 # Increment version
                 instance.version += 1
                 validated_data["version"] = instance.version
@@ -2963,7 +2959,6 @@ class UserDocumentAccessSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocumentPermission
         fields = ['document', 'permission']
-
 
 
 
