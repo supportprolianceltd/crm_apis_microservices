@@ -67,6 +67,7 @@ from .models import (
     UserActivity,
     UserProfile,
     UserSession,
+    DocumentVersion,
     DocumentAcknowledgment,
 )
 
@@ -103,6 +104,7 @@ from .serializers import (
     get_tenant_id_from_jwt,
     get_user_data_from_jwt,
     DocumentAcknowledgmentSerializer,
+    DocumentVersionSerializer,
 )
 
 # Auth Service Utils

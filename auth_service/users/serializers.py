@@ -2600,6 +2600,8 @@ class ClientCreateSerializer(serializers.ModelSerializer):
             profile_serializer.save(user=user)
             return user
 
+
+
 class DocumentVersionSerializer(serializers.ModelSerializer):
     created_by = serializers.SerializerMethodField()
     # Removed last_updated_by and last_updated_by_id (versions aren't updated)

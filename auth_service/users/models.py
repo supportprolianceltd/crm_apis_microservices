@@ -1424,6 +1424,9 @@ class BlacklistedToken(models.Model):
     blacklisted_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
 
+
+
+
 class Document(models.Model):
     tenant_id = models.CharField(max_length=255, blank=True, null=True)
     title = models.CharField(max_length=255)
@@ -1474,6 +1477,9 @@ class DocumentAcknowledgment(models.Model):
             models.Index(fields=['document', 'tenant_id']),
             models.Index(fields=['user_id', 'tenant_id']),
         ]
+
+
+
 
 class Group(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
