@@ -2661,8 +2661,6 @@ class RSAKeyPairCreateView(APIView):
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
-
 class DocumentListCreateView(APIView):
 
     def get(self, request):
@@ -2689,8 +2687,6 @@ class DocumentListCreateView(APIView):
         except Exception as e:
             logger.error(f"Error creating document: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 class DocumentDetailView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
@@ -2731,6 +2727,7 @@ class DocumentDetailView(APIView):
         try:
             tenant_id = get_tenant_id_from_jwt(request)
             document = Document.objects.get(id=id, tenant_id=tenant_id)
+            # Cascade delete will handle permissions and acknowledgments
             document.delete()
             logger.info(f"Document deleted: {document.title} for tenant {tenant_id}")
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -2740,9 +2737,6 @@ class DocumentDetailView(APIView):
         except Exception as e:
             logger.error(f"Error deleting document for tenant {tenant_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
 
 class DocumentVersionListView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
@@ -2761,8 +2755,6 @@ class DocumentVersionListView(APIView):
         except Exception as e:
             logger.error(f"Error retrieving versions for document {document_id} in tenant {tenant_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 class DocumentAcknowledgeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -2797,7 +2789,6 @@ class DocumentAcknowledgeView(APIView):
             logger.error(f"Error acknowledging document for tenant {tenant_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 class DocumentAcknowledgmentsListView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
@@ -2815,6 +2806,37 @@ class DocumentAcknowledgmentsListView(APIView):
         except Exception as e:
             logger.error(f"Error retrieving acknowledgments for document {document_id} in tenant {tenant_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserDocumentAccessView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        user_identifier = request.query_params.get('user_id') or request.query_params.get('email')
+        if not user_identifier:
+            return Response({"detail": "Either 'user_id' or 'email' query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        tenant_id = get_tenant_id_from_jwt(request)
+        try:
+            if request.query_params.get('user_id'):
+                permission = DocumentPermission.objects.get(user_id=user_identifier, tenant_id=tenant_id)
+            else:
+                permission = DocumentPermission.objects.get(email=user_identifier, tenant_id=tenant_id)
+            # Get all permissions for this user
+            permissions = DocumentPermission.objects.filter(
+                models.Q(user_id=permission.user_id) | models.Q(email=permission.email),
+                tenant_id=tenant_id
+            ).select_related('document')
+            serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})
+            logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_id}")
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except DocumentPermission.DoesNotExist:
+            logger.warning(f"No permissions found for user {user_identifier} in tenant {tenant_id}")
+            return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error retrieving user document access for tenant {tenant_id}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class GroupViewSet(viewsets.ModelViewSet):

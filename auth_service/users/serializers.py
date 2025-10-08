@@ -2,7 +2,7 @@
 import logging
 from datetime import timedelta
 from typing import Any, Dict
-
+from django.db import models
 import jwt
 import requests
 from core.models import Branch, Domain
@@ -17,6 +17,7 @@ import logging
 
 from .models import (
     DocumentAcknowledgment,
+    DocumentPermission, Document, DocumentVersion,
     BlockedIP,
     ClientProfile,
     CustomUser,
@@ -40,7 +41,7 @@ from .models import (
 logger = logging.getLogger(__name__)
 from rest_framework.exceptions import ValidationError
 
-from .models import Document, DocumentVersion
+
 
 
 def get_user_data_from_jwt(request):
@@ -2600,8 +2601,17 @@ class ClientCreateSerializer(serializers.ModelSerializer):
             profile_serializer.save(user=user)
             return user
 
+class DocumentPermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentPermission
+        fields = ["user_id", "email", "first_name", "last_name", "role", "permission_level", "created_at"]
+        read_only_fields = ["created_at"]
 
-
+class DocumentPermissionWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentPermission
+        fields = ["user_id", "permission_level"]
+        
 class DocumentVersionSerializer(serializers.ModelSerializer):
     created_by = serializers.SerializerMethodField()
     # Removed last_updated_by and last_updated_by_id (versions aren't updated)
@@ -2637,13 +2647,11 @@ class DocumentVersionSerializer(serializers.ModelSerializer):
                 return None
         return None
 
-
 class DocumentAcknowledgmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocumentAcknowledgment
         fields = ["id", "document", "user_id", "email", "first_name", "last_name", "role", "acknowledged_at", "tenant_id"]
         read_only_fields = ["id", "document", "user_id", "email", "first_name", "last_name", "role", "acknowledged_at", "tenant_id"]
-
 
 class DocumentSerializer(serializers.ModelSerializer):
     uploaded_by = serializers.SerializerMethodField()
@@ -2651,6 +2659,8 @@ class DocumentSerializer(serializers.ModelSerializer):
     last_updated_by = serializers.SerializerMethodField()
     tenant_domain = serializers.SerializerMethodField()
     acknowledgments = DocumentAcknowledgmentSerializer(many=True, read_only=True)  # New: List of acknowledgments
+    permissions = DocumentPermissionSerializer(many=True, read_only=True)
+    permissions_write = DocumentPermissionWriteSerializer(many=True, required=False, write_only=True)  # New: For bulk write
     file = serializers.FileField(required=False, allow_null=True)
 
     class Meta:
@@ -2678,6 +2688,8 @@ class DocumentSerializer(serializers.ModelSerializer):
             "document_number",
             "file",
             "acknowledgments",  # New field
+            "permissions",  # New field
+            "permissions_write",  # New field
         ]
         read_only_fields = [
             "id",
@@ -2694,6 +2706,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             "version",
             "last_updated_by",
             "acknowledgments",  # Read-only
+            "permissions",  # Read-only
         ]
 
     @extend_schema_field(
@@ -2768,6 +2781,15 @@ class DocumentSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("File size cannot exceed 10MB.")
         return value
 
+    def validate_permissions_write(self, value):
+        if value:
+            for perm_data in value:
+                if 'user_id' not in perm_data or 'permission_level' not in perm_data:
+                    raise serializers.ValidationError("Each permission must include 'user_id' and 'permission_level'.")
+                if perm_data['permission_level'] not in ['view', 'view_download']:
+                    raise serializers.ValidationError("Invalid permission_level. Must be 'view' or 'view_download'.")
+        return value
+
     def validate(self, data):
         tenant_id = get_tenant_id_from_jwt(self.context["request"])
         data["tenant_id"] = tenant_id
@@ -2786,9 +2808,20 @@ class DocumentSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError({"updated_by_id": "User does not belong to this tenant."})
             except CustomUser.DoesNotExist:
                 raise serializers.ValidationError({"updated_by_id": "Invalid user ID."})
+        # Validate permissions_write users belong to tenant
+        permissions_write = data.get('permissions_write', [])
+        for perm_data in permissions_write:
+            user_id = perm_data['user_id']
+            try:
+                user = CustomUser.objects.get(id=user_id)
+                if str(user.tenant_id) != str(tenant_id):
+                    raise serializers.ValidationError({"permissions_write": f"User {user_id} does not belong to this tenant."})
+            except CustomUser.DoesNotExist:
+                raise serializers.ValidationError({"permissions_write": f"Invalid user ID: {user_id}"})
         return data
 
     def create(self, validated_data):
+        permissions_write = validated_data.pop("permissions_write", [])
         file = validated_data.pop("file", None)
         current_user = get_user_data_from_jwt(self.context["request"])  # From token, no API call
         validated_data["tenant_id"] = str(get_tenant_id_from_jwt(self.context["request"]))
@@ -2809,6 +2842,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             logger.info(f"Document file uploaded: {url}")
 
         document = super().create(validated_data)
+        tenant_id = validated_data["tenant_id"]
         if file:
             DocumentVersion.objects.create(
                 document=document,
@@ -2819,13 +2853,41 @@ class DocumentSerializer(serializers.ModelSerializer):
                 file_size=validated_data["file_size"],
                 created_by_id=validated_data["uploaded_by_id"],
             )
+        
+        # Bulk create permissions
+        if permissions_write:
+            permission_objs = []
+            for perm in permissions_write:
+                try:
+                    user = CustomUser.objects.get(id=perm['user_id'])
+                    permission_objs.append(
+                        DocumentPermission(
+                            document=document,
+                            user_id=perm['user_id'],
+                            email=user.email,
+                            first_name=user.first_name,
+                            last_name=user.last_name,
+                            role=getattr(user.profile, 'job_role', '') if hasattr(user, 'profile') else '',
+                            permission_level=perm['permission_level'],
+                            tenant_id=tenant_id
+                        )
+                    )
+                except CustomUser.DoesNotExist:
+                    # This shouldn't happen due to prior validation, but log
+                    logger.error(f"User {perm['user_id']} not found during permission creation")
+                    continue
+            DocumentPermission.objects.bulk_create(permission_objs)
+            logger.info(f"Bulk created {len(permission_objs)} permissions for document {document.title}")
+
         return document
 
     def update(self, instance, validated_data):
+        permissions_write = validated_data.pop("permissions_write", None)
         file = validated_data.pop("file", None)
         current_user = get_user_data_from_jwt(self.context["request"])  # From token
         validated_data["updated_by_id"] = str(current_user["id"])
         instance.last_updated_by_id = str(current_user["id"])  # Update last updater
+        tenant_id = instance.tenant_id
 
         with transaction.atomic():
             if file:
@@ -2864,71 +2926,47 @@ class DocumentSerializer(serializers.ModelSerializer):
                     file_size=validated_data["file_size"],
                     created_by_id=validated_data["updated_by_id"],
                 )
+            
+            # Handle permissions: if provided, replace all (bulk select implies full set)
+            if permissions_write is not None:
+                # Delete existing
+                instance.permissions.filter(tenant_id=tenant_id).delete()
+                # Bulk create new
+                permission_objs = []
+                for perm in permissions_write:
+                    try:
+                        user = CustomUser.objects.get(id=perm['user_id'])
+                        permission_objs.append(
+                            DocumentPermission(
+                                document=instance,
+                                user_id=perm['user_id'],
+                                email=user.email,
+                                first_name=user.first_name,
+                                last_name=user.last_name,
+                                role=getattr(user.profile, 'job_role', '') if hasattr(user, 'profile') else '',
+                                permission_level=perm['permission_level'],
+                                tenant_id=tenant_id
+                            )
+                        )
+                    except CustomUser.DoesNotExist:
+                        logger.error(f"User {perm['user_id']} not found during permission update")
+                        continue
+                DocumentPermission.objects.bulk_create(permission_objs)
+                logger.info(f"Replaced permissions with {len(permission_objs)} new ones for document {instance.title}")
+        
         return instance
 
+class UserDocumentAccessSerializer(serializers.ModelSerializer):
+    document = DocumentSerializer(read_only=True)
+    permission = DocumentPermissionSerializer(read_only=True)
+
+    class Meta:
+        model = DocumentPermission
+        fields = ['document', 'permission']
 
 
-# class DocumentAcknowledgmentSerializer(serializers.ModelSerializer):
-#     user = serializers.SerializerMethodField()
 
-#     class Meta:
-#         model = DocumentAcknowledgment
-#         fields = ["id", "document", "user_id", "user", "acknowledged_at", "tenant_id"]
-#         read_only_fields = ["id", "user_id", "acknowledged_at", "tenant_id"]
 
-#     @extend_schema_field(
-#         {
-#             "type": "object",
-#             "properties": {
-#                 "email": {"type": "string"},
-#                 "first_name": {"type": "string"},
-#                 "last_name": {"type": "string"},
-#                 "job_role": {"type": "string"},
-#             },
-#         }
-#     )
-#     def get_user(self, obj):
-#         if obj.user_id:
-#             try:
-#                 user_response = requests.get(
-#                     f"{settings.AUTH_SERVICE_URL}/api/user/users/{obj.user_id}/",
-#                     headers={
-#                         "Authorization": f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'
-#                     },
-#                 )
-#                 if user_response.status_code == 200:
-#                     user_data = user_response.json()
-#                     return {
-#                         "email": user_data.get("email", ""),
-#                         "first_name": user_data.get("first_name", ""),
-#                         "last_name": user_data.get("last_name", ""),
-#                         "job_role": user_data.get("job_role", ""),
-#                     }
-#                 logger.error(f"Failed to fetch user {obj.user_id} from auth_service")
-#             except Exception as e:
-#                 logger.error(f"Error fetching user {obj.user_id}: {str(e)}")
-#         return None
-
-#     def validate(self, data):
-#         tenant_id = get_tenant_id_from_jwt(self.context["request"])
-#         data["tenant_id"] = tenant_id
-#         if "user_id" in data:
-#             user_response = requests.get(
-#                 f'{settings.AUTH_SERVICE_URL}/api/user/users/{data["user_id"]}/',
-#                 headers={"Authorization": self.context["request"].META.get("HTTP_AUTHORIZATION", "")},
-#             )
-#             if user_response.status_code != 200:
-#                 raise serializers.ValidationError({"user_id": "Invalid user ID."})
-#             user_data = user_response.json()
-#             if user_data.get("tenant_id") != tenant_id:
-#                 raise serializers.ValidationError({"user_id": "User does not belong to this tenant."})
-#         return data
-
-#     def create(self, validated_data):
-#         tenant_id = get_tenant_id_from_jwt(self.context["request"])
-#         validated_data["tenant_id"] = str(tenant_id)
-#         validated_data["user_id"] = self.context["request"].user.id
-#         return super().create(validated_data)
 
 class GroupSerializer(serializers.ModelSerializer):
     last_updated_by = serializers.SerializerMethodField()
@@ -3057,107 +3095,3 @@ class CustomUserMinimalSerializer(serializers.ModelSerializer):
     # def get_last_updated_by(self, obj):
     #     return get_last_updated_by(self, obj)
 
-
-# class CustomTokenSerializer(TokenObtainPairSerializer):
-#     @classmethod
-#     def get_token(cls, user):
-#         return super().get_token(user)
-
-#     def validate(self, attrs):
-#         ip_address = self.context["request"].META.get("REMOTE_ADDR")
-#         user_agent = self.context["request"].META.get("HTTP_USER_AGENT", "")
-#         tenant = self.context["request"].tenant
-
-#         with tenant_context(tenant):
-#             user = authenticate(email=attrs.get("email"), password=attrs.get("password"))
-#             if not user:
-#                 UserActivity.objects.create(
-#                     user=None,
-#                     tenant=tenant,
-#                     action="login",
-#                     performed_by=None,
-#                     details={"reason": "Invalid credentials"},
-#                     ip_address=ip_address,
-#                     user_agent=user_agent,
-#                     success=False,
-#                 )
-#                 raise serializers.ValidationError("Invalid credentials")
-
-#             if user.is_locked or not user.is_active:
-#                 UserActivity.objects.create(
-#                     user=user,
-#                     tenant=tenant,
-#                     action="login",
-#                     performed_by=None,
-#                     details={"reason": "Account locked or suspended"},
-#                     ip_address=ip_address,
-#                     user_agent=user_agent,
-#                     success=False,
-#                 )
-#                 raise serializers.ValidationError("Account is locked or suspended")
-
-#             if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
-#                 UserActivity.objects.create(
-#                     user=user,
-#                     tenant=tenant,
-#                     action="login",
-#                     performed_by=None,
-#                     details={"reason": "IP address blocked"},
-#                     ip_address=ip_address,
-#                     user_agent=user_agent,
-#                     success=False,
-#                 )
-#                 raise serializers.ValidationError("This IP address is blocked")
-
-#             user.reset_login_attempts()
-#             UserActivity.objects.create(
-#                 user=user,
-#                 tenant=tenant,
-#                 action="login",
-#                 performed_by=None,
-#                 details={},
-#                 ip_address=ip_address,
-#                 user_agent=user_agent,
-#                 success=True,
-#             )
-
-#             access_payload = {
-#                 "jti": str(uuid.uuid4()),
-#                 "sub": user.email,
-#                 "role": user.role,
-#                 "status": user.status,
-#                 "tenant_id": user.tenant.id,
-#                 "tenant_organizational_id": str(tenant.organizational_id),
-#                 "tenant_unique_id": str(tenant.unique_id),
-#                 "tenant_schema": user.tenant.schema_name,
-#                 "has_accepted_terms": user.has_accepted_terms,
-#                 "user": CustomUserMinimalSerializer(user).data,
-#                 "email": user.email,
-#                 "type": "access",
-#                 "exp": (timezone.now() + timedelta(minutes=15)).timestamp(),
-#             }
-#             access_token = issue_rsa_jwt(access_payload, user.tenant)
-
-#             refresh_jti = str(uuid.uuid4())
-#             refresh_payload = {
-#                 "jti": refresh_jti,
-#                 "sub": user.email,
-#                 "tenant_id": user.tenant.id,
-#                 "tenant_organizational_id": str(user.tenant.organizational_id),
-#                 "tenant_unique_id": str(user.tenant.unique_id),
-#                 "type": "refresh",
-#                 "exp": (timezone.now() + timedelta(days=7)).timestamp(),
-#             }
-#             refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
-
-#             data = {
-#                 "access": access_token,
-#                 "refresh": refresh_token,
-#                 "tenant_id": user.tenant.id,
-#                 "tenant_organizational_id": str(user.tenant.organizational_id),
-#                 "tenant_unique_id": str(user.tenant.unique_id),
-#                 "tenant_schema": user.tenant.schema_name,
-#                 "user": CustomUserMinimalSerializer(user).data,
-#                 "has_accepted_terms": user.has_accepted_terms,
-#             }
-#             return data

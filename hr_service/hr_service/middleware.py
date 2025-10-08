@@ -10,12 +10,15 @@ from django.contrib.auth.models import AnonymousUser
 
 logger = logging.getLogger('hr')
 
-# Public paths (adapt for HR: docs, health, public endpoints)
+# Public paths for HR service
 public_paths = [
     '/api/docs/',
     '/api/schema/',
     '/api/health/',
-    # Add HR public paths, e.g., '/api/hr/public/profiles/'
+    '/admin/',
+    '/static/',
+    '/api/hr/public/policies/',  # Add your HR-specific public endpoints
+    '/api/hr/public/leave-policies/',
 ]
 
 class SimpleUser:
@@ -24,15 +27,35 @@ class SimpleUser:
         self.username = payload.get('user', {}).get('username', '')
         self.email = payload.get('email', '')
         self.role = payload.get('role', '')
-        self.tenant_id = payload.get('tenant_id')
+        self.tenant_id = payload.get('tenant_unique_id') or payload.get('tenant_id')
         self.tenant_schema = payload.get('tenant_schema')
         self.is_authenticated = True
         self.is_active = True
         self.is_staff = payload.get('role') in ['hr', 'admin', 'root-admin']
         self.is_superuser = payload.get('role') == 'root-admin'
+        # Store the full payload for access to other claims
+        self.jwt_payload = payload
 
     def __str__(self):
         return self.username or self.email
+
+    def has_perm(self, perm, obj=None):
+        """Check if user has specific permission"""
+        # Implement based on your role/permission system
+        if self.is_superuser:
+            return True
+        if perm == 'hr.access':
+            return self.role in ['hr', 'admin', 'root-admin']
+        return False
+
+    def has_module_perms(self, app_label):
+        """Check if user has permissions for the app"""
+        if self.is_superuser:
+            return True
+        if app_label == 'hr':
+            return self.role in ['hr', 'admin', 'root-admin']
+        return False
+
 
 class DatabaseConnectionMiddleware:
     def __init__(self, get_response):
@@ -67,103 +90,105 @@ class DatabaseConnectionMiddleware:
         
         return response
 
+
 class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
+    """
+    JWT authentication middleware for HR microservice
+    Validates RS256 tokens and sets request.user with tenant context
+    """
+    
     def process_request(self, request):
-        # Allow public endpoints without JWT
-        if any(request.path.startswith(public) for public in public_paths):
+        # Skip for public paths and admin/static files
+        if any(request.path.startswith(path) for path in public_paths):
             request.user = AnonymousUser()
+            request.jwt_payload = None
+            request.tenant_id = None
             return
 
-        auth = request.headers.get('Authorization', '')
-        if not auth.startswith('Bearer '):
-            logger.info("No Bearer token provided")
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        
+        if not auth_header.startswith('Bearer '):
+            logger.warning(f"No Bearer token provided for protected path: {request.path}")
             request.user = AnonymousUser()
+            request.jwt_payload = None
+            request.tenant_id = None
             return
 
-        token = auth.split(' ')[1]
+        token = auth_header.split(' ')[1]
+        
         try:
+            # First, decode without verification to get the KID
             unverified_header = jwt.get_unverified_header(token)
             kid = unverified_header.get("kid")
+            
             if not kid:
-                raise AuthenticationFailed("No 'kid' in token header.")
+                logger.error("No 'kid' in token header")
+                raise AuthenticationFailed("Invalid token format: missing key ID")
 
+            # Get unverified payload for tenant context
             unverified_payload = jwt.decode(token, options={"verify_signature": False})
-            tenant_id = unverified_payload.get("tenant_id")
-            tenant_schema = unverified_payload.get("tenant_schema")
-            logger.info(f"Unverified JWT: kid={kid}, tenant_id={tenant_id}, tenant_schema={tenant_schema}")
+            tenant_id = unverified_payload.get("tenant_unique_id") or unverified_payload.get("tenant_id")
+            
+            logger.info(f"JWT validation: kid={kid}, tenant_id={tenant_id}")
 
+            # Fetch public key from auth service
             resp = requests.get(
-                f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/?tenant_id={tenant_id}",
-                headers={'Authorization': auth},  # Pass the same token
+                f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/",
+                headers={'Authorization': f'Bearer {token}'},
                 timeout=5
             )
-            logger.info(f"Public key response: {resp.status_code} {resp.text}")
+            
             if resp.status_code != 200:
-                raise AuthenticationFailed(f"Could not fetch public key: {resp.status_code}")
+                logger.error(f"Failed to fetch public key: {resp.status_code}")
+                raise AuthenticationFailed(f"Authentication service unavailable: {resp.status_code}")
 
-            public_key = resp.json().get("public_key")
+            public_key_data = resp.json()
+            public_key = public_key_data.get("public_key")
+            
             if not public_key:
-                raise AuthenticationFailed("Public key not found.")
+                logger.error("Public key not found in response")
+                raise AuthenticationFailed("Authentication service error: no public key")
 
-            payload = jwt.decode(token, public_key, algorithms=["RS256"])
+            # Verify and decode the token with the public key
+            payload = jwt.decode(
+                token, 
+                public_key, 
+                algorithms=["RS256"],
+                options={"verify_aud": False}  # Adjust based on your auth service
+            )
+            
+            # Set request attributes
             request.jwt_payload = payload
-            request.user = SimpleUser(payload)  # Set custom user
-            logger.info(f"Set request.user: {request.user}, is_authenticated={request.user.is_authenticated}")
+            request.user = SimpleUser(payload)
+            request.tenant_id = payload.get("tenant_unique_id") or payload.get("tenant_id")
+            
+            logger.info(f"Authenticated user: {request.user.email}, tenant: {request.tenant_id}")
 
         except jwt.ExpiredSignatureError:
-            return JsonResponse({'error': 'Token has expired'}, status=401)
+            logger.warning("JWT token has expired")
+            return JsonResponse(
+                {'error': 'Token has expired', 'code': 'token_expired'}, 
+                status=401
+            )
         except jwt.InvalidTokenError as e:
-            return JsonResponse({'error': f'Invalid token: {str(e)}'}, status=401)
+            logger.warning(f"Invalid JWT token: {str(e)}")
+            return JsonResponse(
+                {'error': f'Invalid token: {str(e)}', 'code': 'invalid_token'}, 
+                status=401
+            )
+        except requests.RequestException as e:
+            logger.error(f"Auth service request failed: {str(e)}")
+            return JsonResponse(
+                {'error': 'Authentication service unavailable', 'code': 'auth_service_down'}, 
+                status=503
+            )
         except Exception as e:
-            logger.error(f"JWT error: {str(e)}")
-            return JsonResponse({'error': f'JWT error: {str(e)}'}, status=401)
+            logger.error(f"Unexpected JWT processing error: {str(e)}")
+            return JsonResponse(
+                {'error': 'Authentication failed', 'code': 'auth_failed'}, 
+                status=401
+            )
 
-class CustomTenantSchemaMiddleware:
-    """
-    Middleware to switch DB schema based on tenant_schema in JWT or request data.
-    Handles public endpoints without JWT tokens.
-    """
-    def __init__(self, get_response):
-        self.get_response = get_response
 
-    def __call__(self, request):
-        logger.info(f"Incoming request path: {request.path}")
-        logger.info(f"Authorization header: {request.META.get('HTTP_AUTHORIZATION')}")
-
-        # Step 1: Handle public endpoints - set to public schema and proceed
-        if any(request.path.startswith(path) for path in public_paths):
-            try:
-                connection.set_schema_to_public()
-                logger.info("Set public schema for public endpoint")
-                response = self.get_response(request)
-                # Ensure we reset connection after response
-                connection.set_schema_to_public()
-                return response
-            except Exception as e:
-                logger.error(f"Schema switch failed for public endpoint: {str(e)}")
-                return JsonResponse({'error': 'Database configuration error'}, status=500)
-
-        # Step 2: For non-public endpoints, extract tenant_schema from JWT payload
-        jwt_payload = getattr(request, 'jwt_payload', None)
-        tenant_schema = None
-        
-        if jwt_payload:
-            tenant_schema = jwt_payload.get('tenant_schema')
-            logger.info(f"Found tenant_schema in JWT: {tenant_schema}")
-
-        if not tenant_schema:
-            logger.error("Tenant schema missing in JWT or request.")
-            return JsonResponse({'error': 'Tenant schema missing from token'}, status=403)
-
-        # Step 3: Switch schema for tenant-specific requests
-        try:
-            connection.set_schema(tenant_schema)
-            logger.info(f"Set schema to: {tenant_schema}")
-            response = self.get_response(request)
-            # Reset to public schema after processing
-            connection.set_schema_to_public()
-            return response
-        except Exception as e:
-            logger.error(f"Schema switch failed: {str(e)}")
-            connection.set_schema_to_public()  # Ensure reset on error
-            return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
+# REMOVED: CustomTenantSchemaMiddleware - not using schema-based multi-tenancy
+# Your HR service uses tenant_id fields in models instead

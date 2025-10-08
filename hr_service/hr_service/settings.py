@@ -23,7 +23,7 @@ GATEWAY_URL = env("GATEWAY_URL", default="https://server1.prolianceltd.com")
 # ======================== Database ========================
 DATABASES = {
     'default': {
-        'ENGINE': 'django_tenants.postgresql_backend',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('HR_DB_NAME', default='hr_db'),
         'USER': env('DB_USER', default='postgres'),
         'PASSWORD': env('DB_PASSWORD', default='password'),
@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     'django_filters',
     'hr',  # Your main app
     'django_extensions',
-    'django_tenants',  # Required for schema switching utils
 ]
 
 # ======================== Middleware ========================

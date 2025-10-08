@@ -1426,6 +1426,29 @@ class BlacklistedToken(models.Model):
 
 
 
+class DocumentPermission(models.Model):
+    PERMISSION_CHOICES = [
+        ('view', 'View Only'),
+        ('view_download', 'View and Download'),
+    ]
+    
+    document = models.ForeignKey('Document', on_delete=models.CASCADE, related_name='permissions')
+    user_id = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100)
+    permission_level = models.CharField(max_length=20, choices=PERMISSION_CHOICES)
+    tenant_id = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('document', 'user_id', 'tenant_id')
+        indexes = [
+            models.Index(fields=['document', 'tenant_id']),
+            models.Index(fields=['user_id', 'tenant_id']),
+        ]
+
 
 class Document(models.Model):
     tenant_id = models.CharField(max_length=255, blank=True, null=True)
@@ -1447,7 +1470,6 @@ class Document(models.Model):
     class Meta:
         unique_together = ('tenant_id', 'document_number')
 
-
 class DocumentVersion(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='versions')
     version = models.IntegerField()
@@ -1460,6 +1482,7 @@ class DocumentVersion(models.Model):
 
     class Meta:
         unique_together = ('document', 'version')
+
 
 class DocumentAcknowledgment(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='acknowledgments')
@@ -1477,8 +1500,6 @@ class DocumentAcknowledgment(models.Model):
             models.Index(fields=['document', 'tenant_id']),
             models.Index(fields=['user_id', 'tenant_id']),
         ]
-
-
 
 
 class Group(models.Model):

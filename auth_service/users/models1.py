@@ -1,315 +1,294 @@
-class ProfessionalQualificationSerializer(serializers.ModelSerializer):
-    image_file = serializers.FileField(required=False, allow_null=True)
+# # Document Management API Documentation
 
-    class Meta:
-        model = ProfessionalQualification
-        fields = ["id", "name", "image_file", "image_file_url"]
-        read_only_fields = ["id"]
-        extra_kwargs = {
-            "name": {"required": True},
-            "image_file": {"required": False, "allow_null": True},
-        }
+# This documentation provides a comprehensive guide to using the Document Management API endpoints. The API is built with Django REST Framework and assumes JWT-based authentication (via `Authorization: Bearer <token>` header). All endpoints are tenant-isolated: the `tenant_id` is extracted from the JWT token and used for filtering/validation.
 
-    def create(self, validated_data):
-        image = validated_data.pop("image_file", None)
-        if image:
-            logger.info(f"Uploading professional qualification image: {image.name}")
-            url = upload_file_dynamic(
-                image, image.name, content_type=getattr(image, "content_type", "application/octet-stream")
-            )
-            validated_data["image_file_url"] = url
-            validated_data["image_file"] = None  # Don't save to ImageField
-            logger.info(f"Professional qualification image uploaded: {url}")
-        return super().create(validated_data)
+# ## Base URL
+# All endpoints are relative to `/api/documents/` (adjust based on your URL configuration).
 
-    def update(self, instance, validated_data):
-        image = validated_data.pop("image_file", None)
-        if image:
-            logger.info(f"Updating professional qualification image: {image.name}")
-            url = upload_file_dynamic(
-                image, image.name, content_type=getattr(image, "content_type", "application/octet-stream")
-            )
-            validated_data["image_file_url"] = url
-            validated_data["image_file"] = None  # Don't save to ImageField
-            logger.info(f"Professional qualification image updated: {url}")
-        return super().update(instance, validated_data)
+# ## Authentication & Permissions
+# - **Authentication**: Required for all endpoints. Use JWT tokens containing user details (e.g., `id`, `email`, `first_name`, `last_name`, `job_role`, `tenant_id`).
+# - **Permissions**:
+#   - `IsAuthenticated`: Basic user access (e.g., acknowledgments).
+#   - `IsAdminUser`: Admin-only (e.g., listing, updating, deleting documents).
+# - **Error Responses**:
+#   - 401 Unauthorized: Invalid/missing token.
+#   - 403 Forbidden: Insufficient permissions or tenant mismatch.
+#   - 400 Bad Request: Validation errors (e.g., invalid file type, user not in tenant).
+#   - 404 Not Found: Resource not found.
+#   - 500 Internal Server Error: Server issues (logged for debugging).
 
-    def validate(self, data):
-        logger.info(f"Validating ProfessionalQualificationSerializer data: {data}")
-        return super().validate(data)
+# ## Common Request/Response Formats
+# - **Content-Type**: `application/json` for JSON payloads; `multipart/form-data` for file uploads.
+# - **User Data**: References `CustomUser` model (assumes fields like `id`, `email`, `first_name`, `last_name`, `profile.job_role`).
+# - **Permission Levels**: `'view'` (read-only, no download) or `'view_download'` (view + download).
+# - **Examples**: Use tools like Postman or curl. Replace placeholders (e.g., `<token>`, `<id>`) with real values.
 
+# ---
 
-class EducationDetailSerializer(serializers.ModelSerializer):
-    certificate = serializers.FileField(required=False, allow_null=True)
+# ## 1. List and Create Documents
+# **Endpoint**: `GET/POST /documents/`
 
-    class Meta:
-        model = EducationDetail
-        fields = ["id", "institution", "highest_qualification", "course_of_study", "start_year", "end_year", "certificate", "certificate_url", "skills"]
-        read_only_fields = ["id"]
-        extra_kwargs = {
-            "institution": {"required": True},
-            "highest_qualification": {"required": True},
-            "course_of_study": {"required": True},
-            "start_year": {"required": True, "min_value": 1900, "max_value": 2100},
-            "end_year": {"required": True, "min_value": 1900, "max_value": 2100},
-            "skills": {"required": True},
-            "certificate": {"required": False, "allow_null": True},
-        }
+# ### GET: List All Documents
+# - **Description**: Retrieve a paginated list of all documents for the current tenant. Includes nested `permissions` (user access details) and `acknowledgments`.
+# - **Permissions**: `IsAdminUser`.
+# - **Query Parameters**: None (optional pagination via DRF defaults if configured).
+# - **Request Body**: None.
+# - **Response**:
+#   - 200 OK: Array of document objects.
+# - **Example Request** (curl):
+#   ```
+#   curl -H "Authorization: Bearer <token>" https://yourapi.com/api/documents/
+#   ```
+# - **Example Response**:
+#   ```json
+#   [
+#     {
+#       "id": 1,
+#       "title": "Confidential Report",
+#       "file_url": "https://storage.example.com/report_v1.pdf",
+#       "version": 1,
+#       "status": "active",
+#       "uploaded_at": "2025-10-08T10:00:00Z",
+#       "permissions": [
+#         {
+#           "user_id": "user123",
+#           "email": "user@example.com",
+#           "first_name": "John",
+#           "last_name": "Doe",
+#           "role": "Manager",
+#           "permission_level": "view_download",
+#           "created_at": "2025-10-08T10:00:00Z"
+#         }
+#       ],
+#       "acknowledgments": [
+#         {
+#           "id": 1,
+#           "user_id": "user123",
+#           "email": "user@example.com",
+#           "first_name": "John",
+#           "last_name": "Doe",
+#           "role": "Manager",
+#           "acknowledged_at": "2025-10-08T11:00:00Z"
+#         }
+#       ]
+#     }
+#   ]
+#   ```
 
-    def create(self, validated_data):
-        certificate = validated_data.pop("certificate", None)
-        if certificate:
-            logger.info(f"Uploading education certificate: {certificate.name}")
-            url = upload_file_dynamic(
-                certificate,
-                certificate.name,
-                content_type=getattr(certificate, "content_type", "application/octet-stream"),
-            )
-            validated_data["certificate_url"] = url
-            validated_data["certificate"] = None  # Don't save to ImageField
-            logger.info(f"Education certificate uploaded: {url}")
-        return super().create(validated_data)
+# ### POST: Create a Document
+# - **Description**: Create a new document. Optionally upload a file and assign bulk permissions to users.
+# - **Permissions**: `IsAdminUser`.
+# - **Query Parameters**: None.
+# - **Request Body** (JSON or multipart/form-data):
+#   - Required: `title` (string).
+#   - Optional: `file` (file upload, PDF/image only, ≤10MB), `expiring_date` (datetime string, ISO 8601), `status` (string, default "active"), `document_number` (string, unique per tenant).
+#   - Optional: `permissions_write` (array of objects for bulk user assignment):
+#     ```json
+#     [
+#       {"user_id": "user123", "permission_level": "view"},
+#       {"user_id": "user456", "permission_level": "view_download"}
+#     ]
+#     ```
+# - **Response**:
+#   - 201 Created: Full document object, including new `permissions` and version 1.
+# - **Example Request** (curl with file and permissions):
+#   ```
+#   curl -X POST -H "Authorization: Bearer <token>" \
+#     -F "title=New Report" \
+#     -F "file=@/path/to/report.pdf" \
+#     -F 'permissions_write=[{"user_id":"user123","permission_level":"view_download"}]' \
+#     https://yourapi.com/api/documents/
+#   ```
+# - **Notes**: 
+#   - File upload creates version 1 automatically.
+#   - Permissions are fetched from `CustomUser` and stored with user details (email, name, role).
+#   - Validation: Users must exist and belong to the tenant.
 
-    def update(self, instance, validated_data):
-        certificate = validated_data.pop("certificate", None)
-        if certificate:
-            logger.info(f"Updating education certificate: {certificate.name}")
-            url = upload_file_dynamic(
-                certificate,
-                certificate.name,
-                content_type=getattr(certificate, "content_type", "application/octet-stream"),
-            )
-            validated_data["certificate_url"] = url
-            validated_data["certificate"] = None  # Don't save to ImageField
-            logger.info(f"Education certificate updated: {url}")
-        return super().update(instance, validated_data)
+# ---
 
-    def validate(self, data):
-        logger.info(f"Validating EducationDetailSerializer data: {data}")
-        start_year = data.get("start_year")
-        end_year = data.get("end_year")
-        if start_year and end_year and start_year > end_year:
-            raise serializers.ValidationError({"start_year": "Start year cannot be greater than end year."})
-        return super().validate(data)
+# ## 2. Document Detail Operations
+# **Endpoint**: `GET/PATCH/DELETE /documents/<int:id>/`
 
+# - **Path Parameter**: `id` (integer, document ID).
 
-class ProofOfAddressSerializer(serializers.ModelSerializer):
-    document = serializers.FileField(required=False, allow_null=True)
-    nin_document = serializers.FileField(required=False, allow_null=True)
+# ### GET: Retrieve a Single Document
+# - **Description**: Get full details of a document, including `permissions` and `acknowledgments`.
+# - **Permissions**: `IsAdminUser`.
+# - **Query Parameters**: None.
+# - **Request Body**: None.
+# - **Response**:
+#   - 200 OK: Single document object (similar to list response).
+# - **Example Request** (curl):
+#   ```
+#   curl -H "Authorization: Bearer <token>" https://yourapi.com/api/documents/1/
+#   ```
 
-    class Meta:
-        model = ProofOfAddress
-        fields = ["id", "type", "document", "document_url", "issue_date", "nin", "nin_document", "nin_document_url"]
-        read_only_fields = ["id"]
-        extra_kwargs = {field: {"required": False, "allow_null": True} for field in ["type", "issue_date", "nin"]}
+# ### PATCH: Update a Document
+# - **Description**: Partially update document metadata, file (triggers new version), or replace permissions.
+# - **Permissions**: `IsAdminUser`.
+# - **Query Parameters**: None.
+# - **Request Body** (JSON or multipart/form-data, partial allowed):
+#   - Optional: `title`, `expiring_date`, `status`, `file` (new file increments version).
+#   - Optional: `permissions_write` (array; if provided—even empty—replaces all existing permissions).
+# - **Response**:
+#   - 200 OK: Updated document object.
+# - **Example Request** (curl, update title and permissions):
+#   ```
+#   curl -X PATCH -H "Authorization: Bearer <token>" \
+#     -H "Content-Type: application/json" \
+#     -d '{"title": "Updated Report", "permissions_write": [{"user_id": "user789", "permission_level": "view"}]}' \
+#     https://yourapi.com/api/documents/1/
+#   ```
+# - **Notes**:
+#   - File update: Archives old version, creates new one, increments `version`.
+#   - Permissions: Full replacement (delete old, bulk create new). Omit to keep unchanged.
 
-    def create(self, validated_data):
-        document = validated_data.pop("document", None)
-        nin_document = validated_data.pop("nin_document", None)
-        if document:
-            logger.info(f"Uploading proof of address document: {document.name}")
-            url = upload_file_dynamic(
-                document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
-            )
-            validated_data["document_url"] = url
-            validated_data["document"] = None  # Don't save to ImageField
-            logger.info(f"Proof of address document uploaded: {url}")
-        if nin_document:
-            logger.info(f"Uploading proof of address NIN document: {nin_document.name}")
-            url = upload_file_dynamic(
-                nin_document,
-                nin_document.name,
-                content_type=getattr(nin_document, "content_type", "application/octet-stream"),
-            )
-            validated_data["nin_document_url"] = url
-            validated_data["nin_document"] = None  # Don't save to ImageField
-            logger.info(f"Proof of address NIN document uploaded: {url}")
-        return super().create(validated_data)
+# ### DELETE: Delete a Document
+# - **Description**: Permanently delete the document and all related data (versions, permissions, acknowledgments via CASCADE).
+# - **Permissions**: `IsAdminUser`.
+# - **Query Parameters**: None.
+# - **Request Body**: None.
+# - **Response**:
+#   - 204 No Content: Success (no body).
+# - **Example Request** (curl):
+#   ```
+#   curl -X DELETE -H "Authorization: Bearer <token>" https://yourapi.com/api/documents/1/
+#   ```
 
-    def update(self, instance, validated_data):
-        document = validated_data.pop("document", None)
-        nin_document = validated_data.pop("nin_document", None)
-        if document:
-            logger.info(f"Updating proof of address document: {document.name}")
-            url = upload_file_dynamic(
-                document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
-            )
-            validated_data["document_url"] = url
-            validated_data["document"] = None  # Don't save to ImageField
-            logger.info(f"Proof of address document updated: {url}")
-        if nin_document:
-            logger.info(f"Updating proof of address NIN document: {nin_document.name}")
-            url = upload_file_dynamic(
-                nin_document,
-                nin_document.name,
-                content_type=getattr(nin_document, "content_type", "application/octet-stream"),
-            )
-            validated_data["nin_document_url"] = url
-            validated_data["nin_document"] = None  # Don't save to ImageField
-            logger.info(f"Proof of address NIN document updated: {url}")
-        return super().update(instance, validated_data)
+# ---
 
+# ## 3. Document Versions
+# **Endpoint**: `GET /documents/<int:document_id>/versions/`
 
-class InsuranceVerificationSerializer(serializers.ModelSerializer):
-    document = serializers.FileField(required=False, allow_null=True)
+# - **Path Parameter**: `document_id` (integer).
+# - **Description**: List all versions of a document, with creator details.
+# - **Permissions**: `IsAdminUser`.
+# - **Query Parameters**: None.
+# - **Request Body**: None.
+# - **Response**:
+#   - 200 OK: Array of version objects.
+# - **Example Response**:
+#   ```json
+#   [
+#     {
+#       "version": 1,
+#       "file_url": "https://storage.example.com/report_v1.pdf",
+#       "file_type": "application/pdf",
+#       "file_size": 1024000,
+#       "created_at": "2025-10-08T10:00:00Z",
+#       "created_by": {
+#         "email": "admin@example.com",
+#         "first_name": "Admin",
+#         "last_name": "User",
+#         "job_role": "Admin"
+#       }
+#     }
+#   ]
+#   ```
+# - **Example Request** (curl):
+#   ```
+#   curl -H "Authorization: Bearer <token>" https://yourapi.com/api/documents/1/versions/
+#   ```
 
-    class Meta:
-        model = InsuranceVerification
-        fields = ["id", "insurance_type", "document", "document_url", "provider_name", "coverage_start_date", "expiry_date", "phone_number"]
-        read_only_fields = ["id"]
-        extra_kwargs = {
-            field: {"required": False, "allow_null": True}
-            for field in ["insurance_type", "provider_name", "coverage_start_date", "expiry_date", "phone_number"]
-        }
+# ---
 
-    def create(self, validated_data):
-        document = validated_data.pop("document", None)
-        if document:
-            logger.info(f"Uploading insurance document: {document.name}")
-            url = upload_file_dynamic(
-                document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
-            )
-            validated_data["document_url"] = url
-            validated_data["document"] = None  # Don't save to ImageField
-            logger.info(f"Insurance document uploaded: {url}")
-        return super().create(validated_data)
+# ## 4. Document Acknowledgment
+# **Endpoint**: `POST /documents/<int:document_id>/acknowledge/`
 
-    def update(self, instance, validated_data):
-        document = validated_data.pop("document", None)
-        if document:
-            logger.info(f"Updating insurance document: {document.name}")
-            url = upload_file_dynamic(
-                document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
-            )
-            validated_data["document_url"] = url
-            validated_data["document"] = None  # Don't save to ImageField
-            logger.info(f"Insurance document updated: {url}")
-        return super().update(instance, validated_data)
+# - **Path Parameter**: `document_id` (integer).
+# - **Description**: Mark the current user as having acknowledged the document (prevents duplicates).
+# - **Permissions**: `IsAuthenticated`.
+# - **Query Parameters**: None.
+# - **Request Body**: Empty.
+# - **Response**:
+#   - 201 Created: Acknowledgment object.
+#   - 400 Bad Request: If already acknowledged.
+# - **Example Response**:
+#   ```json
+#   {
+#     "id": 1,
+#     "document": 1,
+#     "user_id": "current_user_id",
+#     "email": "user@example.com",
+#     "first_name": "John",
+#     "last_name": "Doe",
+#     "role": "Manager",
+#     "acknowledged_at": "2025-10-08T11:00:00Z"
+#   }
+#   ```
+# - **Example Request** (curl):
+#   ```
+#   curl -X POST -H "Authorization: Bearer <token>" https://yourapi.com/api/documents/1/acknowledge/
+#   ```
 
+# ---
 
-class DrivingRiskAssessmentSerializer(serializers.ModelSerializer):
-    supporting_document = serializers.FileField(required=False, allow_null=True)
+# ## 5. List Acknowledgments
+# **Endpoint**: `GET /documents/<int:document_id>/acknowledgments/`
 
-    class Meta:
-        model = DrivingRiskAssessment
-        fields = ["id", "assessment_date", "fuel_card_usage_compliance", "road_traffic_compliance", "tracker_usage_compliance", "maintenance_schedule_compliance", "additional_notes", "supporting_document", "supporting_document_url"]
-        read_only_fields = ["id"]
-        extra_kwargs = {
-            field: {"required": False, "allow_null": True}
-            for field in ["assessment_date", "fuel_card_usage_compliance", "road_traffic_compliance", "tracker_usage_compliance", "maintenance_schedule_compliance", "additional_notes"]
-        }
+# - **Path Parameter**: `document_id` (integer).
+# - **Description**: List all acknowledgments for a document, sorted by `acknowledged_at` (descending).
+# - **Permissions**: `IsAdminUser`.
+# - **Query Parameters**: None.
+# - **Request Body**: None.
+# - **Response**:
+#   - 200 OK: Array of acknowledgment objects (as in POST response).
+# - **Example Request** (curl):
+#   ```
+#   curl -H "Authorization: Bearer <token>" https://yourapi.com/api/documents/1/acknowledgments/
+#   ```
 
-    def create(self, validated_data):
-        supporting_document = validated_data.pop("supporting_document", None)
-        if supporting_document:
-            logger.info(f"Uploading driving risk assessment document: {supporting_document.name}")
-            url = upload_file_dynamic(
-                supporting_document,
-                supporting_document.name,
-                content_type=getattr(supporting_document, "content_type", "application/octet-stream"),
-            )
-            validated_data["supporting_document_url"] = url
-            validated_data["supporting_document"] = None  # Don't save to ImageField
-            logger.info(f"Driving risk assessment document uploaded: {url}")
-        return super().create(validated_data)
+# ---
 
-    def update(self, instance, validated_data):
-        supporting_document = validated_data.pop("supporting_document", None)
-        if supporting_document:
-            logger.info(f"Updating driving risk assessment document: {supporting_document.name}")
-            url = upload_file_dynamic(
-                supporting_document,
-                supporting_document.name,
-                content_type=getattr(supporting_document, "content_type", "application/octet-stream"),
-            )
-            validated_data["supporting_document_url"] = url
-            validated_data["supporting_document"] = None  # Don't save to ImageField
-            logger.info(f"Driving risk assessment document updated: {url}")
-        return super().update(instance, validated_data)
+# ## 6. User Document Access
+# **Endpoint**: `GET /documents/user-access/`
 
+# - **Description**: Retrieve all documents a specific user has access to, based on `user_id` or `email`. Returns documents with their permissions for that user.
+# - **Permissions**: `IsAdminUser`.
+# - **Query Parameters** (one required):
+#   - `user_id` (string): User ID.
+#   - `email` (string): User email (alternative to user_id).
+# - **Request Body**: None.
+# - **Response**:
+#   - 200 OK: Array of objects with `document` (full doc details) and `permission` (user's permission for that doc).
+#   - 400 Bad Request: Missing user identifier.
+#   - 404 Not Found: No access found.
+# - **Example Request** (curl, by user_id):
+#   ```
+#   curl -H "Authorization: Bearer <token>" "https://yourapi.com/api/documents/user-access/?user_id=user123"
+#   ```
+# - **Example Response**:
+#   ```json
+#   [
+#     {
+#       "document": {
+#         "id": 1,
+#         "title": "Confidential Report",
+#         "file_url": "https://storage.example.com/report_v1.pdf",
+#         ...
+#       },
+#       "permission": {
+#         "user_id": "user123",
+#         "email": "user@example.com",
+#         "first_name": "John",
+#         "last_name": "Doe",
+#         "role": "Manager",
+#         "permission_level": "view_download",
+#         "created_at": "2025-10-08T10:00:00Z"
+#       }
+#     }
+#   ]
+#   ```
+# - **Notes**: Matches by exact user_id or email within the tenant. Useful for auditing user access.
 
-class LegalWorkEligibilitySerializer(serializers.ModelSerializer):
-    document = serializers.FileField(required=False, allow_null=True)
+# ---
 
-    class Meta:
-        model = LegalWorkEligibility
-        fields = ["id", "evidence_of_right_to_rent", "document", "document_url", "expiry_date", "phone_number"]
-        read_only_fields = ["id"]
-        extra_kwargs = {
-            field: {"required": False, "allow_null": True}
-            for field in ["evidence_of_right_to_rent", "expiry_date", "phone_number"]
-        }
+# ## Additional Notes
+# - **File Handling**: Uploads use `upload_file_dynamic` (custom function, assumed implemented). Supported: PDF, PNG, JPG, JPEG (≤10MB).
+# - **Bulk Operations**: `permissions_write` supports up to DB limits (e.g., 1000 users). For large sets, paginate client-side.
+# - **Enforcement**: Permissions are stored but not yet enforced (e.g., for downloads). Add custom logic (e.g., permission classes) to check `permission_level`.
+# - **Migrations**: Run `python manage.py makemigrations` and `migrate` after model changes.
+# - **Testing**: Use Django's test client or Postman collections. Log errors via `logger` for debugging.
+# - **Extensibility**: For additive permissions (not replacement), extend the serializer with a `mode` field (e.g., "replace", "add").
 
-    def create(self, validated_data):
-        document = validated_data.pop("document", None)
-        if document:
-            logger.info(f"Uploading legal work eligibility document: {document.name}")
-            url = upload_file_dynamic(
-                document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
-            )
-            validated_data["document_url"] = url
-            validated_data["document"] = None  # Don't save to ImageField
-            logger.info(f"Legal work eligibility document uploaded: {url}")
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        document = validated_data.pop("document", None)
-        if document:
-            logger.info(f"Updating legal work eligibility document: {document.name}")
-            url = upload_file_dynamic(
-                document, document.name, content_type=getattr(document, "content_type", "application/octet-stream")
-            )
-            validated_data["document_url"] = url
-            validated_data["document"] = None  # Don't save to ImageField
-            logger.info(f"Legal work eligibility document updated: {url}")
-        return super().update(instance, validated_data)
-
-
-class OtherUserDocumentsSerializer(serializers.ModelSerializer):
-    file = serializers.FileField(required=False, allow_null=True)
-    title = serializers.CharField(required=False, allow_null=True)
-    branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)
-
-    class Meta:
-        model = OtherUserDocuments
-        fields = ["id", "government_id_type", "title", "document_number", "expiry_date", "file", "file_url", "branch"]
-        read_only_fields = ["id"]
-        extra_kwargs = {
-            "government_id_type": {"required": False},
-            "title": {"required": False},
-            "document_number": {"required": False},
-            "expiry_date": {"required": False},
-            "branch": {"required": False},
-        }
-
-    def validate_file(self, value):
-        if value and not value.name.lower().endswith((".pdf", ".png", ".jpg", ".jpeg")):
-            raise serializers.ValidationError("Only PDF or image files are allowed.")
-        if value and value.size > 10 * 1024 * 1024:
-            raise serializers.ValidationError("File size cannot exceed 10MB.")
-        return value
-
-    def create(self, validated_data):
-        file = validated_data.pop("file", None)
-        if file:
-            logger.info(f"Uploading other user document: {file.name}")
-            url = upload_file_dynamic(
-                file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
-            )
-            validated_data["file_url"] = url
-            validated_data["file"] = None  # Don't save to ImageField
-            logger.info(f"Other user document uploaded: {url}")
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        file = validated_data.pop("file", None)
-        if file:
-            logger.info(f"Updating other user document: {file.name}")
-            url = upload_file_dynamic(
-                file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
-            )
-            validated_data["file_url"] = url
-            validated_data["file"] = None  # Don't save to ImageField
-            logger.info(f"Other user document updated: {url}")
-        return super().update(instance, validated_data)
-
+# For issues or extensions, refer to the source code or contact the maintainer.
