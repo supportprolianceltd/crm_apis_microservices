@@ -67,6 +67,7 @@ from .models import (
     UserActivity,
     UserProfile,
     UserSession,
+    DocumentAcknowledgment,
 )
 
 # Local App - Serializers
@@ -100,6 +101,8 @@ from .serializers import (
     UserPasswordRegenerateSerializer,
     UserSessionSerializer,
     get_tenant_id_from_jwt,
+    get_user_data_from_jwt,
+    DocumentAcknowledgmentSerializer,
 )
 
 # Auth Service Utils
