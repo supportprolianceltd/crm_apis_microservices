@@ -2791,8 +2791,9 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def validate_permissions_write(self, value):
         if value:
+            valid_levels = [choice[0] for choice in DocumentPermission.PERMISSION_CHOICES]  # Extract 'view', 'view_download'
             for perm_data in value:
-                if 'permission_level' in perm_data and perm_data['permission_level'] not in DocumentPermission.PERMISSION_CHOICES:
+                if 'permission_level' in perm_data and perm_data['permission_level'] not in valid_levels:
                     raise serializers.ValidationError("Invalid permission_level. Must be 'view' or 'view_download'.")
                 if ('user_id' not in perm_data or not perm_data['user_id']) and ('email' not in perm_data or not perm_data['email']):
                     raise serializers.ValidationError("Each permission must include either 'user_id' or 'email'.")
