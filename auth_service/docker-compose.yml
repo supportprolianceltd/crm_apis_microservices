@@ -242,3 +242,6 @@ volumes:
 networks:
   auth_service_default:
     external: true
+
+
+

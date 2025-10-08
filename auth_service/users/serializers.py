@@ -244,6 +244,7 @@ class EmploymentDetailSerializer(serializers.ModelSerializer):
             "probation_end_date": {"required": False, "allow_null": True},
             "line_manager": {"required": False, "allow_null": True},
             "currency": {"required": False, "allow_null": True},
+            "salary_rate": {"required": False, "allow_null": True},
         }
         read_only_fields = ["last_updated_by", "last_updated_by_id"]
 
@@ -1137,6 +1138,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "Right_to_Work_country_of_issue",
             "Right_to_Work_file",
             "Right_to_Work_file_url",
+            "Right_to_rent_file",
+            "Right_to_rent_file_url",
             "Right_to_Work_restrictions",
             "dbs_type",
             "dbs_certificate",
@@ -1270,6 +1273,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 "drivers_licence_image1_url",
                 "drivers_licence_image2_url",
                 "Right_to_Work_file_url",
+                "Right_to_rent_file_url",
                 "dbs_certificate_url",
                 "dbs_update_file_url",
             ]
@@ -1324,6 +1328,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             ("drivers_licence_image1", "drivers_licence_image1_url"),
             ("drivers_licence_image2", "drivers_licence_image2_url"),
             ("Right_to_Work_file", "Right_to_Work_file_url"),
+            ("Right_to_rent_file", "Right_to_rent_file_url"),
             ("dbs_certificate", "dbs_certificate_url"),
             ("dbs_update_file", "dbs_update_file_url"),
         ]
@@ -1394,6 +1399,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 ("drivers_licence_image1", "drivers_licence_image1_url"),
                 ("drivers_licence_image2", "drivers_licence_image2_url"),
                 ("Right_to_Work_file", "Right_to_Work_file_url"),
+                ("Right_to_rent_file", "Right_to_rent_file_url"),
                 ("dbs_certificate", "dbs_certificate_url"),
                 ("dbs_update_file", "dbs_update_file_url"),
             ]

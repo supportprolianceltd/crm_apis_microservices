@@ -428,6 +428,9 @@ class UserProfile(models.Model):
 
     Right_to_Work_file = models.ImageField(upload_to='right_to_work/', max_length=255, blank=True, null=True)
     Right_to_Work_file_url = models.CharField(max_length=1024, blank=True, null=True)
+    
+    Right_to_rent_file = models.ImageField(upload_to='right_to_work/', max_length=255, blank=True, null=True)
+    Right_to_rent_file_url = models.CharField(max_length=1024, blank=True, null=True)
 
 
     Right_to_Work_country_of_issue = models.CharField(max_length=100, blank=True)
@@ -717,6 +720,25 @@ class EducationDetail(models.Model):
 
 
 class EmploymentDetail(models.Model):
+
+    SALARY_RATE_CHOICES = [
+        ('hourly', 'Hourly'),
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('bi_weekly', 'Bi-Weekly'),
+        ('monthly', 'Monthly'),
+        ('annual', 'Annual'),
+        ]
+
+        # Add the salary rate field
+    salary_rate = models.CharField(
+        max_length=20, 
+        choices=SALARY_RATE_CHOICES, 
+        blank=True, 
+        null=True,
+        help_text="How often the user wants to be paid"
+    )
+
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='employment_details')
     job_role = models.CharField(max_length=255)
     hierarchy = models.CharField(max_length=100)
