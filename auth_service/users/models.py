@@ -1241,6 +1241,8 @@ class DocumentVersion(models.Model):
     class Meta:
         unique_together = ('document', 'version')
 
+
+
 # class DocumentAcknowledgment(models.Model):
 #     document = models.ForeignKey(Document, on_delete=models.CASCADE)
 #     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

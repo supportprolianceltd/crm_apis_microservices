@@ -2240,12 +2240,254 @@ class DocumentVersionSerializer(serializers.ModelSerializer):
         return get_last_updated_by(self, obj)
 
 
+# class DocumentSerializer(serializers.ModelSerializer):
+#     uploaded_by = serializers.SerializerMethodField()
+#     updated_by = serializers.SerializerMethodField()
+#     last_updated_by = serializers.SerializerMethodField()
+#     tenant_domain = serializers.SerializerMethodField()
+#     file = serializers.FileField(required=False, allow_null=True)
+
+#     class Meta:
+#         model = Document
+#         fields = [
+#             "id",
+#             "tenant_id",
+#             "tenant_domain",
+#             "title",
+#             "file_url",
+#             "file_path",
+#             "file_type",
+#             "file_size",
+#             "version",
+#             "uploaded_by_id",
+#             "uploaded_by",
+#             "updated_by_id",
+#             "updated_by",
+#             "uploaded_at",
+#             "updated_at",
+#             "expiring_date",
+#             "status",
+#             "document_number",
+#             "file",
+#             "last_updated_by_id",
+#             "last_updated_by",
+#         ]
+#         read_only_fields = [
+#             "id",
+#             "tenant_id",
+#             "tenant_domain",
+#             "uploaded_by_id",
+#             "updated_by_id",
+#             "uploaded_at",
+#             "updated_at",
+#             "document_number",
+#             "file_url",
+#             "file_path",
+#             "version",
+#             "last_updated_by",
+#             "last_updated_by_id",
+#         ]
+
+#     @extend_schema_field(
+#         {
+#             "type": "object",
+#             "properties": {
+#                 "email": {"type": "string"},
+#                 "first_name": {"type": "string"},
+#                 "last_name": {"type": "string"},
+#                 "job_role": {"type": "string"},
+#             },
+#         }
+#     )
+#     def get_uploaded_by(self, obj):
+#         if obj.uploaded_by_id:
+#             try:
+#                 user_response = requests.get(
+#                     f"{settings.AUTH_SERVICE_URL}/api/user/users/{obj.uploaded_by_id}/",
+#                     headers={
+#                         "Authorization": f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'
+#                     },
+#                 )
+#                 if user_response.status_code == 200:
+#                     user_data = user_response.json()
+#                     return {
+#                         "email": user_data.get("email", ""),
+#                         "first_name": user_data.get("first_name", ""),
+#                         "last_name": user_data.get("last_name", ""),
+#                         "job_role": user_data.get("job_role", ""),
+#                     }
+#                 logger.error(f"Failed to fetch user {obj.uploaded_by_id} from auth_service")
+#             except Exception as e:
+#                 logger.error(f"Error fetching uploaded_by {obj.uploaded_by_id}: {str(e)}")
+#         return None
+
+#     @extend_schema_field(
+#         {
+#             "type": "object",
+#             "properties": {
+#                 "email": {"type": "string"},
+#                 "first_name": {"type": "string"},
+#                 "last_name": {"type": "string"},
+#                 "job_role": {"type": "string"},
+#             },
+#         }
+#     )
+#     def get_updated_by(self, obj):
+#         if obj.updated_by_id:
+#             try:
+#                 user_response = requests.get(
+#                     f"{settings.AUTH_SERVICE_URL}/api/user/users/{obj.updated_by_id}/",
+#                     headers={
+#                         "Authorization": f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'
+#                     },
+#                 )
+#                 if user_response.status_code == 200:
+#                     user_data = user_response.json()
+#                     return {
+#                         "email": user_data.get("email", ""),
+#                         "first_name": user_data.get("first_name", ""),
+#                         "last_name": user_data.get("last_name", ""),
+#                         "job_role": user_data.get("job_role", ""),
+#                     }
+#                 logger.error(f"Failed to fetch user {obj.updated_by_id} from auth_service")
+#             except Exception as e:
+#                 logger.error(f"Error fetching updated_by {obj.updated_by_id}: {str(e)}")
+#         return None
+
+#     def get_last_updated_by(self, obj):
+#         return get_last_updated_by(self, obj)
+
+#     @extend_schema_field(str)
+#     def get_tenant_domain(self, obj):
+#         try:
+#             tenant_response = requests.get(
+#                 f"{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{obj.tenant_id}/",
+#                 headers={
+#                     "Authorization": f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'
+#                 },
+#             )
+#             if tenant_response.status_code == 200:
+#                 tenant_data = tenant_response.json()
+#                 domains = tenant_data.get("domains", [])
+#                 primary_domain = next((d["domain"] for d in domains if d.get("is_primary")), None)
+#                 return primary_domain
+#             logger.error(f"Failed to fetch tenant {obj.tenant_id} from auth_service")
+#         except Exception as e:
+#             logger.error(f"Error fetching tenant domain for {obj.tenant_id}: {str(e)}")
+#         return None
+
+#     def validate_file(self, value):
+#         if value:
+#             if not value.name.lower().endswith((".pdf", ".png", ".jpg", ".jpeg")):
+#                 raise serializers.ValidationError("Only PDF or image files are allowed.")
+#             if value.size > 10 * 1024 * 1024:  # 10MB limit
+#                 raise serializers.ValidationError("File size cannot exceed 10MB.")
+#         return value
+
+#     def validate(self, data):
+#         tenant_id = get_tenant_id_from_jwt(self.context["request"])
+#         data["tenant_id"] = tenant_id
+#         if "uploaded_by_id" in data:
+#             user_response = requests.get(
+#                 f'{settings.AUTH_SERVICE_URL}/api/user/users/{data["uploaded_by_id"]}/',
+#                 headers={"Authorization": self.context["request"].META.get("HTTP_AUTHORIZATION", "")},
+#             )
+#             if user_response.status_code != 200:
+#                 raise serializers.ValidationError({"uploaded_by_id": "Invalid user ID."})
+#             user_data = user_response.json()
+#             if user_data.get("tenant_id") != tenant_id:
+#                 raise serializers.ValidationError({"uploaded_by_id": "User does not belong to this tenant."})
+#         if "updated_by_id" in data:
+#             user_response = requests.get(
+#                 f'{settings.AUTH_SERVICE_URL}/api/user/users/{data["updated_by_id"]}/',
+#                 headers={"Authorization": self.context["request"].META.get("HTTP_AUTHORIZATION", "")},
+#             )
+#             if user_response.status_code != 200:
+#                 raise serializers.ValidationError({"updated_by_id": "Invalid user ID."})
+#             user_data = user_response.json()
+#             if user_data.get("tenant_id") != tenant_id:
+#                 raise serializers.ValidationError({"updated_by_id": "User does not belong to this tenant."})
+#         return data
+
+#     def create(self, validated_data):
+#         file = validated_data.pop("file", None)
+#         tenant_id = get_tenant_id_from_jwt(self.context["request"])
+#         validated_data["tenant_id"] = str(tenant_id)
+#         validated_data["uploaded_by_id"] = str(self.context["request"].user.id)
+#         validated_data["updated_by_id"] = str(self.context["request"].user.id)
+#         validated_data['last_updated_by_id'] = str(self.context["request"].user.id)
+
+#         if file:
+#             logger.info(f"Uploading document file: {file.name}")
+#             file_name = f"{file.name.rsplit('.', 1)[0]}_v1.{file.name.rsplit('.', 1)[1]}" if '.' in file.name else f"{file.name}_v1"
+#             url = upload_file_dynamic(
+#                 file, file_name, content_type=getattr(file, "content_type", "application/octet-stream")
+#             )
+#             validated_data["file_url"] = url
+#             validated_data["file_path"] = url
+#             validated_data["file_type"] = getattr(file, "content_type", "application/octet-stream")
+#             validated_data["file_size"] = file.size
+#             logger.info(f"Document file uploaded: {url}")
+
+#         document = super().create(validated_data)
+#         if file:
+#             DocumentVersion.objects.create(
+#                 document=document,
+#                 version=1,
+#                 file_url=validated_data["file_url"],
+#                 file_path=validated_data["file_path"],
+#                 file_type=validated_data["file_type"],
+#                 file_size=validated_data["file_size"],
+#                 created_by_id=validated_data["uploaded_by_id"],
+#             )
+#         return document
+
+#     def update(self, instance, validated_data):
+#         file = validated_data.pop("file", None)
+#         validated_data["updated_by_id"] = str(self.context["request"].user.id)
+#         instance.last_updated_by_id = str(self.context["request"].user.id)
+
+#         with transaction.atomic():
+#             if file:
+#                 # Save the current version to DocumentVersion
+#                 DocumentVersion.objects.create(
+#                     document=instance,
+#                     version=instance.version,
+#                     file_url=instance.file_url,
+#                     file_path=instance.file_path,
+#                     file_type=instance.file_type,
+#                     file_size=instance.file_size,
+#                     created_by_id=instance.updated_by_id or instance.uploaded_by_id,
+#                 )
+#                 # Increment version
+#                 instance.version += 1
+#                 validated_data["version"] = instance.version
+#                 # Upload new file
+#                 file_name = f"{file.name.rsplit('.', 1)[0]}_v{instance.version}.{file.name.rsplit('.', 1)[1]}" if '.' in file.name else f"{file.name}_v{instance.version}"
+#                 url = upload_file_dynamic(
+#                     file, file_name, content_type=getattr(file, "content_type", "application/octet-stream")
+#                 )
+#                 validated_data["file_url"] = url
+#                 validated_data["file_path"] = url
+#                 validated_data["file_type"] = getattr(file, "content_type", "application/octet-stream")
+#                 validated_data["file_size"] = file.size
+#                 logger.info(f"Document file updated: {url}")
+
+#             instance = super().update(instance, validated_data)
+#             if file:
+#                 DocumentVersion.objects.create(
+#                     document=instance,
+#                     version=instance.version,
+#                     file_url=validated_data["file_url"],
+#                     file_path=validated_data["file_path"],
+#                     file_type=validated_data["file_type"],
+#                     file_size=validated_data["file_size"],
+#                     created_by_id=validated_data["updated_by_id"],
+#                 )
+#         return instance
+
 class DocumentSerializer(serializers.ModelSerializer):
-    uploaded_by = serializers.SerializerMethodField()
-    updated_by = serializers.SerializerMethodField()
-    last_updated_by = serializers.SerializerMethodField()
-    tenant_domain = serializers.SerializerMethodField()
-    file = serializers.FileField(required=False, allow_null=True)
+    last_updated_by = serializers.SerializerMethodField()  # Keep this for display
 
     class Meta:
         model = Document
@@ -2269,8 +2511,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             "status",
             "document_number",
             "file",
-            "last_updated_by_id",
-            "last_updated_by",
+            "last_updated_by",  # Keep display field
         ]
         read_only_fields = [
             "id",
@@ -2285,206 +2526,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             "file_path",
             "version",
             "last_updated_by",
-            "last_updated_by_id",
         ]
-
-    @extend_schema_field(
-        {
-            "type": "object",
-            "properties": {
-                "email": {"type": "string"},
-                "first_name": {"type": "string"},
-                "last_name": {"type": "string"},
-                "job_role": {"type": "string"},
-            },
-        }
-    )
-    def get_uploaded_by(self, obj):
-        if obj.uploaded_by_id:
-            try:
-                user_response = requests.get(
-                    f"{settings.AUTH_SERVICE_URL}/api/user/users/{obj.uploaded_by_id}/",
-                    headers={
-                        "Authorization": f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'
-                    },
-                )
-                if user_response.status_code == 200:
-                    user_data = user_response.json()
-                    return {
-                        "email": user_data.get("email", ""),
-                        "first_name": user_data.get("first_name", ""),
-                        "last_name": user_data.get("last_name", ""),
-                        "job_role": user_data.get("job_role", ""),
-                    }
-                logger.error(f"Failed to fetch user {obj.uploaded_by_id} from auth_service")
-            except Exception as e:
-                logger.error(f"Error fetching uploaded_by {obj.uploaded_by_id}: {str(e)}")
-        return None
-
-    @extend_schema_field(
-        {
-            "type": "object",
-            "properties": {
-                "email": {"type": "string"},
-                "first_name": {"type": "string"},
-                "last_name": {"type": "string"},
-                "job_role": {"type": "string"},
-            },
-        }
-    )
-    def get_updated_by(self, obj):
-        if obj.updated_by_id:
-            try:
-                user_response = requests.get(
-                    f"{settings.AUTH_SERVICE_URL}/api/user/users/{obj.updated_by_id}/",
-                    headers={
-                        "Authorization": f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'
-                    },
-                )
-                if user_response.status_code == 200:
-                    user_data = user_response.json()
-                    return {
-                        "email": user_data.get("email", ""),
-                        "first_name": user_data.get("first_name", ""),
-                        "last_name": user_data.get("last_name", ""),
-                        "job_role": user_data.get("job_role", ""),
-                    }
-                logger.error(f"Failed to fetch user {obj.updated_by_id} from auth_service")
-            except Exception as e:
-                logger.error(f"Error fetching updated_by {obj.updated_by_id}: {str(e)}")
-        return None
-
-    def get_last_updated_by(self, obj):
-        return get_last_updated_by(self, obj)
-
-    @extend_schema_field(str)
-    def get_tenant_domain(self, obj):
-        try:
-            tenant_response = requests.get(
-                f"{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{obj.tenant_id}/",
-                headers={
-                    "Authorization": f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'
-                },
-            )
-            if tenant_response.status_code == 200:
-                tenant_data = tenant_response.json()
-                domains = tenant_data.get("domains", [])
-                primary_domain = next((d["domain"] for d in domains if d.get("is_primary")), None)
-                return primary_domain
-            logger.error(f"Failed to fetch tenant {obj.tenant_id} from auth_service")
-        except Exception as e:
-            logger.error(f"Error fetching tenant domain for {obj.tenant_id}: {str(e)}")
-        return None
-
-    def validate_file(self, value):
-        if value:
-            if not value.name.lower().endswith((".pdf", ".png", ".jpg", ".jpeg")):
-                raise serializers.ValidationError("Only PDF or image files are allowed.")
-            if value.size > 10 * 1024 * 1024:  # 10MB limit
-                raise serializers.ValidationError("File size cannot exceed 10MB.")
-        return value
-
-    def validate(self, data):
-        tenant_id = get_tenant_id_from_jwt(self.context["request"])
-        data["tenant_id"] = tenant_id
-        if "uploaded_by_id" in data:
-            user_response = requests.get(
-                f'{settings.AUTH_SERVICE_URL}/api/user/users/{data["uploaded_by_id"]}/',
-                headers={"Authorization": self.context["request"].META.get("HTTP_AUTHORIZATION", "")},
-            )
-            if user_response.status_code != 200:
-                raise serializers.ValidationError({"uploaded_by_id": "Invalid user ID."})
-            user_data = user_response.json()
-            if user_data.get("tenant_id") != tenant_id:
-                raise serializers.ValidationError({"uploaded_by_id": "User does not belong to this tenant."})
-        if "updated_by_id" in data:
-            user_response = requests.get(
-                f'{settings.AUTH_SERVICE_URL}/api/user/users/{data["updated_by_id"]}/',
-                headers={"Authorization": self.context["request"].META.get("HTTP_AUTHORIZATION", "")},
-            )
-            if user_response.status_code != 200:
-                raise serializers.ValidationError({"updated_by_id": "Invalid user ID."})
-            user_data = user_response.json()
-            if user_data.get("tenant_id") != tenant_id:
-                raise serializers.ValidationError({"updated_by_id": "User does not belong to this tenant."})
-        return data
-
-    def create(self, validated_data):
-        file = validated_data.pop("file", None)
-        tenant_id = get_tenant_id_from_jwt(self.context["request"])
-        validated_data["tenant_id"] = str(tenant_id)
-        validated_data["uploaded_by_id"] = str(self.context["request"].user.id)
-        validated_data["updated_by_id"] = str(self.context["request"].user.id)
-        validated_data['last_updated_by_id'] = str(self.context["request"].user.id)
-
-        if file:
-            logger.info(f"Uploading document file: {file.name}")
-            file_name = f"{file.name.rsplit('.', 1)[0]}_v1.{file.name.rsplit('.', 1)[1]}" if '.' in file.name else f"{file.name}_v1"
-            url = upload_file_dynamic(
-                file, file_name, content_type=getattr(file, "content_type", "application/octet-stream")
-            )
-            validated_data["file_url"] = url
-            validated_data["file_path"] = url
-            validated_data["file_type"] = getattr(file, "content_type", "application/octet-stream")
-            validated_data["file_size"] = file.size
-            logger.info(f"Document file uploaded: {url}")
-
-        document = super().create(validated_data)
-        if file:
-            DocumentVersion.objects.create(
-                document=document,
-                version=1,
-                file_url=validated_data["file_url"],
-                file_path=validated_data["file_path"],
-                file_type=validated_data["file_type"],
-                file_size=validated_data["file_size"],
-                created_by_id=validated_data["uploaded_by_id"],
-            )
-        return document
-
-    def update(self, instance, validated_data):
-        file = validated_data.pop("file", None)
-        validated_data["updated_by_id"] = str(self.context["request"].user.id)
-        instance.last_updated_by_id = str(self.context["request"].user.id)
-
-        with transaction.atomic():
-            if file:
-                # Save the current version to DocumentVersion
-                DocumentVersion.objects.create(
-                    document=instance,
-                    version=instance.version,
-                    file_url=instance.file_url,
-                    file_path=instance.file_path,
-                    file_type=instance.file_type,
-                    file_size=instance.file_size,
-                    created_by_id=instance.updated_by_id or instance.uploaded_by_id,
-                )
-                # Increment version
-                instance.version += 1
-                validated_data["version"] = instance.version
-                # Upload new file
-                file_name = f"{file.name.rsplit('.', 1)[0]}_v{instance.version}.{file.name.rsplit('.', 1)[1]}" if '.' in file.name else f"{file.name}_v{instance.version}"
-                url = upload_file_dynamic(
-                    file, file_name, content_type=getattr(file, "content_type", "application/octet-stream")
-                )
-                validated_data["file_url"] = url
-                validated_data["file_path"] = url
-                validated_data["file_type"] = getattr(file, "content_type", "application/octet-stream")
-                validated_data["file_size"] = file.size
-                logger.info(f"Document file updated: {url}")
-
-            instance = super().update(instance, validated_data)
-            if file:
-                DocumentVersion.objects.create(
-                    document=instance,
-                    version=instance.version,
-                    file_url=validated_data["file_url"],
-                    file_path=validated_data["file_path"],
-                    file_type=validated_data["file_type"],
-                    file_size=validated_data["file_size"],
-                    created_by_id=validated_data["updated_by_id"],
-                )
-        return instance
 
 
 

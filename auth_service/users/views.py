@@ -2734,6 +2734,9 @@ class DocumentDetailView(APIView):
             logger.error(f"Error deleting document for tenant {tenant_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+
 class DocumentVersionListView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
