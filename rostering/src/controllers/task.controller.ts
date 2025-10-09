@@ -32,6 +32,8 @@ export class TaskController {
     if (!body.relatedTable || typeof body.relatedTable !== 'string') errors.push('relatedTable is required and must be a string');
     if (!body.relatedId || typeof body.relatedId !== 'string') errors.push('relatedId is required and must be a string');
     if (!body.title || typeof body.title !== 'string') errors.push('title is required and must be a string');
+    if (!body.description || typeof body.description !== 'string') errors.push('description is required and must be a string');
+    if (!body.riskFrequency || typeof body.riskFrequency !== 'string') errors.push('riskFrequency is required and must be a string');
     
     if (body.relatedTable && !this.validRelatedTables.includes(body.relatedTable)) {
       errors.push(`relatedTable must be one of: ${this.validRelatedTables.join(', ')}`);
@@ -40,9 +42,9 @@ export class TaskController {
     if (body.status && !['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'ON_HOLD'].includes(body.status)) {
       errors.push('status must be one of: PENDING, IN_PROGRESS, COMPLETED, CANCELLED, ON_HOLD');
     }
-    
-    if (body.priority && !['LOW', 'MEDIUM', 'HIGH', 'URGENT'].includes(body.priority)) {
-      errors.push('priority must be one of: LOW, MEDIUM, HIGH, URGENT');
+
+    if (body.riskCategory && !Array.isArray(body.riskCategory)) {
+      errors.push('riskCategory must be an array of strings');
     }
 
     return errors;
@@ -84,15 +86,16 @@ export class TaskController {
         relatedTable: payload.relatedTable,
         relatedId: payload.relatedId,
         title: payload.title,
+        description: payload.description,
+        riskFrequency: payload.riskFrequency,
       };
 
-      if (payload.description !== undefined) data.description = payload.description;
       if (payload.status) data.status = payload.status;
-      if (payload.priority) data.priority = payload.priority;
+      if (payload.startDate) data.startDate = this.toDateOrNull(payload.startDate);
       if (payload.dueDate) data.dueDate = this.toDateOrNull(payload.dueDate);
-      if (payload.notes !== undefined) data.notes = payload.notes;
+      if (payload.additionalNotes !== undefined) data.additionalNotes = payload.additionalNotes;
       if (payload.createdBy) data.createdBy = payload.createdBy;
-      if (Array.isArray(payload.attachments)) data.attachments = payload.attachments;
+      if (Array.isArray(payload.riskCategory)) data.riskCategory = payload.riskCategory;
 
       const created = await (this.prisma as any).task.create({
         data,
@@ -126,7 +129,6 @@ export class TaskController {
       // Optional filters from query params
       const relatedTable = req.query.relatedTable as string;
       const status = req.query.status as string;
-      const priority = req.query.priority as string;
 
       const where: any = {
         tenantId: tenantId.toString(),
@@ -135,7 +137,6 @@ export class TaskController {
 
       if (relatedTable) where.relatedTable = relatedTable;
       if (status) where.status = status;
-      if (priority) where.priority = priority;
 
       const tasks = await (this.prisma as any).task.findMany({
         where,
@@ -149,7 +150,7 @@ export class TaskController {
           }
         },
         orderBy: [
-          { priority: 'desc' },
+          { status: 'asc' },
           { dueDate: 'asc' },
           { createdAt: 'desc' }
         ]
@@ -207,7 +208,7 @@ export class TaskController {
           }
         },
         orderBy: [
-          { priority: 'desc' },
+          { status: 'asc' },
           { dueDate: 'asc' },
           { createdAt: 'desc' }
         ]
@@ -274,7 +275,7 @@ export class TaskController {
           }
         },
         orderBy: [
-          { priority: 'desc' },
+          { status: 'asc' },
           { dueDate: 'asc' },
           { createdAt: 'desc' }
         ]
@@ -336,7 +337,7 @@ export class TaskController {
           }
         },
         orderBy: [
-          { priority: 'desc' },
+          { status: 'asc' },
           { dueDate: 'asc' },
           { createdAt: 'desc' }
         ]
@@ -389,10 +390,11 @@ export class TaskController {
           updateData.completedAt = null;
         }
       }
-      if (payload.priority !== undefined) updateData.priority = payload.priority;
+      if (payload.riskFrequency !== undefined) updateData.riskFrequency = payload.riskFrequency;
+      if (payload.startDate !== undefined) updateData.startDate = this.toDateOrNull(payload.startDate);
       if (payload.dueDate !== undefined) updateData.dueDate = this.toDateOrNull(payload.dueDate);
-      if (payload.notes !== undefined) updateData.notes = payload.notes;
-      if (Array.isArray(payload.attachments)) updateData.attachments = payload.attachments;
+      if (payload.additionalNotes !== undefined) updateData.additionalNotes = payload.additionalNotes;
+      if (Array.isArray(payload.riskCategory)) updateData.riskCategory = payload.riskCategory;
 
       const updated = await (this.prisma as any).task.update({
         where: { id: taskId },

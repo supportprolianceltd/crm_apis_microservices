@@ -279,7 +279,7 @@ model PersonalCare {
   toiletingSupport          String
 
   // Additional Notes
-  additionalNotes           String
+  additionalNotes           String              @db.Text
    // Dropdowns
   continenceCare            String
   mobilityAssistance        String
@@ -301,7 +301,7 @@ model EverydayActivityPlan{
   canTheyShop String
   canTheyCall String
   canTheyWash String
-  additionalNotes String
+  additionalNotes String                @db.Text
   communityAccessNeeds String
   ExerciseandMobilityActivities String
   
@@ -325,11 +325,11 @@ model FallsAndMobility{
   canTransfer String
   canuseStairs String
   canTravelAlone String
-  mobilityAdditionalNotes String
+  mobilityAdditionalNotes String        @db.Text
   visionStatus String
   speechStatus String
   hearingStatus String
-  sensoryAdditionalNotes String
+  sensoryAdditionalNotes String         @db.Text
 
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
@@ -342,9 +342,9 @@ model MedicalInformation {
   tenantId     String
   carePlanId   String   @unique
   primaryDiagnosis String
-  primaryAdditionalNotes String
+  primaryAdditionalNotes String         @db.Text
   secondaryDiagnoses String
-  secondaryAdditionalNotes String
+  secondaryAdditionalNotes String       @db.Text
   pastMedicalHistory String
   medicalSupport Boolean @default(false)
   breathingDifficulty Boolean @default(false)
@@ -355,11 +355,11 @@ model MedicalInformation {
   airWayEquipmentMitigationPlan String
   haveSkinPressureSores Boolean @default(false)
   skinPressureConcerningIssues Boolean @default(false)
-  skinAdditionalInformation String?
+  skinAdditionalInformation String?     @db.Text
   currentHealthStatus String
 
   raisedSafeGuardingIssue Boolean @default(false)
-  safeGuardingAdditionalInformation String?
+  safeGuardingAdditionalInformation String? @db.Text
   // Relation: one medical info can have many medications
   medications         Medication[]
   primaryDoctor       String
@@ -426,7 +426,7 @@ model PsychologicalInformation{
   specifyMemoryStatus String
   canTheyDoHouseKeeping String
   houseKeepingSupport Boolean @default(false)
-  houseKeepingAdditionalNotes String
+  houseKeepingAdditionalNotes String    @db.Text
 
   carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
   @@index([tenantId])
@@ -638,18 +638,19 @@ model Task {
   
   // Task details
   title       String
-  description String?     @db.Text
+  description String     @db.Text
   status      TaskStatus  @default(PENDING)
-  priority    TaskPriority @default(MEDIUM)
+  riskCategory String[]    @default([])
+  riskFrequency String
   
   // Timing
+  startDate   DateTime?
   dueDate     DateTime?
   completedAt DateTime?
   createdBy   String?     // Who created the task (for audit purposes)
   
   // Additional context
-  notes       String?     @db.Text
-  attachments String[]    @default([]) // URLs or file paths
+  additionalNotes       String?     @db.Text
   
   // Audit fields
   createdAt   DateTime    @default(now())
@@ -755,11 +756,4 @@ enum TaskStatus {
   COMPLETED
   CANCELLED
   ON_HOLD
-}
-
-enum TaskPriority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
 }

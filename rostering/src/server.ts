@@ -23,6 +23,7 @@ import { createEmailRoutes } from './routes/email.routes';
 import { createCarePlanRoutes } from './routes/careplan.routes';
 import { createTaskRoutes } from './routes/task.routes';
 import { EmailWorker } from './workers/email.worker';
+import { authenticate } from './middleware/auth.middleware';
 
 // Load environment variables
 dotenv.config();
@@ -120,25 +121,25 @@ class RosteringServer {
   }
 
   private setupRoutes(): void {
-    // Health routes
+    // Health routes (no auth required)
     this.app.use('/api/v1', createHealthRoutes());
 
-    // API routes
-    this.app.use('/api/v1/requests', createRequestRoutes(this.requestController));
-    this.app.use('/api/v1/carers', createCarerRoutes(this.carerController));
-    this.app.use('/api/v1/sync', createSyncRoutes(
+    // API routes (with authentication)
+    this.app.use('/api/v1/requests', authenticate, createRequestRoutes(this.requestController));
+    this.app.use('/api/v1/carers', authenticate, createCarerRoutes(this.carerController));
+    this.app.use('/api/v1/sync', authenticate, createSyncRoutes(
       this.prisma,
       this.authSyncService, 
       this.tenantEmailConfigService,
       this.notificationService
     ));
-    this.app.use('/api/v1/emails', createEmailRoutes(
+    this.app.use('/api/v1/emails', authenticate, createEmailRoutes(
       this.prisma,
       this.emailService,
       this.emailWorker
     ));
-    this.app.use('/api/v1/careplans', createCarePlanRoutes(this.carePlanController));
-    this.app.use('/api/v1/tasks', createTaskRoutes(this.taskController));
+    this.app.use('/api/v1/careplans', authenticate, createCarePlanRoutes(this.carePlanController));
+    this.app.use('/api/v1/tasks', authenticate, createTaskRoutes(this.taskController));
 
     // Root endpoint
     this.app.get('/', (req: Request, res: Response) => {
