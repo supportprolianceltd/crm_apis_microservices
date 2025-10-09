@@ -5,7 +5,7 @@ import secrets
 import string
 import uuid
 from datetime import datetime, timedelta
-
+from django.db.models import Q
 # Third-Party
 import jwt
 import requests
@@ -3407,6 +3407,7 @@ class DocumentAcknowledgmentsListView(APIView):
             logger.error(f"Error retrieving acknowledgments for document {document_id} in tenant {tenant_uuid}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class UserDocumentAccessView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
@@ -3418,19 +3419,14 @@ class UserDocumentAccessView(APIView):
         tenant_uuid = get_tenant_id_from_jwt(request)
         try:
             if request.query_params.get('user_id'):
-                permission = DocumentPermission.objects.get(user_id=user_identifier, tenant_id=tenant_uuid)
+                permissions = DocumentPermission.objects.filter(user_id=user_identifier, tenant_id=tenant_uuid).select_related('document')
             else:
-                permission = DocumentPermission.objects.get(email=user_identifier, tenant_id=tenant_uuid)
-            permissions = DocumentPermission.objects.filter(
-                Q(user_id=permission.user_id) | Q(email=permission.email),
-                tenant_id=tenant_uuid
-            ).select_related('document')
+                permissions = DocumentPermission.objects.filter(email=user_identifier, tenant_id=tenant_uuid).select_related('document')
             serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})
+            if not permissions.exists():
+                return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
             logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_uuid}")
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except DocumentPermission.DoesNotExist:
-            logger.warning(f"No permissions found for user {user_identifier} in tenant {tenant_uuid}")
-            return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f"Error retrieving user document access for tenant {tenant_uuid}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

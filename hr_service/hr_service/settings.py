@@ -5,6 +5,8 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext_lazy as _
 from datetime import timedelta
 import logging
+# Fix for host parsing
+import django.http.request
 
 # ======================== Base Dir & Env ========================
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +31,7 @@ DATABASES = {
         'PASSWORD': env('DB_PASSWORD', default='password'),
         'HOST': env('DB_HOST', default='hr_postgres'),
         'PORT': env('DB_PORT', default='5432'),
-        'CONN_MAX_AGE': 0,  # Disable persistent connections to avoid leaks during schema switches
+        'CONN_MAX_AGE': 60,
         'OPTIONS': {
             'connect_timeout': 30,
             'keepalives': 1,
@@ -43,31 +45,33 @@ DATABASES = {
 if not DATABASES['default']['ENGINE']:
     raise ImproperlyConfigured("DATABASES['default']['ENGINE'] must be set.")
 
+# ======================== Apps ========================
 INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'corsheaders',
-    'django.contrib.auth',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'drf_spectacular',
     'drf_yasg',
     'django_filters',
-    'hr',  # Your main app
     'django_extensions',
+    'hr',  # Your main app
 ]
 
 # ======================== Middleware ========================
 MIDDLEWARE = [
-    'hr.middleware.DatabaseConnectionMiddleware',  # Add this FIRST
+    'hr.middleware.DatabaseConnectionMiddleware',
     'hr.middleware.MicroserviceRS256JWTMiddleware',
-    'hr.middleware.CustomTenantSchemaMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -79,7 +83,6 @@ WSGI_APPLICATION = 'hr_service.wsgi.application'
 
 # ======================== REST Framework ========================
 REST_FRAMEWORK = {
-    # Use only custom JWT middleware, not DRF JWTAuthentication
     'DEFAULT_AUTHENTICATION_CLASSES': (),
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
@@ -181,7 +184,7 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        'hr': {  # HR-specific
+        'hr': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': False,
@@ -196,7 +199,7 @@ USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# drf-spectacular: Add Bearer token security scheme for Swagger UI
+# drf-spectacular settings
 SPECTACULAR_SETTINGS = {
     'TITLE': 'HR Service API',
     'DESCRIPTION': 'API documentation for HR microservice',
@@ -216,11 +219,9 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-# Patched split_domain_port for host parsing (from talent_engine)
-import django.http.request
+
 
 def patched_split_domain_port(host):
-    # Accept underscores in hostnames
     if host and host.count(':') == 1 and host.rfind(']') < host.find(':'):
         host, port = host.split(':', 1)
     else:

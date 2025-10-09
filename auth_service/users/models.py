@@ -991,7 +991,6 @@ class ReferenceCheck(models.Model):
         verbose_name_plural = "Reference Checks"
 
 
-
 class ProofOfAddress(models.Model):
     TYPE_CHOICES = [
         ('utility_bill', 'Utility Bill'),
@@ -1426,6 +1425,7 @@ class BlacklistedToken(models.Model):
 
 
 
+
 class Document(models.Model):
     tenant_id = models.CharField(max_length=255, blank=True, null=True)
     title = models.CharField(max_length=255)
@@ -1437,7 +1437,7 @@ class Document(models.Model):
     version = models.IntegerField(default=1)
     uploaded_by_id = models.CharField(max_length=255, blank=True, null=True)
     updated_by_id = models.CharField(max_length=255, blank=True, null=True)
-    last_updated_by_id = models.CharField(max_length=255, blank=True, null=True)  # New field for last updater
+    last_updated_by_id = models.CharField(max_length=255, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     expiring_date = models.DateTimeField(blank=True, null=True)
@@ -1489,7 +1489,7 @@ class DocumentAcknowledgment(models.Model):
     email = models.EmailField(max_length=255)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    role = models.CharField(max_length=100)  # Stores job_role or role from user at acknowledgment time
+    role = models.CharField(max_length=100)
     acknowledged_at = models.DateTimeField(auto_now_add=True)
     tenant_id = models.CharField(max_length=255)
 
@@ -1499,8 +1499,6 @@ class DocumentAcknowledgment(models.Model):
             models.Index(fields=['document', 'tenant_id']),
             models.Index(fields=['user_id', 'tenant_id']),
         ]
-
-
 
 class Group(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

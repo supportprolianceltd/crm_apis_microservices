@@ -338,5 +338,3 @@ CELERY_BEAT_SCHEDULE = {
 
 #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 # ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
-
-
