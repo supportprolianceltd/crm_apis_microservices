@@ -88,12 +88,13 @@ from .views import (
     UserActivityViewSet, jwks_view, protected_view, GroupViewSet, DocumentVersionListView,
     ProfessionalQualificationView, EmploymentDetailView, EducationDetailView,
     ReferenceCheckView, ProofOfAddressView, InsuranceVerificationView,DocumentAcknowledgmentsListView, DocumentAcknowledgeView,
-    DrivingRiskAssessmentView, LegalWorkEligibilityView, OtherUserDocumentsView,UserDocumentAccessView,
+    DrivingRiskAssessmentView, LegalWorkEligibilityView, OtherUserDocumentsView,UserDocumentAccessView, UsersViewSetNoPagination,
     AllTenantsUsersListView,  # Ensure this import is added
 )
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
+router.register(r'users-no-pagination', UsersViewSetNoPagination, basename='users_no_pagination')
 router.register(r'clients', ClientViewSet, basename='client')
 router.register(r'user-sessions', UserSessionViewSet, basename='user-session')
 router.register(r'login-attempts', LoginAttemptViewSet, basename='login-attempt')

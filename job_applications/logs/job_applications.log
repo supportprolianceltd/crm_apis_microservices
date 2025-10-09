@@ -1013,3 +1013,12 @@
 2025-10-09 01:21:21,846 [INFO] job_applications: Found 0 applications with resumes for PRO-0342
 2025-10-09 01:21:21,848 [INFO] job_applications: No applications for PRO-0342, skipping
 2025-10-09 01:21:21,860 [INFO] job_applications: 📊 Daily vetting summary: {'processed_requisitions': 1, 'total_applications_vetted': 1, 'shortlisted_count': 1, 'rejected_count': 0, 'total_time_seconds': 53.09}
+2025-10-09 07:26:14,615 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-09 07:26:14,614 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-09 07:26:14,681 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-09 07:26:14,709 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-09 07:26:14,732 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-09 07:26:14,745 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-09 07:26:16,369 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-10-09 07:26:16,484 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-10-09 07:26:16,608 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
