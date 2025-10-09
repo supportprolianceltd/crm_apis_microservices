@@ -2616,10 +2616,8 @@ class DocumentPermissionWriteSerializer(serializers.Serializer):  # Changed to S
     permission_level = serializers.ChoiceField(choices=DocumentPermission.PERMISSION_CHOICES, required=False)
 
 
-
 class DocumentVersionSerializer(serializers.ModelSerializer):
     created_by = serializers.SerializerMethodField()
-    # Removed last_updated_by and last_updated_by_id (versions aren't updated)
 
     class Meta:
         model = DocumentVersion
@@ -2658,14 +2656,33 @@ class DocumentAcknowledgmentSerializer(serializers.ModelSerializer):
         fields = ["id", "document", "user_id", "email", "first_name", "last_name", "role", "acknowledged_at", "tenant_id"]
         read_only_fields = ["id", "document", "user_id", "email", "first_name", "last_name", "role", "acknowledged_at", "tenant_id"]
 
+class DocumentPermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentPermission
+        fields = ["user_id", "email", "first_name", "last_name", "role", "permission_level", "created_at"]
+        read_only_fields = ["created_at"]
+
+class DocumentPermissionWriteSerializer(serializers.Serializer):
+    user_id = serializers.CharField(max_length=255, required=False, allow_blank=False)
+    email = serializers.EmailField(required=False, allow_blank=False)
+    permission_level = serializers.ChoiceField(choices=DocumentPermission.PERMISSION_CHOICES, required=False)
+
+class UserDocumentAccessSerializer(serializers.ModelSerializer):
+    document = 'DocumentSerializer'  # Forward reference or import
+    permission = DocumentPermissionSerializer(read_only=True)
+
+    class Meta:
+        model = DocumentPermission
+        fields = ['document', 'permission']
+
 class DocumentSerializer(serializers.ModelSerializer):
     uploaded_by = serializers.SerializerMethodField()
     updated_by = serializers.SerializerMethodField()
     last_updated_by = serializers.SerializerMethodField()
     tenant_domain = serializers.SerializerMethodField()
-    acknowledgments = DocumentAcknowledgmentSerializer(many=True, read_only=True)  # New: List of acknowledgments
+    acknowledgments = DocumentAcknowledgmentSerializer(many=True, read_only=True)
     permissions = DocumentPermissionSerializer(many=True, read_only=True)
-    permissions_write = DocumentPermissionWriteSerializer(many=True, required=False, write_only=True)  # New: For bulk write
+    permissions_write = DocumentPermissionWriteSerializer(many=True, required=False, write_only=True)
     permission_action = serializers.ChoiceField(choices=['add', 'remove', 'replace'], required=False, write_only=True)
     file = serializers.FileField(required=False, allow_null=True)
 
@@ -2694,10 +2711,10 @@ class DocumentSerializer(serializers.ModelSerializer):
             "status",
             "document_number",
             "file",
-            "acknowledgments",  # New field
-            "permissions",  # New field
-            "permissions_write",  # New field
-            "permission_action",  # New field
+            "acknowledgments",
+            "permissions",
+            "permissions_write",
+            "permission_action",
         ]
         read_only_fields = [
             "id",
@@ -2713,8 +2730,8 @@ class DocumentSerializer(serializers.ModelSerializer):
             "file_path",
             "version",
             "last_updated_by",
-            "acknowledgments",  # Read-only
-            "permissions",  # Read-only
+            "acknowledgments",
+            "permissions",
         ]
 
     @extend_schema_field(
@@ -2770,7 +2787,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         return None
 
     def get_last_updated_by(self, obj):
-        return get_last_updated_by(self, obj)  # Uses local query (defined below)
+        return get_last_updated_by(self, obj)  # Assuming this function exists
 
     @extend_schema_field(str)
     def get_tenant_domain(self, obj):
@@ -2791,7 +2808,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def validate_permissions_write(self, value):
         if value:
-            valid_levels = [choice[0] for choice in DocumentPermission.PERMISSION_CHOICES]  # Extract 'view', 'view_download'
+            valid_levels = [choice[0] for choice in DocumentPermission.PERMISSION_CHOICES]
             for perm_data in value:
                 if 'permission_level' in perm_data and perm_data['permission_level'] not in valid_levels:
                     raise serializers.ValidationError("Invalid permission_level. Must be 'view' or 'view_download'.")
@@ -2799,34 +2816,34 @@ class DocumentSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Each permission must include either 'user_id' or 'email'.")
                 if ('user_id' in perm_data and perm_data['user_id']) and ('email' in perm_data and perm_data['email']):
                     raise serializers.ValidationError("Each permission must include exactly one of 'user_id' or 'email', not both.")
-                # For 'remove' action, permission_level is optional and ignored
         return value
 
     def validate(self, data):
         tenant_id = get_tenant_id_from_jwt(self.context["request"])
         data["tenant_id"] = tenant_id
-        # Validate uploaded_by_id and updated_by_id if provided (though read-only, for partial updates)
+        # Validate uploaded_by_id and updated_by_id if provided
         if "uploaded_by_id" in data:
             try:
                 user = CustomUser.objects.get(id=data["uploaded_by_id"])
-                if str(user.tenant_id) != str(tenant_id):
+                user_tenant_uuid = str(Tenant.objects.get(id=user.tenant_id).unique_id)
+                if user_tenant_uuid != str(tenant_id):
                     raise serializers.ValidationError({"uploaded_by_id": "User does not belong to this tenant."})
-            except CustomUser.DoesNotExist:
+            except (CustomUser.DoesNotExist, Tenant.DoesNotExist):
                 raise serializers.ValidationError({"uploaded_by_id": "Invalid user ID."})
         if "updated_by_id" in data:
             try:
                 user = CustomUser.objects.get(id=data["updated_by_id"])
-                if str(user.tenant_id) != str(tenant_id):
+                user_tenant_uuid = str(Tenant.objects.get(id=user.tenant_id).unique_id)
+                if user_tenant_uuid != str(tenant_id):
                     raise serializers.ValidationError({"updated_by_id": "User does not belong to this tenant."})
-            except CustomUser.DoesNotExist:
+            except (CustomUser.DoesNotExist, Tenant.DoesNotExist):
                 raise serializers.ValidationError({"updated_by_id": "Invalid user ID."})
         # Validate permissions_write users belong to tenant
         permissions_write = data.get('permissions_write', [])
-        permission_action = data.get('permission_action', 'add')  # Default to 'add'
+        permission_action = data.get('permission_action', 'add')
         resolved_permissions = []
         for perm_data in permissions_write:
             if permission_action == 'remove':
-                # For remove, resolve user but don't need level
                 user = None
                 if 'user_id' in perm_data and perm_data['user_id']:
                     try:
@@ -2838,16 +2855,15 @@ class DocumentSerializer(serializers.ModelSerializer):
                         user = CustomUser.objects.get(email=perm_data['email'])
                     except CustomUser.DoesNotExist:
                         raise serializers.ValidationError({"permissions_write": f"Invalid user email: {perm_data['email']}"})
-                
                 if not user:
                     raise serializers.ValidationError({"permissions_write": "Could not resolve user from provided ID or email."})
-                
-                if str(user.tenant_id) != str(tenant_id):
-                    raise serializers.ValidationError({"permissions_write": f"User {perm_data.get('user_id', perm_data.get('email'))} does not belong to this tenant."})
-                
-                resolved_perm = {
-                    'resolved_user_id': str(user.id),
-                }
+                try:
+                    user_tenant_uuid = str(Tenant.objects.get(id=user.tenant_id).unique_id)
+                    if user_tenant_uuid != str(tenant_id):
+                        raise serializers.ValidationError({"permissions_write": f"User {perm_data.get('user_id', perm_data.get('email'))} does not belong to this tenant."})
+                except Tenant.DoesNotExist:
+                    raise serializers.ValidationError({"permissions_write": f"Invalid tenant for user {perm_data.get('user_id', perm_data.get('email'))}."})
+                resolved_perm = {'resolved_user_id': str(user.id)}
                 resolved_permissions.append(resolved_perm)
             else:  # add or replace
                 user = None
@@ -2861,39 +2877,37 @@ class DocumentSerializer(serializers.ModelSerializer):
                         user = CustomUser.objects.get(email=perm_data['email'])
                     except CustomUser.DoesNotExist:
                         raise serializers.ValidationError({"permissions_write": f"Invalid user email: {perm_data['email']}"})
-                
                 if not user:
                     raise serializers.ValidationError({"permissions_write": "Could not resolve user from provided ID or email."})
-                
-                if str(user.tenant_id) != str(tenant_id):
-                    raise serializers.ValidationError({"permissions_write": f"User {perm_data.get('user_id', perm_data.get('email'))} does not belong to this tenant."})
-                
-                # Store resolved user_id and user details for create/update
+                try:
+                    user_tenant_uuid = str(Tenant.objects.get(id=user.tenant_id).unique_id)
+                    if user_tenant_uuid != str(tenant_id):
+                        raise serializers.ValidationError({"permissions_write": f"User {perm_data.get('user_id', perm_data.get('email'))} does not belong to this tenant."})
+                except Tenant.DoesNotExist:
+                    raise serializers.ValidationError({"permissions_write": f"Invalid tenant for user {perm_data.get('user_id', perm_data.get('email'))}."})
                 resolved_perm = {
                     'resolved_user_id': str(user.id),
                     'email': user.email,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
                     'role': getattr(user.profile, 'job_role', '') if hasattr(user, 'profile') else '',
-                    'permission_level': perm_data.get('permission_level', 'view_download')  # Default to full access
+                    'permission_level': perm_data.get('permission_level', 'view_download')
                 }
                 resolved_permissions.append(resolved_perm)
-        
-        # Attach resolved data and action to validated_data for use in create/update
         data['resolved_permissions_write'] = resolved_permissions
         data['permission_action'] = permission_action
         return data
 
     def create(self, validated_data):
         resolved_permissions = validated_data.pop("resolved_permissions_write", [])
-        permissions_write = validated_data.pop("permissions_write", [])  # Pop original for super()
+        permissions_write = validated_data.pop("permissions_write", [])
         permission_action = validated_data.pop("permission_action", "add")
         file = validated_data.pop("file", None)
-        current_user = get_user_data_from_jwt(self.context["request"])  # From token, no API call
+        current_user = get_user_data_from_jwt(self.context["request"])
         validated_data["tenant_id"] = str(get_tenant_id_from_jwt(self.context["request"]))
         validated_data["uploaded_by_id"] = str(current_user["id"])
         validated_data["updated_by_id"] = str(current_user["id"])
-        validated_data["last_updated_by_id"] = str(current_user["id"])  # Set for creation
+        validated_data["last_updated_by_id"] = str(current_user["id"])
 
         if file:
             logger.info(f"Uploading document file: {file.name}")
@@ -2938,7 +2952,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         except CustomUser.DoesNotExist:
             logger.error(f"Creator user {validated_data['uploaded_by_id']} not found")
         
-        # Handle additional permissions if provided (default action 'add')
+        # Handle additional permissions
         if resolved_permissions:
             if permission_action == 'add':
                 permission_objs = [
@@ -2957,7 +2971,6 @@ class DocumentSerializer(serializers.ModelSerializer):
                 DocumentPermission.objects.bulk_create(permission_objs)
                 logger.info(f"Added {len(resolved_permissions)} permissions for document {document.title}")
             elif permission_action == 'replace':
-                # For create, replace would delete nothing, just add all
                 permission_objs = [
                     DocumentPermission(
                         document=document,
@@ -2978,17 +2991,16 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         resolved_permissions = validated_data.pop("resolved_permissions_write", None)
-        permissions_write = validated_data.pop("permissions_write", None)  # Pop original
+        permissions_write = validated_data.pop("permissions_write", None)
         permission_action = validated_data.pop("permission_action", "add")
         file = validated_data.pop("file", None)
-        current_user = get_user_data_from_jwt(self.context["request"])  # From token
+        current_user = get_user_data_from_jwt(self.context["request"])
         validated_data["updated_by_id"] = str(current_user["id"])
-        instance.last_updated_by_id = str(current_user["id"])  # Update last updater
+        instance.last_updated_by_id = str(current_user["id"])
         tenant_id = instance.tenant_id
 
         with transaction.atomic():
             if file:
-                # Save current version
                 DocumentVersion.objects.create(
                     document=instance,
                     version=instance.version,
@@ -2998,10 +3010,8 @@ class DocumentSerializer(serializers.ModelSerializer):
                     file_size=instance.file_size,
                     created_by_id=instance.updated_by_id or instance.uploaded_by_id,
                 )
-                # Increment version
                 instance.version += 1
                 validated_data["version"] = instance.version
-                # Upload new file
                 file_name = f"{file.name.rsplit('.', 1)[0]}_v{instance.version}.{file.name.rsplit('.', 1)[1]}" if '.' in file.name else f"{file.name}_v{instance.version}"
                 url = upload_file_dynamic(
                     file, file_name, content_type=getattr(file, "content_type", "application/octet-stream")
@@ -3024,11 +3034,9 @@ class DocumentSerializer(serializers.ModelSerializer):
                     created_by_id=validated_data["updated_by_id"],
                 )
             
-            # Handle permissions based on action
-            if permissions_write is not None:  # Only if permissions_write provided
+            if permissions_write is not None:
                 existing_permissions = instance.permissions.filter(tenant_id=tenant_id)
                 if permission_action == 'add':
-                    # Add new, skip if already exists
                     added_count = 0
                     for perm in resolved_permissions:
                         if not existing_permissions.filter(user_id=perm['resolved_user_id']).exists():
@@ -3046,14 +3054,12 @@ class DocumentSerializer(serializers.ModelSerializer):
                             added_count += 1
                     logger.info(f"Added {added_count} new permissions for document {instance.title}")
                 elif permission_action == 'remove':
-                    # Remove specified users
                     removed_count = 0
                     for perm in resolved_permissions:
                         deleted = existing_permissions.filter(user_id=perm['resolved_user_id']).delete()[0]
                         removed_count += deleted
                     logger.info(f"Removed {removed_count} permissions for document {instance.title}")
                 elif permission_action == 'replace':
-                    # Full replacement: delete all, add new (but keep creator if not in list? No, full replace)
                     existing_permissions.delete()
                     permission_objs = [
                         DocumentPermission(
@@ -3072,16 +3078,6 @@ class DocumentSerializer(serializers.ModelSerializer):
                     logger.info(f"Replaced with {len(resolved_permissions)} permissions for document {instance.title}")
         
         return instance
-
-class UserDocumentAccessSerializer(serializers.ModelSerializer):
-    document = DocumentSerializer(read_only=True)
-    permission = DocumentPermissionSerializer(read_only=True)
-
-    class Meta:
-        model = DocumentPermission
-        fields = ['document', 'permission']
-
-
 
 class GroupSerializer(serializers.ModelSerializer):
     last_updated_by = serializers.SerializerMethodField()
