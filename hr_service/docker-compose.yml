@@ -1,4 +1,4 @@
-
+version: '3.9'
 
 services:
   hr-service:
@@ -13,7 +13,7 @@ services:
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DEBUG=True
-      - DB_ENGINE=django_tenants.postgresql_backend
+      - DB_ENGINE=django.db.backends.postgresql
       - HR_DB_NAME=hr_db
       - DB_USER=postgres
       - DB_PASSWORD=password
@@ -35,6 +35,7 @@ services:
       - REDIS_URL=redis://hr_redis:6379/1
       - CORS_ALLOWED_ORIGINS=http://localhost:5173,https://crm-frontend-react.vercel.app,http://localhost:8000
       - TZ=UTC
+      - RUN_MAIN_SERVICE=true
     volumes:
       - .:/app
       - ./hr_logs:/app/hr_logs
@@ -43,11 +44,6 @@ services:
     command: >
       bash -c "
       /app/wait-for-it.sh hr_postgres:5432 -t 60 &&
-      python manage.py makemigrations --noinput &&
-      python manage.py migrate_schemas --schema=public --noinput &&
-      python manage.py migrate_schemas --shared --tenant --noinput &&
-      python create_default_tenant.py &&
-      python manage.py collectstatic --noinput &&
       gunicorn hr_service.wsgi:application --bind 0.0.0.0:8004 --workers=1 --timeout 300
       "
     depends_on:
@@ -60,7 +56,7 @@ services:
     restart: unless-stopped
     mem_limit: 4g
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8004/api/hr/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8004/api/hr/health/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -74,17 +70,12 @@ services:
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DJANGO_SETTINGS_MODULE=hr_service.settings
-      - DB_ENGINE=django_tenants.postgresql_backend
+      - DB_ENGINE=django.db.backends.postgresql
       - HR_DB_NAME=hr_db
       - DB_USER=postgres
       - DB_PASSWORD=password
       - DB_HOST=hr_postgres
       - DB_PORT=5432
-      - AUTH_SERVICE_URL=http://auth-service:8001
-      - TALENT_ENGINE_URL=http://talent-engine:8002
-      - NOTIFICATIONS_SERVICE_URL=http://app:3001
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
       - CELERY_BROKER_URL=redis://hr_redis:6379/0
       - CELERY_RESULT_BACKEND=redis://hr_redis:6379/0
       - REDIS_URL=redis://hr_redis:6379/1
@@ -95,8 +86,6 @@ services:
     command: >
       bash -c "
       /app/wait-for-it.sh hr_postgres:5432 -t 60 &&
-      python manage.py migrate_schemas --schema=public --noinput &&
-      python create_default_tenant.py &&
       celery -A hr_service worker --loglevel=info
       "
     depends_on:
@@ -120,14 +109,12 @@ services:
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DJANGO_SETTINGS_MODULE=hr_service.settings
-      - DB_ENGINE=django_tenants.postgresql_backend
+      - DB_ENGINE=django.db.backends.postgresql
       - HR_DB_NAME=hr_db
       - DB_USER=postgres
       - DB_PASSWORD=password
       - DB_HOST=hr_postgres
       - DB_PORT=5432
-      - AUTH_SERVICE_URL=http://auth-service:8001
-      - TALENT_ENGINE_URL=http://talent-engine:8002
       - CELERY_BROKER_URL=redis://hr_redis:6379/0
       - CELERY_RESULT_BACKEND=redis://hr_redis:6379/0
       - TZ=UTC
@@ -137,8 +124,6 @@ services:
     command: >
       bash -c "
       /app/wait-for-it.sh hr_postgres:5432 -t 60 &&
-      python manage.py migrate_schemas --schema=public --noinput &&
-      python create_default_tenant.py &&
       celery -A hr_service beat --loglevel=info
       "
     depends_on:
@@ -164,17 +149,12 @@ services:
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DJANGO_SETTINGS_MODULE=hr_service.settings
-      - DB_ENGINE=django_tenants.postgresql_backend
+      - DB_ENGINE=django.db.backends.postgresql
       - HR_DB_NAME=hr_db
       - DB_USER=postgres
       - DB_PASSWORD=password
       - DB_HOST=hr_postgres
       - DB_PORT=5432
-      - AUTH_SERVICE_URL=http://auth-service:8001
-      - TALENT_ENGINE_URL=http://talent-engine:8002
-      - NOTIFICATIONS_SERVICE_URL=http://app:3001
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
       - CELERY_BROKER_URL=redis://hr_redis:6379/0
       - CELERY_RESULT_BACKEND=redis://hr_redis:6379/0
       - REDIS_URL=redis://hr_redis:6379/1
@@ -185,9 +165,7 @@ services:
     command: >
       bash -c "
       /app/wait-for-it.sh hr_postgres:5432 -t 60 &&
-      python manage.py migrate_schemas --schema=public --noinput &&
-      python create_default_tenant.py &&
-      celery -A hr_service flower --port=5555 --broker=redis://hr_redis:6379/0
+      celery --broker=redis://hr_redis:6379/0 flower --port=5555
       "
     depends_on:
       - hr-service
@@ -210,7 +188,7 @@ services:
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DEBUG=True
-      - DB_ENGINE=django_tenants.postgresql_backend
+      - DB_ENGINE=django.db.backends.postgresql
       - HR_DB_NAME=hr_db
       - DB_USER=postgres
       - DB_PASSWORD=password
@@ -224,9 +202,7 @@ services:
     command: >
       bash -c "
       /app/wait-for-it.sh hr_postgres:5432 -t 60 &&
-      python manage.py migrate_schemas --schema=public --noinput &&
-      python create_default_tenant.py &&
-      python hr/consumers.py
+      python -m hr.consumers
       "
     depends_on:
       - hr-service

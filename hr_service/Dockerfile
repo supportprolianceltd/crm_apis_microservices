@@ -31,6 +31,6 @@ EXPOSE 8004
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8004/api/hr/ || exit 1
+    CMD curl -f http://localhost:8004/api/hr/health/ || exit 1
 
 ENTRYPOINT ["/app/entrypoint.sh"]

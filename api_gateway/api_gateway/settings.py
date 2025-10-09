@@ -241,6 +241,8 @@ MESSAGING_URL = env.str("MESSAGING_URL", default="http://messaging:3000")
 LMS_APP_URL = env.str("LMS_APP_URL", default="http://lms-app:8004")
 NOTIFICATIONS_SERVICE_URL = env.str("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
 
+HR_SERVICE_URL = env.str("HR_SERVICE_URL", default="http://hr:8004")
+
 # ======================== ROUTE CONFIGURATION ========================
 AUTH_ROUTES = [
     "token", "token/refresh", "token/validate", "login", "logout",
@@ -255,6 +257,7 @@ MICROSERVICE_URLS = {
     "messaging": MESSAGING_URL,
     "lms": LMS_APP_URL,
     "notifications": NOTIFICATIONS_SERVICE_URL,
+    "hr": HR_SERVICE_URL,  # New: Routes /api/hr/... to HR service
 }
 
 # Register all auth routes under auth service
@@ -280,6 +283,8 @@ PUBLIC_PATHS = [
     "metrics/",
     "circuit-breaker/status/",
     "api/user/users/all-tenants/",
+
+    "hr/public/health/",  # Example: Add HR-specific public paths here
 ]
 
 # ======================== RATE LIMITING ========================

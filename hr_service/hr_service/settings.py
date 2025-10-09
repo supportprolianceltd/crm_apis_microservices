@@ -5,8 +5,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext_lazy as _
 from datetime import timedelta
 import logging
-# Fix for host parsing
-import django.http.request
 
 # ======================== Base Dir & Env ========================
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,18 +32,10 @@ DATABASES = {
         'CONN_MAX_AGE': 60,
         'OPTIONS': {
             'connect_timeout': 30,
-            'keepalives': 1,
-            'keepalives_idle': 30,
-            'keepalives_interval': 10,
-            'keepalives_count': 5,
         },
     }
 }
 
-if not DATABASES['default']['ENGINE']:
-    raise ImproperlyConfigured("DATABASES['default']['ENGINE'] must be set.")
-
-# ======================== Apps ========================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,8 +54,8 @@ INSTALLED_APPS = [
 
 # ======================== Middleware ========================
 MIDDLEWARE = [
-    'hr.middleware.DatabaseConnectionMiddleware',
-    'hr.middleware.MicroserviceRS256JWTMiddleware',
+    'hr_service.middleware.DatabaseConnectionMiddleware',
+    'hr_service.middleware.MicroserviceRS256JWTMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -75,6 +65,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Remove all schema-based tenancy - use tenant_id fields instead
 
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
 
@@ -94,6 +86,8 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 100
 }
 
 # ======================== External Services ========================
@@ -209,17 +203,10 @@ SPECTACULAR_SETTINGS = {
         'persistAuthorization': True,
     },
     'COMPONENT_SPLIT_REQUEST': True,
-    'SECURITY': [{"BearerAuth": []}],
-    'SECURITY_SCHEMES': {
-        'BearerAuth': {
-            'type': 'http',
-            'scheme': 'bearer',
-            'bearerFormat': 'JWT',
-        },
-    },
 }
 
-
+# Fix for host parsing
+import django.http.request
 
 def patched_split_domain_port(host):
     if host and host.count(':') == 1 and host.rfind(']') < host.find(':'):

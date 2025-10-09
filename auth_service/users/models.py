@@ -1500,6 +1500,8 @@ class DocumentAcknowledgment(models.Model):
             models.Index(fields=['user_id', 'tenant_id']),
         ]
 
+
+
 class Group(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, unique=True)

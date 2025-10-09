@@ -1,28 +1,23 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (
-    LeaveTypeViewSet, LeaveRequestViewSet, ContractViewSet, EquipmentViewSet,
-    PolicyViewSet, PolicyAcknowledgmentViewSet, EscalationAlertViewSet,
-    DisciplinaryWarningViewSet, ProbationPeriodViewSet, PerformanceReviewViewSet,
-    EmployeeRelationCaseViewSet, StarterLeaverViewSet, HRAnalyticsView,
-    PublicLeavePoliciesView
-)
+from . import views
 
 router = DefaultRouter()
-router.register(r"leave-types", LeaveTypeViewSet)
-router.register(r"leave-requests", LeaveRequestViewSet)
-router.register(r"contracts", ContractViewSet)
-router.register(r"equipment", EquipmentViewSet)
-router.register(r"policies", PolicyViewSet)
-router.register(r"policy-acknowledgments", PolicyAcknowledgmentViewSet)
-router.register(r"escalation-alerts", EscalationAlertViewSet)
-router.register(r"disciplinary-warnings", DisciplinaryWarningViewSet)
-router.register(r"probation-periods", ProbationPeriodViewSet)
-router.register(r"performance-reviews", PerformanceReviewViewSet)
-router.register(r"employee-relation-cases", EmployeeRelationCaseViewSet)
-router.register(r"starters-leavers", StarterLeaverViewSet)
+router.register(r'leave-types', views.LeaveTypeViewSet, basename='leavetype')
+router.register(r'leave-requests', views.LeaveRequestViewSet, basename='leaverequest')
+router.register(r'contracts', views.ContractViewSet, basename='contract')
+router.register(r'equipment', views.EquipmentViewSet, basename='equipment')
+router.register(r'policies', views.PolicyViewSet, basename='policy')
+router.register(r'policy-acknowledgments', views.PolicyAcknowledgmentViewSet, basename='policyacknowledgment')
+router.register(r'alerts', views.EscalationAlertViewSet, basename='alert')
+router.register(r'warnings', views.DisciplinaryWarningViewSet, basename='warning')
+router.register(r'probation-periods', views.ProbationPeriodViewSet, basename='probationperiod')
+router.register(r'performance-reviews', views.PerformanceReviewViewSet, basename='performancereview')
+router.register(r'er-cases', views.EmployeeRelationCaseViewSet, basename='ercase')
+router.register(r'starters-leavers', views.StarterLeaverViewSet, basename='starterleaver')
 
 urlpatterns = [
-    path("analytics/", HRAnalyticsView.as_view(), name="hr-analytics"),
-    path("public/policies/<str:tenant_unique_id>/", PublicLeavePoliciesView.as_view(), name="public-policies"),
-] + router.urls
+    path('', include(router.urls)),
+    path('analytics/dashboard/', views.HRAnalyticsView.as_view(), name='hr-analytics'),
+    path('public/policies/<str:tenant_unique_id>/', views.PublicLeavePoliciesView.as_view(), name='public-policies'),
+]
