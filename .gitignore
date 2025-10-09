@@ -317,8 +317,8 @@ venv/
 db.sqlite3
 .env
 # Ignore all venv and .env in subdirectories
-talent_engine/venv/
-talent_engine/.env
+hr_service/venv/
+hr_service/.env
 job_applications/venv/
 job_applications/.env
 auth_service/venv/
@@ -378,7 +378,13 @@ notifications_app/generated/prisma
 !auth_service.log
 auth_service/logs
 
-
+# Ignore all venv and .env in subdirectories
+hr_service/venv/
+hr_service/staticfiles/
+hr_service/media/
+hr_service/logs/
+hr_service/.env
+hr_service/..gitignore
 
 # docker compose build --no-cache
 # docker compose up -d
