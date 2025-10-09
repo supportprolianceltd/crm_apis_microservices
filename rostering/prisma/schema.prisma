@@ -215,6 +215,9 @@ model CarePlan {
   legalRequirement LegalRequirement?
   careRequirements CareRequirements?
 
+  // Task management
+  tasks        Task[]
+
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 
@@ -624,6 +627,45 @@ model LegalRequirement {
   @@index([carePlanId])
 }
 
+model Task {
+  id          String      @id @default(cuid())
+  tenantId    String
+  carePlanId  String      // Link to the main care plan
+  
+  // Polymorphic relation - which table and record this task is for
+  relatedTable String     // e.g. "RiskAssessment", "PersonalCare", "MedicalInformation", etc.
+  relatedId   String      // ID of the related record
+  
+  // Task details
+  title       String
+  description String?     @db.Text
+  status      TaskStatus  @default(PENDING)
+  priority    TaskPriority @default(MEDIUM)
+  
+  // Timing
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdBy   String?     // Who created the task (for audit purposes)
+  
+  // Additional context
+  notes       String?     @db.Text
+  attachments String[]    @default([]) // URLs or file paths
+  
+  // Audit fields
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  carePlan    CarePlan    @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@index([carePlanId])
+  @@index([relatedTable, relatedId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("tasks")
+}
+
 // Enums
 enum RequestUrgency {
   LOW
@@ -705,4 +747,19 @@ enum CommunicationMethod {
   EMAIL
   SMS
   IN_PERSON
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  ON_HOLD
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
