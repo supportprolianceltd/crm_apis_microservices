@@ -3,6 +3,7 @@ import logging
 from datetime import timedelta
 from typing import Any, Dict
 from django.db import models
+
 import jwt
 import requests
 from core.models import Branch, Domain
@@ -14,7 +15,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from utils.supabase import upload_file_dynamic
 import logging
-
+from core.models import  Domain, Tenant
 from .models import (
     DocumentAcknowledgment,
     DocumentPermission, Document, DocumentVersion,
