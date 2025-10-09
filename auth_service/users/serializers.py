@@ -2668,13 +2668,7 @@ class DocumentPermissionWriteSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=False)
     permission_level = serializers.ChoiceField(choices=DocumentPermission.PERMISSION_CHOICES, required=False)
 
-class UserDocumentAccessSerializer(serializers.ModelSerializer):
-    document = 'DocumentSerializer'  # Forward reference or import
-    permission = DocumentPermissionSerializer(read_only=True)
 
-    class Meta:
-        model = DocumentPermission
-        fields = ['document', 'permission']
 
 class DocumentSerializer(serializers.ModelSerializer):
     uploaded_by = serializers.SerializerMethodField()
@@ -3081,6 +3075,13 @@ class DocumentSerializer(serializers.ModelSerializer):
         return instance
 
 
+class UserDocumentAccessSerializer(serializers.ModelSerializer):
+    document = DocumentSerializer(read_only=True)
+    permission = DocumentPermissionSerializer(read_only=True)
+
+    class Meta:
+        model = DocumentPermission
+        fields = ['document', 'permission']
 
 
 class GroupSerializer(serializers.ModelSerializer):
