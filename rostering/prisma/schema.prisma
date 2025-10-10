@@ -1,0 +1,759 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+model ExternalRequest {
+  id                   String                 @id @default(cuid())
+  tenantId             String
+  subject              String
+  content              String                 @db.Text
+  requestorEmail       String
+  requestorName        String?
+  requestorPhone       String?
+  address              String
+  postcode             String
+  location             Unsupported("geography(POINT, 4326)")?
+  latitude             Float?
+  longitude            Float?
+  urgency              RequestUrgency         @default(MEDIUM)
+  status               RequestStatus          @default(PENDING)
+  requirements         String?                @db.Text
+  estimatedDuration    Int?                   // in minutes
+  scheduledStartTime   DateTime?
+  scheduledEndTime     DateTime?
+  notes                String?                @db.Text
+  emailMessageId       String?                // Original email message ID
+  emailThreadId        String?                // Email thread/conversation ID
+  
+  // Relationships
+  matches              RequestCarerMatch[]
+  
+  // Audit fields
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  processedAt          DateTime?
+  
+  @@index([tenantId])
+  @@index([status])
+  @@index([urgency])
+  @@index([postcode])
+  @@index([createdAt])
+  @@index([scheduledStartTime])
+  @@map("external_requests")
+}
+
+model Carer {
+  id                   String                 @id @default(cuid())
+  tenantId             String
+  email                String
+  firstName            String
+  lastName             String
+  phone                String?
+  address              String
+  postcode             String
+  country              String?                // Country for geocoding
+  location             Unsupported("geography(POINT, 4326)")?
+  latitude             Float?
+  longitude            Float?
+  
+  // Availability and preferences
+  isActive             Boolean                @default(true)
+  maxTravelDistance    Int                    @default(10000) // in meters
+  availabilityHours    Json?                  // Flexible JSON structure for availability
+  skills               String[]               // Array of skills/specializations
+  languages            String[]               // Languages spoken
+  
+  // Professional details
+  qualification        String?
+  experience           Int?                   // years of experience
+  hourlyRate           Float?
+  
+  // Auth service reference
+  authUserId           String?                // Reference to user ID in auth service
+  
+  // Relationships
+  matches              RequestCarerMatch[]
+  
+  // Audit fields
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@index([isActive])
+  @@index([postcode])
+  @@index([skills])
+  @@map("carers")
+}
+
+model RequestCarerMatch {
+  id                   String                 @id @default(cuid())
+  tenantId             String
+  
+  // Relationships
+  requestId            String
+  request              ExternalRequest        @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  
+  carerId              String
+  carer                Carer                  @relation(fields: [carerId], references: [id], onDelete: Cascade)
+  
+  // Match details
+  distance             Float                  // distance in meters
+  matchScore           Float                  // calculated match score (0-100)
+  status               MatchStatus            @default(PENDING)
+  
+  // Response tracking
+  respondedAt          DateTime?
+  response             MatchResponse?
+  responseNotes        String?
+  notificationSent     Boolean                @default(false)
+  
+  // Audit fields
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  
+  @@unique([requestId, carerId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([distance])
+  @@map("request_carer_matches")
+}
+
+model EmailProcessingLog {
+  id                   String                 @id @default(cuid())
+  tenantId             String
+  messageId            String                 // Email message ID
+  subject              String
+  fromAddress          String
+  processedAt          DateTime               @default(now())
+  status               ProcessingStatus
+  errorMessage         String?
+  requestId            String?                // Link to created request if successful
+  
+  @@unique([tenantId, messageId])
+  @@index([tenantId])
+  @@index([processedAt])
+  @@index([status])
+  @@map("email_processing_logs")
+}
+
+model GeocodingCache {
+  id                   String                 @id @default(cuid())
+  address              String                 @unique
+  postcode             String?
+  latitude             Float
+  longitude            Float
+  location             Unsupported("geography(POINT, 4326)")
+  confidence           Float?                 // Geocoding confidence score
+  source               String                 @default("nominatim")
+  
+  // Audit fields
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  
+  @@index([postcode])
+  @@map("geocoding_cache")
+}
+
+model TenantEmailConfig {
+  id                   String                 @id @default(cuid())
+  tenantId             String                 @unique
+  
+  // IMAP settings (for receiving care requests)
+  imapHost             String
+  imapPort             Int                    @default(993)
+  imapUser             String
+  imapPassword         String                 // Should be encrypted in production
+  imapTls              Boolean                @default(true)
+  
+  // Email processing settings
+  isActive             Boolean                @default(true)
+  pollInterval         Int                    @default(300) // seconds
+  lastChecked          DateTime?
+  
+  // Audit fields
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  
+  @@map("tenant_email_configs")
+}
+
+model CarePlan {
+  id            String              @id @default(cuid())
+  tenantId      String
+  clientId      String
+  title         String
+  description   String?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        CarePlanStatus      @default(ACTIVE)
+
+  // Relations
+  carers        CarePlanCarer[]
+  riskAssessment RiskAssessment?
+  personalCare   PersonalCare?
+  everydayActivityPlan EverydayActivityPlan?
+  fallsAndMobility FallsAndMobility?
+  medicalInfo    MedicalInformation?
+  psychologicalInfo PsychologicalInformation?
+  foodHydration  FoodNutritionHydration?
+  routine        RoutinePreference?
+  cultureValues  CultureValues?
+  bodyMap        BodyMap?
+  movingHandling MovingHandling?
+  legalRequirement LegalRequirement?
+  careRequirements CareRequirements?
+
+  // Task management
+  tasks        Task[]
+
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, clientId])
+}
+
+model CarePlanCarer {
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String
+  carerId     String   // Comes from external system
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, carePlanId, carerId]) // Prevent duplicate assignments
+  @@index([tenantId])
+}
+
+model RiskAssessment {
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  primarySupportNeed   String?
+   // Multi-select checkbox fields — stored as String[] arrays
+  riskFactorsAndAlerts String[] @default([]) // options: ["fall risk", "choking risk", "compliance", "wandering", "sensory impairment", "others"]
+  details     String?
+  areasRequiringSupport String[] @default([]) // options: ["washing/bathing", "dressing", "grooming", "oral care", "toileting", "nutrition/hydration", "medication prompting"]
+  homeLayout            String?  // dropdown (e.g. "stairs")
+  safetyFeaturesPresent String[] @default([]) // options: ["grab rail", "good lighting", "none"]
+  hazards               String[] @default([]) // options: ["loose rugs", "clutter", "electrical risks", "other"]
+  accessibilityNeeds    String[] @default([]) // options: ["ramps", "lifts", "wide doors", "adapted furniture"]
+  loneWorkerConsideration Boolean? // yes/no checkbox
+  riskAssessmentAndTraining String? // text box
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model PersonalCare {
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+   // Bathing & Showering
+  bathingAndShowering       BathingAssistance
+  oralHygiene               String
+   // Personal Appearance
+  maintainThemselves        String
+  dressThemselves           String
+  // Grooming Needs (multi-select)
+  groomingNeeds             String[] @default([]) // options: ["Hair", "Nails", "Shaving", "Oral Hygiene", "Others (Specify)"]
+
+  // Toilet
+  toiletUsage               String
+  bowelControl              String
+  bladderControl            String
+  toiletingSupport          String
+
+  // Additional Notes
+  additionalNotes           String              @db.Text
+   // Dropdowns
+  continenceCare            String
+  mobilityAssistance        String
+  preferredLanguage         String
+  // Communication
+  communicationStyleNeeds   String
+
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model EverydayActivityPlan{
+  id         String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  canTheyShop String
+  canTheyCall String
+  canTheyWash String
+  additionalNotes String                @db.Text
+  communityAccessNeeds String
+  ExerciseandMobilityActivities String
+  
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model FallsAndMobility{
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  fallenBefore Boolean @default(false)
+  timesFallen Int
+  mobilityLevel MobilityLevel
+  mobilitySupport MobilitySupport
+  otherMobilitySupport String?
+  activeAsTheyLikeToBe String
+  canTransfer String
+  canuseStairs String
+  canTravelAlone String
+  mobilityAdditionalNotes String        @db.Text
+  visionStatus String
+  speechStatus String
+  hearingStatus String
+  sensoryAdditionalNotes String         @db.Text
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model MedicalInformation {
+  id           String   @id @default(cuid())
+  tenantId     String
+  carePlanId   String   @unique
+  primaryDiagnosis String
+  primaryAdditionalNotes String         @db.Text
+  secondaryDiagnoses String
+  secondaryAdditionalNotes String       @db.Text
+  pastMedicalHistory String
+  medicalSupport Boolean @default(false)
+  breathingDifficulty Boolean @default(false)
+  breathingSupportNeed String
+  useAirWayManagementEquipment Boolean @default(false)
+  specifyAirwayEquipment String?
+  airwayEquipmentRisk String?
+  airWayEquipmentMitigationPlan String
+  haveSkinPressureSores Boolean @default(false)
+  skinPressureConcerningIssues Boolean @default(false)
+  skinAdditionalInformation String?     @db.Text
+  currentHealthStatus String
+
+  raisedSafeGuardingIssue Boolean @default(false)
+  safeGuardingAdditionalInformation String? @db.Text
+  // Relation: one medical info can have many medications
+  medications         Medication[]
+  primaryDoctor       String
+  supportContactPhone String
+  specialistContact String
+  HospitalContact String
+  EmergencyCareNotes String
+  medicalReportUpload String
+  knownAllergies Boolean @default(false)
+  clientAllergies       ClientAllergy[]
+
+
+  carePlan     CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model ClientAllergy {
+  id          String   @id @default(cuid())
+  tenantId    String
+  medicalInfoId String
+  allergy     String
+  severity    String
+  allergyMedicationFrequency  String
+  allergyMedicationName String
+  allergyMedicationDosage String
+  Appointments DateTime
+  knownTrigger String
+
+
+  medicalInfo MedicalInformation @relation(fields: [medicalInfoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([medicalInfoId])
+}
+
+model Medication {
+  id                String   @id @default(cuid())
+  tenantId          String
+  medicalInfoId     String
+
+  drugName          String
+  dosage            String
+  frequency         String
+
+  medicalInfo       MedicalInformation @relation(fields: [medicalInfoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([medicalInfoId])
+}
+
+model PsychologicalInformation{
+  id         String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  healthLevelSatisfaction String
+  healthMotivationalLevel String
+  sleepMood String
+  specifySleepMood String
+  sleepStatus String
+  anyoneWorriedAboutMemory Boolean @default(false)
+  memoryStatus String
+  specifyMemoryStatus String
+  canTheyDoHouseKeeping String
+  houseKeepingSupport Boolean @default(false)
+  houseKeepingAdditionalNotes String    @db.Text
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  @@index([tenantId])
+  @@index([carePlanId])
+
+}
+
+model FoodNutritionHydration {
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  dietaryRequirements String
+  foodOrDrinkAllergies Boolean @default(false)
+  foodAllergiesSpecification String
+  allergiesImpact String
+  favouriteFoods String
+  foodTextures String
+  appetiteLevel String
+  swallowingDifficulties String
+  medicationsAffectingSwallowing String
+  specifyMedicationsAffectingSwallowing String
+  canFeedSelf String
+  canPrepareLightMeals String
+  canCookMeals String
+  clientFoodGiver String
+  mealtimeSupport String
+  hydrationSchedule String
+  strongDislikes String
+  fluidPreferences String
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model RoutinePreference {
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  PersonalBiography String
+  haveJob Boolean @default(false)
+  aboutJob String
+  haveImportantPerson Boolean @default(false)
+  aboutImportantPerson String
+  significantPersonHasLocation Boolean @default(false)
+  importantPersonLocationEffects String
+  canMaintainOralHygiene String
+  careGiverGenderPreference GenderPreference @default(NO_PREFERENCE)
+  autonomyPreference String
+  dailyRoutine String
+  haveSpecificImportantRoutine Boolean @default(false)
+  haveDislikes Boolean @default(false)
+  dislikesEffect String
+  haveHobbiesRoutines Boolean @default(false)
+  hobbiesRoutinesEffect String
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+
+model CultureValues {
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  religiousBackground    String
+  ethnicGroup    String
+  culturalAccommodation     String
+  sexualityandRelationshipPreferences       String
+  sexImpartingCareNeeds String
+  preferredLanguage         String
+  communicationStyleNeeds   String[] @default([])
+  preferredMethodOfCommunication String
+  keyFamilyMembers String
+  receivesInformalCare Boolean @default(false)
+  informalCareByWho String?
+  supportMethodByInformalCare String?
+  concernsOnInformalCare String?
+  specifyConcernsOnInformalCare String
+  receivesFormalCare Boolean @default(false)
+  specifyFormalCare String?
+  socialGroupAndCommunity String
+  emotionalSupportNeeds String[] @default([])
+  mentalWellbeingTracking Boolean @default(false)
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model BodyMap {
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  visitFrequency String
+  carePlanReviewDate DateTime
+  invoicingCycle String
+  fundingAndInsuranceDetails String
+  assignedCareManager String
+  initialClinicalObservations Boolean @default(false)
+  initialSkinIntegrity Boolean @default(false)
+  type String
+  size String
+  locationDescription String
+  dateFirstObserved DateTime
+  weight String
+  height String
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model MovingHandling {
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  equipmentsNeeds String
+  anyPainDuringRestingAndMovement String
+  anyCognitiveImpairment String
+  behaviouralChanges Boolean @default(false)
+  describeBehaviouralChanges String
+  walkIndependently Boolean @default(false)
+  manageStairs Boolean @default(false)
+  sittingToStandingDependence String
+  limitedSittingBalance Boolean @default(false)
+  turnInBed Boolean @default(false)
+  lyingToSittingDependence Boolean @default(false)
+  gettingUpFromChairDependence String
+  bathOrShower String
+  chairToCommodeOrBed Boolean @default(false)
+  profilingBedAndMattress Boolean @default(false)
+  transferRisks String[] @default([])
+  behaviouralChallenges String[] @default([])
+  riskManagementPlan String
+  locationRiskReview String
+  EvacuationPlanRequired Boolean @default(false)
+  dailyGoal String
+  IntakeLog IntakeLog[]
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model IntakeLog{
+  id         String   @id @default(cuid())
+  tenantId    String
+  movingHandlingId String
+  date        DateTime
+  time        String
+  amount      Float
+  notes       String?
+
+  MovingHandling MovingHandling @relation(fields: [movingHandlingId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([date])
+  @@index([movingHandlingId])
+}
+
+model CareRequirements{
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  careType    String
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model LegalRequirement {
+  id          String   @id @default(cuid())
+  tenantId    String
+  carePlanId  String   @unique
+  attorneyInPlace Boolean @default(false)
+  attorneyType String
+  attorneyName String
+  attorneyContact String
+  attorneyEmail String
+  solicitor String
+  certificateNumber String
+  certificateUpload String
+  digitalConsentsAndPermissions String[] @default([])
+  consertUpload String
+
+  carePlan    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([carePlanId])
+}
+
+model Task {
+  id          String      @id @default(cuid())
+  tenantId    String
+  carePlanId  String      // Link to the main care plan
+  
+  // Polymorphic relation - which table and record this task is for
+  relatedTable String     // e.g. "RiskAssessment", "PersonalCare", "MedicalInformation", etc.
+  relatedId   String      // ID of the related record
+  
+  // Task details
+  title       String
+  description String     @db.Text
+  status      TaskStatus  @default(PENDING)
+  riskCategory String[]    @default([])
+  riskFrequency String
+  
+  // Timing
+  startDate   DateTime?
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdBy   String?     // Who created the task (for audit purposes)
+  
+  // Additional context
+  additionalNotes       String?     @db.Text
+  
+  // Audit fields
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  carePlan    CarePlan    @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@index([carePlanId])
+  @@index([relatedTable, relatedId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("tasks")
+}
+
+// Enums
+enum RequestUrgency {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum RequestStatus {
+  PENDING
+  PROCESSING
+  MATCHED
+  ASSIGNED
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum MatchStatus {
+  PENDING
+  SENT
+  OPENED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+enum MatchResponse {
+  ACCEPTED
+  DECLINED
+  INTERESTED
+}
+
+enum ProcessingStatus {
+  SUCCESS
+  FAILED
+  DUPLICATE
+  INVALID_FORMAT
+  GEOCODING_FAILED
+}
+
+enum CarePlanStatus {
+  ACTIVE
+  INACTIVE
+  COMPLETED
+}
+
+enum BathingAssistance {
+  YES_INDEPENDENTLY
+  YES_WITH_HELP
+  NO_NEEDS_FULL_ASSISTANCE
+}
+
+enum MobilityLevel {
+  INDEPENDENT
+  DEPENDENT
+  INDEPENDENT_WITH_AIDS
+  IMMOBILE
+}
+
+enum MobilitySupport {
+  WALKING_STICK
+  WHEELCHAIR
+  NONE
+  OTHERS
+}
+
+enum GenderPreference {
+  NO_PREFERENCE
+  MALE
+  FEMALE
+  NON_BINARY
+  OTHER
+}
+
+enum CommunicationMethod {
+  PHONE
+  EMAIL
+  SMS
+  IN_PERSON
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  ON_HOLD
+}

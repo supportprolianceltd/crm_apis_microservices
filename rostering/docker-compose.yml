@@ -1,0 +1,130 @@
+
+
+services:
+  # Rostering Service
+  rostering-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rostering-service
+    ports:
+      - "3005:3005"
+    environment:
+      NODE_ENV: development
+      PORT: 3005
+      DATABASE_URL: postgresql://postgres:password@rostering-db:5432/rostering_dev
+      REDIS_URL: redis://rostering-redis:6379
+      AUTH_SERVICE_URL: https://server1.prolianceltd.com
+      # JWT_RS256_PUBLIC_KEY_URL: https://server1.prolianceltd.com/api/auth/public-key/
+      JWT_SECRET: "django-insecure-va=ok0r=3)*b@ekd_c^+zkz&d)@*sd3sm$t(1o-n$yj)zwfked"
+      NOMINATIM_URL: https://nominatim.openstreetmap.org
+      DEFAULT_MATCHING_RADIUS: 5000
+      EMAIL_POLLING_INTERVAL: 5
+      LOG_LEVEL: debug
+      # Email configuration examples (add your actual credentials)
+      TENANT_1_EMAIL_HOST: imap.gmail.com
+      TENANT_1_EMAIL_PORT: 993
+      TENANT_1_EMAIL_USER: your-email@gmail.com
+      TENANT_1_EMAIL_PASS: your-app-password
+      TENANT_1_EMAIL_SECURE: true
+    depends_on:
+      rostering-db:
+        condition: service_healthy
+      rostering-redis:
+        condition: service_healthy
+    volumes:
+      - rostering-logs:/app/logs
+    networks:
+      - rostering-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); const options = { hostname: 'localhost', port: 3005, path: '/api/v1/health', timeout: 2000 }; const req = http.request(options, (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }); req.on('error', () => process.exit(1)); req.end();"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL Database with PostGIS
+  rostering-db:
+    image: postgis/postgis:15-3.3
+    container_name: rostering-db
+    environment:
+      POSTGRES_DB: rostering_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5450:5432"  # Different port to avoid conflicts
+    volumes:
+      - rostering-db-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - rostering-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rostering_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and session management
+  rostering-redis:
+    image: redis:7-alpine
+    container_name: rostering-redis
+    ports:
+      - "6390:6379"  # Different port to avoid conflicts
+    volumes:
+      - rostering-redis-data:/data
+    networks:
+      - rostering-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
+  # Adminer for database management
+  adminer:
+    image: adminer:latest
+    container_name: rostering-adminer
+    ports:
+      - "8083:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: rostering-db
+      ADMINER_DESIGN: lucas
+    networks:
+      - rostering-network
+    restart: unless-stopped
+    depends_on:
+      - rostering-db
+
+  # Redis Commander for Redis management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: rostering-redis-commander
+    ports:
+      - "8084:8081"
+    environment:
+      REDIS_HOSTS: "local:rostering-redis:6379"
+      HTTP_USER: admin
+      HTTP_PASSWORD: admin
+    networks:
+      - rostering-network
+    restart: unless-stopped
+    depends_on:
+      - rostering-redis
+
+volumes:
+  rostering-db-data:
+    driver: local
+  rostering-redis-data:
+    driver: local
+  rostering-logs:
+    driver: local
+
+networks:
+  rostering-network:
+    driver: bridge
+    name: rostering-network
