@@ -763,3 +763,9 @@
 2025-10-10 12:28:52,393 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
 2025-10-10 12:29:22,498 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
 2025-10-10 12:29:52,571 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:30:22,673 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:30:52,716 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:31:22,839 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:31:52,846 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:32:22,934 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:32:52,988 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/

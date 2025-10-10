@@ -3070,6 +3070,36 @@ class DocumentSerializer(serializers.ModelSerializer):
         
     #     return instance
 
+
+    def patch(self, request, id):
+        try:
+            tenant_uuid = get_tenant_id_from_jwt(request)
+            document = Document.objects.get(id=id, tenant_id=tenant_uuid)
+            
+            # Check if trying to update with same file (optional)
+            if 'file' in request.data and hasattr(request.data['file'], 'name'):
+                if document.file_url and document.file_url.endswith(request.data['file'].name):
+                    return Response(
+                        {"detail": "Document with the same file name already exists"}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            serializer = DocumentSerializer(document, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                logger.info(f"Document updated: {document.title} for tenant {tenant_uuid}, version {document.version}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            logger.error(f"Validation error for tenant {tenant_uuid}: {serializer.errors}")
+            return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Document.DoesNotExist:
+            logger.error(f"Document not found for tenant {tenant_uuid}")
+            return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error updating document for tenant {tenant_uuid}: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
     def update(self, instance, validated_data):
         resolved_permissions = validated_data.pop("resolved_permissions_write", None)
         permissions_write = validated_data.pop("permissions_write", None)
