@@ -3083,6 +3083,103 @@ class DocumentSerializer(serializers.ModelSerializer):
 
         with transaction.atomic():
             if file:
+                # Increment version *before* updating file details (no need to create a version for the old state—it's already there)
+                instance.version += 1
+                validated_data["version"] = instance.version
+                file_name = f"{file.name.rsplit('.', 1)[0]}_v{instance.version}.{file.name.rsplit('.', 1)[1]}" if '.' in file.name else f"{file.name}_v{instance.version}"
+                url = upload_file_dynamic(
+                    file, file_name, content_type=getattr(file, "content_type", "application/octet-stream")
+                )
+                validated_data["file_url"] = url
+                validated_data["file_path"] = url
+                validated_data["file_type"] = getattr(file, "content_type", "application/octet-stream")
+                validated_data["file_size"] = file.size
+                logger.info(f"Document file updated: {url} (new version: {instance.version})")
+
+            instance = super().update(instance, validated_data)
+            if file:
+                # Only create the *new* version record after the document is updated
+                DocumentVersion.objects.create(
+                    document=instance,
+                    version=instance.version,
+                    file_url=validated_data["file_url"],
+                    file_path=validated_data["file_path"],
+                    file_type=validated_data["file_type"],
+                    file_size=validated_data["file_size"],
+                    created_by_id=validated_data["updated_by_id"],
+                )
+                logger.info(f"Created new DocumentVersion {instance.version} for document {instance.title}")
+            
+            if permissions_write is not None:
+                existing_permissions = instance.permissions.filter(tenant_id=tenant_id)
+                if permission_action == 'add':
+                    added_count = 0
+                    for perm in resolved_permissions:
+                        if not existing_permissions.filter(user_id=perm['resolved_user_id']).exists():
+                            new_perm = DocumentPermission(
+                                document=instance,
+                                user_id=perm['resolved_user_id'],
+                                email=perm['email'],
+                                first_name=perm['first_name'],
+                                last_name=perm['last_name'],
+                                role=perm['role'],
+                                permission_level=perm['permission_level'],
+                                tenant_id=tenant_id
+                            )
+                            new_perm.save()
+                            added_count += 1
+                    logger.info(f"Added {added_count} new permissions for document {instance.title}")
+                elif permission_action == 'remove':
+                    removed_count = 0
+                    for perm in resolved_permissions:
+                        deleted = existing_permissions.filter(user_id=perm['resolved_user_id']).delete()[0]
+                        removed_count += deleted
+                    logger.info(f"Removed {removed_count} permissions for document {instance.title}")
+                elif permission_action == 'replace':
+                    existing_permissions.delete()
+                    permission_objs = [
+                        DocumentPermission(
+                            document=instance,
+                            user_id=perm['resolved_user_id'],
+                            email=perm['email'],
+                            first_name=perm['first_name'],
+                            last_name=perm['last_name'],
+                            role=perm['role'],
+                            permission_level=perm['permission_level'],
+                            tenant_id=tenant_id
+                        )
+                        for perm in resolved_permissions
+                    ]
+                    DocumentPermission.objects.bulk_create(permission_objs)
+                    logger.info(f"Replaced with {len(resolved_permissions)} permissions for document {instance.title}")
+                elif permission_action == 'update_level':
+                    updated_count = 0
+                    for perm in resolved_permissions:
+                        existing_perm = existing_permissions.filter(user_id=perm['resolved_user_id']).first()
+                        if existing_perm:
+                            existing_perm.permission_level = perm['permission_level']
+                            existing_perm.save()
+                            updated_count += 1
+                        else:
+                            logger.warning(f"User {perm['resolved_user_id']} not found in existing permissions; skipping update.")
+                    logger.info(f"Updated {updated_count} permission levels for document {instance.title}")
+        
+        return instance
+
+
+# 
+    def update(self, instance, validated_data):
+        resolved_permissions = validated_data.pop("resolved_permissions_write", None)
+        permissions_write = validated_data.pop("permissions_write", None)
+        permission_action = validated_data.pop("permission_action", "add")
+        file = validated_data.pop("file", None)
+        current_user = get_user_data_from_jwt(self.context["request"])
+        validated_data["updated_by_id"] = str(current_user["id"])
+        instance.last_updated_by_id = str(current_user["id"])
+        tenant_id = instance.tenant_id
+
+        with transaction.atomic():
+            if file:
                 DocumentVersion.objects.create(
                     document=instance,
                     version=instance.version,
@@ -3171,6 +3268,10 @@ class DocumentSerializer(serializers.ModelSerializer):
                     logger.info(f"Updated {updated_count} permission levels for document {instance.title}")
         
         return instance
+
+
+
+
 
 class UserDocumentAccessSerializer(serializers.ModelSerializer):
     document = DocumentSerializer(read_only=True)
