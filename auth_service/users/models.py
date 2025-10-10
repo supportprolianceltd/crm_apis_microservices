@@ -1443,6 +1443,7 @@ class Document(models.Model):
     expiring_date = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=50, default="active")
     document_number = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    tags = models.CharField(max_length=500, blank=True, default='', help_text='Comma-separated tags (e.g., "tag1, tag2, tag3")')
 
     class Meta:
         unique_together = ('tenant_id', 'document_number')

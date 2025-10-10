@@ -2698,6 +2698,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             "expiring_date",
             "status",
             "document_number",
+            "tags",
             "file",
             "acknowledgments",
             "permissions",
@@ -3070,36 +3071,6 @@ class DocumentSerializer(serializers.ModelSerializer):
         
     #     return instance
 
-
-    def patch(self, request, id):
-        try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=id, tenant_id=tenant_uuid)
-            
-            # Check if trying to update with same file (optional)
-            if 'file' in request.data and hasattr(request.data['file'], 'name'):
-                if document.file_url and document.file_url.endswith(request.data['file'].name):
-                    return Response(
-                        {"detail": "Document with the same file name already exists"}, 
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            
-            serializer = DocumentSerializer(document, data=request.data, partial=True, context={"request": request})
-            if serializer.is_valid():
-                serializer.save()
-                logger.info(f"Document updated: {document.title} for tenant {tenant_uuid}, version {document.version}")
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            logger.error(f"Validation error for tenant {tenant_uuid}: {serializer.errors}")
-            return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
-            return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            logger.error(f"Error updating document for tenant {tenant_uuid}: {str(e)}")
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
     def update(self, instance, validated_data):
         resolved_permissions = validated_data.pop("resolved_permissions_write", None)
         permissions_write = validated_data.pop("permissions_write", None)
@@ -3121,17 +3092,19 @@ class DocumentSerializer(serializers.ModelSerializer):
             }
 
             if file:
-                # Only increment version if there was a previous file
-                if instance.file_url:  # If there was a previous file, create version history
-                    DocumentVersion.objects.create(
-                        document=instance,
-                        version=instance.version,
-                        file_url=old_file_info['file_url'],
-                        file_path=old_file_info['file_path'],
-                        file_type=old_file_info['file_type'],
-                        file_size=old_file_info['file_size'],
-                        created_by_id=instance.updated_by_id or instance.uploaded_by_id,
-                    )
+                # Only create version history if there was a previous file AND it's different from the new one
+                if instance.file_url and instance.file_url != old_file_info['file_url']:
+                    # Check if version already exists before creating
+                    if not DocumentVersion.objects.filter(document=instance, version=old_file_info['version']).exists():
+                        DocumentVersion.objects.create(
+                            document=instance,
+                            version=old_file_info['version'],
+                            file_url=old_file_info['file_url'],
+                            file_path=old_file_info['file_path'],
+                            file_type=old_file_info['file_type'],
+                            file_size=old_file_info['file_size'],
+                            created_by_id=instance.updated_by_id or instance.uploaded_by_id,
+                        )
                 
                 # Increment version for the new file
                 instance.version += 1
@@ -3151,17 +3124,21 @@ class DocumentSerializer(serializers.ModelSerializer):
             # Update the document instance
             instance = super().update(instance, validated_data)
 
-            # Create DocumentVersion for the NEW file (only if file was updated)
+            # Create DocumentVersion for the NEW file (only if file was updated and version doesn't exist)
             if file:
-                DocumentVersion.objects.create(
-                    document=instance,
-                    version=instance.version,
-                    file_url=validated_data["file_url"],
-                    file_path=validated_data["file_path"],
-                    file_type=validated_data["file_type"],
-                    file_size=validated_data["file_size"],
-                    created_by_id=validated_data["updated_by_id"],
-                )
+                # Check if this version already exists before creating
+                if not DocumentVersion.objects.filter(document=instance, version=instance.version).exists():
+                    DocumentVersion.objects.create(
+                        document=instance,
+                        version=instance.version,
+                        file_url=validated_data["file_url"],
+                        file_path=validated_data["file_path"],
+                        file_type=validated_data["file_type"],
+                        file_size=validated_data["file_size"],
+                        created_by_id=validated_data["updated_by_id"],
+                    )
+                else:
+                    logger.warning(f"DocumentVersion for document {instance.id} version {instance.version} already exists, skipping creation")
             
             # Handle permissions (your existing code)
             if permissions_write is not None:
