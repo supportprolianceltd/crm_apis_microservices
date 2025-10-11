@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_filters',
     'django_extensions',
-    'hr',  # Your main app
+    # 'hr',  # Your main app
+    "rewards_penalties"
 ]
 
 # ======================== Middleware ========================
@@ -216,3 +217,6 @@ def patched_split_domain_port(host):
     return host, port
 
 django.http.request.split_domain_port = patched_split_domain_port
+
+
+

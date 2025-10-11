@@ -14,7 +14,7 @@ logger = logging.getLogger('hr')
 public_paths = [
     '/api/docs/',
     '/api/schema/',
-    '/api/health/',
+    '/api/hr/health/',
     '/admin/',
     '/static/',
     '/api/hr/public/policies/',  # Add your HR-specific public endpoints
@@ -27,7 +27,7 @@ class SimpleUser:
         self.username = payload.get('user', {}).get('username', '')
         self.email = payload.get('email', '')
         self.role = payload.get('role', '')
-        self.tenant_id = payload.get('tenant_unique_id') or payload.get('tenant_id')
+        self.tenant_id = payload.get('tenant_id')
         self.tenant_schema = payload.get('tenant_schema')
         self.is_authenticated = True
         self.is_active = True
@@ -117,34 +117,40 @@ class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
         token = auth_header.split(' ')[1]
         
         try:
-            # First, decode without verification to get the KID
+            # First, decode without verification to get the KID and alg
             unverified_header = jwt.get_unverified_header(token)
             kid = unverified_header.get("kid")
+            alg = unverified_header.get("alg")
+            logger.info(f"Token header: kid={kid}, alg={alg}")
             
             if not kid:
                 logger.error("No 'kid' in token header")
                 raise AuthenticationFailed("Invalid token format: missing key ID")
 
+            if alg != "RS256":
+                logger.error(f"Unsupported algorithm in token: {alg}. Expected RS256.")
+                raise AuthenticationFailed(f"Unsupported algorithm: {alg}")
+
             # Get unverified payload for tenant context
             unverified_payload = jwt.decode(token, options={"verify_signature": False})
-            tenant_id = unverified_payload.get("tenant_unique_id") or unverified_payload.get("tenant_id")
+            tenant_id = unverified_payload.get("tenant_id")
+            tenant_schema = unverified_payload.get("tenant_schema")
             
-            logger.info(f"JWT validation: kid={kid}, tenant_id={tenant_id}")
+            logger.info(f"JWT validation: kid={kid}, tenant_id={tenant_id}, tenant_schema={tenant_schema}")
 
-            # Fetch public key from auth service
+            # Fetch public key from auth service (match talent_engine exactly)
             resp = requests.get(
-                f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/",
-                headers={'Authorization': f'Bearer {token}'},
+                f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/?tenant_id={tenant_id}",
+                headers={'Authorization': auth_header},  # Forward original token
                 timeout=5
             )
-            
+            logger.info(f"Public key response: {resp.status_code} {resp.text[:200]}...")  # Log snippet for debugging
             if resp.status_code != 200:
-                logger.error(f"Failed to fetch public key: {resp.status_code}")
-                raise AuthenticationFailed(f"Authentication service unavailable: {resp.status_code}")
+                logger.error(f"Failed to fetch public key: {resp.status_code} - {resp.text}")
+                raise AuthenticationFailed(f"Could not fetch public key: {resp.status_code}")
 
             public_key_data = resp.json()
             public_key = public_key_data.get("public_key")
-            
             if not public_key:
                 logger.error("Public key not found in response")
                 raise AuthenticationFailed("Authentication service error: no public key")
@@ -160,7 +166,7 @@ class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
             # Set request attributes
             request.jwt_payload = payload
             request.user = SimpleUser(payload)
-            request.tenant_id = payload.get("tenant_unique_id") or payload.get("tenant_id")
+            request.tenant_id = tenant_id
             
             logger.info(f"Authenticated user: {request.user.email}, tenant: {request.tenant_id}")
 
@@ -188,7 +194,3 @@ class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
                 {'error': 'Authentication failed', 'code': 'auth_failed'}, 
                 status=401
             )
-
-
-# REMOVED: CustomTenantSchemaMiddleware - not using schema-based multi-tenancy
-# Your HR service uses tenant_id fields in models instead

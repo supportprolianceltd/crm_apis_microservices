@@ -32,7 +32,8 @@ from django.http import JsonResponse
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/hr/', include('hr.urls')),
+    # path('api/hr/', include('hr.urls')),
+    path('api/hr/', include('rewards_penalties.urls', namespace='rewards_penalties')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/hr/health/', lambda request: JsonResponse({"status": "ok"}), name='health-check'),

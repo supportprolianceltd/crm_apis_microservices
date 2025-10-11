@@ -1,0 +1,13 @@
+[run]
+source = hr/
+omit =
+    */migrations/*
+    */tests*
+    */settings/*
+    manage.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    raise AssertionError
+    raise NotImplementedError

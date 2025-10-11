@@ -1,3 +1,4 @@
-from .celery import app as celery_app
-
-__all__ = ['celery_app']
+try:
+    from hr_service.hr_service.celery import app as celery_app
+except ImportError:
+    celery_app = None
