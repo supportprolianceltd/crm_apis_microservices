@@ -23,8 +23,9 @@ class RewardType(Enum):
     PROMOTION = 'promotion'
     RECOGNITION = 'recognition'
     EXTRA_PTO = 'extra_pto'
-    GIFT_CARD = 'gift_card'
+    GIFT = 'gift'
     PUBLIC_PRAISE = 'public_praise'
+    CERTIFICATE = 'certificate'
     TRAINING_OPPORTUNITY = 'training_opportunity'
     OTHER = 'other'
 
@@ -124,6 +125,7 @@ class BaseRewardsPenaltyModel(models.Model):
     notes = models.TextField(max_length=500, blank=True)
     is_public = models.BooleanField(default=False)  # For announcements
     impact_assessment = JSONField(default=dict, blank=True)  # e.g., {'team_morale': 'positive', 'productivity': 'high'}
+    issuing_authority = models.CharField(max_length=255, blank=True, null=True)
 
     objects = SoftDeleteManager()
     active_objects = ActiveRewardsPenaltiesManager()

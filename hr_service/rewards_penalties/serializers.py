@@ -63,7 +63,8 @@ class BaseRewardsPenaltySerializer(serializers.ModelSerializer):
             'updated_by_id', 'updated_by_details', 'is_deleted', 'created_at', 'updated_at',
             'compliance_checklist', 'last_compliance_check', 'checked_by_id', 'checked_by_details',
             'approval_workflow', 'current_approval_stage', 'approval_date', 'evidence_file',
-            'evidence_file_url', 'notes', 'is_public', 'impact_assessment', 'custom_fields'
+            'evidence_file_url', 'notes', 'is_public', 'impact_assessment', 'custom_fields',
+            'issuing_authority'
         ]
         read_only_fields = [
             'id', 'code', 'tenant_id', 'tenant_domain', 'created_by_id', 'created_by_details',
@@ -241,5 +242,3 @@ class PenaltySerializer(BaseRewardsPenaltySerializer):
         instance.full_clean()  # Re-validate on update
         self._handle_evidence_upload(instance, evidence_file)
         return instance
-    
-
