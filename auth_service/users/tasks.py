@@ -1,214 +1,307 @@
 # users/tasks.py
+
 import logging
-from datetime import datetime, timedelta
+import uuid
+from datetime import timedelta
+import requests
 from celery import shared_task
 from django.utils import timezone
 from django_tenants.utils import tenant_context
 from django.conf import settings
-import requests
-import uuid
-
-from core.models import Tenant
-from users.models import UserProfile, OtherUserDocuments, InsuranceVerification, LegalWorkEligibility, Document
 from django.contrib.auth import get_user_model
 
-logger = logging.getLogger('users')
+from core.models import Tenant
+from users.models import (
+    UserProfile,
+    OtherUserDocuments,
+    InsuranceVerification,
+    LegalWorkEligibility,
+    Document,
+)
 
+logger = logging.getLogger("users")
 User = get_user_model()
 
-EXPIRY_THRESHOLDS = [30, 14, 7, 3, 1]  # days before expiry
+# Days before expiry to trigger warning
+EXPIRY_THRESHOLDS = [30, 14, 7, 3, 1]
 
-def send_expiry_notification(user, document_info, days_left, event_type, source="users"):
+
+# ---------------------------------------------------------------------------
+# Activity Logger (Async)
+# ---------------------------------------------------------------------------
+@shared_task
+def log_activity_async(action, user_id, tenant_id, details, ip=None, user_agent=None, success=True):
+    from .models import CustomUser, UserActivity
+
+    user = CustomUser.objects.get(id=user_id) if user_id else None
+    tenant = Tenant.objects.get(id=tenant_id)
+
+    UserActivity.objects.create(
+        user=user,
+        tenant=tenant,
+        action=action,
+        details=details,
+        ip_address=ip,
+        user_agent=user_agent,
+        success=success,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Notification Sender
+# ---------------------------------------------------------------------------
+def send_expiry_notification(user, document_info, days_value, event_type, source="application-system"):
     """
-    Send an expiry notification event to the notification microservice.
+    Send a document expiry or expired notification to the Notification microservice.
+    event_type can be:
+      - user.document.expiry.warning
+      - user.document.expired
     """
     try:
+        now = timezone.now()
+        tenant_id = str(user.tenant.id) if hasattr(user, "tenant") else "unknown-tenant"
+
         event_payload = {
             "metadata": {
-                "tenant_id": str(user.tenant.id),
-                "event_type": event_type,
                 "event_id": str(uuid.uuid4()),
-                "created_at": timezone.now().isoformat(),
-                "source": source
+                "event_type": event_type,
+                "event_version": "1.0",
+                "created_at": now.isoformat(),
+                "source": source,
+                "tenant_id": tenant_id,
+                "timestamp": now.isoformat(),
             },
             "data": {
-                "user_email": user.email,
                 "full_name": f"{user.first_name} {user.last_name}".strip() or user.email,
+                "user_email": user.email,
                 "document_type": document_info.get("type", "Unknown Document"),
                 "document_name": document_info.get("name", ""),
-                "expiry_date": document_info.get("expiry_date").isoformat() if document_info.get("expiry_date") else None,
-                "days_left": days_left,
-                "timestamp": timezone.now().isoformat(),
-                "user_agent": "background-task"  # Optional field
-            }
+                "expiry_date": (
+                    document_info.get("expiry_date").isoformat()
+                    if document_info.get("expiry_date")
+                    else None
+                ),
+                "days_left": days_value if event_type == "user.document.expiry.warning" else None,
+                "days_expired": days_value if event_type == "user.document.expired" else None,
+                "message": (
+                    f"Your {document_info.get('type')} is expiring soon. "
+                    "Please renew immediately to avoid employment disruption."
+                    if event_type == "user.document.expiry.warning"
+                    else f"Your {document_info.get('type')} has expired. Please renew immediately."
+                ),
+                "timezone": str(now.tzinfo) or "Africa/Lagos",
+            },
         }
 
         notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-        logger.info(f"➡️ POST to {notifications_url} with payload for user {user.email}: {event_payload}")
-
+        logger.info(f"➡️ Sending {event_type} for {user.email} to {notifications_url}")
         response = requests.post(notifications_url, json=event_payload, timeout=5)
         response.raise_for_status()
-
-        logger.info(f"✅ Expiry notification sent for {event_type} to {user.email}. "
-                    f"Status: {response.status_code}, Response: {response.text}")
+        logger.info(f"✅ Notification sent for {event_type} ({response.status_code})")
 
     except requests.exceptions.RequestException as e:
-        logger.warning(f"[❌ Notification Error] Failed to send expiry event for {user.email}: {str(e)}")
+        logger.warning(f"[❌ Notification Error] Failed to send event for {user.email}: {str(e)}")
     except Exception as e:
         logger.error(f"[❌ Notification Exception] Unexpected error for {user.email}: {str(e)}")
 
+
+# ---------------------------------------------------------------------------
+# Daily Document Expiry Checker
+# ---------------------------------------------------------------------------
 @shared_task
 def check_expiring_documents():
     """
-    Daily task to check for expiring documents across all tenants and send notifications.
+    Daily task to check for expiring or expired documents across all tenants
+    and send notifications to the Notification Service.
     """
-    logger.info("Starting daily check for expiring documents")
+    logger.info("🔄 Starting daily check for expiring and expired documents")
     today = timezone.now().date()
-    
-    # Get all tenants
     tenants = Tenant.objects.all()
-    
+
     for tenant in tenants:
         with tenant_context(tenant):
-            logger.info(f"Processing tenant: {tenant.schema_name}")
-            
-            # UserProfile documents
-            user_profiles = UserProfile.objects.select_related('user').all()
+            logger.info(f"🏢 Processing tenant: {tenant.schema_name}")
+
+            # -------------------------------------------------------------------
+            # USER PROFILE DOCUMENTS
+            # -------------------------------------------------------------------
+            user_profiles = UserProfile.objects.select_related("user").all()
             for profile in user_profiles:
                 user = profile.user
-                if not user.is_active:
+                if not user or not user.is_active:
                     continue
-                
-                # Right to Work
-                if profile.Right_to_work_document_expiry_date:
-                    expiry_date = profile.Right_to_work_document_expiry_date
+
+                # Define documents to check
+                docs_to_check = [
+                    {
+                        "field": "Right_to_work_document_expiry_date",
+                        "type": "Right to Work Document",
+                        "name": profile.Right_to_work_document_type or "Right to Work",
+                    },
+                    {
+                        "field": "drivers_licence_expiry_date",
+                        "type": "Driver's Licence",
+                        "name": "Driver's Licence",
+                    },
+                    {
+                        "field": "drivers_licence_insurance_expiry_date",
+                        "type": "Driver's Licence Insurance",
+                        "name": profile.drivers_license_insurance_provider or "Insurance",
+                    },
+                ]
+
+                for doc in docs_to_check:
+                    expiry_date = getattr(profile, doc["field"], None)
+                    if not expiry_date:
+                        continue
+
+                    # Warn before expiry
                     if expiry_date >= today:
                         for threshold in EXPIRY_THRESHOLDS:
-                            target_date = today + timedelta(days=threshold)
-                            if expiry_date == target_date:
-                                document_info = {
-                                    "type": "Right to Work Document",
-                                    "name": profile.Right_to_work_document_type or "Right to Work",
-                                    "expiry_date": expiry_date
-                                }
-                                event_type = f"user.document.right_to_work.expiry.warning.{threshold}d"
-                                send_expiry_notification(user, document_info, threshold, event_type)
+                            if expiry_date == today + timedelta(days=threshold):
+                                send_expiry_notification(
+                                    user,
+                                    doc,
+                                    threshold,
+                                    "user.document.expiry.warning",
+                                )
                                 break
-                
-                # Driver's Licence
-                if profile.drivers_licence_expiry_date:
-                    expiry_date = profile.drivers_licence_expiry_date
-                    if expiry_date >= today:
-                        for threshold in EXPIRY_THRESHOLDS:
-                            target_date = today + timedelta(days=threshold)
-                            if expiry_date == target_date:
-                                document_info = {
-                                    "type": "Driver's Licence",
-                                    "name": "Driver's Licence",
-                                    "expiry_date": expiry_date
-                                }
-                                event_type = f"user.document.drivers_licence.expiry.warning.{threshold}d"
-                                send_expiry_notification(user, document_info, threshold, event_type)
-                                break
-                
-                # Driver's Licence Insurance
-                if profile.drivers_licence_insurance_expiry_date:
-                    expiry_date = profile.drivers_licence_insurance_expiry_date
-                    if expiry_date >= today:
-                        for threshold in EXPIRY_THRESHOLDS:
-                            target_date = today + timedelta(days=threshold)
-                            if expiry_date == target_date:
-                                document_info = {
-                                    "type": "Driver's Licence Insurance",
-                                    "name": profile.drivers_license_insurance_provider or "Insurance",
-                                    "expiry_date": expiry_date
-                                }
-                                event_type = f"user.document.drivers_insurance.expiry.warning.{threshold}d"
-                                send_expiry_notification(user, document_info, threshold, event_type)
-                                break
-            
-            # OtherUserDocuments
-            other_docs = OtherUserDocuments.objects.select_related('user_profile__user').filter(expiry_date__gte=today)
+
+                    # Notify if already expired
+                    elif expiry_date < today:
+                        days_expired = (today - expiry_date).days
+                        send_expiry_notification(
+                            user,
+                            doc,
+                            days_expired,
+                            "user.document.expired",
+                        )
+
+            # -------------------------------------------------------------------
+            # OTHER USER DOCUMENTS
+            # -------------------------------------------------------------------
+            other_docs = OtherUserDocuments.objects.select_related("user_profile__user").all()
             for doc in other_docs:
                 user = doc.user_profile.user
-                if not user.is_active:
+                if not user or not user.is_active:
                     continue
                 expiry_date = doc.expiry_date
-                for threshold in EXPIRY_THRESHOLDS:
-                    target_date = today + timedelta(days=threshold)
-                    if expiry_date == target_date:
-                        document_info = {
+
+                if not expiry_date:
+                    continue
+
+                if expiry_date >= today:
+                    for threshold in EXPIRY_THRESHOLDS:
+                        if expiry_date == today + timedelta(days=threshold):
+                            send_expiry_notification(
+                                user,
+                                {
+                                    "type": "Other User Document",
+                                    "name": doc.title or doc.government_id_type or "Generic Document",
+                                    "expiry_date": expiry_date,
+                                },
+                                threshold,
+                                "user.document.expiry.warning",
+                            )
+                            break
+                elif expiry_date < today:
+                    days_expired = (today - expiry_date).days
+                    send_expiry_notification(
+                        user,
+                        {
                             "type": "Other User Document",
                             "name": doc.title or doc.government_id_type or "Generic Document",
-                            "expiry_date": expiry_date
-                        }
-                        event_type = f"user.document.other.expiry.warning.{threshold}d"
-                        send_expiry_notification(user, document_info, threshold, event_type)
-                        break
-            
-            # InsuranceVerification
-            insurances = InsuranceVerification.objects.select_related('user_profile__user').filter(expiry_date__gte=today)
+                            "expiry_date": expiry_date,
+                        },
+                        days_expired,
+                        "user.document.expired",
+                    )
+
+            # -------------------------------------------------------------------
+            # INSURANCE VERIFICATION
+            # -------------------------------------------------------------------
+            insurances = InsuranceVerification.objects.select_related("user_profile__user").all()
             for ins in insurances:
                 user = ins.user_profile.user
-                if not user.is_active:
+                if not user or not user.is_active:
                     continue
                 expiry_date = ins.expiry_date
-                for threshold in EXPIRY_THRESHOLDS:
-                    target_date = today + timedelta(days=threshold)
-                    if expiry_date == target_date:
-                        document_info = {
-                            "type": "Insurance Verification",
-                            "name": ins.insurance_type.replace('_', ' ').title(),
-                            "expiry_date": expiry_date
-                        }
-                        event_type = f"user.document.insurance.expiry.warning.{threshold}d"
-                        send_expiry_notification(user, document_info, threshold, event_type)
-                        break
-            
-            # LegalWorkEligibility
-            legal_docs = LegalWorkEligibility.objects.select_related('user_profile__user').filter(expiry_date__gte=today)
+                if not expiry_date:
+                    continue
+
+                doc_info = {
+                    "type": "Insurance Verification",
+                    "name": ins.insurance_type.replace("_", " ").title(),
+                    "expiry_date": expiry_date,
+                }
+
+                if expiry_date >= today:
+                    for threshold in EXPIRY_THRESHOLDS:
+                        if expiry_date == today + timedelta(days=threshold):
+                            send_expiry_notification(user, doc_info, threshold, "user.document.expiry.warning")
+                            break
+                elif expiry_date < today:
+                    days_expired = (today - expiry_date).days
+                    send_expiry_notification(user, doc_info, days_expired, "user.document.expired")
+
+            # -------------------------------------------------------------------
+            # LEGAL WORK ELIGIBILITY
+            # -------------------------------------------------------------------
+            legal_docs = LegalWorkEligibility.objects.select_related("user_profile__user").all()
             for legal in legal_docs:
                 user = legal.user_profile.user
-                if not user.is_active:
+                if not user or not user.is_active:
                     continue
                 expiry_date = legal.expiry_date
-                for threshold in EXPIRY_THRESHOLDS:
-                    target_date = today + timedelta(days=threshold)
-                    if expiry_date == target_date:
-                        document_info = {
-                            "type": "Legal Work Eligibility",
-                            "name": "Legal Work Document",
-                            "expiry_date": expiry_date
-                        }
-                        event_type = f"user.document.legal_work.expiry.warning.{threshold}d"
-                        send_expiry_notification(user, document_info, threshold, event_type)
-                        break
-            
-            # Document (General) - assuming tenant_id links to tenant
-            general_docs = Document.objects.filter(tenant_id=tenant.id, expiring_date__gte=timezone.now())
+                if not expiry_date:
+                    continue
+
+                doc_info = {
+                    "type": "Legal Work Eligibility",
+                    "name": "Legal Work Document",
+                    "expiry_date": expiry_date,
+                }
+
+                if expiry_date >= today:
+                    for threshold in EXPIRY_THRESHOLDS:
+                        if expiry_date == today + timedelta(days=threshold):
+                            send_expiry_notification(user, doc_info, threshold, "user.document.expiry.warning")
+                            break
+                elif expiry_date < today:
+                    days_expired = (today - expiry_date).days
+                    send_expiry_notification(user, doc_info, days_expired, "user.document.expired")
+
+            # -------------------------------------------------------------------
+            # GENERAL DOCUMENTS
+            # -------------------------------------------------------------------
+            general_docs = Document.objects.filter(tenant_id=tenant.id)
             for doc in general_docs:
-                # Find associated user if possible, e.g., via uploaded_by_id or other logic
-                # For simplicity, assume we can find user; adjust as needed
                 try:
                     user = User.objects.get(id=doc.uploaded_by_id) if doc.uploaded_by_id else None
-                    if user and not user.is_active:
-                        continue
-                    expiry_date = doc.expiring_date.date()
-                    if expiry_date >= today:
-                        for threshold in EXPIRY_THRESHOLDS:
-                            target_date = today + timedelta(days=threshold)
-                            if expiry_date == target_date:
-                                document_info = {
-                                    "type": "General Document",
-                                    "name": doc.title,
-                                    "expiry_date": expiry_date
-                                }
-                                event_type = f"user.document.general.expiry.warning.{threshold}d"
-                                if user:
-                                    send_expiry_notification(user, document_info, threshold, event_type)
-                                break
                 except User.DoesNotExist:
                     logger.warning(f"No user found for document {doc.id} in tenant {tenant.schema_name}")
                     continue
-    
-    logger.info("Daily check for expiring documents completed")
+
+                if not user or not user.is_active:
+                    continue
+
+                expiry_date = doc.expiring_date.date() if doc.expiring_date else None
+                if not expiry_date:
+                    continue
+
+                doc_info = {
+                    "type": "General Document",
+                    "name": doc.title or "Untitled Document",
+                    "expiry_date": expiry_date,
+                }
+
+                if expiry_date >= today:
+                    for threshold in EXPIRY_THRESHOLDS:
+                        if expiry_date == today + timedelta(days=threshold):
+                            send_expiry_notification(user, doc_info, threshold, "user.document.expiry.warning")
+                            break
+                elif expiry_date < today:
+                    days_expired = (today - expiry_date).days
+                    send_expiry_notification(user, doc_info, days_expired, "user.document.expired")
+
+    logger.info("✅ Daily check for expiring and expired documents completed")

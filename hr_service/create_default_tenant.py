@@ -64,56 +64,56 @@
 
 
 
-{
-  "employee_id": "123e4567-e89b-12d3-a456-426614174003",
-  "employee_details": {
-    "id": "123e4567-e89b-12d3-a456-426614174003",
-    "email": "bob.wilson@example.com",
-    "first_name": "Bob",
-    "last_name": "Wilson",
-    "job_role": "Senior Developer",
-    "department": "Engineering"
-  },
-  "date_issued": "2025-10-11",
-  "effective_date": "2025-10-18",
-  "reason": "Innovative solution to scalability issue",
-  "description": "Bob developed a caching mechanism that reduced server load by 40%, improving application performance.",
-  "status": "pending",
-  "compliance_checklist": [
-    {
-      "name": "Technical Review",
-      "completed": true
-    },
-    {
-      "name": "Peer Feedback",
-      "completed": true
-    }
-  ],
-  "approval_workflow": {
-    "stages": [
-      {
-        "role": "Engineering Manager"
-      },
-      {
-        "role": "CTO"
-      }
-    ]
-  },
-  "current_approval_stage": 0,
-  "notes": "Consider pairing with training opportunity.",
-  "is_public": true,
-  "impact_assessment": {
-    "team_morale": "boosted",
-    "productivity": "enhanced"
-  },
-  "custom_fields": {
-    "innovation_score": 9.5
-  },
-  "type": "recognition",
-  "value": 1000.00,
-  "value_type": "points",
-  "duration_days": null,
-  "announcement_channel": "engineering-team",
-  "follow_up_required": true,
-  "follow_up_date": "2025-10-25"
-}
+# {
+#   "employee_id": "123e4567-e89b-12d3-a456-426614174003",
+#   "employee_details": {
+#     "id": "123e4567-e89b-12d3-a456-426614174003",
+#     "email": "bob.wilson@example.com",
+#     "first_name": "Bob",
+#     "last_name": "Wilson",
+#     "job_role": "Senior Developer",
+#     "department": "Engineering"
+#   },
+#   "date_issued": "2025-10-11",
+#   "effective_date": "2025-10-18",
+#   "reason": "Innovative solution to scalability issue",
+#   "description": "Bob developed a caching mechanism that reduced server load by 40%, improving application performance.",
+#   "status": "pending",
+#   "compliance_checklist": [
+#     {
+#       "name": "Technical Review",
+#       "completed": true
+#     },
+#     {
+#       "name": "Peer Feedback",
+#       "completed": true
+#     }
+#   ],
+#   "approval_workflow": {
+#     "stages": [
+#       {
+#         "role": "Engineering Manager"
+#       },
+#       {
+#         "role": "CTO"
+#       }
+#     ]
+#   },
+#   "current_approval_stage": 0,
+#   "notes": "Consider pairing with training opportunity.",
+#   "is_public": true,
+#   "impact_assessment": {
+#     "team_morale": "boosted",
+#     "productivity": "enhanced"
+#   },
+#   "custom_fields": {
+#     "innovation_score": 9.5
+#   },
+#   "type": "recognition",
+#   "value": 1000.00,
+#   "value_type": "points",
+#   "duration_days": null,
+#   "announcement_channel": "engineering-team",
+#   "follow_up_required": true,
+#   "follow_up_date": "2025-10-25"
+# }
