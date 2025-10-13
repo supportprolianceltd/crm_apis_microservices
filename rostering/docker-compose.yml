@@ -2,11 +2,11 @@
 
 services:
   # Rostering Service
-  rostering-service:
+  rostering:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: rostering-service
+    container_name: rostering
     ports:
       - "3005:3005"
     environment:
