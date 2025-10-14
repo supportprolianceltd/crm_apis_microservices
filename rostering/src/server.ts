@@ -22,6 +22,7 @@ import { createHealthRoutes } from './routes/health.routes';
 import { createEmailRoutes } from './routes/email.routes';
 import { createCarePlanRoutes } from './routes/careplan.routes';
 import { createTaskRoutes } from './routes/task.routes';
+import { createClusterRoutes } from './routes/cluster.routes';
 import { EmailWorker } from './workers/email.worker';
 import { authenticate } from './middleware/auth.middleware';
 
@@ -140,6 +141,7 @@ class RosteringServer {
     ));
     this.app.use('/api/v1/careplans', authenticate, createCarePlanRoutes(this.carePlanController));
     this.app.use('/api/v1/tasks', authenticate, createTaskRoutes(this.taskController));
+    this.app.use('/api/v1/clusters', authenticate, createClusterRoutes(this.prisma));
 
     // Root endpoint
     this.app.get('/', (req: Request, res: Response) => {
