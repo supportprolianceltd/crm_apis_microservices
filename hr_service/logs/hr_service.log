@@ -1,0 +1,1860 @@
+2025-10-09 15:53:28,113 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:53:58,156 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:54:28,423 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:54:58,493 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:55:28,600 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:55:58,591 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:56:28,721 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:56:58,770 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:57:28,863 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:57:58,889 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:58:28,926 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:58:58,967 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:59:29,023 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 15:59:59,049 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:00:29,130 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:00:59,205 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:01:29,291 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:01:59,328 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:02:29,368 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:02:59,347 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:03:29,412 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:03:59,438 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:04:29,477 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:04:59,499 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:05:29,546 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:05:59,612 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:06:29,666 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:06:59,696 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:07:29,739 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:07:59,750 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:08:29,776 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:08:59,822 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:09:29,875 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:09:59,942 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:10:29,965 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:11:00,050 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:11:30,692 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:12:01,413 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:12:32,207 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:13:03,014 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:13:33,167 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:14:03,498 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:14:33,564 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:15:03,634 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:15:33,753 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:16:03,793 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:16:33,861 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:17:04,296 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:17:35,039 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:18:05,436 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:18:35,991 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:19:06,688 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:19:37,207 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:20:07,645 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:20:38,111 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:21:08,786 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:21:39,359 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:22:09,477 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:22:39,894 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:23:10,368 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:23:40,750 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:24:10,864 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:24:41,019 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:25:11,005 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:25:41,061 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:26:11,161 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:26:41,175 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:27:11,238 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:27:41,299 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:28:11,349 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:28:41,404 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:29:11,473 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:29:41,596 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:30:11,600 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:30:41,619 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:31:11,671 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:31:41,724 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:32:11,784 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:32:41,813 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:33:11,962 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:33:42,102 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:34:12,133 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:34:42,218 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:35:12,307 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:35:42,694 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:36:13,162 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:36:43,255 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:37:13,274 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:37:43,445 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:38:13,668 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:38:43,817 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:39:14,420 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:39:44,512 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:40:14,546 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:40:44,805 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:41:14,845 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:41:44,941 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:42:15,162 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:42:45,325 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:43:15,702 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:43:45,985 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:44:16,118 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:44:46,429 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:45:16,550 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:45:46,925 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:46:17,292 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:46:47,410 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:47:17,502 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:47:47,901 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:48:18,106 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:48:48,213 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:49:18,291 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:49:48,554 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:50:18,604 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:50:49,078 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:51:19,436 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:51:49,467 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:52:19,480 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:52:49,756 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:53:20,244 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:53:50,301 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:54:20,380 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:54:50,704 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:55:21,058 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:55:51,236 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:56:21,278 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:56:51,371 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:57:21,459 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:57:51,592 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:58:21,674 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:58:51,792 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:59:21,918 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 16:59:52,013 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:00:22,166 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:00:52,235 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:01:22,297 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:01:52,714 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:02:22,947 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:02:53,080 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:03:23,159 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:03:53,264 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:04:23,916 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:04:54,563 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:05:24,664 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:05:54,820 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:06:24,879 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:06:54,956 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:07:25,067 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:07:55,544 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:08:25,675 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:08:55,926 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:09:26,086 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:09:56,362 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:10:26,524 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-09 17:10:56,996 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:03:32,914 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:04:13,379 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:04:44,285 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:05:14,919 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:05:45,101 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:06:15,227 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:06:45,381 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:07:15,662 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:07:45,781 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:08:15,945 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:08:46,206 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:09:16,500 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:09:46,707 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:10:16,851 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:10:47,103 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:11:17,434 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:11:47,596 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:12:17,773 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:12:47,970 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:13:18,558 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:13:48,676 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:14:19,347 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:14:49,525 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:15:20,087 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:15:50,247 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:16:20,460 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:16:50,559 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:17:20,737 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:17:50,850 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:18:20,957 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:18:51,054 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:19:21,172 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:19:51,282 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:20:21,535 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:20:51,665 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:21:21,874 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:21:51,981 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:22:22,104 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:22:52,214 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:23:22,378 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:23:52,725 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:24:22,854 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:24:52,959 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:25:23,270 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:25:53,448 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:26:23,888 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:26:55,772 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:27:27,773 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:27:58,304 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:28:28,761 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:28:58,912 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:29:29,167 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:29:59,321 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:30:29,469 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:31:00,018 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:31:30,257 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:32:00,628 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:32:31,014 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:33:01,142 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:33:31,332 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:34:01,449 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:34:31,618 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:35:01,716 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:35:31,924 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:36:02,092 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:36:32,527 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:37:03,064 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:37:33,351 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:38:03,489 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:38:33,778 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:39:03,914 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:39:34,256 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:40:04,514 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:40:34,659 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:41:04,777 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:41:35,184 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:50:40,306 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:51:14,239 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:51:44,616 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:52:15,049 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:52:45,459 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:53:15,706 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:53:45,868 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:54:15,964 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:54:46,330 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:55:16,476 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:55:46,608 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:56:16,730 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:56:46,889 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:57:17,164 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:57:47,552 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:58:17,954 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:58:48,109 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:59:18,457 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 07:59:48,595 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:00:18,743 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:00:48,981 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:01:19,139 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:01:49,269 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:02:19,560 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:02:49,741 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:03:19,953 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:03:50,121 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:04:20,281 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:04:50,477 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:05:20,683 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:05:50,965 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:06:21,268 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:06:51,438 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:07:21,768 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:07:51,959 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:08:22,132 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:19:30,490 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:20:00,754 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:20:30,818 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:21:00,889 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:21:30,983 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:22:01,014 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:22:31,083 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:23:01,121 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:23:31,205 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:24:01,241 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:24:31,281 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:25:01,341 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:25:31,442 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:26:01,518 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:26:32,285 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:27:03,471 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:27:34,613 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:28:04,932 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:28:35,475 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:29:06,825 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:29:37,152 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:30:07,324 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:30:37,393 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:31:07,628 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:31:37,706 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:32:08,093 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:32:38,248 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:33:08,638 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:33:38,785 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:34:08,893 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:34:39,030 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:35:09,086 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:35:39,110 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:36:09,193 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:36:39,236 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:37:09,340 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:37:39,426 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:38:09,485 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:38:39,612 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:39:10,245 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:39:40,754 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:40:11,101 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:40:42,183 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:41:12,293 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:41:42,434 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:42:12,563 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:42:42,712 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:43:12,915 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:43:43,403 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:44:14,366 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:44:45,361 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:45:16,096 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:45:46,259 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:46:16,302 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:46:46,406 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:47:16,686 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:47:46,805 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:48:16,848 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:48:46,979 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:49:17,159 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:49:47,470 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:50:17,926 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:50:48,638 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:51:19,028 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:51:49,372 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:52:19,908 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:52:50,675 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:53:21,439 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:53:52,070 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:54:22,719 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:54:53,742 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:55:24,703 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:55:55,594 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:56:26,163 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:56:56,758 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:57:27,556 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:57:58,413 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:58:29,165 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:59:01,095 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 08:59:31,744 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:00:02,179 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:00:32,789 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:01:04,068 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:01:35,885 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:02:06,455 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:02:36,917 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:03:07,585 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:03:37,541 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:04:08,234 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:04:38,531 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:05:08,628 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:05:38,684 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:06:08,981 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:06:39,079 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:07:09,608 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:07:39,798 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:08:09,916 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:08:40,999 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:09:11,293 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:09:41,495 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:10:11,611 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:10:41,795 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:11:11,989 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:11:42,173 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:12:12,335 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:12:42,468 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:13:12,719 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:13:42,838 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:14:13,178 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:14:43,312 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:15:13,799 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:15:43,906 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:16:14,118 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:16:44,263 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:17:14,529 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:17:44,651 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:18:15,022 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:18:45,199 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:19:15,296 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:19:45,390 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:20:15,530 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:20:45,668 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:21:15,788 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:21:45,995 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:22:16,140 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:22:46,253 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:23:16,421 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:23:46,631 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:24:17,300 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:24:47,496 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:25:17,731 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:25:47,832 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:26:17,977 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:26:48,121 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:27:18,247 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:27:48,351 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:28:18,591 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:28:48,660 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:29:18,793 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:29:48,937 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:30:19,124 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:30:49,341 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:31:19,459 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:31:49,604 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:32:19,796 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:32:50,763 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:33:21,328 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:33:51,553 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:34:22,014 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:34:52,394 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:35:22,662 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:35:53,509 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:36:23,971 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:36:54,297 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:37:24,586 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:37:54,670 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:38:25,093 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:38:55,369 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:39:25,817 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:39:56,032 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:40:26,344 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:40:56,782 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:41:26,957 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:41:57,139 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:42:27,306 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:42:57,506 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:43:27,737 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:43:57,815 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:44:27,879 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:44:57,921 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:45:27,964 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:45:58,121 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:46:28,274 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:46:58,388 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:47:28,703 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:47:58,743 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:48:28,744 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:48:58,789 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:49:28,811 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:49:58,812 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:50:28,827 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:50:58,844 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:51:28,872 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:51:58,899 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:52:28,923 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:52:59,016 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:53:29,056 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:53:59,152 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:54:29,252 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:54:59,302 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:55:29,306 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:55:59,410 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:56:29,468 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:56:59,470 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:57:29,510 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:57:59,344 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:58:29,380 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:58:59,483 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:59:29,624 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 09:59:59,664 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:00:29,737 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:00:59,794 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:01:29,855 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:01:59,882 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:02:30,150 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:03:00,414 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:03:30,634 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:04:00,762 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:04:30,934 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:05:01,084 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:05:31,197 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:06:01,393 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:06:31,543 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:07:01,613 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:07:31,752 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:08:01,963 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:08:32,142 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:09:02,286 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:09:32,499 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:10:02,693 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:10:32,854 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:11:03,033 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:11:33,200 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:12:03,342 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:12:33,468 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:13:03,561 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:13:33,931 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:14:04,095 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:14:34,244 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:15:04,920 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:15:35,202 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:16:05,439 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:16:35,669 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:17:05,775 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:17:35,724 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:18:05,871 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:18:36,029 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:19:06,245 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:19:36,457 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:20:06,693 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:20:36,822 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:21:06,945 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:21:37,151 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:22:07,300 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:22:37,452 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:23:07,609 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:23:37,901 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:24:08,007 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:24:38,226 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:25:08,423 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:25:38,559 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:26:08,850 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:26:38,965 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:27:09,180 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:27:39,401 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:28:09,527 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:28:39,685 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:29:09,773 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:29:39,955 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:30:10,151 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:30:40,261 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:31:10,460 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:31:40,597 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:32:10,838 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:32:40,899 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:33:11,574 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:33:41,723 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:34:12,280 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:34:43,289 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:35:13,610 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:35:43,746 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:36:13,838 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:36:44,008 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:37:14,110 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:37:44,241 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:38:14,341 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:38:44,445 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:39:14,545 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:39:44,676 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:40:14,838 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:40:44,993 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:41:15,169 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:41:45,351 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:42:15,486 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:42:45,655 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:43:15,764 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:43:46,023 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:44:16,139 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:44:46,475 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:45:16,745 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:45:47,085 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:46:17,397 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:46:47,590 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:47:17,689 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:47:47,841 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:48:18,330 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:48:48,760 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:49:19,040 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:49:49,285 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:50:19,463 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:50:49,704 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:51:19,801 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:51:49,899 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:52:20,134 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:52:50,398 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:53:20,561 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:53:50,767 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:54:20,916 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:54:51,030 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:55:21,118 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:55:51,315 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:56:21,492 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:56:51,678 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:57:21,802 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:57:52,028 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:58:22,158 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:58:52,324 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:59:22,535 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 10:59:52,891 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:00:23,040 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:00:53,183 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:01:23,417 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:01:53,658 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:02:23,812 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:02:54,014 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:03:24,179 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:03:54,511 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:04:24,608 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:04:54,842 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:05:25,023 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:05:55,247 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:06:25,398 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:06:55,600 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:07:25,757 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:07:55,973 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:08:26,109 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:08:56,416 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:09:26,537 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:09:56,725 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:10:26,889 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:10:57,209 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:11:27,345 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:11:57,544 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:12:27,678 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:12:57,966 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:13:28,106 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:13:58,572 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:14:28,877 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:14:59,105 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:15:29,230 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:15:59,511 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:16:29,760 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:17:00,171 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:17:30,732 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:18:00,869 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:18:30,998 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:19:01,136 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:19:31,341 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:20:01,645 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:20:31,907 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:21:02,108 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:21:32,193 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:22:02,335 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:22:32,682 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:23:02,824 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:23:32,972 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:24:03,109 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:24:33,271 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:25:03,357 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:25:33,691 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:26:03,952 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:26:34,148 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:27:04,338 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:27:34,608 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:28:04,944 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:28:35,117 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:29:05,222 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:29:35,785 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:30:06,059 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:30:36,282 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:31:06,586 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:31:36,750 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:32:06,937 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:32:37,033 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:33:07,225 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:33:37,483 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:34:07,653 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:34:37,902 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:35:08,216 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:35:38,384 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:36:08,732 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:36:38,776 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:37:08,862 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:37:39,122 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:38:09,217 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:38:39,347 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:39:09,719 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:39:40,117 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:40:10,398 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:40:40,828 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:41:11,012 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:41:41,096 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:42:11,435 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:42:41,566 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:43:11,659 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:43:41,781 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:44:11,346 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:44:41,340 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:45:11,814 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:45:41,986 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:46:12,113 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:46:42,168 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:47:12,317 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:47:42,396 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:48:12,621 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:48:42,776 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:49:12,883 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:49:43,008 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:50:13,154 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:50:43,203 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:51:13,243 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:51:43,279 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:52:13,813 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:52:44,173 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:53:13,881 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:53:44,146 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:54:14,280 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:54:44,389 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:55:14,462 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:55:44,549 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:56:14,730 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:56:44,864 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:57:15,132 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:57:45,201 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:58:15,283 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:58:45,600 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:59:15,728 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 11:59:45,813 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:00:15,931 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:00:46,238 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:01:16,463 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:01:46,555 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:02:16,615 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:02:47,004 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:03:17,062 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:03:47,118 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:04:17,193 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:04:47,263 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:05:17,438 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:05:47,711 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:06:17,815 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:06:47,829 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:07:17,953 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:07:48,056 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:08:18,077 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:08:48,155 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:09:18,288 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:09:48,395 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:10:18,497 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:10:48,593 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:11:18,955 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:11:49,035 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:12:19,072 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:12:49,633 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:13:19,687 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:13:49,745 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:14:19,850 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:14:49,921 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:15:20,306 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:15:50,391 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:16:20,573 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:16:50,977 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:17:20,614 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:17:50,476 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:18:20,849 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:18:50,879 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:19:20,992 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:19:51,071 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:20:21,149 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:20:51,171 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:21:21,276 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:21:51,473 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:22:21,561 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:22:51,681 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:23:21,745 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:23:51,736 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:24:21,767 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:24:51,783 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:25:22,105 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:25:52,173 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:26:22,216 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:26:52,219 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:27:22,291 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:27:52,322 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:28:22,352 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:28:52,393 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:29:22,498 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:29:52,571 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:30:22,673 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:30:52,716 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:31:22,839 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:31:52,846 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:32:22,934 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:32:52,988 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:33:23,119 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:33:53,082 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:34:23,117 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:34:53,055 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:35:23,172 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:35:53,257 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:36:23,330 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:36:53,363 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:37:23,479 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:37:53,646 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:38:23,670 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:38:54,453 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:39:24,583 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:39:54,673 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:40:24,779 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:40:54,991 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:41:25,288 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:41:55,395 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:42:25,422 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:42:55,424 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:43:25,332 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:43:55,369 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:44:25,504 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:44:55,546 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:45:26,353 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:45:56,705 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:46:26,769 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:46:56,845 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:47:27,025 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:47:57,063 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:48:27,135 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:48:57,175 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:49:27,315 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:49:57,374 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:50:27,508 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:50:57,575 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:51:27,649 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:51:57,712 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:52:27,784 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:52:58,471 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:53:28,694 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:53:58,896 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:54:29,043 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:54:59,276 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:55:29,522 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:55:59,580 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:56:29,652 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:56:59,780 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:57:30,038 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:58:00,080 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:58:30,156 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:59:00,296 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 12:59:30,805 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:00:00,986 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:00:31,207 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:01:01,385 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:01:31,807 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:02:01,913 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:02:32,134 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:03:02,470 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:03:32,551 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:04:02,645 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:04:32,761 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:05:02,832 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:05:32,919 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:06:03,019 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:06:33,139 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:07:03,179 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:07:33,223 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:08:03,261 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:08:33,362 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:09:03,557 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:09:33,614 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:10:03,647 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:10:33,747 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:11:03,826 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:11:33,900 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:12:03,925 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:12:33,965 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:13:04,135 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:13:34,193 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:14:04,741 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:14:34,914 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:15:05,087 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:15:35,282 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:16:05,362 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:16:35,425 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:17:05,478 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:17:35,613 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:18:05,736 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:18:35,821 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:19:05,886 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:19:35,938 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:20:06,002 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:20:36,078 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:21:06,145 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:21:36,295 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:22:06,386 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:22:36,408 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:23:06,468 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:23:36,589 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:24:06,694 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:24:36,820 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:25:06,945 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:25:37,107 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:26:07,155 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:26:37,271 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:27:07,343 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:27:37,338 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:28:07,733 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:28:37,852 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:29:08,537 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:29:39,170 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:30:09,248 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:30:40,324 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:31:10,438 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:31:40,537 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:32:10,651 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:32:40,752 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:33:10,805 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:33:41,025 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:34:11,100 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:34:41,166 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:35:11,234 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:35:41,349 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:36:11,411 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:36:41,516 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:37:11,624 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:37:41,773 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:38:11,903 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:38:42,016 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:39:12,136 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:39:42,234 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:40:12,356 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:40:42,418 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:41:12,481 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:41:42,595 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:42:12,769 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:42:42,844 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:43:12,927 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:43:43,107 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:44:13,163 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:44:43,198 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:45:13,250 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:45:43,403 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:46:13,509 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:46:43,698 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:47:13,791 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:47:43,891 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:48:14,103 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:48:44,172 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:49:14,150 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:49:44,263 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:50:14,331 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:50:44,600 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:51:14,676 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:51:44,847 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:52:14,929 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:52:45,415 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:53:15,771 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:53:45,865 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:54:15,915 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:54:45,991 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:55:16,029 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:55:46,172 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:56:16,244 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:56:46,351 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:57:16,545 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:57:46,604 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:58:17,172 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:58:47,400 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:59:17,541 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 13:59:47,761 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:00:17,914 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:00:48,008 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:01:18,047 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:01:48,316 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:02:18,566 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:02:48,797 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:03:19,022 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:03:49,245 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:04:19,375 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:04:49,694 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:05:19,991 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:05:50,328 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:06:20,872 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:06:51,464 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:07:22,117 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:07:52,742 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:08:23,259 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:08:53,886 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:09:25,013 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:09:56,053 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:10:26,640 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:10:57,405 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:11:27,968 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:11:58,743 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:12:29,117 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:12:59,465 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:13:29,551 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:13:59,977 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:14:30,168 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:15:00,644 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:15:30,810 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:16:01,102 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:16:31,696 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:17:02,524 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:17:33,089 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:18:03,274 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:18:33,616 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:19:03,753 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:19:33,797 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:20:03,958 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:20:34,043 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:21:04,130 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:21:34,629 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:22:04,868 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:22:34,985 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:23:05,107 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:23:35,219 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:24:05,861 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:24:35,960 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:25:06,348 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:25:36,817 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:26:07,218 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:26:37,331 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:27:07,535 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:27:37,605 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:28:07,862 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:28:37,912 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:29:08,600 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:29:38,745 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:30:09,098 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:30:39,175 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:31:09,297 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:31:39,432 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:32:09,582 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:32:39,833 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:33:09,971 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:33:40,067 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:34:10,395 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:34:40,401 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:35:10,533 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:35:40,627 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:36:10,942 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:36:41,019 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:37:11,185 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:37:41,293 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:38:11,404 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:38:41,616 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:39:12,079 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:39:42,193 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:40:12,710 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:40:42,992 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:41:13,390 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:41:43,582 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:42:13,977 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:42:44,173 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:43:14,250 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:43:44,290 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:44:14,396 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:44:45,411 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:45:15,519 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:45:45,729 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:46:16,264 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:46:46,352 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:47:17,188 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:47:47,331 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:48:17,646 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:48:47,794 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:49:17,920 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:49:48,061 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:50:18,323 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:50:48,444 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:51:18,769 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:51:48,968 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:52:19,163 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:52:49,323 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:53:19,431 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:53:49,674 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:54:20,079 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:54:50,504 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:55:20,979 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:55:52,494 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:56:24,317 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:56:55,649 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:57:27,076 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:57:58,381 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:58:29,534 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:59:00,585 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 14:59:30,851 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:00:01,219 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:00:31,644 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:01:01,919 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:01:32,134 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:02:02,341 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:02:32,573 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:03:02,751 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:03:32,957 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:04:03,209 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:04:33,501 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:05:04,010 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:05:34,188 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:06:04,381 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:06:34,597 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:07:05,120 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:07:35,351 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:08:05,615 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:08:36,119 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:09:06,520 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:09:36,941 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:10:07,086 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:10:37,274 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:11:07,495 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:11:38,070 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:12:08,441 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:12:38,647 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:13:08,847 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:13:39,429 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:14:09,615 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:14:39,865 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:15:09,974 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:15:40,091 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:16:10,198 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:16:40,357 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:17:10,501 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:17:40,674 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:18:10,836 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:18:40,981 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:19:11,118 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:19:41,321 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:20:11,452 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:20:41,588 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:21:11,705 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:21:41,864 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:22:12,195 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:22:42,403 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:23:12,547 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:23:45,544 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:24:12,932 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:24:43,074 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:25:13,265 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:25:43,457 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:26:13,725 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:26:43,920 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:27:14,016 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:27:44,293 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:28:14,503 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:28:44,768 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:29:14,984 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:29:45,134 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:30:15,324 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:30:45,567 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:31:15,712 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:31:45,895 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:32:16,390 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:32:46,573 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:33:16,828 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:33:47,058 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:34:17,228 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:34:47,419 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:35:17,622 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:35:47,849 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:36:18,501 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:36:48,870 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:37:19,102 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:37:49,240 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:38:19,390 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:38:49,551 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:39:19,798 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:39:50,018 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:40:20,160 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:40:50,306 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:41:20,406 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:41:50,572 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:42:20,698 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:42:50,813 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:43:21,015 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:43:51,122 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:44:21,257 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:44:51,365 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:45:21,448 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:45:51,573 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:46:21,725 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:46:51,985 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:47:22,144 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:47:52,438 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:48:22,497 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:48:52,985 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:49:23,052 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:49:53,309 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:50:23,518 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:50:53,733 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:51:23,992 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:51:54,228 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:52:24,396 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:52:55,724 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:53:26,902 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:53:57,406 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:54:28,086 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:54:58,663 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:55:28,998 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:55:59,119 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:56:29,237 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:56:59,396 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:57:29,598 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:58:00,195 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:58:30,860 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:59:01,977 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 15:59:33,001 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-10 16:00:03,876 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:33:41,262 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:35:32,460 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:36:02,855 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:36:33,269 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:37:03,634 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:37:33,959 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:38:04,080 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:38:34,436 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:39:04,626 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:39:34,804 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:40:04,968 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:40:35,116 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:41:05,288 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:41:35,499 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:42:05,625 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:42:35,828 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:43:06,528 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:43:36,677 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:44:06,787 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:44:36,918 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:45:08,103 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:45:41,352 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:46:07,978 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:46:41,118 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:47:12,998 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:47:27,672 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=99e62459-719e-4a79-9c54-1ab178bfe87b
+2025-10-11 11:47:27,816 [ERROR] hr: Failed to fetch public key: 400
+2025-10-11 11:47:27,817 [ERROR] hr: Unexpected JWT processing error: Authentication service unavailable: 400
+2025-10-11 11:47:27,821 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 11:47:43,541 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:48:14,178 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:48:44,717 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:49:14,904 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:49:45,091 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:50:15,203 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:50:45,348 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:51:15,491 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:51:45,701 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:52:15,853 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:52:46,089 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:53:16,219 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:53:46,886 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:54:17,200 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:54:47,815 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:55:18,051 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:55:48,199 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:56:18,339 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:56:49,253 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:57:19,665 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:57:49,824 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:58:20,111 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:58:50,255 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:59:20,380 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 11:59:50,526 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:00:20,702 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:00:51,310 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:01:23,183 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:01:53,312 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:02:24,596 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:02:55,385 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:03:25,898 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:03:56,585 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:04:26,844 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:04:57,901 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:05:28,539 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:07:18,299 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:07:50,023 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=99e62459-719e-4a79-9c54-1ab178bfe87b
+2025-10-11 12:07:50,675 [ERROR] hr: Failed to fetch public key: 400
+2025-10-11 12:07:50,676 [ERROR] hr: Unexpected JWT processing error: Authentication service unavailable: 400
+2025-10-11 12:07:50,680 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 12:07:50,684 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:08:08,735 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=99e62459-719e-4a79-9c54-1ab178bfe87b
+2025-10-11 12:08:08,796 [ERROR] hr: Failed to fetch public key: 400
+2025-10-11 12:08:08,797 [ERROR] hr: Unexpected JWT processing error: Authentication service unavailable: 400
+2025-10-11 12:08:08,800 [WARNING] django.request: Unauthorized: /api/hr/rewards/
+2025-10-11 12:08:20,991 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:08:51,257 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:09:21,502 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:09:51,729 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:10:21,960 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:10:52,157 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:11:22,395 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:11:52,706 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:12:25,133 [WARNING] hr: No Bearer token provided for protected path: /api/hr/health/
+2025-10-11 12:14:11,020 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=99e62459-719e-4a79-9c54-1ab178bfe87b
+2025-10-11 12:14:11,352 [ERROR] hr: Failed to fetch JWKS: 404
+2025-10-11 12:14:11,353 [ERROR] hr: Unexpected JWT processing error: Authentication service unavailable: 404
+2025-10-11 12:14:11,357 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 12:14:33,165 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=99e62459-719e-4a79-9c54-1ab178bfe87b
+2025-10-11 12:14:33,196 [ERROR] hr: Failed to fetch JWKS: 404
+2025-10-11 12:14:33,197 [ERROR] hr: Unexpected JWT processing error: Authentication service unavailable: 404
+2025-10-11 12:14:33,199 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 12:14:33,891 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=99e62459-719e-4a79-9c54-1ab178bfe87b
+2025-10-11 12:14:33,924 [ERROR] hr: Failed to fetch JWKS: 404
+2025-10-11 12:14:33,925 [ERROR] hr: Unexpected JWT processing error: Authentication service unavailable: 404
+2025-10-11 12:14:33,926 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 12:14:34,646 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=99e62459-719e-4a79-9c54-1ab178bfe87b
+2025-10-11 12:14:34,708 [ERROR] hr: Failed to fetch JWKS: 404
+2025-10-11 12:14:34,711 [ERROR] hr: Unexpected JWT processing error: Authentication service unavailable: 404
+2025-10-11 12:14:34,715 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 12:14:35,340 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=99e62459-719e-4a79-9c54-1ab178bfe87b
+2025-10-11 12:14:35,374 [ERROR] hr: Failed to fetch JWKS: 404
+2025-10-11 12:14:35,375 [ERROR] hr: Unexpected JWT processing error: Authentication service unavailable: 404
+2025-10-11 12:14:35,376 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 12:33:07,653 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 12:33:08,106 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 12:33:08,106 [WARNING] hr: Invalid JWT token: Algorithm not supported
+2025-10-11 12:33:08,108 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 12:33:20,228 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 12:33:20,267 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 12:33:20,268 [WARNING] hr: Invalid JWT token: Algorithm not supported
+2025-10-11 12:33:20,269 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 12:33:21,464 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 12:33:21,506 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 12:33:21,507 [WARNING] hr: Invalid JWT token: Algorithm not supported
+2025-10-11 12:33:21,508 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 12:41:56,921 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 12:41:56,923 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 12:41:57,093 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 12:41:57,094 [WARNING] hr: Invalid JWT token: Algorithm not supported
+2025-10-11 12:41:57,096 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 12:46:41,567 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 12:46:41,568 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 12:46:42,004 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 12:46:42,006 [WARNING] hr: Invalid JWT token: Algorithm not supported
+2025-10-11 12:46:42,013 [WARNING] django.request: Unauthorized: /api/hr/rewards
+2025-10-11 13:01:25,860 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 13:01:25,862 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 13:01:26,394 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 13:01:26,404 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 13:01:26,491 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 13:01:26,492 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 13:01:26,546 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 13:01:26,548 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 13:01:26,752 [ERROR] django.request: Internal Server Error: /api/hr/rewards/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/generics.py", line 243, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'CustomPagination' object has no attribute 'paginate_queryset'
+2025-10-11 13:09:28,616 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 13:09:28,620 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 13:09:28,937 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 13:09:28,948 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 13:09:29,048 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 13:09:29,048 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 13:09:29,087 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 13:09:29,089 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 13:59:57,172 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 13:59:57,182 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 13:59:57,194 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:05:50,988 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:05:50,992 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:05:50,997 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:13:15,435 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:13:15,436 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:13:15,442 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:17:52,244 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,249 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,283 [ERROR] django.request: Service Unavailable: /api/hr/penalties/
+2025-10-11 14:17:52,309 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,311 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,314 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:17:52,327 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,329 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,331 [ERROR] django.request: Service Unavailable: /api/hr/penalties/
+2025-10-11 14:17:52,340 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,344 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,351 [ERROR] django.request: Service Unavailable: /api/hr/penalties/
+2025-10-11 14:17:52,354 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,356 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,358 [ERROR] django.request: Service Unavailable: /api/hr/penalties/
+2025-10-11 14:17:52,422 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,426 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,429 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:17:52,433 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,438 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,450 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:17:52,467 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,472 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,475 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:17:52,503 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,511 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,515 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:17:52,526 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,529 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,535 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:17:52,542 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,550 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,553 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:17:52,568 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,570 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,572 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:17:52,613 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,617 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,627 [ERROR] django.request: Service Unavailable: /api/hr/penalties/
+2025-10-11 14:17:52,645 [ERROR] hr: Database connection verification failed: connection already closed
+2025-10-11 14:17:52,650 [ERROR] hr: Failed to reestablish database connection: connection already closed
+2025-10-11 14:17:52,654 [ERROR] django.request: Service Unavailable: /api/hr/rewards/
+2025-10-11 14:32:05,611 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:32:05,612 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:32:06,524 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 14:32:06,648 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 14:32:07,193 [ERROR] django.request: Internal Server Error: /api/hr/rewards/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.NotNullViolation: null value in column "created_by_id" of relation "rewards_penalties_reward" violates not-null constraint
+DETAIL:  Failing row contains (PRO-R-0001, 99e62459-719e-4a79-9c54-1ab178bfe87b, null, 123e4567-e89b-12d3-a456-426614174000, {"id": "123e4567-e89b-12d3-a456-426614174000", "email": "john.do..., 2025-10-11, 2025-10-15, Outstanding performance in Q3 project delivery, John led the team to complete the project two weeks ahead of sch..., pending, null, null, null, null, null, null, f, null, 2025-10-11 14:32:06.808191+00, 2025-10-11 14:32:06.80822+00, [{"name": "HR Policy Review", "completed": true}, {"name": "Budg..., null, null, {}, {"stages": [{"role": "Manager"}, {"role": "HR Director"}]}, 0, null, , null, Discuss with team lead for additional context., f, {"team_morale": "positive", "productivity": "high"}, PRO-REW-0001, bonus, 5000.00, monetary, null, department, t, 2025-11-11, {"bonus_multiplier": 1.2}).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/generics.py", line 246, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "/app/rewards_penalties/views.py", line 98, in perform_create
+    serializer.save()
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/rewards_penalties/serializers.py", line 159, in create
+    instance.save()
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: null value in column "created_by_id" of relation "rewards_penalties_reward" violates not-null constraint
+DETAIL:  Failing row contains (PRO-R-0001, 99e62459-719e-4a79-9c54-1ab178bfe87b, null, 123e4567-e89b-12d3-a456-426614174000, {"id": "123e4567-e89b-12d3-a456-426614174000", "email": "john.do..., 2025-10-11, 2025-10-15, Outstanding performance in Q3 project delivery, John led the team to complete the project two weeks ahead of sch..., pending, null, null, null, null, null, null, f, null, 2025-10-11 14:32:06.808191+00, 2025-10-11 14:32:06.80822+00, [{"name": "HR Policy Review", "completed": true}, {"name": "Budg..., null, null, {}, {"stages": [{"role": "Manager"}, {"role": "HR Director"}]}, 0, null, , null, Discuss with team lead for additional context., f, {"team_morale": "positive", "productivity": "high"}, PRO-REW-0001, bonus, 5000.00, monetary, null, department, t, 2025-11-11, {"bonus_multiplier": 1.2}).
+
+2025-10-11 14:32:41,013 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:32:41,015 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:32:41,084 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 14:32:41,086 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 14:32:41,094 [WARNING] django.request: Bad Request: /api/hr/penalties/
+2025-10-11 14:34:39,641 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:34:39,642 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:34:39,802 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 14:34:39,804 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 14:34:39,810 [WARNING] django.request: Bad Request: /api/hr/penalties/
+2025-10-11 14:35:48,120 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:35:48,121 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:35:48,169 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 14:35:48,170 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 14:35:48,176 [WARNING] django.request: Bad Request: /api/hr/penalties/
+2025-10-11 14:36:15,127 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:36:15,129 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:36:15,246 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 14:36:15,255 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 14:36:15,275 [WARNING] django.request: Bad Request: /api/hr/penalties/
+2025-10-11 14:36:24,661 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:36:24,662 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:36:24,702 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 14:36:24,703 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 14:36:24,840 [ERROR] django.request: Internal Server Error: /api/hr/penalties/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/generics.py", line 246, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "/app/rewards_penalties/views.py", line 134, in perform_create
+    serializer.save()
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/rewards_penalties/serializers.py", line 191, in create
+    instance.full_clean()  # Validate custom clean
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/base.py", line 1502, in full_clean
+    raise ValidationError(errors)
+django.core.exceptions.ValidationError: {'created_by_id': ['This field cannot be null.'], 'created_by_details': ['This field cannot be null.']}
+2025-10-11 14:45:17,883 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:45:17,885 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:45:17,989 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 14:45:17,997 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 14:45:18,117 [ERROR] django.request: Internal Server Error: /api/hr/penalties/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/generics.py", line 246, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "/app/rewards_penalties/views.py", line 134, in perform_create
+    serializer.save()
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/rewards_penalties/serializers.py", line 232, in create
+    instance = Reward(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/base.py", line 567, in __init__
+    raise TypeError(
+TypeError: Reward() got unexpected keyword arguments: 'severity_level'
+2025-10-11 14:48:39,074 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:48:39,096 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:48:39,786 [INFO] hr: Public key response: 403 {"detail":"Token has expired."}...
+2025-10-11 14:48:39,831 [ERROR] hr: Failed to fetch public key: 403 - {"detail":"Token has expired."}
+2025-10-11 14:48:39,835 [ERROR] hr: Unexpected JWT processing error: Could not fetch public key: 403
+2025-10-11 14:48:39,837 [WARNING] django.request: Unauthorized: /api/hr/penalties/
+2025-10-11 14:49:13,339 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:49:13,379 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:49:14,481 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 14:49:14,494 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 14:49:15,370 [ERROR] django.request: Internal Server Error: /api/hr/penalties/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/generics.py", line 246, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "/app/rewards_penalties/views.py", line 134, in perform_create
+    serializer.save()
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/rewards_penalties/serializers.py", line 232, in create
+    return instance
+               ^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/base.py", line 567, in __init__
+    raise TypeError(
+TypeError: Reward() got unexpected keyword arguments: 'severity_level', 'end_date', 'probation_period_months', 'corrective_action_plan', 'escalation_history', 'legal_compliance_notes'
+2025-10-11 14:52:44,315 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:52:44,714 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:52:45,787 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 14:52:45,795 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 14:52:47,467 [ERROR] django.request: Internal Server Error: /api/hr/penalties/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/generics.py", line 246, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "/app/rewards_penalties/views.py", line 134, in perform_create
+    serializer.save()
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/rewards_penalties/serializers.py", line 232, in create
+    return instance
+               ^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/base.py", line 567, in __init__
+    raise TypeError(
+TypeError: Reward() got unexpected keyword arguments: 'severity_level', 'end_date', 'probation_period_months', 'corrective_action_plan', 'escalation_history', 'legal_compliance_notes'
+2025-10-11 14:59:06,472 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 14:59:06,494 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 14:59:06,861 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 14:59:06,884 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 14:59:07,769 [ERROR] django.request: Internal Server Error: /api/hr/penalties/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/generics.py", line 246, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/mixins.py", line 20, in create
+    headers = self.get_success_headers(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/serializers.py", line 573, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/serializers.py", line 251, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/serializers.py", line 540, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rest_framework/fields.py", line 1870, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "/app/rewards_penalties/serializers.py", line 72, in get_evidence_file_url
+    storage_type = getattr(settings, 'STORAGE_TYPE', 'local').lower()
+                           ^^^^^^^^
+NameError: name 'settings' is not defined
+2025-10-11 15:14:09,068 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:14:09,075 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:14:10,079 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:14:10,163 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:14:32,447 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:14:32,452 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:14:32,686 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:14:32,690 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:14:32,863 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:14:32,869 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:14:32,999 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:14:33,001 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:14:42,318 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:14:42,319 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:14:42,595 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:14:42,597 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:14:42,695 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:14:42,697 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:14:42,810 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:14:42,812 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:15:51,469 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:15:51,471 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:15:51,683 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:15:51,687 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:15:57,344 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:15:57,348 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:15:57,541 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:15:57,544 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:15:57,733 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:15:57,734 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:15:57,901 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:15:57,904 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:16:03,239 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:16:03,244 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:16:03,322 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:16:03,324 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:16:03,375 [WARNING] django.request: Not Found: /api/hr/rewards/PRO-R-0001
+2025-10-11 15:16:07,369 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:16:07,370 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:16:07,439 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:16:07,441 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:16:07,477 [WARNING] django.request: Not Found: /api/hr/rewards/PRO-R-0001
+2025-10-11 15:16:11,980 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:16:11,982 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:16:12,203 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:16:12,208 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:16:12,329 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:16:12,336 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:16:12,509 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:16:12,513 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:26:10,924 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:26:10,944 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:26:11,196 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:26:11,212 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:26:41,666 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:26:41,668 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:26:41,794 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:26:41,796 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:26:41,948 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:26:41,954 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:26:42,056 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:26:42,058 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:26:46,080 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:26:46,082 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:26:46,297 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:26:46,309 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:26:54,824 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:26:54,825 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:26:54,991 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:26:54,995 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:26:55,153 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:26:55,157 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:26:55,293 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:26:55,297 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:27:02,183 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:27:02,185 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:27:02,445 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:27:02,447 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:27:02,570 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:27:02,572 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:27:02,747 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:27:02,753 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:27:41,334 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:27:41,335 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:27:41,439 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:27:41,440 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:27:48,568 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:27:48,572 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:27:48,672 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:27:48,675 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:27:57,626 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:27:57,628 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:27:57,689 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:27:57,691 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:27:57,736 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:27:57,737 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:27:57,797 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:27:57,800 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:28:03,882 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:28:03,890 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:28:03,995 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:28:03,998 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:28:04,071 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:28:04,072 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:28:04,148 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:28:04,150 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3
+2025-10-11 15:28:16,151 [INFO] hr: Token header: kid=3485a77f8c4141b082b996b29a2ca508, alg=RS256
+2025-10-11 15:28:16,153 [INFO] hr: JWT validation: kid=3485a77f8c4141b082b996b29a2ca508, tenant_id=3, tenant_schema=proliance
+2025-10-11 15:28:16,213 [INFO] hr: Public key response: 200 {"public_key":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGsifGR0rmhSyMvQ2NQz\ng5ife7B7tPnpM9VLar2fOrLn2fU4cCclx8R6uR71Pca6owiv31VlK22aFIkIxxpv\n3uHmrrs+lGIkKk9ksLbfPg45J...
+2025-10-11 15:28:16,215 [INFO] hr: Authenticated user: support@prolianceltd.com, tenant: 3

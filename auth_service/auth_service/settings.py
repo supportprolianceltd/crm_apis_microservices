@@ -2,7 +2,8 @@
 import os
 from datetime import timedelta
 from pathlib import Path
-
+# auth_service/settings.py
+from celery.schedules import crontab
 import environ
 from django.utils.translation import gettext_lazy as _
 
@@ -76,7 +77,12 @@ INSTALLED_APPS = SHARED_APPS + TENANT_APPS + ["django_extensions"]
 
 # Authentication
 AUTH_USER_MODEL = "users.CustomUser"
-AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+
+# Update AUTHENTICATION_BACKENDS in settings.py
+AUTHENTICATION_BACKENDS = (
+    'auth_service.authentication.UsernameModelBackend',  # New
+    'django.contrib.auth.backends.ModelBackend',  # Existing for email
+)
 
 # REST Framework
 REST_FRAMEWORK = {
@@ -249,7 +255,7 @@ WEB_PAGE_URL = env("WEB_PAGE_URL", default="https://crm-frontend-react.vercel.ap
 
 AUTH_SERVICE_URL = env("AUTH_SERVICE_URL", default="http://auth-service:8001")
 NOTIFICATIONS_EVENT_URL = env("NOTIFICATIONS_EVENT_URL", default="http://app:3000/events/")
-GATEWAY_URL = env("GATEWAY_URL", default="http://localhost:9090")
+GATEWAY_URL = env("GATEWAY_URL", default="https://server1.prolianceltd.com")
 
 
 SUPABASE_URL = env("SUPABASE_URL", default="")
@@ -305,10 +311,23 @@ CACHES = {
 # Cache-enabled flag for feature toggle
 CACHE_ENABLED = env.bool("CACHE_ENABLED", default=True)
 
+
+
+
+
+
 # Multi-tenant cache prefix helper (use in code)
 TENANT_CACHE_PREFIX = "tenant:{}:"  # e.g., "tenant:example_user:"
 
 
+
+CELERY_BEAT_SCHEDULE = {
+    # Existing schedules...
+    'daily-check-expiring-documents': {
+        'task': 'users.tasks.check_expiring_documents',
+        'schedule': crontab(hour=0, minute=0),  # Run daily at midnight UTC
+    },
+}
 
 # sudo nano /etc/nginx/nginx.conf
 # sudo nano /etc/nginx/conf.d/crm_api.conf

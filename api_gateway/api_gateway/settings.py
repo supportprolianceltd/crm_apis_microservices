@@ -1,4 +1,3 @@
-
 import os
 import requests
 from pathlib import Path
@@ -125,7 +124,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-
 # api_gateway/settings.py
 # Increase timeout for resume screening
 
@@ -156,7 +154,6 @@ adapter = requests.adapters.HTTPAdapter(
 )
 session.mount('http://', adapter)
 session.mount('https://', adapter)
-
 
 # ======================== DEFAULT AUTO FIELD ========================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -210,8 +207,8 @@ CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
     "http://localhost:5173",
     "https://crm-frontend-react.vercel.app", 
     "http://localhost:8000",
+    # Add rostering frontend if needed, e.g., "http://localhost:3006"
 ])
-
 
 # Add specific headers needed for file uploads
 CORS_ALLOW_HEADERS = [
@@ -232,7 +229,6 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS', default=False)
 CORS_ALLOW_CREDENTIALS = True
 
-
 # ======================== MICROSERVICE URLS ========================
 AUTH_SERVICE_URL = env.str("AUTH_SERVICE_URL", default="http://auth-service:8001")
 APPLICATIONS_ENGINE_URL = env.str("JOB_APPLICATIONS_URL", default="http://job-applications:8003")
@@ -240,6 +236,11 @@ TALENT_ENGINE_URL = env.str("TALENT_ENGINE_URL", default="http://talent-engine:8
 MESSAGING_URL = env.str("MESSAGING_URL", default="http://messaging:3000")
 LMS_APP_URL = env.str("LMS_APP_URL", default="http://lms-app:8004")
 NOTIFICATIONS_SERVICE_URL = env.str("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
+
+HR_SERVICE_URL = env.str("HR_SERVICE_URL", default="http://hr:8004")
+
+# New: Rostering Service URL
+ROSTERING_SERVICE_URL = env.str("ROSTERING_SERVICE_URL", default="http://rostering:3005")
 
 # ======================== ROUTE CONFIGURATION ========================
 AUTH_ROUTES = [
@@ -255,14 +256,15 @@ MICROSERVICE_URLS = {
     "messaging": MESSAGING_URL,
     "lms": LMS_APP_URL,
     "notifications": NOTIFICATIONS_SERVICE_URL,
+    "hr": HR_SERVICE_URL,
+    # New: Rostering routes /api/rostering/... to rostering service
+    "rostering": ROSTERING_SERVICE_URL,
 }
 
 # Register all auth routes under auth service
 MICROSERVICE_URLS.update({route: AUTH_SERVICE_URL for route in AUTH_ROUTES})
 
 # ======================== PUBLIC PATHS (NO AUTH REQUIRED) ========================
-
-
 PUBLIC_PATHS = [
     "applications-engine/applications/parse-resume/autofill/",
     "talent-engine/requisitions/by-link/",
@@ -280,9 +282,14 @@ PUBLIC_PATHS = [
     "metrics/",
     "circuit-breaker/status/",
     "api/user/users/all-tenants/",
+
+    "hr/public/health/",  # Example: Add HR-specific public paths here
+
+    # New: Example rostering public paths (adjust based on your rostering API)
+    "rostering/public/health/",
+    "rostering/api/v1/health",
 ]
 
 # ======================== RATE LIMITING ========================
 RATELIMIT_ENABLE = True
 RATELIMIT_USE_CACHE = 'default'
-

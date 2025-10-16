@@ -1,3 +1,110 @@
+# services:
+#   db:
+#     image: postgres:15
+#     container_name: auth_postgres
+#     environment:
+#       POSTGRES_DB: auth_db
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password
+#     ports:
+#       - "5411:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+#     networks:
+#       - auth_service_default
+
+#   redis:
+#     image: redis:7-alpine
+#     container_name: auth_redis
+#     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+#     ports:
+#       - "6372:6379"
+ 
+#     healthcheck:
+#       test: ["CMD", "redis-cli", "ping"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     networks:
+#       - auth_service_default
+#     depends_on:
+#       - db
+
+#   auth-service:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: auth-service
+#     ports:
+#       - "8001:8001"
+#     env_file:                # ✅ Corrected key
+#       - ./.env
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
+#     volumes:
+#       - .:/app
+#     networks:
+#       - auth_service_default
+#     mem_limit: 2g
+
+#   kafka:
+#     image: confluentinc/cp-kafka:7.0.1
+#     container_name: kafka
+#     environment:
+#       KAFKA_BROKER_ID: 1
+#       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+#       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#     depends_on:
+#       - zookeeper
+#     ports:
+#       - "9092:9092"
+#     networks:
+#       - auth_service_default
+
+#   zookeeper:
+#     image: confluentinc/cp-zookeeper:7.0.1
+#     container_name: zookeeper
+#     environment:
+#       ZOOKEEPER_CLIENT_PORT: 2181
+#       ZOOKEEPER_TICK_TIME: 2000
+#     ports:
+#       - "2181:2181"
+#     networks:
+#       - auth_service_default
+
+#   key-rotator:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: key-rotator
+#     command: >
+#       sh -c "sleep 86400; while true; do python manage.py rotate_tenant_keys; done"
+#     depends_on:
+#       - auth-service
+#     volumes:
+#       - .:/app
+#     networks:
+#       - auth_service_default
+
+# volumes:
+#   postgres_data:
+#   redis_data:
+
+
+# networks:
+#   auth_service_default:
+#     external: true
+
+# docker-compose.yml
 services:
   db:
     image: postgres:15
@@ -24,7 +131,6 @@ services:
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
       - "6372:6379"
- 
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -54,6 +160,40 @@ services:
     networks:
       - auth_service_default
     mem_limit: 2g
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery-worker
+    command: celery -A auth_service worker -l info --concurrency=4
+    env_file:
+      - ./.env
+    depends_on:
+      - auth-service
+      - redis
+    volumes:
+      - .:/app
+    networks:
+      - auth_service_default
+    mem_limit: 1g
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery-beat
+    command: celery -A auth_service beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - ./.env
+    depends_on:
+      - auth-service
+      - redis
+    volumes:
+      - .:/app
+    networks:
+      - auth_service_default
+    mem_limit: 512m
 
   kafka:
     image: confluentinc/cp-kafka:7.0.1
@@ -99,7 +239,9 @@ volumes:
   postgres_data:
   redis_data:
 
-
 networks:
   auth_service_default:
     external: true
+
+
+

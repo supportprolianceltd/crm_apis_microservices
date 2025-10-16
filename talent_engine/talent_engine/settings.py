@@ -52,7 +52,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
     "localhost", "127.0.0.1", "talent-engine", "0.0.0.0", "*", "talent-engine:8001", "http://localhost:9090"
 ])
 
-GATEWAY_URL = "http://localhost:9090"
+GATEWAY_URL = env("GATEWAY_URL", default="https://server1.prolianceltd.com")
 # ======================== Database ========================
 
 # In your talent_engine/settings.py

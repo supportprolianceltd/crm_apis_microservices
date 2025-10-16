@@ -6,6 +6,12 @@ from django.db import models, transaction
 from django.db import models
 from django_tenants.utils import tenant_context
 from django.utils import timezone
+from django.db import models
+from django_tenants.models import TenantMixin, DomainMixin
+from django.utils.translation import gettext_lazy as _
+from django_tenants.utils import get_public_schema_name
+
+
 logger = logging.getLogger('core')
 
 
@@ -106,3 +112,27 @@ class TenantConfig(models.Model):
 
 
 
+
+# NEW: Shared UsernameIndex for global uniqueness
+class UsernameIndex(models.Model):
+    username = models.CharField(max_length=150, unique=True, db_index=True)  # Global unique
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
+    user_id = models.PositiveIntegerField()  # Denormalized user PK (for quick ref)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = f"{get_public_schema_name()}.core_usernameindex"  # Explicit public table
+
+    def __str__(self):
+        return f"{self.username} → {self.tenant.schema_name}"
+
+    def save(self, *args, **kwargs):
+        # Auto-sync on update (e.g., if username changes)
+        if self.pk:  # Update
+            old = UsernameIndex.objects.get(pk=self.pk)
+            if old.username != self.username:
+                # Handle rename: Ensure no conflict
+                if UsernameIndex.objects.filter(username=self.username).exclude(pk=self.pk).exists():
+                    raise ValueError(f"Username '{self.username}' already exists globally.")
+        super().save(*args, **kwargs)

@@ -87,13 +87,14 @@ from .views import (
     BranchUsersListView, UserSessionViewSet, LoginAttemptViewSet, BlockedIPViewSet,
     UserActivityViewSet, jwks_view, protected_view, GroupViewSet, DocumentVersionListView,
     ProfessionalQualificationView, EmploymentDetailView, EducationDetailView,
-    ReferenceCheckView, ProofOfAddressView, InsuranceVerificationView,
-    DrivingRiskAssessmentView, LegalWorkEligibilityView, OtherUserDocumentsView,
+    ReferenceCheckView, ProofOfAddressView, InsuranceVerificationView,DocumentAcknowledgmentsListView, DocumentAcknowledgeView,
+    DrivingRiskAssessmentView, LegalWorkEligibilityView, OtherUserDocumentsView,UserDocumentAccessView, UsersViewSetNoPagination,
     AllTenantsUsersListView,  # Ensure this import is added
 )
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
+router.register(r'users-no-pagination', UsersViewSetNoPagination, basename='users_no_pagination')
 router.register(r'clients', ClientViewSet, basename='client')
 router.register(r'user-sessions', UserSessionViewSet, basename='user-session')
 router.register(r'login-attempts', LoginAttemptViewSet, basename='login-attempt')
@@ -152,6 +153,12 @@ urlpatterns = [
     path('legal-work-eligibilities/<int:obj_id>/', LegalWorkEligibilityView.as_view(), name='legal-work-eligibility-update'),
     
     # Other User Documents endpoints
-    path('other-user-documents/', OtherUserDocumentsView.as_view(), name='other-user-document-create'),
-    path('other-user-documents/<int:obj_id>/', OtherUserDocumentsView.as_view(), name='other-user-document-update'),
+
+
+    path('documents/', DocumentListCreateView.as_view(), name='document-list-create'),
+    path('documents/<int:id>/', DocumentDetailView.as_view(), name='document-detail'),
+    path('documents/<int:document_id>/versions/', DocumentVersionListView.as_view(), name='document-versions'),
+    path('documents/<int:document_id>/acknowledge/', DocumentAcknowledgeView.as_view(), name='document-acknowledge'),  # New
+    path('documents/<int:document_id>/acknowledgments/', DocumentAcknowledgmentsListView.as_view(), name='document-acknowledgments'),  # New
+    path('documents/user-access/', UserDocumentAccessView.as_view(), name='user-document-access'),  # New
 ]

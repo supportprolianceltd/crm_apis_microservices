@@ -119,11 +119,10 @@ if not Tenant.objects.filter(schema_name='netwiver').exists():
 from core.models import Tenant
 from users.models import CustomUser
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='arts')
+tenant = Tenant.objects.get(schema_name='harvoxx')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='ekeneonwon',
-        email='support@artstraining.co.uk',
+        email='support@harvoxx.com',
         password='qwerty',
         role='admin',
         first_name='Ikenga',
@@ -140,7 +139,6 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='netwiver')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='info',
         email='support@netwiver.com',
         password='qwerty',
         role='admin',
@@ -156,13 +154,12 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='support',
-        email='support@prolianceltd.com',
+        email='prince.godson@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='Daniel',
-        last_name='Finland',
-        job_role=' Backend developer',
+        first_name='Prince',
+        last_name='Godson',
+        job_role=' Frontend Developer',
         tenant=tenant
     )
 
@@ -235,7 +232,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='proliance')
+tenant = Tenant.objects.get(schema_name='harvoxx')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(
