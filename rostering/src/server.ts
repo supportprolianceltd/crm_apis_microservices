@@ -88,8 +88,8 @@ class RosteringServer {
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
     }));
 
-    // Compression
-    this.app.use(compression());
+    // Compression - disabled
+    // this.app.use(compression());
 
     // Rate limiting
     const limiter = rateLimit({
