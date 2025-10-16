@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
 import { GeocodingService } from '../services/geocoding.service';
 import { MatchingService } from '../services/matching.service';
+import { ClusteringService } from '../services/clustering.service';
 import { logger, logServiceError } from '../utils/logger';
 import { 
   CreateRequestPayload, 
@@ -52,6 +53,7 @@ export class RequestController {
   private prisma: PrismaClient;
   private geocodingService: GeocodingService;
   private matchingService: MatchingService;
+  private clusteringService: ClusteringService;
 
   constructor(
     prisma: PrismaClient, 
@@ -61,6 +63,7 @@ export class RequestController {
     this.prisma = prisma;
     this.geocodingService = geocodingService;
     this.matchingService = matchingService;
+    this.clusteringService = new ClusteringService(prisma);
   }
 
   /**
@@ -78,6 +81,23 @@ export class RequestController {
         validatedData.address, 
         validatedData.postcode
       );
+
+      let clusterId: string | undefined;
+      let cluster: any = null;
+
+      // Find or create cluster if we have coordinates
+      if (geocoded?.latitude && geocoded?.longitude) {
+        try {
+          cluster = await this.clusteringService.findOrCreateClusterForLocation(
+            tenantId,
+            geocoded.latitude,
+            geocoded.longitude
+          );
+          clusterId = cluster?.id;
+        } catch (error) {
+          logger.warn('Failed to assign cluster, continuing without cluster', { error });
+        }
+      }
 
       // Create the request
       const request = await this.prisma.externalRequest.create({
@@ -98,20 +118,51 @@ export class RequestController {
           scheduledStartTime: validatedData.scheduledStartTime ? new Date(validatedData.scheduledStartTime) : undefined,
           scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
           notes: validatedData.notes,
-          status: 'PENDING'
+          status: 'PENDING',
+          clusterId
         }
       });
+
+      // Update PostGIS location field using raw SQL
+      if (geocoded?.latitude && geocoded?.longitude) {
+        try {
+          await this.prisma.$executeRaw`
+            UPDATE external_requests 
+            SET location = ST_SetSRID(ST_MakePoint(${geocoded.longitude}, ${geocoded.latitude}), 4326)::geography
+            WHERE id = ${request.id}
+          `;
+        } catch (error) {
+          logger.warn('Failed to set PostGIS location', { error, requestId: request.id });
+        }
+      }
+
+      // Update cluster stats if assigned to a cluster
+      if (clusterId) {
+        this.clusteringService.updateClusterStats(clusterId).catch(error => 
+          logger.warn('Failed to update cluster stats', { error, clusterId })
+        );
+      }
 
       // Start auto-matching in the background
       this.matchingService.autoMatchRequest(request.id).catch(error => 
         logServiceError('Request', 'autoMatch', error, { requestId: request.id })
       );
 
-      logger.info(`Created request: ${request.id}`, { tenantId, requestId: request.id });
+      logger.info(`Created request: ${request.id}`, { 
+        tenantId, 
+        requestId: request.id, 
+        clusterId: clusterId || 'none',
+        clusterName: cluster?.name || 'none'
+      });
 
       res.status(201).json({
         success: true,
         data: request,
+        cluster: cluster ? {
+          id: cluster.id,
+          name: cluster.name,
+          location: `${cluster.latitude}, ${cluster.longitude}`
+        } : null,
         message: 'Request created successfully'
       });
 
@@ -226,7 +277,6 @@ export class RequestController {
         if (geocoded) {
           updateData.latitude = geocoded.latitude;
           updateData.longitude = geocoded.longitude;
-          updateData.location = `POINT(${geocoded.longitude} ${geocoded.latitude})`;
         }
       }
 
@@ -235,6 +285,19 @@ export class RequestController {
         where: { id: requestId },
         data: updateData
       });
+
+      // Update PostGIS location field if coordinates changed
+      if (validatedData.address && updatedRequest.latitude && updatedRequest.longitude) {
+        try {
+          await this.prisma.$executeRaw`
+            UPDATE external_requests 
+            SET location = ST_SetSRID(ST_MakePoint(${updatedRequest.longitude}, ${updatedRequest.latitude}), 4326)::geography
+            WHERE id = ${requestId}
+          `;
+        } catch (error) {
+          logger.warn('Failed to update PostGIS location', { error, requestId });
+        }
+      }
 
       logger.info(`Updated request: ${requestId}`, { tenantId, requestId });
 
@@ -399,7 +462,7 @@ export class RequestController {
       const totalPages = Math.ceil(total / limit);
 
       const response: PaginatedResponse<ExternalRequest> = {
-        data: requests as ExternalRequest[],
+        data: requests as any,
         pagination: {
           page,
           limit,

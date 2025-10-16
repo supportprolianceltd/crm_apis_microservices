@@ -1,6 +1,6 @@
 services:
   # Rostering Service
-  rostering-service:
+  rostering:
     build:
       context: .
       dockerfile: Dockerfile
