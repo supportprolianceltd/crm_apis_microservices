@@ -123,33 +123,33 @@ class RosteringServer {
 
   private setupRoutes(): void {
     // Health routes (no auth required)
-    this.app.use('/api/v1', createHealthRoutes());
+    this.app.use('/api/rostering/api/v1', createHealthRoutes());
 
     // API routes (with authentication)
-    this.app.use('/api/v1/requests', authenticate, createRequestRoutes(this.requestController));
-    this.app.use('/api/v1/carers', authenticate, createCarerRoutes(this.carerController));
-    this.app.use('/api/v1/sync', authenticate, createSyncRoutes(
+    this.app.use('/api/rostering/api/v1/requests', authenticate, createRequestRoutes(this.requestController));
+    this.app.use('/api/rostering/api/v1/carers', authenticate, createCarerRoutes(this.carerController));
+    this.app.use('/api/rostering/api/v1/sync', authenticate, createSyncRoutes(
       this.prisma,
       this.authSyncService, 
       this.tenantEmailConfigService,
       this.notificationService
     ));
-    this.app.use('/api/v1/emails', authenticate, createEmailRoutes(
+    this.app.use('/api/rostering/api/v1/emails', authenticate, createEmailRoutes(
       this.prisma,
       this.emailService,
       this.emailWorker
     ));
-    this.app.use('/api/v1/careplans', authenticate, createCarePlanRoutes(this.carePlanController));
-    this.app.use('/api/v1/tasks', authenticate, createTaskRoutes(this.taskController));
-    this.app.use('/api/v1/clusters', authenticate, createClusterRoutes(this.prisma));
+    this.app.use('/api/rostering/api/v1/careplans', authenticate, createCarePlanRoutes(this.carePlanController));
+    this.app.use('/api/rostering/api/v1/tasks', authenticate, createTaskRoutes(this.taskController));
+    this.app.use('/api/rostering/api/v1/clusters', authenticate, createClusterRoutes(this.prisma));
 
     // Root endpoint
     this.app.get('/', (req: Request, res: Response) => {
       res.json({
-        service: 'rostering-service',
+        service: 'rostering',
         version: '1.0.0',
         timestamp: new Date().toISOString(),
-        documentation: '/api/v1/health'
+        documentation: '/api/rostering/api/v1/health'
       });
     });
 
