@@ -685,7 +685,7 @@ export class CarePlanController {
           if (!('time' in log) || typeof log.time !== 'string') {
             errors.push(`movingHandling.IntakeLog[${idx}].time is required and must be a string`);
           }
-          if (!('amount' in log) || typeof log.amount !== 'number') {
+          if (!('amount' in log) || typeof log.amount !== 'string') {
             errors.push(`movingHandling.IntakeLog[${idx}].amount is required and must be a number`);
           }
           if ('notes' in log && typeof log.notes !== 'string') {
