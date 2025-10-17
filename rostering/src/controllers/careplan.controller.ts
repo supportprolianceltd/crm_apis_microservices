@@ -682,13 +682,10 @@ export class CarePlanController {
             errors.push(`movingHandling.IntakeLog[${idx}] must be an object`);
             return;
           }
-          if (!('date' in log) || isNaN(Date.parse(log.date))) {
-            errors.push(`movingHandling.IntakeLog[${idx}].date is required and must be a valid date string`);
-          }
           if (!('time' in log) || typeof log.time !== 'string') {
             errors.push(`movingHandling.IntakeLog[${idx}].time is required and must be a string`);
           }
-          if (!('amount' in log) || typeof log.amount !== 'number') {
+          if (!('amount' in log) || typeof log.amount !== 'string') {
             errors.push(`movingHandling.IntakeLog[${idx}].amount is required and must be a number`);
           }
           if ('notes' in log && typeof log.notes !== 'string') {

@@ -624,15 +624,13 @@ model IntakeLog {
   id               String   @id @default(cuid())
   tenantId         String
   movingHandlingId String
-  date             DateTime
   time             String
-  amount           Float
+  amount           String
   notes            String?
 
   MovingHandling MovingHandling @relation(fields: [movingHandlingId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
-  @@index([date])
   @@index([movingHandlingId])
 }
 
