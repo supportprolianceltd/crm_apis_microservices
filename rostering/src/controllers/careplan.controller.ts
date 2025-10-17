@@ -1,11 +1,10 @@
-// ...existing code...
-
-  // ...existing code...
-
-// ...existing code...
-
-  // ...existing code...
-
+// Enum values from schema.prisma
+const CARE_PLAN_STATUS = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
+const BATHING_ASSISTANCE = ['YES_INDEPENDENTLY', 'YES_WITH_HELP', 'NO_NEEDS_FULL_ASSISTANCE'];
+const MOBILITY_LEVEL = ['INDEPENDENT', 'DEPENDENT', 'INDEPENDENT_WITH_AIDS', 'IMMOBILE'];
+const MOBILITY_SUPPORT = ['WALKING_STICK', 'WHEELCHAIR', 'NONE', 'OTHERS'];
+const GENDER_PREFERENCE = ['NO_PREFERENCE', 'MALE', 'FEMALE', 'NON_BINARY', 'OTHER'];
+const TASK_STATUS = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'ON_HOLD'];
 
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
@@ -79,6 +78,8 @@ export class CarePlanController {
     // Required fields from schema
     if (!('bathingAndShowering' in obj) || typeof obj.bathingAndShowering !== 'string') {
       errors.push('personalCare.bathingAndShowering is required and must be a string');
+    } else if (!BATHING_ASSISTANCE.includes(obj.bathingAndShowering)) {
+      errors.push(`personalCare.bathingAndShowering must be one of: ${BATHING_ASSISTANCE.join(', ')}`);
     }
     if (!('oralHygiene' in obj) || typeof obj.oralHygiene !== 'string') {
       errors.push('personalCare.oralHygiene is required and must be a string');
@@ -149,21 +150,25 @@ export class CarePlanController {
   }
 
       private validateFallsAndMobility(obj: any): string[] {
-    const errors: string[] = [];
-    if (!obj) return errors;
-    // Required fields from schema
-    if (!('fallenBefore' in obj) || typeof obj.fallenBefore !== 'boolean') {
-      errors.push('fallsAndMobility.fallenBefore is required and must be a boolean');
-    }
-    if (!('timesFallen' in obj) || typeof obj.timesFallen !== 'number') {
-      errors.push('fallsAndMobility.timesFallen is required and must be a number');
-    }
-    if (!('mobilityLevel' in obj) || typeof obj.mobilityLevel !== 'string') {
-      errors.push('fallsAndMobility.mobilityLevel is required and must be a string');
-    }
-    if (!('mobilitySupport' in obj) || typeof obj.mobilitySupport !== 'string') {
-      errors.push('fallsAndMobility.mobilitySupport is required and must be a string');
-    }
+        const errors: string[] = [];
+        if (!obj) return errors;
+        // Required fields from schema
+        if (!('fallenBefore' in obj) || typeof obj.fallenBefore !== 'boolean') {
+          errors.push('fallsAndMobility.fallenBefore is required and must be a boolean');
+        }
+        if (!('timesFallen' in obj) || typeof obj.timesFallen !== 'number') {
+          errors.push('fallsAndMobility.timesFallen is required and must be a number');
+        }
+        if (!('mobilityLevel' in obj) || typeof obj.mobilityLevel !== 'string') {
+          errors.push('fallsAndMobility.mobilityLevel is required and must be a string');
+        } else if (!MOBILITY_LEVEL.includes(obj.mobilityLevel)) {
+          errors.push(`fallsAndMobility.mobilityLevel must be one of: ${MOBILITY_LEVEL.join(', ')}`);
+        }
+        if (!('mobilitySupport' in obj) || typeof obj.mobilitySupport !== 'string') {
+          errors.push('fallsAndMobility.mobilitySupport is required and must be a string');
+        } else if (!MOBILITY_SUPPORT.includes(obj.mobilitySupport)) {
+          errors.push(`fallsAndMobility.mobilitySupport must be one of: ${MOBILITY_SUPPORT.join(', ')}`);
+        }
     if (!('activeAsTheyLikeToBe' in obj) || typeof obj.activeAsTheyLikeToBe !== 'string') {
       errors.push('fallsAndMobility.activeAsTheyLikeToBe is required and must be a string');
     }
@@ -327,6 +332,8 @@ export class CarePlanController {
     }
     if (!('careGiverGenderPreference' in obj) || typeof obj.careGiverGenderPreference !== 'string') {
       errors.push('routine.careGiverGenderPreference is required and must be a string');
+    } else if (!GENDER_PREFERENCE.includes(obj.careGiverGenderPreference)) {
+      errors.push(`routine.careGiverGenderPreference must be one of: ${GENDER_PREFERENCE.join(', ')}`);
     }
     if (!('autonomyPreference' in obj) || typeof obj.autonomyPreference !== 'string') {
       errors.push('routine.autonomyPreference is required and must be a string');
@@ -357,6 +364,114 @@ export class CarePlanController {
     if (!obj) return errors;
     if (!('careType' in obj) || typeof obj.careType !== 'string') {
       errors.push('careRequirements.careType is required and must be a string');
+    }
+    return errors;
+  }
+
+  private validateMedicalInfo(obj: any): string[] {
+    const errors: string[] = [];
+    if (!obj) return errors;
+    // Required fields from schema
+    if (!('primaryDiagnosis' in obj) || typeof obj.primaryDiagnosis !== 'string') {
+      errors.push('medicalInfo.primaryDiagnosis is required and must be a string');
+    }
+    if (!('primaryAdditionalNotes' in obj) || typeof obj.primaryAdditionalNotes !== 'string') {
+      errors.push('medicalInfo.primaryAdditionalNotes is required and must be a string');
+    }
+    if (!('secondaryDiagnoses' in obj) || typeof obj.secondaryDiagnoses !== 'string') {
+      errors.push('medicalInfo.secondaryDiagnoses is required and must be a string');
+    }
+    if (!('secondaryAdditionalNotes' in obj) || typeof obj.secondaryAdditionalNotes !== 'string') {
+      errors.push('medicalInfo.secondaryAdditionalNotes is required and must be a string');
+    }
+    if (!('pastMedicalHistory' in obj) || typeof obj.pastMedicalHistory !== 'string') {
+      errors.push('medicalInfo.pastMedicalHistory is required and must be a string');
+    }
+    if (!('medicalSupport' in obj) || typeof obj.medicalSupport !== 'boolean') {
+      errors.push('medicalInfo.medicalSupport is required and must be a boolean');
+    }
+    if (!('breathingDifficulty' in obj) || typeof obj.breathingDifficulty !== 'boolean') {
+      errors.push('medicalInfo.breathingDifficulty is required and must be a boolean');
+    }
+    if (!('breathingSupportNeed' in obj) || typeof obj.breathingSupportNeed !== 'string') {
+      errors.push('medicalInfo.breathingSupportNeed is required and must be a string');
+    }
+    if (!('useAirWayManagementEquipment' in obj) || typeof obj.useAirWayManagementEquipment !== 'boolean') {
+      errors.push('medicalInfo.useAirWayManagementEquipment is required and must be a boolean');
+    }
+    if ('specifyAirwayEquipment' in obj && typeof obj.specifyAirwayEquipment !== 'string') {
+      errors.push('medicalInfo.specifyAirwayEquipment must be a string');
+    }
+    if ('airwayEquipmentRisk' in obj && typeof obj.airwayEquipmentRisk !== 'string') {
+      errors.push('medicalInfo.airwayEquipmentRisk must be a string');
+    }
+    if (!('airWayEquipmentMitigationPlan' in obj) || typeof obj.airWayEquipmentMitigationPlan !== 'string') {
+      errors.push('medicalInfo.airWayEquipmentMitigationPlan is required and must be a string');
+    }
+    if (!('haveSkinPressureSores' in obj) || typeof obj.haveSkinPressureSores !== 'boolean') {
+      errors.push('medicalInfo.haveSkinPressureSores is required and must be a boolean');
+    }
+    if (!('skinPressureConcerningIssues' in obj) || typeof obj.skinPressureConcerningIssues !== 'boolean') {
+      errors.push('medicalInfo.skinPressureConcerningIssues is required and must be a boolean');
+    }
+    if ('skinAdditionalInformation' in obj && typeof obj.skinAdditionalInformation !== 'string') {
+      errors.push('medicalInfo.skinAdditionalInformation must be a string');
+    }
+    if (!('currentHealthStatus' in obj) || typeof obj.currentHealthStatus !== 'string') {
+      errors.push('medicalInfo.currentHealthStatus is required and must be a string');
+    }
+    if (!('raisedSafeGuardingIssue' in obj) || typeof obj.raisedSafeGuardingIssue !== 'boolean') {
+      errors.push('medicalInfo.raisedSafeGuardingIssue is required and must be a boolean');
+    }
+    if ('safeGuardingAdditionalInformation' in obj && typeof obj.safeGuardingAdditionalInformation !== 'string') {
+      errors.push('medicalInfo.safeGuardingAdditionalInformation must be a string');
+    }
+    // medications: should be an array if present, and each medication must have required fields
+    if ('medications' in obj) {
+      if (!Array.isArray(obj.medications)) {
+        errors.push('medicalInfo.medications must be an array');
+      } else {
+        obj.medications.forEach((med: any, idx: number) => {
+          if (typeof med !== 'object' || med === null) {
+            errors.push(`medicalInfo.medications[${idx}] must be an object`);
+            return;
+          }
+          if (!('drugName' in med) || typeof med.drugName !== 'string') {
+            errors.push(`medicalInfo.medications[${idx}].drugName is required and must be a string`);
+          }
+          if (!('dosage' in med) || typeof med.dosage !== 'string') {
+            errors.push(`medicalInfo.medications[${idx}].dosage is required and must be a string`);
+          }
+          if (!('frequency' in med) || typeof med.frequency !== 'string') {
+            errors.push(`medicalInfo.medications[${idx}].frequency is required and must be a string`);
+          }
+        });
+      }
+    }
+    if (!('primaryDoctor' in obj) || typeof obj.primaryDoctor !== 'string') {
+      errors.push('medicalInfo.primaryDoctor is required and must be a string');
+    }
+    if (!('supportContactPhone' in obj) || typeof obj.supportContactPhone !== 'string') {
+      errors.push('medicalInfo.supportContactPhone is required and must be a string');
+    }
+    if (!('specialistContact' in obj) || typeof obj.specialistContact !== 'string') {
+      errors.push('medicalInfo.specialistContact is required and must be a string');
+    }
+    if (!('HospitalContact' in obj) || typeof obj.HospitalContact !== 'string') {
+      errors.push('medicalInfo.HospitalContact is required and must be a string');
+    }
+    if (!('EmergencyCareNotes' in obj) || typeof obj.EmergencyCareNotes !== 'string') {
+      errors.push('medicalInfo.EmergencyCareNotes is required and must be a string');
+    }
+    if ('medicalReportUpload' in obj && typeof obj.medicalReportUpload !== 'string') {
+      errors.push('medicalInfo.medicalReportUpload must be a string');
+    }
+    if (!('knownAllergies' in obj) || typeof obj.knownAllergies !== 'boolean') {
+      errors.push('medicalInfo.knownAllergies is required and must be a boolean');
+    }
+    // clientAllergies: should be an array if present
+    if ('clientAllergies' in obj && !Array.isArray(obj.clientAllergies)) {
+      errors.push('medicalInfo.clientAllergies must be an array');
     }
     return errors;
   }
@@ -489,33 +604,167 @@ export class CarePlanController {
     return errors;
   }
 
+    private validateMovingHandling(obj: any): string[] {
+    const errors: string[] = [];
+    if (!obj) return errors;
+    // Required fields from schema
+    if (!('equipmentsNeeds' in obj) || typeof obj.equipmentsNeeds !== 'string') {
+      errors.push('movingHandling.equipmentsNeeds is required and must be a string');
+    }
+    if (!('anyPainDuringRestingAndMovement' in obj) || typeof obj.anyPainDuringRestingAndMovement !== 'string') {
+      errors.push('movingHandling.anyPainDuringRestingAndMovement is required and must be a string');
+    }
+    if (!('anyCognitiveImpairment' in obj) || typeof obj.anyCognitiveImpairment !== 'string') {
+      errors.push('movingHandling.anyCognitiveImpairment is required and must be a string');
+    }
+    if (!('behaviouralChanges' in obj) || typeof obj.behaviouralChanges !== 'boolean') {
+      errors.push('movingHandling.behaviouralChanges is required and must be a boolean');
+    }
+    if (!('describeBehaviouralChanges' in obj) || typeof obj.describeBehaviouralChanges !== 'string') {
+      errors.push('movingHandling.describeBehaviouralChanges is required and must be a string');
+    }
+    if (!('walkIndependently' in obj) || typeof obj.walkIndependently !== 'boolean') {
+      errors.push('movingHandling.walkIndependently is required and must be a boolean');
+    }
+    if (!('manageStairs' in obj) || typeof obj.manageStairs !== 'boolean') {
+      errors.push('movingHandling.manageStairs is required and must be a boolean');
+    }
+    if (!('sittingToStandingDependence' in obj) || typeof obj.sittingToStandingDependence !== 'string') {
+      errors.push('movingHandling.sittingToStandingDependence is required and must be a string');
+    }
+    if (!('limitedSittingBalance' in obj) || typeof obj.limitedSittingBalance !== 'boolean') {
+      errors.push('movingHandling.limitedSittingBalance is required and must be a boolean');
+    }
+    if (!('turnInBed' in obj) || typeof obj.turnInBed !== 'boolean') {
+      errors.push('movingHandling.turnInBed is required and must be a boolean');
+    }
+    if (!('lyingToSittingDependence' in obj) || typeof obj.lyingToSittingDependence !== 'boolean') {
+      errors.push('movingHandling.lyingToSittingDependence is required and must be a boolean');
+    }
+    if (!('gettingUpFromChairDependence' in obj) || typeof obj.gettingUpFromChairDependence !== 'string') {
+      errors.push('movingHandling.gettingUpFromChairDependence is required and must be a string');
+    }
+    if (!('bathOrShower' in obj) || typeof obj.bathOrShower !== 'string') {
+      errors.push('movingHandling.bathOrShower is required and must be a string');
+    }
+    if (!('chairToCommodeOrBed' in obj) || typeof obj.chairToCommodeOrBed !== 'boolean') {
+      errors.push('movingHandling.chairToCommodeOrBed is required and must be a boolean');
+    }
+    if (!('profilingBedAndMattress' in obj) || typeof obj.profilingBedAndMattress !== 'boolean') {
+      errors.push('movingHandling.profilingBedAndMattress is required and must be a boolean');
+    }
+    // transferRisks and behaviouralChallenges are arrays
+    if ('transferRisks' in obj && !Array.isArray(obj.transferRisks)) {
+      errors.push('movingHandling.transferRisks must be an array');
+    }
+    if ('behaviouralChallenges' in obj && !Array.isArray(obj.behaviouralChallenges)) {
+      errors.push('movingHandling.behaviouralChallenges must be an array');
+    }
+    if (!('riskManagementPlan' in obj) || typeof obj.riskManagementPlan !== 'string') {
+      errors.push('movingHandling.riskManagementPlan is required and must be a string');
+    }
+    if (!('locationRiskReview' in obj) || typeof obj.locationRiskReview !== 'string') {
+      errors.push('movingHandling.locationRiskReview is required and must be a string');
+    }
+    if (!('EvacuationPlanRequired' in obj) || typeof obj.EvacuationPlanRequired !== 'boolean') {
+      errors.push('movingHandling.EvacuationPlanRequired is required and must be a boolean');
+    }
+    if (!('dailyGoal' in obj) || typeof obj.dailyGoal !== 'string') {
+      errors.push('movingHandling.dailyGoal is required and must be a string');
+    }
+    // IntakeLog: should be an array if present, and each log must have required fields
+    if ('IntakeLog' in obj) {
+      if (!Array.isArray(obj.IntakeLog)) {
+        errors.push('movingHandling.IntakeLog must be an array');
+      } else {
+        obj.IntakeLog.forEach((log: any, idx: number) => {
+          if (typeof log !== 'object' || log === null) {
+            errors.push(`movingHandling.IntakeLog[${idx}] must be an object`);
+            return;
+          }
+          if (!('date' in log) || isNaN(Date.parse(log.date))) {
+            errors.push(`movingHandling.IntakeLog[${idx}].date is required and must be a valid date string`);
+          }
+          if (!('time' in log) || typeof log.time !== 'string') {
+            errors.push(`movingHandling.IntakeLog[${idx}].time is required and must be a string`);
+          }
+          if (!('amount' in log) || typeof log.amount !== 'number') {
+            errors.push(`movingHandling.IntakeLog[${idx}].amount is required and must be a number`);
+          }
+          if ('notes' in log && typeof log.notes !== 'string') {
+            errors.push(`movingHandling.IntakeLog[${idx}].notes must be a string`);
+          }
+        });
+      }
+    }
+    return errors;
+  }
+
+  private validateCarers(carers: any): string[] {
+    const errors: string[] = [];
+    if (carers === undefined || carers === null) return errors; // Not required, skip if not present
+    if (!Array.isArray(carers)) {
+      errors.push('carers must be an array');
+      return errors;
+    }
+    carers.forEach((c, idx) => {
+      if (typeof c === 'string') {
+        if (!c || typeof c !== 'string') {
+          errors.push(`carers[${idx}] must be a non-empty string (carerId)`);
+        }
+      } else if (typeof c === 'object' && c !== null) {
+        if (!('carerId' in c) || typeof c.carerId !== 'string' || !c.carerId) {
+          errors.push(`carers[${idx}].carerId is required and must be a non-empty string`);
+        }
+        if ('role' in c && typeof c.role !== 'string') {
+          errors.push(`carers[${idx}].role must be a string if present`);
+        }
+      } else {
+        errors.push(`carers[${idx}] must be a string (carerId) or object with carerId`);
+      }
+    });
+    return errors;
+  }
+
   private validateCreatePayload(body: any) {
     const errors: string[] = [];
     if (!body) errors.push('body required');
     if (!body.clientId || typeof body.clientId !== 'string') errors.push('clientId is required and must be a string');
     if (!body.title || typeof body.title !== 'string') errors.push('title is required and must be a string');
+    // Enum validation for status
+    if ('status' in body && body.status !== undefined && body.status !== null) {
+      if (typeof body.status !== 'string' || !CARE_PLAN_STATUS.includes(body.status)) {
+        errors.push(`status must be one of: ${CARE_PLAN_STATUS.join(', ')}`);
+      }
+    }
     // Nested validation for riskAssessment
     errors.push(...this.validateRiskAssessment(body.riskAssessment));
     // Nested validation for personalCare
     errors.push(...this.validatePersonalCare(body.personalCare));
     // Nested validation for everydayActivityPlan
     errors.push(...this.validateEverydayActivityPlan(body.everydayActivityPlan));
-  // Nested validation for fallsAndMobility
-  errors.push(...this.validateFallsAndMobility(body.fallsAndMobility));
-  // Nested validation for psychologicalInfo
-  errors.push(...this.validatePsychologicalInfo(body.psychologicalInfo));
-  // Nested validation for foodHydration
-  errors.push(...this.validateFoodHydration(body.foodHydration));
-  // Nested validation for routine
-  errors.push(...this.validateRoutine(body.routine));
-  // Nested validation for cultureValues
-  errors.push(...this.validateCultureValues(body.cultureValues));
-  // Nested validation for bodyMap
-  errors.push(...this.validateBodyMap(body.bodyMap));
-  // Nested validation for legalRequirement
-  errors.push(...this.validateLegalRequirement(body.legalRequirement));
-  // Nested validation for careRequirements
-  errors.push(...this.validateCareRequirements(body.careRequirements));
+    // Nested validation for fallsAndMobility
+    errors.push(...this.validateFallsAndMobility(body.fallsAndMobility));
+    // Nested validation for psychologicalInfo
+    errors.push(...this.validatePsychologicalInfo(body.psychologicalInfo));
+    // Nested validation for foodHydration
+    errors.push(...this.validateFoodHydration(body.foodHydration));
+    // Nested validation for routine
+    errors.push(...this.validateRoutine(body.routine));
+    // Nested validation for cultureValues
+    errors.push(...this.validateCultureValues(body.cultureValues));
+    // Nested validation for bodyMap
+    errors.push(...this.validateBodyMap(body.bodyMap));
+    // Nested validation for legalRequirement
+    errors.push(...this.validateLegalRequirement(body.legalRequirement));
+    // Nested validation for careRequirements
+    errors.push(...this.validateCareRequirements(body.careRequirements));
+    // Nested validation for medicalInfo
+    errors.push(...this.validateMedicalInfo(body.medicalInfo));
+    // Nested validation for movingHandling
+    errors.push(...this.validateMovingHandling(body.movingHandling));
+    // Validation for carers
+    errors.push(...this.validateCarers(body.carers));
     return errors;
   }
 
