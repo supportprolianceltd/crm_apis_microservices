@@ -33,7 +33,7 @@ class AuthMiddleware {
 
   constructor() {
     this.hs256Secret = process.env.JWT_SECRET || 'default-secret';
-    this.authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:8001';
+    this.authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8001';
     // Remove the automatic public key fetching - we'll do it per request
   }
 

@@ -1,5 +1,3 @@
-
-
 services:
   # Rostering Service
   rostering:
@@ -14,14 +12,12 @@ services:
       PORT: 3005
       DATABASE_URL: postgresql://postgres:password@rostering-db:5432/rostering_dev
       REDIS_URL: redis://rostering-redis:6379
-      AUTH_SERVICE_URL: https://server1.prolianceltd.com
-      # JWT_RS256_PUBLIC_KEY_URL: https://server1.prolianceltd.com/api/auth/public-key/
+      AUTH_SERVICE_URL: http://auth-service:8001
       JWT_SECRET: "django-insecure-va=ok0r=3)*b@ekd_c^+zkz&d)@*sd3sm$t(1o-n$yj)zwfked"
       NOMINATIM_URL: https://nominatim.openstreetmap.org
       DEFAULT_MATCHING_RADIUS: 5000
       EMAIL_POLLING_INTERVAL: 5
       LOG_LEVEL: debug
-      # Email configuration examples (add your actual credentials)
       TENANT_1_EMAIL_HOST: imap.gmail.com
       TENANT_1_EMAIL_PORT: 993
       TENANT_1_EMAIL_USER: your-email@gmail.com
@@ -35,7 +31,7 @@ services:
     volumes:
       - rostering-logs:/app/logs
     networks:
-      - rostering-network
+      - auth_service_default
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "const http = require('http'); const options = { hostname: 'localhost', port: 3005, path: '/api/v1/health', timeout: 2000 }; const req = http.request(options, (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }); req.on('error', () => process.exit(1)); req.end();"]
@@ -54,12 +50,12 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     ports:
-      - "5450:5432"  # Different port to avoid conflicts
+      - "5450:5432"
     volumes:
       - rostering-db-data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
-      - rostering-network
+      - auth_service_default
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d rostering_dev"]
@@ -72,11 +68,11 @@ services:
     image: redis:7-alpine
     container_name: rostering-redis
     ports:
-      - "6390:6379"  # Different port to avoid conflicts
+      - "6390:6379"
     volumes:
       - rostering-redis-data:/data
     networks:
-      - rostering-network
+      - auth_service_default
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -95,7 +91,7 @@ services:
       ADMINER_DEFAULT_SERVER: rostering-db
       ADMINER_DESIGN: lucas
     networks:
-      - rostering-network
+      - auth_service_default
     restart: unless-stopped
     depends_on:
       - rostering-db
@@ -111,7 +107,7 @@ services:
       HTTP_USER: admin
       HTTP_PASSWORD: admin
     networks:
-      - rostering-network
+      - auth_service_default
     restart: unless-stopped
     depends_on:
       - rostering-redis
@@ -125,6 +121,5 @@ volumes:
     driver: local
 
 networks:
-  rostering-network:
-    driver: bridge
-    name: rostering-network
+  auth_service_default:
+    external: true
