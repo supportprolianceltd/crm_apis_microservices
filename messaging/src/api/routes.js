@@ -1,9 +1,11 @@
 import { Router } from "express";
 import prisma from "../config/prisma.js";
 import chatsRouter from "./routes/chats.js";
+import messagesRouter from "./routes/messages.js";
 const apiRouter = Router();
 
 apiRouter.use("/", chatsRouter);
+apiRouter.use("/messages", messagesRouter);
 
 /**
  * @swagger
