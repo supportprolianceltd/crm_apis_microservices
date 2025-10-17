@@ -31,7 +31,7 @@ services:
     volumes:
       - rostering-logs:/app/logs
     networks:
-      - auth_service_default
+      - rostering-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "const http = require('http'); const options = { hostname: 'localhost', port: 3005, path: '/api/v1/health', timeout: 2000 }; const req = http.request(options, (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }); req.on('error', () => process.exit(1)); req.end();"]
@@ -69,6 +69,7 @@ services:
     container_name: rostering-redis
     ports:
       - "6390:6379"
+      - "6390:6379"
     volumes:
       - rostering-redis-data:/data
     networks:
@@ -92,6 +93,7 @@ services:
       ADMINER_DESIGN: lucas
     networks:
       - auth_service_default
+      - auth_service_default
     restart: unless-stopped
     depends_on:
       - rostering-db
@@ -107,6 +109,7 @@ services:
       HTTP_USER: admin
       HTTP_PASSWORD: admin
     networks:
+      - auth_service_default
       - auth_service_default
     restart: unless-stopped
     depends_on:
