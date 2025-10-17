@@ -412,7 +412,7 @@ model MedicalInformation {
   specialistContact                 String
   HospitalContact                   String
   EmergencyCareNotes                String
-  medicalReportUpload               String
+  medicalReportUpload               String?
   knownAllergies                    Boolean         @default(false)
   clientAllergies                   ClientAllergy[]
 
@@ -659,9 +659,9 @@ model LegalRequirement {
   attorneyEmail                 String
   solicitor                     String
   certificateNumber             String
-  certificateUpload             String
+  certificateUpload             String?
   digitalConsentsAndPermissions String[] @default([])
-  consertUpload                 String
+  consertUpload                 String?
 
   carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
