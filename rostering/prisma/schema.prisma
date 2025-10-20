@@ -428,6 +428,7 @@ model ClientAllergy {
   medicalInfoId              String
   allergy                    String
   severity                   String
+  allergyDetails             String
   allergyMedicationFrequency String
   allergyMedicationName      String
   allergyMedicationDosage    String
