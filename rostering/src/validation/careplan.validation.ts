@@ -651,6 +651,9 @@ function validateLegalRequirement(obj: any): string[] {
                 if (!('severity' in allergy) || typeof allergy.severity !== 'string') {
                   errors.push(`medicalInfo.clientAllergies[${idx}].severity is required and must be a string`);
                 }
+                if (!('allergyDetails' in allergy) || typeof allergy.allergyDetails !== 'string') {
+                  errors.push(`allergyDetails is required and must be a string`);
+                }
                 if (!('allergyMedicationFrequency' in allergy) || typeof allergy.allergyMedicationFrequency !== 'string') {
                   errors.push(`medicalInfo.clientAllergies[${idx}].allergyMedicationFrequency is required and must be a string`);
                 }
