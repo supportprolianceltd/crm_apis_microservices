@@ -15,10 +15,26 @@ function getUserFriendlyError(error: any): string {
   if (error?.code === 'P2003') {
     return 'Invalid reference to a related record.';
   }
-  if (error?.name === 'ValidationError') {
-    return 'Invalid data provided.';
+  if (error?.name === 'ValidationError' || error?.isValidationError) {
+    if (error.details) {
+      return `Invalid data provided: ${JSON.stringify(error.details)}`;
+    }
+    return error.message || 'Invalid data provided.';
   }
-  // Add more Prisma or validation error codes as needed
+  // Prisma 'Unknown argument' error
+  if (typeof error?.message === 'string' && error.message.includes('Unknown argument')) {
+    const match = error.message.match(/Unknown argument `(\w+)`/);
+    if (match && match[1]) {
+      return `You provided a field that does not exist in the schema: ${match[1]}. Please check your payload.`;
+    }
+    return 'You provided a field that does not exist in the schema. Please check your payload.';
+  }
+  if (error?.name === 'PrismaClientKnownRequestError' && error?.message) {
+    return error.message;
+  }
+  if (error?.message) {
+    return error.message;
+  }
   return 'An unexpected error occurred. Please try again or contact support.';
 }
 

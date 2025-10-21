@@ -15,33 +15,34 @@ const CARE_PLAN_STATUS = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
         errors.push(`status must be one of: ${CARE_PLAN_STATUS.join(', ')}`);
       }
     }
-    // Nested validation for riskAssessment
+
+    // Unknown field detection for top-level
+    const allowedTopLevel = [
+      'tenantId', 'clientId', 'title', 'description', 'startDate', 'endDate', 'status',
+      'riskAssessment', 'personalCare', 'everydayActivityPlan', 'fallsAndMobility',
+      'psychologicalInfo', 'foodHydration', 'routine', 'cultureValues', 'bodyMap',
+      'legalRequirement', 'careRequirements', 'medicalInfo', 'movingHandling', 'carers'
+    ];
+    Object.keys(body || {}).forEach(key => {
+      if (!allowedTopLevel.includes(key)) {
+        errors.push(`Unknown field at top-level: ${key}`);
+      }
+    });
+
+    // Nested validation for riskAssessment (with unknown field detection)
     errors.push(...validateRiskAssessment(body.riskAssessment));
-    // Nested validation for personalCare
     errors.push(...validatePersonalCare(body.personalCare));
-    // Nested validation for everydayActivityPlan
     errors.push(...validateEverydayActivityPlan(body.everydayActivityPlan));
-    // Nested validation for fallsAndMobility
     errors.push(...validateFallsAndMobility(body.fallsAndMobility));
-    // Nested validation for psychologicalInfo
     errors.push(...validatePsychologicalInfo(body.psychologicalInfo));
-    // Nested validation for foodHydration
     errors.push(...validateFoodHydration(body.foodHydration));
-    // Nested validation for routine
     errors.push(...validateRoutine(body.routine));
-    // Nested validation for cultureValues
     errors.push(...validateCultureValues(body.cultureValues));
-    // Nested validation for bodyMap
     errors.push(...validateBodyMap(body.bodyMap));
-    // Nested validation for legalRequirement
     errors.push(...validateLegalRequirement(body.legalRequirement));
-    // Nested validation for careRequirements
     errors.push(...validateCareRequirements(body.careRequirements));
-    // Nested validation for medicalInfo
     errors.push(...validateMedicalInfo(body.medicalInfo));
-    // Nested validation for movingHandling
     errors.push(...validateMovingHandling(body.movingHandling));
-    // Validation for carers
     errors.push(...validateCarers(body.carers));
     return errors;
   }
