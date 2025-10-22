@@ -1330,100 +1330,9 @@
 #             success=True,
 #         )
 #         return Response({"token": token})
-import json
-import logging
-import random
-import uuid
-from datetime import datetime, timedelta
 
-import jwt
-import requests
-from core.models import Tenant, UsernameIndex  # NEW: Import for global lookup
-from django.conf import settings
-from django.contrib.auth import authenticate, get_user_model
-from django.core.cache import cache
-from django.db import connection
-from django.utils import timezone
-from django_tenants.utils import tenant_context
-from jose import jwk
-from kafka import KafkaProducer
-from rest_framework import serializers, status
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.serializers import (
-    TokenObtainPairSerializer
-)
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
-from users.models import (
-    BlacklistedToken,
-    BlockedIP,
-    CustomUser,
-    RSAKeyPair,
-    UserActivity,
-    UserProfile,
-)
-from users.serializers import (
-    CustomUserMinimalSerializer,
-    CustomUserSerializer,
-)
 
-from auth_service.authentication import RS256TenantJWTAuthentication
-from auth_service.utils.jwt_rsa import (
-    blacklist_refresh_token,
-    decode_rsa_jwt,
-    issue_rsa_jwt,
-)
 
-logger = logging.getLogger(__name__)
-
-class TokenValidateView(APIView):
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [RS256TenantJWTAuthentication]
-
-    def get(self, request):
-        logger.info(f"TokenValidateView request payload: {request.headers}")
-        try:
-            # TEMPORARILY COMMENT THIS OUT FOR DEVELOPMENT
-            # forwarded_by_gateway = request.headers.get('X-Gateway-Request-ID')
-            # if not forwarded_by_gateway:
-            #     logger.warning("Token validation request not from gateway")
-            #     return Response({
-            #         "status": "error", 
-            #         "message": "Invalid request source"
-            #     }, status=status.HTTP_400_BAD_REQUEST)
-                
-            user = request.user
-            tenant = getattr(request, "tenant", None)
-            
-            if not tenant:
-                return Response({
-                    "status": "error", 
-                    "message": "Tenant context missing"
-                }, status=status.HTTP_400_BAD_REQUEST)
-                
-            with tenant_context(tenant):
-                user_data = CustomUserSerializer(user).data
-                response_data = {
-                    "status": "success",
-                    "user": user_data,
-                    "tenant_id": str(tenant.id),
-                    "tenant_organizational_id": str(tenant.organizational_id),
-                    "tenant_unique_id": str(tenant.unique_id),
-                    "tenant_schema": tenant.schema_name,
-                }
-                logger.info("Token validation successful")
-                return Response(response_data, status=status.HTTP_200_OK)
-                
-        except Exception as e:
-            logger.error(f"Token validation failed: {str(e)}")
-            return Response({
-                "status": "error", 
-                "message": "Token validation failed",
-                "code": "TOKEN_INVALID"
-            }, status=status.HTTP_401_UNAUTHORIZED)
-        
 
 # class CustomTokenSerializer(TokenObtainPairSerializer):
 #     # Override the default username field to be optional
@@ -1852,6 +1761,223 @@ class TokenValidateView(APIView):
 
 # class CustomTokenObtainPairView(TokenObtainPairView):
 #     serializer_class = CustomTokenSerializer
+
+
+# class LoginWith2FAView(TokenObtainPairView):
+#     serializer_class = CustomTokenSerializer
+#     permission_classes = [AllowAny]
+
+#     def post(self, request, *args, **kwargs):
+#         ip_address = request.META.get("REMOTE_ADDR")
+#         user_agent = request.META.get("HTTP_USER_AGENT", "")
+#         tenant = getattr(request, "tenant", None)
+
+#         if not tenant:
+#             UserActivity.objects.create(
+#                 user=None,
+#                 tenant=Tenant.objects.first(),
+#                 action="login",
+#                 performed_by=None,
+#                 details={"reason": "Tenant not found"},
+#                 ip_address=ip_address,
+#                 user_agent=user_agent,
+#                 success=False,
+#             )
+#             return Response({"detail": "Tenant not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         with tenant_context(tenant):
+#             serializer = self.get_serializer(data=request.data, context={"request": request})
+#             try:
+#                 serializer.is_valid(raise_exception=True)
+#             except serializers.ValidationError as e:
+#                 identifier = request.data.get("email") or request.data.get("username")
+#                 # Updated: Use global index for username resolution in error logging
+#                 if '@' not in identifier:
+#                     try:
+#                         index_entry = UsernameIndex.objects.get(username=identifier)
+#                         user = CustomUser.objects.get(id=index_entry.user_id)
+#                     except (UsernameIndex.DoesNotExist, CustomUser.DoesNotExist):
+#                         user = None
+#                 else:
+#                     user = CustomUser.objects.filter(email=identifier, tenant=tenant).first()
+#                 method = "username" if request.data.get("username") else "email"
+#                 UserActivity.objects.create(
+#                     user=user,
+#                     tenant=tenant,
+#                     action="login",
+#                     performed_by=None,
+#                     details={"reason": f"Invalid credentials ({method}): {str(e)}"},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=False,
+#                 )
+#                 return Response(e.detail, status=status.HTTP_401_UNAUTHORIZED)
+
+#             user = serializer.user
+#             method = "username" if request.data.get("username") else "email"
+#             if user.is_locked or user.status == "suspended" or not user.is_active:
+#                 UserActivity.objects.create(
+#                     user=user,
+#                     tenant=tenant,
+#                     action="login",
+#                     performed_by=None,
+#                     details={"reason": "Account locked or suspended", "method": method},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=False,
+#                 )
+#                 return Response({"detail": "Account is locked or suspended."}, status=status.HTTP_403_FORBIDDEN)
+
+#             if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
+#                 UserActivity.objects.create(
+#                     user=user,
+#                     tenant=tenant,
+#                     action="login",
+#                     performed_by=None,
+#                     details={"reason": "IP address blocked", "method": method},
+#                     ip_address=ip_address,
+#                     user_agent=user_agent,
+#                     success=False,
+#                 )
+#                 return Response({"detail": "This IP address is blocked."}, status=status.HTTP_403_FORBIDDEN)
+
+#             code = f"{random.randint(100000, 999999)}"
+#             cache.set(f"2fa_{user.id}", code, timeout=300)
+#             event_payload = {
+#                 "data": {
+#                     "user_email": user.email,
+#                     "2fa_code": code,
+#                     "2fa_method": "email",
+#                     "ip_address": ip_address,
+#                     "user_agent": user_agent,
+#                     "login_method": method,  # New
+#                     "expires_in_seconds": 300,
+#                 },
+#                 "metadata": {
+#                     "event_id": f"evt-{uuid.uuid4()}",
+#                     "event_type": "auth.2fa.code.requested",
+#                     "created_at": datetime.utcnow().isoformat() + "Z",
+#                     "source": "auth-service",
+#                     "tenant_id": str(getattr(tenant, "id", "unknown")),
+#                 },
+#             }
+#             try:
+#                 requests.post(settings.NOTIFICATIONS_EVENT_URL, json=event_payload, timeout=3)
+#             except Exception as e:
+#                 logger.error(f"Failed to send 2FA event notification: {e}")
+
+#             UserActivity.objects.create(
+#                 user=user,
+#                 tenant=tenant,
+#                 action="login",
+#                 performed_by=None,
+#                 details={"reason": "2FA code sent", "method": method},
+#                 ip_address=ip_address,
+#                 user_agent=user_agent,
+#                 success=False,
+#             )
+#             return Response({"detail": "2FA code sent to your email.", "2fa_code": code}, status=200)
+
+
+
+
+import json
+import logging
+import random
+import uuid
+from datetime import datetime, timedelta
+
+import jwt
+import requests
+from core.models import Tenant, UsernameIndex  # NEW: Import for global lookup
+from django.conf import settings
+from django.contrib.auth import authenticate, get_user_model
+from django.core.cache import cache
+from django.db import connection
+from django.utils import timezone
+from django_tenants.utils import tenant_context
+from jose import jwk
+from kafka import KafkaProducer
+from rest_framework import serializers, status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.serializers import (
+    TokenObtainPairSerializer
+)
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from users.models import (
+    BlacklistedToken,
+    BlockedIP,
+    CustomUser,
+    RSAKeyPair,
+    UserActivity,
+    UserProfile,
+)
+from users.serializers import (
+    CustomUserMinimalSerializer,
+    CustomUserSerializer,
+)
+
+from auth_service.authentication import RS256TenantJWTAuthentication
+from auth_service.utils.jwt_rsa import (
+    blacklist_refresh_token,
+    decode_rsa_jwt,
+    issue_rsa_jwt,
+)
+
+logger = logging.getLogger(__name__)
+
+class TokenValidateView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [RS256TenantJWTAuthentication]
+
+    def get(self, request):
+        logger.info(f"TokenValidateView request payload: {request.headers}")
+        try:
+            # TEMPORARILY COMMENT THIS OUT FOR DEVELOPMENT
+            # forwarded_by_gateway = request.headers.get('X-Gateway-Request-ID')
+            # if not forwarded_by_gateway:
+            #     logger.warning("Token validation request not from gateway")
+            #     return Response({
+            #         "status": "error", 
+            #         "message": "Invalid request source"
+            #     }, status=status.HTTP_400_BAD_REQUEST)
+                
+            user = request.user
+            tenant = getattr(request, "tenant", None)
+            
+            if not tenant:
+                return Response({
+                    "status": "error", 
+                    "message": "Tenant context missing"
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+            with tenant_context(tenant):
+                user_data = CustomUserSerializer(user).data
+                response_data = {
+                    "status": "success",
+                    "user": user_data,
+                    "tenant_id": str(tenant.id),
+                    "tenant_organizational_id": str(tenant.organizational_id),
+                    "tenant_unique_id": str(tenant.unique_id),
+                    "tenant_schema": tenant.schema_name,
+                }
+                logger.info("Token validation successful")
+                return Response(response_data, status=status.HTTP_200_OK)
+                
+        except Exception as e:
+            logger.error(f"Token validation failed: {str(e)}")
+            return Response({
+                "status": "error", 
+                "message": "Token validation failed",
+                "code": "TOKEN_INVALID"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+
+
+
 
 import json
 import logging
@@ -2293,6 +2419,8 @@ class LoginWith2FAView(APIView):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenSerializer
 
+
+
 class CustomTokenRefreshView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []  # Add this line to disable authentication
@@ -2455,120 +2583,8 @@ class CustomTokenRefreshView(APIView):
             )
             return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
-# class LoginWith2FAView(TokenObtainPairView):
-#     serializer_class = CustomTokenSerializer
-#     permission_classes = [AllowAny]
 
-#     def post(self, request, *args, **kwargs):
-#         ip_address = request.META.get("REMOTE_ADDR")
-#         user_agent = request.META.get("HTTP_USER_AGENT", "")
-#         tenant = getattr(request, "tenant", None)
 
-#         if not tenant:
-#             UserActivity.objects.create(
-#                 user=None,
-#                 tenant=Tenant.objects.first(),
-#                 action="login",
-#                 performed_by=None,
-#                 details={"reason": "Tenant not found"},
-#                 ip_address=ip_address,
-#                 user_agent=user_agent,
-#                 success=False,
-#             )
-#             return Response({"detail": "Tenant not found."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         with tenant_context(tenant):
-#             serializer = self.get_serializer(data=request.data, context={"request": request})
-#             try:
-#                 serializer.is_valid(raise_exception=True)
-#             except serializers.ValidationError as e:
-#                 identifier = request.data.get("email") or request.data.get("username")
-#                 # Updated: Use global index for username resolution in error logging
-#                 if '@' not in identifier:
-#                     try:
-#                         index_entry = UsernameIndex.objects.get(username=identifier)
-#                         user = CustomUser.objects.get(id=index_entry.user_id)
-#                     except (UsernameIndex.DoesNotExist, CustomUser.DoesNotExist):
-#                         user = None
-#                 else:
-#                     user = CustomUser.objects.filter(email=identifier, tenant=tenant).first()
-#                 method = "username" if request.data.get("username") else "email"
-#                 UserActivity.objects.create(
-#                     user=user,
-#                     tenant=tenant,
-#                     action="login",
-#                     performed_by=None,
-#                     details={"reason": f"Invalid credentials ({method}): {str(e)}"},
-#                     ip_address=ip_address,
-#                     user_agent=user_agent,
-#                     success=False,
-#                 )
-#                 return Response(e.detail, status=status.HTTP_401_UNAUTHORIZED)
-
-#             user = serializer.user
-#             method = "username" if request.data.get("username") else "email"
-#             if user.is_locked or user.status == "suspended" or not user.is_active:
-#                 UserActivity.objects.create(
-#                     user=user,
-#                     tenant=tenant,
-#                     action="login",
-#                     performed_by=None,
-#                     details={"reason": "Account locked or suspended", "method": method},
-#                     ip_address=ip_address,
-#                     user_agent=user_agent,
-#                     success=False,
-#                 )
-#                 return Response({"detail": "Account is locked or suspended."}, status=status.HTTP_403_FORBIDDEN)
-
-#             if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
-#                 UserActivity.objects.create(
-#                     user=user,
-#                     tenant=tenant,
-#                     action="login",
-#                     performed_by=None,
-#                     details={"reason": "IP address blocked", "method": method},
-#                     ip_address=ip_address,
-#                     user_agent=user_agent,
-#                     success=False,
-#                 )
-#                 return Response({"detail": "This IP address is blocked."}, status=status.HTTP_403_FORBIDDEN)
-
-#             code = f"{random.randint(100000, 999999)}"
-#             cache.set(f"2fa_{user.id}", code, timeout=300)
-#             event_payload = {
-#                 "data": {
-#                     "user_email": user.email,
-#                     "2fa_code": code,
-#                     "2fa_method": "email",
-#                     "ip_address": ip_address,
-#                     "user_agent": user_agent,
-#                     "login_method": method,  # New
-#                     "expires_in_seconds": 300,
-#                 },
-#                 "metadata": {
-#                     "event_id": f"evt-{uuid.uuid4()}",
-#                     "event_type": "auth.2fa.code.requested",
-#                     "created_at": datetime.utcnow().isoformat() + "Z",
-#                     "source": "auth-service",
-#                     "tenant_id": str(getattr(tenant, "id", "unknown")),
-#                 },
-#             }
-#             try:
-#                 requests.post(settings.NOTIFICATIONS_EVENT_URL, json=event_payload, timeout=3)
-#             except Exception as e:
-#                 logger.error(f"Failed to send 2FA event notification: {e}")
-
-#             UserActivity.objects.create(
-#                 user=user,
-#                 tenant=tenant,
-#                 action="login",
-#                 performed_by=None,
-#                 details={"reason": "2FA code sent", "method": method},
-#                 ip_address=ip_address,
-#                 user_agent=user_agent,
-#                 success=False,
-#             )
-#             return Response({"detail": "2FA code sent to your email.", "2fa_code": code}, status=200)
 
 class Verify2FAView(APIView):
     permission_classes = [AllowAny]
@@ -2783,3 +2799,5 @@ class JitsiTokenView(APIView):
             success=True,
         )
         return Response({"token": token})
+
+
