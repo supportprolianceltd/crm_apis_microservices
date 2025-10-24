@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, RequestStatus, MatchStatus } from '@prisma/client';
 import { GeocodingService } from '../services/geocoding.service';
 import { MatchingService } from '../services/matching.service';
 import { ClusteringService } from '../services/clustering.service';
@@ -30,16 +30,12 @@ const createRequestSchema = z.object({
   notes: z.string().optional()
 });
 
-const updateRequestSchema = createRequestSchema.partial().omit({ 
-  subject: true, 
-  content: true, 
-  requestorEmail: true 
-}).extend({
-  status: z.enum(['PENDING', 'PROCESSING', 'MATCHED', 'ASSIGNED', 'COMPLETED', 'CANCELLED', 'FAILED']).optional()
+const updateRequestSchema = createRequestSchema.partial().omit({}).extend({
+  status: z.enum(['PENDING', 'PROCESSING', 'MATCHED', 'APPROVED', 'COMPLETED', 'DECLINED', 'FAILED']).optional()
 });
 
 const searchRequestsSchema = z.object({
-  status: z.enum(['PENDING', 'PROCESSING', 'MATCHED', 'ASSIGNED', 'COMPLETED', 'CANCELLED', 'FAILED']).optional(),
+  status: z.enum(['PENDING', 'PROCESSING', 'MATCHED', 'APPROVED', 'COMPLETED', 'DECLINED', 'FAILED']).optional(),
   urgency: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   postcode: z.string().optional(),
   dateFrom: z.string().datetime().optional(),
@@ -118,7 +114,7 @@ export class RequestController {
           scheduledStartTime: validatedData.scheduledStartTime ? new Date(validatedData.scheduledStartTime) : undefined,
           scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
           notes: validatedData.notes,
-          status: 'PENDING',
+          status: RequestStatus.PENDING,
           clusterId
         }
       });
@@ -182,6 +178,49 @@ export class RequestController {
         error: 'Failed to create request',
         message: 'Internal server error'
       });
+    }
+  };
+
+  /**
+   * Get requests for current tenant by status (path param)
+   * Example: GET /requests/status/PENDING
+   */
+  getRequestsByStatus = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const tenantId = req.user!.tenantId.toString();
+      const statusParam = (req.params.status || '').toUpperCase();
+
+      // Validate status against generated Prisma enum values
+      const validStatuses = Object.values(RequestStatus) as string[];
+      if (!validStatuses.includes(statusParam)) {
+        res.status(400).json({ success: false, error: 'Invalid status', valid: validStatuses });
+        return;
+      }
+
+      const requests = await this.prisma.externalRequest.findMany({
+        where: {
+          tenantId,
+          status: statusParam as unknown as RequestStatus
+        },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          matches: {
+            select: {
+              id: true,
+              status: true,
+              matchScore: true,
+              distance: true
+            },
+            orderBy: { matchScore: 'desc' },
+            take: 5
+          }
+        }
+      });
+
+      res.json({ success: true, data: requests });
+    } catch (error) {
+      logServiceError('Request', 'getRequestsByStatus', error, { status: req.params.status, tenantId: req.user?.tenantId });
+      res.status(500).json({ success: false, error: 'Failed to get requests by status' });
     }
   };
 
@@ -586,6 +625,121 @@ export class RequestController {
         success: false,
         error: 'Failed to trigger matching'
       });
+    }
+  };
+
+  /**
+   * Approve a request (mark as PROCESSING).
+   * Assumption: Approving moves a PENDING request into PROCESSING and sets processedAt.
+   */
+  approveRequest = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const tenantId = req.user!.tenantId.toString();
+      const requestId = req.params.id;
+
+      const existingRequest = await this.prisma.externalRequest.findFirst({
+        where: { id: requestId, tenantId }
+      });
+
+      if (!existingRequest) {
+        res.status(404).json({ success: false, error: 'Request not found' });
+        return;
+      }
+
+      if (existingRequest.status === RequestStatus.DECLINED || existingRequest.status === RequestStatus.COMPLETED) {
+        res.status(400).json({ success: false, error: `Cannot approve a request with status ${existingRequest.status}` });
+        return;
+      }
+
+      // Optional metadata from body (who approved)
+      const { approvedBy } = req.body as { approvedBy?: string };
+
+      const updateData: any = {
+        status: RequestStatus.APPROVED,
+        processedAt: new Date(),
+        approvedAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      if (approvedBy) {
+        updateData.approvedBy = approvedBy;
+      }
+
+      const updated = await this.prisma.externalRequest.update({
+        where: { id: requestId },
+        data: updateData
+      });
+
+      // Kick off matching again in background to ensure processing continues
+      this.matchingService.autoMatchRequest(requestId).catch(error =>
+        logServiceError('Request', 'autoMatchAfterApprove', error, { requestId })
+      );
+
+      logger.info(`Approved request ${requestId}`, { tenantId, requestId });
+
+      res.json({ success: true, data: updated, message: 'Request approved and set to processing' });
+
+    } catch (error) {
+       console.error('Approve request error:', error);
+      logServiceError('Request', 'approveRequest', error, { requestId: req.params.id });
+      res.status(500).json({ success: false, error: 'Failed to approve request' });
+    }
+  };
+
+  /**
+   * Decline a request (mark as DECLINED). Optionally accepts a reason in body.reason.
+   */
+  declineRequest = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const tenantId = req.user!.tenantId.toString();
+      const requestId = req.params.id;
+
+      const existingRequest = await this.prisma.externalRequest.findFirst({
+        where: { id: requestId, tenantId }
+      });
+
+      if (!existingRequest) {
+        res.status(404).json({ success: false, error: 'Request not found' });
+        return;
+      }
+
+      if (existingRequest.status === RequestStatus.DECLINED || existingRequest.status === RequestStatus.COMPLETED) {
+        res.status(400).json({ success: false, error: `Cannot decline a request with status ${existingRequest.status}` });
+        return;
+      }
+
+      const { reason } = req.body as { reason?: string };
+
+      // Use a transaction to update request and cancel any outstanding matches
+      const updated = await this.prisma.$transaction(async (tx) => {
+        // Cancel request matches
+        await tx.requestCarerMatch.updateMany({
+          where: { requestId },
+          data: { status: MatchStatus.DECLINED }
+        });
+
+        const notes = [existingRequest.notes, reason ? `Decline reason: ${reason}` : null].filter(Boolean).join('\n');
+
+        const u = await tx.externalRequest.update({
+          where: { id: requestId },
+          data: {
+            status: RequestStatus.DECLINED,
+            processedAt: new Date(),
+            notes: notes || undefined,
+            updatedAt: new Date()
+          }
+        });
+
+        return u;
+      });
+
+      logger.info(`Declined request ${requestId}`, { tenantId, requestId });
+
+      res.json({ success: true, data: updated, message: 'Request declined and cancelled' });
+
+    } catch (error) {
+      logServiceError('Request', 'declineRequest', error, { requestId: req.params.id });
+      res.status(500).json({ success: false, error: 'Failed to decline request' });
     }
   };
 }

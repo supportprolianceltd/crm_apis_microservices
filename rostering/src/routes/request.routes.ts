@@ -16,9 +16,14 @@ export function createRequestRoutes(requestController: RequestController): Route
   router.get('/:id', requestController.getRequest);
   router.put('/:id', requestController.updateRequest);
   router.delete('/:id', requestController.deleteRequest);
+  router.patch('/:id', requestController.updateRequest)
+  router.get('/status/:status', requestController.getRequestsByStatus);
 
   // Matching operations
   router.post('/:id/match', requestController.triggerMatching);
+  // Approve / decline operations
+  router.post('/:id/approve', requestController.approveRequest);
+  router.post('/:id/decline', requestController.declineRequest);
 
   return router;
 }
