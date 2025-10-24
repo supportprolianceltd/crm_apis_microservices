@@ -34,6 +34,8 @@ model ExternalRequest {
   notes              String?                                @db.Text
   emailMessageId     String? // Original email message ID
   emailThreadId      String? // Email thread/conversation ID
+  approvedBy         String?
+  approvedAt         DateTime?
 
   // Clustering
   clusterId String?
@@ -46,7 +48,6 @@ model ExternalRequest {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   processedAt DateTime?
-
   @@index([tenantId])
   @@index([status])
   @@index([urgency])
@@ -720,9 +721,9 @@ enum RequestStatus {
   PENDING
   PROCESSING
   MATCHED
-  ASSIGNED
+  APPROVED
   COMPLETED
-  CANCELLED
+  DECLINED
   FAILED
 }
 
