@@ -81,8 +81,9 @@ export class RequestController {
       let clusterId: string | undefined;
       let cluster: any = null;
 
-      // Find or create cluster if we have coordinates
-      if (geocoded?.latitude && geocoded?.longitude) {
+  // Find or create cluster if we have coordinates
+  // Controlled by AUTO_ASSIGN_REQUESTS env var. Automatic assignment only runs when AUTO_ASSIGN_REQUESTS === 'true'.
+  if (process.env.AUTO_ASSIGN_REQUESTS === 'true' && geocoded?.latitude && geocoded?.longitude) {
         try {
           cluster = await this.clusteringService.findOrCreateClusterForLocation(
             tenantId,

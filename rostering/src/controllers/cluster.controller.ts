@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, RequestStatus } from '@prisma/client';
 import { ClusteringService } from '../services/clustering.service';
 
 export class ClusterController {
@@ -7,6 +7,61 @@ export class ClusterController {
 
   constructor(private prisma: PrismaClient) {
     this.clusteringService = new ClusteringService(prisma);
+  }
+
+  /**
+   * Create a new cluster for the tenant
+   */
+  public async createCluster(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) {
+        return res.status(403).json({ error: 'tenantId missing from auth context' });
+      }
+
+      const { name, description, latitude, longitude, radiusMeters } = req.body;
+
+      if (!name) {
+        return res.status(400).json({ error: 'name is required' });
+      }
+
+      // Create cluster without PostGIS regionCenter first
+      const created = await (this.prisma as any).cluster.create({
+        data: {
+          tenantId: tenantId.toString(),
+          name,
+          description: description || null,
+          latitude: typeof latitude === 'number' ? latitude : null,
+          longitude: typeof longitude === 'number' ? longitude : null,
+          radiusMeters: typeof radiusMeters === 'number' ? radiusMeters : 5000,
+          activeRequestCount: 0,
+          totalRequestCount: 0,
+          activeCarerCount: 0,
+          totalCarerCount: 0,
+          lastActivityAt: new Date()
+        }
+      });
+
+      // If lat/lng provided, update PostGIS regionCenter via raw SQL
+      if (latitude !== undefined && longitude !== undefined && latitude !== null && longitude !== null) {
+        try {
+          await this.prisma.$executeRaw`
+            UPDATE clusters
+            SET "regionCenter" = ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography
+            WHERE id = ${created.id}
+          `;
+        } catch (err) {
+          console.error('Failed to set regionCenter for cluster', err);
+        }
+      }
+
+      const cluster = await (this.prisma as any).cluster.findUnique({ where: { id: created.id } });
+
+      return res.status(201).json(cluster);
+    } catch (error: any) {
+      console.error('createCluster error', error);
+      return res.status(500).json({ error: 'Failed to create cluster', details: error?.message });
+    }
   }
 
   /**
@@ -209,6 +264,59 @@ export class ClusterController {
     } catch (error: any) {
       console.error('assignCarerToCluster error', error);
       return res.status(500).json({ error: 'Failed to assign carer to cluster', details: error?.message });
+    }
+  }
+
+  /**
+   * Manually assign a request to a cluster
+   * POST /clusters/:clusterId/assign-request/:requestId
+   */
+  public async assignRequestToCluster(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) {
+        return res.status(403).json({ error: 'tenantId missing from auth context' });
+      }
+
+      const { clusterId, requestId } = req.params as { clusterId?: string; requestId?: string };
+      if (!clusterId || !requestId) {
+        return res.status(400).json({ error: 'clusterId and requestId are required in path' });
+      }
+
+      // Verify cluster belongs to tenant
+      const cluster = await (this.prisma as any).cluster.findFirst({ where: { id: clusterId, tenantId: tenantId.toString() } });
+      if (!cluster) {
+        return res.status(404).json({ error: 'Cluster not found' });
+      }
+
+        // Verify request belongs to tenant
+        const existingRequest = await (this.prisma as any).externalRequest.findFirst({ where: { id: requestId, tenantId: tenantId.toString() } });
+        if (!existingRequest) {
+          return res.status(404).json({ error: 'Request not found' });
+        }
+
+        // Only allow assigning requests that are APPROVED
+        if (existingRequest.status !== RequestStatus.APPROVED) {
+          return res.status(400).json({ error: 'Only requests with status APPROVED can be assigned to a cluster' });
+        }
+
+      // Update the request with the clusterId
+      const updatedRequest = await (this.prisma as any).externalRequest.update({
+        where: { id: requestId },
+        data: { clusterId }
+      });
+
+      // Update cluster statistics asynchronously
+      this.clusteringService.updateClusterStats(clusterId).catch((err) => console.error('updateClusterStats after assignRequest failed', err));
+
+      return res.json({
+        success: true,
+        data: updatedRequest,
+        message: 'Request assigned to cluster successfully'
+      });
+    } catch (error: any) {
+      console.error('assignRequestToCluster error', error);
+      return res.status(500).json({ error: 'Failed to assign request to cluster', details: error?.message });
     }
   }
 }

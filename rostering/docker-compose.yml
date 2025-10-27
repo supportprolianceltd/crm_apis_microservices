@@ -12,7 +12,7 @@ services:
       PORT: 3005
       DATABASE_URL: postgresql://postgres:password@rostering-db:5432/rostering_dev
       REDIS_URL: redis://rostering-redis:6379
-      AUTH_SERVICE_URL: https://server1.prolianceltd.com
+      AUTH_SERVICE_URL: http://auth-service:8001
       JWT_SECRET: "django-insecure-va=ok0r=3)*b@ekd_c^+zkz&d)@*sd3sm$t(1o-n$yj)zwfked"
       NOMINATIM_URL: https://nominatim.openstreetmap.org
       DEFAULT_MATCHING_RADIUS: 5000
