@@ -14,7 +14,6 @@ from datetime import date, timedelta
 logger = logging.getLogger('hr_rewards_penalties')
 
 
-
 def current_date():
     return timezone.now().date()  # Call the method to get the actual date
 
@@ -50,7 +49,7 @@ class Status(Enum):
 def validate_details_json(value):
     if not isinstance(value, dict):
         raise ValidationError("Details must be a dictionary.")
-    required_keys = ['id', 'email', 'first_name', 'last_name', 'job_role', 'department']
+    required_keys = ['email', 'first_name', 'last_name', 'job_role', 'department']
     for key in required_keys:
         if key not in value:
             raise ValidationError(f"Details must include '{key}'.")
@@ -96,7 +95,7 @@ class BaseRewardsPenaltyModel(models.Model):
     id = models.CharField(max_length=50, primary_key=True, editable=False)
     tenant_id = models.UUIDField(db_index=True)
     tenant_domain = models.CharField(max_length=255, blank=True, null=True)
-    employee_id = models.UUIDField(db_index=True)
+    # employee_id = models.UUIDField(db_index=True)
     employee_details = JSONField(validators=[validate_details_json])
     date_issued = models.DateField(default=current_date)
     effective_date = models.DateField(null=True, blank=True)
@@ -135,7 +134,7 @@ class BaseRewardsPenaltyModel(models.Model):
         indexes = [
             models.Index(fields=['tenant_id', 'status']),
             models.Index(fields=['tenant_id', 'date_issued']),
-            models.Index(fields=['employee_id', 'tenant_id']),
+            # models.Index(fields=['employee_id', 'tenant_id']),
         ]
 
     def soft_delete(self):
@@ -151,7 +150,7 @@ class BaseRewardsPenaltyModel(models.Model):
 class Reward(BaseRewardsPenaltyModel):
     code = models.CharField(max_length=50, editable=False)
     type = models.CharField(max_length=50, choices=[(tag.value, tag.name) for tag in RewardType], default=RewardType.BONUS.value)
-    value = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Monetary or points
+    value = models.CharField(max_length=100, blank=True)  # Monetary or points
     value_type = models.CharField(max_length=20, choices=[('monetary', 'Monetary'), ('points', 'Points')], default='monetary')
     duration_days = models.PositiveIntegerField(null=True, blank=True)  # e.g., for extra PTO
     announcement_channel = models.CharField(max_length=100, blank=True)  # e.g., 'company-wide', 'department'

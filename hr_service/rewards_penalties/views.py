@@ -18,7 +18,8 @@ from rest_framework.pagination import PageNumberPagination
 from django.conf import settings
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
-
+# Add these imports if not already present
+from .serializers import get_user_data_from_jwt
 
 logger = logging.getLogger('hr_rewards_penalties')
 
@@ -221,3 +222,62 @@ class PenaltyRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         # close_old_connections()
         instance.soft_delete()  # Use the model's soft delete instead of hard delete
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+
+# Add these new views to hr/rewards_penalties/views.py after the existing views
+
+class UserRewardsListView(generics.ListAPIView):
+    serializer_class = RewardSerializer
+    pagination_class = CustomPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['status', 'type', 'is_public']
+    search_fields = ['reason', 'description']
+
+    def get_queryset(self):
+        close_old_connections()
+        if getattr(self, "swagger_fake_view", False):
+            return Reward.objects.none()
+        try:
+            user_data = get_user_data_from_jwt(self.request)
+            email = user_data['email']
+        except ValidationError:
+            logger.error("Failed to extract user email from JWT")
+            return Reward.objects.none()
+        jwt_payload = getattr(self.request, 'jwt_payload', {})
+        tenant_id = jwt_payload.get('tenant_unique_id')
+        if not tenant_id:
+            logger.error("No tenant_id in token")
+            return Reward.objects.none()
+        return Reward.objects.filter(
+            tenant_id=tenant_id,
+            employee_details__email=email
+        ).order_by('-date_issued')
+
+
+class UserPenaltiesListView(generics.ListAPIView):
+    serializer_class = PenaltySerializer
+    pagination_class = CustomPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['status', 'type', 'severity_level']
+    search_fields = ['reason', 'description', 'legal_compliance_notes']
+
+    def get_queryset(self):
+        close_old_connections()
+        if getattr(self, "swagger_fake_view", False):
+            return Penalty.objects.none()
+        try:
+            user_data = get_user_data_from_jwt(self.request)
+            email = user_data['email']
+        except ValidationError:
+            logger.error("Failed to extract user email from JWT")
+            return Penalty.objects.none()
+        jwt_payload = getattr(self.request, 'jwt_payload', {})
+        tenant_id = jwt_payload.get('tenant_unique_id')
+        if not tenant_id:
+            logger.error("No tenant_id in token")
+            return Penalty.objects.none()
+        return Penalty.objects.filter(
+            tenant_id=tenant_id,
+            employee_details__email=email
+        ).order_by('-date_issued')

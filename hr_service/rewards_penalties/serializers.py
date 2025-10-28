@@ -57,7 +57,7 @@ class BaseRewardsPenaltySerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = [
-            'id', 'code', 'tenant_id', 'tenant_domain', 'employee_id', 'employee_details',
+            'id', 'code', 'tenant_id', 'tenant_domain', 'employee_details',
             'date_issued', 'effective_date', 'reason', 'description', 'status',
             'approver_id', 'approver_details', 'created_by_id', 'created_by_details',
             'updated_by_id', 'updated_by_details', 'is_deleted', 'created_at', 'updated_at',
