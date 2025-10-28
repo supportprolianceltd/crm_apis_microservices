@@ -36,6 +36,7 @@ model ExternalRequest {
   emailThreadId      String? // Email thread/conversation ID
   approvedBy         String?
   approvedAt         DateTime?
+  sendToRostering    Boolean
 
   // Clustering
   clusterId String?

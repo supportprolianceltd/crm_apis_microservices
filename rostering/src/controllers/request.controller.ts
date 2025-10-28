@@ -97,27 +97,34 @@ export class RequestController {
       }
 
       // Create the request
+      const createData: any = {
+        tenantId,
+        subject: validatedData.subject,
+        content: validatedData.content,
+        requestorEmail: validatedData.requestorEmail,
+        requestorName: validatedData.requestorName,
+        requestorPhone: validatedData.requestorPhone,
+        address: validatedData.address,
+        postcode: validatedData.postcode || '',
+        latitude: geocoded?.latitude,
+        longitude: geocoded?.longitude,
+        urgency: validatedData.urgency || 'MEDIUM',
+        requirements: validatedData.requirements,
+        estimatedDuration: validatedData.estimatedDuration,
+        scheduledStartTime: validatedData.scheduledStartTime ? new Date(validatedData.scheduledStartTime) : undefined,
+        scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
+        notes: validatedData.notes,
+        status: RequestStatus.PENDING,
+        endToRostering: false
+      };
+
+      // If we have a cluster, connect the relation instead of setting clusterId directly
+      if (clusterId) {
+        createData.cluster = { connect: { id: clusterId } };
+      }
+
       const request = await this.prisma.externalRequest.create({
-        data: {
-          tenantId,
-          subject: validatedData.subject,
-          content: validatedData.content,
-          requestorEmail: validatedData.requestorEmail,
-          requestorName: validatedData.requestorName,
-          requestorPhone: validatedData.requestorPhone,
-          address: validatedData.address,
-          postcode: validatedData.postcode || '',
-          latitude: geocoded?.latitude,
-          longitude: geocoded?.longitude,
-          urgency: validatedData.urgency || 'MEDIUM',
-          requirements: validatedData.requirements,
-          estimatedDuration: validatedData.estimatedDuration,
-          scheduledStartTime: validatedData.scheduledStartTime ? new Date(validatedData.scheduledStartTime) : undefined,
-          scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
-          notes: validatedData.notes,
-          status: RequestStatus.PENDING,
-          clusterId
-        }
+        data: createData
       });
 
       // Update PostGIS location field using raw SQL
@@ -652,8 +659,8 @@ export class RequestController {
         return;
       }
 
-      // Optional metadata from body (who approved)
-      const { approvedBy } = req.body as { approvedBy?: string };
+      // Optional metadata from body (who approved) and optional sendToRostering flag
+      const { approvedBy, sendToRostering } = req.body as { approvedBy?: string; sendToRostering?: boolean | string };
 
       const updateData: any = {
         status: RequestStatus.APPROVED,
@@ -664,6 +671,16 @@ export class RequestController {
 
       if (approvedBy) {
         updateData.approvedBy = approvedBy;
+      }
+
+      // Allow the caller to explicitly set sendToRostering to true/false when approving.
+      // Accept boolean or string representations ("true"/"false"). Only set the field when provided.
+      if (typeof sendToRostering === 'boolean') {
+        updateData.sendToRostering = sendToRostering;
+      } else if (typeof sendToRostering === 'string') {
+        const lower = sendToRostering.trim().toLowerCase();
+        if (lower === 'true') updateData.sendToRostering = true;
+        else if (lower === 'false') updateData.sendToRostering = false;
       }
 
       const updated = await this.prisma.externalRequest.update({

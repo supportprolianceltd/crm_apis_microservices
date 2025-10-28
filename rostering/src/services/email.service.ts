@@ -621,7 +621,8 @@ export class EmailService {
           notes: extracted.notes,
           emailMessageId: email.messageId,
           emailThreadId: email.threadId,
-          status: 'PENDING'
+          status: 'PENDING',
+           sendToRostering: false
         }
       });
 
