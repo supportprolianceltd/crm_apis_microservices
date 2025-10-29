@@ -21,6 +21,12 @@ export function createClusterRoutes(prisma: PrismaClient) {
   // Update cluster statistics
   router.post('/:clusterId/refresh-stats', clusterController.updateClusterStats.bind(clusterController));
 
+  // Update cluster metadata
+  router.put('/:clusterId', clusterController.updateCluster.bind(clusterController));
+
+  // Delete cluster
+  router.delete('/:clusterId', clusterController.deleteCluster.bind(clusterController));
+
   // Assign carer to cluster
   router.post('/assign-carer/:carerId', clusterController.assignCarerToCluster.bind(clusterController));
 

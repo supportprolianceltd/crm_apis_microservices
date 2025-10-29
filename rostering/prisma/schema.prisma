@@ -206,6 +206,7 @@ model Cluster {
   tenantId    String
   name        String // e.g., "North London Central", "Birmingham East"
   description String?
+  postcode    String?
 
   // Geographic center
   regionCenter Unsupported("geography(POINT, 4326)")?
