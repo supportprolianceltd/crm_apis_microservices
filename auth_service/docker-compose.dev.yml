@@ -1,0 +1,180 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: auth_postgres_dev
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5411:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - auth_service_default
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: auth_redis_dev
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6372:6379"
+    volumes:
+      - redis_data_dev:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - auth_service_default
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: auth-service-dev
+    environment:
+      - DEPLOYMENT_ENV=development
+      - WEB_PAGE_URL=http://localhost:5173
+      - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+      - GLOBAL_ADMIN_EMAIL=admin@platform.local
+      - GLOBAL_ADMIN_PASSWORD=SuperAdmin2025!
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8001:8001"
+    env_file:              
+      - ./.env.development
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - auth_service_default
+    mem_limit: 2g
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/environment-info/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: celery-worker-dev
+    command: celery -A auth_service worker -l info --concurrency=4
+    environment:
+      - DEPLOYMENT_ENV=development
+    env_file:
+      - ./.env.development
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - auth_service_default
+    mem_limit: 1g
+    restart: unless-stopped
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: celery-beat-dev
+    command: celery -A auth_service beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - DEPLOYMENT_ENV=development
+    env_file:
+      - ./.env.development
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - auth_service_default
+    mem_limit: 512m
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.0.1
+    container_name: kafka-dev
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    networks:
+      - auth_service_default
+    restart: unless-stopped
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    container_name: zookeeper-dev
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - auth_service_default
+    restart: unless-stopped
+
+  key-rotator:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: key-rotator-dev
+    command: >
+      sh -c "sleep 30 && python manage.py rotate_tenant_keys"
+    environment:
+      - DEPLOYMENT_ENV=development
+    env_file:
+      - ./.env.development
+    depends_on:
+      auth-service:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - auth_service_default
+    restart: "no"
+
+volumes:
+  postgres_data_dev:
+    driver: local
+  redis_data_dev:
+    driver: local
+
+networks:
+  auth_service_default:
+    external: true
+    name: auth_service_default

@@ -143,6 +143,68 @@ class RS256TenantJWTAuthentication(BaseAuthentication):
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
 
+# auth_service/authentication.py - Enhanced RS256CookieJWTAuthentication
+class RS256CookieJWTAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        token = request.COOKIES.get('access_token')
+        if not token:
+            auth_header = request.headers.get("Authorization", "")
+            if auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+        if not token:
+            return None
+
+        try:
+            unverified_header = jwt.get_unverified_header(token)
+            kid = unverified_header.get("kid")
+            if not kid:
+                raise exceptions.AuthenticationFailed("No 'kid' in token header.")
+
+            unverified_payload = jwt.decode(token, options={"verify_signature": False})
+            tenant_id = unverified_payload.get("tenant_id")
+            tenant_schema = unverified_payload.get("tenant_schema")
+            user_type = unverified_payload.get("user_type", "tenant")  # Get user type
+            
+            if not tenant_id or not tenant_schema:
+                raise exceptions.AuthenticationFailed("Missing tenant info in token.")
+
+            tenant = Tenant.objects.get(id=tenant_id, schema_name=tenant_schema)
+            
+            with tenant_context(tenant):
+                keypair = RSAKeyPair.objects.filter(kid=kid, active=True).first()
+                if not keypair:
+                    raise exceptions.AuthenticationFailed("Invalid token key.")
+
+                public_key = keypair.public_key_pem
+                payload = jwt.decode(token, public_key, algorithms=["RS256"])
+
+                email = payload.get("sub")
+                if not email:
+                    raise exceptions.AuthenticationFailed("No subject in token.")
+
+                # Get user based on type
+                user = None
+                if user_type == "global":
+                    user = GlobalUser.objects.filter(email=email).first()
+                else:
+                    user = CustomUser.objects.filter(email=email, tenant=tenant).first()
+                    
+                if not user:
+                    raise exceptions.AuthenticationFailed("User not found.")
+
+                # Attach tenant to user for consistency
+                user.tenant = tenant
+                request.tenant = tenant
+
+                return (user, payload)
+                
+        except Tenant.DoesNotExist:
+            raise exceptions.AuthenticationFailed("Invalid tenant in token.")
+        except jwt.ExpiredSignatureError:
+            raise exceptions.AuthenticationFailed("Token has expired.")
+        except jwt.InvalidTokenError as e:
+            raise exceptions.AuthenticationFailed(f"Invalid token: {str(e)}")
+        
 class UsernameModelBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         if username is None:
