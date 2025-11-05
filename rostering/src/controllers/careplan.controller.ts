@@ -45,6 +45,23 @@ export class CarePlanController {
     this.prisma = prisma;
   }
 
+  // Normalize day strings to Prisma DayOfWeek enum values (MONDAY..SUNDAY)
+  private normalizeDay(day: string): string | null {
+    if (!day || typeof day !== 'string') return null;
+    const d = day.trim().toUpperCase();
+    const map: Record<string, string> = {
+      MONDAY: 'MONDAY', TUESDAY: 'TUESDAY', WEDNESDAY: 'WEDNESDAY', THURSDAY: 'THURSDAY', FRIDAY: 'FRIDAY', SATURDAY: 'SATURDAY', SUNDAY: 'SUNDAY',
+      // allow lowercase keys
+      MON: 'MONDAY', TUE: 'TUESDAY', WED: 'WEDNESDAY', THU: 'THURSDAY', FRI: 'FRIDAY', SAT: 'SATURDAY', SUN: 'SUNDAY',
+    };
+    // accept values like 'monday' or 'MONDAY' or 'Mon'
+    if (map[d]) return map[d];
+    // also allow full word lower-case
+    const up = d.toUpperCase();
+    if (map[up]) return map[up];
+    return null;
+  }
+
   private toDateOrNull(val: any) {
     if (!val) return null;
     const d = new Date(val);
@@ -89,7 +106,61 @@ export class CarePlanController {
       attachNested('cultureValues', payload.cultureValues ? { ...payload.cultureValues, tenantId: tenantId.toString() } : undefined);
       attachNested('bodyMap', payload.bodyMap ? { ...payload.bodyMap, tenantId: tenantId.toString() } : undefined);
       attachNested('legalRequirement', payload.legalRequirement ? { ...payload.legalRequirement, tenantId: tenantId.toString() } : undefined);
-      attachNested('careRequirements', payload.careRequirements ? { ...payload.careRequirements, tenantId: tenantId.toString() } : undefined);
+      // careRequirements needs special handling so we can persist normalized AgreedCareSchedule + AgreedCareSlot rows
+      if (payload.careRequirements) {
+        const cr: any = { tenantId: tenantId.toString(), careType: payload.careRequirements.careType };
+
+        // Build schedules if provided. Support either an array `schedules` or an object `agreedCareVisits` keyed by day name.
+        const schedulesCreate: any[] = [];
+
+        const pushSlot = (slot: any, idx: number) => {
+          if (!slot) return null;
+          return {
+            startTime: slot.startTime ?? slot.start ?? slot.from ?? slot.start_time ?? slot.startTimeString ?? slot.start_time_string ?? slot.startTime,
+            endTime: slot.endTime ?? slot.end ?? slot.to ?? slot.end_time ?? slot.endTimeString ?? slot.end_time_string ?? slot.endTime,
+            externalId: slot.externalId ?? slot.id ?? slot.clientId ?? null,
+            position: typeof slot.position === 'number' ? slot.position : idx,
+          };
+        };
+
+        if (Array.isArray(payload.careRequirements.schedules) && payload.careRequirements.schedules.length) {
+          for (const s of payload.careRequirements.schedules) {
+            const dayEnum = this.normalizeDay(s.day || s.name || s.dayOfWeek || (s.day && String(s.day)));
+            if (!dayEnum) continue;
+            const slots = Array.isArray(s.slots) ? s.slots.map((sl: any, i: number) => pushSlot(sl, i)) : [];
+            schedulesCreate.push({
+              tenantId: tenantId.toString(),
+              day: dayEnum,
+              enabled: s.enabled === undefined ? true : !!s.enabled,
+              lunchStart: s.lunchStart ?? s.lunch_start ?? null,
+              lunchEnd: s.lunchEnd ?? s.lunch_end ?? null,
+              slots: slots.length ? { create: slots } : undefined,
+            });
+          }
+        } else if (payload.careRequirements.agreedCareVisits && typeof payload.careRequirements.agreedCareVisits === 'object') {
+          // agreedCareVisits may be an object keyed by day names
+          for (const [dayKey, dayVal] of Object.entries(payload.careRequirements.agreedCareVisits)) {
+            const dayEnum = this.normalizeDay(dayKey);
+            if (!dayEnum) continue;
+            const s = dayVal as any;
+            const slots = Array.isArray(s.slots) ? s.slots.map((sl: any, i: number) => pushSlot(sl, i)) : [];
+            schedulesCreate.push({
+              tenantId: tenantId.toString(),
+              day: dayEnum,
+              enabled: s.enabled === undefined ? true : !!s.enabled,
+              lunchStart: s.lunchStart ?? s.lunch_start ?? null,
+              lunchEnd: s.lunchEnd ?? s.lunch_end ?? null,
+              slots: slots.length ? { create: slots } : undefined,
+            });
+          }
+        }
+
+        if (schedulesCreate.length) {
+          cr.schedules = { create: schedulesCreate };
+        }
+
+        data.careRequirements = { create: cr };
+      }
 
       // Medical information is nested and may include arrays
       if (payload.medicalInfo) {
@@ -134,7 +205,7 @@ export class CarePlanController {
         cultureValues: true,
         bodyMap: true,
         legalRequirement: true,
-        careRequirements: true,
+        careRequirements: { include: { schedules: { include: { slots: true } } } },
         medicalInfo: { include: { medications: true, clientAllergies: true } },
         movingHandling: { include: { IntakeLog: true } },
       } as const;
@@ -146,6 +217,144 @@ export class CarePlanController {
       return res.status(201).json(created);
     } catch (error: any) {
       console.error('createCarePlan error', error);
+      return res.status(500).json({ error: getUserFriendlyError(error) });
+    }
+  }
+
+  // Update an existing care plan and optionally upsert careRequirements + schedules/slots
+  public async updateCarePlan(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId ?? (req.body && req.body.tenantId);
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const id = req.params.id;
+      if (!id) return res.status(400).json({ error: 'carePlan id required in path' });
+
+      const payload = req.body || {};
+
+      // Build top-level carePlan update data
+      const updateData: any = {};
+      if (payload.title !== undefined) updateData.title = payload.title;
+      if (payload.description !== undefined) updateData.description = payload.description;
+      if (payload.startDate !== undefined) updateData.startDate = this.toDateOrNull(payload.startDate);
+      if (payload.endDate !== undefined) updateData.endDate = this.toDateOrNull(payload.endDate);
+      if (payload.status !== undefined) updateData.status = payload.status;
+
+      // Helper to build schedulesCreate (same shape as create endpoint)
+      const buildSchedulesCreate = (careReq: any) => {
+        const schedulesCreate: any[] = [];
+        const pushSlot = (slot: any, idx: number) => {
+          if (!slot) return null;
+          return {
+            startTime: slot.startTime ?? slot.start ?? slot.from ?? slot.start_time ?? slot.startTimeString ?? slot.start_time_string ?? slot.startTime,
+            endTime: slot.endTime ?? slot.end ?? slot.to ?? slot.end_time ?? slot.endTimeString ?? slot.end_time_string ?? slot.endTime,
+            externalId: slot.externalId ?? slot.id ?? slot.clientId ?? null,
+            position: typeof slot.position === 'number' ? slot.position : idx,
+          };
+        };
+
+        if (!careReq) return schedulesCreate;
+
+        if (Array.isArray(careReq.schedules) && careReq.schedules.length) {
+          for (const s of careReq.schedules) {
+            const dayEnum = this.normalizeDay(s.day || s.name || s.dayOfWeek || (s.day && String(s.day)));
+            if (!dayEnum) continue;
+            const slots = Array.isArray(s.slots) ? s.slots.map((sl: any, i: number) => pushSlot(sl, i)).filter(Boolean) : [];
+            schedulesCreate.push({
+              tenantId: tenantId.toString(),
+              day: dayEnum,
+              enabled: s.enabled === undefined ? true : !!s.enabled,
+              lunchStart: s.lunchStart ?? s.lunch_start ?? null,
+              lunchEnd: s.lunchEnd ?? s.lunch_end ?? null,
+              slots: slots.length ? { create: slots } : undefined,
+            });
+          }
+        } else if (careReq.agreedCareVisits && typeof careReq.agreedCareVisits === 'object') {
+          for (const [dayKey, dayVal] of Object.entries(careReq.agreedCareVisits)) {
+            const dayEnum = this.normalizeDay(dayKey);
+            if (!dayEnum) continue;
+            const s = dayVal as any;
+            const slots = Array.isArray(s.slots) ? s.slots.map((sl: any, i: number) => pushSlot(sl, i)).filter(Boolean) : [];
+            schedulesCreate.push({
+              tenantId: tenantId.toString(),
+              day: dayEnum,
+              enabled: s.enabled === undefined ? true : !!s.enabled,
+              lunchStart: s.lunchStart ?? s.lunch_start ?? null,
+              lunchEnd: s.lunchEnd ?? s.lunch_end ?? null,
+              slots: slots.length ? { create: slots } : undefined,
+            });
+          }
+        }
+
+        return schedulesCreate;
+      };
+
+      // Run updates in a transaction: update carePlan, upsert careRequirements and replace schedules if provided, and replace carers if provided
+      await this.prisma.$transaction(async (tx) => {
+        if (Object.keys(updateData).length) {
+          await tx.carePlan.update({ where: { id }, data: updateData });
+        }
+
+        if (payload.careRequirements) {
+          const cr = payload.careRequirements;
+          const schedulesCreate = buildSchedulesCreate(cr);
+
+          const createObj: any = {
+            tenantId: tenantId.toString(),
+            carePlanId: id,
+          };
+          if (cr.careType !== undefined) createObj.careType = cr.careType;
+          if (schedulesCreate.length) createObj.schedules = { create: schedulesCreate };
+
+          const updateObj: any = {};
+          if (cr.careType !== undefined) updateObj.careType = cr.careType;
+          if (schedulesCreate.length) updateObj.schedules = { deleteMany: {}, create: schedulesCreate };
+
+          await tx.careRequirements.upsert({
+            where: { carePlanId: id },
+            create: createObj,
+            update: updateObj,
+          });
+        }
+
+        if (Array.isArray(payload.carers)) {
+          // replace existing carers for this care plan
+          await tx.carePlanCarer.deleteMany({ where: { tenantId: tenantId.toString(), carePlanId: id } });
+          if (payload.carers.length) {
+            const carersCreate = payload.carers.map((c: any) => (typeof c === 'string' ? { tenantId: tenantId.toString(), carePlanId: id, carerId: c } : { tenantId: tenantId.toString(), carePlanId: id, carerId: c.carerId, ...('role' in c ? { role: c.role } : {}) }));
+            // use createMany where possible for efficiency
+            try {
+              await tx.carePlanCarer.createMany({ data: carersCreate });
+            } catch (e) {
+              // fallback to individual creates (handles DBs that may not support createMany with certain datatypes)
+              for (const rc of carersCreate) await tx.carePlanCarer.create({ data: rc });
+            }
+          }
+        }
+      });
+
+      // return updated care plan with nested schedules/slots
+      const includeShape = {
+        carers: true,
+        riskAssessment: true,
+        personalCare: true,
+        everydayActivityPlan: true,
+        fallsAndMobility: true,
+        psychologicalInfo: true,
+        foodHydration: true,
+        routine: true,
+        cultureValues: true,
+        bodyMap: true,
+        legalRequirement: true,
+        careRequirements: { include: { schedules: { include: { slots: true } } } },
+        medicalInfo: { include: { medications: true, clientAllergies: true } },
+        movingHandling: { include: { IntakeLog: true } },
+      } as const;
+
+      const updated = await (this.prisma as any).carePlan.findUnique({ where: { id }, include: includeShape });
+      return res.json(updated);
+    } catch (error: any) {
+      console.error('updateCarePlan error', error);
       return res.status(500).json({ error: getUserFriendlyError(error) });
     }
   }
@@ -172,7 +381,7 @@ export class CarePlanController {
         cultureValues: true,
         bodyMap: true,
         legalRequirement: true,
-        careRequirements: true,
+        careRequirements: { include: { schedules: { include: { slots: true } } } },
         medicalInfo: { include: { medications: true, clientAllergies: true } },
         movingHandling: { include: { IntakeLog: true } },
       } as const;
@@ -216,7 +425,7 @@ export class CarePlanController {
         cultureValues: true,
         bodyMap: true,
         legalRequirement: true,
-        careRequirements: true,
+        careRequirements: { include: { schedules: { include: { slots: true } } } },
         medicalInfo: { include: { medications: true, clientAllergies: true } },
         movingHandling: { include: { IntakeLog: true } },
       } as const;
@@ -263,7 +472,7 @@ export class CarePlanController {
         cultureValues: true,
         bodyMap: true,
         legalRequirement: true,
-        careRequirements: true,
+        careRequirements: { include: { schedules: { include: { slots: true } } } },
         medicalInfo: { include: { medications: true, clientAllergies: true } },
         movingHandling: { include: { IntakeLog: true } },
       } as const;

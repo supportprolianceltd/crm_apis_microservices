@@ -5,13 +5,17 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
-import { Server as HTTPServer } from 'http';
-import { Server as SocketIOServer } from 'socket.io';
-import swaggerUi from 'swagger-ui-express';
-import swaggerJsdoc from 'swagger-jsdoc';
 
-// Import routes
-import { createSettlementRoutes } from './routes/settlement.routes';
+import { logger, logRequest } from './utils/logger';
+import { CarerService} from './services/carer.service';
+import { GeocodingService } from './services/geocoding.service';
+import { EmailService } from './services/email.service';
+import { MatchingService } from './services/matching.service';
+import { AuthSyncService } from './services/auth-sync.service';
+import { NotificationService } from './services/notification.service';
+import { TenantEmailConfigService } from './services/tenant-email-config.service';
+import { RequestController } from './controllers/request.controller';
+import { CarerController } from './controllers/carer.controller';
 import { createRequestRoutes } from './routes/request.routes';
 import { createCarerRoutes } from './routes/carer.routes';
 import { createSyncRoutes } from './routes/sync.routes';

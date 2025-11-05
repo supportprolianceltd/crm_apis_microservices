@@ -110,6 +110,24 @@ model Carer {
   @@map("carers")
 }
 
+model ClusterAssignment {
+  id         String   @id @default(cuid())
+  carerId    String // Reference to auth service carer ID
+  clusterId  String
+  tenantId   String
+  assignedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relationships
+  cluster Cluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+
+  @@unique([carerId, tenantId]) // One carer per tenant
+  @@index([carerId])
+  @@index([clusterId])
+  @@index([tenantId])
+  @@index([assignedAt])
+}
+
 model RequestCarerMatch {
   id                 String   @id @default(cuid())
   tenantId           String
@@ -194,6 +212,7 @@ model TenantEmailConfig {
 }
 
 model Cluster {
+  location           String?
   id                 String  @id @default(cuid())
   tenantId           String
   name               String
@@ -213,8 +232,10 @@ model Cluster {
   averageMatchTime   Int?
   lastActivityAt     DateTime?
 
+  // Relationships
   requests           ExternalRequest[]
   carers             Carer[]
+  clusterAssignments ClusterAssignment[]
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -603,7 +624,7 @@ model MovingHandling {
 }
 
 model IntakeLog {
-  id               String   @id @default(cuid())
+  id               String  @id @default(cuid())
   tenantId         String
   movingHandlingId String
   time             String
@@ -622,10 +643,61 @@ model CareRequirements {
   carePlanId String @unique
   careType   String
 
+  // Normalized schedule: one AgreedCareSchedule per day for this CareRequirements
+  schedules AgreedCareSchedule[]
+
   carePlan   CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
+}
+
+// Enum for days of week used by AgreedCareSchedule
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model AgreedCareSchedule {
+  id                 String    @id @default(cuid())
+  tenantId           String
+  careRequirementsId String
+  day                DayOfWeek
+  enabled            Boolean   @default(false)
+  lunchStart         String? // e.g. "13:00"
+  lunchEnd           String? // e.g. "14:00"
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  careRequirements CareRequirements @relation(fields: [careRequirementsId], references: [id], onDelete: Cascade)
+  slots            AgreedCareSlot[]
+
+  @@unique([careRequirementsId, day])
+  @@index([tenantId])
+  @@index([careRequirementsId])
+}
+
+model AgreedCareSlot {
+  id         String   @id @default(cuid())
+  scheduleId String
+  // time values stored as HH:MM strings to match frontend payload
+  startTime  String
+  endTime    String
+  externalId String? // original client-provided id like "monday-default-0"
+  position   Int? // ordering index within the day's slots
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  schedule AgreedCareSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleId])
 }
 
 model LegalRequirement {
