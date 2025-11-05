@@ -1,24 +1,269 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, RosteringConstraints as PrismaRosteringConstraints } from '@prisma/client';
 import { logger } from '../utils/logger';
 
-export interface RosteringConstraints {
+// Use the generated Prisma type instead of custom interface
+export type RosteringConstraints = PrismaRosteringConstraints;
+
+export interface UpdateUserInfo {
   id: string;
-  tenantId: string;
-  name: string;
-  wtdMaxHoursPerWeek: number;
-  restPeriodHours: number;
-  bufferMinutes: number;
-  travelMaxMinutes: number;
-  continuityTargetPercent: number;
-  maxDailyHours?: number | null;           // 👈 allow null
-  minRestBetweenVisits?: number | null;    // 👈 allow null
-  maxTravelTimePerVisit?: number | null;   // 👈 allow null
-  isActive?: boolean | null;               // 👈 allow null
+  email: string;
+  firstName?: string;
+  lastName?: string;
 }
 
+export interface ManualChangeValidation {
+  isValid: boolean;
+  hardBlocks: string[];
+  softWarnings: string[];
+  affectedAssignments?: string[];
+}
 
 export class ConstraintsService {
   constructor(private prisma: PrismaClient) {}
+
+
+   /**
+   * ✅ NEW: Validate manual roster change before applying
+   */
+  async validateManualChange(
+    tenantId: string,
+    change: {
+      assignmentId?: string;
+      visitId: string;
+      newCarerId: string;
+      newScheduledTime?: Date;
+    }
+  ): Promise<ManualChangeValidation> {
+    const constraints = await this.getActiveConstraints(tenantId);
+    const validation: ManualChangeValidation = {
+      isValid: true,
+      hardBlocks: [],
+      softWarnings: []
+    };
+
+    // 1. Get carer details
+    const carer = await this.prisma.carer.findUnique({
+      where: { id: change.newCarerId }
+    });
+
+    if (!carer) {
+      validation.isValid = false;
+      validation.hardBlocks.push('Carer not found');
+      return validation;
+    }
+
+    // 2. Get visit details
+    const visit = await this.prisma.externalRequest.findUnique({
+      where: { id: change.visitId }
+    });
+
+    if (!visit) {
+      validation.isValid = false;
+      validation.hardBlocks.push('Visit not found');
+      return validation;
+    }
+
+    // 3. Check skills match
+    const hasSkills = this.checkSkillsMatch(visit.requirements, carer.skills);
+    if (!hasSkills) {
+      validation.isValid = false;
+      validation.hardBlocks.push(
+        `Carer lacks required skills: ${visit.requirements}`
+      );
+    }
+
+    // 4. Check WTD compliance
+    const scheduledTime = change.newScheduledTime || visit.scheduledStartTime!;
+    const weekStart = this.getWeekStart(scheduledTime);
+    const weekEnd = this.getWeekEnd(weekStart);
+
+    const carerWeeklyHours = await this.getCarerWeeklyHours(
+      change.newCarerId,
+      weekStart,
+      weekEnd
+    );
+
+    const visitHours = (visit.estimatedDuration || 60) / 60;
+    const totalHours = carerWeeklyHours + visitHours;
+
+    if (totalHours > constraints.wtdMaxHoursPerWeek) {
+      validation.isValid = false;
+      validation.hardBlocks.push(
+        `WTD violation: ${totalHours.toFixed(1)}h exceeds ${constraints.wtdMaxHoursPerWeek}h limit`
+      );
+    } else if (totalHours > constraints.wtdMaxHoursPerWeek * 0.9) {
+      validation.softWarnings.push(
+        `Approaching WTD limit: ${totalHours.toFixed(1)}h / ${constraints.wtdMaxHoursPerWeek}h`
+      );
+    }
+
+    // 5. Check time conflicts
+    const conflicts = await this.checkTimeConflicts(
+      change.newCarerId,
+      scheduledTime,
+      new Date(scheduledTime.getTime() + (visit.estimatedDuration || 60) * 60000)
+    );
+
+    if (conflicts.length > 0) {
+      validation.isValid = false;
+      validation.hardBlocks.push(
+        `Time conflict with ${conflicts.length} existing assignment(s)`
+      );
+      validation.affectedAssignments = conflicts.map(c => c.id);
+    }
+
+    // 6. Check rest period
+    const restViolation = await this.checkRestPeriodViolation(
+      change.newCarerId,
+      scheduledTime,
+      constraints.restPeriodHours
+    );
+
+    if (restViolation) {
+      validation.isValid = false;
+      validation.hardBlocks.push(
+        `Rest period violation: Less than ${constraints.restPeriodHours}h since last shift`
+      );
+    }
+
+    // 7. Check travel time
+    const travelViolation = await this.checkTravelTimeViolation(
+      change.newCarerId,
+      visit,
+      constraints.travelMaxMinutes
+    );
+
+    if (travelViolation.exceeds) {
+      validation.softWarnings.push(
+        `Travel time ${travelViolation.actualMinutes}min exceeds recommended ${constraints.travelMaxMinutes}min`
+      );
+    }
+
+    return validation;
+  }
+
+  // ✅ Helper methods
+  private checkSkillsMatch(requirements: string | null, carerSkills: string[]): boolean {
+    if (!requirements) return true;
+    const reqLower = requirements.toLowerCase();
+    return carerSkills.some(skill => reqLower.includes(skill.toLowerCase()));
+  }
+
+  private getWeekStart(date: Date): Date {
+    const weekStart = new Date(date);
+    weekStart.setDate(date.getDate() - date.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    return weekStart;
+  }
+
+  private getWeekEnd(weekStart: Date): Date {
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 7);
+    return weekEnd;
+  }
+
+  private async getCarerWeeklyHours(
+    carerId: string,
+    weekStart: Date,
+    weekEnd: Date
+  ): Promise<number> {
+    const assignments = await this.prisma.assignment.findMany({
+      where: {
+        carerId,
+        scheduledTime: { gte: weekStart, lt: weekEnd },
+        status: { in: ['PENDING', 'ACCEPTED', 'COMPLETED'] }
+      },
+      include: { visit: true }
+    });
+
+    return assignments.reduce((total, a) => {
+      return total + ((a.visit.estimatedDuration || 60) / 60);
+    }, 0);
+  }
+
+  private async checkTimeConflicts(
+    carerId: string,
+    startTime: Date,
+    endTime: Date
+  ) {
+    return await this.prisma.assignment.findMany({
+      where: {
+        carerId,
+        status: { in: ['PENDING', 'ACCEPTED'] },
+        OR: [
+          { scheduledTime: { lt: endTime, gte: startTime } },
+          { estimatedEndTime: { gt: startTime, lte: endTime } }
+        ]
+      }
+    });
+  }
+
+  private async checkRestPeriodViolation(
+    carerId: string,
+    proposedTime: Date,
+    restPeriodHours: number
+  ): Promise<boolean> {
+    const lastAssignment = await this.prisma.assignment.findFirst({
+      where: {
+        carerId,
+        estimatedEndTime: { lt: proposedTime },
+        status: { in: ['ACCEPTED', 'COMPLETED'] }
+      },
+      orderBy: { estimatedEndTime: 'desc' }
+    });
+
+    if (!lastAssignment) return false;
+
+    const hoursSinceLastShift = 
+      (proposedTime.getTime() - lastAssignment.estimatedEndTime.getTime()) / 
+      (1000 * 60 * 60);
+
+    return hoursSinceLastShift < restPeriodHours;
+  }
+
+  private async checkTravelTimeViolation(
+    carerId: string,
+    visit: any,
+    maxTravelMinutes: number
+  ): Promise<{ exceeds: boolean; actualMinutes: number }> {
+    // Get carer's location
+    const carer = await this.prisma.carer.findUnique({
+      where: { id: carerId }
+    });
+
+    if (!carer?.latitude || !visit?.latitude) {
+      return { exceeds: false, actualMinutes: 0 };
+    }
+
+    // Simple Haversine distance estimate
+    const distance = this.calculateDistance(
+      carer.latitude, carer.longitude || 0,
+      visit.latitude, visit.longitude || 0
+    );
+
+    const estimatedMinutes = Math.ceil(distance / 500) + 10; // 500m/min + 10min base
+
+    return {
+      exceeds: estimatedMinutes > maxTravelMinutes,
+      actualMinutes: estimatedMinutes
+    };
+  }
+
+  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371e3;
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c;
+  }
+  
 
   /**
    * Get active constraints for a tenant
@@ -77,18 +322,50 @@ export class ConstraintsService {
    */
   async updateConstraints(
     tenantId: string, 
-    updates: Partial<RosteringConstraints>
+    updates: Partial<RosteringConstraints>,
+    updatedByUser?: UpdateUserInfo
   ): Promise<RosteringConstraints> {
     try {
       const existing = await this.getActiveConstraints(tenantId);
 
-      return await this.prisma.rosteringConstraints.update({
+      const updateData: any = {
+        ...updates,
+        updatedAt: new Date(),
+      };
+
+      // Only add user tracking fields if user info is provided
+      if (updatedByUser) {
+        updateData.updatedBy = updatedByUser.id;
+        updateData.updatedByEmail = updatedByUser.email;
+        updateData.updatedByFirstName = updatedByUser.firstName || null;
+        updateData.updatedByLastName = updatedByUser.lastName || null;
+
+        logger.debug('Updating constraints with user info', {
+          userId: updatedByUser.id,
+          email: updatedByUser.email,
+          firstName: updatedByUser.firstName,
+          lastName: updatedByUser.lastName
+        });
+      } else {
+        // Set default values for tracking fields when no user info provided
+        updateData.updatedBy = null;
+        updateData.updatedByEmail = null;
+        updateData.updatedByFirstName = null;
+        updateData.updatedByLastName = null;
+        logger.warn('Updating constraints without user info');
+      }
+
+      const result = await this.prisma.rosteringConstraints.update({
         where: { id: existing.id },
-        data: {
-          ...updates,
-          updatedAt: new Date()
-        }
+        data: updateData
       });
+
+      logger.info('Constraints updated successfully', {
+        constraintId: result.id,
+        tenantId: result.tenantId
+      });
+
+      return result;
     } catch (error) {
       logger.error('Failed to update constraints:', error);
       throw new Error('Failed to update rostering constraints');
@@ -197,7 +474,16 @@ export class ConstraintsService {
       maxDailyHours: 10,
       minRestBetweenVisits: 0,
       maxTravelTimePerVisit: 60,
-      isActive: true
+      isActive: true,
+      createdBy: 'system',
+      updatedBy: null,
+      updatedByEmail: null,
+      updatedByFirstName: null,
+      updatedByLastName: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
   }
 }
+
+

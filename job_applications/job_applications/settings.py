@@ -166,11 +166,22 @@ KAFKA_TOPICS = {
 }
 
 # ======================== CORS ========================
+
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
-    'http://localhost:5173',
-    'https://crm-frontend-react.vercel.app',
-    'http://localhost:8000'
+    "http://localhost:5173",
+    "https://crm-frontend-react.vercel.app",
+    "https://technicalglobaladministrator.e3os.co.uk",
+    "https://loan-app-puce.vercel.app"
+    "https://e3os.ai",
+    "https://e3os.care",
+    "https://e3os.online",
+    "https://e3os.net",
+    "https://e3os.co.uk",
+    "http://localhost:8000",  # keep for local API testing
+    # Add rostering frontend if needed, e.g., "http://localhost:3006"
 ])
+
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 CORS_ALLOW_HEADERS = ['accept', 'authorization', 'content-type', 'origin', 'x-csrftoken', 'x-requested-with']
@@ -299,6 +310,7 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ROOT_URLCONF = 'job_applications.urls'
 WSGI_APPLICATION = 'job_applications.wsgi.application'
+
 
 
 

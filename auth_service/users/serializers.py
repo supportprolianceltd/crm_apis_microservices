@@ -1,50 +1,31 @@
 # Standard library
 import logging
 from datetime import timedelta
-import os
 from typing import Any, Dict
-from django.db import models
-
+# Third-party
 import jwt
 import requests
-from core.models import Branch, Domain
 from django.conf import settings
-from django.db import transaction
+from django.db import models, transaction
 from django.utils import timezone
 from django_tenants.utils import tenant_context
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+
+# Local imports
+from core.models import Branch, Domain, Tenant, GlobalActivity
 from utils.supabase import upload_file_dynamic
-import logging
-from core.models import  Domain, Tenant
-from .models import (
-    DocumentAcknowledgment,
-    DocumentPermission, Document, DocumentVersion,
-    BlockedIP,
-    ClientProfile,
-    CustomUser,
-    DrivingRiskAssessment,
-    EducationDetail,
-    EmploymentDetail,
-    Group,
-    GroupMembership,
-    InsuranceVerification,
-    LegalWorkEligibility,
-    OtherUserDocuments,
-    PasswordResetToken,
-    ProfessionalQualification,
-    ProofOfAddress,
-    ReferenceCheck,
-    UserActivity,
-    UserProfile,
-    UserSession,
+from .models import (DocumentAcknowledgment, DocumentPermission, Document,
+    DocumentVersion, BlockedIP, ClientProfile, WithdrawalDetail, Group, GroupMembership,
+    CustomUser, DrivingRiskAssessment, EducationDetail,
+    EmploymentDetail, InvestmentDetail, InsuranceVerification, LegalWorkEligibility,
+    OtherUserDocuments, PasswordResetToken,
+    ProfessionalQualification, ProofOfAddress, ReferenceCheck,
+    UserActivity, UserProfile, UserSession,
 )
-
+# Logger
+import os
 logger = logging.getLogger(__name__)
-from rest_framework.exceptions import ValidationError
-
-
-
 
 def get_user_data_from_jwt(request):
     """Extract user data from JWT payload."""
@@ -66,7 +47,6 @@ def get_user_data_from_jwt(request):
         logger.error(f"Failed to decode JWT for user data: {str(e)}")
         raise serializers.ValidationError("Invalid JWT token for user data.")
     
-
 def get_tenant_id_from_jwt(request):
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
@@ -176,12 +156,16 @@ class EducationDetailSerializer(serializers.ModelSerializer):
         fields = ["id", "institution", "highest_qualification", "course_of_study", "start_year", "end_year", "start_year_new", "end_year_new", "certificate", "certificate_url", "skills", "last_updated_by_id", "last_updated_by"]
         read_only_fields = ["id", "last_updated_by", "last_updated_by_id"]
         extra_kwargs = {
+            "institution": {"required": True},
+            "highest_qualification": {"required": True},
+            "course_of_study": {"required": True},
             "start_year": {"required": False, "min_value": 1900, "max_value": 2100},
             "end_year": {"required": False, "min_value": 1900, "max_value": 2100},
-            "start_year_new": {"required": False},
-            "end_year_new": {"required": False},
+            "start_year_new": {"required": False, "min_value": 1900, "max_value": 2100},
+            "end_year_new": {"required": False, "min_value": 1900, "max_value": 2100},
+            "skills": {"required": True},
+            "certificate": {"required": False, "allow_null": True},
         }
-
 
     def get_last_updated_by(self, obj):
         return get_last_updated_by(self, obj)
@@ -236,7 +220,6 @@ class EducationDetailSerializer(serializers.ModelSerializer):
         if start_year and end_year and start_year > end_year:
             raise serializers.ValidationError({"start_year": "Start year cannot be greater than end year."})
         return super().validate(data)
-
 
 
 class EmploymentDetailSerializer(serializers.ModelSerializer):
@@ -339,7 +322,7 @@ class ProofOfAddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProofOfAddress
-        fields = ["id", "type", "document", "document_url", "issue_date","nin_document", "nin_document_url", "last_updated_by_id", "last_updated_by"]
+        fields = ["id", "type", "document", "document_url", "issue_date", "nin_document", "nin_document_url", "last_updated_by_id", "last_updated_by"]
         read_only_fields = ["id", "last_updated_by", "last_updated_by_id"]
         extra_kwargs = {field: {"required": False, "allow_null": True} for field in ["type", "issue_date", "nin"]}
 
@@ -580,74 +563,6 @@ class LegalWorkEligibilitySerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-# class OtherUserDocumentsSerializer(serializers.ModelSerializer):
-#     last_updated_by = serializers.SerializerMethodField()
-#     file = serializers.FileField(required=False, allow_null=True)
-#     title = serializers.CharField(required=False, allow_null=True)
-#     branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), required=False, allow_null=True)
-
-#     class Meta:
-#         model = OtherUserDocuments
-#         fields = ["id", "government_id_type", "title", "document_number", "expiry_date", "file", "file_url", "branch", "last_updated_by_id", "last_updated_by"]
-#         read_only_fields = ["id", "last_updated_by", "last_updated_by_id"]
-#         extra_kwargs = {
-#             "government_id_type": {"required": False},
-#             "title": {"required": False},
-#             "document_number": {"required": False},
-#             "expiry_date": {"required": False},
-#             "branch": {"required": False},
-#         }
-
-#     def get_last_updated_by(self, obj):
-#         return get_last_updated_by(self, obj)
-
-#     def validate_file(self, value):
-#         if value and not value.name.lower().endswith((".pdf", ".png", ".jpg", ".jpeg")):
-#             raise serializers.ValidationError("Only PDF or image files are allowed.")
-#         if value and value.size > 10 * 1024 * 1024:
-#             raise serializers.ValidationError("File size cannot exceed 10MB.")
-#         return value
-
-#     def create(self, validated_data):
-#         user_data = get_user_data_from_jwt(self.context['request'])
-#         user_id = user_data.get('id')
-#         if user_id:
-#             validated_data['last_updated_by_id'] = str(user_id)
-#         else:
-#             logger.warning("No user_id found in JWT payload for creation")
-#             raise serializers.ValidationError({"last_updated_by_id": "User ID required for creation."})
-
-#         file = validated_data.pop("file", None)
-#         if file:
-#             logger.info(f"Uploading other user document: {file.name}")
-#             url = upload_file_dynamic(
-#                 file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
-#             )
-#             validated_data["file_url"] = url
-#             validated_data["file"] = None  # Don't save to ImageField
-#             logger.info(f"Other user document uploaded: {url}")
-#         return super().create(validated_data)
-
-#     def update(self, instance, validated_data):
-#         user_data = get_user_data_from_jwt(self.context['request'])
-#         user_id = user_data.get('id')
-#         if user_id:
-#             instance.last_updated_by_id = str(user_id)
-#         else:
-#             logger.warning("No user_id found in JWT payload for update")
-
-#         file = validated_data.pop("file", None)
-#         if file:
-#             logger.info(f"Updating other user document: {file.name}")
-#             url = upload_file_dynamic(
-#                 file, file.name, content_type=getattr(file, "content_type", "application/octet-stream")
-#             )
-#             validated_data["file_url"] = url
-#             validated_data["file"] = None  # Don't save to ImageField
-#             logger.info(f"Other user document updated: {url}")
-#         return super().update(instance, validated_data)
-
-# OtherUserDocumentsSerializer - update file field and validation
 class OtherUserDocumentsSerializer(serializers.ModelSerializer):
     last_updated_by = serializers.SerializerMethodField()
     file = serializers.FileField(required=False, allow_null=True, validators=[validate_file_extension])
@@ -699,9 +614,146 @@ class OtherUserDocumentsSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
     
 
+class InvestmentDetailSerializer(serializers.ModelSerializer):
+    last_updated_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = InvestmentDetail
+        fields = [
+            "id", "roi_rate", "custom_roi_rate", "investment_amount",
+            "investment_start_date", "remaining_balance",
+            "last_updated_by_id", "last_updated_by"
+        ]
+        read_only_fields = ["id", "last_updated_by", "last_updated_by_id", "remaining_balance"]
+
+    def get_last_updated_by(self, obj):
+        return get_last_updated_by(self, obj)
+
+    def create(self, validated_data, **kwargs):
+        user_data = get_user_data_from_jwt(self.context['request'])
+        user_id = user_data.get('id')
+        if user_id:
+            validated_data['last_updated_by_id'] = str(user_id)
+        else:
+            logger.warning("No user_id found in JWT payload for creation")
+            raise serializers.ValidationError({"last_updated_by_id": "User ID required for creation."})
+        instance = super().create(validated_data)
+        user_profile = kwargs.get('user_profile')
+        if user_profile:
+            instance.user_profile = user_profile
+            instance.save(update_fields=['user_profile'])
+        return instance
+
+        
+
+    def update(self, instance, validated_data):
+        user_data = get_user_data_from_jwt(self.context['request'])
+        user_id = user_data.get('id')
+        if user_id:
+            instance.last_updated_by_id = str(user_id)
+        else:
+            logger.warning("No user_id found in JWT payload for update")
+        return super().update(instance, validated_data)
+
+    def validate(self, data):
+        logger.info(f"Validating InvestmentDetailSerializer data: {data}")
+        return super().validate(data)     
+
+class WithdrawalDetailSerializer(serializers.ModelSerializer):
+    last_updated_by = serializers.SerializerMethodField()
+    # ✅ Include investment for dependency
+    investment = serializers.PrimaryKeyRelatedField(queryset=InvestmentDetail.objects.all())
+
+    class Meta:
+        model = WithdrawalDetail
+        fields = [
+            "id", "investment", "withdrawal_amount",
+            "withdrawal_request_date", "withdrawal_approved_date", "withdrawal_approved",
+            "withdrawal_approved_by", "withdrawn_date", "withdrawan",
+            "last_updated_by_id", "last_updated_by"
+        ]
+        read_only_fields = ["id", "user_profile", "last_updated_by", "last_updated_by_id"]  # user_profile auto-derived
+
+    def get_last_updated_by(self, obj):
+        return get_last_updated_by(self, obj)  # Reuse your existing function
+
+    def validate(self, data):
+        investment = data.get('investment')
+        withdrawal_amount = data.get('withdrawal_amount')
+
+        if not investment:
+            raise serializers.ValidationError({"investment": "Withdrawal requires an associated investment."})
+
+        # ✅ ENFORCE DEPENDENCY: Check available balance
+        available = investment.remaining_balance
+        if withdrawal_amount > available:
+            raise serializers.ValidationError({
+                "withdrawal_amount": f"Amount exceeds available balance (${available})."
+            })
+
+        # ✅ NEW: Role validation for approval
+        request = self.context['request']
+        current_user = request.user
+        if 'withdrawal_approved' in data and data['withdrawal_approved']:
+            if current_user.role not in ['staff', 'admin']:
+                raise serializers.ValidationError({
+                    "withdrawal_approved": "Only staff or admin can approve withdrawals."
+                })
+
+        return data
+
+    def create(self, validated_data):
+        user_data = get_user_data_from_jwt(self.context['request'])
+        user_id = user_data.get('id')
+        if user_id:
+            validated_data['last_updated_by_id'] = str(user_id)
+        else:
+            raise serializers.ValidationError({"last_updated_by_id": "User ID required."})
+
+        # ✅ NEW: If approved on create (unlikely, but handle)
+        if validated_data.get('withdrawal_approved'):
+            approver_data = {
+                'id': str(user_id),
+                'email': user_data['email'],
+                'first_name': user_data['first_name'],
+                'last_name': user_data['last_name'],
+                'role': self.context['request'].user.role
+            }
+            validated_data['withdrawal_approved_by'] = approver_data
+            validated_data['withdrawal_approved_date'] = timezone.now()
+
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        user_data = get_user_data_from_jwt(self.context['request'])
+        user_id = user_data.get('id')
+        if user_id:
+            instance.last_updated_by_id = str(user_id)
+
+        # ✅ NEW: Populate approver details on approval
+        if 'withdrawal_approved' in validated_data and validated_data['withdrawal_approved']:
+            approver_data = {
+                'id': str(user_id),
+                'email': user_data['email'],
+                'first_name': user_data['first_name'],
+                'last_name': user_data['last_name'],
+                'role': self.context['request'].user.role
+            }
+            instance.withdrawal_approved_by = approver_data
+            instance.withdrawal_approved_date = timezone.now()
+            # Optionally set withdrawan to True if approved
+            validated_data['withdrawan'] = True
+
+        # ✅ REFRESH: Re-validate balance on update
+        self.validate(validated_data)  # Re-run validation
+        return super().update(instance, validated_data)
+     
+
 class UserProfileSerializer(serializers.ModelSerializer):
     professional_qualifications = ProfessionalQualificationSerializer(many=True, required=False, allow_null=True)
     employment_details = EmploymentDetailSerializer(many=True, required=False, allow_null=True)
+    investment_details = InvestmentDetailSerializer(many=True, required=False, allow_null=True)
+    withdrawal_details = WithdrawalDetailSerializer(many=True, required=False, allow_null=True)
     education_details = EducationDetailSerializer(many=True, required=False, allow_null=True)
     reference_checks = ReferenceCheckSerializer(many=True, required=False, allow_null=True)
     proof_of_address = ProofOfAddressSerializer(many=True, required=False, allow_null=True)
@@ -817,6 +869,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "professional_qualifications",
             "employment_details",
             "education_details",
+            "investment_details",
+            "withdrawal_details",
             "reference_checks",
             "proof_of_address",
             "insurance_verifications",
@@ -928,6 +982,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "professional_qualifications",
             "employment_details",
             "education_details",
+            "investment_details",
+            "withdrawal_details",
             "reference_checks",
             "proof_of_address",
             "insurance_verifications",
@@ -957,6 +1013,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             ("professional_qualifications", ProfessionalQualificationSerializer, "professional_qualifications"),
             ("employment_details", EmploymentDetailSerializer, "employment_details"),
             ("education_details", EducationDetailSerializer, "education_details"),
+            ("investment_details", InvestmentDetailSerializer, "investment_details"),
+            ("withdrawal_details", WithdrawalDetailSerializer, "withdrawal_details"),
             ("reference_checks", ReferenceCheckSerializer, "reference_checks"),
             ("proof_of_address", ProofOfAddressSerializer, "proof_of_address"),
             ("insurance_verifications", InsuranceVerificationSerializer, "insurance_verifications"),
@@ -1028,6 +1086,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 ("professional_qualifications", ProfessionalQualificationSerializer, "professional_qualifications"),
                 ("employment_details", EmploymentDetailSerializer, "employment_details"),
                 ("education_details", EducationDetailSerializer, "education_details"),
+                ("investment_details", InvestmentDetailSerializer, "investment_details"),
+                ("withdrawal_details", WithdrawalDetailSerializer, "withdrawal_details"),
                 ("reference_checks", ReferenceCheckSerializer, "reference_checks"),
                 ("proof_of_address", ProofOfAddressSerializer, "proof_of_address"),
                 ("insurance_verifications", InsuranceVerificationSerializer, "insurance_verifications"),
@@ -1115,6 +1175,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             return updated_instance
         
 
+
+
 class UserCreateSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=True)
     password = serializers.CharField(write_only=True, required=True, min_length=8)
@@ -1184,6 +1246,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 "professional_qualifications",
                 "employment_details",
                 "education_details",
+                "investment_details",
+                "withdrawal_details",
                 "reference_checks",
                 "proof_of_address",
                 "insurance_verifications",
@@ -1287,6 +1351,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         logger.info(f"Updating user {instance.email} with validated data: {validated_data}")
         with transaction.atomic():
             profile_data = validated_data.pop("profile", {})
+            old_role = instance.role  # Capture old role before update
 
             # Update user fields
             for attr, value in validated_data.items():
@@ -1315,54 +1380,31 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 profile_serializer.is_valid(raise_exception=True)
                 profile_serializer.save()
 
+            # New: Handle policy number based on role change
+            new_role = instance.role
+            if new_role == 'investor' and old_role != 'investor':
+                if not profile.policy_number:
+                    policy_number = self._generate_policy_number(instance)
+                    profile.policy_number = policy_number
+                    profile.save(update_fields=['policy_number'])
+                    logger.info(f"Assigned policy number {policy_number} to investor {instance.email} on role change")
+            elif old_role == 'investor' and new_role != 'investor':
+                if profile.policy_number:
+                    profile.policy_number = None
+                    profile.save(update_fields=['policy_number'])
+                    logger.info(f"Cleared policy number for non-investor {instance.email} on role change")
+
             return instance
 
+    def _generate_policy_number(self, user):
+        """Generate policy number: PREFIX-XXXXXX where PREFIX is first 3 letters of tenant name (upper), XXXXXX is 6-digit sequential per tenant."""
+        prefix = user.tenant.name[:3].upper()
+        # Count existing investors in tenant (includes current user)
+        count = CustomUser.objects.filter(tenant=user.tenant, role='investor').count()
+        return f"{prefix}-{count:06d}"
 
-# class CustomUserListSerializer(serializers.ModelSerializer):
-#     profile = UserProfileSerializer(read_only=True)
-#     tenant = serializers.SlugRelatedField(read_only=True, slug_field="name")
-#     branch = serializers.SlugRelatedField(read_only=True, slug_field="name", allow_null=True)
-#     permission_levels = serializers.ListField(child=serializers.CharField(), required=False)
-#     # last_updated_by = serializers.SerializerMethodField()
 
-#     class Meta:
-#         model = CustomUser
-#         fields = [
-#             "id",
-#             "username",
-#             "email",
-#             "first_name",
-#             "last_name",
-#             "role",
-#             "job_role",
-#             "tenant",
-#             "branch",
-#             "status",
-#             "permission_levels",
-#             "profile",
-#             # "last_updated_by_id",
-#             # "last_updated_by",
-#         ]  # Light fields
-#         # read_only_fields = ["last_updated_by", "last_updated_by_id"]
 
-#     # def get_last_updated_by(self, obj):
-#     #     if obj.last_updated_by_id:
-#     #         try:
-#     #             user_data = get_user_data_from_jwt(self.context['request'])
-#     #             if str(user_data['id']) == str(obj.last_updated_by_id):
-#     #                 return {
-#     #                     'id': user_data['id'],
-#     #                     'email': user_data['email'],
-#     #                     'first_name': user_data['first_name'],
-#     #                     'last_name': user_data['last_name']
-#     #                 }
-#     #             logger.warning(f"Access denied to last_updated_by details for {obj.last_updated_by_id}")
-#     #             return None
-#     #         except Exception as e:
-#     #             logger.error(f"Error fetching last_updated_by {obj.last_updated_by_id}: {str(e)}")
-#     #             return None
-#     #     logger.warning(f"No last_updated_by_id provided for {obj}")
-#     #     return None
 class CustomUserListSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
     tenant = serializers.SlugRelatedField(read_only=True, slug_field="name")
@@ -1394,6 +1436,7 @@ class CustomUserListSerializer(serializers.ModelSerializer):
         except Exception as e:
             logger.error(f"Error calculating profile completion for user {obj.email}: {str(e)}")
             return 0
+
 
 
 
@@ -1480,6 +1523,8 @@ class BlockedIPSerializer(serializers.ModelSerializer):
 class UserActivitySerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source="user.email", read_only=True, allow_null=True)
     tenant_name = serializers.CharField(source="tenant.name", read_only=True)
+    global_correlation_id = serializers.UUIDField(read_only=True, required=False)
+    
     performed_by_email = serializers.EmailField(source="performed_by.email", read_only=True, allow_null=True)
 
     class Meta:
@@ -1492,6 +1537,7 @@ class UserActivitySerializer(serializers.ModelSerializer):
             "tenant_name",
             "action",
             "performed_by",
+            'global_correlation_id',
             "performed_by_email",
             "timestamp",
             "details",
@@ -1648,91 +1694,11 @@ class UserSessionSerializer(serializers.ModelSerializer):
         fields = ["id", "login_time", "logout_time", "duration", "date", "ip_address", "user_agent"]
 
 
-# class ClientProfileSerializer(serializers.ModelSerializer):
-#     preferred_carers = serializers.PrimaryKeyRelatedField(
-#         many=True, queryset=CustomUser.objects.filter(role="carer"), required=False
-#     )
-#     photo = serializers.ImageField(required=False, allow_null=True, write_only=True)
-#     photo_url = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True, read_only=True)
-#     last_updated_by = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = ClientProfile
-#         fields = "__all__"
-#         read_only_fields = ["id", "user", "client_id", "last_updated_by", "last_updated_by_id"]
-
-#     def get_last_updated_by(self, obj):
-#         return get_last_updated_by(self, obj)
-
-#     def validate(self, data):
-#         logger.info(f"Validating ClientProfileSerializer data: {data}")
-#         return super().validate(data)
-
-#     def create(self, validated_data):
-#         user_data = get_user_data_from_jwt(self.context['request'])
-#         user_id = user_data.get('id')
-#         if user_id:
-#             validated_data['last_updated_by_id'] = str(user_id)
-#         else:
-#             logger.warning("No user_id found in JWT payload for creation")
-#             raise serializers.ValidationError({"last_updated_by_id": "User ID required for creation."})
-
-#         photo = validated_data.pop("photo", None)
-#         preferred_carers = validated_data.pop("preferred_carers", [])
-#         client_profile = super().create(validated_data)
-#         if photo and hasattr(photo, "name"):
-#             logger.info(f"Uploading client photo: {photo.name}")
-#             try:
-#                 url = upload_file_dynamic(
-#                     photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
-#                 )
-#                 client_profile.photo_url = url
-#                 logger.info(f"Client photo uploaded: {url}")
-#             except Exception as e:
-#                 logger.error(f"Failed to upload client photo: {str(e)}")
-#                 raise serializers.ValidationError(f"Failed to upload photo: {str(e)}")
-#         else:
-#             logger.info("No photo provided for client profile, setting photo_url to None")
-#             client_profile.photo_url = None
-#         client_profile.preferred_carers.set(preferred_carers)
-#         client_profile.save()
-#         return client_profile
-
-#     def update(self, instance, validated_data):
-#         user_data = get_user_data_from_jwt(self.context['request'])
-#         user_id = user_data.get('id')
-#         if user_id:
-#             instance.last_updated_by_id = str(user_id)
-#         else:
-#             logger.warning("No user_id found in JWT payload for update")
-
-#         photo = validated_data.pop("photo", None)
-#         preferred_carers = validated_data.pop("preferred_carers", None)
-#         instance = super().update(instance, validated_data)
-#         if photo and hasattr(photo, "name"):
-#             logger.info(f"Updating client photo: {photo.name}")
-#             try:
-#                 url = upload_file_dynamic(
-#                     photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
-#                 )
-#                 instance.photo_url = url
-#                 logger.info(f"Client photo updated: {url}")
-#             except Exception as e:
-#                 logger.error(f"Failed to update client photo: {str(e)}")
-#                 raise serializers.ValidationError(f"Failed to update photo: {str(e)}")
-#         elif photo is None:
-#             logger.info("No photo provided for update, keeping existing photo_url")
-#             instance.photo_url = getattr(instance, "photo_url", None)
-#         if preferred_carers is not None:
-#             instance.preferred_carers.set(preferred_carers)
-#         instance.save()
-#         return instance
-# ClientProfileSerializer - update photo field
 class ClientProfileSerializer(serializers.ModelSerializer):
     preferred_carers = serializers.PrimaryKeyRelatedField(
         many=True, queryset=CustomUser.objects.filter(role="carer"), required=False
     )
-    photo = serializers.FileField(required=False, allow_null=True, validators=[validate_file_extension])
+    photo = serializers.ImageField(required=False, allow_null=True, write_only=True)
     photo_url = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True, read_only=True)
     last_updated_by = serializers.SerializerMethodField()
 
@@ -1743,6 +1709,10 @@ class ClientProfileSerializer(serializers.ModelSerializer):
 
     def get_last_updated_by(self, obj):
         return get_last_updated_by(self, obj)
+
+    def validate(self, data):
+        logger.info(f"Validating ClientProfileSerializer data: {data}")
+        return super().validate(data)
 
     def create(self, validated_data):
         user_data = get_user_data_from_jwt(self.context['request'])
@@ -1756,7 +1726,6 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         photo = validated_data.pop("photo", None)
         preferred_carers = validated_data.pop("preferred_carers", [])
         client_profile = super().create(validated_data)
-        
         if photo and hasattr(photo, "name"):
             logger.info(f"Uploading client photo: {photo.name}")
             try:
@@ -1771,7 +1740,6 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         else:
             logger.info("No photo provided for client profile, setting photo_url to None")
             client_profile.photo_url = None
-            
         client_profile.preferred_carers.set(preferred_carers)
         client_profile.save()
         return client_profile
@@ -1787,7 +1755,6 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         photo = validated_data.pop("photo", None)
         preferred_carers = validated_data.pop("preferred_carers", None)
         instance = super().update(instance, validated_data)
-        
         if photo and hasattr(photo, "name"):
             logger.info(f"Updating client photo: {photo.name}")
             try:
@@ -1801,12 +1768,12 @@ class ClientProfileSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"Failed to update photo: {str(e)}")
         elif photo is None:
             logger.info("No photo provided for update, keeping existing photo_url")
-            
+            instance.photo_url = getattr(instance, "photo_url", None)
         if preferred_carers is not None:
             instance.preferred_carers.set(preferred_carers)
         instance.save()
         return instance
-    
+
 
 class ClientDetailSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer()
@@ -1893,7 +1860,6 @@ class ClientDetailSerializer(serializers.ModelSerializer):
         return instance
 
 
-
 class ClientCreateSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer(required=True)
     password = serializers.CharField(write_only=True, required=True, min_length=8)
@@ -1949,15 +1915,11 @@ class ClientCreateSerializer(serializers.ModelSerializer):
             return user
 
 
-
-
 class DocumentPermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocumentPermission
         fields = ["user_id", "email", "first_name", "last_name", "role", "permission_level", "created_at"]
         read_only_fields = ["created_at"]
-
-
 class DocumentPermissionWriteSerializer(serializers.Serializer):
     user_id = serializers.CharField(max_length=255, required=False, allow_blank=False)
     email = serializers.EmailField(required=False, allow_blank=False)
@@ -2008,9 +1970,6 @@ class DocumentPermissionSerializer(serializers.ModelSerializer):
         fields = ["user_id", "email", "first_name", "last_name", "role", "permission_level", "created_at"]
         read_only_fields = ["created_at"]
 
-
-
-
 class DocumentSerializer(serializers.ModelSerializer):
     uploaded_by = serializers.SerializerMethodField()
     updated_by = serializers.SerializerMethodField()
@@ -2020,7 +1979,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     permissions = DocumentPermissionSerializer(many=True, read_only=True)
     permissions_write = DocumentPermissionWriteSerializer(many=True, required=False, write_only=True)
     permission_action = serializers.ChoiceField(choices=['add', 'remove', 'replace', 'update_level'], required=False, write_only=True)
-    file = serializers.FileField(required=False, allow_null=True, validators=[validate_file_extension])
+    file = serializers.FileField(required=False, allow_null=True)
 
     class Meta:
         model = Document
@@ -2134,10 +2093,14 @@ class DocumentSerializer(serializers.ModelSerializer):
         except Exception as e:
             logger.error(f"Error fetching tenant domain for {obj.tenant_id}: {str(e)}")
             return None
-    
-    
+
     def validate_file(self, value):
-        return validate_file_extension(value)
+        if value:
+            if not value.name.lower().endswith((".pdf", ".png", ".jpg", ".jpeg")):
+                raise serializers.ValidationError("Only PDF or image files are allowed.")
+            if value.size > 10 * 1024 * 1024:  # 10MB limit
+                raise serializers.ValidationError("File size cannot exceed 10MB.")
+        return value
 
     def validate_permissions_write(self, value):
             if value:
@@ -2649,9 +2612,42 @@ class UserProfileMinimalSerializer(serializers.ModelSerializer):
     #     return get_last_updated_by(self, obj)
 
 
+# class CustomUserMinimalSerializer(serializers.ModelSerializer):
+#     profile = UserProfileMinimalSerializer(read_only=True)
+#     # last_updated_by = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = CustomUser
+#         fields = [
+#             "id",
+#             "email",
+#             "username",
+#             "first_name",
+#             "last_name",
+#             "role",
+#             "job_role",
+#             "tenant",
+#             "branch",
+#             "status",
+#             "is_locked",
+#             "has_accepted_terms",
+#             "profile",
+#             # "last_updated_by_id",
+#             # "last_updated_by",
+#         ]
+#         # read_only_fields = ["last_updated_by", "last_updated_by_id"]
+
+#     # def get_last_updated_by(self, obj):
+#     #     return get_last_updated_by(self, obj)
+
+
+# users/serializers.py
+
 class CustomUserMinimalSerializer(serializers.ModelSerializer):
-    profile = UserProfileMinimalSerializer(read_only=True)
-    # last_updated_by = serializers.SerializerMethodField()
+    profile = serializers.SerializerMethodField()
+    username = serializers.CharField(source='get_username', read_only=True)
+    tenant = serializers.CharField(source='tenant.schema_name', read_only=True)
+    branch = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
@@ -2669,11 +2665,226 @@ class CustomUserMinimalSerializer(serializers.ModelSerializer):
             "is_locked",
             "has_accepted_terms",
             "profile",
-            # "last_updated_by_id",
-            # "last_updated_by",
         ]
-        # read_only_fields = ["last_updated_by", "last_updated_by_id"]
 
-    # def get_last_updated_by(self, obj):
-    #     return get_last_updated_by(self, obj)
+    def get_profile(self, obj):
+        # GlobalUser has no profile → return None
+        if not hasattr(obj, 'profile'):
+            return None
+        if obj.profile:
+            return UserProfileMinimalSerializer(obj.profile).data
+        return None
+
+    def get_username(self, obj):
+        # GlobalUser has no username → fallback to email
+        return getattr(obj, 'username', obj.email.split('@')[0])
+
+    def get_branch(self, obj):
+        # GlobalUser has no branch
+        if not hasattr(obj, 'branch') or not obj.branch:
+            return None
+        return {"id": obj.branch.id, "name": obj.branch.name}
+
+    def to_representation(self, instance):
+        # Handle GlobalUser gracefully
+        if not hasattr(instance, 'username'):
+            data = {
+                "id": instance.id,
+                "email": instance.email,
+                "username": instance.email.split('@')[0],
+                "first_name": instance.first_name or "",
+                "last_name": instance.last_name or "",
+                "role": getattr(instance, 'role', 'super-admin'),
+                "job_role": None,
+                "tenant": get_public_schema_name(),
+                "branch": None,
+                "status": "active",
+                "is_locked": False,
+                "has_accepted_terms": True,
+                "profile": None,
+            }
+            return data
+        return super().to_representation(instance)
+
+
+
+class ActivityTypeBreakdownSerializer(serializers.Serializer):
+    action = serializers.CharField()
+    count = serializers.IntegerField()
+    success_count = serializers.IntegerField()
+    failure_count = serializers.IntegerField()
+    success_rate = serializers.FloatField()
+
+class UserActivityReportSerializer(serializers.Serializer):
+    user_id = serializers.CharField()
+    email = serializers.EmailField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    role = serializers.CharField()
+    activity_count = serializers.IntegerField()
+    last_activity = serializers.DateTimeField()
+
+class DailyActivitySerializer(serializers.Serializer):
+    date = serializers.DateField()
+    count = serializers.IntegerField()
+    success_count = serializers.IntegerField()
+    failure_count = serializers.IntegerField()
+
+class SystemHealthSerializer(serializers.Serializer):
+    timestamp = serializers.DateTimeField()
+    system_status = serializers.CharField()
+    metrics = serializers.DictField()
+    thresholds = serializers.DictField()
+
+
+class GlobalActivitySerializer(serializers.ModelSerializer):
+    affected_tenant_name = serializers.CharField(source='affected_tenant.schema_name', read_only=True)
+    performed_by_email = serializers.CharField(source='performed_by.email', read_only=True, allow_null=True)
+    global_user_email = serializers.CharField(source='global_user.email', read_only=True, allow_null=True)
+
+    class Meta:
+        model = GlobalActivity
+        fields = [
+            'id', 'global_user', 'global_user_email', 'affected_tenant', 'affected_tenant_name',
+            'action', 'performed_by', 'performed_by_email', 'timestamp',
+            'details', 'ip_address', 'user_agent', 'success'
+        ]
+        read_only_fields = ['timestamp']
+
+
+# New Serializer for Unified Transactions
+class TransactionSerializer(serializers.Serializer):
+    investor_id = serializers.IntegerField(help_text="User ID of the investor")
+    type = serializers.ChoiceField(
+        choices=[
+            ('deposit', 'Deposit (New Investment)'),
+            ('withdrawal', 'Withdrawal'),
+            ('roi_payout', 'ROI Payout'),
+        ],
+        help_text="Type of transaction"
+    )
+    amount = serializers.DecimalField(max_digits=20, decimal_places=2, min_value=0)
+    # Optional fields
+    notes = serializers.CharField(max_length=255, required=False, allow_blank=True, help_text="Optional notes")
+    investment_id = serializers.IntegerField(required=False, allow_null=True, help_text="For withdrawals/ROI: Link to existing InvestmentDetail ID")
+
+    def validate_investor_id(self, value):
+        try:
+            with tenant_context(self.context['request'].user.tenant):
+                investor = CustomUser.objects.get(id=value, role='investor')
+                if not investor.profile:
+                    raise serializers.ValidationError("Investor profile not found.")
+                return value
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError("Investor not found or not an investor role.")
+
+    def validate(self, data):
+        investor_id = data['investor_id']
+        txn_type = data['type']
+        amount = data['amount']
+        investment_id = data.get('investment_id')
+
+        with tenant_context(self.context['request'].user.tenant):
+            profile = UserProfile.objects.get(user_id=investor_id)
+
+            if txn_type == 'deposit':
+                if amount <= 0:
+                    raise serializers.ValidationError({"amount": "Deposit amount must be positive."})
+            elif txn_type in ['withdrawal', 'roi_payout']:
+                if not investment_id:
+                    raise serializers.ValidationError({"investment_id": "Investment ID required for withdrawals/ROI."})
+                try:
+                    investment = InvestmentDetail.objects.get(id=investment_id, user_profile=profile)
+                    available = investment.remaining_balance
+                    if amount > available:
+                        raise serializers.ValidationError({
+                            "amount": f"Amount ({amount}) exceeds available balance ({available})."
+                        })
+                except InvestmentDetail.DoesNotExist:
+                    raise serializers.ValidationError({"investment_id": "Invalid investment ID."})
+
+        return data
+
+    def create(self, validated_data):
+        investor_id = validated_data.pop('investor_id')
+        txn_type = validated_data.pop('type')
+        amount = validated_data.pop('amount')
+        notes = validated_data.pop('notes', '')
+        investment_id = validated_data.pop('investment_id', None)
+
+        with tenant_context(self.context['request'].user.tenant):
+            profile = UserProfile.objects.get(user_id=investor_id)
+            user_data = get_user_data_from_jwt(self.context['request'])
+            last_updated_by_id = str(user_data['id'])
+
+            if txn_type == 'deposit':
+                # Create new InvestmentDetail
+                investment = InvestmentDetail.objects.create(
+                    user_profile=profile,
+                    investment_amount=amount,
+                    roi_rate='monthly',  # Default; can be customized
+                    last_updated_by_id=last_updated_by_id
+                )
+                # Log activity
+                UserActivity.objects.create(
+                    user=profile.user,
+                    tenant=profile.user.tenant,
+                    action='investment_created',
+                    performed_by=self.context['request'].user,
+                    details={
+                        'amount': str(amount),
+                        'investment_id': investment.id,
+                        'notes': notes
+                    },
+                    success=True
+                )
+                return {
+                    'status': 'success',
+                    'type': 'deposit',
+                    'investment_id': investment.id,
+                    'message': f'Deposit of {amount} recorded as new investment.'
+                }
+
+            elif txn_type in ['withdrawal', 'roi_payout']:
+                # Create WithdrawalDetail
+                investment = InvestmentDetail.objects.get(id=investment_id, user_profile=profile)
+                withdrawal = WithdrawalDetail.objects.create(
+                    investment=investment,
+                    user_profile=profile,
+                    withdrawal_amount=amount,
+                    withdrawal_request_date=timezone.now(),
+                    withdrawal_approved=True,  # Auto-approve for simplicity
+                    withdrawal_approved_by={
+                        'id': last_updated_by_id,
+                        'email': user_data['email'],
+                        'first_name': user_data['first_name'],
+                        'last_name': user_data['last_name'],
+                        'role': self.context['request'].user.role
+                    },
+                    withdrawn_date=timezone.now(),
+                    withdrawan=True,
+                    last_updated_by_id=last_updated_by_id
+                )
+                action = 'withdrawal_processed' if txn_type == 'withdrawal' else 'roi_payout_processed'
+                # Log activity
+                UserActivity.objects.create(
+                    user=profile.user,
+                    tenant=profile.user.tenant,
+                    action=action,
+                    performed_by=self.context['request'].user,
+                    details={
+                        'amount': str(amount),
+                        'withdrawal_id': withdrawal.id,
+                        'investment_id': investment.id,
+                        'type': txn_type,
+                        'notes': notes
+                    },
+                    success=True
+                )
+                return {
+                    'status': 'success',
+                    'type': txn_type,
+                    'withdrawal_id': withdrawal.id,
+                    'message': f'{txn_type.replace("_", " ").title()} of {amount} processed.'
+                }
 

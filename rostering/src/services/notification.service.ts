@@ -270,7 +270,7 @@ export class NotificationService {
   /**
    * Send the notification event to the notification service
    */
-  private async sendNotification(event: NotificationEvent): Promise<void> {
+  public async sendNotification(event: NotificationEvent): Promise<void> {
     try {
       await axios.post(this.notificationServiceUrl, event, {
         headers: {
@@ -322,3 +322,5 @@ export class NotificationService {
 }
 
 export default NotificationService;
+
+

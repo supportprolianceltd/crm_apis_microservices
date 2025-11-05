@@ -346,3 +346,4 @@ export class GeocodingService {
     return degrees * (Math.PI / 180);
   }
 }
+

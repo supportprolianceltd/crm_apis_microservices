@@ -2,47 +2,58 @@
 set -e
 
 echo "🚀 Starting Rostering Service..."
+
 cd /app
 
-# Generate Prisma client (safe to rerun)
+# Check if dist/server.js exists
+if [ ! -f "dist/server.js" ]; then
+  echo "❌ ERROR: dist/server.js not found!"
+  exit 1
+fi
+
+echo "✅ Server file found: dist/server.js"
+
+# Generate Prisma client
 echo "🔧 Generating Prisma client..."
 npx prisma generate
 
-# Wait for database and apply migrations with retry logic
-echo "⏳ Waiting for database and applying migrations..."
+if [ $? -ne 0 ]; then
+  echo "❌ Prisma generate failed"
+  exit 1
+fi
+
+echo "✅ Prisma client generated"
+
+# Wait for database to be ready
+echo "⏳ Waiting for database to be ready..."
 MAX_RETRIES=30
 RETRY_COUNT=0
-MIGRATION_SUCCESS=false
+DB_READY=false
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-  if npx prisma migrate deploy; then
-    echo "✅ Database connected and migrations applied successfully!"
-    MIGRATION_SUCCESS=true
-    break
+  if PGPASSWORD=password psql -h rostering-db -U postgres -d rostering_dev -c "SELECT 1;" 2>/dev/null; then
+    echo "✅ Database connection successful!"
+    
+    # Apply database migrations
+    echo "🔧 Applying database schema..."
+    if npx prisma db push --skip-generate; then
+      echo "✅ Database schema synchronized successfully!"
+      DB_READY=true
+      break
+    else
+      echo "❌ Failed to apply database schema"
+    fi
   fi
-  
+
   RETRY_COUNT=$((RETRY_COUNT+1))
-  echo "💤 Database not ready or migrations pending, waiting 2 seconds... (attempt $RETRY_COUNT/$MAX_RETRIES)"
+  echo "💤 Database not ready, waiting 2 seconds... (attempt $RETRY_COUNT/$MAX_RETRIES)"
   sleep 2
 done
 
-if [ "$MIGRATION_SUCCESS" = false ]; then
-  echo "❌ Failed to apply migrations after $MAX_RETRIES attempts"
-  echo "🔍 Checking database connection..."
-  
-  # Try to get more detailed error info
-  if npx prisma db execute --stdin --url="$DATABASE_URL" <<< "SELECT 1" > /dev/null 2>&1; then
-    echo "✅ Database is accessible, but migrations failed"
-    echo "📋 Checking migration status..."
-    npx prisma migrate status
-  else
-    echo "❌ Cannot connect to database at all"
-  fi
-  
+if [ "$DB_READY" = false ]; then
+  echo "❌ Failed to connect to database after $MAX_RETRIES attempts"
   exit 1
 fi
 
 echo "🎉 Setup complete! Starting application..."
-
-# Switch to non-root user and start the application
-exec su-exec rostering "$@"
+exec node dist/server.js

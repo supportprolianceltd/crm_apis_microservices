@@ -12,6 +12,10 @@ datasource db {
   extensions = [postgis]
 }
 
+// ─────────────────────────────────────────────
+// CORE MODELS
+// ─────────────────────────────────────────────
+
 model ExternalRequest {
   id                 String                                 @id @default(cuid())
   tenantId           String
@@ -28,27 +32,28 @@ model ExternalRequest {
   urgency            RequestUrgency                         @default(MEDIUM)
   status             RequestStatus                          @default(PENDING)
   requirements       String?                                @db.Text
-  estimatedDuration  Int? // in minutes
+  estimatedDuration  Int?
   scheduledStartTime DateTime?
   scheduledEndTime   DateTime?
   notes              String?                                @db.Text
-  emailMessageId     String? // Original email message ID
-  emailThreadId      String? // Email thread/conversation ID
+  emailMessageId     String?
+  emailThreadId      String?
   approvedBy         String?
   approvedAt         DateTime?
   sendToRostering    Boolean
 
-  // Clustering
-  clusterId String?
-  cluster   Cluster? @relation(fields: [clusterId], references: [id])
+  clusterId          String?
+  cluster            Cluster?                               @relation(fields: [clusterId], references: [id])
 
-  // Relationships
-  matches RequestCarerMatch[]
+  matches            RequestCarerMatch[]
+  timesheetEntries   TimesheetEntry[]
+  invoiceLineItems   InvoiceLineItem[]
+  assignments Assignment[] @relation("VisitAssignments")
 
-  // Audit fields
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  processedAt DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  processedAt        DateTime?
+
   @@index([tenantId])
   @@index([status])
   @@index([urgency])
@@ -60,44 +65,41 @@ model ExternalRequest {
 }
 
 model Carer {
-  id        String                                 @id @default(cuid())
-  tenantId  String
-  email     String
-  firstName String
-  lastName  String
-  phone     String?
-  address   String
-  postcode  String
-  country   String? // Country for geocoding
-  location  Unsupported("geography(POINT, 4326)")?
-  latitude  Float?
-  longitude Float?
+  id                 String                                 @id @default(cuid())
+  tenantId           String
+  email              String
+  firstName          String
+  lastName           String
+  phone              String?
+  address            String
+  postcode           String
+  country            String?
+  location           Unsupported("geography(POINT, 4326)")?
+  latitude           Float?
+  longitude          Float?
 
-  // Availability and preferences
-  isActive          Boolean  @default(true)
-  maxTravelDistance Int      @default(10000) // in meters
-  availabilityHours Json? // Flexible JSON structure for availability
-  skills            String[] // Array of skills/specializations
-  languages         String[] // Languages spoken
+  isActive           Boolean  @default(true)
+  maxTravelDistance  Int      @default(10000)
+  availabilityHours  Json?
+  skills             String[]
+  languages          String[]
 
-  // Professional details
-  qualification String?
-  experience    Int? // years of experience
-  hourlyRate    Float?
+  qualification      String?
+  experience         Int?
+  hourlyRate         Float?
+  authUserId         String?
 
-  // Auth service reference
-  authUserId String? // Reference to user ID in auth service
+  clusterId          String?
+  cluster            Cluster? @relation(fields: [clusterId], references: [id])
 
-  // Clustering
-  clusterId String?
-  cluster   Cluster? @relation(fields: [clusterId], references: [id])
+  matches            RequestCarerMatch[]
+  timesheets         Timesheet[]
+  payslips           Payslip[]
+  publishedAssignments PublishedAssignment[]
+  assignments Assignment[] @relation("CarerAssignments")
 
-  // Relationships
-  matches RequestCarerMatch[]
-
-  // Audit fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -109,30 +111,25 @@ model Carer {
 }
 
 model RequestCarerMatch {
-  id       String @id @default(cuid())
-  tenantId String
+  id                 String   @id @default(cuid())
+  tenantId           String
 
-  // Relationships
-  requestId String
-  request   ExternalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId          String
+  request            ExternalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  carerId            String
+  carer              Carer    @relation(fields: [carerId], references: [id], onDelete: Cascade)
 
-  carerId String
-  carer   Carer  @relation(fields: [carerId], references: [id], onDelete: Cascade)
+  distance           Float
+  matchScore         Float
+  status             MatchStatus @default(PENDING)
 
-  // Match details
-  distance   Float // distance in meters
-  matchScore Float // calculated match score (0-100)
-  status     MatchStatus @default(PENDING)
+  respondedAt        DateTime?
+  response           MatchResponse?
+  responseNotes      String?
+  notificationSent   Boolean @default(false)
 
-  // Response tracking
-  respondedAt      DateTime?
-  response         MatchResponse?
-  responseNotes    String?
-  notificationSent Boolean        @default(false)
-
-  // Audit fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@unique([requestId, carerId])
   @@index([tenantId])
@@ -143,15 +140,15 @@ model RequestCarerMatch {
 }
 
 model EmailProcessingLog {
-  id           String           @id @default(cuid())
-  tenantId     String
-  messageId    String // Email message ID
-  subject      String
-  fromAddress  String
-  processedAt  DateTime         @default(now())
-  status       ProcessingStatus
-  errorMessage String?
-  requestId    String? // Link to created request if successful
+  id                 String           @id @default(cuid())
+  tenantId           String
+  messageId          String
+  subject            String
+  fromAddress        String
+  processedAt        DateTime         @default(now())
+  status             ProcessingStatus
+  errorMessage       String?
+  requestId          String?
 
   @@unique([tenantId, messageId])
   @@index([tenantId])
@@ -161,76 +158,66 @@ model EmailProcessingLog {
 }
 
 model GeocodingCache {
-  id         String                                @id @default(cuid())
-  address    String                                @unique
-  postcode   String?
-  latitude   Float
-  longitude  Float
-  location   Unsupported("geography(POINT, 4326)")
-  confidence Float? // Geocoding confidence score
-  source     String                                @default("nominatim")
+  id                 String                                @id @default(cuid())
+  address            String                                @unique
+  postcode           String?
+  latitude           Float
+  longitude          Float
+  location           Unsupported("geography(POINT, 4326)")
+  confidence         Float?
+  source             String                                @default("nominatim")
 
-  // Audit fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@index([postcode])
   @@map("geocoding_cache")
 }
 
 model TenantEmailConfig {
-  id       String @id @default(cuid())
-  tenantId String @unique
+  id                 String @id @default(cuid())
+  tenantId           String @unique
+  imapHost           String
+  imapPort           Int     @default(993)
+  imapUser           String
+  imapPassword       String
+  imapTls            Boolean @default(true)
 
-  // IMAP settings (for receiving care requests)
-  imapHost     String
-  imapPort     Int     @default(993)
-  imapUser     String
-  imapPassword String // Should be encrypted in production
-  imapTls      Boolean @default(true)
+  isActive           Boolean   @default(true)
+  pollInterval       Int       @default(300)
+  lastChecked        DateTime?
 
-  // Email processing settings
-  isActive     Boolean   @default(true)
-  pollInterval Int       @default(300) // seconds
-  lastChecked  DateTime?
-
-  // Audit fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@map("tenant_email_configs")
 }
 
 model Cluster {
-  id          String  @id @default(cuid())
-  tenantId    String
-  name        String // e.g., "North London Central", "Birmingham East"
-  description String?
-  postcode    String?
+  id                 String  @id @default(cuid())
+  tenantId           String
+  name               String
+  description        String?
+  postcode           String?
 
-  // Geographic center
-  regionCenter Unsupported("geography(POINT, 4326)")?
-  latitude     Float?
-  longitude    Float?
-  radiusMeters Int                                    @default(5000) // 5km default radius
+  regionCenter       Unsupported("geography(POINT, 4326)")?
+  latitude           Float?
+  longitude          Float?
+  radiusMeters       Int @default(5000)
 
-  // Cluster statistics (auto-updated)
   activeRequestCount Int @default(0)
   totalRequestCount  Int @default(0)
   activeCarerCount   Int @default(0)
   totalCarerCount    Int @default(0)
 
-  // Performance tracking
-  averageMatchTime Int? // Average time to match in minutes
-  lastActivityAt   DateTime? // Last request or carer activity
+  averageMatchTime   Int?
+  lastActivityAt     DateTime?
 
-  // Relationships
-  requests ExternalRequest[]
-  carers   Carer[]
+  requests           ExternalRequest[]
+  carers             Carer[]
 
-  // Audit fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@index([tenantId])
   @@index([latitude, longitude])
@@ -239,17 +226,20 @@ model Cluster {
   @@map("clusters")
 }
 
-model CarePlan {
-  id          String         @id @default(cuid())
-  tenantId    String
-  clientId    String
-  title       String
-  description String?
-  startDate   DateTime?
-  endDate     DateTime?
-  status      CarePlanStatus @default(ACTIVE)
+// ─────────────────────────────────────────────
+// CARE PLAN MODELS
+// ─────────────────────────────────────────────
 
-  // Relations
+model CarePlan {
+  id                   String         @id @default(cuid())
+  tenantId             String
+  clientId             String
+  title                String
+  description          String?
+  startDate            DateTime?
+  endDate              DateTime?
+  status               CarePlanStatus @default(ACTIVE)
+
   carers               CarePlanCarer[]
   riskAssessment       RiskAssessment?
   personalCare         PersonalCare?
@@ -265,11 +255,10 @@ model CarePlan {
   legalRequirement     LegalRequirement?
   careRequirements     CareRequirements?
 
-  // Task management
-  tasks Task[]
+  tasks                Task[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   @@index([tenantId])
   @@index([tenantId, clientId])
@@ -279,11 +268,11 @@ model CarePlanCarer {
   id         String @id @default(cuid())
   tenantId   String
   carePlanId String
-  carerId    String // Comes from external system
+  carerId    String
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan   CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
-  @@unique([tenantId, carePlanId, carerId]) // Prevent duplicate assignments
+  @@unique([tenantId, carePlanId, carerId])
   @@index([tenantId])
 }
 
@@ -292,52 +281,42 @@ model RiskAssessment {
   tenantId                  String
   carePlanId                String   @unique
   primarySupportNeed        String?
-  // Multi-select checkbox fields — stored as String[] arrays
-  riskFactorsAndAlerts      String[] @default([]) // options: ["fall risk", "choking risk", "compliance", "wandering", "sensory impairment", "others"]
+  riskFactorsAndAlerts      String[] @default([])
   details                   String?
-  areasRequiringSupport     String[] @default([]) // options: ["washing/bathing", "dressing", "grooming", "oral care", "toileting", "nutrition/hydration", "medication prompting"]
-  homeLayout                String? // dropdown (e.g. "stairs")
-  safetyFeaturesPresent     String[] @default([]) // options: ["grab rail", "good lighting", "none"]
-  hazards                   String[] @default([]) // options: ["loose rugs", "clutter", "electrical risks", "other"]
-  accessibilityNeeds        String[] @default([]) // options: ["ramps", "lifts", "wide doors", "adapted furniture"]
-  loneWorkerConsideration   Boolean? // yes/no checkbox
-  riskAssessmentAndTraining String? // text box
+  areasRequiringSupport     String[] @default([])
+  homeLayout                String?
+  safetyFeaturesPresent     String[] @default([])
+  hazards                   String[] @default([])
+  accessibilityNeeds        String[] @default([])
+  loneWorkerConsideration   Boolean?
+  riskAssessmentAndTraining String?
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                  CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
 }
 
 model PersonalCare {
-  id                  String            @id @default(cuid())
-  tenantId            String
-  carePlanId          String            @unique
-  // Bathing & Showering
-  bathingAndShowering BathingAssistance
-  oralHygiene         String
-  // Personal Appearance
-  maintainThemselves  String
-  dressThemselves     String
-  // Grooming Needs (multi-select)
-  groomingNeeds       String[]          @default([]) // options: ["Hair", "Nails", "Shaving", "Oral Hygiene", "Others (Specify)"]
+  id                       String            @id @default(cuid())
+  tenantId                 String
+  carePlanId               String            @unique
+  bathingAndShowering      BathingAssistance
+  oralHygiene              String
+  maintainThemselves       String
+  dressThemselves          String
+  groomingNeeds            String[]          @default([])
+  toiletUsage              String
+  bowelControl             String
+  bladderControl           String
+  toiletingSupport         String
+  additionalNotes          String            @db.Text
+  continenceCare           String
+  mobilityAssistance       String
+  preferredLanguage        String
+  communicationStyleNeeds  String
 
-  // Toilet
-  toiletUsage      String
-  bowelControl     String
-  bladderControl   String
-  toiletingSupport String
-
-  // Additional Notes
-  additionalNotes         String @db.Text
-  // Dropdowns
-  continenceCare          String
-  mobilityAssistance      String
-  preferredLanguage       String
-  // Communication
-  communicationStyleNeeds String
-
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                 CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -354,7 +333,7 @@ model EverydayActivityPlan {
   communityAccessNeeds          String
   ExerciseandMobilityActivities String
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                      CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -379,7 +358,7 @@ model FallsAndMobility {
   hearingStatus           String
   sensoryAdditionalNotes  String          @db.Text
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -408,7 +387,6 @@ model MedicalInformation {
 
   raisedSafeGuardingIssue           Boolean         @default(false)
   safeGuardingAdditionalInformation String?         @db.Text
-  // Relation: one medical info can have many medications
   medications                       Medication[]
   primaryDoctor                     String
   supportContactPhone               String
@@ -438,7 +416,7 @@ model ClientAllergy {
   Appointments               DateTime
   knownTrigger               String
 
-  medicalInfo MedicalInformation @relation(fields: [medicalInfoId], references: [id], onDelete: Cascade)
+  medicalInfo                MedicalInformation @relation(fields: [medicalInfoId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([medicalInfoId])
@@ -449,11 +427,11 @@ model Medication {
   tenantId      String
   medicalInfoId String
 
-  drugName  String
-  dosage    String
-  frequency String
+  drugName      String
+  dosage        String
+  frequency     String
 
-  medicalInfo MedicalInformation @relation(fields: [medicalInfoId], references: [id], onDelete: Cascade)
+  medicalInfo   MedicalInformation @relation(fields: [medicalInfoId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([medicalInfoId])
@@ -475,7 +453,7 @@ model PsychologicalInformation {
   houseKeepingSupport         Boolean @default(false)
   houseKeepingAdditionalNotes String  @db.Text
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -504,7 +482,7 @@ model FoodNutritionHydration {
   strongDislikes                        String
   fluidPreferences                      String
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                              CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -531,7 +509,7 @@ model RoutinePreference {
   haveHobbiesRoutines            Boolean          @default(false)
   hobbiesRoutinesEffect          String
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                       CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -561,7 +539,7 @@ model CultureValues {
   emotionalSupportNeeds               String[] @default([])
   mentalWellbeingTracking             Boolean  @default(false)
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                            CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -585,7 +563,7 @@ model BodyMap {
   weight                      String
   height                      String
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -618,7 +596,7 @@ model MovingHandling {
   dailyGoal                       String
   IntakeLog                       IntakeLog[]
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                        CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -632,7 +610,7 @@ model IntakeLog {
   amount           String
   notes            String?
 
-  MovingHandling MovingHandling @relation(fields: [movingHandlingId], references: [id], onDelete: Cascade)
+  MovingHandling   MovingHandling @relation(fields: [movingHandlingId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([movingHandlingId])
@@ -644,7 +622,7 @@ model CareRequirements {
   carePlanId String @unique
   careType   String
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan   CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -665,43 +643,33 @@ model LegalRequirement {
   digitalConsentsAndPermissions String[] @default([])
   consertUpload                 String?
 
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carePlan                      CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
 }
 
 model Task {
-  id         String @id @default(cuid())
-  tenantId   String
-  carePlanId String // Link to the main care plan
+  id             String @id @default(cuid())
+  tenantId       String
+  carePlanId     String
+  relatedTable   String
+  relatedId      String
+  title          String
+  description    String     @db.Text
+  status         TaskStatus @default(PENDING)
+  riskCategory   String[]   @default([])
+  riskFrequency  String
+  startDate      DateTime?
+  dueDate        DateTime?
+  completedAt    DateTime?
+  createdBy      String?
+  additionalNotes String?    @db.Text
 
-  // Polymorphic relation - which table and record this task is for
-  relatedTable String // e.g. "RiskAssessment", "PersonalCare", "MedicalInformation", etc.
-  relatedId    String // ID of the related record
+  carePlan       CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
-  // Task details
-  title         String
-  description   String     @db.Text
-  status        TaskStatus @default(PENDING)
-  riskCategory  String[]   @default([])
-  riskFrequency String
-
-  // Timing
-  startDate   DateTime?
-  dueDate     DateTime?
-  completedAt DateTime?
-  createdBy   String? // Who created the task (for audit purposes)
-
-  // Additional context
-  additionalNotes String? @db.Text
-
-  // Audit fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([tenantId])
   @@index([carePlanId])
@@ -711,7 +679,825 @@ model Task {
   @@map("tasks")
 }
 
-// Enums
+// ─────────────────────────────────────────────
+// ROSTERING & SCHEDULING
+// ─────────────────────────────────────────────
+
+
+
+model RosteringConstraints {
+  id                      String   @id @default(cuid())
+  tenantId                String   @map("tenant_id")
+  name                    String   @default("Default Rules")
+
+  wtdMaxHoursPerWeek      Int      @default(48) @map("wtd_max_hours_per_week")
+  restPeriodHours         Int      @default(11) @map("rest_period_hours")
+  bufferMinutes           Int      @default(5)  @map("buffer_minutes")
+  travelMaxMinutes        Int      @default(20) @map("travel_max_minutes")
+  continuityTargetPercent Int      @default(85) @map("continuity_target_percent")
+
+  maxDailyHours           Int?     @default(10) @map("max_daily_hours")
+  minRestBetweenVisits    Int?     @default(0)  @map("min_rest_between_visits")
+  maxTravelTimePerVisit   Int?     @default(60) @map("max_travel_time_per_visit")
+
+  isActive                Boolean? @default(true) @map("is_active")
+  createdBy               String?  @map("created_by")
+  
+  // NEW FIELDS FOR UPDATE TRACKING
+  updatedBy               String?  @map("updated_by")
+  updatedByEmail          String?  @map("updated_by_email")
+  updatedByFirstName      String?  @map("updated_by_first_name")
+  updatedByLastName       String?  @map("updated_by_last_name")
+
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  @@unique([tenantId, name])
+  @@map("rostering_constraints")
+}
+
+
+model TravelMatrixCache {
+  id                     String   @id @default(cuid())
+  fromPostcode           String   @map("from_postcode")
+  toPostcode             String   @map("to_postcode")
+  distanceMeters         Int?     @map("distance_meters")
+  durationSeconds        Int?     @map("duration_seconds")
+  trafficDurationSeconds Int?     @map("traffic_duration_seconds")
+  mode                   String   @default("driving")
+  calculatedAt           DateTime @default(now()) @map("calculated_at")
+
+  @@unique([fromPostcode, toPostcode, mode])
+  @@map("travel_matrix_cache")
+}
+
+// ─────────────────────────────────────────────
+// ROSTER GENERATION
+// ─────────────────────────────────────────────
+
+model Roster {
+  id                 String   @id @default(cuid())
+  tenantId           String   @map("tenant_id")
+  name               String
+  description        String?
+  strategy           RosterStrategy @default(BALANCED)
+  startDate          DateTime @map("start_date")
+  endDate            DateTime @map("end_date")
+  createdBy          String   @map("created_by")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  status             RosterStatus @default(DRAFT)
+  publishedAt        DateTime? @map("published_at")
+
+  totalAssignments   Int @default(0) @map("total_assignments")
+  totalTravelMinutes Int @default(0) @map("total_travel_minutes")
+  continuityScore    Float @default(0) @map("continuity_score")
+  qualityScore       Float @default(0) @map("quality_score")
+
+  assignments        Assignment[]
+  publications       RosterPublication[]
+
+  @@index([tenantId])
+  @@index([startDate, endDate])
+  @@index([status])
+  @@map("rosters")
+}
+
+model Assignment {
+  id                String   @id @default(cuid())
+  tenantId          String   @map("tenant_id")
+  rosterId          String   @map("roster_id")
+  visitId           String   @map("visit_id")
+  carerId           String   @map("carer_id")
+  scheduledTime     DateTime @map("scheduled_time")
+  estimatedEndTime  DateTime @map("estimated_end_time")
+  actualDuration    Int?     @map("actual_duration")
+  travelFromPrevious Int @default(0) @map("travel_from_previous")
+  travelDistance     Float? @map("travel_distance")
+  wtdCompliant      Boolean @default(true) @map("wtd_compliant")
+  restPeriodOK      Boolean @default(true) @map("rest_period_ok")
+  travelTimeOK      Boolean @default(true) @map("travel_time_ok")
+  skillsMatch       Boolean @default(true) @map("skills_match")
+  warnings          String[] @default([])
+  status            AssignmentStatus @default(PENDING)
+  acceptedAt        DateTime? @map("accepted_at")
+  declinedAt        DateTime? @map("declined_at")
+  declineReason     String?   @map("decline_reason")
+  
+  // NEW FIELDS - ADD THESE
+  locked            Boolean @default(false)
+  lockedReason      String? @map("locked_reason")
+  lockedBy          String? @map("locked_by")
+  lockedAt          DateTime? @map("locked_at")
+  manuallyAssigned  Boolean @default(false) @map("manually_assigned")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  roster            Roster @relation(fields: [rosterId], references: [id], onDelete: Cascade)
+  visit    ExternalRequest @relation("VisitAssignments", fields: [visitId], references: [id])
+  carer    Carer           @relation("CarerAssignments", fields: [carerId], references: [id])
+  publishedAssignments PublishedAssignment[]
+
+  @@unique([rosterId, visitId])
+  @@index([tenantId])
+  @@index([carerId])
+  @@index([scheduledTime])
+  @@index([status])
+  @@index([locked]) // NEW INDEX
+  @@map("assignments")
+}
+
+// ─────────────────────────────────────────────
+// LIVE OPERATIONS
+// ─────────────────────────────────────────────
+
+model CarerLocationUpdate {
+  id          String   @id @default(cuid())
+  carerId     String   @map("carer_id")
+  latitude    Float
+  longitude   Float
+  accuracy    Float
+  location    Unsupported("geography(POINT, 4326)")?
+  currentVisitId String? @map("current_visit_id")
+  status      LocationStatus @default(UNKNOWN)
+  recordedAt  DateTime @default(now()) @map("recorded_at")
+
+  @@index([carerId])
+  @@index([recordedAt])
+  @@map("carer_location_updates")
+}
+
+model VisitCheckIn {
+  id               String   @id @default(cuid())
+  visitId          String   @map("visit_id")
+  carerId          String   @map("carer_id")
+  latitude         Float
+  longitude        Float
+  withinGeofence   Boolean @default(true) @map("within_geofence")
+  distance         Float
+  checkInTime      DateTime @default(now()) @map("check_in_time")
+  notes            String?
+  requiresApproval Boolean @default(false) @map("requires_approval")
+  approvedBy       String? @map("approved_by")
+  approvedAt       DateTime? @map("approved_at")
+
+  @@unique([visitId, carerId])
+  @@index([visitId])
+  @@index([carerId])
+  @@index([checkInTime])
+  @@map("visit_check_ins")
+}
+
+model VisitCheckOut {
+  id               String   @id @default(cuid())
+  visitId          String   @map("visit_id")
+  carerId          String   @map("carer_id")
+  latitude         Float
+  longitude        Float
+  checkOutTime     DateTime @default(now()) @map("check_out_time")
+  actualDuration   Int @map("actual_duration")
+  tasksCompleted   String[] @default([]) @map("tasks_completed")
+  incidentReported Boolean @default(false) @map("incident_reported")
+  incidentDetails  String? @map("incident_details")
+  incidentSeverity IncidentSeverity? @map("incident_severity")
+  notes            String?
+
+  @@unique([visitId, carerId])
+  @@index([visitId])
+  @@index([carerId])
+  @@index([checkOutTime])
+  @@map("visit_check_outs")
+}
+
+model LatenessAlert {
+  id               String   @id @default(cuid())
+  tenantId         String   @map("tenant_id")
+  visitId          String   @map("visit_id")
+  carerId          String   @map("carer_id")
+  scheduledTime    DateTime @map("scheduled_time")
+  estimatedArrival DateTime @map("estimated_arrival")
+  delayMinutes     Int @map("delay_minutes")
+  confidence       Float
+  reason           LatenessReason @default(UNKNOWN)
+  details          String?
+  status           AlertStatus @default(ACTIVE)
+  resolvedAt       DateTime? @map("resolved_at")
+  resolution       String?
+  clientNotified   Boolean @default(false) @map("client_notified")
+  swapSuggested    Boolean @default(false) @map("swap_suggested")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId])
+  @@index([visitId])
+  @@index([carerId])
+  @@index([status])
+  @@map("lateness_alerts")
+}
+
+model Incident {
+  id               String   @id @default(cuid())
+  tenantId         String   @map("tenant_id")
+  visitId          String?  @map("visit_id")
+  carerId          String?  @map("carer_id")
+  clientId         String?  @map("client_id")
+  type             IncidentType
+  severity         IncidentSeverity
+  title            String
+  description      String @db.Text
+  latitude         Float?
+  longitude        Float?
+  status           IncidentStatus @default(REPORTED)
+  reportedAt       DateTime @default(now()) @map("reported_at")
+  reportedBy       String   @map("reported_by")
+  acknowledgedAt   DateTime? @map("acknowledged_at")
+  acknowledgedBy   String?   @map("acknowledged_by")
+  resolvedAt       DateTime? @map("resolved_at")
+  resolvedBy       String?   @map("resolved_by")
+  resolution       String?
+  requiresFollowUp Boolean @default(false) @map("requires_follow_up")
+  followUpNotes    String?   @map("follow_up_notes")
+
+  @@index([tenantId])
+  @@index([visitId])
+  @@index([carerId])
+  @@index([status])
+  @@index([severity])
+  @@map("incidents")
+}
+
+// ─────────────────────────────────────────────
+// ROSTER PUBLICATION
+// ─────────────────────────────────────────────
+
+model AssignmentHistory {
+  id                   String   @id @default(cuid())
+  assignmentId         String   @map("assignment_id")
+  tenantId             String   @map("tenant_id")
+  changeType           String   @map("change_type")
+  previousCarerId      String?  @map("previous_carer_id")
+  newCarerId           String?  @map("new_carer_id")
+  previousTime         DateTime? @map("previous_time")
+  newTime              DateTime? @map("new_time")
+  changedBy            String   @map("changed_by")
+  changedByEmail       String?  @map("changed_by_email")
+  reason               String?
+  constraintOverrides  Json?    @map("constraint_overrides")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  @@index([assignmentId])
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("assignment_history")
+}
+
+// Add these missing models to your schema
+
+model TravelMatrix {
+  id               String   @id @default(cuid())
+  fromPostcode     String   @map("from_postcode")
+  toPostcode       String   @map("to_postcode")
+  durationMinutes  Int      @map("duration_minutes")
+  distanceMeters   Int      @map("distance_meters")
+  lastUpdated      DateTime @default(now()) @map("last_updated")
+  expiresAt        DateTime @map("expires_at")
+  
+  @@unique([fromPostcode, toPostcode])
+  @@index([expiresAt])
+  @@map("travel_matrix")
+}
+
+model VisitEligibility {
+  id               String   @id @default(cuid())
+  tenantId         String   @map("tenant_id")
+  visitId          String   @map("visit_id")
+  carerId          String   @map("carer_id")
+  eligible         Boolean  @default(false)
+  score            Float    @default(0)
+  skillsMatch      Boolean  @default(false) @map("skills_match")
+  credentialsValid Boolean  @default(false) @map("credentials_valid")
+  available        Boolean  @default(false)
+  preferencesMatch Boolean  @default(false) @map("preferences_match")
+  travelTime       Int?     @map("travel_time")
+  lastCalculated   DateTime @default(now()) @map("last_calculated")
+  
+  @@unique([visitId, carerId])
+  @@index([tenantId])
+  @@index([visitId])
+  @@index([carerId])
+  @@index([eligible])
+  @@map("visit_eligibility")
+}
+
+model RosterVersion {
+  id                  String   @id @default(cuid())
+  tenantId            String   @map("tenant_id")
+  rosterId            String   @map("roster_id")
+  versionLabel        String   @map("version_label")
+  publishedAt         DateTime @default(now()) @map("published_at")
+  publishedBy         String   @map("published_by")
+  acceptanceDeadline  DateTime @map("acceptance_deadline")
+  assignments         Json     // Store assignments snapshot
+  
+  @@index([tenantId])
+  @@index([rosterId])
+  @@index([publishedAt])
+  @@map("roster_versions")
+}
+
+// MISSING: Notification Optimization Service
+model CarerNotificationPreference {
+  id                    String   @id @default(cuid())
+  tenantId              String   @map("tenant_id")
+  carerId               String   @map("carer_id")
+  preferredChannel      String   @default("push") @map("preferred_channel")
+  bestResponseTimeStart String?    @map("best_response_time_start")
+  bestResponseTimeEnd   String?    @map("best_response_time_end")
+  averageResponseTime   Int?     @map("average_response_time") // in minutes
+  notificationOptOut    Boolean  @default(false) @map("notification_opt_out")
+  lastNotifiedAt        DateTime? @map("last_notified_at")
+  
+  @@unique([tenantId, carerId])
+  @@index([tenantId])
+  @@index([carerId])
+  @@map("carer_notification_preferences")
+}
+
+// MISSING: Escalation History
+model EscalationHistory {
+  id                  String   @id @default(cuid())
+  tenantId            String   @map("tenant_id")
+  originalAssignmentId String  @map("original_assignment_id")
+  escalatedFrom       String   @map("escalated_from") // carerId
+  escalatedTo         String   @map("escalated_to")   // carerId
+  escalationReason    String   @map("escalation_reason")
+  escalatedAt         DateTime @default(now()) @map("escalated_at")
+  escalatedBy         String   @map("escalated_by")
+  success             Boolean  @default(false)
+  
+  @@index([tenantId])
+  @@index([originalAssignmentId])
+  @@index([escalatedFrom])
+  @@index([escalatedTo])
+  @@map("escalation_history")
+}
+
+model ClusterMetrics {
+  id                  String   @id @default(cuid())
+  tenantId            String   @map("tenant_id")
+  clusterId           String   @map("cluster_id")
+  calculatedAt        DateTime @default(now()) @map("calculated_at")
+  
+  totalVisits         Int      @default(0) @map("total_visits")
+  totalHours          Float    @default(0) @map("total_hours")
+  averageDistance     Float    @default(0) @map("average_distance")
+  totalTravelTime     Int      @default(0) @map("total_travel_time")
+  skillCoverage       Float    @default(0) @map("skill_coverage")
+  continuityRisk      Float    @default(0) @map("continuity_risk")
+  requiredSkills      String[] @default([]) @map("required_skills")
+  
+  @@unique([clusterId, calculatedAt])
+  @@index([tenantId])
+  @@index([clusterId])
+  @@map("cluster_metrics")
+}
+
+
+model RosterPublication {
+  id                  String   @id @default(cuid())
+  tenantId            String   @map("tenant_id")
+  rosterId            String   @map("roster_id")
+  versionLabel        String   @map("version_label")
+  publishedBy         String   @map("published_by")
+  publishedAt         DateTime @default(now()) @map("published_at")
+  acceptanceDeadline  DateTime @map("acceptance_deadline")
+  notificationChannels String[] @default(["push"]) @map("notification_channels")
+  status              PublicationStatus @default(ACTIVE)
+  completedAt         DateTime? @map("completed_at")
+  expiredAt           DateTime? @map("expired_at")
+  totalAssignments    Int @default(0) @map("total_assignments")
+  acceptedCount       Int @default(0) @map("accepted_count")
+  declinedCount       Int @default(0) @map("declined_count")
+  pendingCount        Int @default(0) @map("pending_count")
+  expiredCount        Int @default(0) @map("expired_count")
+  notes               String?  @db.Text
+  metadata            Json?
+
+    // ADD THESE MISSING FIELDS:
+  autoEscalate        Boolean  @default(true) @map("auto_escalate")
+  escalationDelay     Int      @default(30) @map("escalation_delay") // minutes
+  maxEscalationCount  Int      @default(3) @map("max_escalation_count")
+  
+  // ADD RELATIONSHIP:
+  // rosterVersions      RosterVersion[]
+
+
+  roster               Roster @relation(fields: [rosterId], references: [id], onDelete: Cascade)
+  publishedAssignments PublishedAssignment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([rosterId])
+  @@index([publishedAt])
+  @@index([status])
+  @@map("roster_publications")
+}
+
+model PublishedAssignment {
+  id                     String   @id @default(cuid())
+  publicationId          String   @map("publication_id")
+  assignmentId           String   @map("assignment_id")
+  carerId                String   @map("carer_id")
+  notificationSentAt     DateTime? @map("notification_sent_at")
+  notificationChannel    String?   @map("notification_channel")
+  notificationDelivered  Boolean @default(false) @map("notification_delivered")
+  status                 AcceptanceStatus @default(PENDING)
+  acceptedAt             DateTime? @map("accepted_at")
+  acceptedBy             String?   @map("accepted_by")
+  declinedAt             DateTime? @map("declined_at")
+  declineReason          String?   @map("decline_reason")
+  expiredAt              DateTime? @map("expired_at")
+  escalatedAt            DateTime? @map("escalated_at")
+  escalatedTo            String[]  @default([]) @map("escalated_to")
+  escalationCount        Int @default(0) @map("escalation_count")
+  viewedAt               DateTime? @map("viewed_at")
+  responseTime           Int?      @map("response_time")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+    
+  // ADD THESE MISSING FIELDS:
+  originalCarerId     String?  @map("original_carer_id") // For tracking reassignments
+  escalationLevel     Int      @default(0) @map("escalation_level")
+  maxEscalationLevel  Int      @default(3) @map("max_escalation_level")
+  
+  // ADD RELATIONSHIP:
+  // escalationHistory   EscalationHistory[]
+
+  publication            RosterPublication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  assignment             Assignment @relation(fields: [assignmentId], references: [id])
+  carer                  Carer @relation(fields: [carerId], references: [id])
+
+  @@unique([publicationId, assignmentId])
+  @@index([carerId])
+  @@index([status])
+  @@index([notificationSentAt])
+  @@map("published_assignments")
+}
+
+// ─────────────────────────────────────────────
+// DISRUPTION MANAGEMENT
+// ─────────────────────────────────────────────
+
+model Disruption {
+  id                 String   @id @default(cuid())
+  tenantId           String   @map("tenant_id")
+  type               DisruptionType
+  severity           DisruptionSeverity
+  title              String
+  description        String @db.Text
+  affectedVisits     String[] @default([]) @map("affected_visits")
+  affectedCarers     String[] @default([]) @map("affected_carers")
+  affectedClients    String[] @default([]) @map("affected_clients")
+  impactData         Json @map("impact_data")
+  status             DisruptionStatus @default(REPORTED)
+  reportedAt         DateTime @default(now()) @map("reported_at")
+  reportedBy         String   @map("reported_by")
+  acknowledgedAt     DateTime? @map("acknowledged_at")
+  acknowledgedBy     String?   @map("acknowledged_by")
+  analyzedAt         DateTime? @map("analyzed_at")
+  resolvedAt         DateTime? @map("resolved_at")
+  resolvedBy         String?   @map("resolved_by")
+  resolution         String?   @db.Text
+  resolutionOptions  Json? @map("resolution_options")
+  selectedResolution String? @map("selected_resolution")
+  resolutionAppliedAt DateTime? @map("resolution_applied_at")
+  requiresFollowUp   Boolean @default(false) @map("requires_follow_up")
+  followUpNotes      String? @db.Text @map("follow_up_notes")
+  followUpAt         DateTime? @map("follow_up_at")
+
+  actions            DisruptionAction[]
+
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([severity])
+  @@index([type])
+  @@index([reportedAt])
+  @@map("disruptions")
+}
+
+model DisruptionAction {
+  id            String   @id @default(cuid())
+  disruptionId  String   @map("disruption_id")
+  actionType    String   @map("action_type")
+  actionData    Json     @map("action_data")
+  performedBy   String   @map("performed_by")
+  performedAt   DateTime @default(now()) @map("performed_at")
+  success       Boolean  @default(true)
+  errorMessage  String?  @map("error_message")
+
+  disruption    Disruption @relation(fields: [disruptionId], references: [id], onDelete: Cascade)
+
+  @@index([disruptionId])
+  @@index([performedAt])
+  @@map("disruption_actions")
+}
+
+// ─────────────────────────────────────────────
+// SETTLEMENT & TIMESHEET
+// ─────────────────────────────────────────────
+
+model Timesheet {
+  id               String   @id @default(cuid())
+  tenantId         String   @map("tenant_id")
+  carerId          String   @map("carer_id")
+  periodStart      DateTime @map("period_start")
+  periodEnd        DateTime @map("period_end")
+  scheduledHours   Float @map("scheduled_hours")
+  actualHours      Float @map("actual_hours")
+  overtimeHours    Float @default(0) @map("overtime_hours")
+  breakHours       Float @default(0) @map("break_hours")
+  regularPay       Float @default(0) @map("regular_pay")
+  overtimePay      Float @default(0) @map("overtime_pay")
+  totalPay         Float @default(0) @map("total_pay")
+  status           TimesheetStatus @default(DRAFT)
+  submittedAt      DateTime? @map("submitted_at")
+  approvedAt       DateTime? @map("approved_at")
+  approvedBy       String?   @map("approved_by")
+  rejectedAt       DateTime? @map("rejected_at")
+  rejectedBy       String?   @map("rejected_by")
+  rejectionReason  String?   @map("rejection_reason")
+  processedAt      DateTime? @map("processed_at")
+  processedBy      String?   @map("processed_by")
+  payrollBatchId   String?   @map("payroll_batch_id")
+
+  carer            Carer @relation(fields: [carerId], references: [id])
+  entries          TimesheetEntry[]
+  exceptions       TimesheetException[]
+  adjustments      TimesheetAdjustment[]
+  payslips         Payslip[]
+
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@unique([tenantId, carerId, periodStart])
+  @@index([tenantId])
+  @@index([carerId])
+  @@index([status])
+  @@index([periodStart, periodEnd])
+  @@map("timesheets")
+}
+
+model TimesheetEntry {
+  id                String   @id @default(cuid())
+  timesheetId       String   @map("timesheet_id")
+  visitId           String?  @map("visit_id")
+  checkInTime       DateTime @map("check_in_time")
+  checkOutTime      DateTime? @map("check_out_time")
+  scheduledStart    DateTime @map("scheduled_start")
+  scheduledEnd      DateTime @map("scheduled_end")
+  scheduledDuration Int @map("scheduled_duration")
+  actualDuration    Int? @map("actual_duration")
+  variance          Int?
+  checkInLocation   Json? @map("check_in_location")
+  checkOutLocation  Json? @map("check_out_location")
+  withinGeofence    Boolean @default(true) @map("within_geofence")
+  tasksCompleted    String[] @default([]) @map("tasks_completed")
+  notes             String? @db.Text
+  validated         Boolean @default(false)
+  validatedAt       DateTime? @map("validated_at")
+  validatedBy       String?   @map("validated_by")
+
+  timesheet         Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+  visit             ExternalRequest? @relation(fields: [visitId], references: [id])
+
+  @@index([timesheetId])
+  @@index([visitId])
+  @@map("timesheet_entries")
+}
+
+model TimesheetException {
+  id            String   @id @default(cuid())
+  timesheetId   String   @map("timesheet_id")
+  entryId       String?  @map("entry_id")
+  type          ExceptionType
+  severity      ExceptionSeverity
+  description   String @db.Text
+  expectedValue String? @map("expected_value")
+  actualValue   String? @map("actual_value")
+  variance      String?
+  status        ExceptionStatus @default(PENDING)
+  resolvedAt    DateTime? @map("resolved_at")
+  resolvedBy    String?   @map("resolved_by")
+  resolution    String?   @db.Text
+  suggestedAction String? @map("suggested_action")
+  autoResolvable Boolean @default(false) @map("auto_resolvable")
+
+  timesheet     Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([timesheetId])
+  @@index([status])
+  @@index([type])
+  @@map("timesheet_exceptions")
+}
+
+model TimesheetAdjustment {
+  id            String   @id @default(cuid())
+  timesheetId   String   @map("timesheet_id")
+  adjustmentType AdjustmentType @map("adjustment_type")
+  description   String @db.Text
+  hoursAdjustment Float @default(0) @map("hours_adjustment")
+  payAdjustment   Float @default(0) @map("pay_adjustment")
+  reason        String @db.Text
+  approvedBy    String   @map("approved_by")
+  approvedAt    DateTime @default(now()) @map("approved_at")
+
+  timesheet     Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+
+  @@index([timesheetId])
+  @@map("timesheet_adjustments")
+}
+
+// ─────────────────────────────────────────────
+// INVOICE & PAYROLL
+// ─────────────────────────────────────────────
+
+model Invoice {
+  id            String   @id @default(cuid())
+  tenantId      String   @map("tenant_id")
+  clientId      String?  @map("client_id")
+  invoiceNumber String   @unique @map("invoice_number")
+  invoiceDate   DateTime @default(now()) @map("invoice_date")
+  dueDate       DateTime @map("due_date")
+  periodStart   DateTime @map("period_start")
+  periodEnd     DateTime @map("period_end")
+  subtotal      Float @default(0)
+  taxAmount     Float @default(0) @map("tax_amount")
+  taxRate       Float @default(0) @map("tax_rate")
+  totalAmount   Float @default(0) @map("total_amount")
+  status        InvoiceStatus @default(DRAFT)
+  paidAmount    Float @default(0) @map("paid_amount")
+  paidAt        DateTime? @map("paid_at")
+  purchaseOrder String? @map("purchase_order")
+  contractRef   String? @map("contract_ref")
+  notes         String? @db.Text
+  terms         String? @db.Text
+
+  lineItems     InvoiceLineItem[]
+  payments      InvoicePayment[]
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([clientId])
+  @@index([status])
+  @@index([invoiceDate])
+  @@index([dueDate])
+  @@map("invoices")
+}
+
+model InvoiceLineItem {
+  id          String   @id @default(cuid())
+  invoiceId   String   @map("invoice_id")
+  visitId     String?  @map("visit_id")
+  description String   @db.Text
+  quantity    Float    @default(1)
+  unitPrice   Float    @map("unit_price")
+  lineTotal   Float    @map("line_total")
+  serviceDate DateTime? @map("service_date")
+  category    String?
+
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  visit       ExternalRequest? @relation(fields: [visitId], references: [id])
+
+  @@index([invoiceId])
+  @@index([visitId])
+  @@map("invoice_line_items")
+}
+
+model InvoicePayment {
+  id            String   @id @default(cuid())
+  invoiceId     String   @map("invoice_id")
+  amount        Float
+  paymentDate   DateTime @default(now()) @map("payment_date")
+  paymentMethod String   @map("payment_method")
+  reference     String?
+  notes         String? @db.Text
+  processedBy   String   @map("processed_by")
+
+  invoice       Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("invoice_payments")
+}
+
+model PayrollBatch {
+  id            String   @id @default(cuid())
+  tenantId      String   @map("tenant_id")
+  batchNumber   String   @unique @map("batch_number")
+  periodStart   DateTime @map("period_start")
+  periodEnd     DateTime @map("period_end")
+  status        PayrollStatus @default(PROCESSING)
+  totalGrossPay Float @default(0) @map("total_gross_pay")
+  totalNetPay   Float @default(0) @map("total_net_pay")
+  totalTax      Float @default(0) @map("total_tax")
+  totalNI       Float @default(0) @map("total_ni")
+  totalPension  Float @default(0) @map("total_pension")
+  employeeCount Int @default(0) @map("employee_count")
+  processedAt   DateTime? @map("processed_at")
+  processedBy   String?   @map("processed_by")
+  approvedAt    DateTime? @map("approved_at")
+  approvedBy    String?   @map("approved_by")
+  exportedAt    DateTime? @map("exported_at")
+  exportPath    String?   @map("export_path")
+
+  payslips      Payslip[]
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([periodStart, periodEnd])
+  @@map("payroll_batches")
+}
+
+model Payslip {
+  id               String   @id @default(cuid())
+  batchId          String   @map("batch_id")
+  carerId          String   @map("carer_id")
+  timesheetId      String?  @map("timesheet_id")
+  periodStart      DateTime @map("period_start")
+  periodEnd        DateTime @map("period_end")
+  regularHours     Float @map("regular_hours")
+  overtimeHours    Float @default(0) @map("overtime_hours")
+  totalHours       Float @map("total_hours")
+  regularPay       Float @map("regular_pay")
+  overtimePay      Float @default(0) @map("overtime_pay")
+  grossPay         Float @map("gross_pay")
+  taxDeduction     Float @default(0) @map("tax_deduction")
+  niDeduction      Float @default(0) @map("ni_deduction")
+  pensionDeduction Float @default(0) @map("pension_deduction")
+  otherDeductions  Float @default(0) @map("other_deductions")
+  totalDeductions  Float @default(0) @map("total_deductions")
+  netPay           Float @map("net_pay")
+  status           PayslipStatus @default(GENERATED)
+  sentAt           DateTime? @map("sent_at")
+  viewedAt         DateTime? @map("viewed_at")
+
+  batch            PayrollBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  carer            Carer @relation(fields: [carerId], references: [id])
+  timesheet        Timesheet? @relation(fields: [timesheetId], references: [id])
+
+  @@index([batchId])
+  @@index([carerId])
+  @@index([status])
+  @@map("payslips")
+}
+
+// ─────────────────────────────────────────────
+// COMPLIANCE REPORTS
+// ─────────────────────────────────────────────
+
+model ComplianceReport {
+  id           String   @id @default(cuid())
+  tenantId     String   @map("tenant_id")
+  reportType   ComplianceReportType @map("report_type")
+  title        String
+  periodStart  DateTime @map("period_start")
+  periodEnd    DateTime @map("period_end")
+  reportData   Json @map("report_data")
+  summary      Json?
+  passRate     Float? @map("pass_rate")
+  failCount    Int?   @map("fail_count")
+  warningCount Int?   @map("warning_count")
+  status       ReportStatus @default(GENERATING)
+  generatedAt  DateTime? @map("generated_at")
+  generatedBy  String?   @map("generated_by")
+  exportPath   String?   @map("export_path")
+  exportFormat String?   @map("export_format")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([reportType])
+  @@index([periodStart, periodEnd])
+  @@map("compliance_reports")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
 enum RequestUrgency {
   LOW
   MEDIUM
@@ -787,13 +1573,6 @@ enum GenderPreference {
   OTHER
 }
 
-enum CommunicationMethod {
-  PHONE
-  EMAIL
-  SMS
-  IN_PERSON
-}
-
 enum TaskStatus {
   PENDING
   IN_PROGRESS
@@ -801,3 +1580,208 @@ enum TaskStatus {
   CANCELLED
   ON_HOLD
 }
+
+enum RosterStrategy {
+  CONTINUITY
+  TRAVEL
+  BALANCED
+}
+
+enum RosterStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  PUBLISHED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum AssignmentStatus {
+  PENDING
+  OFFERED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  COMPLETED
+  CANCELLED
+}
+
+enum PublicationStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+  CANCELLED
+}
+
+enum AcceptanceStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  ESCALATED
+}
+
+enum LocationStatus {
+  ON_TIME
+  RUNNING_LATE
+  OVERDUE
+  UPCOMING
+  COMPLETED
+  UNKNOWN
+}
+
+enum LatenessReason {
+  TRAFFIC
+  PREVIOUS_OVERRUN
+  DISTANCE
+  EMERGENCY
+  UNKNOWN
+}
+
+enum AlertStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+  DISMISSED
+}
+
+enum IncidentType {
+  FALL
+  MEDICATION_ERROR
+  EQUIPMENT_FAILURE
+  SAFEGUARDING
+  DELAY
+  MISSED_VISIT
+  CLIENT_COMPLAINT
+  OTHER
+}
+
+enum IncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentStatus {
+  REPORTED
+  ACKNOWLEDGED
+  INVESTIGATING
+  RESOLVED
+  ESCALATED
+}
+
+enum DisruptionType {
+  CARER_SICK
+  CARER_UNAVAILABLE
+  VISIT_CANCELLED
+  EMERGENCY_VISIT
+  DELAY
+  EQUIPMENT_FAILURE
+  WEATHER
+  TRANSPORT_ISSUE
+  OTHER
+}
+
+enum DisruptionSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum DisruptionStatus {
+  REPORTED
+  ACKNOWLEDGED
+  ANALYZING
+  RESOLVING
+  RESOLVED
+  ESCALATED
+}
+
+enum TimesheetStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PROCESSED
+}
+
+enum ExceptionType {
+  MISSING_CHECK_OUT
+  SHORT_VISIT
+  LONG_VISIT
+  OUTSIDE_GEOFENCE
+  MISSING_TASKS
+  TIME_CONFLICT
+  OVERTIME_EXCEEDED
+  OTHER
+}
+
+enum ExceptionSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum ExceptionStatus {
+  PENDING
+  ACKNOWLEDGED
+  RESOLVED
+  ESCALATED
+}
+
+enum AdjustmentType {
+  MANUAL_CORRECTION
+  OVERTIME_APPROVAL
+  BONUS
+  DEDUCTION
+  MILEAGE
+  EXPENSE
+  OTHER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  VIEWED
+  PAID
+  OVERDUE
+  CANCELLED
+  PARTIAL
+}
+
+enum PayrollStatus {
+  PROCESSING
+  PENDING_APPROVAL
+  APPROVED
+  EXPORTED
+  COMPLETED
+  FAILED
+}
+
+enum PayslipStatus {
+  GENERATED
+  SENT
+  VIEWED
+  ACKNOWLEDGED
+}
+
+enum ComplianceReportType {
+  WTD_COMPLIANCE
+  REST_PERIOD
+  VISIT_PUNCTUALITY
+  CONTINUITY
+  SKILL_COVERAGE
+  TIMESHEET_ACCURACY
+  FINANCIAL_SUMMARY
+}
+
+enum ReportStatus {
+  GENERATING
+  COMPLETED
+  FAILED
+}
+

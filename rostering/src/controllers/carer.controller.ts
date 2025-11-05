@@ -236,9 +236,51 @@ export class CarerController {
   };
 
   /**
-   * Note: Carer creation, updates, and deletion are handled through 
-   * the auth service sync process. This controller only provides 
-   * read-only access to synced carer data.
+   * Create a new carer (for testing/demo purposes)
+   */
+  createCarer = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const tenantId = req.user?.tenantId || '4'; // Default for demo
+
+      const carerData = {
+        tenantId,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        phone: req.body.phone,
+        address: req.body.address,
+        postcode: req.body.postcode,
+        experienceYears: req.body.experienceYears || 0,
+        skills: req.body.skills || [],
+        isActive: req.body.isActive !== undefined ? req.body.isActive : true,
+        maxTravelDistanceMeters: req.body.maxTravelDistanceMeters || 15000
+      };
+
+      const carer = await this.prisma.carer.create({
+        data: carerData
+      });
+
+      logger.info('Carer created successfully', { carerId: carer.id, tenantId });
+
+      res.status(201).json({
+        success: true,
+        data: carer,
+        message: 'Carer created successfully'
+      });
+
+    } catch (error) {
+      logServiceError('Carer', 'createCarer', error, req.body);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to create carer'
+      });
+    }
+  };
+
+  /**
+   * Note: Carer updates and deletion are handled through
+   * the auth service sync process. This controller provides
+   * limited write access for testing/demo purposes.
    */
 
 

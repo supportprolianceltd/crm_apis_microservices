@@ -1,76 +1,169 @@
-from django.contrib.auth.signals import user_logged_in, user_logged_out
+# users/signals.py (extend your existing file)
+
+import logging
+from django.db.models.signals import post_save, pre_delete
+from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 from django.utils import timezone
-from .models import UserSession
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.db import transaction
+import json  # Add this import
+from decimal import Decimal  # Add this for Decimal handling
+# In users/signals.py
+from .models import (
+    CustomUser, UserActivity, InvestmentDetail, WithdrawalDetail,
+    UserProfile, Document, GroupMembership  # Add more models as needed
+)
 from core.models import Tenant
-from users.models import RSAKeyPair
 from django_tenants.utils import tenant_context
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import serialization
-from django.db import connection
+# Logger
+logger = logging.getLogger("users")
+
+@receiver(post_save, sender=CustomUser)
+def log_user_activity(sender, instance, created, **kwargs):
+    def _log():
+        tenant = instance.tenant
+        action = 'user_created' if created else 'user_updated'
+        details = {
+            'role': instance.role,
+            'status': instance.status,
+            'changes': {}  # Populate with diff if updated (see below)
+        }
+        if not created and kwargs.get('update_fields'):
+            details['changes'] = dict(zip(kwargs['update_fields'], [None] * len(kwargs['update_fields'])))  # Simplified diff
+
+        UserActivity.objects.create(
+            user=instance if action != 'user_created' else None,  # Anonymous for creation
+            tenant=tenant,
+            action=action,
+            performed_by=instance if not created else None,  # Self for updates
+            details=details,
+            ip_address=None,  # Signals don't have request; use middleware for IP
+            user_agent=None,
+            success=True,
+        )
+    transaction.on_commit(_log)
+
+@receiver(pre_delete, sender=CustomUser)
+def log_user_deletion(sender, instance, **kwargs):
+    """Log user deletion before the actual deletion to avoid FK constraint violation."""
+    # Create activity in a separate transaction to avoid FK issues
+    with transaction.atomic(using='default'):
+        UserActivity.objects.create(
+            user=None,  # Set to None to avoid FK constraint
+            tenant=instance.tenant,
+            action='user_deleted',
+            performed_by=None,  # Deletion logs post-facto
+            details={
+                'deleted_user_id': instance.id,
+                'email': instance.email,
+                'role': instance.role,
+                'status': instance.status
+            },
+            success=True,
+        )
+
+@receiver(post_save, sender=UserProfile)
+def log_profile_activity(sender, instance, created, **kwargs):
+    def _log():
+        UserActivity.objects.create(
+            user=instance.user,
+            tenant=instance.user.tenant,
+            action='profile_updated' if not created else 'profile_created',
+            details={'employee_id': instance.employee_id},
+            success=True,
+        )
+    transaction.on_commit(_log)
+
+
+@receiver(post_save, sender=InvestmentDetail)
+def log_investment_activity(sender, instance, created, **kwargs):
+    def _safe_convert_value(value):
+        """Safely convert Decimal and other types to JSON-serializable formats"""
+        if isinstance(value, Decimal):
+            return float(value)
+        return value
+
+    if created:
+        action = 'investment_created'
+        details = {
+            "investment_amount": _safe_convert_value(instance.investment_amount),
+            "roi_rate": _safe_convert_value(instance.roi_rate),
+            "custom_roi_rate": _safe_convert_value(instance.custom_roi_rate),
+            "remaining_balance": _safe_convert_value(instance.remaining_balance),
+            "investment_id": instance.id,
+        }
+    else:
+        action = 'investment_updated'
+        details = {
+            "investment_amount": _safe_convert_value(instance.investment_amount),
+            "roi_rate": _safe_convert_value(instance.roi_rate),
+            "custom_roi_rate": _safe_convert_value(instance.custom_roi_rate),
+            "remaining_balance": _safe_convert_value(instance.remaining_balance),
+            "investment_id": instance.id,
+        }
+
+    def _log():
+        try:
+            # Direct JSON serialization with proper error handling
+            UserActivity.objects.create(
+                user=instance.user_profile.user,
+                tenant=instance.user_profile.user.tenant,
+                action=action,
+                performed_by=None,  # Or set from request if available
+                details=details,
+                success=True,
+            )
+            logger.info(f"Successfully logged {action} for investment {instance.id}")
+        except Exception as e:
+            logger.error(f"Failed to log {action} for investment {instance.id}: {str(e)}", exc_info=True)
+
+    transaction.on_commit(_log)
+
+@receiver(post_save, sender=WithdrawalDetail)
+def log_withdrawal_activity(sender, instance, created, **kwargs):
+    def _log():
+        action = 'withdrawal_requested' if created else ('withdrawal_approved' if instance.withdrawal_approved else 'withdrawal_updated')
+        details = {
+            'amount': float(instance.withdrawal_amount),
+            'approved_by': instance.withdrawal_approved_by,
+            'status': instance.withdrawan,
+        }
+        UserActivity.objects.create(
+            user=instance.user_profile.user,
+            tenant=instance.user_profile.user.tenant,
+            action=action,
+            details=details,
+            success=True,
+        )
+    transaction.on_commit(_log)
+
+# Add similar for other models (e.g., Document, GroupMembership)
+@receiver(post_save, sender=Document)
+def log_document_activity(sender, instance, created, **kwargs):
+    def _log():
+        action = 'document_uploaded' if created else 'document_updated'
+        UserActivity.objects.create(
+            user=None,  # Anonymous if no user tied; link via uploaded_by_id
+            tenant=Tenant.objects.get(id=instance.tenant_id),
+            action=action,
+            details={'title': instance.title, 'version': instance.version},
+            success=True,
+        )
+    transaction.on_commit(_log)
 
 @receiver(user_logged_in)
-def create_user_session(sender, request, user, **kwargs):
-    ip = request.META.get('REMOTE_ADDR')
-    user_agent = request.META.get('HTTP_USER_AGENT', '')
-    UserSession.objects.create(
+def log_user_login(sender, request, user, **kwargs):
+    """Log successful user logins with proper performed_by field"""
+    UserActivity.objects.create(
         user=user,
-        login_time=timezone.now(),
-        date=timezone.now().date(),
-        ip_address=ip,
-        user_agent=user_agent
+        tenant=user.tenant,
+        action='login',
+        performed_by=user,  # ✅ Always set for login signals
+        details={
+            'method': 'session_login',
+            'user_agent': request.META.get('HTTP_USER_AGENT', '')
+        },
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+        success=True
     )
-
-@receiver(user_logged_out)
-def close_user_session(sender, request, user, **kwargs):
-    try:
-        session = UserSession.objects.filter(user=user, logout_time__isnull=True).latest('login_time')
-        session.logout_time = timezone.now()
-        session.save()
-    except UserSession.DoesNotExist:
-        pass
-
-
-
-def generate_rsa_keypair(key_size: int = 2048):
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=key_size
-    )
-    private_pem = private_key.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
-    ).decode('utf-8')
-    public_pem = private_key.public_key().public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
-    ).decode('utf-8')
-    return private_pem, public_pem
-
-@receiver(post_save, sender=Tenant)
-def create_rsa_keypair_for_tenant(sender, instance, created, **kwargs):
-    if created:
-        # Only create keypair for new tenants
-
-        try:
-            with tenant_context(instance):
-                # Check if the table exists before creating the keypair
-                if 'users_rsakeypair' in connection.introspection.table_names():
-                    priv, pub = generate_rsa_keypair()
-                    RSAKeyPair.objects.create(
-                        tenant=instance,
-                        private_key_pem=priv,
-                        public_key_pem=pub,
-                        active=True
-                    )
-                else:
-                    import logging
-                    logger = logging.getLogger('users')
-                    logger.warning(f"users_rsakeypair table does not exist in schema {instance.schema_name}. Skipping RSA keypair creation.")
-        except Exception as e:
-            import logging
-            logger = logging.getLogger('users')
-            logger.error(f"Failed to create RSAKeyPair for tenant {instance.schema_name}: {str(e)}")

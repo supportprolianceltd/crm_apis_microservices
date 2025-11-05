@@ -1,10 +1,11 @@
+// jest.config.js
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
+  roots: ['<rootDir>/tests'],
   testMatch: [
-    '**/__tests__/**/*.ts',
-    '**/?(*.)+(spec|test).ts'
+    '**/tests/**/*.test.ts',
+    '**/tests/**/*.integration.test.ts'
   ],
   transform: {
     '^.+\\.ts$': 'ts-jest',
@@ -12,16 +13,13 @@ module.exports = {
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
-    '!src/types/**',
   ],
   coverageDirectory: 'coverage',
-  coverageReporters: [
-    'text',
-    'lcov',
-    'html'
-  ],
-  setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
-  moduleNameMapping: {
+  coverageReporters: ['text', 'lcov', 'html'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  moduleNameMapper: {  // ✅ FIXED: Changed from moduleNameMapping
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  testTimeout: 30000,
+  setupFiles: ['<rootDir>/tests/setupEnv.ts'],
 };

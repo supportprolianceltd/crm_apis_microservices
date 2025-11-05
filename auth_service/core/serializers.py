@@ -19,7 +19,7 @@ from django_tenants.utils import tenant_context
 
 from kafka import KafkaProducer
 
-from core.models import Tenant, Domain, Module, TenantConfig, Branch
+from core.models import Tenant, Domain, Module, TenantConfig, Branch, GlobalActivity
 from core.email_default_templates import default_templates
 
 from utils.storage import get_storage_service
@@ -40,6 +40,35 @@ def get_tenant_id_from_jwt(request):
     except Exception:
         raise ValidationError("Invalid JWT token.")
     
+
+    import jwt
+
+
+
+
+def get_user_data_from_jwt(request):
+    """Extract user data from JWT payload."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise serializers.ValidationError("No valid Bearer token provided.")
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, options={"verify_signature": False})
+        user_data = payload.get("user", {})
+        return {
+            'email': user_data.get('email', ''),
+            'first_name': user_data.get('first_name', ''),
+            'last_name': user_data.get('last_name', ''),
+            'job_role': user_data.get('job_role', ''),
+            'id': user_data.get('id', None)
+        }
+    except Exception as e:
+        logger.error(f"Failed to decode JWT for user data: {str(e)}")
+        raise serializers.ValidationError("Invalid JWT token for user data.")
+
+
+
+
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Branch
@@ -139,27 +168,72 @@ class TenantConfigSerializer(serializers.ModelSerializer):
 
 
 
-
-
+# core/serializers.py (add these fields to TenantSerializer)
 class TenantSerializer(serializers.ModelSerializer):
-    domain = serializers.CharField(write_only=True, required=True)  # Accept domain in POST
+    domain = serializers.CharField(write_only=True, required=True)
     logo_file = serializers.FileField(write_only=True, required=False)
-    domains = DomainSerializer(many=True, read_only=True, source='domain_set')  # List domains in response
+    domains = DomainSerializer(many=True, read_only=True, source='domain_set')
 
     class Meta:
         model = Tenant
         fields = [
-            'id', 'unique_id', 'organizational_id', 'name', 'title', 'schema_name', 'created_at', 'logo', 'logo_file',
+            'id', 'unique_id', 'organizational_id', 'name', 'title', 'schema_name', 'created_at',
+            'status',  # NEW: Include status field
+            'logo', 'logo_file',
             'email_host', 'email_port', 'email_use_ssl', 'email_host_user',
             'email_host_password', 'default_from_email', 'about_us',
-            'domain',  # for write
-            'domains'  # for read
+            'domain', 'domains',
+            # 🎨 Branding colors
+            'primary_color', 'secondary_color',
+            # 🏦 Investment & Company Settings
+            'account_name', 'bank_name', 'account_number',
+            'roi_percent', 'roi_frequency', 'min_withdrawal_months',
+            'unique_policy_prefix', 'next_policy_number',
+            'kyc_method', 'kyc_custom'
         ]
-        
         read_only_fields = [
             'id', 'unique_id', 'organizational_id',
             'created_at', 'schema_name', 'logo'
         ]
+
+    # NEW: Validation for status field
+    def validate_status(self, value):
+        if value not in dict(Tenant.STATUS_CHOICES):
+            raise serializers.ValidationError("Invalid status. Must be 'active' or 'suspended'.")
+        return value
+
+    # Add validation for new fields
+    def validate_roi_percent(self, value):
+        if value < 0 or value > 100:
+            raise serializers.ValidationError("ROI percentage must be between 0 and 100.")
+        return value
+
+    def validate_min_withdrawal_months(self, value):
+        if value < 1:
+            raise serializers.ValidationError("Minimum withdrawal months must be at least 1.")
+        return value
+
+    def validate_unique_policy_prefix(self, value):
+        if not value.isalnum():
+            raise serializers.ValidationError("Policy prefix can only contain letters and numbers.")
+        return value.upper()
+
+    def validate_next_policy_number(self, value):
+        if value < 1:
+            raise serializers.ValidationError("Next policy number must be positive.")
+        return value
+
+
+    def validate_primary_color(self, value):
+        if not re.match(r'^#(?:[0-9a-fA-F]{3}){1,2}$', value):
+            raise serializers.ValidationError("Primary color must be a valid hex code (e.g. #1A2B3C).")
+        return value
+
+    def validate_secondary_color(self, value):
+        if not re.match(r'^#(?:[0-9a-fA-F]{3}){1,2}$', value):
+            raise serializers.ValidationError("Secondary color must be a valid hex code (e.g. #AABBCC).")
+        return value
+
 
     def validate_schema_name(self, value):
         if not re.match(r'^[a-z0-9_]+$', value):
@@ -293,9 +367,119 @@ class TenantSerializer(serializers.ModelSerializer):
         return data
 
 
+
+
+
 class PublicTenantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tenant
-        fields = ['name', 'title', 'logo']
+        fields = ['name', 'title', 'logo', 'status']  # NEW: Include status
 
 
+# core/serializers.py - Add this
+
+# class GlobalActivitySerializer(serializers.ModelSerializer):
+#     global_user = serializers.SerializerMethodField()
+#     performed_by = serializers.SerializerMethodField()
+#     affected_tenant = serializers.SerializerMethodField()
+    
+#     class Meta:
+#         model = GlobalActivity
+#         fields = [
+#             'id', 'global_user', 'affected_tenant', 'action',
+#             'performed_by', 'timestamp', 'details', 'ip_address',
+#             'user_agent', 'success', 'global_correlation_id'
+#         ]
+    
+#     def get_global_user(self, obj):
+#         if obj.global_user:
+#             return {
+#                 'id': obj.global_user.id,
+#                 'email': obj.global_user.email,
+#                 'first_name': obj.global_user.first_name,
+#                 'last_name': obj.global_user.last_name,
+#                 'role': obj.global_user.role
+#             }
+#         return None
+    
+#     def get_performed_by(self, obj):
+#         if obj.performed_by:
+#             return {
+#                 'id': obj.performed_by.id,
+#                 'email': obj.performed_by.email,
+#                 'first_name': obj.performed_by.first_name,
+#                 'last_name': obj.performed_by.last_name,
+#                 'role': obj.performed_by.role
+#             }
+#         return None
+    
+#     def get_affected_tenant(self, obj):
+#         return {
+#             'id': str(obj.affected_tenant.unique_id),
+#             'name': obj.affected_tenant.name,
+#             'schema_name': obj.affected_tenant.schema_name
+#         }
+
+# core/serializers.py - Updated GlobalActivitySerializer
+
+
+class GlobalActivitySerializer(serializers.ModelSerializer):
+    global_user = serializers.SerializerMethodField()
+    performed_by = serializers.SerializerMethodField()
+    affected_tenant = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = GlobalActivity
+        fields = [
+            'id', 'global_user', 'affected_tenant', 'action',
+            'performed_by', 'timestamp', 'details', 'ip_address',
+            'user_agent', 'success', 'global_correlation_id'
+        ]
+    
+    def get_global_user(self, obj):
+        if obj.global_user:
+            try:
+                # Extract user data from JWT if the request user matches global_user
+                user_data = get_user_data_from_jwt(self.context['request'])
+                if str(user_data['id']) == str(obj.global_user):
+                    return {
+                        'id': user_data['id'],
+                        'email': user_data['email'],
+                        'first_name': user_data['first_name'],
+                        'last_name': user_data['last_name'],
+                        'role': user_data.get('job_role', '')  # Assuming job_role maps to role
+                    }
+                logger.warning(f"User {obj.global_user} not found in local database")
+                return {'id': obj.global_user}  # Fallback to just ID
+            except Exception as e:
+                logger.error(f"Error fetching global_user {obj.global_user}: {str(e)}")
+                return {'id': obj.global_user}  # Fallback to just ID
+        return None
+    
+    def get_performed_by(self, obj):
+        if obj.performed_by:
+            try:
+                # Extract user data from JWT if the request user matches performed_by
+                user_data = get_user_data_from_jwt(self.context['request'])
+                if str(user_data['id']) == str(obj.performed_by):
+                    return {
+                        'id': user_data['id'],
+                        'email': user_data['email'],
+                        'first_name': user_data['first_name'],
+                        'last_name': user_data['last_name'],
+                        'role': user_data.get('job_role', '')  # Assuming job_role maps to role
+                    }
+                logger.warning(f"User {obj.performed_by} not found in local database")
+                return {'id': obj.performed_by}  # Fallback to just ID
+            except Exception as e:
+                logger.error(f"Error fetching performed_by {obj.performed_by}: {str(e)}")
+                return {'id': obj.performed_by}  # Fallback to just ID
+        return None
+    
+    def get_affected_tenant(self, obj):
+        return {
+            'id': str(obj.affected_tenant.unique_id),
+            'name': obj.affected_tenant.name,
+            'schema_name': obj.affected_tenant.schema_name,
+            'status': obj.affected_tenant.status  # NEW: Include tenant status
+        }
