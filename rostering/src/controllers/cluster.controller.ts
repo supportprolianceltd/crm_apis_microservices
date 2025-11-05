@@ -738,5 +738,3 @@ public async generateOptimizedClusters(req: Request, res: Response) {
   }
 }
 }
-
-
