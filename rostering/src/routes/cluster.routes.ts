@@ -33,5 +33,13 @@ export function createClusterRoutes(prisma: PrismaClient) {
   // Assign request to cluster
   router.post('/:clusterId/assign-request/:requestId', clusterController.assignRequestToCluster.bind(clusterController));
 
+
+    // NEW: AI Clustering endpoint
+  router.post('/generate', clusterController.generateClusters.bind(clusterController));
+    // NEW: Optimized AI Clustering endpoint
+  router.post('/generate/optimized', clusterController.generateOptimizedClusters.bind(clusterController));
+
   return router;
 }
+
+

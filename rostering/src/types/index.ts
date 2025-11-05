@@ -1,3 +1,4 @@
+//C:\Users\CPT-003\Desktop\CRM\crm_apis_microservices\rostering\src\types\index.ts
 // Database model types
 export interface ExternalRequest {
   id: string;
@@ -261,3 +262,4 @@ export interface ValidationError extends Error {
   value: any;
   constraint: string;
 }
+

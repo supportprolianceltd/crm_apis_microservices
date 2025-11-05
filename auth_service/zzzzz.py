@@ -11,15 +11,26 @@ if not Tenant.objects.filter(schema_name='public').exists():
         schema_name='public',
     )
     tenant.auto_create_schema = False
-    tenant.save()
-    Domain.objects.create(tenant=tenant, domain='127.0.0.1', is_primary=True)
+    tenant.save()Domain.objects.create(tenant=tenant, domain='127.0.0.1', is_primary=True)
     Domain.objects.create(tenant=tenant, domain='localhost', is_primary=False)
+
+from django_tenants.utils import tenant_context
+tenant = Tenant.objects.get(schema_name='appBrew')
+with tenant_context(tenant):
+    CustomUser.objects.create_superuser(
+        email='support@appBrew.com',
+        password='qwerty',
+        role='admin',
+        first_name='Tonna',
+        last_name='Ezugwu',
+        job_role='Project Manager',
+        tenant=tenant
+    )
 
 from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='tonna',
         email='tonna.ezugwu@prolianceltd.com',
         password='qwerty',
         role='admin',
@@ -34,7 +45,7 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='tonna',
+   
         email='prince.godson@prolianceltd.com',
         password='qwerty',
         role='admin',
@@ -49,7 +60,6 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='david',
         email='david.dappa@prolianceltd.com',
         password='qwerty',
         role='admin',
@@ -60,10 +70,9 @@ with tenant_context(tenant):
     )
 
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='proliance')
+tenant = Tenant.objects.get(schema_name='appBrew')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        username='support',
         email='support@prolianceltd.com',
         password='qwerty',
         role='admin',
@@ -74,14 +83,14 @@ with tenant_context(tenant):
     )
 
 from core.models import Tenant, Domain
-if not Tenant.objects.filter(schema_name='auth').exists():
+if not Tenant.objects.filter(schema_name='public').exists():
     tenant = Tenant.objects.create(
-        name='auth',
-        schema_name='auth',
+        name='public',
+        schema_name='public',
     )
     tenant.auto_create_schema = False
     tenant.save()
-    Domain.objects.create(tenant=tenant, domain='auth-service', is_primary=True)
+    Domain.objects.create(tenant=tenant, domain='public.com', is_primary=True)
 
 from core.models import Tenant, Domain
 if not Tenant.objects.filter(schema_name='auth-service').exists():
@@ -109,20 +118,44 @@ if not Tenant.objects.filter(schema_name='netwiver').exists():
     tenant = Tenant.objects.create(
         name='netwiver',
         schema_name='netwiver',
+        status="suspended"
     )
     tenant.auto_create_schema = False
     tenant.save()
     Domain.objects.create(tenant=tenant, domain='netwiver.com', is_primary=True)
+
+
+from core.models import Tenant, Domain
+if not Tenant.objects.filter(schema_name='rodrimine').exists():
+    tenant = Tenant.objects.create(
+        name='rodrimine',
+        schema_name='rodrimine',
+        status="suspended"
+    )
+    tenant.auto_create_schema = False
+    tenant.save()
+    Domain.objects.create(tenant=tenant, domain='rodrimine.com', is_primary=True)
+
+from core.models import Tenant, Domain
+if not Tenant.objects.filter(schema_name='appbrew').exists():
+    tenant = Tenant.objects.create(
+        name='appbrew',
+        schema_name='appbrew',
+        status="active"
+    )
+    tenant.auto_create_schema = False
+    tenant.save()
+    Domain.objects.create(tenant=tenant, domain='appbrew.com', is_primary=True)
     
 
 # python manage.py shell
 from core.models import Tenant
 from users.models import CustomUser
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='harvoxx')
+tenant = Tenant.objects.get(schema_name='rodrimine')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='support@harvoxx.com',
+        email='support@rodrimine.com',
         password='qwerty',
         role='admin',
         first_name='Ikenga',
@@ -155,6 +188,21 @@ tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
         email='prince.godson@prolianceltd.com',
+        password='qwerty',
+        role='admin',
+        first_name='Prince',
+        last_name='Godson',
+        job_role=' Frontend Developer',
+        tenant=tenant
+    )
+    
+from core.models import Tenant
+from users.models import CustomUser
+from django_tenants.utils import tenant_context
+tenant = Tenant.objects.get(schema_name='appbrew')
+with tenant_context(tenant):
+    CustomUser.objects.create_superuser(
+        email='support@appbrew.com',
         password='qwerty',
         role='admin',
         first_name='Prince',
@@ -210,6 +258,32 @@ for t in tenant:
 # https://server1.prolianceltd.com/
 
 
+
+#DELETE A TENANT
+from core.models import Tenant, Domain
+from django_tenants.utils import schema_context
+
+# Change this to the tenant schema name you want to delete
+schema_to_delete = 'proliance'  # example
+
+try:
+    tenant = Tenant.objects.get(schema_name=schema_to_delete)
+except Tenant.DoesNotExist:
+    print(f"❌ Tenant with schema '{schema_to_delete}' does not exist.")
+else:
+    confirm = input(f"⚠️ Are you sure you want to delete tenant '{tenant.name}' (schema: {tenant.schema_name})? Type 'yes' to confirm: ")
+    if confirm.lower() == 'yes':
+        # Delete associated domains first (optional but cleaner)
+        Domain.objects.filter(tenant=tenant).delete()
+
+        # Drop the tenant schema (this removes all tenant data)
+        tenant.delete(force_drop=True)
+        print(f"✅ Tenant '{tenant.name}' (schema: {tenant.schema_name}) deleted successfully along with its schema.")
+    else:
+        print("🚫 Tenant deletion aborted.")
+
+
+
 from core.models import Tenant
 from users.models import RSAKeyPair
 from django_tenants.utils import tenant_context
@@ -232,7 +306,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='harvoxx')
+tenant = Tenant.objects.get(schema_name='appbrew')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(
@@ -242,3 +316,49 @@ with tenant_context(tenant):
         active=True
     )
     print(f"RSAKeyPair created for tenant: {tenant.schema_name}")
+
+
+
+
+from core.models import Tenant, GlobalUser
+from django_tenants.utils import get_public_schema_name, tenant_context
+
+public_tenant = Tenant.objects.get(schema_name=get_public_schema_name())
+with tenant_context(public_tenant):
+    admin = GlobalUser.objects.get(email='admin@platform.local')
+    print(f"Admin: {admin.email} | Active: {admin.is_active} | Superuser: {admin.is_superuser} | Staff: {admin.is_staff}")
+    print(f"Public tenant domains: {[d.domain for d in public_tenant.domains.all()]}")
+
+
+from django.contrib.auth import authenticate
+from core.models import Tenant
+from django_tenants.utils import get_public_schema_name, tenant_context
+
+public_tenant = Tenant.objects.get(schema_name=get_public_schema_name())
+with tenant_context(public_tenant):
+    user = authenticate(email='admin@platform.local', password='SuperAdmin2025!')
+    print(f"Authenticated: {user is not None} | User: {user.email if user else 'None'}")
+
+
+from core.models import Tenant, Domain
+from django_tenants.utils import get_public_schema_name
+
+# Get public tenant
+public_tenant = Tenant.objects.get(schema_name=get_public_schema_name())
+
+# Add global admin domain (for email @platform.local)
+Domain.objects.get_or_create(
+    domain='platform.local',
+    tenant=public_tenant,
+    defaults={'is_primary': False}  # Not primary; localhost stays primary
+)
+
+# Add internal service domain (for auth-service:8001 requests)
+Domain.objects.get_or_create(
+    domain='auth-service',
+    tenant=public_tenant,
+    defaults={'is_primary': False}
+)
+
+# Verify
+print("Public tenant domains:", [d.domain for d in public_tenant.domains.all()])

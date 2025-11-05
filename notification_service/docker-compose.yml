@@ -1,0 +1,270 @@
+version: '3.9'
+
+services:
+  notifications-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    container_name: notifications
+    ports:
+      - "3001:3001"
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=True
+      - DB_ENGINE=django.db.backends.postgresql
+      - NOTIFICATIONS_DB_NAME=notifications_db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_HOST=notifications_postgres
+      - DB_PORT=5432
+      - DJANGO_SETTINGS_MODULE=notification_service.settings
+      - PYTHONPATH=/app
+      - ALLOWED_HOSTS=localhost,127.0.0.1,*
+      - AUTH_SERVICE_URL=http://auth-service:8001
+      - HR_SERVICE_URL=http://hr-service:8004  # Example integration
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SUPABASE_BUCKET=luminacaremedia
+      - STORAGE_TYPE=supabase
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - CELERY_BROKER_URL=redis://notifications_redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://notifications_redis:6379/0
+      - REDIS_URL=redis://notifications_redis:6379/1
+      - CORS_ALLOWED_ORIGINS=http://localhost:5173,https://crm-frontend-react.vercel.app,http://localhost:8000
+      - TZ=UTC
+      - RUN_MAIN_SERVICE=true
+    volumes:
+      - .:/app
+      - ./notifications_logs:/app/notifications_logs
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+    command: >
+      bash -c "
+      /app/wait-for-it.sh notifications_postgres:5432 -t 60 &&
+      python manage.py migrate &&
+      gunicorn notification_service.wsgi:application --bind 0.0.0.0:3001 --workers=1 --timeout 300
+      "
+    depends_on:
+      notifications_postgres:
+        condition: service_healthy
+      notifications_redis:
+        condition: service_started
+    networks:
+      - auth_service_default
+    restart: unless-stopped
+    mem_limit: 4g
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/notifications/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notifications-celery-worker
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_SETTINGS_MODULE=notification_service.settings
+      - DB_ENGINE=django.db.backends.postgresql
+      - NOTIFICATIONS_DB_NAME=notifications_db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_HOST=notifications_postgres
+      - DB_PORT=5432
+      - CELERY_BROKER_URL=redis://notifications_redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://notifications_redis:6379/0
+      - REDIS_URL=redis://notifications_redis:6379/1
+      - TZ=UTC
+    volumes:
+      - .:/app
+      - ./notifications_logs:/app/notifications_logs
+    command: >
+      bash -c "
+      /app/wait-for-it.sh notifications_postgres:5432 -t 60 &&
+      celery -A notification_service worker --loglevel=info
+      "
+    depends_on:
+      - notifications-service
+    networks:
+      - auth_service_default
+    restart: unless-stopped
+    mem_limit: 2g
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A notification_service inspect ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notifications-celery-beat
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_SETTINGS_MODULE=notification_service.settings
+      - DB_ENGINE=django.db.backends.postgresql
+      - NOTIFICATIONS_DB_NAME=notifications_db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_HOST=notifications_postgres
+      - DB_PORT=5432
+      - CELERY_BROKER_URL=redis://notifications_redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://notifications_redis:6379/0
+      - TZ=UTC
+    volumes:
+      - .:/app
+      - ./notifications_logs:/app/notifications_logs
+    command: >
+      bash -c "
+      /app/wait-for-it.sh notifications_postgres:5432 -t 60 &&
+      celery -A notification_service beat --loglevel=info
+      "
+    depends_on:
+      - notifications-service
+    networks:
+      - auth_service_default
+    restart: unless-stopped
+    mem_limit: 2g
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A notification_service beat --loglevel=info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notifications-flower
+    ports:
+      - "5556:5555"  # Different port from HR
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_SETTINGS_MODULE=notification_service.settings
+      - DB_ENGINE=django.db.backends.postgresql
+      - NOTIFICATIONS_DB_NAME=notifications_db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_HOST=notifications_postgres
+      - DB_PORT=5432
+      - CELERY_BROKER_URL=redis://notifications_redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://notifications_redis:6379/0
+      - REDIS_URL=redis://notifications_redis:6379/1
+      - TZ=UTC
+    volumes:
+      - .:/app
+      - ./notifications_logs:/app/notifications_logs
+    command: >
+      bash -c "
+      /app/wait-for-it.sh notifications_postgres:5432 -t 60 &&
+      celery --broker=redis://notifications_redis:6379/0 flower --port=5555
+      "
+    depends_on:
+      - notifications-service
+    networks:
+      - auth_service_default
+    restart: unless-stopped
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5555/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  notifications_redis:
+    image: redis:7-alpine
+    container_name: notifications_redis
+    ports:
+      - "6383:6379"  # Different from HR
+    volumes:
+      - notifications_redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - auth_service_default
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  notifications_postgres:
+    image: postgres:15-alpine
+    container_name: notifications_postgres
+    environment:
+      - POSTGRES_DB=notifications_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - TZ=UTC
+      - POSTGRES_TIMEOUT=300
+    ports:
+      - "5436:5432"  # Different from HR
+    volumes:
+      - notifications_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notifications_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - auth_service_default
+
+  # Kafka consumer service (moved to top-level under services)
+  kafka-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notifications-kafka-consumer
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=True
+      - DB_ENGINE=django.db.backends.postgresql
+      - NOTIFICATIONS_DB_NAME=notifications_db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_HOST=notifications_postgres
+      - DB_PORT=5432
+      - DJANGO_SETTINGS_MODULE=notification_service.settings
+      - PYTHONPATH=/app
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - TZ=UTC
+    volumes:
+      - .:/app
+    command: >
+      bash -c "
+      /app/wait-for-it.sh notifications_postgres:5432 -t 60 &&
+      python -m notifications.consumers
+      "
+    depends_on:
+      - notifications-service
+    networks:
+      - auth_service_default
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep python"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  auth_service_default:
+    external: true
+    name: auth_service_default
+
+volumes:
+  notifications_postgres_data:
+    driver: local
+  notifications_redis_data:
+    driver: local

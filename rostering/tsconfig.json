@@ -28,7 +28,8 @@
       "@/services/*": ["src/services/*"],
       "@/middleware/*": ["src/middleware/*"],
       "@/controllers/*": ["src/controllers/*"],
-      "@/utils/*": ["src/utils/*"]
+      "@/utils/*": ["src/utils/*"],
+      "@/prisma/*": ["prisma/*"]
     }
   },
   "include": [
@@ -37,6 +38,7 @@
   "exclude": [
     "node_modules",
     "dist",
+    "tests",
     "**/*.test.ts"
   ]
 }

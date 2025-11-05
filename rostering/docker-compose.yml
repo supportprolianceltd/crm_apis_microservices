@@ -1,5 +1,5 @@
 services:
-  # Rostering Service
+  # Rostering Service (your existing service)
   rostering:
     build:
       context: .
@@ -18,15 +18,15 @@ services:
       DEFAULT_MATCHING_RADIUS: 5000
       EMAIL_POLLING_INTERVAL: 5
       LOG_LEVEL: debug
-      TENANT_1_EMAIL_HOST: imap.gmail.com
-      TENANT_1_EMAIL_PORT: 993
-      TENANT_1_EMAIL_USER: your-email@gmail.com
-      TENANT_1_EMAIL_PASS: your-app-password
-      TENANT_1_EMAIL_SECURE: true
+      # NEW: Python optimizer URL
+      PYTHON_OPTIMIZER_URL: http://ortools-optimizer:5000
+      USE_PYTHON_OPTIMIZER: "true"
     depends_on:
       rostering-db:
         condition: service_healthy
       rostering-redis:
+        condition: service_healthy
+      ortools-optimizer:
         condition: service_healthy
     volumes:
       - rostering-logs:/app/logs
@@ -34,13 +34,42 @@ services:
       - auth_service_default
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "const http = require('http'); const options = { hostname: 'localhost', port: 3005, path: '/api/v1/health', timeout: 2000 }; const req = http.request(options, (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }); req.on('error', () => process.exit(1)); req.end();"]
+      test: ["CMD", "node", "-e", "const http = require('http'); const options = { hostname: 'localhost', port: 3005, path: '/health', timeout: 2000 }; const req = http.request(options, (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }); req.on('error', () => process.exit(1)); req.end();"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
-  # PostgreSQL Database with PostGIS
+  # NEW: OR-Tools Python Optimizer Service
+  ortools-optimizer:
+    build:
+      context: ./ortools
+      dockerfile: Dockerfile
+    container_name: ortools-optimizer
+    ports:
+      - "5000:5000"
+    environment:
+      PYTHONUNBUFFERED: 1
+      LOG_LEVEL: INFO
+    networks:
+      - auth_service_default
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 70s
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2G
+        reservations:
+          cpus: '2'
+          memory: 1G
+
+  # ... (rest of your existing services)
   rostering-db:
     image: postgis/postgis:15-3.3
     container_name: rostering-db
@@ -63,7 +92,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Redis for caching and session management
   rostering-redis:
     image: redis:7-alpine
     container_name: rostering-redis
@@ -81,7 +109,6 @@ services:
       retries: 3
     command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
 
-  # Adminer for database management
   adminer:
     image: adminer:latest
     container_name: rostering-adminer
@@ -96,7 +123,6 @@ services:
     depends_on:
       - rostering-db
 
-  # Redis Commander for Redis management
   redis-commander:
     image: rediscommander/redis-commander:latest
     container_name: rostering-redis-commander

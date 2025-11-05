@@ -1,1748 +1,462 @@
-2025-10-09 01:20:28,761 [INFO] job_applications: 🚀 Starting daily background CV vetting with full workflow
-2025-10-09 01:20:34,847 [INFO] job_applications: Fetched 336 requisitions from page; next: False
-2025-10-09 01:20:35,126 [INFO] job_applications: Total open requisitions fetched: 336
-2025-10-09 01:20:35,179 [INFO] job_applications: Processing requisition PRO-0001
-2025-10-09 01:20:39,106 [INFO] job_applications: Found 0 applications with resumes for PRO-0001
-2025-10-09 01:20:39,120 [INFO] job_applications: No applications for PRO-0001, skipping
-2025-10-09 01:20:39,132 [INFO] job_applications: Processing requisition PRO-0011
-2025-10-09 01:20:39,156 [INFO] job_applications: Found 0 applications with resumes for PRO-0011
-2025-10-09 01:20:39,163 [INFO] job_applications: No applications for PRO-0011, skipping
-2025-10-09 01:20:39,171 [INFO] job_applications: Processing requisition PRO-0012
-2025-10-09 01:20:39,191 [INFO] job_applications: Found 0 applications with resumes for PRO-0012
-2025-10-09 01:20:39,197 [INFO] job_applications: No applications for PRO-0012, skipping
-2025-10-09 01:20:39,219 [INFO] job_applications: Processing requisition PRO-0013
-2025-10-09 01:20:39,252 [INFO] job_applications: Found 0 applications with resumes for PRO-0013
-2025-10-09 01:20:39,279 [INFO] job_applications: No applications for PRO-0013, skipping
-2025-10-09 01:20:39,315 [INFO] job_applications: Processing requisition PRO-0014
-2025-10-09 01:20:39,346 [INFO] job_applications: Found 0 applications with resumes for PRO-0014
-2025-10-09 01:20:39,349 [INFO] job_applications: No applications for PRO-0014, skipping
-2025-10-09 01:20:39,383 [INFO] job_applications: Processing requisition PRO-0015
-2025-10-09 01:20:39,459 [INFO] job_applications: Found 0 applications with resumes for PRO-0015
-2025-10-09 01:20:39,506 [INFO] job_applications: No applications for PRO-0015, skipping
-2025-10-09 01:20:39,552 [INFO] job_applications: Processing requisition PRO-0016
-2025-10-09 01:20:39,628 [INFO] job_applications: Found 0 applications with resumes for PRO-0016
-2025-10-09 01:20:39,663 [INFO] job_applications: No applications for PRO-0016, skipping
-2025-10-09 01:20:39,691 [INFO] job_applications: Processing requisition PRO-0017
-2025-10-09 01:20:39,761 [INFO] job_applications: Found 0 applications with resumes for PRO-0017
-2025-10-09 01:20:39,795 [INFO] job_applications: No applications for PRO-0017, skipping
-2025-10-09 01:20:39,851 [INFO] job_applications: Processing requisition PRO-0018
-2025-10-09 01:20:39,897 [INFO] job_applications: Found 0 applications with resumes for PRO-0018
-2025-10-09 01:20:39,902 [INFO] job_applications: No applications for PRO-0018, skipping
-2025-10-09 01:20:39,918 [INFO] job_applications: Processing requisition PRO-0019
-2025-10-09 01:20:39,964 [INFO] job_applications: Found 0 applications with resumes for PRO-0019
-2025-10-09 01:20:40,093 [INFO] job_applications: No applications for PRO-0019, skipping
-2025-10-09 01:20:40,129 [INFO] job_applications: Processing requisition PRO-0020
-2025-10-09 01:20:40,186 [INFO] job_applications: Found 0 applications with resumes for PRO-0020
-2025-10-09 01:20:40,203 [INFO] job_applications: No applications for PRO-0020, skipping
-2025-10-09 01:20:40,217 [INFO] job_applications: Processing requisition PRO-0021
-2025-10-09 01:20:40,403 [INFO] job_applications: Found 0 applications with resumes for PRO-0021
-2025-10-09 01:20:40,432 [INFO] job_applications: No applications for PRO-0021, skipping
-2025-10-09 01:20:40,440 [INFO] job_applications: Processing requisition PRO-0022
-2025-10-09 01:20:40,472 [INFO] job_applications: Found 0 applications with resumes for PRO-0022
-2025-10-09 01:20:40,486 [INFO] job_applications: No applications for PRO-0022, skipping
-2025-10-09 01:20:40,495 [INFO] job_applications: Processing requisition PRO-0023
-2025-10-09 01:20:40,589 [INFO] job_applications: Found 0 applications with resumes for PRO-0023
-2025-10-09 01:20:40,657 [INFO] job_applications: No applications for PRO-0023, skipping
-2025-10-09 01:20:40,674 [INFO] job_applications: Processing requisition PRO-0024
-2025-10-09 01:20:40,732 [INFO] job_applications: Found 0 applications with resumes for PRO-0024
-2025-10-09 01:20:40,764 [INFO] job_applications: No applications for PRO-0024, skipping
-2025-10-09 01:20:40,774 [INFO] job_applications: Processing requisition PRO-0025
-2025-10-09 01:20:40,820 [INFO] job_applications: Found 0 applications with resumes for PRO-0025
-2025-10-09 01:20:40,824 [INFO] job_applications: No applications for PRO-0025, skipping
-2025-10-09 01:20:40,834 [INFO] job_applications: Processing requisition PRO-0026
-2025-10-09 01:20:40,875 [INFO] job_applications: Found 0 applications with resumes for PRO-0026
-2025-10-09 01:20:40,878 [INFO] job_applications: No applications for PRO-0026, skipping
-2025-10-09 01:20:40,885 [INFO] job_applications: Processing requisition PRO-0027
-2025-10-09 01:20:40,899 [INFO] job_applications: Found 0 applications with resumes for PRO-0027
-2025-10-09 01:20:40,902 [INFO] job_applications: No applications for PRO-0027, skipping
-2025-10-09 01:20:40,904 [INFO] job_applications: Processing requisition PRO-0028
-2025-10-09 01:20:40,921 [INFO] job_applications: Found 0 applications with resumes for PRO-0028
-2025-10-09 01:20:40,928 [INFO] job_applications: No applications for PRO-0028, skipping
-2025-10-09 01:20:40,933 [INFO] job_applications: Processing requisition PRO-0029
-2025-10-09 01:20:40,959 [INFO] job_applications: Found 0 applications with resumes for PRO-0029
-2025-10-09 01:20:40,962 [INFO] job_applications: No applications for PRO-0029, skipping
-2025-10-09 01:20:40,965 [INFO] job_applications: Processing requisition PRO-0030
-2025-10-09 01:20:40,981 [INFO] job_applications: Found 0 applications with resumes for PRO-0030
-2025-10-09 01:20:40,984 [INFO] job_applications: No applications for PRO-0030, skipping
-2025-10-09 01:20:40,987 [INFO] job_applications: Processing requisition PRO-0031
-2025-10-09 01:20:40,999 [INFO] job_applications: Found 0 applications with resumes for PRO-0031
-2025-10-09 01:20:41,005 [INFO] job_applications: No applications for PRO-0031, skipping
-2025-10-09 01:20:41,007 [INFO] job_applications: Processing requisition PRO-0032
-2025-10-09 01:20:41,023 [INFO] job_applications: Found 0 applications with resumes for PRO-0032
-2025-10-09 01:20:41,027 [INFO] job_applications: No applications for PRO-0032, skipping
-2025-10-09 01:20:41,031 [INFO] job_applications: Processing requisition PRO-0033
-2025-10-09 01:20:41,039 [INFO] job_applications: Found 0 applications with resumes for PRO-0033
-2025-10-09 01:20:41,041 [INFO] job_applications: No applications for PRO-0033, skipping
-2025-10-09 01:20:41,043 [INFO] job_applications: Processing requisition PRO-0034
-2025-10-09 01:20:41,051 [INFO] job_applications: Found 0 applications with resumes for PRO-0034
-2025-10-09 01:20:41,053 [INFO] job_applications: No applications for PRO-0034, skipping
-2025-10-09 01:20:41,055 [INFO] job_applications: Processing requisition PRO-0035
-2025-10-09 01:20:41,067 [INFO] job_applications: Found 0 applications with resumes for PRO-0035
-2025-10-09 01:20:41,070 [INFO] job_applications: No applications for PRO-0035, skipping
-2025-10-09 01:20:41,073 [INFO] job_applications: Processing requisition PRO-0036
-2025-10-09 01:20:41,082 [INFO] job_applications: Found 0 applications with resumes for PRO-0036
-2025-10-09 01:20:41,085 [INFO] job_applications: No applications for PRO-0036, skipping
-2025-10-09 01:20:41,088 [INFO] job_applications: Processing requisition PRO-0037
-2025-10-09 01:20:41,103 [INFO] job_applications: Found 0 applications with resumes for PRO-0037
-2025-10-09 01:20:41,105 [INFO] job_applications: No applications for PRO-0037, skipping
-2025-10-09 01:20:41,107 [INFO] job_applications: Processing requisition PRO-0038
-2025-10-09 01:20:41,123 [INFO] job_applications: Found 0 applications with resumes for PRO-0038
-2025-10-09 01:20:41,127 [INFO] job_applications: No applications for PRO-0038, skipping
-2025-10-09 01:20:41,131 [INFO] job_applications: Processing requisition PRO-0039
-2025-10-09 01:20:41,170 [INFO] job_applications: Found 0 applications with resumes for PRO-0039
-2025-10-09 01:20:41,202 [INFO] job_applications: No applications for PRO-0039, skipping
-2025-10-09 01:20:41,212 [INFO] job_applications: Processing requisition PRO-0040
-2025-10-09 01:20:41,233 [INFO] job_applications: Found 0 applications with resumes for PRO-0040
-2025-10-09 01:20:41,236 [INFO] job_applications: No applications for PRO-0040, skipping
-2025-10-09 01:20:41,239 [INFO] job_applications: Processing requisition PRO-0041
-2025-10-09 01:20:41,254 [INFO] job_applications: Found 0 applications with resumes for PRO-0041
-2025-10-09 01:20:41,257 [INFO] job_applications: No applications for PRO-0041, skipping
-2025-10-09 01:20:41,262 [INFO] job_applications: Processing requisition PRO-0042
-2025-10-09 01:20:41,281 [INFO] job_applications: Found 0 applications with resumes for PRO-0042
-2025-10-09 01:20:41,284 [INFO] job_applications: No applications for PRO-0042, skipping
-2025-10-09 01:20:41,286 [INFO] job_applications: Processing requisition PRO-0043
-2025-10-09 01:20:41,294 [INFO] job_applications: Found 0 applications with resumes for PRO-0043
-2025-10-09 01:20:41,296 [INFO] job_applications: No applications for PRO-0043, skipping
-2025-10-09 01:20:41,298 [INFO] job_applications: Processing requisition PRO-0044
-2025-10-09 01:20:41,310 [INFO] job_applications: Found 0 applications with resumes for PRO-0044
-2025-10-09 01:20:41,318 [INFO] job_applications: No applications for PRO-0044, skipping
-2025-10-09 01:20:41,320 [INFO] job_applications: Processing requisition PRO-0045
-2025-10-09 01:20:41,329 [INFO] job_applications: Found 0 applications with resumes for PRO-0045
-2025-10-09 01:20:41,355 [INFO] job_applications: No applications for PRO-0045, skipping
-2025-10-09 01:20:41,368 [INFO] job_applications: Processing requisition PRO-0046
-2025-10-09 01:20:41,446 [INFO] job_applications: Found 0 applications with resumes for PRO-0046
-2025-10-09 01:20:41,463 [INFO] job_applications: No applications for PRO-0046, skipping
-2025-10-09 01:20:41,473 [INFO] job_applications: Processing requisition PRO-0047
-2025-10-09 01:20:41,489 [INFO] job_applications: Found 0 applications with resumes for PRO-0047
-2025-10-09 01:20:41,495 [INFO] job_applications: No applications for PRO-0047, skipping
-2025-10-09 01:20:41,512 [INFO] job_applications: Processing requisition PRO-0048
-2025-10-09 01:20:41,548 [INFO] job_applications: Found 0 applications with resumes for PRO-0048
-2025-10-09 01:20:41,551 [INFO] job_applications: No applications for PRO-0048, skipping
-2025-10-09 01:20:41,569 [INFO] job_applications: Processing requisition PRO-0049
-2025-10-09 01:20:41,602 [INFO] job_applications: Found 0 applications with resumes for PRO-0049
-2025-10-09 01:20:41,604 [INFO] job_applications: No applications for PRO-0049, skipping
-2025-10-09 01:20:41,612 [INFO] job_applications: Processing requisition PRO-0050
-2025-10-09 01:20:41,624 [INFO] job_applications: Found 0 applications with resumes for PRO-0050
-2025-10-09 01:20:41,627 [INFO] job_applications: No applications for PRO-0050, skipping
-2025-10-09 01:20:41,629 [INFO] job_applications: Processing requisition PRO-0051
-2025-10-09 01:20:41,641 [INFO] job_applications: Found 0 applications with resumes for PRO-0051
-2025-10-09 01:20:41,643 [INFO] job_applications: No applications for PRO-0051, skipping
-2025-10-09 01:20:41,645 [INFO] job_applications: Processing requisition PRO-0052
-2025-10-09 01:20:41,659 [INFO] job_applications: Found 0 applications with resumes for PRO-0052
-2025-10-09 01:20:41,671 [INFO] job_applications: No applications for PRO-0052, skipping
-2025-10-09 01:20:41,676 [INFO] job_applications: Processing requisition PRO-0053
-2025-10-09 01:20:41,683 [INFO] job_applications: Found 0 applications with resumes for PRO-0053
-2025-10-09 01:20:41,686 [INFO] job_applications: No applications for PRO-0053, skipping
-2025-10-09 01:20:41,689 [INFO] job_applications: Processing requisition PRO-0054
-2025-10-09 01:20:41,701 [INFO] job_applications: Found 0 applications with resumes for PRO-0054
-2025-10-09 01:20:41,703 [INFO] job_applications: No applications for PRO-0054, skipping
-2025-10-09 01:20:41,708 [INFO] job_applications: Processing requisition PRO-0055
-2025-10-09 01:20:41,716 [INFO] job_applications: Found 0 applications with resumes for PRO-0055
-2025-10-09 01:20:41,718 [INFO] job_applications: No applications for PRO-0055, skipping
-2025-10-09 01:20:41,721 [INFO] job_applications: Processing requisition PRO-0056
-2025-10-09 01:20:41,737 [INFO] job_applications: Found 0 applications with resumes for PRO-0056
-2025-10-09 01:20:41,740 [INFO] job_applications: No applications for PRO-0056, skipping
-2025-10-09 01:20:41,748 [INFO] job_applications: Processing requisition PRO-0057
-2025-10-09 01:20:41,768 [INFO] job_applications: Found 0 applications with resumes for PRO-0057
-2025-10-09 01:20:41,770 [INFO] job_applications: No applications for PRO-0057, skipping
-2025-10-09 01:20:41,772 [INFO] job_applications: Processing requisition PRO-0058
-2025-10-09 01:20:41,788 [INFO] job_applications: Found 0 applications with resumes for PRO-0058
-2025-10-09 01:20:41,795 [INFO] job_applications: No applications for PRO-0058, skipping
-2025-10-09 01:20:41,797 [INFO] job_applications: Processing requisition PRO-0059
-2025-10-09 01:20:41,805 [INFO] job_applications: Found 0 applications with resumes for PRO-0059
-2025-10-09 01:20:41,813 [INFO] job_applications: No applications for PRO-0059, skipping
-2025-10-09 01:20:41,816 [INFO] job_applications: Processing requisition PRO-0060
-2025-10-09 01:20:41,824 [INFO] job_applications: Found 0 applications with resumes for PRO-0060
-2025-10-09 01:20:41,889 [INFO] job_applications: No applications for PRO-0060, skipping
-2025-10-09 01:20:41,915 [INFO] job_applications: Processing requisition PRO-0061
-2025-10-09 01:20:41,929 [INFO] job_applications: Found 0 applications with resumes for PRO-0061
-2025-10-09 01:20:41,933 [INFO] job_applications: No applications for PRO-0061, skipping
-2025-10-09 01:20:41,937 [INFO] job_applications: Processing requisition PRO-0062
-2025-10-09 01:20:41,961 [INFO] job_applications: Found 0 applications with resumes for PRO-0062
-2025-10-09 01:20:41,963 [INFO] job_applications: No applications for PRO-0062, skipping
-2025-10-09 01:20:41,969 [INFO] job_applications: Processing requisition PRO-0063
-2025-10-09 01:20:41,981 [INFO] job_applications: Found 0 applications with resumes for PRO-0063
-2025-10-09 01:20:41,983 [INFO] job_applications: No applications for PRO-0063, skipping
-2025-10-09 01:20:41,985 [INFO] job_applications: Processing requisition PRO-0064
-2025-10-09 01:20:41,996 [INFO] job_applications: Found 0 applications with resumes for PRO-0064
-2025-10-09 01:20:42,010 [INFO] job_applications: No applications for PRO-0064, skipping
-2025-10-09 01:20:42,026 [INFO] job_applications: Processing requisition PRO-0065
-2025-10-09 01:20:42,049 [INFO] job_applications: Found 0 applications with resumes for PRO-0065
-2025-10-09 01:20:42,058 [INFO] job_applications: No applications for PRO-0065, skipping
-2025-10-09 01:20:42,065 [INFO] job_applications: Processing requisition PRO-0066
-2025-10-09 01:20:42,112 [INFO] job_applications: Found 0 applications with resumes for PRO-0066
-2025-10-09 01:20:42,120 [INFO] job_applications: No applications for PRO-0066, skipping
-2025-10-09 01:20:42,124 [INFO] job_applications: Processing requisition PRO-0067
-2025-10-09 01:20:42,136 [INFO] job_applications: Found 0 applications with resumes for PRO-0067
-2025-10-09 01:20:42,149 [INFO] job_applications: No applications for PRO-0067, skipping
-2025-10-09 01:20:42,152 [INFO] job_applications: Processing requisition PRO-0068
-2025-10-09 01:20:42,178 [INFO] job_applications: Found 0 applications with resumes for PRO-0068
-2025-10-09 01:20:42,189 [INFO] job_applications: No applications for PRO-0068, skipping
-2025-10-09 01:20:42,193 [INFO] job_applications: Processing requisition PRO-0069
-2025-10-09 01:20:42,212 [INFO] job_applications: Found 0 applications with resumes for PRO-0069
-2025-10-09 01:20:42,226 [INFO] job_applications: No applications for PRO-0069, skipping
-2025-10-09 01:20:42,244 [INFO] job_applications: Processing requisition PRO-0070
-2025-10-09 01:20:42,265 [INFO] job_applications: Found 0 applications with resumes for PRO-0070
-2025-10-09 01:20:42,269 [INFO] job_applications: No applications for PRO-0070, skipping
-2025-10-09 01:20:42,277 [INFO] job_applications: Processing requisition PRO-0071
-2025-10-09 01:20:42,285 [INFO] job_applications: Found 0 applications with resumes for PRO-0071
-2025-10-09 01:20:42,287 [INFO] job_applications: No applications for PRO-0071, skipping
-2025-10-09 01:20:42,290 [INFO] job_applications: Processing requisition PRO-0072
-2025-10-09 01:20:42,317 [INFO] job_applications: Found 0 applications with resumes for PRO-0072
-2025-10-09 01:20:42,321 [INFO] job_applications: No applications for PRO-0072, skipping
-2025-10-09 01:20:42,323 [INFO] job_applications: Processing requisition PRO-0073
-2025-10-09 01:20:42,336 [INFO] job_applications: Found 0 applications with resumes for PRO-0073
-2025-10-09 01:20:42,342 [INFO] job_applications: No applications for PRO-0073, skipping
-2025-10-09 01:20:42,344 [INFO] job_applications: Processing requisition PRO-0074
-2025-10-09 01:20:42,373 [INFO] job_applications: Found 0 applications with resumes for PRO-0074
-2025-10-09 01:20:42,377 [INFO] job_applications: No applications for PRO-0074, skipping
-2025-10-09 01:20:42,400 [INFO] job_applications: Processing requisition PRO-0075
-2025-10-09 01:20:42,425 [INFO] job_applications: Found 0 applications with resumes for PRO-0075
-2025-10-09 01:20:42,432 [INFO] job_applications: No applications for PRO-0075, skipping
-2025-10-09 01:20:42,434 [INFO] job_applications: Processing requisition PRO-0076
-2025-10-09 01:20:42,457 [INFO] job_applications: Found 0 applications with resumes for PRO-0076
-2025-10-09 01:20:42,466 [INFO] job_applications: No applications for PRO-0076, skipping
-2025-10-09 01:20:42,473 [INFO] job_applications: Processing requisition PRO-0077
-2025-10-09 01:20:42,497 [INFO] job_applications: Found 0 applications with resumes for PRO-0077
-2025-10-09 01:20:42,531 [INFO] job_applications: No applications for PRO-0077, skipping
-2025-10-09 01:20:42,590 [INFO] job_applications: Processing requisition PRO-0078
-2025-10-09 01:20:42,629 [INFO] job_applications: Found 0 applications with resumes for PRO-0078
-2025-10-09 01:20:42,640 [INFO] job_applications: No applications for PRO-0078, skipping
-2025-10-09 01:20:42,655 [INFO] job_applications: Processing requisition PRO-0079
-2025-10-09 01:20:42,675 [INFO] job_applications: Found 0 applications with resumes for PRO-0079
-2025-10-09 01:20:42,686 [INFO] job_applications: No applications for PRO-0079, skipping
-2025-10-09 01:20:42,695 [INFO] job_applications: Processing requisition PRO-0080
-2025-10-09 01:20:42,708 [INFO] job_applications: Found 0 applications with resumes for PRO-0080
-2025-10-09 01:20:42,715 [INFO] job_applications: No applications for PRO-0080, skipping
-2025-10-09 01:20:42,718 [INFO] job_applications: Processing requisition PRO-0081
-2025-10-09 01:20:42,727 [INFO] job_applications: Found 0 applications with resumes for PRO-0081
-2025-10-09 01:20:42,738 [INFO] job_applications: No applications for PRO-0081, skipping
-2025-10-09 01:20:42,740 [INFO] job_applications: Processing requisition PRO-0082
-2025-10-09 01:20:42,755 [INFO] job_applications: Found 0 applications with resumes for PRO-0082
-2025-10-09 01:20:42,758 [INFO] job_applications: No applications for PRO-0082, skipping
-2025-10-09 01:20:42,764 [INFO] job_applications: Processing requisition PRO-0083
-2025-10-09 01:20:42,788 [INFO] job_applications: Found 0 applications with resumes for PRO-0083
-2025-10-09 01:20:42,792 [INFO] job_applications: No applications for PRO-0083, skipping
-2025-10-09 01:20:42,795 [INFO] job_applications: Processing requisition PRO-0084
-2025-10-09 01:20:42,804 [INFO] job_applications: Found 0 applications with resumes for PRO-0084
-2025-10-09 01:20:42,809 [INFO] job_applications: No applications for PRO-0084, skipping
-2025-10-09 01:20:42,811 [INFO] job_applications: Processing requisition PRO-0085
-2025-10-09 01:20:42,852 [INFO] job_applications: Found 0 applications with resumes for PRO-0085
-2025-10-09 01:20:42,871 [INFO] job_applications: No applications for PRO-0085, skipping
-2025-10-09 01:20:42,882 [INFO] job_applications: Processing requisition PRO-0086
-2025-10-09 01:20:42,904 [INFO] job_applications: Found 0 applications with resumes for PRO-0086
-2025-10-09 01:20:42,930 [INFO] job_applications: No applications for PRO-0086, skipping
-2025-10-09 01:20:42,959 [INFO] job_applications: Processing requisition PRO-0087
-2025-10-09 01:20:43,034 [INFO] job_applications: Found 0 applications with resumes for PRO-0087
-2025-10-09 01:20:43,073 [INFO] job_applications: No applications for PRO-0087, skipping
-2025-10-09 01:20:43,078 [INFO] job_applications: Processing requisition PRO-0088
-2025-10-09 01:20:43,123 [INFO] job_applications: Found 0 applications with resumes for PRO-0088
-2025-10-09 01:20:43,151 [INFO] job_applications: No applications for PRO-0088, skipping
-2025-10-09 01:20:43,166 [INFO] job_applications: Processing requisition PRO-0089
-2025-10-09 01:20:43,256 [INFO] job_applications: Found 0 applications with resumes for PRO-0089
-2025-10-09 01:20:43,280 [INFO] job_applications: No applications for PRO-0089, skipping
-2025-10-09 01:20:43,292 [INFO] job_applications: Processing requisition PRO-0090
-2025-10-09 01:20:43,351 [INFO] job_applications: Found 0 applications with resumes for PRO-0090
-2025-10-09 01:20:43,369 [INFO] job_applications: No applications for PRO-0090, skipping
-2025-10-09 01:20:43,371 [INFO] job_applications: Processing requisition PRO-0091
-2025-10-09 01:20:43,422 [INFO] job_applications: Found 0 applications with resumes for PRO-0091
-2025-10-09 01:20:43,501 [INFO] job_applications: No applications for PRO-0091, skipping
-2025-10-09 01:20:43,533 [INFO] job_applications: Processing requisition PRO-0092
-2025-10-09 01:20:43,582 [INFO] job_applications: Found 0 applications with resumes for PRO-0092
-2025-10-09 01:20:43,617 [INFO] job_applications: No applications for PRO-0092, skipping
-2025-10-09 01:20:43,632 [INFO] job_applications: Processing requisition PRO-0093
-2025-10-09 01:20:43,710 [INFO] job_applications: Found 0 applications with resumes for PRO-0093
-2025-10-09 01:20:43,713 [INFO] job_applications: No applications for PRO-0093, skipping
-2025-10-09 01:20:43,771 [INFO] job_applications: Processing requisition PRO-0094
-2025-10-09 01:20:43,818 [INFO] job_applications: Found 0 applications with resumes for PRO-0094
-2025-10-09 01:20:43,834 [INFO] job_applications: No applications for PRO-0094, skipping
-2025-10-09 01:20:43,858 [INFO] job_applications: Processing requisition PRO-0095
-2025-10-09 01:20:43,869 [INFO] job_applications: Found 0 applications with resumes for PRO-0095
-2025-10-09 01:20:43,893 [INFO] job_applications: No applications for PRO-0095, skipping
-2025-10-09 01:20:43,898 [INFO] job_applications: Processing requisition PRO-0096
-2025-10-09 01:20:43,937 [INFO] job_applications: Found 0 applications with resumes for PRO-0096
-2025-10-09 01:20:43,967 [INFO] job_applications: No applications for PRO-0096, skipping
-2025-10-09 01:20:43,977 [INFO] job_applications: Processing requisition PRO-0097
-2025-10-09 01:20:44,023 [INFO] job_applications: Found 0 applications with resumes for PRO-0097
-2025-10-09 01:20:44,034 [INFO] job_applications: No applications for PRO-0097, skipping
-2025-10-09 01:20:44,035 [INFO] job_applications: Processing requisition PRO-0098
-2025-10-09 01:20:44,051 [INFO] job_applications: Found 0 applications with resumes for PRO-0098
-2025-10-09 01:20:44,053 [INFO] job_applications: No applications for PRO-0098, skipping
-2025-10-09 01:20:44,068 [INFO] job_applications: Processing requisition PRO-0099
-2025-10-09 01:20:44,076 [INFO] job_applications: Found 0 applications with resumes for PRO-0099
-2025-10-09 01:20:44,087 [INFO] job_applications: No applications for PRO-0099, skipping
-2025-10-09 01:20:44,089 [INFO] job_applications: Processing requisition PRO-0100
-2025-10-09 01:20:44,128 [INFO] job_applications: Found 0 applications with resumes for PRO-0100
-2025-10-09 01:20:44,129 [INFO] job_applications: No applications for PRO-0100, skipping
-2025-10-09 01:20:44,140 [INFO] job_applications: Processing requisition PRO-0101
-2025-10-09 01:20:44,167 [INFO] job_applications: Found 0 applications with resumes for PRO-0101
-2025-10-09 01:20:44,179 [INFO] job_applications: No applications for PRO-0101, skipping
-2025-10-09 01:20:44,196 [INFO] job_applications: Processing requisition PRO-0102
-2025-10-09 01:20:44,209 [INFO] job_applications: Found 0 applications with resumes for PRO-0102
-2025-10-09 01:20:44,219 [INFO] job_applications: No applications for PRO-0102, skipping
-2025-10-09 01:20:44,222 [INFO] job_applications: Processing requisition PRO-0103
-2025-10-09 01:20:44,248 [INFO] job_applications: Found 0 applications with resumes for PRO-0103
-2025-10-09 01:20:44,252 [INFO] job_applications: No applications for PRO-0103, skipping
-2025-10-09 01:20:44,254 [INFO] job_applications: Processing requisition REQ-0001
-2025-10-09 01:20:44,271 [INFO] job_applications: Found 0 applications with resumes for REQ-0001
-2025-10-09 01:20:44,288 [INFO] job_applications: No applications for REQ-0001, skipping
-2025-10-09 01:20:44,301 [INFO] job_applications: Processing requisition REQ-0002
-2025-10-09 01:20:44,318 [INFO] job_applications: Found 0 applications with resumes for REQ-0002
-2025-10-09 01:20:44,344 [INFO] job_applications: No applications for REQ-0002, skipping
-2025-10-09 01:20:44,372 [INFO] job_applications: Processing requisition PRO-0104
-2025-10-09 01:20:44,379 [INFO] job_applications: Found 0 applications with resumes for PRO-0104
-2025-10-09 01:20:44,386 [INFO] job_applications: No applications for PRO-0104, skipping
-2025-10-09 01:20:44,387 [INFO] job_applications: Processing requisition PRO-0105
-2025-10-09 01:20:44,395 [INFO] job_applications: Found 0 applications with resumes for PRO-0105
-2025-10-09 01:20:44,419 [INFO] job_applications: No applications for PRO-0105, skipping
-2025-10-09 01:20:44,427 [INFO] job_applications: Processing requisition PRO-0106
-2025-10-09 01:20:44,448 [INFO] job_applications: Found 0 applications with resumes for PRO-0106
-2025-10-09 01:20:44,450 [INFO] job_applications: No applications for PRO-0106, skipping
-2025-10-09 01:20:44,458 [INFO] job_applications: Processing requisition PRO-0107
-2025-10-09 01:20:44,469 [INFO] job_applications: Found 0 applications with resumes for PRO-0107
-2025-10-09 01:20:44,471 [INFO] job_applications: No applications for PRO-0107, skipping
-2025-10-09 01:20:44,474 [INFO] job_applications: Processing requisition PRO-0108
-2025-10-09 01:20:44,487 [INFO] job_applications: Found 0 applications with resumes for PRO-0108
-2025-10-09 01:20:44,501 [INFO] job_applications: No applications for PRO-0108, skipping
-2025-10-09 01:20:44,505 [INFO] job_applications: Processing requisition PRO-0109
-2025-10-09 01:20:44,529 [INFO] job_applications: Found 0 applications with resumes for PRO-0109
-2025-10-09 01:20:44,546 [INFO] job_applications: No applications for PRO-0109, skipping
-2025-10-09 01:20:44,555 [INFO] job_applications: Processing requisition PRO-0110
-2025-10-09 01:20:44,570 [INFO] job_applications: Found 0 applications with resumes for PRO-0110
-2025-10-09 01:20:44,572 [INFO] job_applications: No applications for PRO-0110, skipping
-2025-10-09 01:20:44,586 [INFO] job_applications: Processing requisition PRO-0111
-2025-10-09 01:20:44,604 [INFO] job_applications: Found 0 applications with resumes for PRO-0111
-2025-10-09 01:20:44,607 [INFO] job_applications: No applications for PRO-0111, skipping
-2025-10-09 01:20:44,614 [INFO] job_applications: Processing requisition PRO-0112
-2025-10-09 01:20:44,631 [INFO] job_applications: Found 0 applications with resumes for PRO-0112
-2025-10-09 01:20:44,643 [INFO] job_applications: No applications for PRO-0112, skipping
-2025-10-09 01:20:44,664 [INFO] job_applications: Processing requisition PRO-0113
-2025-10-09 01:20:44,697 [INFO] job_applications: Found 0 applications with resumes for PRO-0113
-2025-10-09 01:20:44,713 [INFO] job_applications: No applications for PRO-0113, skipping
-2025-10-09 01:20:44,745 [INFO] job_applications: Processing requisition PRO-0114
-2025-10-09 01:20:44,762 [INFO] job_applications: Found 0 applications with resumes for PRO-0114
-2025-10-09 01:20:44,765 [INFO] job_applications: No applications for PRO-0114, skipping
-2025-10-09 01:20:44,767 [INFO] job_applications: Processing requisition PRO-0115
-2025-10-09 01:20:44,779 [INFO] job_applications: Found 0 applications with resumes for PRO-0115
-2025-10-09 01:20:44,784 [INFO] job_applications: No applications for PRO-0115, skipping
-2025-10-09 01:20:44,792 [INFO] job_applications: Processing requisition PRO-0116
-2025-10-09 01:20:44,806 [INFO] job_applications: Found 0 applications with resumes for PRO-0116
-2025-10-09 01:20:44,812 [INFO] job_applications: No applications for PRO-0116, skipping
-2025-10-09 01:20:44,826 [INFO] job_applications: Processing requisition PRO-0117
-2025-10-09 01:20:44,834 [INFO] job_applications: Found 0 applications with resumes for PRO-0117
-2025-10-09 01:20:44,840 [INFO] job_applications: No applications for PRO-0117, skipping
-2025-10-09 01:20:44,846 [INFO] job_applications: Processing requisition PRO-0118
-2025-10-09 01:20:44,870 [INFO] job_applications: Found 0 applications with resumes for PRO-0118
-2025-10-09 01:20:44,873 [INFO] job_applications: No applications for PRO-0118, skipping
-2025-10-09 01:20:44,879 [INFO] job_applications: Processing requisition PRO-0119
-2025-10-09 01:20:44,900 [INFO] job_applications: Found 0 applications with resumes for PRO-0119
-2025-10-09 01:20:44,907 [INFO] job_applications: No applications for PRO-0119, skipping
-2025-10-09 01:20:44,910 [INFO] job_applications: Processing requisition PRO-0120
-2025-10-09 01:20:44,918 [INFO] job_applications: Found 0 applications with resumes for PRO-0120
-2025-10-09 01:20:44,921 [INFO] job_applications: No applications for PRO-0120, skipping
-2025-10-09 01:20:44,931 [INFO] job_applications: Processing requisition PRO-0121
-2025-10-09 01:20:44,946 [INFO] job_applications: Found 0 applications with resumes for PRO-0121
-2025-10-09 01:20:44,958 [INFO] job_applications: No applications for PRO-0121, skipping
-2025-10-09 01:20:44,972 [INFO] job_applications: Processing requisition PRO-0122
-2025-10-09 01:20:44,982 [INFO] job_applications: Found 0 applications with resumes for PRO-0122
-2025-10-09 01:20:44,997 [INFO] job_applications: No applications for PRO-0122, skipping
-2025-10-09 01:20:45,020 [INFO] job_applications: Processing requisition PRO-0123
-2025-10-09 01:20:45,061 [INFO] job_applications: Found 0 applications with resumes for PRO-0123
-2025-10-09 01:20:45,067 [INFO] job_applications: No applications for PRO-0123, skipping
-2025-10-09 01:20:45,070 [INFO] job_applications: Processing requisition PRO-0124
-2025-10-09 01:20:45,103 [INFO] job_applications: Found 0 applications with resumes for PRO-0124
-2025-10-09 01:20:45,107 [INFO] job_applications: No applications for PRO-0124, skipping
-2025-10-09 01:20:45,109 [INFO] job_applications: Processing requisition PRO-0125
-2025-10-09 01:20:45,131 [INFO] job_applications: Found 0 applications with resumes for PRO-0125
-2025-10-09 01:20:45,143 [INFO] job_applications: No applications for PRO-0125, skipping
-2025-10-09 01:20:45,145 [INFO] job_applications: Processing requisition PRO-0126
-2025-10-09 01:20:45,153 [INFO] job_applications: Found 0 applications with resumes for PRO-0126
-2025-10-09 01:20:45,157 [INFO] job_applications: No applications for PRO-0126, skipping
-2025-10-09 01:20:45,168 [INFO] job_applications: Processing requisition PRO-0127
-2025-10-09 01:20:45,176 [INFO] job_applications: Found 0 applications with resumes for PRO-0127
-2025-10-09 01:20:45,179 [INFO] job_applications: No applications for PRO-0127, skipping
-2025-10-09 01:20:45,185 [INFO] job_applications: Processing requisition PRO-0128
-2025-10-09 01:20:45,202 [INFO] job_applications: Found 0 applications with resumes for PRO-0128
-2025-10-09 01:20:45,208 [INFO] job_applications: No applications for PRO-0128, skipping
-2025-10-09 01:20:45,226 [INFO] job_applications: Processing requisition PRO-0129
-2025-10-09 01:20:45,233 [INFO] job_applications: Found 0 applications with resumes for PRO-0129
-2025-10-09 01:20:45,235 [INFO] job_applications: No applications for PRO-0129, skipping
-2025-10-09 01:20:45,237 [INFO] job_applications: Processing requisition PRO-0130
-2025-10-09 01:20:45,256 [INFO] job_applications: Found 0 applications with resumes for PRO-0130
-2025-10-09 01:20:45,266 [INFO] job_applications: No applications for PRO-0130, skipping
-2025-10-09 01:20:45,268 [INFO] job_applications: Processing requisition PRO-0131
-2025-10-09 01:20:45,275 [INFO] job_applications: Found 0 applications with resumes for PRO-0131
-2025-10-09 01:20:45,284 [INFO] job_applications: No applications for PRO-0131, skipping
-2025-10-09 01:20:45,289 [INFO] job_applications: Processing requisition PRO-0132
-2025-10-09 01:20:45,296 [INFO] job_applications: Found 0 applications with resumes for PRO-0132
-2025-10-09 01:20:45,301 [INFO] job_applications: No applications for PRO-0132, skipping
-2025-10-09 01:20:45,303 [INFO] job_applications: Processing requisition PRO-0133
-2025-10-09 01:20:45,316 [INFO] job_applications: Found 0 applications with resumes for PRO-0133
-2025-10-09 01:20:45,319 [INFO] job_applications: No applications for PRO-0133, skipping
-2025-10-09 01:20:45,321 [INFO] job_applications: Processing requisition PRO-0134
-2025-10-09 01:20:45,336 [INFO] job_applications: Found 0 applications with resumes for PRO-0134
-2025-10-09 01:20:45,341 [INFO] job_applications: No applications for PRO-0134, skipping
-2025-10-09 01:20:45,343 [INFO] job_applications: Processing requisition PRO-0135
-2025-10-09 01:20:45,359 [INFO] job_applications: Found 0 applications with resumes for PRO-0135
-2025-10-09 01:20:45,366 [INFO] job_applications: No applications for PRO-0135, skipping
-2025-10-09 01:20:45,368 [INFO] job_applications: Processing requisition PRO-0136
-2025-10-09 01:20:45,401 [INFO] job_applications: Found 0 applications with resumes for PRO-0136
-2025-10-09 01:20:45,433 [INFO] job_applications: No applications for PRO-0136, skipping
-2025-10-09 01:20:45,456 [INFO] job_applications: Processing requisition PRO-0137
-2025-10-09 01:20:45,510 [INFO] job_applications: Found 0 applications with resumes for PRO-0137
-2025-10-09 01:20:45,527 [INFO] job_applications: No applications for PRO-0137, skipping
-2025-10-09 01:20:45,534 [INFO] job_applications: Processing requisition PRO-0138
-2025-10-09 01:20:45,567 [INFO] job_applications: Found 0 applications with resumes for PRO-0138
-2025-10-09 01:20:45,578 [INFO] job_applications: No applications for PRO-0138, skipping
-2025-10-09 01:20:45,582 [INFO] job_applications: Processing requisition PRO-0139
-2025-10-09 01:20:45,592 [INFO] job_applications: Found 0 applications with resumes for PRO-0139
-2025-10-09 01:20:45,602 [INFO] job_applications: No applications for PRO-0139, skipping
-2025-10-09 01:20:45,604 [INFO] job_applications: Processing requisition PRO-0140
-2025-10-09 01:20:45,612 [INFO] job_applications: Found 0 applications with resumes for PRO-0140
-2025-10-09 01:20:45,617 [INFO] job_applications: No applications for PRO-0140, skipping
-2025-10-09 01:20:45,629 [INFO] job_applications: Processing requisition PRO-0141
-2025-10-09 01:20:45,685 [INFO] job_applications: Found 0 applications with resumes for PRO-0141
-2025-10-09 01:20:45,714 [INFO] job_applications: No applications for PRO-0141, skipping
-2025-10-09 01:20:45,717 [INFO] job_applications: Processing requisition PRO-0142
-2025-10-09 01:20:45,778 [INFO] job_applications: Found 0 applications with resumes for PRO-0142
-2025-10-09 01:20:45,832 [INFO] job_applications: No applications for PRO-0142, skipping
-2025-10-09 01:20:45,849 [INFO] job_applications: Processing requisition PRO-0143
-2025-10-09 01:20:45,936 [INFO] job_applications: Found 0 applications with resumes for PRO-0143
-2025-10-09 01:20:45,951 [INFO] job_applications: No applications for PRO-0143, skipping
-2025-10-09 01:20:45,957 [INFO] job_applications: Processing requisition PRO-0144
-2025-10-09 01:20:45,986 [INFO] job_applications: Found 0 applications with resumes for PRO-0144
-2025-10-09 01:20:45,994 [INFO] job_applications: No applications for PRO-0144, skipping
-2025-10-09 01:20:46,016 [INFO] job_applications: Processing requisition PRO-0145
-2025-10-09 01:20:46,060 [INFO] job_applications: Found 0 applications with resumes for PRO-0145
-2025-10-09 01:20:46,088 [INFO] job_applications: No applications for PRO-0145, skipping
-2025-10-09 01:20:46,092 [INFO] job_applications: Processing requisition PRO-0146
-2025-10-09 01:20:46,111 [INFO] job_applications: Found 0 applications with resumes for PRO-0146
-2025-10-09 01:20:46,147 [INFO] job_applications: No applications for PRO-0146, skipping
-2025-10-09 01:20:46,154 [INFO] job_applications: Processing requisition PRO-0147
-2025-10-09 01:20:46,171 [INFO] job_applications: Found 0 applications with resumes for PRO-0147
-2025-10-09 01:20:46,176 [INFO] job_applications: No applications for PRO-0147, skipping
-2025-10-09 01:20:46,178 [INFO] job_applications: Processing requisition PRO-0148
-2025-10-09 01:20:46,208 [INFO] job_applications: Found 0 applications with resumes for PRO-0148
-2025-10-09 01:20:46,211 [INFO] job_applications: No applications for PRO-0148, skipping
-2025-10-09 01:20:46,232 [INFO] job_applications: Processing requisition PRO-0149
-2025-10-09 01:20:46,308 [INFO] job_applications: Found 0 applications with resumes for PRO-0149
-2025-10-09 01:20:46,326 [INFO] job_applications: No applications for PRO-0149, skipping
-2025-10-09 01:20:46,356 [INFO] job_applications: Processing requisition PRO-0150
-2025-10-09 01:20:46,403 [INFO] job_applications: Found 0 applications with resumes for PRO-0150
-2025-10-09 01:20:46,416 [INFO] job_applications: No applications for PRO-0150, skipping
-2025-10-09 01:20:46,480 [INFO] job_applications: Processing requisition PRO-0151
-2025-10-09 01:20:46,490 [INFO] job_applications: Found 0 applications with resumes for PRO-0151
-2025-10-09 01:20:46,494 [INFO] job_applications: No applications for PRO-0151, skipping
-2025-10-09 01:20:46,498 [INFO] job_applications: Processing requisition PRO-0152
-2025-10-09 01:20:46,536 [INFO] job_applications: Found 0 applications with resumes for PRO-0152
-2025-10-09 01:20:46,538 [INFO] job_applications: No applications for PRO-0152, skipping
-2025-10-09 01:20:46,549 [INFO] job_applications: Processing requisition PRO-0153
-2025-10-09 01:20:46,571 [INFO] job_applications: Found 0 applications with resumes for PRO-0153
-2025-10-09 01:20:46,610 [INFO] job_applications: No applications for PRO-0153, skipping
-2025-10-09 01:20:46,627 [INFO] job_applications: Processing requisition PRO-0154
-2025-10-09 01:20:46,646 [INFO] job_applications: Found 0 applications with resumes for PRO-0154
-2025-10-09 01:20:46,656 [INFO] job_applications: No applications for PRO-0154, skipping
-2025-10-09 01:20:46,657 [INFO] job_applications: Processing requisition PRO-0155
-2025-10-09 01:20:46,667 [INFO] job_applications: Found 0 applications with resumes for PRO-0155
-2025-10-09 01:20:46,700 [INFO] job_applications: No applications for PRO-0155, skipping
-2025-10-09 01:20:46,725 [INFO] job_applications: Processing requisition PRO-0156
-2025-10-09 01:20:46,744 [INFO] job_applications: Found 0 applications with resumes for PRO-0156
-2025-10-09 01:20:46,759 [INFO] job_applications: No applications for PRO-0156, skipping
-2025-10-09 01:20:46,761 [INFO] job_applications: Processing requisition PRO-0157
-2025-10-09 01:20:46,786 [INFO] job_applications: Found 0 applications with resumes for PRO-0157
-2025-10-09 01:20:46,794 [INFO] job_applications: No applications for PRO-0157, skipping
-2025-10-09 01:20:46,797 [INFO] job_applications: Processing requisition PRO-0158
-2025-10-09 01:20:46,818 [INFO] job_applications: Found 0 applications with resumes for PRO-0158
-2025-10-09 01:20:46,822 [INFO] job_applications: No applications for PRO-0158, skipping
-2025-10-09 01:20:46,833 [INFO] job_applications: Processing requisition PRO-0159
-2025-10-09 01:20:46,857 [INFO] job_applications: Found 0 applications with resumes for PRO-0159
-2025-10-09 01:20:46,867 [INFO] job_applications: No applications for PRO-0159, skipping
-2025-10-09 01:20:46,869 [INFO] job_applications: Processing requisition PRO-0160
-2025-10-09 01:20:46,888 [INFO] job_applications: Found 0 applications with resumes for PRO-0160
-2025-10-09 01:20:46,891 [INFO] job_applications: No applications for PRO-0160, skipping
-2025-10-09 01:20:46,893 [INFO] job_applications: Processing requisition PRO-0161
-2025-10-09 01:20:46,907 [INFO] job_applications: Found 0 applications with resumes for PRO-0161
-2025-10-09 01:20:46,909 [INFO] job_applications: No applications for PRO-0161, skipping
-2025-10-09 01:20:46,922 [INFO] job_applications: Processing requisition PRO-0162
-2025-10-09 01:20:46,930 [INFO] job_applications: Found 0 applications with resumes for PRO-0162
-2025-10-09 01:20:46,938 [INFO] job_applications: No applications for PRO-0162, skipping
-2025-10-09 01:20:46,944 [INFO] job_applications: Processing requisition PRO-0163
-2025-10-09 01:20:46,967 [INFO] job_applications: Found 0 applications with resumes for PRO-0163
-2025-10-09 01:20:46,971 [INFO] job_applications: No applications for PRO-0163, skipping
-2025-10-09 01:20:46,973 [INFO] job_applications: Processing requisition PRO-0164
-2025-10-09 01:20:46,987 [INFO] job_applications: Found 0 applications with resumes for PRO-0164
-2025-10-09 01:20:46,992 [INFO] job_applications: No applications for PRO-0164, skipping
-2025-10-09 01:20:46,994 [INFO] job_applications: Processing requisition PRO-0165
-2025-10-09 01:20:47,002 [INFO] job_applications: Found 0 applications with resumes for PRO-0165
-2025-10-09 01:20:47,005 [INFO] job_applications: No applications for PRO-0165, skipping
-2025-10-09 01:20:47,008 [INFO] job_applications: Processing requisition PRO-0166
-2025-10-09 01:20:47,024 [INFO] job_applications: Found 0 applications with resumes for PRO-0166
-2025-10-09 01:20:47,028 [INFO] job_applications: No applications for PRO-0166, skipping
-2025-10-09 01:20:47,038 [INFO] job_applications: Processing requisition PRO-0167
-2025-10-09 01:20:47,062 [INFO] job_applications: Found 0 applications with resumes for PRO-0167
-2025-10-09 01:20:47,065 [INFO] job_applications: No applications for PRO-0167, skipping
-2025-10-09 01:20:47,071 [INFO] job_applications: Processing requisition PRO-0168
-2025-10-09 01:20:47,096 [INFO] job_applications: Found 0 applications with resumes for PRO-0168
-2025-10-09 01:20:47,109 [INFO] job_applications: No applications for PRO-0168, skipping
-2025-10-09 01:20:47,115 [INFO] job_applications: Processing requisition PRO-0169
-2025-10-09 01:20:47,122 [INFO] job_applications: Found 0 applications with resumes for PRO-0169
-2025-10-09 01:20:47,127 [INFO] job_applications: No applications for PRO-0169, skipping
-2025-10-09 01:20:47,130 [INFO] job_applications: Processing requisition PRO-0170
-2025-10-09 01:20:47,145 [INFO] job_applications: Found 0 applications with resumes for PRO-0170
-2025-10-09 01:20:47,150 [INFO] job_applications: No applications for PRO-0170, skipping
-2025-10-09 01:20:47,154 [INFO] job_applications: Processing requisition PRO-0171
-2025-10-09 01:20:47,165 [INFO] job_applications: Found 0 applications with resumes for PRO-0171
-2025-10-09 01:20:47,167 [INFO] job_applications: No applications for PRO-0171, skipping
-2025-10-09 01:20:47,172 [INFO] job_applications: Processing requisition PRO-0172
-2025-10-09 01:20:47,185 [INFO] job_applications: Found 0 applications with resumes for PRO-0172
-2025-10-09 01:20:47,187 [INFO] job_applications: No applications for PRO-0172, skipping
-2025-10-09 01:20:47,189 [INFO] job_applications: Processing requisition PRO-0173
-2025-10-09 01:20:47,198 [INFO] job_applications: Found 0 applications with resumes for PRO-0173
-2025-10-09 01:20:47,200 [INFO] job_applications: No applications for PRO-0173, skipping
-2025-10-09 01:20:47,203 [INFO] job_applications: Processing requisition PRO-0174
-2025-10-09 01:20:47,220 [INFO] job_applications: Found 0 applications with resumes for PRO-0174
-2025-10-09 01:20:47,225 [INFO] job_applications: No applications for PRO-0174, skipping
-2025-10-09 01:20:47,229 [INFO] job_applications: Processing requisition PRO-0175
-2025-10-09 01:20:47,263 [INFO] job_applications: Found 0 applications with resumes for PRO-0175
-2025-10-09 01:20:47,275 [INFO] job_applications: No applications for PRO-0175, skipping
-2025-10-09 01:20:47,281 [INFO] job_applications: Processing requisition PRO-0176
-2025-10-09 01:20:47,298 [INFO] job_applications: Found 0 applications with resumes for PRO-0176
-2025-10-09 01:20:47,333 [INFO] job_applications: No applications for PRO-0176, skipping
-2025-10-09 01:20:47,345 [INFO] job_applications: Processing requisition PRO-0177
-2025-10-09 01:20:47,352 [INFO] job_applications: Found 0 applications with resumes for PRO-0177
-2025-10-09 01:20:47,354 [INFO] job_applications: No applications for PRO-0177, skipping
-2025-10-09 01:20:47,365 [INFO] job_applications: Processing requisition PRO-0178
-2025-10-09 01:20:47,404 [INFO] job_applications: Found 0 applications with resumes for PRO-0178
-2025-10-09 01:20:47,407 [INFO] job_applications: No applications for PRO-0178, skipping
-2025-10-09 01:20:47,412 [INFO] job_applications: Processing requisition PRO-0179
-2025-10-09 01:20:47,419 [INFO] job_applications: Found 0 applications with resumes for PRO-0179
-2025-10-09 01:20:47,429 [INFO] job_applications: No applications for PRO-0179, skipping
-2025-10-09 01:20:47,431 [INFO] job_applications: Processing requisition PRO-0180
-2025-10-09 01:20:47,452 [INFO] job_applications: Found 0 applications with resumes for PRO-0180
-2025-10-09 01:20:47,469 [INFO] job_applications: No applications for PRO-0180, skipping
-2025-10-09 01:20:47,472 [INFO] job_applications: Processing requisition PRO-0181
-2025-10-09 01:20:47,488 [INFO] job_applications: Found 0 applications with resumes for PRO-0181
-2025-10-09 01:20:47,491 [INFO] job_applications: No applications for PRO-0181, skipping
-2025-10-09 01:20:47,497 [INFO] job_applications: Processing requisition PRO-0182
-2025-10-09 01:20:47,508 [INFO] job_applications: Found 0 applications with resumes for PRO-0182
-2025-10-09 01:20:47,517 [INFO] job_applications: No applications for PRO-0182, skipping
-2025-10-09 01:20:47,520 [INFO] job_applications: Processing requisition PRO-0183
-2025-10-09 01:20:47,529 [INFO] job_applications: Found 0 applications with resumes for PRO-0183
-2025-10-09 01:20:47,534 [INFO] job_applications: No applications for PRO-0183, skipping
-2025-10-09 01:20:47,537 [INFO] job_applications: Processing requisition PRO-0184
-2025-10-09 01:20:47,548 [INFO] job_applications: Found 0 applications with resumes for PRO-0184
-2025-10-09 01:20:47,570 [INFO] job_applications: No applications for PRO-0184, skipping
-2025-10-09 01:20:47,588 [INFO] job_applications: Processing requisition PRO-0185
-2025-10-09 01:20:47,615 [INFO] job_applications: Found 0 applications with resumes for PRO-0185
-2025-10-09 01:20:47,663 [INFO] job_applications: No applications for PRO-0185, skipping
-2025-10-09 01:20:47,677 [INFO] job_applications: Processing requisition PRO-0186
-2025-10-09 01:20:47,692 [INFO] job_applications: Found 0 applications with resumes for PRO-0186
-2025-10-09 01:20:47,714 [INFO] job_applications: No applications for PRO-0186, skipping
-2025-10-09 01:20:47,723 [INFO] job_applications: Processing requisition PRO-0187
-2025-10-09 01:20:47,755 [INFO] job_applications: Found 0 applications with resumes for PRO-0187
-2025-10-09 01:20:47,757 [INFO] job_applications: No applications for PRO-0187, skipping
-2025-10-09 01:20:47,763 [INFO] job_applications: Processing requisition PRO-0188
-2025-10-09 01:20:47,788 [INFO] job_applications: Found 0 applications with resumes for PRO-0188
-2025-10-09 01:20:47,790 [INFO] job_applications: No applications for PRO-0188, skipping
-2025-10-09 01:20:47,794 [INFO] job_applications: Processing requisition PRO-0189
-2025-10-09 01:20:47,807 [INFO] job_applications: Found 0 applications with resumes for PRO-0189
-2025-10-09 01:20:47,809 [INFO] job_applications: No applications for PRO-0189, skipping
-2025-10-09 01:20:47,814 [INFO] job_applications: Processing requisition PRO-0190
-2025-10-09 01:20:47,821 [INFO] job_applications: Found 0 applications with resumes for PRO-0190
-2025-10-09 01:20:47,825 [INFO] job_applications: No applications for PRO-0190, skipping
-2025-10-09 01:20:47,829 [INFO] job_applications: Processing requisition PRO-0191
-2025-10-09 01:20:47,839 [INFO] job_applications: Found 0 applications with resumes for PRO-0191
-2025-10-09 01:20:47,842 [INFO] job_applications: No applications for PRO-0191, skipping
-2025-10-09 01:20:47,845 [INFO] job_applications: Processing requisition PRO-0192
-2025-10-09 01:20:47,854 [INFO] job_applications: Found 0 applications with resumes for PRO-0192
-2025-10-09 01:20:47,859 [INFO] job_applications: No applications for PRO-0192, skipping
-2025-10-09 01:20:47,863 [INFO] job_applications: Processing requisition PRO-0193
-2025-10-09 01:20:47,877 [INFO] job_applications: Found 0 applications with resumes for PRO-0193
-2025-10-09 01:20:47,880 [INFO] job_applications: No applications for PRO-0193, skipping
-2025-10-09 01:20:47,883 [INFO] job_applications: Processing requisition PRO-0194
-2025-10-09 01:20:47,892 [INFO] job_applications: Found 0 applications with resumes for PRO-0194
-2025-10-09 01:20:47,895 [INFO] job_applications: No applications for PRO-0194, skipping
-2025-10-09 01:20:47,898 [INFO] job_applications: Processing requisition PRO-0195
-2025-10-09 01:20:47,907 [INFO] job_applications: Found 0 applications with resumes for PRO-0195
-2025-10-09 01:20:47,908 [INFO] job_applications: No applications for PRO-0195, skipping
-2025-10-09 01:20:47,910 [INFO] job_applications: Processing requisition PRO-0196
-2025-10-09 01:20:47,930 [INFO] job_applications: Found 0 applications with resumes for PRO-0196
-2025-10-09 01:20:47,934 [INFO] job_applications: No applications for PRO-0196, skipping
-2025-10-09 01:20:47,938 [INFO] job_applications: Processing requisition PRO-0197
-2025-10-09 01:20:47,966 [INFO] job_applications: Found 0 applications with resumes for PRO-0197
-2025-10-09 01:20:47,972 [INFO] job_applications: No applications for PRO-0197, skipping
-2025-10-09 01:20:47,980 [INFO] job_applications: Processing requisition PRO-0198
-2025-10-09 01:20:47,999 [INFO] job_applications: Found 0 applications with resumes for PRO-0198
-2025-10-09 01:20:48,003 [INFO] job_applications: No applications for PRO-0198, skipping
-2025-10-09 01:20:48,005 [INFO] job_applications: Processing requisition PRO-0199
-2025-10-09 01:20:48,016 [INFO] job_applications: Found 0 applications with resumes for PRO-0199
-2025-10-09 01:20:48,018 [INFO] job_applications: No applications for PRO-0199, skipping
-2025-10-09 01:20:48,020 [INFO] job_applications: Processing requisition PRO-0200
-2025-10-09 01:20:48,034 [INFO] job_applications: Found 0 applications with resumes for PRO-0200
-2025-10-09 01:20:48,039 [INFO] job_applications: No applications for PRO-0200, skipping
-2025-10-09 01:20:48,040 [INFO] job_applications: Processing requisition PRO-0201
-2025-10-09 01:20:48,052 [INFO] job_applications: Found 0 applications with resumes for PRO-0201
-2025-10-09 01:20:48,055 [INFO] job_applications: No applications for PRO-0201, skipping
-2025-10-09 01:20:48,059 [INFO] job_applications: Processing requisition PRO-0202
-2025-10-09 01:20:48,070 [INFO] job_applications: Found 0 applications with resumes for PRO-0202
-2025-10-09 01:20:48,077 [INFO] job_applications: No applications for PRO-0202, skipping
-2025-10-09 01:20:48,080 [INFO] job_applications: Processing requisition PRO-0203
-2025-10-09 01:20:48,098 [INFO] job_applications: Found 0 applications with resumes for PRO-0203
-2025-10-09 01:20:48,101 [INFO] job_applications: No applications for PRO-0203, skipping
-2025-10-09 01:20:48,104 [INFO] job_applications: Processing requisition PRO-0204
-2025-10-09 01:20:48,127 [INFO] job_applications: Found 0 applications with resumes for PRO-0204
-2025-10-09 01:20:48,130 [INFO] job_applications: No applications for PRO-0204, skipping
-2025-10-09 01:20:48,133 [INFO] job_applications: Processing requisition PRO-0205
-2025-10-09 01:20:48,156 [INFO] job_applications: Found 0 applications with resumes for PRO-0205
-2025-10-09 01:20:48,158 [INFO] job_applications: No applications for PRO-0205, skipping
-2025-10-09 01:20:48,163 [INFO] job_applications: Processing requisition PRO-0206
-2025-10-09 01:20:48,188 [INFO] job_applications: Found 0 applications with resumes for PRO-0206
-2025-10-09 01:20:48,190 [INFO] job_applications: No applications for PRO-0206, skipping
-2025-10-09 01:20:48,192 [INFO] job_applications: Processing requisition PRO-0207
-2025-10-09 01:20:48,204 [INFO] job_applications: Found 0 applications with resumes for PRO-0207
-2025-10-09 01:20:48,211 [INFO] job_applications: No applications for PRO-0207, skipping
-2025-10-09 01:20:48,217 [INFO] job_applications: Processing requisition PRO-0208
-2025-10-09 01:20:48,236 [INFO] job_applications: Found 0 applications with resumes for PRO-0208
-2025-10-09 01:20:48,240 [INFO] job_applications: No applications for PRO-0208, skipping
-2025-10-09 01:20:48,244 [INFO] job_applications: Processing requisition PRO-0209
-2025-10-09 01:20:48,252 [INFO] job_applications: Found 0 applications with resumes for PRO-0209
-2025-10-09 01:20:48,255 [INFO] job_applications: No applications for PRO-0209, skipping
-2025-10-09 01:20:48,257 [INFO] job_applications: Processing requisition PRO-0210
-2025-10-09 01:20:48,266 [INFO] job_applications: Found 0 applications with resumes for PRO-0210
-2025-10-09 01:20:48,272 [INFO] job_applications: No applications for PRO-0210, skipping
-2025-10-09 01:20:48,278 [INFO] job_applications: Processing requisition PRO-0211
-2025-10-09 01:20:48,285 [INFO] job_applications: Found 0 applications with resumes for PRO-0211
-2025-10-09 01:20:48,291 [INFO] job_applications: No applications for PRO-0211, skipping
-2025-10-09 01:20:48,296 [INFO] job_applications: Processing requisition PRO-0212
-2025-10-09 01:20:48,304 [INFO] job_applications: Found 0 applications with resumes for PRO-0212
-2025-10-09 01:20:48,306 [INFO] job_applications: No applications for PRO-0212, skipping
-2025-10-09 01:20:48,309 [INFO] job_applications: Processing requisition PRO-0213
-2025-10-09 01:20:48,319 [INFO] job_applications: Found 0 applications with resumes for PRO-0213
-2025-10-09 01:20:48,327 [INFO] job_applications: No applications for PRO-0213, skipping
-2025-10-09 01:20:48,329 [INFO] job_applications: Processing requisition PRO-0214
-2025-10-09 01:20:48,338 [INFO] job_applications: Found 0 applications with resumes for PRO-0214
-2025-10-09 01:20:48,340 [INFO] job_applications: No applications for PRO-0214, skipping
-2025-10-09 01:20:48,342 [INFO] job_applications: Processing requisition PRO-0215
-2025-10-09 01:20:48,349 [INFO] job_applications: Found 0 applications with resumes for PRO-0215
-2025-10-09 01:20:48,354 [INFO] job_applications: No applications for PRO-0215, skipping
-2025-10-09 01:20:48,356 [INFO] job_applications: Processing requisition PRO-0010
-2025-10-09 01:20:48,392 [INFO] job_applications: Found 1 applications with resumes for PRO-0010
-2025-10-09 01:20:48,400 [INFO] job_applications: Extracted requirements length for PRO-0010: 229 chars
-2025-10-09 01:21:17,080 [INFO] job_applications: Shortlisted app 969df70a-7429-41a1-8654-f1090939f992 (score: 1775.0)
-2025-10-09 01:21:17,211 [INFO] job_applications: Updated statuses for 1 shortlisted / 0 rejected
-2025-10-09 01:21:17,215 [INFO] job_applications: Req PRO-0010: 1 shortlisted from 1
-2025-10-09 01:21:17,219 [INFO] job_applications: Processing requisition PRO-0216
-2025-10-09 01:21:17,239 [INFO] job_applications: Found 0 applications with resumes for PRO-0216
-2025-10-09 01:21:17,245 [INFO] job_applications: No applications for PRO-0216, skipping
-2025-10-09 01:21:17,254 [INFO] job_applications: Processing requisition PRO-0217
-2025-10-09 01:21:17,268 [INFO] job_applications: Found 0 applications with resumes for PRO-0217
-2025-10-09 01:21:17,298 [INFO] job_applications: No applications for PRO-0217, skipping
-2025-10-09 01:21:17,316 [INFO] job_applications: Processing requisition PRO-0218
-2025-10-09 01:21:17,349 [INFO] job_applications: Found 0 applications with resumes for PRO-0218
-2025-10-09 01:21:17,353 [INFO] job_applications: No applications for PRO-0218, skipping
-2025-10-09 01:21:17,356 [INFO] job_applications: Processing requisition PRO-0219
-2025-10-09 01:21:17,392 [INFO] job_applications: Found 0 applications with resumes for PRO-0219
-2025-10-09 01:21:17,400 [INFO] job_applications: No applications for PRO-0219, skipping
-2025-10-09 01:21:17,410 [INFO] job_applications: Processing requisition PRO-0220
-2025-10-09 01:21:17,427 [INFO] job_applications: Found 0 applications with resumes for PRO-0220
-2025-10-09 01:21:17,436 [INFO] job_applications: No applications for PRO-0220, skipping
-2025-10-09 01:21:17,439 [INFO] job_applications: Processing requisition PRO-0221
-2025-10-09 01:21:17,447 [INFO] job_applications: Found 0 applications with resumes for PRO-0221
-2025-10-09 01:21:17,459 [INFO] job_applications: No applications for PRO-0221, skipping
-2025-10-09 01:21:17,469 [INFO] job_applications: Processing requisition PRO-0222
-2025-10-09 01:21:17,492 [INFO] job_applications: Found 0 applications with resumes for PRO-0222
-2025-10-09 01:21:17,502 [INFO] job_applications: No applications for PRO-0222, skipping
-2025-10-09 01:21:17,504 [INFO] job_applications: Processing requisition PRO-0223
-2025-10-09 01:21:17,514 [INFO] job_applications: Found 0 applications with resumes for PRO-0223
-2025-10-09 01:21:17,520 [INFO] job_applications: No applications for PRO-0223, skipping
-2025-10-09 01:21:17,522 [INFO] job_applications: Processing requisition PRO-0224
-2025-10-09 01:21:17,544 [INFO] job_applications: Found 0 applications with resumes for PRO-0224
-2025-10-09 01:21:17,548 [INFO] job_applications: No applications for PRO-0224, skipping
-2025-10-09 01:21:17,559 [INFO] job_applications: Processing requisition PRO-0225
-2025-10-09 01:21:17,575 [INFO] job_applications: Found 0 applications with resumes for PRO-0225
-2025-10-09 01:21:17,578 [INFO] job_applications: No applications for PRO-0225, skipping
-2025-10-09 01:21:17,581 [INFO] job_applications: Processing requisition PRO-0226
-2025-10-09 01:21:17,587 [INFO] job_applications: Found 0 applications with resumes for PRO-0226
-2025-10-09 01:21:17,590 [INFO] job_applications: No applications for PRO-0226, skipping
-2025-10-09 01:21:17,593 [INFO] job_applications: Processing requisition PRO-0227
-2025-10-09 01:21:17,608 [INFO] job_applications: Found 0 applications with resumes for PRO-0227
-2025-10-09 01:21:17,610 [INFO] job_applications: No applications for PRO-0227, skipping
-2025-10-09 01:21:17,622 [INFO] job_applications: Processing requisition PRO-0228
-2025-10-09 01:21:17,643 [INFO] job_applications: Found 0 applications with resumes for PRO-0228
-2025-10-09 01:21:17,645 [INFO] job_applications: No applications for PRO-0228, skipping
-2025-10-09 01:21:17,657 [INFO] job_applications: Processing requisition PRO-0229
-2025-10-09 01:21:17,669 [INFO] job_applications: Found 0 applications with resumes for PRO-0229
-2025-10-09 01:21:17,671 [INFO] job_applications: No applications for PRO-0229, skipping
-2025-10-09 01:21:17,674 [INFO] job_applications: Processing requisition PRO-0230
-2025-10-09 01:21:17,693 [INFO] job_applications: Found 0 applications with resumes for PRO-0230
-2025-10-09 01:21:17,695 [INFO] job_applications: No applications for PRO-0230, skipping
-2025-10-09 01:21:17,696 [INFO] job_applications: Processing requisition PRO-0231
-2025-10-09 01:21:17,708 [INFO] job_applications: Found 0 applications with resumes for PRO-0231
-2025-10-09 01:21:17,710 [INFO] job_applications: No applications for PRO-0231, skipping
-2025-10-09 01:21:17,717 [INFO] job_applications: Processing requisition PRO-0232
-2025-10-09 01:21:17,737 [INFO] job_applications: Found 0 applications with resumes for PRO-0232
-2025-10-09 01:21:17,747 [INFO] job_applications: No applications for PRO-0232, skipping
-2025-10-09 01:21:17,749 [INFO] job_applications: Processing requisition PRO-0233
-2025-10-09 01:21:17,763 [INFO] job_applications: Found 0 applications with resumes for PRO-0233
-2025-10-09 01:21:17,765 [INFO] job_applications: No applications for PRO-0233, skipping
-2025-10-09 01:21:17,770 [INFO] job_applications: Processing requisition PRO-0234
-2025-10-09 01:21:17,792 [INFO] job_applications: Found 0 applications with resumes for PRO-0234
-2025-10-09 01:21:17,795 [INFO] job_applications: No applications for PRO-0234, skipping
-2025-10-09 01:21:17,805 [INFO] job_applications: Processing requisition PRO-0235
-2025-10-09 01:21:17,821 [INFO] job_applications: Found 0 applications with resumes for PRO-0235
-2025-10-09 01:21:17,823 [INFO] job_applications: No applications for PRO-0235, skipping
-2025-10-09 01:21:17,825 [INFO] job_applications: Processing requisition PRO-0236
-2025-10-09 01:21:17,860 [INFO] job_applications: Found 0 applications with resumes for PRO-0236
-2025-10-09 01:21:17,876 [INFO] job_applications: No applications for PRO-0236, skipping
-2025-10-09 01:21:17,878 [INFO] job_applications: Processing requisition PRO-0237
-2025-10-09 01:21:17,896 [INFO] job_applications: Found 0 applications with resumes for PRO-0237
-2025-10-09 01:21:17,899 [INFO] job_applications: No applications for PRO-0237, skipping
-2025-10-09 01:21:17,913 [INFO] job_applications: Processing requisition PRO-0238
-2025-10-09 01:21:17,936 [INFO] job_applications: Found 0 applications with resumes for PRO-0238
-2025-10-09 01:21:17,940 [INFO] job_applications: No applications for PRO-0238, skipping
-2025-10-09 01:21:17,956 [INFO] job_applications: Processing requisition PRO-0239
-2025-10-09 01:21:17,973 [INFO] job_applications: Found 0 applications with resumes for PRO-0239
-2025-10-09 01:21:17,982 [INFO] job_applications: No applications for PRO-0239, skipping
-2025-10-09 01:21:17,986 [INFO] job_applications: Processing requisition PRO-0240
-2025-10-09 01:21:18,011 [INFO] job_applications: Found 0 applications with resumes for PRO-0240
-2025-10-09 01:21:18,012 [INFO] job_applications: No applications for PRO-0240, skipping
-2025-10-09 01:21:18,025 [INFO] job_applications: Processing requisition PRO-0241
-2025-10-09 01:21:18,033 [INFO] job_applications: Found 0 applications with resumes for PRO-0241
-2025-10-09 01:21:18,036 [INFO] job_applications: No applications for PRO-0241, skipping
-2025-10-09 01:21:18,038 [INFO] job_applications: Processing requisition PRO-0242
-2025-10-09 01:21:18,072 [INFO] job_applications: Found 0 applications with resumes for PRO-0242
-2025-10-09 01:21:18,075 [INFO] job_applications: No applications for PRO-0242, skipping
-2025-10-09 01:21:18,094 [INFO] job_applications: Processing requisition PRO-0243
-2025-10-09 01:21:18,116 [INFO] job_applications: Found 0 applications with resumes for PRO-0243
-2025-10-09 01:21:18,120 [INFO] job_applications: No applications for PRO-0243, skipping
-2025-10-09 01:21:18,124 [INFO] job_applications: Processing requisition PRO-0244
-2025-10-09 01:21:18,134 [INFO] job_applications: Found 0 applications with resumes for PRO-0244
-2025-10-09 01:21:18,144 [INFO] job_applications: No applications for PRO-0244, skipping
-2025-10-09 01:21:18,147 [INFO] job_applications: Processing requisition PRO-0245
-2025-10-09 01:21:18,165 [INFO] job_applications: Found 0 applications with resumes for PRO-0245
-2025-10-09 01:21:18,167 [INFO] job_applications: No applications for PRO-0245, skipping
-2025-10-09 01:21:18,169 [INFO] job_applications: Processing requisition PRO-0246
-2025-10-09 01:21:18,185 [INFO] job_applications: Found 0 applications with resumes for PRO-0246
-2025-10-09 01:21:18,187 [INFO] job_applications: No applications for PRO-0246, skipping
-2025-10-09 01:21:18,194 [INFO] job_applications: Processing requisition PRO-0247
-2025-10-09 01:21:18,212 [INFO] job_applications: Found 0 applications with resumes for PRO-0247
-2025-10-09 01:21:18,218 [INFO] job_applications: No applications for PRO-0247, skipping
-2025-10-09 01:21:18,229 [INFO] job_applications: Processing requisition PRO-0248
-2025-10-09 01:21:18,238 [INFO] job_applications: Found 0 applications with resumes for PRO-0248
-2025-10-09 01:21:18,239 [INFO] job_applications: No applications for PRO-0248, skipping
-2025-10-09 01:21:18,245 [INFO] job_applications: Processing requisition PRO-0249
-2025-10-09 01:21:18,253 [INFO] job_applications: Found 0 applications with resumes for PRO-0249
-2025-10-09 01:21:18,255 [INFO] job_applications: No applications for PRO-0249, skipping
-2025-10-09 01:21:18,257 [INFO] job_applications: Processing requisition PRO-0250
-2025-10-09 01:21:18,270 [INFO] job_applications: Found 0 applications with resumes for PRO-0250
-2025-10-09 01:21:18,276 [INFO] job_applications: No applications for PRO-0250, skipping
-2025-10-09 01:21:18,280 [INFO] job_applications: Processing requisition PRO-0251
-2025-10-09 01:21:18,288 [INFO] job_applications: Found 0 applications with resumes for PRO-0251
-2025-10-09 01:21:18,290 [INFO] job_applications: No applications for PRO-0251, skipping
-2025-10-09 01:21:18,292 [INFO] job_applications: Processing requisition PRO-0252
-2025-10-09 01:21:18,315 [INFO] job_applications: Found 0 applications with resumes for PRO-0252
-2025-10-09 01:21:18,326 [INFO] job_applications: No applications for PRO-0252, skipping
-2025-10-09 01:21:18,329 [INFO] job_applications: Processing requisition PRO-0253
-2025-10-09 01:21:18,336 [INFO] job_applications: Found 0 applications with resumes for PRO-0253
-2025-10-09 01:21:18,338 [INFO] job_applications: No applications for PRO-0253, skipping
-2025-10-09 01:21:18,341 [INFO] job_applications: Processing requisition PRO-0254
-2025-10-09 01:21:18,357 [INFO] job_applications: Found 0 applications with resumes for PRO-0254
-2025-10-09 01:21:18,361 [INFO] job_applications: No applications for PRO-0254, skipping
-2025-10-09 01:21:18,363 [INFO] job_applications: Processing requisition PRO-0255
-2025-10-09 01:21:18,382 [INFO] job_applications: Found 0 applications with resumes for PRO-0255
-2025-10-09 01:21:18,386 [INFO] job_applications: No applications for PRO-0255, skipping
-2025-10-09 01:21:18,388 [INFO] job_applications: Processing requisition PRO-0256
-2025-10-09 01:21:18,407 [INFO] job_applications: Found 0 applications with resumes for PRO-0256
-2025-10-09 01:21:18,412 [INFO] job_applications: No applications for PRO-0256, skipping
-2025-10-09 01:21:18,417 [INFO] job_applications: Processing requisition PRO-0257
-2025-10-09 01:21:18,435 [INFO] job_applications: Found 0 applications with resumes for PRO-0257
-2025-10-09 01:21:18,439 [INFO] job_applications: No applications for PRO-0257, skipping
-2025-10-09 01:21:18,446 [INFO] job_applications: Processing requisition PRO-0258
-2025-10-09 01:21:18,452 [INFO] job_applications: Found 0 applications with resumes for PRO-0258
-2025-10-09 01:21:18,465 [INFO] job_applications: No applications for PRO-0258, skipping
-2025-10-09 01:21:18,470 [INFO] job_applications: Processing requisition PRO-0259
-2025-10-09 01:21:18,480 [INFO] job_applications: Found 0 applications with resumes for PRO-0259
-2025-10-09 01:21:18,486 [INFO] job_applications: No applications for PRO-0259, skipping
-2025-10-09 01:21:18,497 [INFO] job_applications: Processing requisition PRO-0260
-2025-10-09 01:21:18,504 [INFO] job_applications: Found 0 applications with resumes for PRO-0260
-2025-10-09 01:21:18,509 [INFO] job_applications: No applications for PRO-0260, skipping
-2025-10-09 01:21:18,513 [INFO] job_applications: Processing requisition PRO-0261
-2025-10-09 01:21:18,543 [INFO] job_applications: Found 0 applications with resumes for PRO-0261
-2025-10-09 01:21:18,550 [INFO] job_applications: No applications for PRO-0261, skipping
-2025-10-09 01:21:18,553 [INFO] job_applications: Processing requisition PRO-0262
-2025-10-09 01:21:18,570 [INFO] job_applications: Found 0 applications with resumes for PRO-0262
-2025-10-09 01:21:18,582 [INFO] job_applications: No applications for PRO-0262, skipping
-2025-10-09 01:21:18,591 [INFO] job_applications: Processing requisition PRO-0263
-2025-10-09 01:21:18,610 [INFO] job_applications: Found 0 applications with resumes for PRO-0263
-2025-10-09 01:21:18,619 [INFO] job_applications: No applications for PRO-0263, skipping
-2025-10-09 01:21:18,628 [INFO] job_applications: Processing requisition PRO-0264
-2025-10-09 01:21:18,642 [INFO] job_applications: Found 0 applications with resumes for PRO-0264
-2025-10-09 01:21:18,668 [INFO] job_applications: No applications for PRO-0264, skipping
-2025-10-09 01:21:18,699 [INFO] job_applications: Processing requisition PRO-0265
-2025-10-09 01:21:18,739 [INFO] job_applications: Found 0 applications with resumes for PRO-0265
-2025-10-09 01:21:18,746 [INFO] job_applications: No applications for PRO-0265, skipping
-2025-10-09 01:21:18,748 [INFO] job_applications: Processing requisition PRO-0266
-2025-10-09 01:21:18,761 [INFO] job_applications: Found 0 applications with resumes for PRO-0266
-2025-10-09 01:21:18,765 [INFO] job_applications: No applications for PRO-0266, skipping
-2025-10-09 01:21:18,768 [INFO] job_applications: Processing requisition PRO-0267
-2025-10-09 01:21:18,775 [INFO] job_applications: Found 0 applications with resumes for PRO-0267
-2025-10-09 01:21:18,777 [INFO] job_applications: No applications for PRO-0267, skipping
-2025-10-09 01:21:18,780 [INFO] job_applications: Processing requisition PRO-0268
-2025-10-09 01:21:18,792 [INFO] job_applications: Found 0 applications with resumes for PRO-0268
-2025-10-09 01:21:18,794 [INFO] job_applications: No applications for PRO-0268, skipping
-2025-10-09 01:21:18,796 [INFO] job_applications: Processing requisition PRO-0269
-2025-10-09 01:21:18,807 [INFO] job_applications: Found 0 applications with resumes for PRO-0269
-2025-10-09 01:21:18,817 [INFO] job_applications: No applications for PRO-0269, skipping
-2025-10-09 01:21:18,819 [INFO] job_applications: Processing requisition PRO-0270
-2025-10-09 01:21:18,861 [INFO] job_applications: Found 0 applications with resumes for PRO-0270
-2025-10-09 01:21:18,866 [INFO] job_applications: No applications for PRO-0270, skipping
-2025-10-09 01:21:18,871 [INFO] job_applications: Processing requisition PRO-0271
-2025-10-09 01:21:18,885 [INFO] job_applications: Found 0 applications with resumes for PRO-0271
-2025-10-09 01:21:18,897 [INFO] job_applications: No applications for PRO-0271, skipping
-2025-10-09 01:21:18,905 [INFO] job_applications: Processing requisition PRO-0272
-2025-10-09 01:21:18,921 [INFO] job_applications: Found 0 applications with resumes for PRO-0272
-2025-10-09 01:21:18,927 [INFO] job_applications: No applications for PRO-0272, skipping
-2025-10-09 01:21:18,933 [INFO] job_applications: Processing requisition PRO-0273
-2025-10-09 01:21:18,951 [INFO] job_applications: Found 0 applications with resumes for PRO-0273
-2025-10-09 01:21:18,954 [INFO] job_applications: No applications for PRO-0273, skipping
-2025-10-09 01:21:18,956 [INFO] job_applications: Processing requisition PRO-0274
-2025-10-09 01:21:18,979 [INFO] job_applications: Found 0 applications with resumes for PRO-0274
-2025-10-09 01:21:18,988 [INFO] job_applications: No applications for PRO-0274, skipping
-2025-10-09 01:21:19,000 [INFO] job_applications: Processing requisition PRO-0275
-2025-10-09 01:21:19,030 [INFO] job_applications: Found 0 applications with resumes for PRO-0275
-2025-10-09 01:21:19,038 [INFO] job_applications: No applications for PRO-0275, skipping
-2025-10-09 01:21:19,041 [INFO] job_applications: Processing requisition PRO-0276
-2025-10-09 01:21:19,055 [INFO] job_applications: Found 0 applications with resumes for PRO-0276
-2025-10-09 01:21:19,059 [INFO] job_applications: No applications for PRO-0276, skipping
-2025-10-09 01:21:19,062 [INFO] job_applications: Processing requisition PRO-0277
-2025-10-09 01:21:19,095 [INFO] job_applications: Found 0 applications with resumes for PRO-0277
-2025-10-09 01:21:19,126 [INFO] job_applications: No applications for PRO-0277, skipping
-2025-10-09 01:21:19,128 [INFO] job_applications: Processing requisition PRO-0278
-2025-10-09 01:21:19,144 [INFO] job_applications: Found 0 applications with resumes for PRO-0278
-2025-10-09 01:21:19,163 [INFO] job_applications: No applications for PRO-0278, skipping
-2025-10-09 01:21:19,166 [INFO] job_applications: Processing requisition PRO-0279
-2025-10-09 01:21:19,190 [INFO] job_applications: Found 0 applications with resumes for PRO-0279
-2025-10-09 01:21:19,195 [INFO] job_applications: No applications for PRO-0279, skipping
-2025-10-09 01:21:19,204 [INFO] job_applications: Processing requisition PRO-0280
-2025-10-09 01:21:19,227 [INFO] job_applications: Found 0 applications with resumes for PRO-0280
-2025-10-09 01:21:19,245 [INFO] job_applications: No applications for PRO-0280, skipping
-2025-10-09 01:21:19,251 [INFO] job_applications: Processing requisition PRO-0281
-2025-10-09 01:21:19,268 [INFO] job_applications: Found 0 applications with resumes for PRO-0281
-2025-10-09 01:21:19,276 [INFO] job_applications: No applications for PRO-0281, skipping
-2025-10-09 01:21:19,281 [INFO] job_applications: Processing requisition PRO-0282
-2025-10-09 01:21:19,296 [INFO] job_applications: Found 0 applications with resumes for PRO-0282
-2025-10-09 01:21:19,300 [INFO] job_applications: No applications for PRO-0282, skipping
-2025-10-09 01:21:19,303 [INFO] job_applications: Processing requisition PRO-0283
-2025-10-09 01:21:19,310 [INFO] job_applications: Found 0 applications with resumes for PRO-0283
-2025-10-09 01:21:19,315 [INFO] job_applications: No applications for PRO-0283, skipping
-2025-10-09 01:21:19,316 [INFO] job_applications: Processing requisition PRO-0284
-2025-10-09 01:21:19,328 [INFO] job_applications: Found 0 applications with resumes for PRO-0284
-2025-10-09 01:21:19,340 [INFO] job_applications: No applications for PRO-0284, skipping
-2025-10-09 01:21:19,359 [INFO] job_applications: Processing requisition PRO-0285
-2025-10-09 01:21:19,392 [INFO] job_applications: Found 0 applications with resumes for PRO-0285
-2025-10-09 01:21:19,409 [INFO] job_applications: No applications for PRO-0285, skipping
-2025-10-09 01:21:19,414 [INFO] job_applications: Processing requisition PRO-0286
-2025-10-09 01:21:19,426 [INFO] job_applications: Found 0 applications with resumes for PRO-0286
-2025-10-09 01:21:19,428 [INFO] job_applications: No applications for PRO-0286, skipping
-2025-10-09 01:21:19,433 [INFO] job_applications: Processing requisition PRO-0287
-2025-10-09 01:21:19,455 [INFO] job_applications: Found 0 applications with resumes for PRO-0287
-2025-10-09 01:21:19,458 [INFO] job_applications: No applications for PRO-0287, skipping
-2025-10-09 01:21:19,460 [INFO] job_applications: Processing requisition PRO-0288
-2025-10-09 01:21:19,476 [INFO] job_applications: Found 0 applications with resumes for PRO-0288
-2025-10-09 01:21:19,478 [INFO] job_applications: No applications for PRO-0288, skipping
-2025-10-09 01:21:19,490 [INFO] job_applications: Processing requisition PRO-0289
-2025-10-09 01:21:19,509 [INFO] job_applications: Found 0 applications with resumes for PRO-0289
-2025-10-09 01:21:19,515 [INFO] job_applications: No applications for PRO-0289, skipping
-2025-10-09 01:21:19,517 [INFO] job_applications: Processing requisition PRO-0290
-2025-10-09 01:21:19,550 [INFO] job_applications: Found 0 applications with resumes for PRO-0290
-2025-10-09 01:21:19,554 [INFO] job_applications: No applications for PRO-0290, skipping
-2025-10-09 01:21:19,560 [INFO] job_applications: Processing requisition PRO-0291
-2025-10-09 01:21:19,569 [INFO] job_applications: Found 0 applications with resumes for PRO-0291
-2025-10-09 01:21:19,570 [INFO] job_applications: No applications for PRO-0291, skipping
-2025-10-09 01:21:19,578 [INFO] job_applications: Processing requisition PRO-0292
-2025-10-09 01:21:19,602 [INFO] job_applications: Found 0 applications with resumes for PRO-0292
-2025-10-09 01:21:19,620 [INFO] job_applications: No applications for PRO-0292, skipping
-2025-10-09 01:21:19,627 [INFO] job_applications: Processing requisition PRO-0293
-2025-10-09 01:21:19,710 [INFO] job_applications: Found 0 applications with resumes for PRO-0293
-2025-10-09 01:21:19,717 [INFO] job_applications: No applications for PRO-0293, skipping
-2025-10-09 01:21:19,722 [INFO] job_applications: Processing requisition PRO-0294
-2025-10-09 01:21:19,743 [INFO] job_applications: Found 0 applications with resumes for PRO-0294
-2025-10-09 01:21:19,745 [INFO] job_applications: No applications for PRO-0294, skipping
-2025-10-09 01:21:19,747 [INFO] job_applications: Processing requisition PRO-0295
-2025-10-09 01:21:19,761 [INFO] job_applications: Found 0 applications with resumes for PRO-0295
-2025-10-09 01:21:19,763 [INFO] job_applications: No applications for PRO-0295, skipping
-2025-10-09 01:21:19,766 [INFO] job_applications: Processing requisition PRO-0296
-2025-10-09 01:21:19,800 [INFO] job_applications: Found 0 applications with resumes for PRO-0296
-2025-10-09 01:21:19,831 [INFO] job_applications: No applications for PRO-0296, skipping
-2025-10-09 01:21:19,833 [INFO] job_applications: Processing requisition PRO-0297
-2025-10-09 01:21:19,873 [INFO] job_applications: Found 0 applications with resumes for PRO-0297
-2025-10-09 01:21:19,874 [INFO] job_applications: No applications for PRO-0297, skipping
-2025-10-09 01:21:19,876 [INFO] job_applications: Processing requisition PRO-0298
-2025-10-09 01:21:19,927 [INFO] job_applications: Found 0 applications with resumes for PRO-0298
-2025-10-09 01:21:19,931 [INFO] job_applications: No applications for PRO-0298, skipping
-2025-10-09 01:21:19,933 [INFO] job_applications: Processing requisition PRO-0299
-2025-10-09 01:21:19,943 [INFO] job_applications: Found 0 applications with resumes for PRO-0299
-2025-10-09 01:21:19,944 [INFO] job_applications: No applications for PRO-0299, skipping
-2025-10-09 01:21:19,953 [INFO] job_applications: Processing requisition PRO-0300
-2025-10-09 01:21:19,987 [INFO] job_applications: Found 0 applications with resumes for PRO-0300
-2025-10-09 01:21:20,001 [INFO] job_applications: No applications for PRO-0300, skipping
-2025-10-09 01:21:20,003 [INFO] job_applications: Processing requisition PRO-0301
-2025-10-09 01:21:20,043 [INFO] job_applications: Found 0 applications with resumes for PRO-0301
-2025-10-09 01:21:20,065 [INFO] job_applications: No applications for PRO-0301, skipping
-2025-10-09 01:21:20,115 [INFO] job_applications: Processing requisition PRO-0302
-2025-10-09 01:21:20,165 [INFO] job_applications: Found 0 applications with resumes for PRO-0302
-2025-10-09 01:21:20,182 [INFO] job_applications: No applications for PRO-0302, skipping
-2025-10-09 01:21:20,194 [INFO] job_applications: Processing requisition PRO-0303
-2025-10-09 01:21:20,224 [INFO] job_applications: Found 0 applications with resumes for PRO-0303
-2025-10-09 01:21:20,249 [INFO] job_applications: No applications for PRO-0303, skipping
-2025-10-09 01:21:20,254 [INFO] job_applications: Processing requisition PRO-0304
-2025-10-09 01:21:20,290 [INFO] job_applications: Found 0 applications with resumes for PRO-0304
-2025-10-09 01:21:20,302 [INFO] job_applications: No applications for PRO-0304, skipping
-2025-10-09 01:21:20,305 [INFO] job_applications: Processing requisition PRO-0305
-2025-10-09 01:21:20,336 [INFO] job_applications: Found 0 applications with resumes for PRO-0305
-2025-10-09 01:21:20,347 [INFO] job_applications: No applications for PRO-0305, skipping
-2025-10-09 01:21:20,365 [INFO] job_applications: Processing requisition PRO-0306
-2025-10-09 01:21:20,379 [INFO] job_applications: Found 0 applications with resumes for PRO-0306
-2025-10-09 01:21:20,388 [INFO] job_applications: No applications for PRO-0306, skipping
-2025-10-09 01:21:20,392 [INFO] job_applications: Processing requisition PRO-0307
-2025-10-09 01:21:20,411 [INFO] job_applications: Found 0 applications with resumes for PRO-0307
-2025-10-09 01:21:20,413 [INFO] job_applications: No applications for PRO-0307, skipping
-2025-10-09 01:21:20,415 [INFO] job_applications: Processing requisition PRO-0308
-2025-10-09 01:21:20,430 [INFO] job_applications: Found 0 applications with resumes for PRO-0308
-2025-10-09 01:21:20,434 [INFO] job_applications: No applications for PRO-0308, skipping
-2025-10-09 01:21:20,443 [INFO] job_applications: Processing requisition PRO-0309
-2025-10-09 01:21:20,450 [INFO] job_applications: Found 0 applications with resumes for PRO-0309
-2025-10-09 01:21:20,454 [INFO] job_applications: No applications for PRO-0309, skipping
-2025-10-09 01:21:20,457 [INFO] job_applications: Processing requisition PRO-0310
-2025-10-09 01:21:20,474 [INFO] job_applications: Found 0 applications with resumes for PRO-0310
-2025-10-09 01:21:20,476 [INFO] job_applications: No applications for PRO-0310, skipping
-2025-10-09 01:21:20,482 [INFO] job_applications: Processing requisition PRO-0311
-2025-10-09 01:21:20,495 [INFO] job_applications: Found 0 applications with resumes for PRO-0311
-2025-10-09 01:21:20,506 [INFO] job_applications: No applications for PRO-0311, skipping
-2025-10-09 01:21:20,510 [INFO] job_applications: Processing requisition PRO-0312
-2025-10-09 01:21:20,519 [INFO] job_applications: Found 0 applications with resumes for PRO-0312
-2025-10-09 01:21:20,525 [INFO] job_applications: No applications for PRO-0312, skipping
-2025-10-09 01:21:20,538 [INFO] job_applications: Processing requisition PRO-0313
-2025-10-09 01:21:20,565 [INFO] job_applications: Found 0 applications with resumes for PRO-0313
-2025-10-09 01:21:20,576 [INFO] job_applications: No applications for PRO-0313, skipping
-2025-10-09 01:21:20,584 [INFO] job_applications: Processing requisition PRO-0314
-2025-10-09 01:21:20,617 [INFO] job_applications: Found 0 applications with resumes for PRO-0314
-2025-10-09 01:21:20,626 [INFO] job_applications: No applications for PRO-0314, skipping
-2025-10-09 01:21:20,640 [INFO] job_applications: Processing requisition PRO-0315
-2025-10-09 01:21:20,664 [INFO] job_applications: Found 0 applications with resumes for PRO-0315
-2025-10-09 01:21:20,666 [INFO] job_applications: No applications for PRO-0315, skipping
-2025-10-09 01:21:20,672 [INFO] job_applications: Processing requisition PRO-0316
-2025-10-09 01:21:20,696 [INFO] job_applications: Found 0 applications with resumes for PRO-0316
-2025-10-09 01:21:20,706 [INFO] job_applications: No applications for PRO-0316, skipping
-2025-10-09 01:21:20,717 [INFO] job_applications: Processing requisition PRO-0317
-2025-10-09 01:21:20,736 [INFO] job_applications: Found 0 applications with resumes for PRO-0317
-2025-10-09 01:21:20,762 [INFO] job_applications: No applications for PRO-0317, skipping
-2025-10-09 01:21:20,764 [INFO] job_applications: Processing requisition PRO-0318
-2025-10-09 01:21:20,811 [INFO] job_applications: Found 0 applications with resumes for PRO-0318
-2025-10-09 01:21:20,816 [INFO] job_applications: No applications for PRO-0318, skipping
-2025-10-09 01:21:20,823 [INFO] job_applications: Processing requisition PRO-0319
-2025-10-09 01:21:20,883 [INFO] job_applications: Found 0 applications with resumes for PRO-0319
-2025-10-09 01:21:20,946 [INFO] job_applications: No applications for PRO-0319, skipping
-2025-10-09 01:21:20,994 [INFO] job_applications: Processing requisition PRO-0320
-2025-10-09 01:21:21,066 [INFO] job_applications: Found 0 applications with resumes for PRO-0320
-2025-10-09 01:21:21,072 [INFO] job_applications: No applications for PRO-0320, skipping
-2025-10-09 01:21:21,082 [INFO] job_applications: Processing requisition PRO-0321
-2025-10-09 01:21:21,099 [INFO] job_applications: Found 0 applications with resumes for PRO-0321
-2025-10-09 01:21:21,115 [INFO] job_applications: No applications for PRO-0321, skipping
-2025-10-09 01:21:21,164 [INFO] job_applications: Processing requisition PRO-0322
-2025-10-09 01:21:21,185 [INFO] job_applications: Found 0 applications with resumes for PRO-0322
-2025-10-09 01:21:21,187 [INFO] job_applications: No applications for PRO-0322, skipping
-2025-10-09 01:21:21,200 [INFO] job_applications: Processing requisition PRO-0323
-2025-10-09 01:21:21,222 [INFO] job_applications: Found 0 applications with resumes for PRO-0323
-2025-10-09 01:21:21,231 [INFO] job_applications: No applications for PRO-0323, skipping
-2025-10-09 01:21:21,246 [INFO] job_applications: Processing requisition PRO-0324
-2025-10-09 01:21:21,268 [INFO] job_applications: Found 0 applications with resumes for PRO-0324
-2025-10-09 01:21:21,274 [INFO] job_applications: No applications for PRO-0324, skipping
-2025-10-09 01:21:21,282 [INFO] job_applications: Processing requisition PRO-0325
-2025-10-09 01:21:21,316 [INFO] job_applications: Found 0 applications with resumes for PRO-0325
-2025-10-09 01:21:21,334 [INFO] job_applications: No applications for PRO-0325, skipping
-2025-10-09 01:21:21,351 [INFO] job_applications: Processing requisition PRO-0326
-2025-10-09 01:21:21,362 [INFO] job_applications: Found 0 applications with resumes for PRO-0326
-2025-10-09 01:21:21,364 [INFO] job_applications: No applications for PRO-0326, skipping
-2025-10-09 01:21:21,380 [INFO] job_applications: Processing requisition PRO-0327
-2025-10-09 01:21:21,397 [INFO] job_applications: Found 0 applications with resumes for PRO-0327
-2025-10-09 01:21:21,410 [INFO] job_applications: No applications for PRO-0327, skipping
-2025-10-09 01:21:21,412 [INFO] job_applications: Processing requisition PRO-0328
-2025-10-09 01:21:21,437 [INFO] job_applications: Found 0 applications with resumes for PRO-0328
-2025-10-09 01:21:21,442 [INFO] job_applications: No applications for PRO-0328, skipping
-2025-10-09 01:21:21,447 [INFO] job_applications: Processing requisition PRO-0329
-2025-10-09 01:21:21,455 [INFO] job_applications: Found 0 applications with resumes for PRO-0329
-2025-10-09 01:21:21,462 [INFO] job_applications: No applications for PRO-0329, skipping
-2025-10-09 01:21:21,465 [INFO] job_applications: Processing requisition PRO-0330
-2025-10-09 01:21:21,477 [INFO] job_applications: Found 0 applications with resumes for PRO-0330
-2025-10-09 01:21:21,482 [INFO] job_applications: No applications for PRO-0330, skipping
-2025-10-09 01:21:21,486 [INFO] job_applications: Processing requisition PRO-0331
-2025-10-09 01:21:21,505 [INFO] job_applications: Found 0 applications with resumes for PRO-0331
-2025-10-09 01:21:21,516 [INFO] job_applications: No applications for PRO-0331, skipping
-2025-10-09 01:21:21,518 [INFO] job_applications: Processing requisition PRO-0332
-2025-10-09 01:21:21,539 [INFO] job_applications: Found 0 applications with resumes for PRO-0332
-2025-10-09 01:21:21,550 [INFO] job_applications: No applications for PRO-0332, skipping
-2025-10-09 01:21:21,566 [INFO] job_applications: Processing requisition PRO-0333
-2025-10-09 01:21:21,613 [INFO] job_applications: Found 0 applications with resumes for PRO-0333
-2025-10-09 01:21:21,625 [INFO] job_applications: No applications for PRO-0333, skipping
-2025-10-09 01:21:21,627 [INFO] job_applications: Processing requisition PRO-0334
-2025-10-09 01:21:21,639 [INFO] job_applications: Found 0 applications with resumes for PRO-0334
-2025-10-09 01:21:21,643 [INFO] job_applications: No applications for PRO-0334, skipping
-2025-10-09 01:21:21,644 [INFO] job_applications: Processing requisition PRO-0335
-2025-10-09 01:21:21,653 [INFO] job_applications: Found 0 applications with resumes for PRO-0335
-2025-10-09 01:21:21,658 [INFO] job_applications: No applications for PRO-0335, skipping
-2025-10-09 01:21:21,660 [INFO] job_applications: Processing requisition PRO-0336
-2025-10-09 01:21:21,676 [INFO] job_applications: Found 0 applications with resumes for PRO-0336
-2025-10-09 01:21:21,682 [INFO] job_applications: No applications for PRO-0336, skipping
-2025-10-09 01:21:21,685 [INFO] job_applications: Processing requisition PRO-0337
-2025-10-09 01:21:21,703 [INFO] job_applications: Found 0 applications with resumes for PRO-0337
-2025-10-09 01:21:21,709 [INFO] job_applications: No applications for PRO-0337, skipping
-2025-10-09 01:21:21,715 [INFO] job_applications: Processing requisition PRO-0338
-2025-10-09 01:21:21,734 [INFO] job_applications: Found 0 applications with resumes for PRO-0338
-2025-10-09 01:21:21,742 [INFO] job_applications: No applications for PRO-0338, skipping
-2025-10-09 01:21:21,756 [INFO] job_applications: Processing requisition PRO-0339
-2025-10-09 01:21:21,778 [INFO] job_applications: Found 0 applications with resumes for PRO-0339
-2025-10-09 01:21:21,784 [INFO] job_applications: No applications for PRO-0339, skipping
-2025-10-09 01:21:21,786 [INFO] job_applications: Processing requisition PRO-0340
-2025-10-09 01:21:21,801 [INFO] job_applications: Found 0 applications with resumes for PRO-0340
-2025-10-09 01:21:21,809 [INFO] job_applications: No applications for PRO-0340, skipping
-2025-10-09 01:21:21,815 [INFO] job_applications: Processing requisition PRO-0341
-2025-10-09 01:21:21,823 [INFO] job_applications: Found 0 applications with resumes for PRO-0341
-2025-10-09 01:21:21,826 [INFO] job_applications: No applications for PRO-0341, skipping
-2025-10-09 01:21:21,829 [INFO] job_applications: Processing requisition PRO-0342
-2025-10-09 01:21:21,846 [INFO] job_applications: Found 0 applications with resumes for PRO-0342
-2025-10-09 01:21:21,848 [INFO] job_applications: No applications for PRO-0342, skipping
-2025-10-09 01:21:21,860 [INFO] job_applications: 📊 Daily vetting summary: {'processed_requisitions': 1, 'total_applications_vetted': 1, 'shortlisted_count': 1, 'rejected_count': 0, 'total_time_seconds': 53.09}
-2025-10-09 07:26:14,615 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-09 07:26:14,614 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-09 07:26:14,681 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 07:26:14,709 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 07:26:14,732 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 07:26:14,745 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 07:26:16,369 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-09 07:26:16,484 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 07:26:16,608 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 07:27:45,908 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-10-09 07:27:45,908 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-10-09 07:27:45,921 [DEBUG] celery.utils.functional: 
-def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
-    return 1
-
-2025-10-09 07:27:45,948 [DEBUG] celery.utils.functional: 
-def auto_screen_all_applications():
-    return 1
-
-2025-10-09 07:27:45,951 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-10-09 07:27:45,954 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-10-09 07:27:45,968 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-10-09 07:27:45,970 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-10-09 07:27:45,985 [DEBUG] celery.utils.functional: 
-def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
-    return 1
-
-2025-10-09 07:27:45,986 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-10-09 07:27:46,001 [DEBUG] celery.utils.functional: 
-def chain(*args, **kwargs):
-    return 1
-
-2025-10-09 07:27:46,002 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-10-09 07:27:46,018 [DEBUG] celery.utils.functional: 
-def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
-    return 1
-
-2025-10-09 07:27:46,020 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-10-09 07:27:46,035 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-10-09 07:27:46,059 [DEBUG] celery.utils.functional: 
-def chain(*args, **kwargs):
-    return 1
-
-2025-10-09 07:27:46,051 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
-    return 1
-
-2025-10-09 07:27:46,081 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-10-09 07:27:46,068 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-10-09 07:27:46,098 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-10-09 07:27:46,104 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-10-09 07:27:46,103 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
-    return 1
-
-2025-10-09 07:27:46,113 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-10-09 07:27:46,113 [DEBUG] celery.utils.functional: 
-def auto_screen_all_applications():
-    return 1
-
-2025-10-09 07:27:46,116 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-10-09 07:27:46,127 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-10-09 07:27:46,162 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-10-09 07:27:46,165 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-10-09 07:27:46,175 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-10-09 07:27:46,176 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-10-09 07:27:46,180 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-10-09 07:27:46,183 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-10-09 07:27:46,181 [DEBUG] celery.utils.functional: 
-def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
-    return 1
-
-2025-10-09 07:27:46,186 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-10-09 08:12:10,572 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-09 08:12:10,574 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 08:12:10,596 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 08:12:10,639 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-09 08:12:10,670 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 08:12:10,672 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 08:12:11,109 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-09 08:12:11,118 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 08:12:11,194 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-09 08:13:19,412 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-10-09 08:13:19,403 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-10-09 08:13:19,421 [DEBUG] celery.utils.functional: 
-def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
-    return 1
-
-2025-10-09 08:13:19,416 [DEBUG] celery.utils.functional: 
-def auto_screen_all_applications():
-    return 1
-
-2025-10-09 08:13:19,434 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-10-09 08:13:19,444 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-10-09 08:13:19,444 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-10-09 08:13:19,450 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-10-09 08:13:19,465 [DEBUG] celery.utils.functional: 
-def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
-    return 1
-
-2025-10-09 08:13:19,469 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-10-09 08:13:19,460 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-10-09 08:13:19,472 [DEBUG] celery.utils.functional: 
-def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
-    return 1
-
-2025-10-09 08:13:19,474 [DEBUG] celery.utils.functional: 
-def chain(*args, **kwargs):
-    return 1
-
-2025-10-09 08:13:19,486 [DEBUG] celery.utils.functional: 
-def chain(*args, **kwargs):
-    return 1
-
-2025-10-09 08:13:19,486 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-10-09 08:13:19,490 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-10-09 08:13:19,500 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-10-09 08:13:19,496 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
-    return 1
-
-2025-10-09 08:13:19,510 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-10-09 08:13:19,509 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
-    return 1
-
-2025-10-09 08:13:19,532 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-10-09 08:13:19,548 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-10-09 08:13:19,552 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-10-09 08:13:19,554 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-10-09 08:13:19,539 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-10-09 08:13:19,556 [DEBUG] celery.utils.functional: 
-def auto_screen_all_applications():
-    return 1
-
-2025-10-09 08:13:19,558 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-10-09 08:13:19,566 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-10-09 08:13:19,572 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-10-09 08:13:19,573 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-10-09 08:13:19,583 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-10-09 08:13:19,593 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-10-09 08:13:19,610 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-10-09 08:13:19,615 [DEBUG] celery.utils.functional: 
-def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
-    return 1
-
-2025-10-10 07:04:10,973 [INFO] job_applications: 🚀 Starting daily background CV vetting with full workflow
-2025-10-10 07:04:18,079 [ERROR] job_applications: Error fetching requisitions page: HTTPConnectionPool(host='talent-engine', port=8002): Max retries exceeded with url: /api/talent-engine/requisitions/upcoming/public/jobs/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x789a3ffcc110>: Failed to resolve 'talent-engine' ([Errno -5] No address associated with hostname)"))
-2025-10-10 07:04:18,373 [INFO] job_applications: Total open requisitions fetched: 0
-2025-10-10 07:04:18,697 [INFO] job_applications: No open requisitions found
-2025-10-10 07:45:46,841 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-10 07:45:46,851 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 07:45:46,868 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 07:45:47,511 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-10 07:45:47,513 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 07:45:47,516 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 07:45:47,541 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-10 07:45:47,545 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 07:45:47,552 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 07:47:23,455 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-10-10 07:47:23,463 [DEBUG] celery.utils.functional: 
-def auto_screen_all_applications():
-    return 1
-
-2025-10-10 07:47:23,469 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-10-10 07:47:23,475 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-10-10 07:47:23,480 [DEBUG] celery.utils.functional: 
-def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
-    return 1
-
-2025-10-10 07:47:23,489 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-10-10 07:47:23,494 [DEBUG] celery.utils.functional: 
-def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
-    return 1
-
-2025-10-10 07:47:23,499 [DEBUG] celery.utils.functional: 
-def chain(*args, **kwargs):
-    return 1
-
-2025-10-10 07:47:23,505 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-10-10 07:47:23,510 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
-    return 1
-
-2025-10-10 07:47:23,519 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-10-10 07:47:23,523 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-10-10 07:47:23,528 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-10-10 07:47:23,540 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-10-10 07:47:23,544 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-10-10 07:47:23,549 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-10-10 07:47:23,553 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-10-10 07:47:25,151 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-10-10 07:47:25,212 [DEBUG] celery.utils.functional: 
-def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
-    return 1
-
-2025-10-10 07:47:25,216 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-10-10 07:47:25,223 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-10-10 07:47:25,430 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-10-10 07:47:25,434 [DEBUG] celery.utils.functional: 
-def chain(*args, **kwargs):
-    return 1
-
-2025-10-10 07:47:25,460 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-10-10 07:47:25,463 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-10-10 07:47:25,469 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
-    return 1
-
-2025-10-10 07:47:25,473 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-10-10 07:47:25,479 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-10-10 07:47:25,482 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-10-10 07:47:25,486 [DEBUG] celery.utils.functional: 
-def auto_screen_all_applications():
-    return 1
-
-2025-10-10 07:47:25,493 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-10-10 07:47:25,497 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-10-10 07:47:25,504 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-10-10 07:47:25,509 [DEBUG] celery.utils.functional: 
-def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
-    return 1
-
-2025-10-10 08:18:04,362 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-10 08:18:04,366 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 08:18:04,369 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 08:18:04,651 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-10 08:18:04,717 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 08:18:04,734 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 08:18:05,419 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-10 08:18:05,615 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 08:18:05,891 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 08:19:09,184 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-10-10 08:19:09,184 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-10-10 08:19:09,187 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-10-10 08:19:09,187 [DEBUG] celery.utils.functional: 
-def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
-    return 1
-
-2025-10-10 08:19:09,190 [DEBUG] celery.utils.functional: 
-def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
-    return 1
-
-2025-10-10 08:19:09,190 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-10-10 08:19:09,193 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-10-10 08:19:09,193 [DEBUG] celery.utils.functional: 
-def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
-    return 1
-
-2025-10-10 08:19:09,195 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-10-10 08:19:09,196 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-10-10 08:19:09,198 [DEBUG] celery.utils.functional: 
-def chain(*args, **kwargs):
-    return 1
-
-2025-10-10 08:19:09,198 [DEBUG] celery.utils.functional: 
-def chain(*args, **kwargs):
-    return 1
-
-2025-10-10 08:19:09,201 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-10-10 08:19:09,201 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-10-10 08:19:09,203 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-10-10 08:19:09,204 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-10-10 08:19:09,207 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
-    return 1
-
-2025-10-10 08:19:09,207 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-10-10 08:19:09,210 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-10-10 08:19:09,210 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
-    return 1
-
-2025-10-10 08:19:09,212 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-10-10 08:19:09,213 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-10-10 08:19:09,216 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-10-10 08:19:09,216 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-10-10 08:19:09,218 [DEBUG] celery.utils.functional: 
-def auto_screen_all_applications():
-    return 1
-
-2025-10-10 08:19:09,219 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-10-10 08:19:09,221 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-10-10 08:19:09,222 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-10-10 08:19:09,223 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-10-10 08:19:09,224 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-10-10 08:19:09,226 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-10-10 08:19:09,226 [DEBUG] celery.utils.functional: 
-def auto_screen_all_applications():
-    return 1
-
-2025-10-10 08:19:09,228 [DEBUG] celery.utils.functional: 
-def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
-    return 1
-
-2025-10-10 08:19:09,229 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-10-10 09:42:35,931 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-10 09:42:35,942 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 09:42:35,945 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 09:42:36,302 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-10 09:42:36,306 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 09:42:36,313 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 09:42:36,360 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-10-10 09:42:36,361 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 09:42:36,363 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-10-10 09:43:16,165 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-10-10 09:43:16,165 [DEBUG] celery.utils.functional: 
-def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
-    return 1
-
-2025-10-10 09:43:16,169 [DEBUG] celery.utils.functional: 
-def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
-    return 1
-
-2025-10-10 09:43:16,171 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-10-10 09:43:16,172 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-10-10 09:43:16,174 [DEBUG] celery.utils.functional: 
-def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
-    return 1
-
-2025-10-10 09:43:16,175 [DEBUG] celery.utils.functional: 
-def chain(*args, **kwargs):
-    return 1
-
-2025-10-10 09:43:16,178 [DEBUG] celery.utils.functional: 
-def chain(*args, **kwargs):
-    return 1
-
-2025-10-10 09:43:16,178 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-10-10 09:43:16,181 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-10-10 09:43:16,182 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-10-10 09:43:16,184 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
-    return 1
-
-2025-10-10 09:43:16,184 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-10-10 09:43:16,187 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-10-10 09:43:16,187 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
-    return 1
-
-2025-10-10 09:43:16,190 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-10-10 09:43:16,191 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-10-10 09:43:16,193 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-10-10 09:43:16,195 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-10-10 09:43:16,198 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-10-10 09:43:16,200 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-10-10 09:43:16,201 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-10-10 09:43:16,203 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-10-10 09:43:16,204 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-10-10 09:43:16,206 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-10-10 09:43:16,207 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-10-10 09:43:16,209 [DEBUG] celery.utils.functional: 
-def auto_screen_all_applications():
-    return 1
-
-2025-10-10 09:43:16,210 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-10-10 09:43:16,213 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-10-10 09:43:16,213 [DEBUG] celery.utils.functional: 
-def auto_screen_all_applications():
-    return 1
-
-2025-10-10 09:43:16,216 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-10-10 09:43:16,216 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-10-10 09:43:16,219 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-10-10 09:43:16,222 [DEBUG] celery.utils.functional: 
-def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
-    return 1
-
-2025-10-11 11:04:05,213 [INFO] job_applications: 🚀 Starting daily background CV vetting with full workflow
-2025-10-11 11:04:39,071 [ERROR] job_applications: Error fetching requisitions page: HTTPConnectionPool(host='talent-engine', port=8002): Read timed out. (read timeout=30)
-2025-10-11 11:04:39,113 [INFO] job_applications: Total open requisitions fetched: 0
-2025-10-11 11:04:39,159 [INFO] job_applications: No open requisitions found
+2025-11-04 15:10:44,797 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:44,823 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:44,824 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:44,890 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:44,891 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:44,892 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:44,907 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:44,909 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:44,926 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:44,927 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,007 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,008 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,009 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,029 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,031 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,051 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,052 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,082 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,082 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,083 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,097 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,099 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,124 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,125 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,156 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,156 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,158 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,173 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,175 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,192 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,193 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,247 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,247 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,248 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,263 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,265 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,281 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,281 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,361 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,361 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,362 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,376 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,378 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,394 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,395 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,436 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,437 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,438 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,451 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,453 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,471 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,472 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,515 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,515 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,516 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,534 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,536 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,555 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,556 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,630 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,631 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,632 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,651 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,653 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,678 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,679 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,755 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,756 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,757 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,778 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,780 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,804 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,805 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,848 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,849 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,850 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,871 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,873 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,896 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,897 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:45,935 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:45,936 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:45,937 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,954 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:45,956 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:45,979 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:45,980 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:10:46,055 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:10:46,056 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:10:46,057 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:46,077 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:10:46,079 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:10:46,102 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:10:46,103 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:38:17,039 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:38:17,041 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:38:17,045 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:38:17,903 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:38:17,915 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:38:17,955 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:38:17,955 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:38:18,008 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-04 15:38:18,009 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-04 15:38:18,010 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:38:19,581 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-04 15:38:19,583 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-04 15:38:19,599 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-04 15:38:19,600 [INFO] job_applications: Set schema to: proliance
+2025-11-04 15:38:19,602 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-04 15:38:19,685 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-04 15:38:19,767 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:19,773 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:19,778 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:19,783 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:19,804 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-04 15:38:20,037 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:20,046 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:20,054 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:20,061 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:20,077 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-04 15:38:20,094 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:20,101 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-04 15:38:20,109 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-04 15:38:20,115 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-04 15:38:20,125 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:20,129 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-04 15:38:20,134 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 00:29:35,010 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 00:29:35,012 [INFO] job_applications: No Bearer token provided
+2025-11-05 00:29:35,012 [ERROR] job_applications: Tenant schema or ID missing in JWT: None
+2025-11-05 00:29:35,014 [WARNING] django.request: Forbidden: /
+2025-11-05 00:29:35,014 [WARNING] django.request: Forbidden: /
+2025-11-05 07:59:25,413 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 07:59:25,415 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 07:59:25,419 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 07:59:27,335 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 07:59:27,367 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 07:59:28,234 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 07:59:28,235 [INFO] job_applications: Set schema to: proliance
+2025-11-05 07:59:28,296 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 07:59:28,297 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 07:59:28,298 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 07:59:30,022 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 07:59:30,025 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 07:59:30,046 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 07:59:30,047 [INFO] job_applications: Set schema to: proliance
+2025-11-05 07:59:30,050 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-05 07:59:30,270 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-05 07:59:30,369 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,377 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,386 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,393 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,423 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 07:59:30,670 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,678 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,685 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,694 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,709 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 07:59:30,727 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,735 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 07:59:30,743 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 07:59:30,749 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 07:59:30,760 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,765 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:30,771 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,265 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 07:59:31,266 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 07:59:31,267 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 07:59:31,284 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 07:59:31,286 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 07:59:31,305 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 07:59:31,306 [INFO] job_applications: Set schema to: proliance
+2025-11-05 07:59:31,348 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 07:59:31,349 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 07:59:31,350 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 07:59:31,369 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 07:59:31,371 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 07:59:31,391 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 07:59:31,391 [INFO] job_applications: Set schema to: proliance
+2025-11-05 07:59:31,392 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-05 07:59:31,498 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-05 07:59:31,565 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,570 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,575 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,580 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,601 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 07:59:31,878 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,886 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,894 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,902 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,916 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 07:59:31,936 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,944 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 07:59:31,953 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 07:59:31,960 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 07:59:31,975 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,980 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 07:59:31,984 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:18,130 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:01:18,133 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:01:18,138 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:01:20,214 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:01:20,225 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:01:20,260 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:01:20,261 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:01:20,293 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:01:20,293 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:01:20,294 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:01:20,311 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:01:20,313 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:01:20,351 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:01:20,352 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:01:20,355 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-05 08:01:20,562 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-05 08:01:20,677 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:20,685 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:20,692 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:20,700 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:20,734 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:01:21,152 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:21,161 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:21,170 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:21,178 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:21,199 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:01:21,224 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:21,231 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:01:21,237 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:01:21,242 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:01:21,253 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:21,260 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:01:21,266 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:08,119 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:08:08,122 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:08:08,125 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:12,071 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:08:12,084 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:12,142 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:08:12,143 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:08:12,221 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:08:12,222 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:08:12,223 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:13,282 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:08:13,284 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:13,328 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:08:13,328 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:08:13,331 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-05 08:08:15,503 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-05 08:08:15,585 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,594 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,605 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,617 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,655 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:08:15,835 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,841 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,848 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,854 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,864 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:08:15,897 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,907 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:08:15,912 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:08:15,918 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:08:15,927 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,932 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:15,937 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:16,428 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:08:16,429 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:08:16,432 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:16,723 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:08:16,725 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:16,758 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:08:16,759 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:08:16,801 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:08:16,801 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:08:16,803 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:16,828 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:08:16,830 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:16,864 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:08:16,865 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:08:16,867 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-05 08:08:17,001 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-05 08:08:17,101 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,115 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,127 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,138 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,183 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:08:17,405 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,410 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,415 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,420 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,432 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:08:17,445 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,450 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:08:17,455 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:08:17,460 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:08:17,470 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,475 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:17,480 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:48,617 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:08:48,619 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:08:48,623 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:48,668 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:08:48,679 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:50,005 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:08:50,006 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:08:50,051 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:08:50,051 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:08:50,052 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:52,247 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:08:52,251 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:08:52,275 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:08:52,275 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:08:52,278 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-05 08:08:52,418 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-05 08:08:52,525 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:52,530 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:52,535 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:52,541 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:52,562 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:08:52,979 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:52,988 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:52,998 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:53,009 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:53,043 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:08:53,063 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:53,072 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:08:53,081 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:08:53,089 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:08:53,107 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:53,115 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:08:53,123 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:13,097 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:11:13,099 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:11:13,104 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:11:13,139 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:11:13,151 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:11:15,867 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:11:15,868 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:11:15,938 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:11:15,939 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:11:15,941 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:11:17,101 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:11:17,103 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:11:17,124 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:11:17,125 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:11:17,128 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-05 08:11:17,374 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-05 08:11:17,619 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:17,629 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:17,639 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:17,649 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:17,688 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:11:18,045 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:18,053 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:18,061 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:18,068 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:18,088 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:11:18,107 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:18,114 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:11:18,121 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:11:18,129 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:11:18,149 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:18,160 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:18,168 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:23,727 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:11:23,731 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:11:23,734 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:11:25,570 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:11:25,579 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:11:25,608 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:11:25,609 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:11:25,681 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:11:25,682 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:11:25,683 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:11:25,707 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:11:25,709 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:11:25,738 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:11:25,738 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:11:25,740 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-05 08:11:25,896 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-05 08:11:25,966 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:25,974 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:25,989 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:26,000 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:26,039 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:11:26,306 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:26,312 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:26,318 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:26,330 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:26,346 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:11:26,366 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:26,375 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:11:26,383 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:11:26,390 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:11:26,406 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:26,416 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:11:26,423 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:08,593 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:28:08,596 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:28:08,601 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:28:09,199 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:28:09,212 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:28:09,262 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:28:09,263 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:28:09,326 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:28:09,327 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:28:09,329 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:28:11,573 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:28:11,583 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:28:11,637 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:28:11,637 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:28:11,640 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-05 08:28:16,127 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-05 08:28:16,370 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,384 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,394 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,402 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,431 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:28:16,815 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,828 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,838 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,846 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,875 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:28:16,897 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,904 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:28:16,910 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:28:16,919 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:28:16,933 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,941 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:16,949 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:18,178 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:28:18,179 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:28:18,182 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:28:19,186 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:28:19,201 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:28:19,224 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:28:19,225 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:28:19,268 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-05 08:28:19,269 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4
+2025-11-05 08:28:19,270 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:28:19,298 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/dc3f874ee1ad471e99d35009034c55e4/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-05 08:28:19,301 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-05 08:28:19,330 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/6746c2be-5c36-4e88-9d3d-83374f5157c5/ HTTP/1.1" 200 600
+2025-11-05 08:28:19,331 [INFO] job_applications: Set schema to: proliance
+2025-11-05 08:28:19,333 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-05 08:28:19,451 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=6746c2be-5c36-4e88-9d3d-83374f5157c5&publish_status=True HTTP/1.1" 200 248805
+2025-11-05 08:28:19,524 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,532 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,539 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,547 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,579 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:28:19,875 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,884 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,893 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,901 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,920 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:28:19,939 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,948 [ERROR] job_applications: Error fetching scheduled_by 1: 'request'
+2025-11-05 08:28:19,955 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:28:19,963 [ERROR] job_applications: Error fetching scheduled_by 2: 'request'
+2025-11-05 08:28:19,980 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,988 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
+2025-11-05 08:28:19,996 [ERROR] job_applications: Error fetching scheduled_by 3: 'request'
