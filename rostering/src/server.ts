@@ -33,6 +33,7 @@ import { createDemoRoutes } from './routes/demo.routes';
 
 // Import services
 import { logger, logRequest } from './utils/logger';
+import { CarerService} from './services/carer.service';
 import { GeocodingService } from './services/geocoding.service';
 import { EmailService } from './services/email.service';
 import { MatchingService } from './services/matching.service';
@@ -113,6 +114,19 @@ class RosteringServer {
   private travelMatrixController?: TravelMatrixController;
   private eligibilityController?: EligibilityController;
   private clusterMetricsController?: ClusterMetricsController;
+  private prisma: PrismaClient;
+  private carerService: CarerService;
+  private geocodingService: GeocodingService;
+  private emailService: EmailService;
+  private matchingService: MatchingService;
+  private authSyncService: AuthSyncService;
+  private notificationService: NotificationService;
+  private tenantEmailConfigService: TenantEmailConfigService;
+  private emailWorker: EmailWorker;
+  private requestController: RequestController;
+  private carerController: CarerController;
+  private carePlanController: any;
+  private taskController: any;
 
   constructor() {
     console.log('🔧 [DEBUG] Constructor called');
@@ -127,6 +141,29 @@ class RosteringServer {
     } else {
       logger.info('Initializing swagger-only mode - skipping database and services');
     }
+    this.prisma = new PrismaClient();
+    this.carerService = new CarerService();
+    this.geocodingService = new GeocodingService(this.prisma);
+    this.tenantEmailConfigService = new TenantEmailConfigService(this.prisma);
+    this.notificationService = new NotificationService();
+    this.emailService = new EmailService(this.prisma, this.tenantEmailConfigService, this.notificationService);
+    this.authSyncService = new AuthSyncService(this.prisma, this.geocodingService);
+    this.matchingService = new MatchingService(this.prisma, this.geocodingService);
+    this.emailWorker = new EmailWorker(
+      this.prisma,
+      this.emailService,
+      this.matchingService,
+      this.tenantEmailConfigService,
+      this.notificationService
+    );
+    this.requestController = new RequestController(
+      this.prisma, 
+      this.geocodingService, 
+      this.matchingService
+    );
+    this.carerController = new CarerController(this.carerService);
+    this.carePlanController = new (require('./controllers/careplan.controller').CarePlanController)(this.prisma);
+    this.taskController = new (require('./controllers/task.controller').TaskController)(this.prisma);
 
     console.log('🔧 [DEBUG] Starting middleware setup...');
     this.setupMiddleware();

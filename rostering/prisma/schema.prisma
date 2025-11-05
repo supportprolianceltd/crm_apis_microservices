@@ -54,6 +54,11 @@ model ExternalRequest {
   updatedAt          DateTime  @updatedAt
   processedAt        DateTime?
 
+  // Audit fields
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  processedAt DateTime?
+
   @@index([tenantId])
   @@index([status])
   @@index([urgency])
@@ -100,6 +105,44 @@ model Carer {
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  id        String                                 @id @default(cuid())
+  tenantId  String
+  email     String
+  firstName String
+  lastName  String
+  phone     String?
+  address   String
+  postcode  String
+  country   String? // Country for geocoding
+  location  Unsupported("geography(POINT, 4326)")?
+  latitude  Float?
+  longitude Float?
+
+  // Availability and preferences
+  isActive          Boolean  @default(true)
+  maxTravelDistance Int      @default(10000) // in meters
+  availabilityHours Json? // Flexible JSON structure for availability
+  skills            String[] // Array of skills/specializations
+  languages         String[] // Languages spoken
+
+  // Professional details
+  qualification String?
+  experience    Int? // years of experience
+  hourlyRate    Float?
+
+  // Auth service reference
+  authUserId String? // Reference to user ID in auth service
+
+  // Clustering
+  clusterId String?
+  cluster   Cluster? @relation(fields: [clusterId], references: [id])
+
+  // Relationships
+  // NOTE: removed `matches` relation to RequestCarerMatch because matches now store external carer IDs
+
+  // Audit fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -110,6 +153,24 @@ model Carer {
   @@map("carers")
 }
 
+model ClusterAssignment {
+  id         String   @id @default(cuid())
+  carerId    String // Reference to auth service carer ID
+  clusterId  String
+  tenantId   String
+  assignedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relationships
+  cluster Cluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+
+  @@unique([carerId, tenantId]) // One carer per tenant
+  @@index([carerId])
+  @@index([clusterId])
+  @@index([tenantId])
+  @@index([assignedAt])
+}
+
 model RequestCarerMatch {
   id                 String   @id @default(cuid())
   tenantId           String
@@ -118,6 +179,7 @@ model RequestCarerMatch {
   request            ExternalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   carerId            String
   carer              Carer    @relation(fields: [carerId], references: [id], onDelete: Cascade)
+  carerId String
 
   distance           Float
   matchScore         Float
@@ -205,6 +267,20 @@ model Cluster {
   longitude          Float?
   radiusMeters       Int @default(5000)
 
+  id          String  @id @default(cuid())
+  tenantId    String
+  name        String // e.g., "North London Central", "Birmingham East"
+  description String?
+  postcode    String?
+  location    String
+
+  // Geographic center
+  regionCenter Unsupported("geography(POINT, 4326)")?
+  latitude     Float?
+  longitude    Float?
+  radiusMeters Int                                    @default(5000) // 5km default radius
+
+  // Cluster statistics (auto-updated)
   activeRequestCount Int @default(0)
   totalRequestCount  Int @default(0)
   activeCarerCount   Int @default(0)
@@ -215,6 +291,10 @@ model Cluster {
 
   requests           ExternalRequest[]
   carers             Carer[]
+  // Relationships
+  requests           ExternalRequest[]
+  carers             Carer[]
+  clusterAssignments ClusterAssignment[]
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -603,7 +683,7 @@ model MovingHandling {
 }
 
 model IntakeLog {
-  id               String   @id @default(cuid())
+  id               String  @id @default(cuid())
   tenantId         String
   movingHandlingId String
   time             String
@@ -623,9 +703,61 @@ model CareRequirements {
   careType   String
 
   carePlan   CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  // Normalized schedule: one AgreedCareSchedule per day for this CareRequirements
+  schedules AgreedCareSchedule[]
+
+  carePlan CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([carePlanId])
+}
+
+// Enum for days of week used by AgreedCareSchedule
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model AgreedCareSchedule {
+  id                 String    @id @default(cuid())
+  tenantId           String
+  careRequirementsId String
+  day                DayOfWeek
+  enabled            Boolean   @default(false)
+  lunchStart         String? // e.g. "13:00"
+  lunchEnd           String? // e.g. "14:00"
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  careRequirements CareRequirements @relation(fields: [careRequirementsId], references: [id], onDelete: Cascade)
+  slots            AgreedCareSlot[]
+
+  @@unique([careRequirementsId, day])
+  @@index([tenantId])
+  @@index([careRequirementsId])
+}
+
+model AgreedCareSlot {
+  id         String   @id @default(cuid())
+  scheduleId String
+  // time values stored as HH:MM strings to match frontend payload
+  startTime  String
+  endTime    String
+  externalId String? // original client-provided id like "monday-default-0"
+  position   Int? // ordering index within the day's slots
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  schedule AgreedCareSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleId])
 }
 
 model LegalRequirement {
