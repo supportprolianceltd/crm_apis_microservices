@@ -329,6 +329,7 @@ class TenantSerializer(serializers.ModelSerializer):
     #         logger.error(f"Tenant creation failed: {str(e)}")
     #         raise serializers.ValidationError(f"Tenant creation failed: {str(e)}")
 
+# core/serializers.py - Update the Kafka publishing section
 
     def create(self, validated_data):
         logo_file = validated_data.pop('logo_file', None)
@@ -374,33 +375,51 @@ class TenantSerializer(serializers.ModelSerializer):
                     Module.objects.create(name=module_name, tenant=tenant)
                 logger.info(f"Created modules for tenant {tenant.id}")
 
-                # ✅ FIX: Send Kafka event with explicit domain data
-                try:
-                    producer = KafkaProducer(
-                        bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
-                        value_serializer=lambda v: json.dumps(v).encode('utf-8')
-                    )
-                    event_data = {
-                        'event_type': 'tenant_created',
-                        'tenant_id': str(tenant.id),
-                        'schema_name': tenant.schema_name,
-                        'name': tenant.name,
-                        'title': tenant.title,
-                        'email_host': tenant.email_host,
-                        'domains': [domain_name],  # ✅ Use the domain we just created
-                    }
-                    producer.send('tenant-events', event_data)
-                    producer.flush()
-                    logger.info(f"Sent tenant_created event for tenant {tenant.id}")
-                except Exception as e:
-                    logger.error(f"Kafka publish failed: {str(e)}")
+                # ✅ FIX: Make Kafka publishing async with timeout
+                self._publish_tenant_created_async(tenant, domain_name)
 
                 return tenant
 
         except Exception as e:
             logger.error(f"Tenant creation failed: {str(e)}")
             raise serializers.ValidationError(f"Tenant creation failed: {str(e)}")
-            
+
+    def _publish_tenant_created_async(self, tenant, domain_name):
+        """Publish tenant created event asynchronously"""
+        import threading
+        import time
+        
+        def publish_event():
+            try:
+                producer = KafkaProducer(
+                    bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+                    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                    # ✅ Add timeout configurations
+                    request_timeout_ms=5000,  # 5 second timeout
+                    retries=1,  # Only retry once
+                )
+                event_data = {
+                    'event_type': 'tenant_created',
+                    'tenant_id': str(tenant.id),
+                    'schema_name': tenant.schema_name,
+                    'name': tenant.name,
+                    'title': tenant.title,
+                    'email_host': tenant.email_host,
+                    'domains': [domain_name],
+                }
+                # ✅ Send with timeout
+                future = producer.send('tenant-events', event_data)
+                future.get(timeout=5)  # 5 second timeout
+                producer.flush(timeout=5)
+                logger.info(f"Sent tenant_created event for tenant {tenant.id}")
+            except Exception as e:
+                logger.error(f"Kafka publish failed (async): {str(e)}")
+        
+        # Start async publishing
+        thread = threading.Thread(target=publish_event)
+        thread.daemon = True  # Daemon thread won't block process exit
+        thread.start() 
+
     def update(self, instance, validated_data):
         request = self.context.get('request')
 
