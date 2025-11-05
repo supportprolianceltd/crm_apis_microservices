@@ -1337,25 +1337,26 @@ public async generateOptimizedClusters(
     return this.generateClusterName({ latitude, longitude });
   }
 
-  /**
-   * Update cluster statistics (call this after adding/removing requests or carers)
+/**
+   * Update cluster statistics using ClusterAssignment table
    */
   async updateClusterStats(clusterId: string) {
     try {
+      // Get counts from ClusterAssignment table
       const stats = await this.prisma.$queryRaw<Array<{
-        active_requests: number;
-        total_requests: number;
         active_carers: number;
         total_carers: number;
+        active_requests: number;
+        total_requests: number;
       }>>`
         SELECT 
+          COUNT(ca.id) as active_carers,
+          COUNT(ca.id) as total_carers, -- For now, all assigned carers are considered active
           COUNT(CASE WHEN er.status IN ('PENDING', 'PROCESSING', 'MATCHED') THEN 1 END) as active_requests,
-          COUNT(er.id) as total_requests,
-          COUNT(CASE WHEN c."isActive" = true THEN 1 END) as active_carers,
-          COUNT(c.id) as total_carers
+          COUNT(er.id) as total_requests
         FROM clusters cl
+        LEFT JOIN cluster_assignments ca ON ca."clusterId" = cl.id
         LEFT JOIN external_requests er ON er."clusterId" = cl.id
-        LEFT JOIN carers c ON c."clusterId" = cl.id
         WHERE cl.id = ${clusterId}
         GROUP BY cl.id
       `;
@@ -1377,77 +1378,98 @@ public async generateOptimizedClusters(
     }
   }
 
-  /**
-   * Get available carers in a cluster, with option to include nearby carers
+    /**
+   * Get carer assignments in a cluster (returns assignment IDs, not carer details)
    */
-  async getCarersInCluster(clusterId: string, includeNearby: boolean = false) {
-    let carers = await this.prisma.carer.findMany({
-      where: {
-        clusterId,
-        isActive: true
-      }
+  async getCarerAssignmentsInCluster(clusterId: string) {
+    return await this.prisma.clusterAssignment.findMany({
+      where: { clusterId },
+      include: { cluster: true }
     });
+  }
 
-    // If not enough carers in cluster, find nearby ones
-    if (includeNearby && carers.length < 3) {
-      const cluster = await (this.prisma as any).cluster.findUnique({
+  /**
+   * Get available carer assignments in cluster with optional nearby clusters
+   */
+    async getCarerAssignmentsInClusterWithNearby(
+      clusterId: string, 
+      includeNearby: boolean = false,
+      maxDistanceMeters: number = 10000
+    ) {
+      const cluster = await this.prisma.cluster.findUnique({
         where: { id: clusterId }
       });
 
-      if (cluster && cluster.latitude && cluster.longitude) {
+      if (!cluster || !cluster.latitude || !cluster.longitude) {
+        return await this.getCarerAssignmentsInCluster(clusterId);
+      }
+
+      let assignments = await this.getCarerAssignmentsInCluster(clusterId);
+
+      // If not enough carers in cluster and nearby requested, find nearby assignments
+      if (includeNearby && assignments.length < 3) {
         try {
-          const nearbyCarers = await this.prisma.$queryRaw<any[]>`
-            SELECT c.* 
-            FROM carers c
-            WHERE c."tenantId" = ${cluster.tenantId}
-              AND c."isActive" = true
-              AND (c."clusterId" != ${clusterId} OR c."clusterId" IS NULL)
-              AND c.location IS NOT NULL
+          const nearbyAssignments = await this.prisma.$queryRaw<any[]>`
+            SELECT ca.* 
+            FROM cluster_assignments ca
+            JOIN clusters c ON c.id = ca."clusterId"
+            WHERE ca."clusterId" != ${clusterId}
+              AND ca."tenantId" = ${cluster.tenantId}
+              AND c.latitude IS NOT NULL 
+              AND c.longitude IS NOT NULL
               AND ST_DWithin(
-                c.location::geography,
+                c."regionCenter"::geography,
                 ST_SetSRID(ST_MakePoint(${cluster.longitude}, ${cluster.latitude}), 4326)::geography,
-                c."maxTravelDistance"
+                ${maxDistanceMeters}
               )
             ORDER BY ST_Distance(
-              c.location::geography,
+              c."regionCenter"::geography,
               ST_SetSRID(ST_MakePoint(${cluster.longitude}, ${cluster.latitude}), 4326)::geography
             )
             LIMIT 10
           `;
 
-          carers = [...carers, ...nearbyCarers];
+          assignments = [...assignments, ...nearbyAssignments];
         } catch (error) {
-          console.error('Error finding nearby carers:', error);
+          console.error('Error finding nearby carer assignments:', error);
         }
       }
+
+      return assignments;
     }
 
-    return carers;
-  }
 
   /**
    * Assign a carer to a cluster based on their location
    */
-  async assignCarerToCluster(carerId: string, latitude: number, longitude: number) {
+  async assignCarerToCluster(tenantId: string, carerId: string, latitude: number, longitude: number) {
     try {
-      const carer = await this.prisma.carer.findUnique({
-        where: { id: carerId }
-      });
 
-      if (!carer) {
-        throw new Error('Carer not found');
-      }
 
       const cluster = await this.findOrCreateClusterForLocation(
-        carer.tenantId.toString(),
+        tenantId,
         latitude,
         longitude
       );
 
       if (cluster) {
-        await (this.prisma as any).carer.update({
-          where: { id: carerId },
-          data: { clusterId: cluster.id }
+        await this.prisma.clusterAssignment.upsert({
+        where: {
+          carerId_tenantId: {
+            carerId: carerId,
+            tenantId: tenantId
+          }
+        },
+        update: { 
+          clusterId: cluster.id,
+          updatedAt: new Date()
+        },
+        create: {
+          carerId: carerId,
+          clusterId: cluster.id,
+          tenantId: tenantId,
+          assignedAt: new Date()
+        }
         });
 
         // Update cluster stats
@@ -1488,6 +1510,98 @@ public async generateOptimizedClusters(
         clustersNeedingAttention: needAttention
       }
     };
+  }
+
+  /**
+   * Remove carer from cluster (when they become inactive)
+   */
+  async removeCarerFromCluster(tenantId: string, carerId: string) {
+    const assignment = await this.prisma.clusterAssignment.findUnique({
+      where: { carerId_tenantId: { carerId, tenantId } }
+    });
+
+    if (assignment) {
+      await this.prisma.clusterAssignment.delete({
+        where: { carerId_tenantId: { carerId, tenantId } }
+      });
+      await this.updateClusterStats(assignment.clusterId);
+    }
+  }
+
+  /**
+   * Get carer's current cluster assignment
+   */
+  async getCarerClusterAssignment(tenantId: string, carerId: string) {
+    return await this.prisma.clusterAssignment.findUnique({
+      where: { carerId_tenantId: { carerId, tenantId } },
+      include: { cluster: true }
+    });
+  }
+
+  /**
+   * Move carer from one cluster to another
+   */
+  async moveCarerToCluster(tenantId: string, carerId: string, newClusterId: string) {
+    try {
+      // Verify the new cluster exists and belongs to the same tenant
+      const newCluster = await this.prisma.cluster.findUnique({
+        where: { id: newClusterId }
+      });
+
+      if (!newCluster) {
+        throw new Error('Target cluster not found');
+      }
+
+      if (newCluster.tenantId !== tenantId) {
+        throw new Error('Target cluster does not belong to tenant');
+      }
+
+      // Get current assignment to track which cluster stats to update
+      const currentAssignment = await this.prisma.clusterAssignment.findUnique({
+        where: {
+          carerId_tenantId: {
+            carerId: carerId,
+            tenantId: tenantId
+          }
+        }
+      });
+
+      // Move carer to new cluster
+      const updatedAssignment = await this.prisma.clusterAssignment.upsert({
+        where: {
+          carerId_tenantId: {
+            carerId: carerId,
+            tenantId: tenantId
+          }
+        },
+        update: { 
+          clusterId: newClusterId,
+          updatedAt: new Date()
+        },
+        create: {
+          carerId: carerId,
+          clusterId: newClusterId,
+          tenantId: tenantId,
+          assignedAt: new Date()
+        }
+      });
+
+      // Update stats for both old and new clusters
+      if (currentAssignment) {
+        await this.updateClusterStats(currentAssignment.clusterId); // Old cluster
+      }
+      await this.updateClusterStats(newClusterId); // New cluster
+
+      return {
+        carerId,
+        previousClusterId: currentAssignment?.clusterId || null,
+        newClusterId,
+        message: 'Carer moved to cluster successfully'
+      };
+    } catch (error) {
+      console.error('Error moving carer to cluster:', error);
+      throw error;
+    }
   }
 
   

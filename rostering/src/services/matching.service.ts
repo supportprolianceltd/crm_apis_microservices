@@ -13,10 +13,16 @@ import {
 export class MatchingService {
   private prisma: PrismaClient;
   private geocodingService: GeocodingService;
+  private carerService: any;
 
   constructor(prisma: PrismaClient, geocodingService: GeocodingService) {
     this.prisma = prisma;
     this.geocodingService = geocodingService;
+    // instantiate CarerService for fetching external carer details
+    // require here to avoid circular deps at module load time
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { CarerService } = require('./carer.service');
+    this.carerService = new CarerService();
   }
 
   /**
@@ -97,129 +103,69 @@ export class MatchingService {
 
       logger.debug(`🔍 Searching for carers for tenant: ${request.tenantId}`);
 
-      // First, check if we have any carers at all for this tenant
-      const totalCarers = await this.prisma.carer.count({
-        where: { tenantId: request.tenantId }
-      });
-      logger.debug(`📊 Total carers for tenant ${request.tenantId}: ${totalCarers}`);
+      // We no longer rely on a local `carer` table. Instead, find candidate carer IDs
+      // from `cluster_assignments` and then enrich each carer via the external CarerService.
+      let candidateCarerIds: string[] = [];
 
-      if (totalCarers === 0) {
-        logger.warn(`⚠️ No carers found for tenant ${request.tenantId}`);
-        return [];
-      }
-
-      // Check active carers
-      const activeCarers = await this.prisma.carer.count({
-        where: { 
-          tenantId: request.tenantId,
-          isActive: true
-        }
-      });
-      logger.debug(`✅ Active carers for tenant ${request.tenantId}: ${activeCarers}`);
-
-      if (activeCarers === 0) {
-        logger.warn(`⚠️ No active carers found for tenant ${request.tenantId}`);
-        return [];
-      }
-
-      let carers: any[] = [];
-
-      // If we have coordinates, try PostGIS distance filtering
       if (request.latitude && request.longitude) {
         logger.debug(`🌍 Request has coordinates: ${request.latitude}, ${request.longitude}`);
-        
-        // Check for carers with location data
-        const carersWithLocation = await this.prisma.carer.count({
-          where: { 
-            tenantId: request.tenantId,
-            isActive: true,
-            latitude: { not: null },
-            longitude: { not: null }
-          }
-        });
-        logger.debug(`📍 Carers with location data: ${carersWithLocation}`);
 
-        if (carersWithLocation > 0) {
-          try {
-            logger.debug(`🗺️ Attempting PostGIS distance query within ${maxDistance}m...`);
-            
-            // Use PostGIS with geography columns as per schema
-            const sqlQuery = `
-              SELECT c.*,
-                     ST_Distance(c.location, ST_GeogFromText($2)) as distance_meters
-              FROM carers c
-              WHERE c."tenantId" = $1
-                AND c."isActive" = true
-                AND c.location IS NOT NULL
-                AND ST_DWithin(c.location, ST_GeogFromText($2), $3)
-              ORDER BY ST_Distance(c.location, ST_GeogFromText($2))
-              LIMIT 50
-            `;
+        try {
+          // Find assignments whose cluster center is within maxDistance of the request
+          const rows = await this.prisma.$queryRaw<any[]>`
+            SELECT DISTINCT ca."carerId", ca."clusterId", c.latitude as cluster_lat, c.longitude as cluster_lng
+            FROM cluster_assignments ca
+            JOIN clusters c ON c.id = ca."clusterId"
+            WHERE ca."tenantId" = ${request.tenantId}
+              AND c."regionCenter" IS NOT NULL
+              AND ST_DWithin(c."regionCenter"::geography, ST_SetSRID(ST_MakePoint(${request.longitude}, ${request.latitude}), 4326)::geography, ${maxDistance})
+            LIMIT 500
+          `;
 
-            const pointWKT = `POINT(${request.longitude} ${request.latitude})`;
-            const params = [request.tenantId, pointWKT, maxDistance];
-
-            logger.debug(`🔧 Executing PostGIS query with params: ${JSON.stringify(params)}`);
-
-            carers = await this.prisma.$queryRawUnsafe(sqlQuery, ...params);
-            logger.debug(`✅ PostGIS query found ${carers.length} carers within ${maxDistance}m`);
-
-          } catch (sqlError) {
-            logger.error(`❌ PostGIS query failed:`, sqlError);
-            logger.debug(`🔄 Falling back to coordinate-based distance calculation...`);
-            
-            // Fallback: Get all carers with coordinates and calculate distance in code
-            const allCarersWithCoords = await this.prisma.carer.findMany({
-              where: {
-                tenantId: request.tenantId,
-                isActive: true,
-                latitude: { not: null },
-                longitude: { not: null }
-              }
-            });
-
-            // Calculate distances manually and filter
-            carers = allCarersWithCoords.filter(carer => {
-              if (!carer.latitude || !carer.longitude) return false;
-              
-              const distance = this.calculateDistance(
-                request.latitude, request.longitude,
-                carer.latitude, carer.longitude
-              );
-              
-              // Add distance to carer object for sorting
-              (carer as any).distance_meters = distance;
-              
-              return distance <= maxDistance;
-            }).sort((a, b) => (a as any).distance_meters - (b as any).distance_meters);
-
-            logger.debug(`📏 Manual distance calculation found ${carers.length} carers within ${maxDistance}m`);
-          }
-        } else {
-          logger.warn(`⚠️ No carers have location data for tenant ${request.tenantId}`);
-          // Fall back to all active carers
-          carers = await this.prisma.carer.findMany({
-            where: {
-              tenantId: request.tenantId,
-              isActive: true
-            },
-            take: 50
-          });
-          logger.debug(`📋 Retrieved ${carers.length} active carers (no location filtering)`);
+          candidateCarerIds = rows.map(r => r.carerId).filter((v, i, a) => a.indexOf(v) === i);
+          logger.debug(`🔎 Found ${candidateCarerIds.length} candidate carers from cluster_assignments`);
+        } catch (sqlError) {
+          logger.error('❌ cluster_assignments spatial query failed:', sqlError);
+          logger.debug('🔄 Falling back to retrieving recent assignments...');
+          const rows = await this.prisma.clusterAssignment.findMany({ where: { tenantId: request.tenantId }, take: 500, select: { carerId: true } });
+          candidateCarerIds = rows.map(r => r.carerId);
         }
       } else {
-        logger.debug(`📮 No coordinates available, getting all active carers`);
-        // No coordinates - just get all active carers
-        carers = await this.prisma.carer.findMany({
-          where: {
-            tenantId: request.tenantId,
-            isActive: true,
-            ...(request.postcode ? { postcode: request.postcode } : {})
-          },
-          take: 50
-        });
-        logger.debug(`📋 Retrieved ${carers.length} active carers (postcode: ${request.postcode || 'none'})`);
+        // No coords: get recent assignments for tenant
+        const rows = await this.prisma.clusterAssignment.findMany({ where: { tenantId: request.tenantId }, take: 500, select: { carerId: true } });
+        candidateCarerIds = rows.map(r => r.carerId);
       }
+
+      if (candidateCarerIds.length === 0) {
+        logger.warn(`⚠️ No candidate carer assignments found for tenant ${request.tenantId}`);
+        return [];
+      }
+
+      // Limit the number of external lookups to a reasonable amount
+      const limitedIds = candidateCarerIds.slice(0, 200);
+
+      // Fetch carer details from external service in parallel
+      const carersFromExternal = await Promise.all(limitedIds.map(async (carerId) => {
+        try {
+          const carer = await this.carerService.getCarerById(undefined, carerId);
+          return carer ? { ...carer } : null;
+        } catch (err) {
+          logger.error(`Failed to fetch carer ${carerId} from auth service:`, err);
+          return null;
+        }
+      }));
+
+      // Map external carer objects into the shape expected by matching logic
+      const carers: any[] = carersFromExternal.filter(Boolean).map((c: any) => ({
+        id: c.id?.toString() ?? c.user_id ?? c.auth_user_id ?? null,
+        latitude: c.latitude ?? c.location?.lat ?? c.profile?.location?.lat ?? null,
+        longitude: c.longitude ?? c.location?.lng ?? c.profile?.location?.lng ?? null,
+        skills: c.profile?.professional_qualifications ?? c.skills ?? [],
+        languages: c.profile?.languages ?? c.languages ?? [],
+        maxTravelDistance: c.profile?.maxTravelDistance ?? c.maxTravelDistance ?? c.profile?.max_travel_distance ?? 10000,
+        isActive: (c.status ? c.status === 'active' : true),
+        experience: c.profile?.experience_years ?? c.experience ?? 0
+      })).filter(carer => carer.id !== null);
 
       logger.debug(`🎯 Final result: Found ${carers.length} potential carers for request: ${request.id}`);
       return carers;
