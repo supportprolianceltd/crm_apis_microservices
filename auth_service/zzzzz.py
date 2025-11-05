@@ -3,16 +3,7 @@
 # python manage.py migrate_schemas --shared
 # python manage.py migrate_schemas
 
-#python manage.py shell
-from core.models import Tenant, Domain
-if not Tenant.objects.filter(schema_name='public').exists():
-    tenant = Tenant.objects.create(
-        name='public',
-        schema_name='public',
-    )
-    tenant.auto_create_schema = False
-    tenant.save()Domain.objects.create(tenant=tenant, domain='127.0.0.1', is_primary=True)
-    Domain.objects.create(tenant=tenant, domain='localhost', is_primary=False)
+
 
 from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='appBrew')
@@ -204,9 +195,9 @@ with tenant_context(tenant):
     CustomUser.objects.create_superuser(
         email='support@appbrew.com',
         password='qwerty',
-        role='admin',
-        first_name='Prince',
-        last_name='Godson',
+        role='staff',
+        first_name='Abib',
+        last_name='Achmed',
         job_role=' Frontend Developer',
         tenant=tenant
     )
