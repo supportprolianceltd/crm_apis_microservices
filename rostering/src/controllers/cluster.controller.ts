@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient, RequestStatus } from '@prisma/client';
 import { ClusteringService } from '../services/clustering.service';
+import { CarerService } from '../services/carer.service';
 
 export class ClusterController {
   private clusteringService: ClusteringService;
@@ -19,7 +20,7 @@ export class ClusterController {
         return res.status(403).json({ error: 'tenantId missing from auth context' });
       }
 
-      const { name, description, postcode, latitude, longitude } = req.body;
+      const { name, description, postcode, latitude, longitude, location } = req.body;
 
       if (!name) {
         return res.status(400).json({ error: 'name is required' });
@@ -66,6 +67,7 @@ export class ClusterController {
           postcode: normalizedPostcode,
           latitude: typeof latitude === 'number' ? latitude : null,
           longitude: typeof longitude === 'number' ? longitude : null,
+          location: location,
           radiusMeters: 5000,
           activeRequestCount: 0,
           totalRequestCount: 0,
@@ -137,22 +139,8 @@ export class ClusterController {
             where: { status: { in: ['PENDING', 'PROCESSING', 'MATCHED'] } },
             orderBy: { createdAt: 'desc' },
             take: 10
-          },
-          carers: {
-            where: { isActive: true },
-            take: 10,
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
-              phone: true,
-              skills: true,
-              maxTravelDistance: true,
-              latitude: true,
-              longitude: true
-            }
           }
+          // REMOVED: carers inclusion
         }
       });
 
@@ -160,10 +148,123 @@ export class ClusterController {
         return res.status(404).json({ error: 'Cluster not found' });
       }
 
-      return res.json(cluster);
+      // Get carer assignments from clustering service
+      const assignments = await this.clusteringService.getCarerAssignmentsInCluster(clusterId);
+      
+      // Get carer details from auth service
+      const authHeader = req.headers.authorization as string | undefined;
+      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+      const carerService = new CarerService();
+      
+      const carersWithDetails = await Promise.all(
+        assignments.map(async (assignment) => {
+          const carer = await carerService.getCarerById(token, assignment.carerId);
+          return {
+            assignmentId: assignment.id,
+            carerId: assignment.carerId,
+            assignedAt: assignment.assignedAt,
+            carerDetails: carer ? {
+              id: carer.id,
+              firstName: carer.first_name,
+              lastName: carer.last_name,
+              email: carer.email,
+              phone: carer.profile?.personal_phone || carer.profile?.work_phone || null,
+              skills: carer.profile?.professional_qualifications || [],
+              // Add other fields you need from auth service
+            } : null
+          };
+        })
+      );
+
+      return res.json({
+        ...cluster,
+        carerAssignments: carersWithDetails
+      });
     } catch (error: any) {
       console.error('getClusterDetails error', error);
       return res.status(500).json({ error: 'Failed to fetch cluster details', details: error?.message });
+    }
+  }
+
+  /**
+   * Remove carer from cluster
+   */
+  public async removeCarerFromCluster(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) {
+        return res.status(403).json({ error: 'tenantId missing from auth context' });
+      }
+
+      const { carerId } = req.params;
+
+      await this.clusteringService.removeCarerFromCluster(tenantId.toString(), carerId);
+
+      return res.json({
+        carerId,
+        message: 'Carer removed from cluster successfully'
+      });
+    } catch (error: any) {
+      console.error('removeCarerFromCluster error', error);
+      return res.status(500).json({ error: 'Failed to remove carer from cluster', details: error?.message });
+    }
+  }
+
+  /**
+   * Move carer to different cluster
+   */
+  public async moveCarerToCluster(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) {
+        return res.status(403).json({ error: 'tenantId missing from auth context' });
+      }
+
+      const { carerId } = req.params;
+      const { newClusterId } = req.body;
+
+      if (!newClusterId) {
+        return res.status(400).json({ error: 'newClusterId required in body' });
+      }
+
+      const result = await this.clusteringService.moveCarerToCluster(
+        tenantId.toString(), 
+        carerId, 
+        newClusterId
+      );
+
+      return res.json(result);
+    } catch (error: any) {
+      console.error('moveCarerToCluster error', error);
+      return res.status(500).json({ error: 'Failed to move carer to cluster', details: error?.message });
+    }
+  }
+
+  /**
+   * Get carer's current cluster assignment
+   */
+  public async getCarerClusterAssignment(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) {
+        return res.status(403).json({ error: 'tenantId missing from auth context' });
+      }
+
+      const { carerId } = req.params;
+
+      const assignment = await this.clusteringService.getCarerClusterAssignment(
+        tenantId.toString(), 
+        carerId
+      );
+
+      if (!assignment) {
+        return res.status(404).json({ error: 'Carer cluster assignment not found' });
+      }
+
+      return res.json(assignment);
+    } catch (error: any) {
+      console.error('getCarerClusterAssignment error', error);
+      return res.status(500).json({ error: 'Failed to fetch carer cluster assignment', details: error?.message });
     }
   }
 
@@ -193,24 +294,43 @@ export class ClusterController {
         return res.status(404).json({ error: 'Cluster not found' });
       }
 
-      const carers = await this.clusteringService.getCarersInCluster(clusterId, includeNearby);
+      // Use new method that returns assignments
+      const assignments = await this.clusteringService.getCarerAssignmentsInClusterWithNearby(
+        clusterId, 
+        includeNearby
+      );
+
+      // Get carer details from auth service
+      const authHeader = req.headers.authorization as string | undefined;
+      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+      const carerService = new CarerService();
+      
+      const carersWithDetails = await Promise.all(
+        assignments.map(async (assignment) => {
+          const carer = await carerService.getCarerById(token, assignment.carerId);
+          return {
+            assignmentId: assignment.id,
+            carerId: assignment.carerId,
+            assignedAt: assignment.assignedAt,
+            isInCluster: assignment.clusterId === clusterId,
+            carerDetails: carer ? {
+              id: carer.id,
+              firstName: carer.first_name,
+              lastName: carer.last_name,
+              email: carer.email,
+              phone: carer.profile?.personal_phone || carer.profile?.work_phone || null,
+              skills: carer.profile?.professional_qualifications || [],
+              // Add other fields from auth service
+            } : null
+          };
+        })
+      );
 
       return res.json({
         clusterId,
         clusterName: cluster.name,
         includeNearby,
-        carers: carers.map(carer => ({
-          id: carer.id,
-          firstName: carer.firstName,
-          lastName: carer.lastName,
-          email: carer.email,
-          phone: carer.phone,
-          skills: carer.skills,
-          maxTravelDistance: carer.maxTravelDistance,
-          latitude: carer.latitude,
-          longitude: carer.longitude,
-          isInCluster: carer.clusterId === clusterId
-        }))
+        carerAssignments: carersWithDetails
       });
     } catch (error: any) {
       console.error('getClusterCarers error', error);
@@ -277,16 +397,21 @@ export class ClusterController {
         return res.status(400).json({ error: 'latitude and longitude required in body' });
       }
 
-      // Verify carer belongs to tenant
-      const carer = await (this.prisma as any).carer.findFirst({
-        where: { id: carerId, tenantId: tenantId.toString() }
-      });
+      // Use auth-backed CarerService to validate carer identity and tenant
+      const authHeader = req.headers.authorization as string | undefined;
+      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+      const carerService = new CarerService();
+      const carer = await carerService.getCarerById(token, carerId);
 
       if (!carer) {
-        return res.status(404).json({ error: 'Carer not found' });
+        return res.status(404).json({ error: 'Carer not found in auth service' });
       }
 
-      const cluster = await this.clusteringService.assignCarerToCluster(carerId, latitude, longitude);
+      if (carer.tenantId !== tenantId.toString()) {
+        return res.status(403).json({ error: 'Carer does not belong to tenant' });
+      }
+
+      const cluster = await this.clusteringService.assignCarerToCluster(tenantId.toString(), carerId, latitude, longitude);
 
       return res.json({
         carerId,

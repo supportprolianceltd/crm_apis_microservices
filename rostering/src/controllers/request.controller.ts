@@ -115,7 +115,8 @@ export class RequestController {
         scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
         notes: validatedData.notes,
         status: RequestStatus.PENDING,
-        endToRostering: false
+        // Use the schema field name `sendToRostering` (not `endToRostering`)
+        sendToRostering: false
       };
 
       // If we have a cluster, connect the relation instead of setting clusterId directly
@@ -212,18 +213,48 @@ export class RequestController {
         },
         orderBy: { createdAt: 'desc' },
         include: {
+          // include basic match fields (carer is external — do not try to include relation)
           matches: {
             select: {
               id: true,
               status: true,
               matchScore: true,
-              distance: true
+              distance: true,
+              carerId: true
             },
             orderBy: { matchScore: 'desc' },
             take: 5
           }
         }
       });
+
+      // Enrich matches with external carer details
+      try {
+        // require here to avoid circular imports at module load time
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { CarerService } = require('../services/carer.service');
+        const carerService = new CarerService();
+        const authToken = req.headers?.authorization?.split?.(' ')?.[1];
+
+        await Promise.all(requests.map(async (r: any) => {
+          if (!r.matches || r.matches.length === 0) return;
+          await Promise.all(r.matches.map(async (m: any) => {
+            try {
+              const carer = await carerService.getCarerById(authToken, m.carerId);
+              m.carer = carer ? {
+                id: carer.id,
+                email: carer.email,
+                firstName: carer.firstName || carer.profile?.firstName,
+                lastName: carer.lastName || carer.profile?.lastName
+              } : null;
+            } catch (err) {
+              m.carer = null;
+            }
+          }));
+        }));
+      } catch (err) {
+        logger.warn('Failed to enrich matches with carer data', { err });
+      }
 
       res.json({ success: true, data: requests });
     } catch (error) {
@@ -247,8 +278,12 @@ export class RequestController {
         },
         include: {
           matches: {
-            include: {
-              carer: true
+            select: {
+              id: true,
+              status: true,
+              matchScore: true,
+              distance: true,
+              carerId: true
             },
             orderBy: {
               matchScore: 'desc'
@@ -263,6 +298,32 @@ export class RequestController {
           error: 'Request not found'
         });
         return;
+      }
+
+      // Enrich matches with carer details from external service
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { CarerService } = require('../services/carer.service');
+        const carerService = new CarerService();
+        const authToken = req.headers?.authorization?.split?.(' ')?.[1];
+
+        if (request.matches && request.matches.length > 0) {
+          await Promise.all(request.matches.map(async (m: any) => {
+            try {
+              const carer = await carerService.getCarerById(authToken, m.carerId);
+              m.carer = carer ? {
+                id: carer.id,
+                email: carer.email,
+                firstName: carer.firstName || carer.profile?.firstName,
+                lastName: carer.lastName || carer.profile?.lastName
+              } : null;
+            } catch (err) {
+              m.carer = null;
+            }
+          }));
+        }
+      } catch (err) {
+        logger.warn('Failed to enrich request matches with carer data', { err });
       }
 
       res.json({
@@ -399,14 +460,7 @@ export class RequestController {
                 status: true,
                 matchScore: true,
                 distance: true,
-                carer: {
-                  select: {
-                    id: true,
-                    email: true,
-                    firstName: true,
-                    lastName: true
-                  }
-                }
+                carerId: true
               },
               orderBy: {
                 matchScore: 'desc'
@@ -416,6 +470,33 @@ export class RequestController {
           }
         })
       ]);
+
+        // Enrich results with external carer information
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const { CarerService } = require('../services/carer.service');
+          const carerService = new CarerService();
+          const authToken = req.headers?.authorization?.split?.(' ')?.[1];
+
+          await Promise.all(requests.map(async (r: any) => {
+            if (!r.matches || r.matches.length === 0) return;
+            await Promise.all(r.matches.map(async (m: any) => {
+              try {
+                const carer = await carerService.getCarerById(authToken, m.carerId);
+                m.carer = carer ? {
+                  id: carer.id,
+                  email: carer.email,
+                  firstName: carer.firstName || carer.profile?.firstName,
+                  lastName: carer.lastName || carer.profile?.lastName
+                } : null;
+              } catch (err) {
+                m.carer = null;
+              }
+            }));
+          }));
+        } catch (err) {
+          logger.warn('Failed to enrich listRequests matches with carer data', { err });
+        }
 
       const totalPages = Math.ceil(total / limit);
 

@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 
 import { logger, logRequest } from './utils/logger';
+import { CarerService} from './services/carer.service';
 import { GeocodingService } from './services/geocoding.service';
 import { EmailService } from './services/email.service';
 import { MatchingService } from './services/matching.service';
@@ -32,6 +33,7 @@ dotenv.config();
 class RosteringServer {
   private app: Application;
   private prisma: PrismaClient;
+  private carerService: CarerService;
   private geocodingService: GeocodingService;
   private emailService: EmailService;
   private matchingService: MatchingService;
@@ -47,6 +49,7 @@ class RosteringServer {
   constructor() {
     this.app = express();
     this.prisma = new PrismaClient();
+    this.carerService = new CarerService();
     this.geocodingService = new GeocodingService(this.prisma);
     this.tenantEmailConfigService = new TenantEmailConfigService(this.prisma);
     this.notificationService = new NotificationService();
@@ -65,7 +68,7 @@ class RosteringServer {
       this.geocodingService, 
       this.matchingService
     );
-    this.carerController = new CarerController(this.prisma);
+    this.carerController = new CarerController(this.carerService);
     this.carePlanController = new (require('./controllers/careplan.controller').CarePlanController)(this.prisma);
     this.taskController = new (require('./controllers/task.controller').TaskController)(this.prisma);
 

@@ -7,6 +7,7 @@ import {
   PaginatedResponse,
   Carer
 } from '../types';
+import { CarerService } from '../services/carer.service';
 
 // Validation schemas
 const searchCarersSchema = z.object({
@@ -20,54 +21,39 @@ const searchCarersSchema = z.object({
 });
 
 export class CarerController {
-  private prisma: PrismaClient;
+  private carerService: CarerService;
 
-  constructor(prisma: PrismaClient) {
-    this.prisma = prisma;
+  constructor(carerService: CarerService) {
+    this.carerService = carerService;
   }
 
   /**
    * Get carer by ID (read-only)
    */
-  getCarer = async (req: Request, res: Response): Promise<void> => {
+ getCarer = async (req: Request, res: Response): Promise<void> => {
     try {
       const tenantId = req.user!.tenantId;
       const carerId = req.params.id;
+      const authToken = req.headers.authorization?.replace('Bearer ', '');
 
-      const carer = await this.prisma.carer.findFirst({
-        where: {
-          id: carerId,
-          tenantId
-        },
-        include: {
-          matches: {
-            include: {
-              request: {
-                select: {
-                  id: true,
-                  subject: true,
-                  urgency: true,
-                  status: true,
-                  address: true,
-                  createdAt: true
-                }
-              }
-            },
-            orderBy: {
-              createdAt: 'desc'
-            },
-            take: 10 // Recent matches only
-          }
-        }
-      });
-
-      if (!carer) {
-        res.status(404).json({
-          success: false,
-          error: 'Carer not found'
-        });
+      if (!authToken) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
         return;
       }
+
+      console.log('Fetching carer with ID:', carerId);
+      console.log('Using auth token:', authToken.substring(0, 20) + '...');
+
+      const carer = await this.carerService.getCarerById(authToken, carerId);
+      console.log('Carer service response:', carer);
+
+      if (!carer || carer.tenantId !== tenantId) {
+        res.status(404).json({ success: false, error: 'Carer not found' });
+        return;
+      }
+
+      // TODO: If you need matches, you'll need to query them separately
+      // since they're stored locally but reference carer IDs
 
       res.json({
         success: true,
@@ -75,10 +61,16 @@ export class CarerController {
       });
 
     } catch (error) {
-      logServiceError('Carer', 'getCarer', error, { carerId: req.params.id });
-      res.status(500).json({
-        success: false,
-        error: 'Failed to retrieve carer'
+      console.error('getCarer error:', error);
+      if (error instanceof Error) {
+        console.error('Error stack:', error.stack);
+      } else {
+        console.error('Non-Error thrown:', error);
+      }
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to retrieve carer',
+        details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined
       });
     }
   };
@@ -87,102 +79,93 @@ export class CarerController {
    * Search carers with pagination (read-only)
    */
   searchCarers = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const tenantId = req.user!.tenantId;
-      
-      // Validate query parameters
-      const validatedQuery = searchCarersSchema.parse(req.query);
-
-      const page = validatedQuery.page || 1;
-      const limit = validatedQuery.limit || 20;
-      const skip = (page - 1) * limit;
-
-      // Build where clause
-      const whereClause: any = {
-        tenantId,
-        ...(validatedQuery.isActive !== undefined && { isActive: validatedQuery.isActive }),
-        ...(validatedQuery.postcode && { postcode: { contains: validatedQuery.postcode, mode: 'insensitive' } })
-      };
-
-      // Add skill filtering if specified
-      if (validatedQuery.skills && validatedQuery.skills.length > 0) {
-        whereClause.skills = {
-          hasEvery: validatedQuery.skills
-        };
-      }
-
-      // Add language filtering if specified
-      if (validatedQuery.languages && validatedQuery.languages.length > 0) {
-        whereClause.languages = {
-          hasSome: validatedQuery.languages
-        };
-      }
-
-      // Get total count and data
-      const [total, carers] = await Promise.all([
-        this.prisma.carer.count({ where: whereClause }),
-        this.prisma.carer.findMany({
-          where: whereClause,
-          skip,
-          take: limit,
-          orderBy: [
-            { isActive: 'desc' },
-            { createdAt: 'desc' }
-          ],
-          include: {
-            matches: {
-              select: {
-                id: true,
-                status: true,
-                matchScore: true,
-                distance: true,
-                createdAt: true
-              },
-              orderBy: {
-                createdAt: 'desc'
-              },
-              take: 3 // Only include recent matches in list view
-            }
-          }
-        })
-      ]);
-
-      const totalPages = Math.ceil(total / limit);
-
-      const response: PaginatedResponse<any> = {
-        data: carers, // Remove type assertion since Prisma types don't match exactly
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: totalPages,
-          hasNext: page < totalPages,
-          hasPrev: page > 1
+      try {
+        const tenantId = req.user!.tenantId;
+        const authToken = req.headers.authorization?.replace('Bearer ', '');
+        
+        if (!authToken) {
+          res.status(401).json({ success: false, error: 'Authentication required' });
+          return;
         }
-      };
 
-      res.json({
-        success: true,
-        ...response
-      });
+        // Validate query parameters
+        const validatedQuery = searchCarersSchema.parse(req.query);
 
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({
-          success: false,
-          error: 'Validation error',
-          details: error.errors
+        // Get all carers from auth service
+        const allCarers = await this.carerService.getCarers(authToken, tenantId);
+
+        // Apply filters manually since we're getting all data from auth service
+        let filteredCarers = allCarers;
+
+        if (validatedQuery.postcode) {
+          filteredCarers = filteredCarers.filter(carer => 
+            carer.profile?.zip_code?.includes(validatedQuery.postcode!)
+          );
+        }
+
+        if (validatedQuery.skills && validatedQuery.skills.length > 0) {
+          filteredCarers = filteredCarers.filter(carer =>
+            validatedQuery.skills!.every(skill => 
+              carer.profile?.professional_qualifications?.includes(skill)
+            )
+          );
+        }
+
+        if (validatedQuery.languages && validatedQuery.languages.length > 0) {
+          filteredCarers = filteredCarers.filter(carer =>
+            validatedQuery.languages!.some(language => 
+              // You'd need to add languages to your auth service user model
+              carer.languages?.includes(language)
+            )
+          );
+        }
+
+        if (validatedQuery.isActive !== undefined) {
+          filteredCarers = filteredCarers.filter(carer => 
+            carer.status === (validatedQuery.isActive ? 'active' : 'inactive')
+          );
+        }
+
+        // Paginate results
+        const page = validatedQuery.page || 1;
+        const limit = validatedQuery.limit || 20;
+        const skip = (page - 1) * limit;
+        
+        const paginatedCarers = filteredCarers.slice(skip, skip + limit);
+        const total = filteredCarers.length;
+        const totalPages = Math.ceil(total / limit);
+
+        const response = {
+          data: paginatedCarers,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: totalPages,
+            hasNext: page < totalPages,
+            hasPrev: page > 1
+          }
+        };
+
+        res.json({
+          success: true,
+          ...response
         });
-        return;
-      }
 
-      logServiceError('Carer', 'searchCarers', error, { tenantId: req.user?.tenantId });
-      res.status(500).json({
-        success: false,
-        error: 'Failed to search carers'
-      });
-    }
-  };
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          res.status(400).json({
+            success: false,
+            error: 'Validation error',
+            details: error.errors
+          });
+          return;
+        }
+
+        console.error('searchCarers error:', error);
+        res.status(500).json({ success: false, error: 'Failed to search carers' });
+      }
+    };
 
   /**
    * Get carer availability (read-only)
@@ -191,47 +174,38 @@ export class CarerController {
     try {
       const tenantId = req.user!.tenantId;
       const carerId = req.params.id;
+      const authToken = req.headers.authorization?.replace('Bearer ', '');
 
-      const carer = await this.prisma.carer.findFirst({
-        where: {
-          id: carerId,
-          tenantId
-        },
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          isActive: true,
-          availabilityHours: true,
-          maxTravelDistance: true,
-          skills: true,
-          languages: true
-        }
-      });
+      if (!authToken) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
 
-      if (!carer) {
-        res.status(404).json({
-          success: false,
-          error: 'Carer not found'
-        });
+      const carer = await this.carerService.getCarerById(authToken, carerId);
+
+      if (!carer || carer.tenantId !== tenantId) {
+        res.status(404).json({ success: false, error: 'Carer not found' });
         return;
       }
 
       res.json({
         success: true,
         data: {
-          ...carer,
-          availability: carer.availabilityHours || null
+          id: carer.id,
+          firstName: carer.first_name,
+          lastName: carer.last_name,
+          email: carer.email,
+          isActive: carer.status === 'active',
+          availability: carer.profile?.availability || null,
+          maxTravelDistance: carer.profile?.max_travel_distance || null,
+          skills: carer.profile?.professional_qualifications || [],
+          languages: carer.languages || []
         }
       });
 
     } catch (error) {
-      logServiceError('Carer', 'getCarerAvailability', error, { carerId: req.params.id });
-      res.status(500).json({
-        success: false,
-        error: 'Failed to retrieve carer availability'
-      });
+      console.error('getCarerAvailability error:', error);
+      res.status(500).json({ success: false, error: 'Failed to retrieve carer availability' });
     }
   };
 

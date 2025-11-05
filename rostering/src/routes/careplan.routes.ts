@@ -15,5 +15,8 @@ export function createCarePlanRoutes(controller: CarePlanController) {
   // Get care plans by carerId
   router.get('/carer/:carerId', (req, res) => controller.getCarePlansByCarer(req, res));
 
+  // Update an existing care plan (upsert careRequirements + schedules/slots when provided)
+  router.patch('/:id', (req, res) => controller.updateCarePlan(req, res));
+
   return router;
 }
