@@ -645,7 +645,6 @@ class TenantViewSet(viewsets.ModelViewSet):
             return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class PublicTenantInfoView(APIView):
     permission_classes = [AllowAny]
 

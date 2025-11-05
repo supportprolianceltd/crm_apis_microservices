@@ -258,6 +258,79 @@ class TenantSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Logo file size exceeds 5 MB limit.")
         return value
 
+    # def create(self, validated_data):
+    #     logo_file = validated_data.pop('logo_file', None)
+    #     domain_name = validated_data.pop('domain')
+    #     schema_name = validated_data.get('schema_name') or validated_data['name'].lower().replace(' ', '_').replace('-', '_')
+    #     validated_data['schema_name'] = schema_name
+
+    #     logger.info(f"Creating tenant: {validated_data['name']} | Schema: {schema_name} | Domain: {domain_name}")
+
+    #     try:
+    #         with transaction.atomic():
+    #             # Create tenant
+    #             tenant = Tenant.objects.create(**validated_data)
+
+    #             # Create primary domain
+    #             Domain.objects.create(tenant=tenant, domain=domain_name, is_primary=True)
+
+    #             # Upload logo if provided
+    #             if logo_file:
+    #                 file_ext = os.path.splitext(logo_file.name)[1]
+    #                 filename = f"{uuid.uuid4()}{file_ext}"
+    #                 folder_path = f"tenant_logos/{timezone.now().strftime('%Y/%m/%d')}"
+    #                 path = f"{folder_path}/{filename}"
+    #                 content_type = mimetypes.guess_type(logo_file.name)[0]
+    #                 storage = get_storage_service()
+    #                 storage.upload_file(logo_file, path, content_type or 'application/octet-stream')
+    #                 tenant.logo = storage.get_public_url(path)
+    #                 tenant.save()
+    #                 logger.info(f"Uploaded logo for tenant {tenant.id}")
+
+    #             # Create tenant config
+    #             TenantConfig.objects.create(
+    #                 tenant=tenant,
+    #                 email_templates=default_templates
+    #             )
+
+    #             # Create default modules
+    #             default_modules = [
+    #                 'Talent Engine', 'Compliance', 'Training', 'Care Coordination',
+    #                 'Workforce', 'Analytics', 'Integrations', 'Assets Management', 'Payroll'
+    #             ]
+    #             for module_name in default_modules:
+    #                 Module.objects.create(name=module_name, tenant=tenant)
+    #             logger.info(f"Created modules for tenant {tenant.id}")
+
+    #             # Send Kafka event
+    #             try:
+    #                 producer = KafkaProducer(
+    #                     bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+    #                     value_serializer=lambda v: json.dumps(v).encode('utf-8')
+    #                 )
+    #                 event_data = {
+    #                     'event_type': 'tenant_created',
+    #                     'tenant_id': str(tenant.id),
+    #                     'schema_name': tenant.schema_name,
+    #                     'name': tenant.name,
+    #                     'title': tenant.title,
+    #                     'email_host': tenant.email_host,
+    #                     'domains': [d.domain for d in tenant.domain_set.all()],
+    #                 }
+    #                 producer.send('tenant-events', event_data)
+    #                 producer.flush()
+    #                 logger.info(f"Sent tenant_created event for tenant {tenant.id}")
+    #             except Exception as e:
+    #                 logger.error(f"Kafka publish failed: {str(e)}")
+
+    #             return tenant
+
+    #     except Exception as e:
+    #         logger.error(f"Tenant creation failed: {str(e)}")
+    #         raise serializers.ValidationError(f"Tenant creation failed: {str(e)}")
+
+# core/serializers.py - Update the Kafka publishing section
+
     def create(self, validated_data):
         logo_file = validated_data.pop('logo_file', None)
         domain_name = validated_data.pop('domain')
@@ -272,7 +345,7 @@ class TenantSerializer(serializers.ModelSerializer):
                 tenant = Tenant.objects.create(**validated_data)
 
                 # Create primary domain
-                Domain.objects.create(tenant=tenant, domain=domain_name, is_primary=True)
+                domain = Domain.objects.create(tenant=tenant, domain=domain_name, is_primary=True)
 
                 # Upload logo if provided
                 if logo_file:
@@ -302,26 +375,8 @@ class TenantSerializer(serializers.ModelSerializer):
                     Module.objects.create(name=module_name, tenant=tenant)
                 logger.info(f"Created modules for tenant {tenant.id}")
 
-                # Send Kafka event
-                try:
-                    producer = KafkaProducer(
-                        bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
-                        value_serializer=lambda v: json.dumps(v).encode('utf-8')
-                    )
-                    event_data = {
-                        'event_type': 'tenant_created',
-                        'tenant_id': str(tenant.id),
-                        'schema_name': tenant.schema_name,
-                        'name': tenant.name,
-                        'title': tenant.title,
-                        'email_host': tenant.email_host,
-                        'domains': [d.domain for d in tenant.domain_set.all()],
-                    }
-                    producer.send('tenant-events', event_data)
-                    producer.flush()
-                    logger.info(f"Sent tenant_created event for tenant {tenant.id}")
-                except Exception as e:
-                    logger.error(f"Kafka publish failed: {str(e)}")
+                # ✅ FIX: Make Kafka publishing async with timeout
+                self._publish_tenant_created_async(tenant, domain_name)
 
                 return tenant
 
@@ -329,7 +384,42 @@ class TenantSerializer(serializers.ModelSerializer):
             logger.error(f"Tenant creation failed: {str(e)}")
             raise serializers.ValidationError(f"Tenant creation failed: {str(e)}")
 
-            
+    def _publish_tenant_created_async(self, tenant, domain_name):
+        """Publish tenant created event asynchronously"""
+        import threading
+        import time
+        
+        def publish_event():
+            try:
+                producer = KafkaProducer(
+                    bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+                    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                    # ✅ Add timeout configurations
+                    request_timeout_ms=5000,  # 5 second timeout
+                    retries=1,  # Only retry once
+                )
+                event_data = {
+                    'event_type': 'tenant_created',
+                    'tenant_id': str(tenant.id),
+                    'schema_name': tenant.schema_name,
+                    'name': tenant.name,
+                    'title': tenant.title,
+                    'email_host': tenant.email_host,
+                    'domains': [domain_name],
+                }
+                # ✅ Send with timeout
+                future = producer.send('tenant-events', event_data)
+                future.get(timeout=5)  # 5 second timeout
+                producer.flush(timeout=5)
+                logger.info(f"Sent tenant_created event for tenant {tenant.id}")
+            except Exception as e:
+                logger.error(f"Kafka publish failed (async): {str(e)}")
+        
+        # Start async publishing
+        thread = threading.Thread(target=publish_event)
+        thread.daemon = True  # Daemon thread won't block process exit
+        thread.start() 
+
     def update(self, instance, validated_data):
         request = self.context.get('request')
 

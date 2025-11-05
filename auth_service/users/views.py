@@ -789,7 +789,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     permission_classes = [IsAuthenticated]
-    # pagination_class = CustomPagination
+    pagination_class = CustomPagination
 
     def get_base_queryset(self):
         """DRY helper for tenant-filtered queryset with role-based access, excluding clients."""
