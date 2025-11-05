@@ -10,7 +10,7 @@ export class ClusteringService {
     tenantId: string,
     latitude: number,
     longitude: number,
-    maxDistanceMeters: number = 5000
+    maxDistanceMeters: number = 500
   ) {
     try {
       // Find nearest existing cluster using PostGIS
