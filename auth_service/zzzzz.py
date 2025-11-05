@@ -57,14 +57,14 @@ with tenant_context(tenant):
 
 
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='proliance')
+tenant = Tenant.objects.get(schema_name='appbrew')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='david.dappa@prolianceltd.com',
+        email='supporta@appbrew.com',
         password='qwerty',
-        role='admin',
-        first_name='David',
-        last_name='Dappa',
+        role='root-admin',
+        first_name='Ekene',
+        last_name='Hanson',
         job_role='Frontend Developer',
         tenant=tenant
     )
@@ -130,7 +130,7 @@ if not Tenant.objects.filter(schema_name='rodrimine').exists():
     tenant = Tenant.objects.create(
         name='rodrimine',
         schema_name='rodrimine',
-        status="suspended"
+        status="active"
     )
     tenant.auto_create_schema = False
     tenant.save()
