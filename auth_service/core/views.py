@@ -1,49 +1,86 @@
+# core/views.py
 import jwt
 import logging
+from django_tenants.utils import get_public_schema_name
 from django.conf import settings
 from django.db import transaction, connection
-from django_tenants.utils import tenant_context
+from django_tenants.utils import tenant_context, schema_context
 from cryptography.hazmat.primitives import serialization
-from core.utils.kafka_producer import publish_event  # Adjust path if needed
-from core.utils.notifications import  send_notification_event
-
+from core.utils.kafka_producer import publish_event
+from core.utils.notifications import send_notification_event
+from django.db.models import Count
+from django.utils import timezone
+from django.db.models import Q
+from django.core.exceptions import PermissionDenied
 from rest_framework import viewsets, status, serializers, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.pagination import PageNumberPagination
-
-
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.decorators import action
+from datetime import timedelta
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from users.models import RSAKeyPair
-from core.models import Tenant
-
-from .models import (
-    Domain,
-    Module,
-    TenantConfig,
-    Branch
+from core.models import (
+    Tenant, Domain, Module, TenantConfig, Branch, GlobalActivity
 )
-
 from .serializers import (
-    TenantSerializer,
-    ModuleSerializer,
-    TenantConfigSerializer,
-    BranchSerializer,
-    PublicTenantSerializer,
+    TenantSerializer, ModuleSerializer, TenantConfigSerializer, 
+    BranchSerializer, PublicTenantSerializer, GlobalActivitySerializer
 )
+from django.db.models import Prefetch
 
 logger = logging.getLogger(__name__)
-
-
 
 class CustomPagination(PageNumberPagination):
     page_size = 20
 
+    def get_next_link(self):
+        if not self.page.has_next():
+            return None
+        gateway_url = getattr(settings, 'GATEWAY_URL', None)
+        if not gateway_url:
+            return super().get_next_link()
+
+        request = self.request
+        path = request.path
+        query_params = request.query_params.copy()
+        query_params['page'] = self.page.next_page_number()
+        query_string = urlencode(query_params, doseq=True)
+
+        parsed_gateway = urlparse(gateway_url)
+        full_url = f"{parsed_gateway.scheme}://{parsed_gateway.netloc}{path}?{query_string}"
+        return full_url
+
+    def get_previous_link(self):
+        if not self.page.has_previous():
+            return None
+        gateway_url = getattr(settings, 'GATEWAY_URL', None)
+        if not gateway_url:
+            return super().get_previous_link()
+
+        request = self.request
+        path = request.path
+        query_params = request.query_params.copy()
+        query_params['page'] = self.page.previous_page_number()
+        query_string = urlencode(query_params, doseq=True)
+
+        parsed_gateway = urlparse(gateway_url)
+        full_url = f"{parsed_gateway.scheme}://{parsed_gateway.netloc}{path}?{query_string}"
+        return full_url
+
+    def get_paginated_response(self, data):
+        response = super().get_paginated_response(data)
+        gateway_url = getattr(settings, 'GATEWAY_URL', None)
+        if gateway_url:
+            response['next'] = self.get_next_link()
+            response['previous'] = self.get_previous_link()
+        return response
+
 class IsSuperUser(IsAuthenticated):
     def has_permission(self, request, view):
         return super().has_permission(request, view) and request.user.is_superuser
-
-
 
 class BranchListCreateView(generics.ListCreateAPIView):
     serializer_class = BranchSerializer
@@ -234,7 +271,7 @@ class TenantConfigView(APIView):
                     'interviewScheduling': {
                         'content': (
                             'Hello [Candidate Name],\n\n'
-                            'We’re pleased to invite you to an interview for the [Position] role at [Company].\n'
+                            'We\'re pleased to invite you to an interview for the [Position] role at [Company].\n'
                             'Please let us know your availability so we can confirm a convenient time.\n\n'
                             'Best regards,\n[Your Name]'
                         ),
@@ -261,7 +298,7 @@ class TenantConfigView(APIView):
                     'interviewAcceptance': {
                         'content': (
                             'Hello [Candidate Name],\n\n'
-                            'Congratulations! We are moving you to the next stage. We’ll follow up with next steps.\n\n'
+                            'Congratulations! We are moving you to the next stage. We\'ll follow up with next steps.\n\n'
                             'Looking forward,\n[Your Name]'
                         ),
                         'is_auto_sent': False
@@ -269,7 +306,7 @@ class TenantConfigView(APIView):
                     'jobRejection': {
                         'content': (
                             'Hello [Candidate Name],\n\n'
-                            'Thank you for applying. Unfortunately, we’ve chosen another candidate at this time.\n\n'
+                            'Thank you for applying. Unfortunately, we\'ve chosen another candidate at this time.\n\n'
                             'Kind regards,\n[Your Name]'
                         ),
                         'is_auto_sent': False
@@ -277,7 +314,7 @@ class TenantConfigView(APIView):
                     'jobAcceptance': {
                         'content': (
                             'Hello [Candidate Name],\n\n'
-                            'We’re excited to offer you the [Position] role at [Company]! '
+                            'We\'re excited to offer you the [Position] role at [Company]! '
                             'Please find the offer letter attached.\n\n'
                             'Welcome aboard!\n[Your Name]'
                         ),
@@ -338,226 +375,20 @@ class TenantConfigView(APIView):
                 logger.error(f"Error creating tenant config for tenant {tenant.schema_name}: {str(e)}")
                 return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-
-
-
-
-# class TenantViewSet(viewsets.ModelViewSet):
-#     queryset = Tenant.objects.all()
-#     serializer_class = TenantSerializer
-#     permission_classes = [IsAuthenticated]
-#     pagination_class = CustomPagination
-
-#     def get_permissions(self):
-#         """
-#         Restrict list action to superusers only; other actions require IsAuthenticated.
-#         """
-#         if self.action == 'list':
-#             return [IsSuperUser()]
-#         return [IsAuthenticated()]
-
-#     def get_object(self):
-#         unique_id = self.kwargs.get('pk')  # DRF still calls it 'pk' even if it's UUID
-#         try:
-#             return Tenant.objects.get(unique_id=unique_id)
-#         except Tenant.DoesNotExist:
-#             raise serializers.ValidationError("Tenant not found with this unique ID.")
-
-#     def get_tenant(self, request):
-#         try:
-#             if hasattr(request.user, 'tenant') and request.user.tenant:
-#                 logger.debug(f"Tenant from user: {request.user.tenant.schema_name}")
-#                 return request.user.tenant
-#             auth_header = request.headers.get('Authorization', '')
-#             if not auth_header.startswith('Bearer '):
-#                 logger.warning("No valid Bearer token provided")
-#                 raise ValueError("Invalid token format")
-#             token = auth_header.split(' ')[1]
-#             # Decode token to get tenant_id or schema_name without signature verification
-#             decoded_token = jwt.decode(token, options={"verify_signature": False})
-#             tenant_id = decoded_token.get('tenant_id')
-#             schema_name = decoded_token.get('tenant_schema')
-#             if not tenant_id and not schema_name:
-#                 logger.warning("No tenant_id or schema_name in token")
-#                 raise ValueError("Tenant not specified in token")
-            
-#             # Fetch tenant
-#             if tenant_id:
-#                 tenant = Tenant.objects.get(id=tenant_id)
-#             else:
-#                 tenant = Tenant.objects.get(schema_name=schema_name)
-            
-#             # Verify token signature using RSA public key
-#             keypair = RSAKeyPair.objects.filter(tenant=tenant, active=True).first()
-#             if not keypair:
-#                 logger.error(f"No active RSA keypair found for tenant {tenant.schema_name}")
-#                 raise serializers.ValidationError("No active keypair for tenant")
-#             public_key = serialization.load_pem_public_key(keypair.public_key_pem.encode())
-#             jwt.decode(token, public_key, algorithms=["RS256"])
-            
-#             logger.debug(f"Tenant extracted from token: {tenant.schema_name}")
-#             return tenant
-#         except Tenant.DoesNotExist:
-#             logger.error("Tenant not found")
-#             raise serializers.ValidationError("Tenant not found")
-#         except jwt.InvalidTokenError:
-#             logger.error("Invalid JWT token")
-#             raise serializers.ValidationError("Invalid token")
-#         except Exception as e:
-#             logger.error(f"Error extracting tenant: {str(e)}")
-#             raise serializers.ValidationError(f"Error extracting tenant: {str(e)}")
-
-#     def get_queryset(self):
-#         """
-#         Return all tenants for the list action; otherwise, filter by the authenticated user's tenant.
-#         """
-#         if self.action == 'list':
-#             logger.debug("Returning all tenants for list action")
-#             return Tenant.objects.all()
-#         tenant = self.get_tenant(self.request)
-#         logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
-#         connection.set_schema(tenant.schema_name)
-#         with connection.cursor() as cursor:
-#             cursor.execute("SHOW search_path;")
-#             search_path = cursor.fetchone()[0]
-#             logger.debug(f"Database search_path: {search_path}")
-#         return Tenant.objects.filter(id=tenant.id)
-
-
-
-
-#     # def perform_create(self, serializer):
-#     #     original_schema = connection.schema_name
-#     #     try:
-#     #         connection.set_schema('public')
-#     #         with transaction.atomic():
-#     #             new_tenant = serializer.save()
-#     #             logger.info(f"Tenant created: {new_tenant.name} (schema: {new_tenant.schema_name})")
-#     #     except Exception as e:
-#     #         logger.error(f"Failed to create tenant: {str(e)}")
-#     #         raise serializers.ValidationError(f"Failed to create tenant: {str(e)}")
-#     #     finally:
-#     #         connection.set_schema(original_schema)
-#     def perform_create(self, serializer):
-#         original_schema = connection.schema_name
-#         try:
-#             connection.set_schema('public')
-#             with transaction.atomic():
-#                 new_tenant = serializer.save()
-#                 logger.info(f"Tenant created: {new_tenant.name} (schema: {new_tenant.schema_name})")
-                
-#                 # Publish Kafka event with tenant details
-#                 tenant_data = TenantSerializer(new_tenant).data  # Serialize to dict
-#                 publish_event(
-#                     settings.KAFKA_TOPIC_TENANT_EVENTS,
-#                     {
-#                         'event_type': 'tenant_created',
-#                         'tenant_id': str(new_tenant.unique_id),
-#                         'data': tenant_data
-#                     }
-#                 )
-#         except Exception as e:
-#             logger.error(f"Failed to create tenant: {str(e)}")
-#             raise serializers.ValidationError(f"Failed to create tenant: {str(e)}")
-#         finally:
-#             connection.set_schema(original_schema)
-
-
-
-#     def list(self, request, *args, **kwargs):
-#         try:
-#             queryset = self.get_queryset()
-#             page = self.paginate_queryset(queryset)
-#             if page is not None:
-#                 serializer = self.get_serializer(page, many=True)
-#                 logger.info(f"Listing paginated tenants: {[t['id'] for t in serializer.data]}")
-#                 return self.get_paginated_response(serializer.data)
-#             serializer = self.get_serializer(queryset, many=True)
-#             logger.info(f"Listing all tenants: {[t['id'] for t in serializer.data]}")
-#             return Response(serializer.data)
-#         except Exception as e:
-#             logger.error(f"Error listing tenants: {str(e)}")
-#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#     def retrieve(self, request, *args, **kwargs):
-#         tenant = self.get_tenant(request)
-#         instance = self.get_object()
-#         # if instance.id != tenant.id:
-#         #     logger.warning(f"Unauthorized access attempt to tenant {instance.id} by tenant {tenant.id}")
-#         #     return Response({"detail": "Not authorized to access this tenant"}, status=status.HTTP_403_FORBIDDEN)
-#         serializer = self.get_serializer(instance)
-#         logger.info(f"Retrieving tenant: {instance.id} for tenant {tenant.schema_name}")
-#         return Response(serializer.data)
-
-
-
-#     def perform_destroy(self, instance):
-#         tenant = self.get_tenant(self.request)
-#         if instance.id != tenant.id:
-#             logger.error(f"Unauthorized delete attempt on tenant {instance.id} by tenant {tenant.id}")
-#             raise serializers.ValidationError("Not authorized to delete this tenant")
-#         with tenant_context(tenant):
-#             instance.delete()
-#         logger.info(f"Tenant deleted: {instance.name} for tenant {tenant.schema_name}")
-
-#     def create(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         self.perform_create(serializer)
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-#     def perform_update(self, serializer):
-#         instance = self.get_object()
-#         tenant = self.get_tenant(self.request)
-
-#         # Optional: only allow tenant owners or superusers
-#         if instance.id != tenant.id and not self.request.user.is_superuser:
-#             raise serializers.ValidationError("Not authorized to update this tenant")
-
-#         # Use tenant context for schema switching
-#         with tenant_context(tenant):
-#             serializer.save()
-#         logger.info(f"Tenant updated: {instance.name} for tenant {tenant.schema_name}")
-
-#     def update(self, request, *args, **kwargs):
-#         partial = kwargs.pop('partial', False)
-#         instance = self.get_object()
-#         tenant = self.get_tenant(request)
-
-#         # Pass request to serializer context for file handling
-#         serializer = self.get_serializer(
-#             instance, 
-#             data=request.data, 
-#             partial=partial, 
-#             context={'request': request}  # ensure request is available
-#         )
-#         serializer.is_valid(raise_exception=True)
-
-#         # Use tenant context when saving
-#         with tenant_context(tenant):
-#             serializer.save()
-
-#         return Response(serializer.data)
-
-
-
 class TenantViewSet(viewsets.ModelViewSet):
     queryset = Tenant.objects.all()
     serializer_class = TenantSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPagination
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_permissions(self):
-        """
-        Restrict list action to superusers only; other actions require IsAuthenticated.
-        """
         if self.action == 'list':
             return [IsSuperUser()]
         return [IsAuthenticated()]
 
     def get_object(self):
-        unique_id = self.kwargs.get('pk')  # DRF still calls it 'pk' even if it's UUID
+        unique_id = self.kwargs.get('pk')
         try:
             return Tenant.objects.get(unique_id=unique_id)
         except Tenant.DoesNotExist:
@@ -573,7 +404,6 @@ class TenantViewSet(viewsets.ModelViewSet):
                 logger.warning("No valid Bearer token provided")
                 raise ValueError("Invalid token format")
             token = auth_header.split(' ')[1]
-            # Decode token to get tenant_id or schema_name without signature verification
             decoded_token = jwt.decode(token, options={"verify_signature": False})
             tenant_id = decoded_token.get('tenant_id')
             schema_name = decoded_token.get('tenant_schema')
@@ -581,13 +411,11 @@ class TenantViewSet(viewsets.ModelViewSet):
                 logger.warning("No tenant_id or schema_name in token")
                 raise ValueError("Tenant not specified in token")
             
-            # Fetch tenant
             if tenant_id:
                 tenant = Tenant.objects.get(id=tenant_id)
             else:
                 tenant = Tenant.objects.get(schema_name=schema_name)
             
-            # Verify token signature using RSA public key
             keypair = RSAKeyPair.objects.filter(tenant=tenant, active=True).first()
             if not keypair:
                 logger.error(f"No active RSA keypair found for tenant {tenant.schema_name}")
@@ -608,9 +436,6 @@ class TenantViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError(f"Error extracting tenant: {str(e)}")
 
     def get_queryset(self):
-        """
-        Return all tenants for the list action; otherwise, filter by the authenticated user's tenant.
-        """
         if self.action == 'list':
             logger.debug("Returning all tenants for list action")
             return Tenant.objects.all()
@@ -630,6 +455,19 @@ class TenantViewSet(viewsets.ModelViewSet):
             with transaction.atomic():
                 new_tenant = serializer.save()
                 logger.info(f"Tenant created: {new_tenant.name} (schema: {new_tenant.schema_name})")
+                
+                # ✅ FIX: Log global activity for tenant creation
+                GlobalActivity.log_platform_action(
+                    action='tenant_created',
+                    affected_tenant=new_tenant,
+                    performed_by_id=str(self.request.user.id) if self.request.user.is_authenticated else None,
+                    details={
+                        'tenant_name': new_tenant.name,
+                        'schema_name': new_tenant.schema_name,
+                        'organizational_id': new_tenant.organizational_id
+                    },
+                    request=self.request
+                )
                 
                 # Publish Kafka event with tenant details
                 tenant_data = TenantSerializer(new_tenant).data
@@ -682,6 +520,20 @@ class TenantViewSet(viewsets.ModelViewSet):
         if instance.id != tenant.id:
             logger.error(f"Unauthorized delete attempt on tenant {instance.id} by tenant {tenant.id}")
             raise serializers.ValidationError("Not authorized to delete this tenant")
+        
+        # ✅ FIX: Log global activity for tenant deletion
+        with schema_context('public'):
+            GlobalActivity.log_platform_action(
+                action='tenant_deleted',
+                affected_tenant=instance,
+                performed_by_id=str(self.request.user.id) if self.request.user.is_authenticated else None,
+                details={
+                    'tenant_name': instance.name,
+                    'schema_name': instance.schema_name
+                },
+                request=self.request
+            )
+        
         with tenant_context(tenant):
             instance.delete()
         logger.info(f"Tenant deleted: {instance.name} for tenant {tenant.schema_name}")
@@ -697,6 +549,20 @@ class TenantViewSet(viewsets.ModelViewSet):
         tenant = self.get_tenant(self.request)
         if instance.id != tenant.id and not self.request.user.is_superuser:
             raise serializers.ValidationError("Not authorized to update this tenant")
+        
+        # ✅ FIX: Log global activity for tenant update
+        with schema_context('public'):
+            GlobalActivity.log_platform_action(
+                action='tenant_updated',
+                affected_tenant=instance,
+                performed_by_id=str(self.request.user.id) if self.request.user.is_authenticated else None,
+                details={
+                    'tenant_name': instance.name,
+                    'schema_name': instance.schema_name
+                },
+                request=self.request
+            )
+        
         with tenant_context(tenant):
             serializer.save()
         logger.info(f"Tenant updated: {instance.name} for tenant {tenant.schema_name}")
@@ -716,6 +582,68 @@ class TenantViewSet(viewsets.ModelViewSet):
             serializer.save()
         return Response(serializer.data)
 
+    # NEW: Action to suspend a tenant
+    @action(detail=True, methods=['post'], url_path='suspend')
+    def suspend(self, request, pk=None):
+        instance = self.get_object()
+        if instance.status == 'suspended':
+            return Response({'detail': 'Tenant is already suspended.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        reason = request.data.get('reason', 'Manual suspension')
+        try:
+            with schema_context('public'):  # Log in shared schema
+                GlobalActivity.log_platform_action(
+                    action='tenant_suspended',
+                    affected_tenant=instance,
+                    performed_by_id=str(request.user.id),
+                    details={'reason': reason},
+                    request=request
+                )
+            
+            with tenant_context(instance):
+                instance.status = 'suspended'
+                instance.save(update_fields=['status'])
+            
+            logger.info(f"Tenant suspended: {instance.name} (ID: {pk}) by {request.user.email}")
+            return Response({
+                'detail': f'Tenant "{instance.name}" suspended successfully.',
+                'status': instance.status
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error suspending tenant {pk}: {str(e)}")
+            return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # NEW: Action to activate a tenant
+    @action(detail=True, methods=['post'], url_path='activate')
+    def activate(self, request, pk=None):
+        instance = self.get_object()
+        if instance.status == 'active':
+            return Response({'detail': 'Tenant is already active.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        reason = request.data.get('reason', 'Manual activation')
+        try:
+            with schema_context('public'):  # Log in shared schema
+                GlobalActivity.log_platform_action(
+                    action='tenant_activated',
+                    affected_tenant=instance,
+                    performed_by_id=str(request.user.id),
+                    details={'reason': reason},
+                    request=request
+                )
+            
+            with tenant_context(instance):
+                instance.status = 'active'
+                instance.save(update_fields=['status'])
+            
+            logger.info(f"Tenant activated: {instance.name} (ID: {pk}) by {request.user.email}")
+            return Response({
+                'detail': f'Tenant "{instance.name}" activated successfully.',
+                'status': instance.status
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error activating tenant {pk}: {str(e)}")
+            return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class PublicTenantInfoView(APIView):
@@ -729,5 +657,130 @@ class PublicTenantInfoView(APIView):
         except Tenant.DoesNotExist:
             return Response({"detail": "Tenant not found."}, status=status.HTTP_404_NOT_FOUND)
 
-
-
+class GlobalActivityViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Global activity logs accessible ONLY by superusers.
+    Shows cross-tenant activities performed by platform admins.
+    """
+    queryset = GlobalActivity.objects.all()
+    serializer_class = GlobalActivitySerializer
+    permission_classes = [IsSuperUser]  # Changed from AllowAny to IsSuperUser
+    pagination_class = CustomPagination
+    
+    def get_queryset(self):
+        # Only superusers can access global logs
+        if not self.request.user.is_superuser:
+            raise PermissionDenied("Only platform superusers can view global activity logs.")
+        
+        queryset = GlobalActivity.objects.all().select_related('affected_tenant').order_by('-timestamp')
+        
+        # Apply filters
+        queryset = self._apply_filters(queryset)
+        return queryset
+    
+    def _apply_filters(self, queryset):
+        params = self.request.query_params
+        
+        # Filter by tenant
+        tenant_id = params.get('tenant_id')
+        if tenant_id:
+            queryset = queryset.filter(affected_tenant__unique_id=tenant_id)
+        
+        # Filter by action type
+        actions = params.getlist('action') or params.getlist('action[]')
+        if actions:
+            queryset = queryset.filter(action__in=actions)
+        
+        # Date range
+        date_from = params.get('date_from')
+        date_to = params.get('date_to')
+        if date_from:
+            queryset = queryset.filter(timestamp__gte=date_from)
+        if date_to:
+            queryset = queryset.filter(timestamp__lte=date_to)
+        
+        # Search
+        search = params.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(action__icontains=search) |
+                Q(affected_tenant__name__icontains=search) |
+                Q(global_user__icontains=search) |
+                Q(performed_by__icontains=search)
+            )
+        
+        return queryset
+    
+    @action(detail=False, methods=['get'], url_path='dashboard-stats')
+    def dashboard_stats(self, request):
+        """Global dashboard statistics"""
+        days = int(request.query_params.get('days', 30))
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=days)
+        
+        activities = GlobalActivity.objects.filter(
+            timestamp__gte=start_date,
+            timestamp__lte=end_date
+        )
+        
+        # Total activities
+        total_activities = activities.count()
+        
+        # Activities by tenant
+        activities_by_tenant = activities.values(
+            'affected_tenant__unique_id',
+            'affected_tenant__name',
+            'affected_tenant__schema_name'
+        ).annotate(
+            count=Count('id')
+        ).order_by('-count')[:10]
+        
+        # Activities by type
+        activities_by_type = activities.values('action').annotate(
+            count=Count('id')
+        ).order_by('-count')
+        
+        # Most active admins
+        active_admins = activities.values('global_user').annotate(
+            activity_count=Count('id')
+        ).order_by('-activity_count')[:10]
+        
+        return Response({
+            'period': {'start_date': start_date, 'end_date': end_date, 'days': days},
+            'summary': {
+                'total_activities': total_activities,
+                'affected_tenants_count': activities.values('affected_tenant').distinct().count(),
+                'active_admins_count': activities.values('global_user').distinct().count(),
+            },
+            'activities_by_tenant': list(activities_by_tenant),
+            'activities_by_type': list(activities_by_type),
+            'active_admins': list(active_admins),
+        })
+    
+    @action(detail=False, methods=['get'], url_path='tenant-activities')
+    def tenant_activities(self, request):
+        """Get all activities for a specific tenant"""
+        tenant_id = request.query_params.get('tenant_id')
+        if not tenant_id:
+            return Response(
+                {"error": "tenant_id parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            tenant = Tenant.objects.get(unique_id=tenant_id)
+        except Tenant.DoesNotExist:
+            return Response(
+                {"error": "Tenant not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        activities = GlobalActivity.objects.filter(affected_tenant=tenant).select_related('affected_tenant').order_by('-timestamp')
+        
+        page = self.paginate_queryset(activities)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(activities, many=True)
+        return Response(serializer.data)

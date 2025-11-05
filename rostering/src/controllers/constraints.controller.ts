@@ -1,12 +1,18 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { ConstraintsService } from '../services/constraints.service';
+import { TravelService } from '../services/travel.service';
+import { ClusteringService } from '../services/clustering.service';
 
 export class ConstraintsController {
   private constraintsService: ConstraintsService;
+  private travelService: TravelService;
+  private clusteringService: ClusteringService;
 
   constructor(private prisma: PrismaClient) {
     this.constraintsService = new ConstraintsService(prisma);
+    this.travelService = new TravelService(prisma);
+    this.clusteringService = new ClusteringService(prisma, this.constraintsService, this.travelService);
   }
 
   /**
@@ -14,7 +20,16 @@ export class ConstraintsController {
    */
   public getConstraints = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId;
+      const user = req.user;
+      if (!user) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated'
+        });
+        return;
+      }
+
+      const tenantId = user.tenantId.toString();
       const constraints = await this.constraintsService.getActiveConstraints(tenantId);
 
       res.json({
@@ -35,26 +50,33 @@ export class ConstraintsController {
    */
   public updateConstraints = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId;
-      const updates = req.body;
-
-      // Validate required fields
-      const requiredFields = [
-        'wtdMaxHoursPerWeek', 'restPeriodHours', 'bufferMinutes', 
-        'travelMaxMinutes', 'continuityTargetPercent'
-      ];
-
-      for (const field of requiredFields) {
-        if (updates[field] === undefined) {
-          res.status(400).json({
-            success: false,
-            error: `Missing required field: ${field}`
-          });
-          return;
-        }
+      const user = req.user;
+      if (!user) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated'
+        });
+        return;
       }
 
-      const updated = await this.constraintsService.updateConstraints(tenantId, updates);
+      const tenantId = user.tenantId.toString();
+      const updates = req.body;
+
+      // Pass user info to service for tracking
+      const updatedByUser = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      };
+
+      console.log('Updating constraints with user info:', updatedByUser);
+
+      const updated = await this.constraintsService.updateConstraints(
+        tenantId, 
+        updates,
+        updatedByUser
+      );
 
       res.json({
         success: true,
@@ -75,7 +97,16 @@ export class ConstraintsController {
    */
   public createRuleSet = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId;
+      const user = req.user;
+      if (!user) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated'
+        });
+        return;
+      }
+
+      const tenantId = user.tenantId.toString();
       const { name, ...constraints } = req.body;
 
       if (!name) {
@@ -107,7 +138,16 @@ export class ConstraintsController {
    */
   public getRuleSets = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId;
+      const user = req.user;
+      if (!user) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated'
+        });
+        return;
+      }
+
+      const tenantId = user.tenantId.toString();
       const ruleSets = await this.constraintsService.getRuleSets(tenantId);
 
       res.json({
@@ -128,7 +168,16 @@ export class ConstraintsController {
    */
   public validateAssignment = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId;
+      const user = req.user;
+      if (!user) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated'
+        });
+        return;
+      }
+
+      const tenantId = user.tenantId.toString();
       const assignment = req.body;
 
       const constraints = await this.constraintsService.getActiveConstraints(tenantId);
@@ -146,4 +195,88 @@ export class ConstraintsController {
       });
     }
   };
+
+  /**
+   * Generate AI-powered clusters for a date range
+   */
+  public async generateClusters(req: Request, res: Response) {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ 
+          success: false,
+          error: 'User not authenticated' 
+        });
+      }
+
+      const tenantId = user.tenantId.toString();
+      
+      if (!tenantId) {
+        return res.status(403).json({ 
+          success: false,
+          error: 'tenantId missing from auth context' 
+        });
+      }
+
+      const {
+        startDate,
+        endDate,
+        maxTravelTime = 30,
+        timeWindowTolerance = 15,
+        minClusterSize = 2,
+        maxClusterSize = 8
+      } = req.body;
+
+      if (!startDate || !endDate) {
+        return res.status(400).json({ 
+          success: false,
+          error: 'startDate and endDate are required' 
+        });
+      }
+
+      // Initialize services
+      const constraintsService = new ConstraintsService(this.prisma);
+      const travelService = new TravelService(this.prisma);
+      const clusteringService = new ClusteringService(
+        this.prisma, 
+        constraintsService, 
+        travelService
+      );
+
+      const params = {
+        dateRange: {
+          start: new Date(startDate),
+          end: new Date(endDate)
+        },
+        maxTravelTime,
+        timeWindowTolerance,
+        minClusterSize,
+        maxClusterSize
+      };
+
+      const clusters = await clusteringService.generateClusters(tenantId.toString(), params);
+
+      return res.json({
+        success: true,
+        data: {
+          clusters,
+          summary: {
+            totalClusters: clusters.length,
+            totalVisits: clusters.reduce((sum: number, cluster) => sum + cluster.visits.length, 0),
+            averageClusterSize: clusters.length > 0 
+              ? clusters.reduce((sum: number, cluster) => sum + cluster.visits.length, 0) / clusters.length 
+              : 0
+          }
+        }
+      });
+
+    } catch (error: any) {
+      console.error('generateClusters error', error);
+      return res.status(500).json({ 
+        success: false,
+        error: 'Failed to generate clusters', 
+        details: error.message 
+      });
+    }
+  }
 }

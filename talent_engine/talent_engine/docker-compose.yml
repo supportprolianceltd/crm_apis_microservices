@@ -1,0 +1,117 @@
+services:
+  talent-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: talent_engine
+    ports:
+      - "8002:8002"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DEBUG: "True"
+      DB_ENGINE: django_tenants.postgresql_backend
+      DB_NAME: talent_db
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_HOST: talent_postgres
+      DB_PORT: 5432
+      DJANGO_SETTINGS_MODULE: talent_engine.settings
+      PYTHONPATH: /app
+      ALLOWED_HOSTS: localhost,127.0.0.1,*
+      SUPABASE_URL: https://gkvgqvosnetifsonhxuo.supabase.co
+      SUPABASE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrdmdxdm9zbmV0aWZzb25oeHVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2NTU0OTcsImV4cCI6MjA2ODIzMTQ5N30.foh7w4Ko-wGwMc9GW7ZX2YswK8d4J51wel532mjPTfw
+      SUPABASE_BUCKET: luminacaremedia
+      AUTH_SERVICE_URL: http://auth-service:8001
+      JOB_APPLICATIONS_URL: http://job_applications:8003
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,https://crm-frontend-react.vercel.app,http://localhost:8000
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+    depends_on:
+      talent_postgres:
+        condition: service_healthy
+    networks:
+      - auth_service_default
+
+  kafka-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kafka-consumer
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DEBUG: "True"
+      DB_ENGINE: django_tenants.postgresql_backend
+      DB_NAME: talent_db
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_HOST: talent_postgres
+      DB_PORT: 5432
+      DJANGO_SETTINGS_MODULE: talent_engine.settings
+      PYTHONPATH: /app
+    volumes:
+      - .:/app
+    depends_on:
+      talent_postgres:
+        condition: service_healthy
+    networks:
+      - auth_service_default
+    command: sh -c "./wait-for-it.sh kafka:9092 -- python consumer.py"
+
+
+
+  # talent_postgres:
+  #   image: postgres:15
+  #   container_name: talent_postgres
+  #   environment:
+  #     POSTGRES_DB: talent_db
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: password
+  #   volumes:
+  #     - talent_postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5433:5432"
+  #   networks:
+  #     - auth_service_default
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres -d talent_db"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+  talent_postgres:
+    image: postgres:15
+    container_name: talent_postgres
+    environment:
+      POSTGRES_DB: talent_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_TIMEOUT: 300  # Add this
+    volumes:
+      - talent_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - auth_service_default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d talent_db -t 30"]
+      interval: 10s
+      timeout: 30s
+      retries: 10
+      start_period: 40s
+    restart: unless-stopped
+
+
+volumes:
+  talent_postgres_data:
+
+networks:
+  auth_service_default:
+    external: true
+
+
+
+
+

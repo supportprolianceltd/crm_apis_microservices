@@ -1,16 +1,19 @@
-from django.core.validators import RegexValidator
+import uuid
+import random
+import logging
 from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.db.models import Max
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from core.models import Tenant, Module, Branch
-from django.db.models import Max
-import uuid
-import logging
-import random
+from django.contrib.auth.models import AbstractUser, UserManager
+from django.core.validators import RegexValidator
 from django_tenants.utils import tenant_context
 from django.utils.timezone import now
+
+from core.models import Tenant, Module, Branch
+
 logger = logging.getLogger('users')
+
 
 def generate_kid():
     return uuid.uuid4().hex
@@ -18,21 +21,19 @@ def generate_kid():
 def today():
     return timezone.now().date()
 
-
 import os
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 
 def validate_image_or_pdf(value):
     ext = os.path.splitext(value.name)[1].lower()
-    valid_extensions = ['.jpg', '.jpeg', '.png', '.pdf']
+    valid_extensions = ['.jpg', '.jpeg', '.png', '.pdf', '.webp', '.gif', '.tiff', '.doc', '.svg',]
     if ext not in valid_extensions:
         raise ValidationError('Only JPG, PNG, and PDF files are allowed.')
     
     # Optional: Add file size validation
     if value.size > 2 * 1024 * 1024:  # 2MB limit
         raise ValidationError('File size cannot exceed 2MB.')
-
 
 class CustomUserManager(UserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -86,15 +87,22 @@ class CustomUserManager(UserManager):
         extra_fields.setdefault('is_active', True)
         return self.create_user(email, password, **extra_fields)
 
+
 class CustomUser(AbstractUser):
     ROLES = (
+
+        #APP OWNERS ROLES
+        ('super-admin', 'Super Admin'),
         ('admin', 'Admin'),
-        ('root-admin', 'Root-Admin'),
-        ('co-admin', 'Co-Admin'),
+
+        #APP USERS ROLES
+        ('root-admin', 'Root Admin'),
+        ('co-admin', 'Co Admin'),
         ('hr', 'HR'),
-        ('staff', 'Staff'),
-        ('user', 'User'),
+        ('staff', 'Staff'), 
+        ('investor', 'Investor'),
         ('carer', 'Carer'),
+        ('user', 'User'),
         ('client', 'Client'),
         ('family', 'Family'),
         ('auditor', 'Auditor'),
@@ -308,25 +316,94 @@ class BlockedIP(models.Model):
         return f"Blocked IP {self.ip_address} for tenant {self.tenant.name}"
 
 class UserActivity(models.Model):
+    global_correlation_id = models.UUIDField(null=True, blank=True, default=None)
+
+    # Update the ACTION_TYPES in UserActivity model
     ACTION_TYPES = (
-        ('impersonation', 'Impersonation'),
+        # Authentication & Security
         ('login', 'Login'),
         ('logout', 'Logout'),
-        ('password_reset', 'Password Reset'),
+        ('login_failed', 'Login Failed'),
+        ('password_reset_request', 'Password Reset Request'),
+        ('password_reset_confirm', 'Password Reset Confirm'),
         ('account_lock', 'Account Lock'),
         ('account_unlock', 'Account Unlock'),
         ('account_suspend', 'Account Suspend'),
         ('account_activate', 'Account Activate'),
         ('ip_block', 'IP Block'),
         ('ip_unblock', 'IP Unblock'),
+        ('impersonation', 'Impersonation'),
+        
+        # User Management
+        ('user_created', 'User Created'),
+        ('user_updated', 'User Updated'),
+        ('user_deleted', 'User Deleted'),
+        ('profile_updated', 'Profile Updated'),
+        ('bulk_user_create', 'Bulk User Create'),
+        ('user_password_regenerated', 'User Password Regenerated'),
+        
+        # Document Management
+        ('document_uploaded', 'Document Uploaded'),
+        ('document_updated', 'Document Updated'),
+        ('document_deleted', 'Document Deleted'),
+        ('document_acknowledged', 'Document Acknowledged'),
+        ('document_permission_granted', 'Document Permission Granted'),
+        ('document_permission_revoked', 'Document Permission Revoked'),
+        
+        # Investment & Financial
+        ('investment_created', 'Investment Created'),
+        ('investment_updated', 'Investment Updated'),
+        ('withdrawal_requested', 'Withdrawal Requested'),
+        ('withdrawal_approved', 'Withdrawal Approved'),
+        ('withdrawal_rejected', 'Withdrawal Rejected'),
+        ('withdrawal_processed', 'Withdrawal Processed'),
+        
+        # Group Management
+        ('group_created', 'Group Created'),
+        ('group_updated', 'Group Updated'),
+        ('group_deleted', 'Group Deleted'),
+        ('group_member_added', 'Group Member Added'),
+        ('group_member_removed', 'Group Member Removed'),
+        
+        # System Operations
+        ('rsa_key_created', 'RSA Key Created'),
+        ('terms_accepted', 'Terms Accepted'),
+        ('session_clock_in', 'Session Clock In'),
+        ('session_clock_out', 'Session Clock Out'),
+        
+        # API & General
+        ('api_request', 'API Request'),
+        ('export_requested', 'Export Requested'),
+        ('bulk_operation', 'Bulk Operation'),
+
+
+        # New tenant-specific actions        ('tenant_created', 'Tenant Created'),
+        ('tenant_user_created', 'Tenant User Created'),
+        ('tenant_user_updated', 'Tenant User Updated'),
+        ('tenant_user_deleted', 'Tenant User Deleted'),
+        ('branch_created', 'Branch Created'),
+        ('branch_updated', 'Branch Updated'),
+        ('branch_deleted', 'Branch Deleted'),
+        ('module_activated', 'Module Activated'),
+        ('module_deactivated', 'Module Deactivated'),
+        ('tenant_config_updated', 'Tenant Config Updated'),
+        ('investment_withdrawn', 'Investment Withdrawn'),
+        ('document_shared', 'Document Shared'),
+        ('group_member_added', 'Group Member Added'),
+        ('session_clocked_in', 'Session Clocked In'),
+        ('session_clocked_out', 'Session Clocked Out'),
     )
+
+
+
+
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='activities', null=True, blank=True)
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     action = models.CharField(max_length=50, choices=ACTION_TYPES)
     performed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='performed_activities')
     timestamp = models.DateTimeField(auto_now_add=True)
-    details = models.JSONField(default=dict, blank=True)
+    details = models.JSONField(default=dict, blank=True)  # e.g., {"old_balance": 1000, "new_balance": 800}
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(null=True, blank=True)
     success = models.BooleanField(null=True, help_text="Indicates if the action (e.g., login) was successful.")
@@ -335,13 +412,26 @@ class UserActivity(models.Model):
         verbose_name = "User Activity"
         verbose_name_plural = "User Activities"
         indexes = [
-            models.Index(fields=['user', 'timestamp']),
+            models.Index(fields=['tenant', 'timestamp']),
+            models.Index(fields=['tenant', 'action', 'timestamp']),
+            models.Index(fields=['tenant', 'user', 'timestamp']),
+            models.Index(fields=['tenant', 'performed_by', 'timestamp']),
+            models.Index(fields=['tenant', 'success', 'timestamp']),
+            models.Index(fields=['ip_address', 'timestamp']),
             models.Index(fields=['action', 'timestamp']),
-            models.Index(fields=['ip_address']),
+            models.Index(fields=['timestamp']),  # For time-based queries
         ]
+        ordering = ['-timestamp']
 
     def __str__(self):
         return f"{self.action} {'success' if self.success else 'failed' if self.success is False else ''} for {self.user.email if self.user else 'unknown'} at {self.timestamp}"
+
+
+    def save(self, *args, **kwargs):
+        # Optional: Auto-generate correlation ID if not provided (for linking to global events)
+        if not self.global_correlation_id:
+            self.global_correlation_id = uuid.uuid4()
+        super().save(*args, **kwargs)
 
 
 class UserProfile(models.Model):
@@ -367,6 +457,12 @@ class UserProfile(models.Model):
     zip_code = models.CharField(max_length=20, blank=True, null=True)
     department = models.CharField(max_length=100, blank=True, null=True)
     # modules = models.ManyToManyField(Module, blank=True)
+    policy_number = models.CharField(
+        max_length=20, 
+        blank=True, 
+        null=True,
+        help_text="Auto-generated policy number for investors (e.g., PRO-000001)"
+    )
 
     # Add the salary rate field
     salary_rate = models.CharField(
@@ -583,31 +679,195 @@ class UserProfile(models.Model):
             models.Index(fields=['user']),
         ]
 
+    # def save(self, *args, **kwargs):
+    #     if not self.employee_id and self.user and self.user.tenant:
+    #         tenant = self.user.tenant
+    #         tenant_code = tenant.name.strip().upper()[:3]  # e.g., "PRO" from "Proliance"
+
+    #         # Get the max employee_id that starts with this tenant code
+    #         last_employee = UserProfile.objects.filter(
+    #             user__tenant=tenant,
+    #             employee_id__startswith=tenant_code
+    #         ).aggregate(
+    #             max_id=models.Max('employee_id')
+    #         )['max_id']
+
+    #         if last_employee:
+    #             try:
+    #                 last_number = int(last_employee.split('-')[1])
+    #             except (IndexError, ValueError):
+    #                 last_number = 0
+    #         else:
+    #             last_number = 0
+
+    #         next_number = last_number + 1
+    #         self.employee_id = f"{tenant_code}-{next_number:04d}"
+
+    #     super().save(*args, **kwargs)
+
+
     def save(self, *args, **kwargs):
-        if not self.employee_id and self.user and self.user.tenant:
-            tenant = self.user.tenant
-            tenant_code = tenant.name.strip().upper()[:3]  # e.g., "PRO" from "Proliance"
+            # Existing employee_id generation logic
+            if not self.employee_id and self.user and self.user.tenant:
+                tenant = self.user.tenant
+                tenant_code = tenant.name.strip().upper()[:3]  # e.g., "PRO" from "Proliance"
 
-            # Get the max employee_id that starts with this tenant code
-            last_employee = UserProfile.objects.filter(
-                user__tenant=tenant,
-                employee_id__startswith=tenant_code
-            ).aggregate(
-                max_id=models.Max('employee_id')
-            )['max_id']
+                # Get the max employee_id that starts with this tenant code
+                last_employee = UserProfile.objects.filter(
+                    user__tenant=tenant,
+                    employee_id__startswith=tenant_code
+                ).aggregate(
+                    max_id=models.Max('employee_id')
+                )['max_id']
 
-            if last_employee:
-                try:
-                    last_number = int(last_employee.split('-')[1])
-                except (IndexError, ValueError):
+                if last_employee:
+                    try:
+                        last_number = int(last_employee.split('-')[1])
+                    except (IndexError, ValueError):
+                        last_number = 0
+                else:
                     last_number = 0
-            else:
-                last_number = 0
 
-            next_number = last_number + 1
-            self.employee_id = f"{tenant_code}-{next_number:04d}"
+                next_number = last_number + 1
+                self.employee_id = f"{tenant_code}-{next_number:04d}"
 
+            # New policy_number generation logic for investors
+            if (self.user and self.user.role == 'investor' and 
+                not self.policy_number and self.user.tenant):
+                tenant = self.user.tenant
+                tenant_code = tenant.name.strip().upper()[:3]  # e.g., "PRO" from "Proliance"
+
+                # Get the max policy_number that starts with this tenant code for investors
+                last_policy = UserProfile.objects.filter(
+                    user__tenant=tenant,
+                    user__role='investor',
+                    policy_number__startswith=tenant_code
+                ).aggregate(
+                    max_id=models.Max('policy_number')
+                )['max_id']
+
+                if last_policy:
+                    try:
+                        last_number = int(last_policy.split('-')[1])
+                    except (IndexError, ValueError):
+                        last_number = 0
+                else:
+                    last_number = 0
+
+                next_number = last_number + 1
+                self.policy_number = f"{tenant_code}-{next_number:06d}"
+
+            super().save(*args, **kwargs)
+
+
+
+class InvestmentDetail(models.Model):
+    ROI_RATE_CHOICES = [
+        ('on_demand', 'On Demand (Flexible)'),  # ✅ New option for frontend-defined ROI rate
+        ('hourly', 'Hourly'),
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('bi_weekly', 'Bi-Weekly'),
+        ('monthly', 'Monthly'),
+        ('quarterly', 'Quarterly'),
+        ('semi_annual', 'Semi-Annual'),
+        ('annual', 'Annual'),
+        ('one_time', 'One-Time'),
+        ('others', 'Others'),
+    ]
+
+    roi_rate = models.CharField(
+        max_length=20,
+        choices=ROI_RATE_CHOICES,
+        blank=True,
+        null=True,
+        help_text="How often the user wants to receive ROI (set to 'On Demand' if flexible)"
+    )
+
+    # Optional: If you want to store the actual custom ROI rate from frontend
+    custom_roi_rate = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text="Custom ROI rate value when roi_rate is 'on_demand'"
+    )
+    user_profile = models.ForeignKey(
+        'UserProfile',
+        on_delete=models.CASCADE,
+        related_name='investment_details'
+    )
+    investment_amount = models.DecimalField(max_digits=20, decimal_places=2)
+    investment_start_date = models.DateTimeField(default=now)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
+
+    # ✅ OPTIONAL: Add remaining_balance for better withdrawal tracking
+    remaining_balance = models.DecimalField(
+        max_digits=20,
+        decimal_places=2,
+        default=0,  # Computed from investment_amount minus total withdrawals
+        help_text="Current available balance after withdrawals"
+    )
+
+    class Meta:
+        verbose_name = "Investment Detail"
+        verbose_name_plural = "Investment Details"
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            total_withdrawals = self.withdrawals.aggregate(total=models.Sum('withdrawal_amount'))['total'] or 0
+            self.remaining_balance = self.investment_amount - total_withdrawals
+        else:
+            self.remaining_balance = self.investment_amount  # Initial value for new instances
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user_profile} - ${self.investment_amount}"
+
+class WithdrawalDetail(models.Model):
+
+
+    # ✅ NEW: ForeignKey to InvestmentDetail for dependency enforcement
+    investment = models.ForeignKey(
+        InvestmentDetail,
+        on_delete=models.CASCADE,
+        related_name='withdrawals',
+        help_text="The investment this withdrawal is made against"
+    )
+
+    # Keep user_profile for backward compatibility/queries, but make it derived/read-only in practice
+    user_profile = models.ForeignKey(
+        'UserProfile',
+        on_delete=models.CASCADE,
+        related_name='withdrawal_details',  # Updated related_name to avoid conflict with InvestmentDetail
+    )
+
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
+    withdrawal_amount = models.DecimalField(max_digits=20, decimal_places=2)
+    withdrawal_request_date = models.DateTimeField(default=now)
+    withdrawal_approved_date = models.DateTimeField(default=now)
+    withdrawal_approved = models.BooleanField(default=False)
+    withdrawal_approved_by = models.JSONField(
+        blank=True, null=True,
+        help_text="JSON object with approver details: {'id': str, 'email': str, 'first_name': str, 'last_name': str, 'role': str}"
+    )
+    withdrawn_date = models.DateTimeField(default=now)
+    withdrawan = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Withdrawal Detail"
+        verbose_name_plural = "Withdrawal Details"
+
+    def save(self, *args, **kwargs):
+        # ✅ ENFORCE DEPENDENCY: Ensure user_profile matches the investment's user_profile
+        if self.investment:
+            self.user_profile = self.investment.user_profile
+        super().save(*args, **kwargs)
+
+    # def __str__(self):
+    #     return f"{self.user_profile} - {self.roi_rate or 'Not Set'} - {self.investment}"
+    def __str__(self):
+        return f"{self.user_profile} - {self.investment.roi_rate or 'Not Set'} - {self.investment}"
 
 
 class ProfessionalQualification(models.Model):
@@ -639,7 +899,7 @@ class EducationDetail(models.Model):
 
     start_year_new = models.DateField(blank=True, null=True)
     end_year_new = models.DateField(blank=True, null=True)
-    
+
     certificate = models.FileField(
         upload_to='Educational-certificates/', 
         max_length=255, 
@@ -732,7 +992,7 @@ class ProofOfAddress(models.Model):
     )
     document_url = models.CharField(max_length=1024, blank=True, null=True)
     issue_date = models.DateField(null=True, blank=True)
-    nin = models.CharField(max_length=20, blank=True, null=True, verbose_name="National Insurance Number (NIN)")
+    # nin = models.CharField(max_length=20, blank=True, null=True, verbose_name="National Insurance Number (NIN)")
     nin_document = models.FileField(
         upload_to='nin_documents/', 
         max_length=255, 
@@ -740,7 +1000,7 @@ class ProofOfAddress(models.Model):
         null=True,
         validators=[validate_image_or_pdf]
     )
-    # nin_document = models.ImageField(upload_to='nin_documents/', max_length=255, blank=True, null=True)
+    nin_document = models.ImageField(upload_to='nin_documents/', max_length=255, blank=True, null=True)
     nin_document_url = models.CharField(max_length=1024, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
@@ -842,6 +1102,8 @@ class OtherUserDocuments(models.Model):
 
 
 
+
+
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
@@ -874,6 +1136,8 @@ class UserSession(models.Model):
 
     def __str__(self):
         return f"{self.user.email} | {self.date} | {self.login_time} - {self.logout_time}"
+
+
 
 class ClientProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='client_profile')
@@ -1131,34 +1395,6 @@ class ClientProfile(models.Model):
     #     return f"{self.first_name} {self.last_name}"
 
 
-# class RSAKeyPair(models.Model):
-#     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='rsa_keys')
-#     kid = models.CharField(max_length=64, unique=True, default=generate_kid)
-#     private_key_pem = models.TextField()  # PEM encoded private key
-#     public_key_pem = models.TextField()   # PEM encoded public key
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)  # <-- Add this
-#     active = models.BooleanField(default=True)
-
-
-#     @classmethod
-#     def get_active_by_kid(cls, kid, tenant):
-#         """Cached active keypair lookup."""
-#         from auth_service.utils.cache import get_cache_key, get_from_cache, set_to_cache
-#         key = get_cache_key(tenant.schema_name, 'rsakey', kid)
-#         keypair = get_from_cache(key)
-#         if keypair is None:
-#             with tenant_context(tenant):
-#                 keypair = cls.objects.filter(kid=kid, active=True, tenant=tenant).first()
-#                 if keypair:
-#                     # Cache public_key_pem only for security
-#                     set_to_cache(key, keypair.public_key_pem, timeout=3600)  # 1 hour
-#         return keypair
-
-#     def __str__(self):
-#         return f"RSAKeyPair(kid={self.kid}, tenant={self.tenant_id}, active={self.active})"
-
-
 class RSAKeyPair(models.Model):
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='rsa_keys')
     kid = models.CharField(max_length=64, unique=True, default=generate_kid)
@@ -1198,8 +1434,6 @@ class BlacklistedToken(models.Model):
     expires_at = models.DateTimeField()
 
 
-
-
 class Document(models.Model):
     tenant_id = models.CharField(max_length=255, blank=True, null=True)
     title = models.CharField(max_length=255)
@@ -1221,8 +1455,6 @@ class Document(models.Model):
 
     class Meta:
         unique_together = ('tenant_id', 'document_number')
-
-
 
 class DocumentVersion(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='versions')
@@ -1278,7 +1510,6 @@ class DocumentAcknowledgment(models.Model):
         ]
 
 
-
 class Group(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, unique=True)
@@ -1313,3 +1544,4 @@ class GroupMembership(models.Model):
 
     def __str__(self):
         return f"{self.user.email} in {self.group.name}"
+

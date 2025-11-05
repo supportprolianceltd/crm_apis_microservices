@@ -1,4 +1,4 @@
-import cron from 'node-cron';
+import * as cron from 'node-cron';
 import { PrismaClient } from '@prisma/client';
 import { EmailService } from '../services/email.service';
 import { MatchingService } from '../services/matching.service';
@@ -49,22 +49,16 @@ export class EmailWorker {
     // Schedule email processing
     const emailCronJob = cron.schedule(cronExpression, async () => {
       await this.processEmails();
-    }, {
-      scheduled: false
     });
 
     // Schedule cleanup tasks (daily at 2 AM)
     const cleanupCronJob = cron.schedule('0 2 * * *', async () => {
       await this.cleanupOldLogs();
-    }, {
-      scheduled: false
     });
 
     // Schedule geocoding cache cleanup (weekly on Sunday at 3 AM)
     const geocodingCleanupJob = cron.schedule('0 3 * * 0', async () => {
       await this.cleanupGeocodingCache();
-    }, {
-      scheduled: false
     });
 
     this.cronJobs = [emailCronJob, cleanupCronJob, geocodingCleanupJob];

@@ -9,10 +9,14 @@ export function createCarerRoutes(carerController: CarerController): Router {
   router.use(authenticate);
   router.use(ensureTenantAccess);
 
-  // Read-only carer operations (management is handled by auth service)
+  // Carer operations
+  router.post('/', carerController.createCarer); // For testing/demo purposes
   router.get('/search', carerController.searchCarers);
   router.get('/:id', carerController.getCarer);
   router.get('/:id/availability', carerController.getCarerAvailability);
 
   return router;
 }
+
+
+

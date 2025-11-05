@@ -2,15 +2,16 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    UserViewSet, TermsAndConditionsView, PasswordResetRequestView, PasswordResetConfirmView,
+    EnhancedUserActivityViewSet, UserViewSet, TermsAndConditionsView, PasswordResetRequestView, PasswordResetConfirmView,
     DocumentDetailView, DocumentListCreateView, UserPasswordRegenerateView, ClientViewSet,
     AdminUserCreateView, RSAKeyPairCreateView, UserBranchUpdateView, TenantUsersListView,
     BranchUsersListView, UserSessionViewSet, LoginAttemptViewSet, BlockedIPViewSet,
-    UserActivityViewSet, jwks_view, protected_view, GroupViewSet, DocumentVersionListView,
-    ProfessionalQualificationView, EmploymentDetailView, EducationDetailView,
-    ReferenceCheckView, ProofOfAddressView, InsuranceVerificationView,DocumentAcknowledgmentsListView, DocumentAcknowledgeView,
-    DrivingRiskAssessmentView, LegalWorkEligibilityView, OtherUserDocumentsView,UserDocumentAccessView, UsersViewSetNoPagination,
-    AllTenantsUsersListView,  # Ensure this import is added
+    jwks_view, protected_view, GroupViewSet, DocumentVersionListView,TransactionView,
+    ProfessionalQualificationView, EmploymentDetailView, EducationDetailView, InvestmentDetailView,
+    WithdrawalDetailView, ReferenceCheckView, ProofOfAddressView, InsuranceVerificationView,
+    DocumentAcknowledgmentsListView, DocumentAcknowledgeView, DrivingRiskAssessmentView, PublicRegisterView,
+    LegalWorkEligibilityView, OtherUserDocumentsView, UserDocumentAccessView, UsersViewSetNoPagination,
+    AllTenantsUsersListView, AllTenantNamesUsersListView # Ensure this import is added
 )
 
 router = DefaultRouter()
@@ -20,15 +21,17 @@ router.register(r'clients', ClientViewSet, basename='client')
 router.register(r'user-sessions', UserSessionViewSet, basename='user-session')
 router.register(r'login-attempts', LoginAttemptViewSet, basename='login-attempt')
 router.register(r'blocked-ips', BlockedIPViewSet, basename='blocked-ip')
-router.register(r'user-activities', UserActivityViewSet, basename='user-activity')
+router.register(r'user-activities', EnhancedUserActivityViewSet, basename='user-activity')  # 
 router.register(r'groups', GroupViewSet, basename='group')
 
 urlpatterns = [
+    path('users/all-tenants-name/', AllTenantNamesUsersListView.as_view(), name='all-tenants-users'),  # Place before router
     path('users/all-tenants/', AllTenantsUsersListView.as_view(), name='all-tenants-users'),  # Place before router
     path('', include(router.urls)),
     path('protected/', protected_view, name='protected_token'),
     path('api/jwks/<int:tenant_id>/', jwks_view, name='jwks'),
     path('users/admin/create/', AdminUserCreateView.as_view(), name='users_admin_create'),
+    path('public-register/', PublicRegisterView.as_view(), name='public_user_register'),
     path('users/<int:user_id>/branch/', UserBranchUpdateView.as_view(), name='users_branch_update'),
     path('password/regenerate/', UserPasswordRegenerateView.as_view(), name='users_regenerate_password'),
     path('tenant-users/', TenantUsersListView.as_view(), name='users_tenant_list'),
@@ -48,11 +51,15 @@ urlpatterns = [
     # Employment Detail endpoints
     path('employment-details/', EmploymentDetailView.as_view(), name='employment-detail-create'),
     path('employment-details/<int:obj_id>/', EmploymentDetailView.as_view(), name='employment-detail-update'),
-    
-    # Education Detail endpoints
-    path('education-details/', EducationDetailView.as_view(), name='education-detail-create'),
-    path('education-details/<int:obj_id>/', EducationDetailView.as_view(), name='education-detail-update'),
-    
+
+    # Investment Detail endpoints
+    path('investment-details/', InvestmentDetailView.as_view(), name='investment-detail-create'),
+    path('investment-details/<int:obj_id>/', InvestmentDetailView.as_view(), name='investment-detail-update'),
+
+    # Withdrawal Detail endpoints
+    path('withdrawal-details/', WithdrawalDetailView.as_view(), name='withdrawal-detail-create'),
+    path('withdrawal-details/<int:obj_id>/', WithdrawalDetailView.as_view(), name='withdrawal-detail-update'),
+
     # Reference Check endpoints
     path('reference-checks/', ReferenceCheckView.as_view(), name='reference-check-create'),
     path('reference-checks/<int:obj_id>/', ReferenceCheckView.as_view(), name='reference-check-update'),
@@ -75,10 +82,20 @@ urlpatterns = [
     
     # Other User Documents endpoints
 
+
     path('documents/', DocumentListCreateView.as_view(), name='document-list-create'),
     path('documents/<int:id>/', DocumentDetailView.as_view(), name='document-detail'),
     path('documents/<int:document_id>/versions/', DocumentVersionListView.as_view(), name='document-versions'),
     path('documents/<int:document_id>/acknowledge/', DocumentAcknowledgeView.as_view(), name='document-acknowledge'),  # New
     path('documents/<int:document_id>/acknowledgments/', DocumentAcknowledgmentsListView.as_view(), name='document-acknowledgments'),  # New
     path('documents/user-access/', UserDocumentAccessView.as_view(), name='user-document-access'),  # New
+
+
+
+    path('user-activities/dashboard/quick-stats/', EnhancedUserActivityViewSet.as_view({'get': 'dashboard_stats'}),
+        name='activity-quick-stats'
+    ),
+    path('user-activities/security/overview/', EnhancedUserActivityViewSet.as_view({'get': 'security_events'}), name='security-overview'),
+
+    path('transactions/', TransactionView.as_view(), name='transaction-create'),
 ]

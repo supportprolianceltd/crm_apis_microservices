@@ -351,7 +351,7 @@ def api_gateway_view(request, path):
             'content-encoding', 'transfer-encoding', 'connection',
             'keep-alive', 'proxy-authenticate', 'proxy-authorization'
         }
-        
+
         response_headers = {}
         for key, value in response.headers.items():
             key_lower = key.lower()
@@ -361,6 +361,24 @@ def api_gateway_view(request, path):
         # Add gateway headers to response
         response_headers['X-Gateway-Request-ID'] = request_id
         response_headers['X-Gateway-Service'] = service_name
+
+        # Special handling for Swagger UI static assets
+        if service_name == 'rostering' and 'docs' in path:
+            # Ensure proper content type for Swagger UI assets
+            content_type = response.headers.get('Content-Type', '')
+            if not content_type:
+                if path.endswith('.css'):
+                    response_headers['Content-Type'] = 'text/css'
+                elif path.endswith('.js'):
+                    response_headers['Content-Type'] = 'application/javascript'
+                elif path.endswith('.html') or path.endswith('.htm'):
+                    response_headers['Content-Type'] = 'text/html'
+                elif path.endswith('.json'):
+                    response_headers['Content-Type'] = 'application/json'
+                elif path.endswith('.png'):
+                    response_headers['Content-Type'] = 'image/png'
+                elif path.endswith('.ico'):
+                    response_headers['Content-Type'] = 'image/x-icon'
 
         # Create Django response
         django_response = HttpResponse(

@@ -13,16 +13,33 @@ declare global {
         email: string;
         tenantId: string;
         permissions?: string[];
+        firstName?: string;
+        lastName?: string;
       };
     }
   }
 }
 
 interface JWTPayload {
-  user_id: string;
+  // Your actual JWT token structure
+  jti: string;
+  sub: string;
+  username: string;
   email: string;
   tenant_id: string;
+  tenant_organizational_id: string;
+  tenant_name: string;
+  tenant_unique_id: string;
+  tenant_schema: string;
+  tenant_domain: string;
+  has_accepted_terms: boolean;
+  user_type: string;
+  role: string;
+  status: string;
   permissions?: string[];
+  first_name?: string;
+  last_name?: string;
+  type: string;
   exp: number;
   iat: number;
 }
@@ -34,7 +51,46 @@ class AuthMiddleware {
   constructor() {
     this.hs256Secret = process.env.JWT_SECRET || 'default-secret';
     this.authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8001';
-    // Remove the automatic public key fetching - we'll do it per request
+  }
+
+  /**
+   * Extract display name from available token fields
+   */
+  private getDisplayName(decoded: JWTPayload): { firstName: string; lastName: string } {
+    // If first_name and last_name are provided and not null, use them
+    if (decoded.first_name && decoded.last_name) {
+      return {
+        firstName: decoded.first_name,
+        lastName: decoded.last_name
+      };
+    }
+
+    // If only first_name is provided, use it and leave lastName empty
+    if (decoded.first_name) {
+      return {
+        firstName: decoded.first_name,
+        lastName: '' // No last name available
+      };
+    }
+
+    // Try to extract from username (e.g., "pgodson6919" -> "Pgodson")
+    if (decoded.username && decoded.username !== 'null') {
+      // Remove numbers and split camelCase or use as is
+      const cleanUsername = decoded.username.replace(/[0-9]/g, '');
+      if (cleanUsername.length > 0) {
+        return {
+          firstName: cleanUsername.charAt(0).toUpperCase() + cleanUsername.slice(1),
+          lastName: '' // Username typically doesn't contain last name
+        };
+      }
+    }
+    
+    // Fallback to email prefix
+    const emailPart = decoded.email.split('@')[0];
+    return {
+      firstName: emailPart.charAt(0).toUpperCase() + emailPart.slice(1),
+      lastName: ''
+    };
   }
 
   /**
@@ -121,7 +177,7 @@ class AuthMiddleware {
             }) as JWTPayload;
 
             logger.debug('Token verified using RS256', { 
-              userId: decoded.user_id,
+              userId: decoded.sub,
               email: decoded.email,
               tenantId: decoded.tenant_id,
               kid: unverifiedHeader.kid
@@ -148,7 +204,7 @@ class AuthMiddleware {
       }) as JWTPayload;
 
       logger.debug('Token verified using HS256', { 
-        userId: decoded.user_id,
+        userId: decoded.sub,
         email: decoded.email,
         tenantId: decoded.tenant_id 
       });
@@ -209,15 +265,23 @@ class AuthMiddleware {
         return;
       }
 
-      // Attach user info to request
+      // Extract display name from available fields
+      const displayName = this.getDisplayName(decoded);
+
+      // Attach user info to request including first and last name
       req.user = {
-        id: decoded.user_id,
+        id: decoded.sub, // Use 'sub' as user ID
         email: decoded.email,
         tenantId: decoded.tenant_id,
-        permissions: decoded.permissions || []
+        permissions: decoded.permissions || [],
+        firstName: displayName.firstName,
+        lastName: displayName.lastName
       };
 
-      logger.debug(`Authenticated user: ${decoded.email} (tenant: ${decoded.tenant_id})`);
+      logger.debug(`Authenticated user: ${decoded.email} (tenant: ${decoded.tenant_id})`, {
+        firstName: displayName.firstName,
+        lastName: displayName.lastName
+      });
       next();
 
     } catch (error) {

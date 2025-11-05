@@ -1,13 +1,36 @@
 import { Request, Response } from 'express';
 import { PrismaClient, RequestStatus } from '@prisma/client';
 import { ClusteringService } from '../services/clustering.service';
+import { ConstraintsService } from '../services/constraints.service';
+import { TravelService } from '../services/travel.service';
+
+interface Carer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  skills: string[];
+  maxTravelDistance: number;
+  latitude: number | null;
+  longitude: number | null;
+  clusterId?: string;
+}
 import { CarerService } from '../services/carer.service';
 
 export class ClusterController {
   private clusteringService: ClusteringService;
+  private constraintsService: ConstraintsService;
+  private travelService: TravelService;
 
   constructor(private prisma: PrismaClient) {
-    this.clusteringService = new ClusteringService(prisma);
+    this.constraintsService = new ConstraintsService(prisma);
+    this.travelService = new TravelService(prisma);
+    this.clusteringService = new ClusteringService(
+      prisma, 
+      this.constraintsService, 
+      this.travelService
+    );
   }
 
   /**
@@ -15,11 +38,13 @@ export class ClusterController {
    */
   public async createCluster(req: Request, res: Response) {
     try {
-      const tenantId = req.user?.tenantId;
-      if (!tenantId) {
-        return res.status(403).json({ error: 'tenantId missing from auth context' });
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ error: 'User not authenticated' });
       }
 
+      const tenantId = user.tenantId.toString();
+      const { name, description, postcode, latitude, longitude } = req.body;
       const { name, description, postcode, latitude, longitude, location } = req.body;
 
       if (!name) {
@@ -330,6 +355,18 @@ export class ClusterController {
         clusterId,
         clusterName: cluster.name,
         includeNearby,
+        carers: carers.map((carer: Carer) => ({
+          id: carer.id,
+          firstName: carer.firstName,
+          lastName: carer.lastName,
+          email: carer.email,
+          phone: carer.phone,
+          skills: carer.skills,
+          maxTravelDistance: carer.maxTravelDistance,
+          latitude: carer.latitude,
+          longitude: carer.longitude,
+          isInCluster: carer.clusterId === clusterId
+        }))
         carerAssignments: carersWithDetails
       });
     } catch (error: any) {
@@ -586,4 +623,258 @@ export class ClusterController {
       return res.status(500).json({ error: 'Failed to delete cluster', details: error?.message });
     }
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Add this method to your existing ClusterController
+
+/**
+ * Generate AI-powered clusters for a date range
+ */
+public async generateClusters(req: Request, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      return res.status(403).json({ error: 'tenantId missing from auth context' });
+    }
+
+    const {
+      startDate,
+      endDate,
+      maxTravelTime = 30,
+      timeWindowTolerance = 15,
+      minClusterSize = 2,
+      maxClusterSize = 8,
+      epsilon = 0.1,
+      minPoints = 2
+    } = req.body;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ error: 'startDate and endDate are required' });
+    }
+
+    // Initialize services
+    const constraintsService = new ConstraintsService(this.prisma);
+    const travelService = new TravelService(this.prisma);
+    const clusteringService = new ClusteringService(
+      this.prisma, 
+      constraintsService, 
+      travelService
+    );
+
+    const params = {
+      dateRange: {
+        start: new Date(startDate),
+        end: new Date(endDate)
+      },
+      maxTravelTime,
+      timeWindowTolerance,
+      minClusterSize,
+      maxClusterSize,
+      epsilon,
+      minPoints
+    };
+
+    const clusters = await clusteringService.generateClusters(tenantId.toString(), params);
+
+    // Create actual cluster records in database
+    const createdClusters = await this.createClusterRecords(tenantId.toString(), clusters);
+
+    return res.json({
+      success: true,
+      data: {
+        clusters: createdClusters,
+        summary: {
+          totalClusters: clusters.length,
+          totalVisits: clusters.reduce((sum, cluster) => sum + cluster.visits.length, 0),
+          averageClusterSize: clusters.length > 0 
+            ? clusters.reduce((sum, cluster) => sum + cluster.visits.length, 0) / clusters.length 
+            : 0
+        }
+      }
+    });
+
+  } catch (error: any) {
+    console.error('generateClusters error', error);
+    return res.status(500).json({ 
+      error: 'Failed to generate clusters', 
+      details: error.message 
+    });
+  }
 }
+
+/**
+ * Create actual cluster records in database from generated clusters
+ */
+private async createClusterRecords(tenantId: string, clusters: any[]) {
+  const createdClusters = [];
+
+  for (const cluster of clusters) {
+    // Create cluster record
+    const clusterRecord = await (this.prisma as any).cluster.create({
+      data: {
+        tenantId,
+        name: cluster.name,
+        latitude: cluster.centroid.latitude,
+        longitude: cluster.centroid.longitude,
+        radiusMeters: 5000,
+        activeRequestCount: cluster.visits.length,
+        totalRequestCount: cluster.visits.length,
+        activeCarerCount: cluster.metrics.suggestedCarers.length,
+        totalCarerCount: cluster.metrics.suggestedCarers.length,
+        lastActivityAt: new Date()
+      }
+    });
+
+    // Update PostGIS regionCenter
+    try {
+      await this.prisma.$executeRaw`
+        UPDATE clusters 
+        SET "regionCenter" = ST_SetSRID(ST_MakePoint(${cluster.centroid.longitude}, ${cluster.centroid.latitude}), 4326)::geography
+        WHERE id = ${clusterRecord.id}
+      `;
+    } catch (error) {
+      console.error('Failed to update cluster regionCenter:', error);
+    }
+
+    // Assign visits to cluster
+    for (const visit of cluster.visits) {
+      await (this.prisma as any).externalRequest.update({
+        where: { id: visit.id },
+        data: { clusterId: clusterRecord.id }
+      });
+    }
+
+    createdClusters.push({
+      ...clusterRecord,
+      metrics: cluster.metrics,
+      visits: cluster.visits
+    });
+  }
+
+  return createdClusters;
+}
+
+
+/**
+ * Generate OPTIMIZED AI-powered clusters
+ */
+public async generateOptimizedClusters(req: Request, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      return res.status(403).json({ error: 'tenantId missing from auth context' });
+    }
+
+    const {
+      startDate,
+      endDate,
+      maxTravelTime = 30,
+      timeWindowTolerance = 15,
+      minClusterSize = 2,
+      maxClusterSize = 8,
+      epsilon = 0.1,
+      minPoints = 2,
+      enableOptimization = true
+    } = req.body;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ error: 'startDate and endDate are required' });
+    }
+
+    // Initialize services
+    const constraintsService = new ConstraintsService(this.prisma);
+    const travelService = new TravelService(this.prisma);
+    const clusteringService = new ClusteringService(
+      this.prisma, 
+      constraintsService, 
+      travelService
+    );
+
+    const params = {
+      dateRange: {
+        start: new Date(startDate),
+        end: new Date(endDate)
+      },
+      maxTravelTime,
+      timeWindowTolerance,
+      minClusterSize,
+      maxClusterSize,
+      epsilon,
+      minPoints,
+      enableOptimization
+    };
+
+    let result;
+    if (enableOptimization) {
+      // Use the optimized method
+      result = await clusteringService.generateOptimizedClusters(tenantId.toString(), params);
+    } else {
+      // Use regular method and create compatible result structure
+      const clusters = await clusteringService.generateClusters(tenantId.toString(), params);
+      const metrics = clusteringService.calculateOverallQualityMetrics(clusters);
+      
+      result = {
+        clusters,
+        metrics: {
+          before: metrics,
+          after: metrics,
+          improvements: {
+            geographicCompactness: 0,
+            timeWindowCohesion: 0,
+            carerFitScore: 0,
+            workloadBalance: 0
+          }
+        },
+        actions: { 
+          clustersSplit: 0, 
+          clustersMerged: 0, 
+          outliersRemoved: 0, 
+          visitsReassigned: 0 
+        }
+      };
+    }
+
+    return res.json({
+      success: true,
+      data: result,
+      message: enableOptimization ? 
+        `Generated ${result.clusters.length} optimized clusters` :
+        `Generated ${result.clusters.length} raw clusters`
+    });
+
+  } catch (error: any) {
+    console.error('generateOptimizedClusters error', error);
+    return res.status(500).json({ 
+      error: 'Failed to generate clusters', 
+      details: error.message 
+    });
+  }
+}
+}
+
+

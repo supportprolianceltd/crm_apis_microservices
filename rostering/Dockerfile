@@ -46,9 +46,10 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 # Generate Prisma client in runtime stage
 RUN npx prisma generate
 
-# Copy entrypoint
+# Copy entrypoint and seed script
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY seed.sh /seed.sh
+RUN chmod +x /entrypoint.sh /seed.sh
 
 # Create directories
 RUN mkdir -p /app/logs && addgroup --system --gid 1001 nodejs \
@@ -60,7 +61,7 @@ EXPOSE 3005
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "const http = require('http'); \
-    const options = { hostname: 'localhost', port: 3005, path: '/api/v1/health', timeout: 2000 }; \
+    const options = { hostname: 'localhost', port: 3005, path: '/health', timeout: 2000 }; \
     const req = http.request(options, (res) => { \
       process.exit(res.statusCode === 200 ? 0 : 1); \
     }); \
@@ -70,3 +71,6 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["node", "dist/server.js"]
+
+
+

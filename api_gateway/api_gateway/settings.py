@@ -31,15 +31,18 @@ import django.http.request
 django.http.request.split_domain_port = patched_split_domain_port
 # ======================== END MONKEY PATCH ========================
 
+
 # ======================== BASE DIRECTORY & ENVIRONMENT ========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
+
 # ======================== SECURITY ========================
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-fallback-key-for-dev-only')
 DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', 'gateway', '0.0.0.0', '*'])
+
 
 # ======================== APPLICATION DEFINITION ========================
 INSTALLED_APPS = [
@@ -55,20 +58,23 @@ INSTALLED_APPS = [
     'django_ratelimit',
 ]
 
+
 # ======================== MIDDLEWARE ========================
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # must be first
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 # ======================== URL CONFIGURATION ========================
 ROOT_URLCONF = 'api_gateway.urls'
+
 
 # ======================== TEMPLATES ========================
 TEMPLATES = [
@@ -87,8 +93,10 @@ TEMPLATES = [
     },
 ]
 
+
 # ======================== WSGI ========================
 WSGI_APPLICATION = 'api_gateway.wsgi.application'
+
 
 # ======================== DATABASE ========================
 DATABASES = {
@@ -98,21 +106,15 @@ DATABASES = {
     }
 }
 
+
 # ======================== PASSWORD VALIDATION ========================
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
+
 
 # ======================== INTERNATIONALIZATION ========================
 LANGUAGE_CODE = 'en-us'
@@ -120,31 +122,28 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+
 # ======================== STATIC FILES ========================
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# api_gateway/settings.py
-# Increase timeout for resume screening
 
-# Gateway-specific settings
+# ======================== GATEWAY TIMEOUTS & RETRIES ========================
 GATEWAY_TIMEOUTS = {
     'default': 300,
     'screen-resumes': 900,
     'upload': 600,
     'health': 30,
     'auth': 60,
-    'notifications': 30
+    'notifications': 30,
 }
 
-# Add retry configuration
 GATEWAY_RETRIES = {
     'max_retries': 3,
     'backoff_factor': 1,
     'status_forcelist': [500, 502, 503, 504],
 }
 
-# Update session configuration with better connection pooling
 session = requests.Session()
 adapter = requests.adapters.HTTPAdapter(
     pool_connections=50,
@@ -155,26 +154,23 @@ adapter = requests.adapters.HTTPAdapter(
 session.mount('http://', adapter)
 session.mount('https://', adapter)
 
+
 # ======================== DEFAULT AUTO FIELD ========================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 # ======================== FILE UPLOAD LIMITS ========================
-FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2.5 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2.5 * 1024 * 1024
+
 
 # ======================== LOGGING ========================
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '{asctime} [{levelname}] {name}: {message}',
-            'style': '{'
-        },
-        'simple': {
-            'format': '[{levelname}] {message}',
-            'style': '{'
-        },
+        'verbose': {'format': '{asctime} [{levelname}] {name}: {message}', 'style': '{'},
+        'simple': {'format': '[{levelname}] {message}', 'style': '{'},
     },
     'handlers': {
         'file': {
@@ -183,34 +179,40 @@ LOGGING = {
             'filename': 'gateway.log',
             'formatter': 'verbose',
         },
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
+        'console': {'class': 'logging.StreamHandler', 'formatter': 'simple'},
     },
     'loggers': {
-        'gateway': {
-            'handlers': ['file', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'django': {
-            'handlers': ['file', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
+        'gateway': {'handlers': ['file', 'console'], 'level': 'INFO', 'propagate': True},
+        'django': {'handlers': ['file', 'console'], 'level': 'INFO', 'propagate': True},
     },
 }
 
-# ======================== CORS CONFIGURATION ========================
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
-    "http://localhost:5173",
-    "https://crm-frontend-react.vercel.app", 
-    "http://localhost:8000",
-    # Add rostering frontend if needed, e.g., "http://localhost:3006"
-])
 
-# Add specific headers needed for file uploads
+# ======================== CORS CONFIGURATION ========================
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow all e3os subdomains
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https:\/\/([\w-]+\.)*e3os\.co\.uk$",
+    r"^https:\/\/([\w-]+\.)*e3os\.ai$",
+    r"^https:\/\/([\w-]+\.)*e3os\.care$",
+    r"^https:\/\/([\w-]+\.)*e3os\.net$",
+    r"^https:\/\/([\w-]+\.)*e3os\.online$",
+]
+
+# Explicitly include other origins
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:8000",
+    "http://localhost:3001",
+    "https://crm-frontend-react.vercel.app",
+    "https://loan-app-puce.vercel.app",
+    "https://e3os.co.uk",
+    "https://technicalglobaladministrator.e3os.co.uk",
+]
+
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -224,10 +226,8 @@ CORS_ALLOW_HEADERS = [
     'x-file-size',
     'x-file-name',
 ]
+CORS_EXPOSE_HEADERS = ["Content-Type", "Authorization"]
 
-# Add more permissive CORS settings for development
-CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS', default=False)
-CORS_ALLOW_CREDENTIALS = True
 
 # ======================== MICROSERVICE URLS ========================
 AUTH_SERVICE_URL = env.str("AUTH_SERVICE_URL", default="http://auth-service:8001")
@@ -236,19 +236,17 @@ TALENT_ENGINE_URL = env.str("TALENT_ENGINE_URL", default="http://talent-engine:8
 MESSAGING_URL = env.str("MESSAGING_URL", default="http://messaging:3000")
 LMS_APP_URL = env.str("LMS_APP_URL", default="http://lms-app:8004")
 NOTIFICATIONS_SERVICE_URL = env.str("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
-
 HR_SERVICE_URL = env.str("HR_SERVICE_URL", default="http://hr:8004")
-
-# New: Rostering Service URL
 ROSTERING_SERVICE_URL = env.str("ROSTERING_SERVICE_URL", default="http://rostering:3005")
+
 
 # ======================== ROUTE CONFIGURATION ========================
 AUTH_ROUTES = [
     "token", "token/refresh", "token/validate", "login", "logout",
-    "verify-2fa", "docs", "doc", "user", "tenant", "public-key", "jitsi"
+    "debug-cookies", "test-cookies", "simple-cookie-test",
+    "verify-2fa", "docs", "doc", "user", "tenant", "public-key", "jitsi", "reviews",
 ]
 
-# Microservice routing dictionary
 MICROSERVICE_URLS = {
     "auth_service": AUTH_SERVICE_URL,
     "applications-engine": APPLICATIONS_ENGINE_URL,
@@ -257,12 +255,12 @@ MICROSERVICE_URLS = {
     "lms": LMS_APP_URL,
     "notifications": NOTIFICATIONS_SERVICE_URL,
     "hr": HR_SERVICE_URL,
-    # New: Rostering routes /api/rostering/... to rostering service
     "rostering": ROSTERING_SERVICE_URL,
 }
 
 # Register all auth routes under auth service
 MICROSERVICE_URLS.update({route: AUTH_SERVICE_URL for route in AUTH_ROUTES})
+
 
 # ======================== PUBLIC PATHS (NO AUTH REQUIRED) ========================
 PUBLIC_PATHS = [
@@ -277,18 +275,13 @@ PUBLIC_PATHS = [
     "applications-engine/applications/code/",
     "applications-engine/applications/applicant/upload/",
     "talent-engine/requisitions/public/close/batch/",
-    "health/",
-    "health",
-    "metrics/",
-    "circuit-breaker/status/",
-    "api/user/users/all-tenants/",
-
-    "hr/public/health/",  # Example: Add HR-specific public paths here
-
-    # New: Example rostering public paths (adjust based on your rostering API)
-    "rostering/public/health/",
-    "rostering/api/v1/health",
+    "health/", "health", "metrics/", "circuit-breaker/status/",
+    "api/user/users/all-tenants/", "api/user/public-register/",
+    "hr/public/health/", "rostering/public/health/",
+    "rostering/api/v1/health", "reviews/public/submit/",
+    "rostering/docs", "rostering/docs/",
 ]
+
 
 # ======================== RATE LIMITING ========================
 RATELIMIT_ENABLE = True

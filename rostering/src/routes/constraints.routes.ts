@@ -18,3 +18,6 @@ export function createConstraintsRoutes(prisma: PrismaClient) {
 
   return router;
 }
+
+
+

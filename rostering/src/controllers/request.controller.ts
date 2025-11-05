@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { PrismaClient, RequestStatus, MatchStatus } from '@prisma/client';
+import { PrismaClient, RequestStatus, MatchStatus, Prisma } from '@prisma/client';
 import { GeocodingService } from '../services/geocoding.service';
 import { MatchingService } from '../services/matching.service';
 import { ClusteringService } from '../services/clustering.service';
+import { ConstraintsService } from '../services/constraints.service';
+import { TravelService } from '../services/travel.service';
 import { logger, logServiceError } from '../utils/logger';
 import { 
   CreateRequestPayload, 
@@ -59,7 +61,9 @@ export class RequestController {
     this.prisma = prisma;
     this.geocodingService = geocodingService;
     this.matchingService = matchingService;
-    this.clusteringService = new ClusteringService(prisma);
+    const constraintsService = new ConstraintsService(prisma);
+    const travelService = new TravelService(prisma);
+    this.clusteringService = new ClusteringService(prisma, constraintsService, travelService);
   }
 
   /**
@@ -67,7 +71,8 @@ export class RequestController {
    */
   createRequest = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId.toString();
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
       
       // Validate request body
       const validatedData = createRequestSchema.parse(req.body);
@@ -196,7 +201,8 @@ export class RequestController {
    */
   getRequestsByStatus = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId.toString();
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
       const statusParam = (req.params.status || '').toUpperCase();
 
       // Validate status against generated Prisma enum values
@@ -268,7 +274,8 @@ export class RequestController {
    */
   getRequest = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId.toString();
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
       const requestId = req.params.id;
 
       const request = await this.prisma.externalRequest.findFirst({
@@ -345,7 +352,8 @@ export class RequestController {
    */
   updateRequest = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId.toString();
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
       const requestId = req.params.id;
 
       // Validate request body
@@ -438,7 +446,8 @@ export class RequestController {
    */
   listRequests = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId.toString();
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
       const page = parseInt(req.query.page as string) || 1;
       const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
       const skip = (page - 1) * limit;
@@ -531,7 +540,8 @@ export class RequestController {
    */
   searchRequests = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId.toString();
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
       
       // Validate query parameters
       const validatedQuery = searchRequestsSchema.parse(req.query);
@@ -629,7 +639,8 @@ export class RequestController {
    */
   deleteRequest = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId.toString();
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
       const requestId = req.params.id;
 
       // Check if request exists and belongs to tenant
@@ -674,7 +685,8 @@ export class RequestController {
    */
   triggerMatching = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId.toString();
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
       const requestId = req.params.id;
 
       // Check if request exists and belongs to tenant
@@ -723,7 +735,8 @@ export class RequestController {
    */
   approveRequest = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId.toString();
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
       const requestId = req.params.id;
 
       const existingRequest = await this.prisma.externalRequest.findFirst({
@@ -790,7 +803,8 @@ export class RequestController {
    */
   declineRequest = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId.toString();
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
       const requestId = req.params.id;
 
       const existingRequest = await this.prisma.externalRequest.findFirst({
@@ -810,7 +824,7 @@ export class RequestController {
       const { reason } = req.body as { reason?: string };
 
       // Use a transaction to update request and cancel any outstanding matches
-      const updated = await this.prisma.$transaction(async (tx) => {
+      const updated = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         // Cancel request matches
         await tx.requestCarerMatch.updateMany({
           where: { requestId },
@@ -842,3 +856,4 @@ export class RequestController {
     }
   };
 }
+
