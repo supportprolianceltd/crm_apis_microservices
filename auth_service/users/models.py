@@ -135,6 +135,11 @@ class CustomUser(AbstractUser):
     login_attempts = models.PositiveIntegerField(default=0)
     last_password_reset = models.DateTimeField(null=True, blank=True)
 
+    # Two-Factor Authentication fields
+    two_factor_enabled = models.BooleanField(default=False)
+    two_factor_secret = models.CharField(max_length=32, blank=True, null=True)
+    two_factor_backup_codes = models.JSONField(default=list, blank=True)
+
     class Meta:
         # REMOVED: unique_together = [('tenant', 'username')]  # Now global via index
         pass

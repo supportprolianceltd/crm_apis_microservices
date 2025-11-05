@@ -32,6 +32,12 @@ from users.serializers import (
     CustomUserSerializer,
 )
 
+# 2FA imports
+import pyotp
+import qrcode
+from io import BytesIO
+import base64
+
 from auth_service.authentication import RS256TenantJWTAuthentication, RS256CookieJWTAuthentication
 from auth_service.utils.jwt_rsa import (
     blacklist_refresh_token,
@@ -449,10 +455,29 @@ class CustomTokenSerializer(serializers.Serializer):
                              ip_address, user_agent, False)
             raise serializers.ValidationError("This IP address is blocked")
 
+        # Check if 2FA is enabled
+        if user.two_factor_enabled:
+            # Cache login data for 2FA verification
+            cache_key = f"login_pending_{user.id}"
+            cache.set(cache_key, {
+                'remember_me': remember_me,
+                'method': "username" if "username" in attrs else "email",
+                'ip_address': ip_address,
+                'user_agent': user_agent
+            }, timeout=300)  # 5 minutes
+
+            # Don't complete login yet, require 2FA
+            return {
+                "requires_2fa": True,
+                "user_id": user.id,
+                "email": user.email,
+                "message": "Two-factor authentication required"
+            }
+
         # Success: Reset attempts & log
         if hasattr(user, 'reset_login_attempts'):
             user.reset_login_attempts()
-            
+
         method = "username" if "username" in attrs else "email"
         self._log_activity(user, user.tenant, "login", {"method": method}, ip_address, user_agent, True)
 
@@ -710,22 +735,33 @@ class CustomTokenObtainPairView(APIView):
         try:
             serializer.is_valid(raise_exception=True)
             logger.info("✅ Custom token serializer validation successful")
-            
-            # Get validated data (includes tokens)
+
+            # Get validated data
             validated_data = serializer.validated_data
+
+            # Check if 2FA is required
+            if validated_data.get("requires_2fa"):
+                return Response({
+                    "requires_2fa": True,
+                    "user_id": validated_data["user_id"],
+                    "email": validated_data["email"],
+                    "message": "Two-factor authentication required. Please verify your code."
+                }, status=status.HTTP_200_OK)
+
+            # Normal login flow
             remember_me = request.data.get('remember_me', False)
-            
+
             # Create response with JSON data (for backward compatibility or non-cookie clients)
             response = Response(validated_data, status=status.HTTP_200_OK)
-            
+
             # Set cookies for secure storage using helper function
             response = set_auth_cookies(
-                response, 
-                validated_data['access'], 
+                response,
+                validated_data['access'],
                 validated_data['refresh'],
                 remember_me=remember_me
             )
-            
+
             logger.info("✅ Login successful with cookies set")
             return response
             
@@ -1517,3 +1553,284 @@ class JitsiTokenView(APIView):
             success=True,
         )
         return Response({"token": token})
+
+
+# ============================================================================
+# TWO-FACTOR AUTHENTICATION VIEWS
+# ============================================================================
+
+class TwoFactorSetupView(APIView):
+    """
+    Generate and display QR code for 2FA setup
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [RS256TenantJWTAuthentication, RS256CookieJWTAuthentication]
+
+    def get(self, request):
+        """Generate QR code for 2FA setup"""
+        user = request.user
+        tenant = getattr(request, "tenant", None)
+
+        if not tenant:
+            return Response({"detail": "Tenant context missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+        with tenant_context(tenant):
+            # Check if 2FA is already enabled
+            if user.two_factor_enabled:
+                return Response({
+                    "detail": "Two-factor authentication is already enabled",
+                    "enabled": True
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Generate secret if not exists
+            if not user.two_factor_secret:
+                secret = pyotp.random_base32()
+                user.two_factor_secret = secret
+                user.save()
+
+            # Create TOTP object
+            totp = pyotp.TOTP(user.two_factor_secret)
+            provisioning_uri = totp.provisioning_uri(
+                name=user.email,
+                issuer_name=f"{tenant.name} CRM"
+            )
+
+            # Generate QR code
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(provisioning_uri)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+
+            # Convert to base64
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+            return Response({
+                "secret": user.two_factor_secret,
+                "qr_code": f"data:image/png;base64,{qr_code_base64}",
+                "provisioning_uri": provisioning_uri
+            })
+
+
+class TwoFactorEnableView(APIView):
+    """
+    Enable 2FA after verification
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [RS256TenantJWTAuthentication, RS256CookieJWTAuthentication]
+
+    def post(self, request):
+        """Verify code and enable 2FA"""
+        user = request.user
+        tenant = getattr(request, "tenant", None)
+        code = request.data.get("code")
+
+        if not tenant:
+            return Response({"detail": "Tenant context missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not code:
+            return Response({"detail": "Verification code is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        with tenant_context(tenant):
+            if user.two_factor_enabled:
+                return Response({"detail": "Two-factor authentication is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if not user.two_factor_secret:
+                return Response({"detail": "Please setup 2FA first"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Verify the code
+            totp = pyotp.TOTP(user.two_factor_secret)
+            if not totp.verify(code):
+                return Response({"detail": "Invalid verification code"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Generate backup codes
+            backup_codes = [str(random.randint(100000, 999999)) for _ in range(10)]
+            user.two_factor_enabled = True
+            user.two_factor_backup_codes = backup_codes
+            user.save()
+
+            # Log activity
+            UserActivity.objects.create(
+                user=user,
+                tenant=tenant,
+                action="2fa_enabled",
+                performed_by=user,
+                details={"method": "TOTP"},
+                ip_address=request.META.get("REMOTE_ADDR"),
+                user_agent=request.META.get("HTTP_USER_AGENT", ""),
+                success=True,
+            )
+
+            return Response({
+                "detail": "Two-factor authentication enabled successfully",
+                "backup_codes": backup_codes
+            })
+
+
+class TwoFactorDisableView(APIView):
+    """
+    Disable 2FA
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [RS256TenantJWTAuthentication, RS256CookieJWTAuthentication]
+
+    def post(self, request):
+        """Disable 2FA"""
+        user = request.user
+        tenant = getattr(request, "tenant", None)
+        code = request.data.get("code")
+
+        if not tenant:
+            return Response({"detail": "Tenant context missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+        with tenant_context(tenant):
+            if not user.two_factor_enabled:
+                return Response({"detail": "Two-factor authentication is not enabled"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if not code:
+                return Response({"detail": "Verification code is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Verify the code before disabling
+            totp = pyotp.TOTP(user.two_factor_secret)
+            if not totp.verify(code):
+                return Response({"detail": "Invalid verification code"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Disable 2FA
+            user.two_factor_enabled = False
+            user.two_factor_secret = None
+            user.two_factor_backup_codes = []
+            user.save()
+
+            # Log activity
+            UserActivity.objects.create(
+                user=user,
+                tenant=tenant,
+                action="2fa_disabled",
+                performed_by=user,
+                details={"method": "TOTP"},
+                ip_address=request.META.get("REMOTE_ADDR"),
+                user_agent=request.META.get("HTTP_USER_AGENT", ""),
+                success=True,
+            )
+
+            return Response({"detail": "Two-factor authentication disabled successfully"})
+
+
+class TwoFactorVerifyView(APIView):
+    """
+    Verify 2FA code during login
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """Verify 2FA code and complete login"""
+        email = request.data.get("email")
+        code = request.data.get("code")
+        tenant = getattr(request, "tenant", None)
+
+        if not tenant:
+            return Response({"detail": "Tenant context missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not email or not code:
+            return Response({"detail": "Email and verification code are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        with tenant_context(tenant):
+            try:
+                user = CustomUser.objects.get(email=email, tenant=tenant)
+            except CustomUser.DoesNotExist:
+                return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            if not user.two_factor_enabled:
+                return Response({"detail": "Two-factor authentication is not enabled for this account"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if code is in backup codes first
+            if code in user.two_factor_backup_codes:
+                # Remove used backup code
+                user.two_factor_backup_codes.remove(code)
+                user.save()
+                code_type = "backup"
+            else:
+                # Verify TOTP code
+                totp = pyotp.TOTP(user.two_factor_secret)
+                if not totp.verify(code):
+                    return Response({"detail": "Invalid verification code"}, status=status.HTTP_400_BAD_REQUEST)
+                code_type = "totp"
+
+            # Get cached login data
+            cached_key = f"login_pending_{user.id}"
+            login_data = cache.get(cached_key)
+
+            if not login_data:
+                return Response({"detail": "Login session expired. Please try logging in again."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Generate tokens
+            primary_domain = tenant.domains.filter(is_primary=True).first()
+            tenant_domain = primary_domain.domain if primary_domain else None
+
+            access_payload = {
+                "jti": str(uuid.uuid4()),
+                "sub": user.email,
+                "username": user.username,
+                "role": user.role,
+                "status": user.status,
+                "tenant_id": user.tenant.id,
+                "tenant_organizational_id": str(tenant.organizational_id),
+                "tenant_unique_id": str(tenant.unique_id),
+                "tenant_schema": user.tenant.schema_name,
+                "tenant_domain": tenant_domain,
+                "has_accepted_terms": user.has_accepted_terms,
+                "user": CustomUserMinimalSerializer(user).data,
+                "email": user.email,
+                "type": "access",
+                "exp": (timezone.now() + timedelta(minutes=180)).timestamp(),
+            }
+            access_token = issue_rsa_jwt(access_payload, user.tenant)
+
+            refresh_jti = str(uuid.uuid4())
+            refresh_days = 30 if login_data.get('remember_me', False) else 7
+            refresh_payload = {
+                "jti": refresh_jti,
+                "sub": user.email,
+                "username": user.username,
+                "tenant_id": user.tenant.id,
+                "tenant_organizational_id": str(user.tenant.organizational_id),
+                "tenant_unique_id": str(tenant.unique_id),
+                "tenant_domain": tenant_domain,
+                "type": "refresh",
+                "remember_me": login_data.get('remember_me', False),
+                "exp": (timezone.now() + timedelta(days=refresh_days)).timestamp(),
+            }
+            refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
+
+            data = {
+                "access": access_token,
+                "refresh": refresh_token,
+                "tenant_id": user.tenant.id,
+                "tenant_schema": user.tenant.schema_name,
+                "tenant_domain": tenant_domain,
+                "user": CustomUserMinimalSerializer(user).data,
+                "has_accepted_terms": user.has_accepted_terms,
+                "remember_me": login_data.get('remember_me', False),
+            }
+
+            # Log successful login
+            UserActivity.objects.create(
+                user=user,
+                tenant=tenant,
+                action="login",
+                performed_by=None,
+                details={"method": "2FA", "code_type": code_type},
+                ip_address=request.META.get("REMOTE_ADDR"),
+                user_agent=request.META.get("HTTP_USER_AGENT", ""),
+                success=True,
+            )
+
+            # Clear cache
+            cache.delete(cached_key)
+
+            # Create response and set cookies
+            response = Response(data, status=status.HTTP_200_OK)
+            response = set_auth_cookies(response, access_token, refresh_token, remember_me=login_data.get('remember_me', False))
+
+            return response

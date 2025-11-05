@@ -24,6 +24,9 @@ COPY . .
 RUN curl -L https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh -o /app/wait-for-it.sh \
     && chmod +x ./wait-for-it.sh
 
+RUN chmod +x /app/wait-for-it.sh
+
+
 # Make entrypoint executable
 RUN chmod +x ./entrypoint.sh
 
