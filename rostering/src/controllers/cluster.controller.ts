@@ -5,18 +5,7 @@ import { CarerService } from '../services/carer.service';
 import { ConstraintsService } from '../services/constraints.service';
 import { TravelService } from '../services/travel.service';
 
-interface Carer {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  skills: string[];
-  maxTravelDistance: number;
-  latitude: number | null;
-  longitude: number | null;
-  clusterId?: string;
-}
+
 
 export class ClusterController {
   private clusteringService: ClusteringService;
@@ -43,6 +32,7 @@ export class ClusterController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
+      const tenantId = user.tenantId;
       const { name, description, postcode, latitude, longitude, location } = req.body;
 
       if (!name) {
@@ -62,7 +52,7 @@ export class ClusterController {
       }
       // Normalize postcode for comparison (remove spaces, convert to uppercase)
       normalizedPostcode = postcode.trim().replace(/\s+/g, '').toUpperCase();
-      
+
       const existingCluster = await (this.prisma as any).cluster.findFirst({
         where: {
           tenantId: tenantId.toString(),
@@ -74,7 +64,7 @@ export class ClusterController {
       });
 
       if (existingCluster) {
-        return res.status(409).json({ 
+        return res.status(409).json({
           error: 'A cluster with this postcode already exists',
           details: `Cluster "${existingCluster.name}" already uses postcode ${postcode}`
         });
@@ -180,7 +170,7 @@ export class ClusterController {
       const carerService = new CarerService();
       
       const carersWithDetails = await Promise.all(
-        assignments.map(async (assignment) => {
+        assignments.map(async (assignment: any) => {
           const carer = await carerService.getCarerById(token, assignment.carerId);
           return {
             assignmentId: assignment.id,
@@ -329,7 +319,7 @@ export class ClusterController {
       const carerService = new CarerService();
       
       const carersWithDetails = await Promise.all(
-        assignments.map(async (assignment) => {
+        assignments.map(async (assignment: any) => {
           const carer = await carerService.getCarerById(token, assignment.carerId);
           return {
             assignmentId: assignment.id,

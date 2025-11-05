@@ -5,6 +5,10 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import http from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 
 import { logger, logRequest } from './utils/logger';
 import { CarerService} from './services/carer.service';
@@ -34,15 +38,9 @@ import { createTravelMatrixRoutes } from './routes/travel-matrix.routes';
 import { createEligibilityRoutes } from './routes/eligibility.routes';
 import { createClusterMetricsRoutes } from './routes/cluster-metrics.routes';
 import { createDemoRoutes } from './routes/demo.routes';
+import { createSettlementRoutes } from './routes/settlement.routes';
 
 // Import services
-import { logger, logRequest } from './utils/logger';
-import { GeocodingService } from './services/geocoding.service';
-import { EmailService } from './services/email.service';
-import { MatchingService } from './services/matching.service';
-import { AuthSyncService } from './services/auth-sync.service';
-import { NotificationService } from './services/notification.service';
-import { TenantEmailConfigService } from './services/tenant-email-config.service';
 import { ConstraintsService } from './services/constraints.service';
 import { TravelService } from './services/travel.service';
 import { ClusteringService } from './services/clustering.service';
@@ -58,8 +56,6 @@ import { ClusterMetricsService } from './services/cluster-metrics.service';
 import { AdvancedOptimizationService } from './services/advanced-optimization.service';
 
 // Import controllers
-import { RequestController } from './controllers/request.controller';
-import { CarerController } from './controllers/carer.controller';
 import { RosterController } from './controllers/roster.controller';
 import { CarePlanController } from './controllers/careplan.controller';
 import { TaskController } from './controllers/task.controller';
@@ -77,10 +73,10 @@ import { authenticate } from './middleware/auth.middleware';
 dotenv.config();
 
 class RosteringServer {
-  private app: Application;
-  private httpServer: HTTPServer;
-  private io?: SocketIOServer;
-  private prisma?: PrismaClient;
+   private app: Application;
+   private httpServer: http.Server;
+   private io?: SocketIOServer;
+   private prisma?: PrismaClient;
 
   // Services
   private geocodingService?: GeocodingService;
@@ -121,7 +117,7 @@ class RosteringServer {
   constructor() {
     console.log('🔧 [DEBUG] Constructor called');
     this.app = express();
-    this.httpServer = new HTTPServer(this.app);
+    this.httpServer = http.createServer(this.app);
     console.log('🔧 [DEBUG] Express setup complete');
 
     // Skip database and service initialization in swagger-only mode
@@ -245,7 +241,7 @@ class RosteringServer {
       // Initialize controllers
       console.log('🔧 [DEBUG] Initializing controllers...');
       this.requestController = new RequestController(this.prisma, this.geocodingService, this.matchingService);
-      this.carerController = new CarerController(this.prisma);
+      this.carerController = new CarerController(this.prisma!);
       this.rosterController = new RosterController(this.prisma);
       this.carePlanController = new CarePlanController(this.prisma);
       this.taskController = new TaskController(this.prisma);

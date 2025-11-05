@@ -127,13 +127,13 @@ export class MatchingService {
         } catch (sqlError) {
           logger.error('❌ cluster_assignments spatial query failed:', sqlError);
           logger.debug('🔄 Falling back to retrieving recent assignments...');
-          const rows = await this.prisma.clusterAssignment.findMany({ where: { tenantId: request.tenantId }, take: 500, select: { carerId: true } });
-          candidateCarerIds = rows.map(r => r.carerId);
+          const rows = await (this.prisma as any).clusterAssignment.findMany({ where: { tenantId: request.tenantId }, take: 500, select: { carerId: true } });
+          candidateCarerIds = rows.map((r: any) => r.carerId);
         }
       } else {
         // No coords: get recent assignments for tenant
-        const rows = await this.prisma.clusterAssignment.findMany({ where: { tenantId: request.tenantId }, take: 500, select: { carerId: true } });
-        candidateCarerIds = rows.map(r => r.carerId);
+        const rows = await (this.prisma as any).clusterAssignment.findMany({ where: { tenantId: request.tenantId }, take: 500, select: { carerId: true } });
+        candidateCarerIds = rows.map((r: any) => r.carerId);
       }
 
       if (candidateCarerIds.length === 0) {

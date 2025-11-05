@@ -22,9 +22,11 @@ const searchCarersSchema = z.object({
 
 export class CarerController {
   private carerService: CarerService;
+  private prisma: PrismaClient;
 
-  constructor(carerService: CarerService) {
-    this.carerService = carerService;
+  constructor(prisma: PrismaClient) {
+    this.prisma = prisma;
+    this.carerService = new CarerService();
   }
 
   /**
