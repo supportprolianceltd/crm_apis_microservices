@@ -38,8 +38,22 @@ model ExternalRequest {
   notes              String?                                @db.Text
   emailMessageId     String?
   emailThreadId      String?
+  
+  // Existing approval fields
   approvedBy         String?
   approvedAt         DateTime?
+  
+  // NEW: Detailed user tracking for creation
+  createdBy          String?   @map("created_by")
+  createdByEmail     String?   @map("created_by_email")
+  createdByFirstName String?   @map("created_by_first_name")
+  createdByLastName  String?   @map("created_by_last_name")
+  
+  // NEW: Detailed user tracking for approval
+  approvedByEmail     String?  @map("approved_by_email")
+  approvedByFirstName String?  @map("approved_by_first_name")
+  approvedByLastName  String?  @map("approved_by_last_name")
+  
   sendToRostering    Boolean
 
   clusterId          String?
@@ -48,7 +62,7 @@ model ExternalRequest {
   matches            RequestCarerMatch[]
   timesheetEntries   TimesheetEntry[]
   invoiceLineItems   InvoiceLineItem[]
-  assignments Assignment[] @relation("VisitAssignments")
+  assignments        Assignment[]                           @relation("VisitAssignments")
 
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -61,8 +75,11 @@ model ExternalRequest {
   @@index([createdAt])
   @@index([scheduledStartTime])
   @@index([clusterId])
+  @@index([createdBy])
+  @@index([approvedBy])
   @@map("external_requests")
 }
+
 
 model Carer {
   id                 String                                 @id @default(cuid())

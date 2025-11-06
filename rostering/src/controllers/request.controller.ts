@@ -15,7 +15,7 @@ import {
   ExternalRequest
 } from '../types';
 
-// Validation schemas
+// Validation schemas (unchanged)
 const createRequestSchema = z.object({
   subject: z.string().min(1, 'Subject is required'),
   content: z.string().min(1, 'Content is required'),
@@ -67,7 +67,7 @@ export class RequestController {
   }
 
   /**
-   * Create a new request
+   * Create a new request with creator tracking
    */
   createRequest = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -86,9 +86,8 @@ export class RequestController {
       let clusterId: string | undefined;
       let cluster: any = null;
 
-  // Find or create cluster if we have coordinates
-  // Controlled by AUTO_ASSIGN_REQUESTS env var. Automatic assignment only runs when AUTO_ASSIGN_REQUESTS === 'true'.
-  if (process.env.AUTO_ASSIGN_REQUESTS === 'true' && geocoded?.latitude && geocoded?.longitude) {
+      // Find or create cluster if we have coordinates
+      if (process.env.AUTO_ASSIGN_REQUESTS === 'true' && geocoded?.latitude && geocoded?.longitude) {
         try {
           cluster = await this.clusteringService.findOrCreateClusterForLocation(
             tenantId,
@@ -101,7 +100,7 @@ export class RequestController {
         }
       }
 
-      // Create the request
+      // Create the request with creator information
       const createData: any = {
         tenantId,
         subject: validatedData.subject,
@@ -120,11 +119,15 @@ export class RequestController {
         scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
         notes: validatedData.notes,
         status: RequestStatus.PENDING,
-        // Use the schema field name `sendToRostering` (not `endToRostering`)
-        sendToRostering: false
+        sendToRostering: false,
+        // NEW: Track creator information
+        createdBy: user?.id,
+        createdByEmail: user?.email,
+        createdByFirstName: user?.firstName,
+        createdByLastName: user?.lastName
       };
 
-      // If we have a cluster, connect the relation instead of setting clusterId directly
+      // If we have a cluster, connect the relation
       if (clusterId) {
         createData.cluster = { connect: { id: clusterId } };
       }
@@ -162,7 +165,8 @@ export class RequestController {
         tenantId, 
         requestId: request.id, 
         clusterId: clusterId || 'none',
-        clusterName: cluster?.name || 'none'
+        clusterName: cluster?.name || 'none',
+        createdBy: user?.email
       });
 
       res.status(201).json({
@@ -196,8 +200,7 @@ export class RequestController {
   };
 
   /**
-   * Get requests for current tenant by status (path param)
-   * Example: GET /requests/status/PENDING
+   * Get requests for current tenant by status
    */
   getRequestsByStatus = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -205,7 +208,6 @@ export class RequestController {
       const tenantId = user?.tenantId?.toString();
       const statusParam = (req.params.status || '').toUpperCase();
 
-      // Validate status against generated Prisma enum values
       const validStatuses = Object.values(RequestStatus) as string[];
       if (!validStatuses.includes(statusParam)) {
         res.status(400).json({ success: false, error: 'Invalid status', valid: validStatuses });
@@ -219,7 +221,6 @@ export class RequestController {
         },
         orderBy: { createdAt: 'desc' },
         include: {
-          // include basic match fields (carer is external — do not try to include relation)
           matches: {
             select: {
               id: true,
@@ -236,8 +237,6 @@ export class RequestController {
 
       // Enrich matches with external carer details
       try {
-        // require here to avoid circular imports at module load time
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { CarerService } = require('../services/carer.service');
         const carerService = new CarerService();
         const authToken = req.headers?.authorization?.split?.(' ')?.[1];
@@ -307,9 +306,8 @@ export class RequestController {
         return;
       }
 
-      // Enrich matches with carer details from external service
+      // Enrich matches with carer details
       try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { CarerService } = require('../services/carer.service');
         const carerService = new CarerService();
         const authToken = req.headers?.authorization?.split?.(' ')?.[1];
@@ -356,10 +354,8 @@ export class RequestController {
       const tenantId = user?.tenantId?.toString();
       const requestId = req.params.id;
 
-      // Validate request body
       const validatedData = updateRequestSchema.parse(req.body);
 
-      // Check if request exists and belongs to tenant
       const existingRequest = await this.prisma.externalRequest.findFirst({
         where: {
           id: requestId,
@@ -375,12 +371,16 @@ export class RequestController {
         return;
       }
 
-      // Prepare update data
       const updateData: any = {
         ...validatedData,
         scheduledStartTime: validatedData.scheduledStartTime ? new Date(validatedData.scheduledStartTime) : undefined,
         scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        // NEW: Track updater information
+        updatedBy: user?.id,
+        updatedByEmail: user?.email,
+        updatedByFirstName: user?.firstName,
+        updatedByLastName: user?.lastName
       };
 
       // If address changed, re-geocode
@@ -396,13 +396,12 @@ export class RequestController {
         }
       }
 
-      // Update the request
       const updatedRequest = await this.prisma.externalRequest.update({
         where: { id: requestId },
         data: updateData
       });
 
-      // Update PostGIS location field if coordinates changed
+      // Update PostGIS location if coordinates changed
       if (validatedData.address && updatedRequest.latitude && updatedRequest.longitude) {
         try {
           await this.prisma.$executeRaw`
@@ -442,7 +441,7 @@ export class RequestController {
   };
 
   /**
-   * List all requests for a tenant (simplified version of searchRequests)
+   * List all requests for a tenant
    */
   listRequests = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -452,7 +451,6 @@ export class RequestController {
       const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
       const skip = (page - 1) * limit;
 
-      // Get total count and data
       const [total, requests] = await Promise.all([
         this.prisma.externalRequest.count({ where: { tenantId } }),
         this.prisma.externalRequest.findMany({
@@ -474,38 +472,37 @@ export class RequestController {
               orderBy: {
                 matchScore: 'desc'
               },
-              take: 5 // Show top 5 matches
+              take: 5
             }
           }
         })
       ]);
 
-        // Enrich results with external carer information
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const { CarerService } = require('../services/carer.service');
-          const carerService = new CarerService();
-          const authToken = req.headers?.authorization?.split?.(' ')?.[1];
+      // Enrich results with external carer information
+      try {
+        const { CarerService } = require('../services/carer.service');
+        const carerService = new CarerService();
+        const authToken = req.headers?.authorization?.split?.(' ')?.[1];
 
-          await Promise.all(requests.map(async (r: any) => {
-            if (!r.matches || r.matches.length === 0) return;
-            await Promise.all(r.matches.map(async (m: any) => {
-              try {
-                const carer = await carerService.getCarerById(authToken, m.carerId);
-                m.carer = carer ? {
-                  id: carer.id,
-                  email: carer.email,
-                  firstName: carer.firstName || carer.profile?.firstName,
-                  lastName: carer.lastName || carer.profile?.lastName
-                } : null;
-              } catch (err) {
-                m.carer = null;
-              }
-            }));
+        await Promise.all(requests.map(async (r: any) => {
+          if (!r.matches || r.matches.length === 0) return;
+          await Promise.all(r.matches.map(async (m: any) => {
+            try {
+              const carer = await carerService.getCarerById(authToken, m.carerId);
+              m.carer = carer ? {
+                id: carer.id,
+                email: carer.email,
+                firstName: carer.firstName || carer.profile?.firstName,
+                lastName: carer.lastName || carer.profile?.lastName
+              } : null;
+            } catch (err) {
+              m.carer = null;
+            }
           }));
-        } catch (err) {
-          logger.warn('Failed to enrich listRequests matches with carer data', { err });
-        }
+        }));
+      } catch (err) {
+        logger.warn('Failed to enrich listRequests matches with carer data', { err });
+      }
 
       const totalPages = Math.ceil(total / limit);
 
@@ -543,14 +540,12 @@ export class RequestController {
       const user = (req as any).user;
       const tenantId = user?.tenantId?.toString();
       
-      // Validate query parameters
       const validatedQuery = searchRequestsSchema.parse(req.query);
 
       const page = validatedQuery.page || 1;
       const limit = validatedQuery.limit || 20;
       const skip = (page - 1) * limit;
 
-      // Build where clause
       const whereClause: any = {
         tenantId,
         ...(validatedQuery.status && { status: validatedQuery.status }),
@@ -559,7 +554,6 @@ export class RequestController {
         ...(validatedQuery.requestorEmail && { requestorEmail: { contains: validatedQuery.requestorEmail, mode: 'insensitive' } })
       };
 
-      // Add date filtering
       if (validatedQuery.dateFrom || validatedQuery.dateTo) {
         whereClause.createdAt = {};
         if (validatedQuery.dateFrom) {
@@ -570,7 +564,6 @@ export class RequestController {
         }
       }
 
-      // Get total count and data
       const [total, requests] = await Promise.all([
         this.prisma.externalRequest.count({ where: whereClause }),
         this.prisma.externalRequest.findMany({
@@ -591,7 +584,7 @@ export class RequestController {
               orderBy: {
                 matchScore: 'desc'
               },
-              take: 3 // Only include top 3 matches in list view
+              take: 3
             }
           }
         })
@@ -643,7 +636,6 @@ export class RequestController {
       const tenantId = user?.tenantId?.toString();
       const requestId = req.params.id;
 
-      // Check if request exists and belongs to tenant
       const existingRequest = await this.prisma.externalRequest.findFirst({
         where: {
           id: requestId,
@@ -659,7 +651,6 @@ export class RequestController {
         return;
       }
 
-      // Delete the request (cascades to matches)
       await this.prisma.externalRequest.delete({
         where: { id: requestId }
       });
@@ -689,7 +680,6 @@ export class RequestController {
       const tenantId = user?.tenantId?.toString();
       const requestId = req.params.id;
 
-      // Check if request exists and belongs to tenant
       const existingRequest = await this.prisma.externalRequest.findFirst({
         where: {
           id: requestId,
@@ -705,7 +695,6 @@ export class RequestController {
         return;
       }
 
-      // Trigger matching
       const success = await this.matchingService.autoMatchRequest(requestId);
 
       if (success) {
@@ -730,8 +719,7 @@ export class RequestController {
   };
 
   /**
-   * Approve a request (mark as PROCESSING).
-   * Assumption: Approving moves a PENDING request into PROCESSING and sets processedAt.
+   * Approve a request with approver tracking
    */
   approveRequest = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -753,22 +741,21 @@ export class RequestController {
         return;
       }
 
-      // Optional metadata from body (who approved) and optional sendToRostering flag
-      const { approvedBy, sendToRostering } = req.body as { approvedBy?: string; sendToRostering?: boolean | string };
+      const { sendToRostering } = req.body as { sendToRostering?: boolean | string };
 
       const updateData: any = {
         status: RequestStatus.APPROVED,
         processedAt: new Date(),
         approvedAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        // NEW: Track approver information
+        approvedBy: user?.id,
+        approvedByEmail: user?.email,
+        approvedByFirstName: user?.firstName,
+        approvedByLastName: user?.lastName
       };
 
-      if (approvedBy) {
-        updateData.approvedBy = approvedBy;
-      }
-
-      // Allow the caller to explicitly set sendToRostering to true/false when approving.
-      // Accept boolean or string representations ("true"/"false"). Only set the field when provided.
+      // Handle sendToRostering flag
       if (typeof sendToRostering === 'boolean') {
         updateData.sendToRostering = sendToRostering;
       } else if (typeof sendToRostering === 'string') {
@@ -782,24 +769,32 @@ export class RequestController {
         data: updateData
       });
 
-      // Kick off matching again in background to ensure processing continues
+      // Kick off matching again in background
       this.matchingService.autoMatchRequest(requestId).catch(error =>
         logServiceError('Request', 'autoMatchAfterApprove', error, { requestId })
       );
 
-      logger.info(`Approved request ${requestId}`, { tenantId, requestId });
+      logger.info(`Approved request ${requestId}`, { 
+        tenantId, 
+        requestId,
+        approvedBy: user?.email
+      });
 
-      res.json({ success: true, data: updated, message: 'Request approved and set to processing' });
+      res.json({ 
+        success: true, 
+        data: updated, 
+        message: 'Request approved and set to processing' 
+      });
 
     } catch (error) {
-       console.error('Approve request error:', error);
+      console.error('Approve request error:', error);
       logServiceError('Request', 'approveRequest', error, { requestId: req.params.id });
       res.status(500).json({ success: false, error: 'Failed to approve request' });
     }
   };
 
   /**
-   * Decline a request (mark as DECLINED). Optionally accepts a reason in body.reason.
+   * Decline a request
    */
   declineRequest = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -823,9 +818,7 @@ export class RequestController {
 
       const { reason } = req.body as { reason?: string };
 
-      // Use a transaction to update request and cancel any outstanding matches
       const updated = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-        // Cancel request matches
         await tx.requestCarerMatch.updateMany({
           where: { requestId },
           data: { status: MatchStatus.DECLINED }
@@ -856,4 +849,3 @@ export class RequestController {
     }
   };
 }
-

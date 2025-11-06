@@ -40,7 +40,7 @@ if IS_PRODUCTION:
     FRONTEND_URLS = [
         "https://e3os.co.uk",
         "https://crm-frontend-react.vercel.app",
-        "https://loan-app-puce.vercel.app",
+        "https://loan-management-theta.vercel.app",
         "https://technicalglobaladministrator.e3os.co.uk",
         "https://dev.e3os.co.uk",
         "https://e3os.co.uk"
@@ -50,7 +50,7 @@ elif IS_STAGING:
     FRONTEND_URLS = [
         "https://e3os.co.uk",
         "https://crm-frontend-react.vercel.app",
-        "https://loan-app-puce.vercel.app",
+       "https://loan-management-theta.vercel.app",
         "https://technicalglobaladministrator.e3os.co.uk",
         "https://dev.e3os.co.uk",
         "https://e3os.co.uk"
@@ -438,4 +438,4 @@ STORAGE_TYPE = env("STORAGE_TYPE", default="supabase")
 
 
 
-PASSWORD: Kd8k{tq|5?mQeB
+# PASSWORD: Kd8k{tq|5?mQeB
