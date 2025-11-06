@@ -15,22 +15,38 @@ export class CarerService {
     const headers: any = { 'Content-Type': 'application/json' };
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
+    console.log(`Calling: ${this.authServiceUrl}/api/user/users/`);
+    
     const response = await fetch(`${this.authServiceUrl}/api/user/users/`, {
       method: 'GET',
       headers
     });
 
     if (!response.ok) {
+      console.error(`Auth service returned status: ${response.status}`);
       throw new Error(`Auth service request failed: ${response.status}`);
     }
 
-    const users = await response.json() as any[];
-    console.log(`Received ${users.length} users from auth service`);
+    const data: any = await response.json();
+    console.log('Auth service response structure:', Object.keys(data || {}));
+    
+    // Handle the new paginated response format
+    let users: any[] = [];
+    
+    if (data && typeof data === 'object') {
+      if (Array.isArray(data.results)) {
+        console.log(`Found ${data.results.length} users in 'results' array`);
+        users = data.results;
+      } else if (Array.isArray(data)) {
+        console.log(`Found ${data.length} users in direct array`);
+        users = data;
+      } else {
+        console.warn('Unexpected response format from auth service:', data);
+        return [];
+      }
+    }
 
-
-    // Debug: Show what tenant values we actually have
-    const tenantValues = [...new Set(users.map(u => u.tenant))];
-    console.log('Unique tenant values in response:', tenantValues);
+    console.log(`Processing ${users.length} users from auth service`);
 
     // Filter for carers only
     const carers = users.filter((user: any) => 
@@ -38,7 +54,6 @@ export class CarerService {
     );
 
     console.log(`Filtered to ${carers.length} active carers`);
-
     return carers;
   }
 
