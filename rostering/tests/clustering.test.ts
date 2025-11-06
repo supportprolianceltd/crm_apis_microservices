@@ -37,3 +37,16 @@ async function testClusteringEndpoints() {
   await cleanupTestData(prisma, tenantId); // ✅ Now tenantId is defined
   await prisma.$disconnect();
 }
+
+// Add the missing cleanupTestData function
+async function cleanupTestData(prisma: PrismaClient, tenantId: string) {
+  try {
+    console.log('🧹 Cleaning up test data...');
+    await prisma.externalRequest.deleteMany({ where: { tenantId } });
+    await prisma.carer.deleteMany({ where: { tenantId } });
+    await prisma.rosteringConstraints.deleteMany({ where: { tenantId } });
+    console.log('✅ Test data cleaned up');
+  } catch (error: any) {
+    console.error('❌ Cleanup failed:', error.message);
+  }
+}

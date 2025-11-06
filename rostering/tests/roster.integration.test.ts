@@ -366,6 +366,7 @@ async function createRosterTestData(prisma: PrismaClient, tenantId: string) {
     const visits = [];
     for (let i = 0; i < 5; i++) {
       visits.push({
+        id: `visit-${i + 1}-${tenantId}`,
         tenantId,
         subject: `Test Visit ${i + 1}`,
         content: `Test content for visit ${i + 1}`,

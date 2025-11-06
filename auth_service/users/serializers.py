@@ -21,7 +21,7 @@ from .models import (DocumentAcknowledgment, DocumentPermission, Document,
     EmploymentDetail, InvestmentDetail, InsuranceVerification, LegalWorkEligibility,
     OtherUserDocuments, PasswordResetToken,
     ProfessionalQualification, ProofOfAddress, ReferenceCheck,
-    UserActivity, UserProfile, UserSession,
+    SkillDetail, UserActivity, UserProfile, UserSession,
 )
 # Logger
 import os
@@ -184,10 +184,10 @@ class EducationDetailSerializer(serializers.ModelSerializer):
             "institution": {"required": True},
             "highest_qualification": {"required": True},
             "course_of_study": {"required": True},
-            "start_year": {"required": False, "min_value": 1900, "max_value": 2100},
-            "end_year": {"required": False, "min_value": 1900, "max_value": 2100},
-            "start_year_new": {"required": False, "min_value": 1900, "max_value": 2100},
-            "end_year_new": {"required": False, "min_value": 1900, "max_value": 2100},
+            "start_year": {"required": False},
+            "end_year": {"required": False},
+            "start_year_new": {"required": False},
+            "end_year_new": {"required": False},
             "skills": {"required": True},
             "certificate": {"required": False, "allow_null": True},
         }
@@ -242,8 +242,92 @@ class EducationDetailSerializer(serializers.ModelSerializer):
         logger.info(f"Validating EducationDetailSerializer data: {data}")
         start_year = data.get("start_year")
         end_year = data.get("end_year")
+
+        # Validate year ranges
+        if start_year is not None:
+            if start_year < 1900 or start_year > 2100:
+                raise serializers.ValidationError({"start_year": "Start year must be between 1900 and 2100."})
+        if end_year is not None:
+            if end_year < 1900 or end_year > 2100:
+                raise serializers.ValidationError({"end_year": "End year must be between 1900 and 2100."})
+
+        # Validate logical relationship
         if start_year and end_year and start_year > end_year:
             raise serializers.ValidationError({"start_year": "Start year cannot be greater than end year."})
+        return super().validate(data)
+
+
+class SkillDetailSerializer(serializers.ModelSerializer):
+    certificate = serializers.FileField(required=False, allow_null=True, validators=[validate_file_extension])
+    last_updated_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SkillDetail
+        fields = ["id", "skill_name", "proficiency_level", "description", "acquired_date", "years_of_experience", "certificate", "certificate_url", "last_updated_by_id", "last_updated_by"]
+        read_only_fields = ["id", "last_updated_by", "last_updated_by_id"]
+        extra_kwargs = {
+            "skill_name": {"required": True},
+            "proficiency_level": {"required": False, "allow_null": True},
+            "description": {"required": False, "allow_null": True},
+            "acquired_date": {"required": False, "allow_null": True},
+            "years_of_experience": {"required": False, "allow_null": True},
+            "certificate": {"required": False, "allow_null": True},
+        }
+
+    def get_last_updated_by(self, obj):
+        return get_last_updated_by(self, obj)
+
+    def create(self, validated_data):
+        user_data = get_user_data_from_jwt(self.context['request'])
+        user_id = user_data.get('id')
+        if user_id:
+            validated_data['last_updated_by_id'] = str(user_id)
+        else:
+            logger.warning("No user_id found in JWT payload for creation")
+            raise serializers.ValidationError({"last_updated_by_id": "User ID required for creation."})
+
+        certificate = validated_data.pop("certificate", None)
+        if certificate:
+            logger.info(f"Uploading skill certificate: {certificate.name}")
+            url = upload_file_dynamic(
+                certificate,
+                certificate.name,
+                content_type=getattr(certificate, "content_type", "application/octet-stream"),
+            )
+            validated_data["certificate_url"] = url
+            validated_data["certificate"] = None  # Don't save to ImageField
+            logger.info(f"Skill certificate uploaded: {url}")
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        user_data = get_user_data_from_jwt(self.context['request'])
+        user_id = user_data.get('id')
+        if user_id:
+            instance.last_updated_by_id = str(user_id)
+        else:
+            logger.warning("No user_id found in JWT payload for update")
+
+        certificate = validated_data.pop("certificate", None)
+        if certificate:
+            logger.info(f"Updating skill certificate: {certificate.name}")
+            url = upload_file_dynamic(
+                certificate,
+                certificate.name,
+                content_type=getattr(certificate, "content_type", "application/octet-stream"),
+            )
+            validated_data["certificate_url"] = url
+            validated_data["certificate"] = None  # Don't save to ImageField
+            logger.info(f"Skill certificate updated: {url}")
+        return super().update(instance, validated_data)
+
+    def validate(self, data):
+        logger.info(f"Validating SkillDetailSerializer data: {data}")
+        years_of_experience = data.get("years_of_experience")
+        if years_of_experience is not None:
+            if years_of_experience < 0:
+                raise serializers.ValidationError({"years_of_experience": "Years of experience cannot be negative."})
+            if years_of_experience > 50:
+                raise serializers.ValidationError({"years_of_experience": "Years of experience cannot exceed 50."})
         return super().validate(data)
 
 
@@ -780,6 +864,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     investment_details = InvestmentDetailSerializer(many=True, required=False, allow_null=True)
     withdrawal_details = WithdrawalDetailSerializer(many=True, required=False, allow_null=True)
     education_details = EducationDetailSerializer(many=True, required=False, allow_null=True)
+    skill_details = SkillDetailSerializer(many=True, required=False, allow_null=True)
     reference_checks = ReferenceCheckSerializer(many=True, required=False, allow_null=True)
     proof_of_address = ProofOfAddressSerializer(many=True, required=False, allow_null=True)
     insurance_verifications = InsuranceVerificationSerializer(many=True, required=False, allow_null=True)
@@ -894,6 +979,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "professional_qualifications",
             "employment_details",
             "education_details",
+            "skill_details",
             "investment_details",
             "withdrawal_details",
             "reference_checks",
@@ -1007,6 +1093,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "professional_qualifications",
             "employment_details",
             "education_details",
+            "skill_details",
             "investment_details",
             "withdrawal_details",
             "reference_checks",
@@ -1038,6 +1125,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             ("professional_qualifications", ProfessionalQualificationSerializer, "professional_qualifications"),
             ("employment_details", EmploymentDetailSerializer, "employment_details"),
             ("education_details", EducationDetailSerializer, "education_details"),
+            ("skill_details", SkillDetailSerializer, "skill_details"),
             ("investment_details", InvestmentDetailSerializer, "investment_details"),
             ("withdrawal_details", WithdrawalDetailSerializer, "withdrawal_details"),
             ("reference_checks", ReferenceCheckSerializer, "reference_checks"),
@@ -1111,6 +1199,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 ("professional_qualifications", ProfessionalQualificationSerializer, "professional_qualifications"),
                 ("employment_details", EmploymentDetailSerializer, "employment_details"),
                 ("education_details", EducationDetailSerializer, "education_details"),
+                ("skill_details", SkillDetailSerializer, "skill_details"),
                 ("investment_details", InvestmentDetailSerializer, "investment_details"),
                 ("withdrawal_details", WithdrawalDetailSerializer, "withdrawal_details"),
                 ("reference_checks", ReferenceCheckSerializer, "reference_checks"),
@@ -1271,6 +1360,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 "professional_qualifications",
                 "employment_details",
                 "education_details",
+                "skill_details",
                 "investment_details",
                 "withdrawal_details",
                 "reference_checks",
@@ -1279,6 +1369,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 "driving_risk_assessments",
                 "legal_work_eligibilities",
                 "other_user_documents",
+                "skill_details",
             ]
 
             for field in nested_fields:
@@ -1634,7 +1725,7 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
         status = validated_data.pop("status", None)
         validated_data.pop("tenant", None)  # Remove tenant to avoid duplicate argument
 
-        
+
         with tenant_context(tenant):
             user = CustomUser.objects.create_user(
                 email=email,  # Explicitly pass email
@@ -1647,6 +1738,20 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
             if status is not None:
                 user.status = status
             user.save()
+
+            # Create UserProfile with all system access fields set to True
+            UserProfile.objects.create(
+                user=user,
+                system_access_rostering=True,
+                system_access_hr=True,
+                system_access_recruitment=True,
+                system_access_training=True,
+                system_access_finance=True,
+                system_access_compliance=True,
+                system_access_co_superadmin=True,
+                system_access_asset_management=True,
+            )
+
             return user
 
 

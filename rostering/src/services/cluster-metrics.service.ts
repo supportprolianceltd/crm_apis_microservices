@@ -17,18 +17,18 @@ export class ClusterMetricsService {
   constructor(private prisma: PrismaClient) {}
 
   async calculateClusterMetrics(clusterId: string): Promise<ClusterMetrics> {
+    // ✅ FIX 1: Get cluster with visits and carers in single query
     const cluster = await this.prisma.cluster.findUnique({
       where: { id: clusterId },
       include: {
-        requests: {
+        visits: {  // ✅ Direct visits relation
           include: {
             assignments: {
               include: { carer: true }
-            },
-            matches: true
+            }
           }
         },
-        carers: true
+        carers: true  // ✅ Include carers directly
       }
     });
 
@@ -36,7 +36,8 @@ export class ClusterMetricsService {
       throw new Error(`Cluster not found: ${clusterId}`);
     }
 
-    const visits = cluster.requests;
+    // ✅ FIX 2: Use visits and carers directly
+    const visits = cluster.visits;
     const carers = cluster.carers;
 
     // Calculate metrics
@@ -114,23 +115,32 @@ export class ClusterMetricsService {
     };
   }
 
-  private calculateTotalHours(visits: any[]): number {
+  // ✅ FIX 4: Add proper typing to private methods
+  private calculateTotalHours(visits: Array<{ estimatedDuration: number | null }>): number {
     return visits.reduce((total, visit) => {
       return total + (visit.estimatedDuration || 60) / 60;
     }, 0);
   }
 
-  private async calculateAverageDistance(visits: any[]): Promise<number> {
+  private async calculateAverageDistance(
+    visits: Array<{ latitude: number | null; longitude: number | null }>
+  ): Promise<number> {
     if (visits.length < 2) return 0;
 
     let totalDistance = 0;
     let pairCount = 0;
 
     for (let i = 0; i < visits.length; i++) {
+      const v1 = visits[i];
+      if (!v1.latitude || !v1.longitude) continue;
+
       for (let j = i + 1; j < visits.length; j++) {
+        const v2 = visits[j];
+        if (!v2.latitude || !v2.longitude) continue;
+
         const distance = this.calculateHaversineDistance(
-          visits[i].latitude, visits[i].longitude,
-          visits[j].latitude, visits[j].longitude
+          v1.latitude, v1.longitude,
+          v2.latitude, v2.longitude
         );
         totalDistance += distance;
         pairCount++;
@@ -140,12 +150,15 @@ export class ClusterMetricsService {
     return pairCount > 0 ? totalDistance / pairCount : 0;
   }
 
-  private async calculateTotalTravelTime(visits: any[]): Promise<number> {
+  private async calculateTotalTravelTime(visits: Array<any>): Promise<number> {
     // Simplified calculation - in reality would use travel matrix
     return visits.length * 15; // Assume 15 minutes average travel per visit
   }
 
-  private calculateSkillCoverage(visits: any[], carers: any[]): number {
+  private calculateSkillCoverage(
+    visits: Array<{ requirements: string | null }>,
+    carers: Array<{ skills: string[] }>
+  ): number {
     if (visits.length === 0) return 1;
 
     const allRequiredSkills = new Set<string>();
@@ -161,7 +174,7 @@ export class ClusterMetricsService {
 
     // Collect all carer skills
     carers.forEach(carer => {
-      carer.skills.forEach((skill: string) => carerSkills.add(skill.toLowerCase()));
+      carer.skills.forEach(skill => carerSkills.add(skill.toLowerCase()));
     });
 
     if (allRequiredSkills.size === 0) return 1;
@@ -177,17 +190,28 @@ export class ClusterMetricsService {
     return coveredSkills / allRequiredSkills.size;
   }
 
-  private async calculateContinuityRisk(visits: any[]): Promise<number> {
+  private async calculateContinuityRisk(
+    visits: Array<{ 
+      assignments: Array<{ carerId: string }>;
+      externalRequest?: { 
+        matches?: Array<{ response: string; carerId: string }> 
+      } 
+    }>
+  ): Promise<number> {
     if (visits.length === 0) return 0;
 
     let riskCount = 0;
 
     for (const visit of visits) {
-      const hasContinuity = visit.matches.some((match: any) => 
-        match.response === 'ACCEPTED' && match.carerId === visit.assignments[0]?.carerId
+      // Get matches from external request
+      const matches = visit.externalRequest?.matches || [];
+      const assignedCarerId = visit.assignments[0]?.carerId;
+
+      const hasContinuity = matches.some(match => 
+        match.response === 'ACCEPTED' && match.carerId === assignedCarerId
       );
 
-      if (!hasContinuity) {
+      if (!hasContinuity && assignedCarerId) {
         riskCount++;
       }
     }
@@ -195,7 +219,7 @@ export class ClusterMetricsService {
     return riskCount / visits.length;
   }
 
-  private extractRequiredSkills(visits: any[]): string[] {
+  private extractRequiredSkills(visits: Array<{ requirements: string | null }>): string[] {
     const skills = new Set<string>();
     
     visits.forEach(visit => {
@@ -219,7 +243,12 @@ export class ClusterMetricsService {
     return commonSkills.filter(skill => requirementsLower.includes(skill));
   }
 
-  private calculateHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateHaversineDistance(
+    lat1: number, 
+    lon1: number, 
+    lat2: number, 
+    lon2: number
+  ): number {
     const R = 6371e3;
     const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;

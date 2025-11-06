@@ -188,6 +188,7 @@ async function createTestData(prisma: PrismaClient, tenantId: string) {
     await prisma.externalRequest.createMany({
       data: [
         {
+          id: `req-1-${tenantId}`,
           tenantId,
           subject: 'Test Request 1',
           content: 'Test content for request 1',
@@ -204,6 +205,7 @@ async function createTestData(prisma: PrismaClient, tenantId: string) {
           sendToRostering: true
         },
         {
+          id: `req-2-${tenantId}`,
           tenantId,
           subject: 'Test Request 2',
           content: 'Test content for request 2',

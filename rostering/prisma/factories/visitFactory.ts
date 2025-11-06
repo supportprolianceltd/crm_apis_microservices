@@ -33,8 +33,12 @@ export async function createVisit(prisma: PrismaClient, template: VisitTemplate)
   startTime.setHours(template.hour, 0, 0, 0);
   const endTime = addMinutes(startTime, template.duration);
 
+  // Generate unique ID for the visit
+  const visitId = `seed-visit-${template.clientName.toLowerCase().replace(/\s+/g, '-')}-${template.hour}`;
+
   return prisma.externalRequest.create({
     data: {
+      id: visitId,
       tenantId: TENANT_ID,
       subject: `Care Visit - ${template.clientName}`,
       content: template.notes,

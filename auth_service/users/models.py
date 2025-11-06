@@ -270,8 +270,8 @@ class CustomUser(AbstractUser):
 
         # Related Models - count each as one field if they have at least one entry
         related_models = [
-            'professional_qualifications', 'employment_details', 
-            'education_details', 'reference_checks'
+            'professional_qualifications', 'employment_details',
+            'education_details', 'skill_details', 'reference_checks'
         ]
         
         for related_field in related_models:
@@ -829,6 +829,7 @@ class InvestmentDetail(models.Model):
     def __str__(self):
         return f"{self.user_profile} - ${self.investment_amount}"
 
+
 class WithdrawalDetail(models.Model):
 
 
@@ -893,6 +894,8 @@ class ProfessionalQualification(models.Model):
     class Meta:
         verbose_name_plural = "Professional Qualifications"
 
+
+
 class EducationDetail(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='education_details')
     institution = models.CharField(max_length=255)
@@ -906,9 +909,9 @@ class EducationDetail(models.Model):
     end_year_new = models.DateField(blank=True, null=True)
 
     certificate = models.FileField(
-        upload_to='Educational-certificates/', 
-        max_length=255, 
-        blank=True, 
+        upload_to='Educational-certificates/',
+        max_length=255,
+        blank=True,
         null=True,
         validators=[validate_image_or_pdf]
     )
@@ -920,6 +923,50 @@ class EducationDetail(models.Model):
     class Meta:
         verbose_name = "Education Detail"
         verbose_name_plural = "Education Details"
+
+
+class SkillDetail(models.Model):
+    PROFICIENCY_LEVELS = [
+        ('beginner', 'Beginner'),
+        ('intermediate', 'Intermediate'),
+        ('advanced', 'Advanced'),
+        ('expert', 'Expert'),
+    ]
+
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='skill_details')
+    skill_name = models.CharField(max_length=255, help_text="Name of the skill")
+    proficiency_level = models.CharField(
+        max_length=20,
+        choices=PROFICIENCY_LEVELS,
+        blank=True,
+        null=True,
+        help_text="Level of proficiency in this skill"
+    )
+    description = models.TextField(blank=True, help_text="Description of the skill and experience")
+    acquired_date = models.DateField(blank=True, null=True, help_text="When the skill was acquired")
+    years_of_experience = models.PositiveIntegerField(blank=True, null=True, help_text="Years of experience with this skill")
+
+    # Optional document/file for the skill
+    certificate = models.FileField(
+        upload_to='skill-certificates/',
+        max_length=255,
+        blank=True,
+        null=True,
+        validators=[validate_image_or_pdf],
+        help_text="Certificate or document proving this skill"
+    )
+    certificate_url = models.CharField(max_length=1024, blank=True, null=True)
+
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Skill Detail"
+        verbose_name_plural = "Skill Details"
+        unique_together = ('user_profile', 'skill_name')  # Prevent duplicate skills per user
+
+    def __str__(self):
+        return f"{self.skill_name} - {self.user_profile.user.email}"
 
 
 

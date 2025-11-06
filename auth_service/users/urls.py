@@ -10,7 +10,7 @@ from .views import (
     ProfessionalQualificationView, EmploymentDetailView, EducationDetailView, InvestmentDetailView,
     WithdrawalDetailView, ReferenceCheckView, ProofOfAddressView, InsuranceVerificationView,
     DocumentAcknowledgmentsListView, DocumentAcknowledgeView, DrivingRiskAssessmentView, PublicRegisterView,
-    LegalWorkEligibilityView, OtherUserDocumentsView, UserDocumentAccessView, UsersViewSetNoPagination,
+    LegalWorkEligibilityView, OtherUserDocumentsView, SkillDetailView, UserDocumentAccessView, UsersViewSetNoPagination,
     AllTenantsUsersListView, AllTenantNamesUsersListView # Ensure this import is added
 )
 
@@ -81,7 +81,12 @@ urlpatterns = [
     path('legal-work-eligibilities/<int:obj_id>/', LegalWorkEligibilityView.as_view(), name='legal-work-eligibility-update'),
     
     # Other User Documents endpoints
+    path('other-user-documents/', OtherUserDocumentsView.as_view(), name='other-user-documents-create'),
+    path('other-user-documents/<int:obj_id>/', OtherUserDocumentsView.as_view(), name='other-user-documents-update'),
 
+    # Skill Detail endpoints
+    path('skill-details/', SkillDetailView.as_view(), name='skill-detail-create'),
+    path('skill-details/<int:obj_id>/', SkillDetailView.as_view(), name='skill-detail-update'),
 
     path('documents/', DocumentListCreateView.as_view(), name='document-list-create'),
     path('documents/<int:id>/', DocumentDetailView.as_view(), name='document-detail'),

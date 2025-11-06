@@ -16,9 +16,11 @@ export interface ExternalRequest {
   urgency: RequestUrgency;
   status: RequestStatus;
   requirements?: string;
+  requiredSkills: string[];
   estimatedDuration?: number;
   scheduledStartTime?: Date;
   scheduledEndTime?: Date;
+  recurrencePattern?: string;
   notes?: string;
   emailMessageId?: string;
   emailThreadId?: string;
@@ -147,9 +149,11 @@ export interface ExtractedRequest {
   postcode?: string;
   urgency: RequestUrgency;
   requirements?: string;
+  requiredSkills?: string[];
   estimatedDuration?: number;
   scheduledStartTime?: Date;
   scheduledEndTime?: Date;
+  recurrencePattern?: string;
   notes?: string;
 }
 
@@ -179,9 +183,11 @@ export interface CreateRequestPayload {
   postcode?: string;
   urgency?: RequestUrgency;
   requirements?: string;
+  requiredSkills?: string[];
   estimatedDuration?: number;
   scheduledStartTime?: string;
   scheduledEndTime?: string;
+  recurrencePattern?: string;
   notes?: string;
 }
 
@@ -195,9 +201,11 @@ export interface UpdateRequestPayload {
   urgency?: RequestUrgency;
   status?: RequestStatus;
   requirements?: string;
+  requiredSkills?: string[];
   estimatedDuration?: number;
   scheduledStartTime?: string;
   scheduledEndTime?: string;
+  recurrencePattern?: string;
   notes?: string;
 }
 

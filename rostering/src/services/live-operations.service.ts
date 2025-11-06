@@ -175,7 +175,7 @@ export class LiveOperationsService {
     notes?: string
   ) {
     try {
-      const visit = await this.prisma.externalRequest.findUnique({
+      const visit = await this.prisma.visit.findUnique({
         where: { id: visitId },
         include: { assignments: true }
       });
@@ -275,7 +275,7 @@ export class LiveOperationsService {
     } = {}
   ) {
     try {
-      const visit = await this.prisma.externalRequest.findUnique({
+      const visit = await this.prisma.visit.findUnique({
         where: { id: visitId }
       });
 
@@ -463,28 +463,31 @@ export class LiveOperationsService {
 
   // ========== PRIVATE METHODS ==========
 
-  private async isCarerAtVisitLocation(
-    carerId: string,
-    visitId: string,
-    location: { latitude: number; longitude: number }
-  ): Promise<boolean> {
-    const visit = await this.prisma.externalRequest.findUnique({
-      where: { id: visitId },
-      select: { latitude: true, longitude: true }
-    });
+// Add this fix to your LiveOperationsService at line 119 (isCarerAtVisitLocation method)
 
-    if (!visit || !visit.latitude || !visit.longitude) {
-      return false;
-    }
+private async isCarerAtVisitLocation(
+  carerId: string,
+  visitId: string,
+  location: { latitude: number; longitude: number }
+): Promise<boolean> {
+  // ✅ FIX: Query Visit model, not ExternalRequest
+  const visit = await this.prisma.visit.findUnique({
+    where: { id: visitId },
+    select: { latitude: true, longitude: true }
+  });
 
-    return this.isWithinGeofence(
-      location.latitude,
-      location.longitude,
-      visit.latitude,
-      visit.longitude,
-      100 // 100m radius
-    );
+  if (!visit || !visit.latitude || !visit.longitude) {
+    return false;
   }
+
+  return this.isWithinGeofence(
+    location.latitude,
+    location.longitude,
+    visit.latitude,
+    visit.longitude,
+    100 // 100m radius
+  );
+}
 
   private async isWithinGeofence(
     lat1: number,
@@ -844,7 +847,7 @@ export class LiveOperationsService {
   }>> {
     try {
       // Get the delayed visit
-      const visit = await this.prisma.externalRequest.findUnique({
+      const visit = await this.prisma.visit.findUnique({
         where: { id: visitId },
         include: {
           assignments: {

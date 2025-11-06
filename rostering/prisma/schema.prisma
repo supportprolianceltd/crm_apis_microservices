@@ -31,11 +31,13 @@ model ExternalRequest {
   longitude Float?
   urgency RequestUrgency @default(MEDIUM)
   status RequestStatus @default(PENDING)
-  requirements String? @db.Text
-  estimatedDuration Int?
-  scheduledStartTime DateTime?
-  scheduledEndTime DateTime?
-  notes String? @db.Text
+  requirements        String? @db.Text
+  requiredSkills      String[] @default([])
+  estimatedDuration   Int?
+  scheduledStartTime  DateTime?
+  scheduledEndTime    DateTime?
+  recurrencePattern   String?
+  notes               String? @db.Text
   emailMessageId String?
   emailThreadId String?
  
@@ -58,13 +60,11 @@ model ExternalRequest {
   clusterId String?
   cluster Cluster? @relation(fields: [clusterId], references: [id])
   matches RequestCarerMatch[]
-  timesheetEntries TimesheetEntry[]
-  invoiceLineItems InvoiceLineItem[]
-  assignments Assignment[] @relation("VisitAssignments")
+  visits Visit[] // Link to created visits
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   processedAt DateTime?
-  
+
   @@index([tenantId])
   @@index([status])
   @@index([urgency])
@@ -77,6 +77,65 @@ model ExternalRequest {
   // NEW: Composite index for efficient lookup by date pattern
   @@index([id(ops: raw("varchar_pattern_ops"))])
   @@map("external_requests")
+}
+
+model Visit {
+   id String @id // Remove @default(cuid()), we'll generate custom IDs
+   tenantId String
+  externalRequestId String @map("external_request_id")
+  externalRequest ExternalRequest @relation(fields: [externalRequestId], references: [id], onDelete: Cascade)
+
+  // Core visit details
+  subject String
+  content String @db.Text
+  requestorEmail String
+  requestorName String?
+  requestorPhone String?
+  address String
+  postcode String
+  location Unsupported("geography(POINT, 4326)")?
+  latitude Float?
+  longitude Float?
+
+  // Scheduling
+  scheduledStartTime DateTime
+  scheduledEndTime DateTime?
+  estimatedDuration Int?
+  recurrencePattern String?
+
+  // Requirements
+  urgency RequestUrgency @default(MEDIUM)
+  requirements String? @db.Text
+  requiredSkills String[] @default([])
+  notes String? @db.Text
+
+  // Status and lifecycle
+  status VisitStatus @default(SCHEDULED)
+  clusterId String?
+  cluster Cluster? @relation(fields: [clusterId], references: [id])
+
+  // Tracking
+  createdBy String? @map("created_by")
+  createdByEmail String? @map("created_by_email")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  assignments Assignment[]
+  timesheetEntries TimesheetEntry[]
+  invoiceLineItems InvoiceLineItem[]
+  visitCheckIns VisitCheckIn[]
+  visitCheckOuts VisitCheckOut[]
+  latenessAlerts LatenessAlert[]
+  incidents Incident[]
+
+  @@index([tenantId])
+  @@index([externalRequestId])
+  @@index([status])
+  @@index([scheduledStartTime])
+  @@index([clusterId])
+  @@index([createdBy])
+  @@map("visits")
 }
 
 
@@ -253,6 +312,7 @@ model Cluster {
   requests           ExternalRequest[]
   carers             Carer[]
   clusterAssignments ClusterAssignment[]
+  visits             Visit[]
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -872,20 +932,20 @@ model Assignment {
   acceptedAt        DateTime? @map("accepted_at")
   declinedAt        DateTime? @map("declined_at")
   declineReason     String?   @map("decline_reason")
-  
+
   // NEW FIELDS - ADD THESE
   locked            Boolean @default(false)
   lockedReason      String? @map("locked_reason")
   lockedBy          String? @map("locked_by")
   lockedAt          DateTime? @map("locked_at")
   manuallyAssigned  Boolean @default(false) @map("manually_assigned")
-  
+
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
   roster            Roster @relation(fields: [rosterId], references: [id], onDelete: Cascade)
-  visit    ExternalRequest @relation("VisitAssignments", fields: [visitId], references: [id])
-  carer    Carer           @relation("CarerAssignments", fields: [carerId], references: [id])
+  visit             Visit @relation(fields: [visitId], references: [id])
+  carer             Carer @relation("CarerAssignments", fields: [carerId], references: [id])
   publishedAssignments PublishedAssignment[]
 
   @@unique([rosterId, visitId])
@@ -931,6 +991,8 @@ model VisitCheckIn {
   approvedBy       String? @map("approved_by")
   approvedAt       DateTime? @map("approved_at")
 
+  visit            Visit @relation(fields: [visitId], references: [id])
+
   @@unique([visitId, carerId])
   @@index([visitId])
   @@index([carerId])
@@ -951,6 +1013,8 @@ model VisitCheckOut {
   incidentDetails  String? @map("incident_details")
   incidentSeverity IncidentSeverity? @map("incident_severity")
   notes            String?
+
+  visit            Visit @relation(fields: [visitId], references: [id])
 
   @@unique([visitId, carerId])
   @@index([visitId])
@@ -976,6 +1040,8 @@ model LatenessAlert {
   clientNotified   Boolean @default(false) @map("client_notified")
   swapSuggested    Boolean @default(false) @map("swap_suggested")
   createdAt        DateTime @default(now()) @map("created_at")
+
+  visit            Visit @relation(fields: [visitId], references: [id])
 
   @@index([tenantId])
   @@index([visitId])
@@ -1005,7 +1071,9 @@ model Incident {
   resolvedBy       String?   @map("resolved_by")
   resolution       String?
   requiresFollowUp Boolean @default(false) @map("requires_follow_up")
-  followUpNotes    String?   @map("follow_up_notes")
+  followUpNotes    String?   @db.Text @map("follow_up_notes")
+
+  visit            Visit? @relation(fields: [visitId], references: [id])
 
   @@index([tenantId])
   @@index([visitId])
@@ -1362,7 +1430,7 @@ model TimesheetEntry {
   validatedBy       String?   @map("validated_by")
 
   timesheet         Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
-  visit             ExternalRequest? @relation(fields: [visitId], references: [id])
+  visit             Visit? @relation(fields: [visitId], references: [id])
 
   @@index([timesheetId])
   @@index([visitId])
@@ -1465,7 +1533,7 @@ model InvoiceLineItem {
   category    String?
 
   invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  visit       ExternalRequest? @relation(fields: [visitId], references: [id])
+  visit       Visit? @relation(fields: [visitId], references: [id])
 
   @@index([invoiceId])
   @@index([visitId])
@@ -1602,6 +1670,15 @@ enum RequestStatus {
   COMPLETED
   DECLINED
   FAILED
+}
+
+enum VisitStatus {
+  SCHEDULED
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
 }
 
 enum MatchStatus {

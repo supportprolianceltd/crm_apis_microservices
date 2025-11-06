@@ -79,6 +79,7 @@ from .models import (
     ProofOfAddress,
     ReferenceCheck,
     RSAKeyPair,
+    SkillDetail,
     UserActivity,
     UserProfile,
     UserSession,
@@ -87,7 +88,7 @@ from .models import (
 
 # Local App - Serializers
 from .serializers import (
-    AdminUserCreateSerializer,    BlockedIPSerializer,TransactionSerializer,
+    AdminUserCreateSerializer,SkillDetailSerializer,    BlockedIPSerializer,TransactionSerializer,
     ClientCreateSerializer, ClientDetailSerializer, ClientProfileSerializer,
     CustomUserListSerializer, CustomUserSerializer, DocumentAcknowledgmentSerializer,
     DocumentSerializer, DocumentVersionSerializer,  DrivingRiskAssessmentSerializer, EducationDetailSerializer,
@@ -254,7 +255,8 @@ class AllTenantsUsersListView(generics.ListAPIView):
                 # users inside the tenant schema
                 with tenant_context(tenant):
                     users = CustomUser.objects.filter(tenant=tenant) \
-                        .select_related("profile", "tenant", "branch")
+                        .select_related("profile", "tenant", "branch") \
+                        .prefetch_related("profile__skill_details")
 
                     tenants_data[tenant.schema_name]["users"].extend(users)
 
@@ -355,7 +357,7 @@ class AllTenantNamesUsersListView(generics.ListAPIView):
             try:
                 with tenant_context(tenant):
                     users = CustomUser.objects.filter(tenant=tenant) \
-                        .prefetch_related("profile", "tenant", "branch")
+                        .prefetch_related("profile", "tenant", "branch", "profile__skill_details")
                     tenants_data[tenant.schema_name]["users"].extend(users)
 
                 tenants_data[tenant.schema_name].update(
@@ -856,6 +858,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 "profile__driving_risk_assessments",
                 "profile__legal_work_eligibilities",
                 "profile__other_user_documents",
+                "profile__skill_details",
             )
             if self.action == 'retrieve':
                 pk = self.kwargs.get('pk')
@@ -880,6 +883,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "profile__driving_risk_assessments",
             "profile__legal_work_eligibilities",
             "profile__other_user_documents",
+            "profile__skill_details",
         )
 
     def get_serializer_class(self):
@@ -1583,6 +1587,7 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
             "profile__driving_risk_assessments",
             "profile__legal_work_eligibilities",
             "profile__other_user_documents",
+            "profile__skill_details",
         )
 
     def get_serializer_class(self):
@@ -2779,6 +2784,11 @@ class OtherUserDocumentsView(GenericDetailView):
     serializer_class = OtherUserDocumentsSerializer
     model_name = "Other User Document"
 
+class SkillDetailView(GenericDetailView):
+    model = SkillDetail
+    serializer_class = SkillDetailSerializer
+    model_name = "Skill Detail"
+
 
 class AdminUserCreateView(APIView):
     permission_classes = [IsAdminUser]
@@ -3019,6 +3029,7 @@ class TenantUsersListView(APIView):
                 "profile__driving_risk_assessments",
                 "profile__legal_work_eligibilities",
                 "profile__other_user_documents",
+                "profile__skill_details",
             )
             serializer = CustomUserSerializer(users, many=True, context={"request": request})
             return Response(
@@ -3062,6 +3073,7 @@ class BranchUsersListView(APIView):
                 "profile__driving_risk_assessments",
                 "profile__legal_work_eligibilities",
                 "profile__other_user_documents",
+                "profile__skill_details",
             )
             serializer = CustomUserSerializer(users, many=True, context={"request": request})
             return Response(

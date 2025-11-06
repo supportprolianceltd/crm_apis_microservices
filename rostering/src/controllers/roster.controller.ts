@@ -670,10 +670,14 @@ export class RosterController {
             gte: dateStart,
             lt: dateEnd
           },
-          assignments: {
+          visits: {
             some: {
-              carerId,
-              status: { in: ['PENDING', 'OFFERED', 'ACCEPTED'] }
+              assignments: {
+                some: {
+                  carerId,
+                  status: { in: ['PENDING', 'OFFERED', 'ACCEPTED'] }
+                }
+              }
             }
           }
         }
@@ -1603,13 +1607,17 @@ validateManualChange = async (req: Request, res: Response): Promise<void> => {
           requestorEmail: clientId
         },
         include: {
-          assignments: {
-            select: {
-              carerId: true,
-              carer: {
+          visits: {
+            include: {
+              assignments: {
                 select: {
-                  firstName: true,
-                  lastName: true
+                  carerId: true,
+                  carer: {
+                    select: {
+                      firstName: true,
+                      lastName: true
+                    }
+                  }
                 }
               }
             }
@@ -1620,10 +1628,12 @@ validateManualChange = async (req: Request, res: Response): Promise<void> => {
       });
 
       const carerFrequency = new Map<string, number>();
-      visits.forEach((visit: any) => {
-        visit.assignments.forEach((assignment: any) => {
-          const count = carerFrequency.get(assignment.carerId) || 0;
-          carerFrequency.set(assignment.carerId, count + 1);
+      visits.forEach((request: any) => {
+        request.visits.forEach((visit: any) => {
+          visit.assignments.forEach((assignment: any) => {
+            const count = carerFrequency.get(assignment.carerId) || 0;
+            carerFrequency.set(assignment.carerId, count + 1);
+          });
         });
       });
 
@@ -1688,9 +1698,13 @@ validateManualChange = async (req: Request, res: Response): Promise<void> => {
           }
         },
         include: {
-          assignments: {
-            select: {
-              carerId: true
+          visits: {
+            include: {
+              assignments: {
+                select: {
+                  carerId: true
+                }
+              }
             }
           }
         }
@@ -1707,14 +1721,16 @@ validateManualChange = async (req: Request, res: Response): Promise<void> => {
 
       const report = Array.from(clientVisits.entries()).map(([clientId, clientVisitList]: [string, any[]]) => {
         const carerCounts = new Map<string, number>();
-        clientVisitList.forEach((visit: any) => {
-          visit.assignments.forEach((assignment: any) => {
-            const count = carerCounts.get(assignment.carerId) || 0;
-            carerCounts.set(assignment.carerId, count + 1);
+        clientVisitList.forEach((request: any) => {
+          request.visits.forEach((visit: any) => {
+            visit.assignments.forEach((assignment: any) => {
+              const count = carerCounts.get(assignment.carerId) || 0;
+              carerCounts.set(assignment.carerId, count + 1);
+            });
           });
         });
 
-        const totalVisits = clientVisitList.length;
+        const totalVisits = clientVisitList.reduce((sum, request) => sum + request.visits.length, 0);
         const maxCount = Math.max(...Array.from(carerCounts.values()));
         const continuityScore = (maxCount / totalVisits) * 100;
 
@@ -1768,13 +1784,17 @@ validateManualChange = async (req: Request, res: Response): Promise<void> => {
           }
         },
         include: {
-          assignments: {
+          visits: {
             include: {
-              carer: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true
+              assignments: {
+                include: {
+                  carer: {
+                    select: {
+                      id: true,
+                      firstName: true,
+                      lastName: true
+                    }
+                  }
                 }
               }
             }
@@ -1791,23 +1811,27 @@ validateManualChange = async (req: Request, res: Response): Promise<void> => {
       });
 
       const alerts = visits
-        .filter((visit: any) => {
-          const preferredCarers = visit.matches.map((m: any) => m.carerId);
-          const assignedCarer = visit.assignments[0]?.carerId;
-          
-          return preferredCarers.length > 0 && 
-                 assignedCarer && 
+        .filter((request: any) => {
+          const preferredCarers = request.matches.map((m: any) => m.carerId);
+          const visit = request.visits[0]; // Get the first visit
+          const assignedCarer = visit?.assignments[0]?.carerId;
+
+          return preferredCarers.length > 0 &&
+                 assignedCarer &&
                  !preferredCarers.includes(assignedCarer);
         })
-        .map((visit: any) => ({
-          visitId: visit.id,
-          clientId: visit.requestorEmail,
-          clientName: visit.requestorName,
-          scheduledTime: visit.scheduledStartTime,
-          assignedCarer: visit.assignments[0]?.carer,
-          preferredCarers: visit.matches.map((m: any) => m.carerId),
-          reason: 'Preferred carer not assigned'
-        }));
+        .map((request: any) => {
+          const visit = request.visits[0]; // Get the first visit
+          return {
+            visitId: visit?.id || request.id,
+            clientId: request.requestorEmail,
+            clientName: request.requestorName,
+            scheduledTime: request.scheduledStartTime,
+            assignedCarer: visit?.assignments[0]?.carer,
+            preferredCarers: request.matches.map((m: any) => m.carerId),
+            reason: 'Preferred carer not assigned'
+          };
+        });
 
       res.json({
         success: true,

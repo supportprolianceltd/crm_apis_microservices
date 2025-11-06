@@ -17,6 +17,3 @@ export function createCarerRoutes(carerController: CarerController): Router {
 
   return router;
 }
-
-
-

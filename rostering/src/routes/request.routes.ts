@@ -21,6 +21,8 @@ export function createRequestRoutes(requestController: RequestController): Route
 
   // Matching operations
   router.post('/:id/match', requestController.triggerMatching);
+  // Feasibility check
+  router.get('/:id/feasibility', requestController.checkRequestFeasibility);
   // Approve / decline operations
   router.post('/:id/approve', requestController.approveRequest);
   router.post('/:id/decline', requestController.declineRequest);

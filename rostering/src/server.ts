@@ -20,8 +20,10 @@ import { NotificationService } from './services/notification.service';
 import { TenantEmailConfigService } from './services/tenant-email-config.service';
 import { RequestController } from './controllers/request.controller';
 import { CarerController } from './controllers/carer.controller';
+import { VisitController } from './controllers/visit.controller';
 import { createRequestRoutes } from './routes/request.routes';
 import { createCarerRoutes } from './routes/carer.routes';
+import { createVisitRoutes } from './routes/visit.routes';
 import { createSyncRoutes } from './routes/sync.routes';
 import { createHealthRoutes } from './routes/health.routes';
 import { createEmailRoutes } from './routes/email.routes';
@@ -105,6 +107,7 @@ class RosteringServer {
   // Controllers
   private requestController?: RequestController;
   private carerController?: CarerController;
+  private visitController?: VisitController;
   private rosterController?: RosterController;
   private carePlanController?: CarePlanController;
   private taskController?: TaskController;
@@ -242,6 +245,7 @@ class RosteringServer {
       console.log('🔧 [DEBUG] Initializing controllers...');
       this.requestController = new RequestController(this.prisma, this.geocodingService, this.matchingService);
       this.carerController = new CarerController(this.prisma!);
+      this.visitController = new VisitController(this.prisma);
       this.rosterController = new RosterController(this.prisma);
       this.carePlanController = new CarePlanController(this.prisma);
       this.taskController = new TaskController(this.prisma);
@@ -430,6 +434,7 @@ class RosteringServer {
     // Core business routes
     this.app.use('/api/rostering/requests', authenticate, createRequestRoutes(this.requestController!));
     this.app.use('/api/rostering/carers', authenticate, createCarerRoutes(this.carerController!));
+    this.app.use('/api/rostering/visits', authenticate, createVisitRoutes(this.visitController!));
     this.app.use('/api/rostering/careplans', authenticate, createCarePlanRoutes(this.carePlanController!));
     this.app.use('/api/rostering/tasks', authenticate, createTaskRoutes(this.taskController!));
 
@@ -541,6 +546,7 @@ class RosteringServer {
           '/api/rostering/health',
           '/api/rostering/requests',
           '/api/rostering/carers',
+          '/api/rostering/visits',
           '/api/rostering/careplans',
           '/api/rostering/tasks',
           '/api/rostering/roster',

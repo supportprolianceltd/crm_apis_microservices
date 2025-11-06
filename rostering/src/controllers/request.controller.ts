@@ -6,11 +6,12 @@ import { MatchingService } from '../services/matching.service';
 import { ClusteringService } from '../services/clustering.service';
 import { ConstraintsService } from '../services/constraints.service';
 import { TravelService } from '../services/travel.service';
+import { CarerService } from '../services/carer.service';
 import { logger, logServiceError } from '../utils/logger';
 import { generateUniqueRequestId } from '../utils/idGenerator';
-import { 
-  CreateRequestPayload, 
-  UpdateRequestPayload, 
+import {
+  CreateRequestPayload,
+  UpdateRequestPayload,
   SearchRequestsQuery,
   PaginatedResponse,
   ExternalRequest
@@ -27,9 +28,11 @@ const createRequestSchema = z.object({
   postcode: z.string().optional(),
   urgency: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   requirements: z.string().optional(),
+  requiredSkills: z.array(z.string()).optional(),
   estimatedDuration: z.number().int().positive().optional(),
   scheduledStartTime: z.string().datetime().optional(),
   scheduledEndTime: z.string().datetime().optional(),
+  recurrencePattern: z.string().optional(),
   notes: z.string().optional()
 });
 
@@ -53,15 +56,17 @@ export class RequestController {
   private geocodingService: GeocodingService;
   private matchingService: MatchingService;
   private clusteringService: ClusteringService;
+  private carerService: CarerService;
 
   constructor(
-    prisma: PrismaClient, 
-    geocodingService: GeocodingService, 
+    prisma: PrismaClient,
+    geocodingService: GeocodingService,
     matchingService: MatchingService
   ) {
     this.prisma = prisma;
     this.geocodingService = geocodingService;
     this.matchingService = matchingService;
+    this.carerService = new CarerService();
     const constraintsService = new ConstraintsService(prisma);
     const travelService = new TravelService(prisma);
     this.clusteringService = new ClusteringService(prisma, constraintsService, travelService);
@@ -130,9 +135,11 @@ export class RequestController {
         longitude: geocoded?.longitude,
         urgency: validatedData.urgency || 'MEDIUM',
         requirements: validatedData.requirements,
+        requiredSkills: validatedData.requiredSkills || [],
         estimatedDuration: validatedData.estimatedDuration,
         scheduledStartTime: validatedData.scheduledStartTime ? new Date(validatedData.scheduledStartTime) : undefined,
         scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
+        recurrencePattern: validatedData.recurrencePattern,
         notes: validatedData.notes,
         status: RequestStatus.PENDING,
         sendToRostering: false,
@@ -387,6 +394,7 @@ export class RequestController {
 
       const updateData: any = {
         ...validatedData,
+        requiredSkills: validatedData.requiredSkills || [],
         scheduledStartTime: validatedData.scheduledStartTime ? new Date(validatedData.scheduledStartTime) : undefined,
         scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
         updatedAt: new Date(),
@@ -783,6 +791,48 @@ export class RequestController {
         data: updateData
       });
 
+      // Create a Visit record for the approved request only if it has a scheduled start time
+      let visit = null;
+      if (existingRequest.scheduledStartTime) {
+        // Generate unique visit ID using the same generator as ExternalRequest
+        const visitId = await generateUniqueRequestId(async (id: string) => {
+          const existing = await this.prisma.visit.findUnique({
+            where: { id },
+            select: { id: true }
+          });
+          return !!existing;
+        });
+
+        visit = await this.prisma.visit.create({
+          data: {
+            id: visitId, // Use generated readable ID
+            tenantId: existingRequest.tenantId,
+            externalRequestId: existingRequest.id,
+            subject: existingRequest.subject,
+            content: existingRequest.content,
+            requestorEmail: existingRequest.requestorEmail,
+            requestorName: existingRequest.requestorName,
+            requestorPhone: existingRequest.requestorPhone,
+            address: existingRequest.address,
+            postcode: existingRequest.postcode,
+            latitude: existingRequest.latitude,
+            longitude: existingRequest.longitude,
+            scheduledStartTime: existingRequest.scheduledStartTime,
+            scheduledEndTime: existingRequest.scheduledEndTime,
+            estimatedDuration: existingRequest.estimatedDuration,
+            recurrencePattern: (existingRequest as any).recurrencePattern,
+            urgency: existingRequest.urgency,
+            requirements: existingRequest.requirements,
+            requiredSkills: (existingRequest as any).requiredSkills || [],
+            notes: existingRequest.notes,
+            status: 'SCHEDULED',
+            clusterId: existingRequest.clusterId,
+            createdBy: user?.id,
+            createdByEmail: user?.email
+          }
+        });
+      }
+
       // Kick off matching again in background
       this.matchingService.autoMatchRequest(requestId).catch(error =>
         logServiceError('Request', 'autoMatchAfterApprove', error, { requestId })
@@ -808,8 +858,373 @@ export class RequestController {
   };
 
   /**
-   * Decline a request
+   * Check request feasibility - which carers can handle this request
    */
+  checkRequestFeasibility = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
+      const requestId = req.params.id;
+      const { includeScheduleCheck } = req.query as { includeScheduleCheck?: string };
+
+      const existingRequest = await this.prisma.externalRequest.findFirst({
+        where: { id: requestId, tenantId }
+      });
+
+      if (!existingRequest) {
+        res.status(404).json({ success: false, error: 'Request not found' });
+        return;
+      }
+
+      if (!existingRequest.scheduledStartTime) {
+        res.status(400).json({
+          success: false,
+          error: 'Request must have scheduled start time for feasibility check'
+        });
+        return;
+      }
+
+      // Get all carers from auth service using CarerService
+      const authToken = req.headers?.authorization?.split?.(' ')?.[1];
+      if (!authToken) {
+        res.status(401).json({ success: false, error: 'Authorization token required' });
+        return;
+      }
+
+      let allCarers: any[] = [];
+      try {
+        logger.info('Fetching carers from auth service');
+
+        // Get carers directly from auth service using CarerService
+        allCarers = await this.carerService.getCarers(authToken, tenantId);
+
+        logger.info(`Fetched ${allCarers.length} carers from auth service`);
+      } catch (error) {
+        logger.error('Failed to fetch carers from auth service', {
+          error: error instanceof Error ? error.message : String(error),
+          tenantId,
+          hasAuthToken: !!authToken
+        });
+        res.status(500).json({
+          success: false,
+          error: 'Failed to fetch carer data from auth service',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        });
+        return;
+      }
+
+      const requiredSkills = (existingRequest as any).requiredSkills || [];
+      const requirements = existingRequest.requirements || '';
+
+      // Ensure we have valid dates (already checked above but TypeScript needs reassurance)
+      const requestStartTime = existingRequest.scheduledStartTime!;
+      const requestEndTime = existingRequest.scheduledEndTime ||
+        new Date(requestStartTime.getTime() + (existingRequest.estimatedDuration || 60) * 60 * 1000);
+
+      // Check each carer for skills match and availability
+      const feasibilityResults = await Promise.all(
+        allCarers.map(async (carer) => {
+          // 1. Check skills match using carer skills from profile
+          const carerSkills = carer.profile?.skill_details || [];
+          const skillsMatch = this.checkSkillsMatch(carerSkills, requiredSkills, requirements);
+
+          // 2. Check availability based on profile availability
+          const availabilityCheck = this.checkCarerAvailability(
+            carer,
+            requestStartTime,
+            requestEndTime
+          );
+
+          // 3. Optional: Advanced scheduling check using existing assignments
+          // Note: Schedule conflicts check is not available when using external carer API
+          let scheduleConflicts: any[] = [];
+          if (includeScheduleCheck === 'true') {
+            // Since we're using external carer API, we don't have assignment data
+            // This would need to be implemented by calling another API endpoint
+            scheduleConflicts = [];
+          }
+
+          return {
+            carerId: carer.id,
+            carerName: `${carer.first_name || 'Unknown'} ${carer.last_name || 'Carer'}`,
+            email: carer.email,
+            skills: carer.profile?.skill_details || [], // Skills from carer profile
+            skillsMatch: {
+              hasRequiredSkills: skillsMatch.hasSomeRequired,
+              missingSkills: skillsMatch.missingSkills,
+              matchingSkills: skillsMatch.matchingSkills,
+              requirementsMatch: skillsMatch.requirementsMatch
+            },
+            availability: {
+              isAvailable: availabilityCheck.isAvailable,
+              conflicts: availabilityCheck.conflicts,
+              availableHours: carer.profile?.availability || {}
+            },
+            scheduleCheck: includeScheduleCheck === 'true' ? {
+              hasConflicts: scheduleConflicts.length > 0,
+              conflicts: scheduleConflicts,
+              conflictCount: scheduleConflicts.length
+            } : null,
+            overallEligible: skillsMatch.hasSomeRequired && availabilityCheck.isAvailable && (includeScheduleCheck !== 'true' || scheduleConflicts.length === 0)
+          };
+        })
+      );
+
+      // Sort by eligibility (eligible first, then by skill match quality)
+      feasibilityResults.sort((a, b) => {
+        if (a.overallEligible !== b.overallEligible) {
+          return b.overallEligible ? 1 : -1;
+        }
+        // If both eligible or both ineligible, sort by matching skills count
+        return b.skillsMatch.matchingSkills.length - a.skillsMatch.matchingSkills.length;
+      });
+
+      const eligibleCarers = feasibilityResults.filter(r => r.overallEligible);
+      const ineligibleCarers = feasibilityResults.filter(r => !r.overallEligible);
+
+      res.json({
+        success: true,
+        data: {
+          requestId,
+          requestDetails: {
+            subject: existingRequest.subject,
+            scheduledStartTime: existingRequest.scheduledStartTime,
+            scheduledEndTime: existingRequest.scheduledEndTime,
+            estimatedDuration: existingRequest.estimatedDuration,
+            requiredSkills,
+            requirements
+          },
+          summary: {
+            totalCarers: allCarers.length,
+            eligibleCarers: eligibleCarers.length,
+            ineligibleCarers: ineligibleCarers.length,
+            checkedSchedule: includeScheduleCheck === 'true'
+          },
+          eligibleCarers,
+          ineligibleCarers
+        },
+        message: `Found ${eligibleCarers.length} eligible carers out of ${allCarers.length} total carers`
+      });
+
+    } catch (error) {
+      logServiceError('Request', 'checkRequestFeasibility', error, { requestId: req.params.id });
+      res.status(500).json({
+        success: false,
+        error: 'Failed to check request feasibility'
+      });
+    }
+  };
+
+  /**
+   * Helper method to check if carer skills match requirements
+   */
+  private checkSkillsMatch(carerSkills: any[], requiredSkills: string[], requirements: string) {
+    // Extract skill names from skill_details objects or handle string arrays for backward compatibility
+    const carerSkillNames = carerSkills.map(skill =>
+      typeof skill === 'string' ? skill : skill.skill_name || ''
+    ).filter(name => name.trim() !== '');
+
+    const carerSkillsLower = carerSkillNames.map(s => s.toLowerCase());
+    const requiredSkillsLower = requiredSkills.map(s => s.toLowerCase());
+    const requirementsLower = requirements.toLowerCase();
+
+    // Check required skills
+    const missingSkills = requiredSkillsLower.filter(skill =>
+      !carerSkillsLower.some(carerSkill => carerSkill.includes(skill) || skill.includes(carerSkill))
+    );
+
+    const matchingSkills = requiredSkillsLower.filter(skill =>
+      carerSkillsLower.some(carerSkill => carerSkill.includes(skill) || skill.includes(carerSkill))
+    );
+
+    // Check requirements text for skill keywords
+    const skillKeywords = [
+      'personal care', 'medication', 'mobility', 'dementia', 'complex care',
+      'hoist', 'peg feeding', 'catheter', 'stoma', 'diabetes',
+      'parkinson', 'stroke', 'palliative', 'respite', 'companionship'
+    ];
+
+    const requirementsMatch = skillKeywords.some(keyword =>
+      requirementsLower.includes(keyword) &&
+      carerSkillsLower.some(carerSkill => carerSkill.includes(keyword))
+    );
+
+    // Relaxed matching: require at least one skill match if skills are required, otherwise allow if no requirements
+    const hasSomeRequired = requiredSkills.length === 0 || matchingSkills.length > 0;
+
+    return {
+      hasSomeRequired,
+      missingSkills,
+      matchingSkills,
+      requirementsMatch: !requirements || requirementsMatch
+    };
+  }
+
+  /**
+   * Helper method to check basic availability (time windows)
+   */
+  private checkBasicAvailability(carer: any, requestStart: Date, requestEnd: Date) {
+    // This is a simplified check - in reality you'd check against working hours
+    // For now, assume carers are available during typical working hours
+    const requestHour = requestStart.getHours();
+    const isWorkingHour = requestHour >= 8 && requestHour <= 18; // 8 AM to 6 PM
+
+    // Check for obvious conflicts (this is simplified)
+    const conflicts = [];
+    if (!isWorkingHour) {
+      conflicts.push(`Request time (${requestHour}:00) is outside typical working hours (8:00-18:00)`);
+    }
+
+    // Check if it's a weekend (simplified)
+    const dayOfWeek = requestStart.getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      conflicts.push('Request is on a weekend');
+    }
+
+    return {
+      isAvailable: conflicts.length === 0,
+      conflicts
+    };
+  }
+
+  /**
+   * Helper method to check for schedule conflicts with existing assignments
+   */
+  private checkScheduleConflicts(existingAssignments: any[], requestStart: Date, requestEnd: Date) {
+    const conflicts = [];
+
+    for (const assignment of existingAssignments) {
+      const assignmentStart = new Date(assignment.scheduledTime);
+      const assignmentEnd = new Date(assignment.estimatedEndTime);
+
+      // Check for overlap
+      if (requestStart < assignmentEnd && requestEnd > assignmentStart) {
+        conflicts.push({
+          assignmentId: assignment.id,
+          visitId: assignment.visitId,
+          conflictStart: assignmentStart,
+          conflictEnd: assignmentEnd,
+          overlapMinutes: Math.min(requestEnd.getTime(), assignmentEnd.getTime()) -
+                         Math.max(requestStart.getTime(), assignmentStart.getTime())
+        });
+      }
+    }
+
+    return conflicts;
+  }
+
+
+  /**
+   * Check carer availability based on profile availability data
+   */
+  private checkCarerAvailability(carer: any, requestStart: Date, requestEnd: Date) {
+    const availability = carer.profile?.availability || {};
+
+    // Get the day of the week for the request
+    const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const requestDay = daysOfWeek[requestStart.getDay()].toLowerCase();
+
+    // Check if carer has availability for this day
+    const dayAvailability = availability[requestDay];
+    if (!dayAvailability) {
+      return {
+        isAvailable: false,
+        conflicts: [`No availability configured for ${requestDay}`]
+      };
+    }
+
+    // Handle new object format: { start: "08:00", end: "14:00", available: true }
+    if (typeof dayAvailability === 'object' && dayAvailability.available !== false) {
+      const startTime = dayAvailability.start;
+      const endTime = dayAvailability.end;
+
+      if (!startTime || !endTime) {
+        return {
+          isAvailable: false,
+          conflicts: [`Invalid availability object for ${requestDay}: missing start or end time`]
+        };
+      }
+
+      // Parse time strings (e.g., "08:00", "14:00")
+      const [startHourStr, startMinStr] = startTime.split(':');
+      const [endHourStr, endMinStr] = endTime.split(':');
+
+      const startHour24 = parseInt(startHourStr);
+      const endHour24 = parseInt(endHourStr);
+
+      if (isNaN(startHour24) || isNaN(endHour24)) {
+        return {
+          isAvailable: false,
+          conflicts: [`Invalid time format for ${requestDay}: ${startTime} - ${endTime}`]
+        };
+      }
+
+      // Get request times in hours (ignore minutes for simplicity)
+      const requestStartHour = requestStart.getHours();
+      const requestEndHour = requestEnd.getHours();
+
+      // Check if request falls within availability
+      const isAvailable = requestStartHour >= startHour24 && requestEndHour <= endHour24;
+
+      const conflicts = [];
+      if (!isAvailable) {
+        conflicts.push(`Request time (${requestStartHour}:00-${requestEndHour}:00) is outside carer availability (${startHour24}:00-${endHour24}:00) on ${requestDay}`);
+      }
+
+      return {
+        isAvailable,
+        conflicts
+      };
+    }
+
+    // Fallback: Handle old string format (e.g., "8am-6pm") for backward compatibility
+    if (typeof dayAvailability === 'string') {
+      const timeRangeMatch = dayAvailability.match(/(\d+)(am|pm)-(\d+)(am|pm)/i);
+      if (!timeRangeMatch) {
+        return {
+          isAvailable: false,
+          conflicts: [`Invalid availability format for ${requestDay}: ${dayAvailability}`]
+        };
+      }
+
+      const [, startHour, startPeriod, endHour, endPeriod] = timeRangeMatch;
+      let startHour24 = parseInt(startHour);
+      let endHour24 = parseInt(endHour);
+
+      // Convert to 24-hour format
+      if (startPeriod.toLowerCase() === 'pm' && startHour24 !== 12) startHour24 += 12;
+      if (startPeriod.toLowerCase() === 'am' && startHour24 === 12) startHour24 = 0;
+      if (endPeriod.toLowerCase() === 'pm' && endHour24 !== 12) endHour24 += 12;
+      if (endPeriod.toLowerCase() === 'am' && endHour24 === 12) endHour24 = 0;
+
+      // Get request times in hours
+      const requestStartHour = requestStart.getHours();
+      const requestEndHour = requestEnd.getHours();
+
+      // Check if request falls within availability
+      const isAvailable = requestStartHour >= startHour24 && requestEndHour <= endHour24;
+
+      const conflicts = [];
+      if (!isAvailable) {
+        conflicts.push(`Request time (${requestStartHour}:00-${requestEndHour}:00) is outside carer availability (${startHour24}:00-${endHour24}:00) on ${requestDay}`);
+      }
+
+      return {
+        isAvailable,
+        conflicts
+      };
+    }
+
+    // If neither object nor string format
+    return {
+      isAvailable: false,
+      conflicts: [`Unsupported availability format for ${requestDay}`]
+    };
+  }
+
+  /**
+    * Decline a request
+    */
   declineRequest = async (req: Request, res: Response): Promise<void> => {
     try {
       const user = (req as any).user;
