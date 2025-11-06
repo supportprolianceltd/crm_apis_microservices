@@ -1443,6 +1443,7 @@ class CustomUserListSerializer(serializers.ModelSerializer):
 class CustomUserSerializer(CustomUserListSerializer):
     profile = UserProfileSerializer(read_only=True)
     profile_completion_percentage = serializers.SerializerMethodField()
+    two_factor_enabled = serializers.BooleanField(read_only=True)
 
     class Meta(CustomUserListSerializer.Meta):
         fields = "__all__"

@@ -61,15 +61,15 @@ with tenant_context(tenant):
     )
 
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='appBrew')
+tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='support@prolianceltd.com',
+        email='apps@prolianceltd.com',
         password='qwerty',
         role='admin',
-        first_name='Gauis',
-        last_name='Julius',
-        job_role='Backend Developer',
+        first_name='David',
+        last_name='Dappa',
+        job_role='Frontend Developer',
         tenant=tenant
     )
 
@@ -213,7 +213,7 @@ tenant = Tenant.objects.get(schema_name='proliance')
 # Enter tenant context
 with tenant_context(tenant):
     try:
-        user = CustomUser.objects.get(email='support@prolianceltd.com')
+        user = CustomUser.objects.get(email='ekenehanson@prolianceltd.com')
         user.delete()
         print("User deleted successfully.")
     except CustomUser.DoesNotExist:
