@@ -281,7 +281,9 @@ class RosteringServer {
       process.env.CORS_ORIGIN || 'http://localhost:8000',
       'http://localhost:5173',
       'http://localhost:3000',
-      'https://your-production-domain.com'
+      'https://crm-frontend-react.vercel.app',
+      'https://dev.e3os.co.uk/',
+      'https://e3os.co.uk/'
     ].filter(Boolean);
 
     this.app.use(cors({

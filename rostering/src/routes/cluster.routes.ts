@@ -33,6 +33,12 @@ export function createClusterRoutes(prisma: PrismaClient) {
   // Assign request to cluster
   router.post('/:clusterId/assign-request/:requestId', clusterController.assignRequestToCluster.bind(clusterController));
 
+  router.post('/:clusterId/assign-carer/:carerId', clusterController.assignCarerToSpecificCluster.bind(clusterController));
+
+  router.get('/carers/:carerId/assignment', clusterController.getCarerClusterAssignment.bind(clusterController));
+
+  router.delete('/carers/:carerId/cluster', clusterController.removeCarerFromCluster.bind(clusterController));
+
 
     // NEW: AI Clustering endpoint
   router.post('/generate', clusterController.generateClusters.bind(clusterController));

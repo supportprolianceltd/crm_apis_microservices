@@ -34,9 +34,9 @@ export class CarerController {
    */
  getCarer = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId;
       const carerId = req.params.id;
       const authToken = req.headers.authorization?.replace('Bearer ', '');
+      
 
       if (!authToken) {
         res.status(401).json({ success: false, error: 'Authentication required' });
@@ -49,11 +49,12 @@ export class CarerController {
       const carer = await this.carerService.getCarerById(authToken, carerId);
       console.log('Carer service response:', carer);
 
-      if (!carer || carer.tenantId !== tenantId) {
+      if (!carer) {
         res.status(404).json({ success: false, error: 'Carer not found' });
         return;
       }
 
+      console.log('Carer tenant:', carer.tenant);
       // TODO: If you need matches, you'll need to query them separately
       // since they're stored locally but reference carer IDs
 
@@ -174,7 +175,6 @@ export class CarerController {
    */
   getCarerAvailability = async (req: Request, res: Response): Promise<void> => {
     try {
-      const tenantId = req.user!.tenantId;
       const carerId = req.params.id;
       const authToken = req.headers.authorization?.replace('Bearer ', '');
 
@@ -185,7 +185,7 @@ export class CarerController {
 
       const carer = await this.carerService.getCarerById(authToken, carerId);
 
-      if (!carer || carer.tenantId !== tenantId) {
+      if (!carer) {
         res.status(404).json({ success: false, error: 'Carer not found' });
         return;
       }

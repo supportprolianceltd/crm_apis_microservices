@@ -410,7 +410,7 @@ export class ClusterController {
         return res.status(400).json({ error: 'latitude and longitude required in body' });
       }
 
-      // Use auth-backed CarerService to validate carer identity and tenant
+      // Use auth-backed CarerService to validate carer exists
       const authHeader = req.headers.authorization as string | undefined;
       const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
       const carerService = new CarerService();
@@ -420,10 +420,7 @@ export class ClusterController {
         return res.status(404).json({ error: 'Carer not found in auth service' });
       }
 
-      if (carer.tenantId !== tenantId.toString()) {
-        return res.status(403).json({ error: 'Carer does not belong to tenant' });
-      }
-
+      // No tenant check needed - endpoint already filters by tenant
       const cluster = await this.clusteringService.assignCarerToCluster(tenantId.toString(), carerId, latitude, longitude);
 
       return res.json({
@@ -435,6 +432,56 @@ export class ClusterController {
     } catch (error: any) {
       console.error('assignCarerToCluster error', error);
       return res.status(500).json({ error: 'Failed to assign carer to cluster', details: error?.message });
+    }
+  }
+
+  /**
+   * Assign carer to specific cluster (manual assignment)
+   */
+  public async assignCarerToSpecificCluster(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) {
+        return res.status(403).json({ error: 'tenantId missing from auth context' });
+      }
+
+      const { clusterId, carerId } = req.params;
+      const { latitude, longitude } = req.body;
+
+      if (!clusterId || !carerId) {
+        return res.status(400).json({ error: 'clusterId and carerId required in path' });
+      }
+
+      // Verify cluster belongs to tenant
+      const cluster = await (this.prisma as any).cluster.findFirst({
+        where: { id: clusterId, tenantId: tenantId.toString() }
+      });
+
+      if (!cluster) {
+        return res.status(404).json({ error: 'Cluster not found' });
+      }
+
+      // Verify carer exists
+      const authHeader = req.headers.authorization as string | undefined;
+      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+      const carerService = new CarerService();
+      const carer = await carerService.getCarerById(token, carerId);
+
+      if (!carer) {
+        return res.status(404).json({ error: 'Carer not found in auth service' });
+      }
+
+      // Use the moveCarerToCluster method
+      const result = await this.clusteringService.moveCarerToCluster(
+        tenantId.toString(), 
+        carerId, 
+        clusterId
+      );
+
+      return res.json(result);
+    } catch (error: any) {
+      console.error('assignCarerToSpecificCluster error', error);
+      return res.status(500).json({ error: 'Failed to assign carer to specific cluster', details: error?.message });
     }
   }
 

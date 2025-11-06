@@ -46,8 +46,16 @@ export class CarerService {
     const carers = await this.getCarers(authToken);
     console.log(`Searching for carer ID: ${carerId} among ${carers.length} carers`);
     
-    const carer = carers.find((carer: any) => carer.id.toString() === carerId);
-    console.log('Found carer:', carer ? 'Yes' : 'No');
+    // Debug: Log all carer IDs to see what's available
+    console.log('Available carer IDs:', carers.map(c => c.id));
+    
+    const carer = carers.find((carer: any) => {
+      const match = carer.id.toString() === carerId;
+      console.log(`Checking carer ${carer.id} (type: ${typeof carer.id}) against ${carerId} (type: ${typeof carerId}): ${match}`);
+      return match;
+    });
+    
+    console.log('Found carer:', carer ? `Yes - ${carer.first_name} ${carer.last_name}` : 'No');
     
     return carer;
   }

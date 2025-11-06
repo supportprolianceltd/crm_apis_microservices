@@ -1342,6 +1342,8 @@ public async generateOptimizedClusters(
    */
   async updateClusterStats(clusterId: string) {
     try {
+      console.log(`=== UPDATING CLUSTER STATS FOR: ${clusterId} ===`);
+      
       // Get counts from ClusterAssignment table
       const stats = await this.prisma.$queryRaw<Array<{
         active_carers: number;
@@ -1351,7 +1353,7 @@ public async generateOptimizedClusters(
       }>>`
         SELECT 
           COUNT(ca.id) as active_carers,
-          COUNT(ca.id) as total_carers, -- For now, all assigned carers are considered active
+          COUNT(ca.id) as total_carers,
           COUNT(CASE WHEN er.status IN ('PENDING', 'PROCESSING', 'MATCHED') THEN 1 END) as active_requests,
           COUNT(er.id) as total_requests
         FROM clusters cl
@@ -1361,20 +1363,51 @@ public async generateOptimizedClusters(
         GROUP BY cl.id
       `;
 
+      console.log('Raw stats query result:', stats);
+      console.log('Number of stats rows:', stats.length);
+
       if (stats.length > 0) {
+        const activeCarers = Number(stats[0].active_carers) || 0;
+        const totalCarers = Number(stats[0].total_carers) || 0;
+        
+        console.log(`Updating cluster ${clusterId}:`);
+        console.log(`- Active carers: ${activeCarers}`);
+        console.log(`- Total carers: ${totalCarers}`);
+        console.log(`- Active requests: ${Number(stats[0].active_requests) || 0}`);
+        console.log(`- Total requests: ${Number(stats[0].total_requests) || 0}`);
+
         await this.prisma.cluster.update({
           where: { id: clusterId },
           data: {
             activeRequestCount: Number(stats[0].active_requests) || 0,
             totalRequestCount: Number(stats[0].total_requests) || 0,
-            activeCarerCount: Number(stats[0].active_carers) || 0,
-            totalCarerCount: Number(stats[0].total_carers) || 0,
+            activeCarerCount: activeCarers,
+            totalCarerCount: totalCarers,
+            lastActivityAt: new Date()
+          }
+        });
+
+        console.log('Cluster stats updated successfully');
+      } else {
+        console.log('No stats found for cluster, resetting to zero');
+        await this.prisma.cluster.update({
+          where: { id: clusterId },
+          data: {
+            activeRequestCount: 0,
+            totalRequestCount: 0,
+            activeCarerCount: 0,
+            totalCarerCount: 0,
             lastActivityAt: new Date()
           }
         });
       }
     } catch (error) {
       console.error('Error updating cluster stats:', error);
+      // Log the full error details
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
     }
   }
 
