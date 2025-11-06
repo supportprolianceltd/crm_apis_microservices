@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../utils/logger';
+import { generateUniqueRequestId } from '../utils/idGenerator';
 
 export class DemoController {
   constructor(private prisma: PrismaClient) {}
@@ -91,8 +92,16 @@ export class DemoController {
       ];
 
       for (const visitData of visits) {
+        const requestId = await generateUniqueRequestId(async (id: string) => {
+          const existing = await this.prisma.externalRequest.findUnique({
+            where: { id },
+            select: { id: true }
+          });
+          return !!existing;
+        });
         await this.prisma.externalRequest.create({
           data: {
+            id: requestId,
             ...visitData,
             tenantId: tenantId,
             content: visitData.subject,

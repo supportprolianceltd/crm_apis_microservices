@@ -27,26 +27,44 @@ from .models import (DocumentAcknowledgment, DocumentPermission, Document,
 import os
 logger = logging.getLogger(__name__)
 
+# def get_user_data_from_jwt(request):
+#     """Extract user data from JWT payload."""
+#     auth_header = request.headers.get("Authorization", "")
+#     if not auth_header.startswith("Bearer "):
+#         raise serializers.ValidationError("No valid Bearer token provided.")
+#     token = auth_header.split(" ")[1]
+#     try:
+#         payload = jwt.decode(token, options={"verify_signature": False})
+#         user_data = payload.get("user", {})
+#         return {
+#             'email': user_data.get('email', ''),
+#             'first_name': user_data.get('first_name', ''),
+#             'last_name': user_data.get('last_name', ''),
+#             'job_role': user_data.get('job_role', ''),
+#             'id': user_data.get('id', None)
+#         }
+#     except Exception as e:
+#         logger.error(f"Failed to decode JWT for user data: {str(e)}")
+#         raise serializers.ValidationError("Invalid JWT token for user data.")
+
+   
 def get_user_data_from_jwt(request):
-    """Extract user data from JWT payload."""
-    auth_header = request.headers.get("Authorization", "")
-    if not auth_header.startswith("Bearer "):
-        raise serializers.ValidationError("No valid Bearer token provided.")
-    token = auth_header.split(" ")[1]
-    try:
-        payload = jwt.decode(token, options={"verify_signature": False})
-        user_data = payload.get("user", {})
-        return {
-            'email': user_data.get('email', ''),
-            'first_name': user_data.get('first_name', ''),
-            'last_name': user_data.get('last_name', ''),
-            'job_role': user_data.get('job_role', ''),
-            'id': user_data.get('id', None)
-        }
-    except Exception as e:
-        logger.error(f"Failed to decode JWT for user data: {str(e)}")
-        raise serializers.ValidationError("Invalid JWT token for user data.")
+    """Extract user data from the authenticated request user."""
+    if not request.user or not request.user.is_authenticated:
+        logger.warning("No authenticated user available in request")
+        raise serializers.ValidationError("Authentication required. No user found in request.")
     
+    user = request.user
+    logger.info(f"Extracting user data from request user: {user.email}, ID: {user.id}")
+    
+    return {
+        'email': user.email,
+        'first_name': user.first_name or '',
+        'last_name': user.last_name or '',
+        'job_role': getattr(user, 'job_role', ''),
+        'id': user.id  # Keep as numeric ID
+    }    
+
 def get_tenant_id_from_jwt(request):
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
@@ -62,7 +80,11 @@ def get_tenant_id_from_jwt(request):
 def get_last_updated_by(self, obj):
     if obj.last_updated_by_id:
         try:
-            updater = CustomUser.objects.get(id=obj.last_updated_by_id)
+            # Try to get by id if it's numeric, otherwise by email
+            if str(obj.last_updated_by_id).isdigit():
+                updater = CustomUser.objects.get(id=int(obj.last_updated_by_id))
+            else:
+                updater = CustomUser.objects.get(email=obj.last_updated_by_id)
             return {
                 'id': updater.id,
                 'email': updater.email,
@@ -71,6 +93,9 @@ def get_last_updated_by(self, obj):
             }
         except CustomUser.DoesNotExist:
             logger.warning(f"User {obj.last_updated_by_id} not found")
+            return None
+        except ValueError:
+            logger.warning(f"Invalid last_updated_by_id format: {obj.last_updated_by_id}")
             return None
     logger.warning(f"No last_updated_by_id provided for {obj}")
     return None
@@ -1715,18 +1740,69 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         logger.info(f"Validating ClientProfileSerializer data: {data}")
         return super().validate(data)
 
-    def create(self, validated_data):
-        user_data = get_user_data_from_jwt(self.context['request'])
-        user_id = user_data.get('id')
-        if user_id:
-            validated_data['last_updated_by_id'] = str(user_id)
-        else:
-            logger.warning("No user_id found in JWT payload for creation")
-            raise serializers.ValidationError({"last_updated_by_id": "User ID required for creation."})
+    # def create(self, validated_data):
+    #     user_data = get_user_data_from_jwt(self.context['request'])
+    #     user_id = user_data.get('id')
+    #     if user_id:
+    #         validated_data['last_updated_by_id'] = str(user_id)
+    #     else:
+    #         logger.warning("No user_id found in JWT payload for creation")
+    #         raise serializers.ValidationError({"last_updated_by_id": "User ID required for creation."})
 
+    #     photo = validated_data.pop("photo", None)
+    #     preferred_carers = validated_data.pop("preferred_carers", [])
+    #     client_profile = super().create(validated_data)
+    #     if photo and hasattr(photo, "name"):
+    #         logger.info(f"Uploading client photo: {photo.name}")
+    #         try:
+    #             url = upload_file_dynamic(
+    #                 photo, photo.name, content_type=getattr(photo, "content_type", "application/octet-stream")
+    #             )
+    #             client_profile.photo_url = url
+    #             logger.info(f"Client photo uploaded: {url}")
+    #         except Exception as e:
+    #             logger.error(f"Failed to upload client photo: {str(e)}")
+    #             raise serializers.ValidationError(f"Failed to upload photo: {str(e)}")
+    #     else:
+    #         logger.info("No photo provided for client profile, setting photo_url to None")
+    #         client_profile.photo_url = None
+    #     client_profile.preferred_carers.set(preferred_carers)
+    #     client_profile.save()
+    #     return client_profile
+
+
+
+
+    def create(self, validated_data):
+        try:
+            user_data = get_user_data_from_jwt(self.context['request'])
+            user_id = user_data.get('id')
+            
+            if user_id:
+                validated_data['last_updated_by_id'] = str(user_id)
+            else:
+                logger.warning("No user_id found in JWT payload for client creation")
+                # Instead of raising an error, use a fallback or leave it null
+                # You might want to use the authenticated user's ID instead
+                if self.context['request'].user.is_authenticated:
+                    validated_data['last_updated_by_id'] = str(self.context['request'].user.id)
+                else:
+                    logger.warning("No authenticated user found, setting last_updated_by_id to None")
+                    validated_data['last_updated_by_id'] = None
+
+        except Exception as e:
+            logger.error(f"Error extracting user data from JWT: {str(e)}")
+            # Fallback to authenticated user if available
+            if self.context['request'].user.is_authenticated:
+                validated_data['last_updated_by_id'] = str(self.context['request'].user.id)
+            else:
+                validated_data['last_updated_by_id'] = None
+
+        # Rest of your existing code for photo upload and creation
         photo = validated_data.pop("photo", None)
         preferred_carers = validated_data.pop("preferred_carers", [])
         client_profile = super().create(validated_data)
+        
         if photo and hasattr(photo, "name"):
             logger.info(f"Uploading client photo: {photo.name}")
             try:
@@ -1737,13 +1813,16 @@ class ClientProfileSerializer(serializers.ModelSerializer):
                 logger.info(f"Client photo uploaded: {url}")
             except Exception as e:
                 logger.error(f"Failed to upload client photo: {str(e)}")
-                raise serializers.ValidationError(f"Failed to upload photo: {str(e)}")
+                # Don't raise error here, just log it
         else:
             logger.info("No photo provided for client profile, setting photo_url to None")
             client_profile.photo_url = None
+            
         client_profile.preferred_carers.set(preferred_carers)
         client_profile.save()
         return client_profile
+
+
 
     def update(self, instance, validated_data):
         user_data = get_user_data_from_jwt(self.context['request'])
@@ -1774,6 +1853,92 @@ class ClientProfileSerializer(serializers.ModelSerializer):
             instance.preferred_carers.set(preferred_carers)
         instance.save()
         return instance
+
+
+# class ClientDetailSerializer(serializers.ModelSerializer):
+#     profile = ClientProfileSerializer()
+
+#     class Meta:
+#         model = CustomUser
+#         fields = ["id", "email", "first_name", "last_name", "role", "job_role", "branch", "profile"]
+#         read_only_fields = ["id", "role"]
+
+#     def to_internal_value(self, data):
+#         """
+#         Custom parsing for multipart/form-data to handle nested 'profile' fields and files.
+#         Supports both simple nested (e.g., profile[photo]) and deeper nested (e.g., profile[preferred_carers][0]).
+#         """
+#         logger.info(f"Raw payload in ClientDetailSerializer: {dict(data) if hasattr(data, 'dict') else data}")
+#         mutable_data = {}
+#         profile_data = {}
+
+#         if hasattr(data, "getlist"):  # Multipart/form-data case
+#             # Initialize nested arrays (e.g., preferred_carers)
+#             nested_arrays = ["preferred_carers"]  # Add more if needed (e.g., for future many=True fields)
+#             for field in nested_arrays:
+#                 profile_data[field] = []
+
+#             for key in data:
+#                 if key.startswith("profile[") and key.endswith("]"):
+#                     # Handle profile-prefixed fields
+#                     if "][" in key:
+#                         # Deeper nested: e.g., profile[preferred_carers][0]
+#                         parts = key.split("[")
+#                         field_name = parts[1][:-1]  # e.g., "preferred_carers"
+#                         index_str = parts[2][:-1]   # e.g., "0"
+#                         if len(parts) > 3:
+#                             sub_field = parts[3][:-1]  # e.g., sub-sub-field
+#                             index = int(index_str)
+
+#                             # Ensure list is long enough
+#                             while len(profile_data.get(field_name, [])) <= index:
+#                                 profile_data[field_name].append({})
+
+#                             # Add value (file or text)
+#                             if key in self.context["request"].FILES:
+#                                 profile_data[field_name][index][sub_field] = self.context["request"].FILES[key]
+#                             else:
+#                                 profile_data[field_name][index][sub_field] = data.get(key)
+#                         else:
+#                             # Handle edge cases if needed
+#                             pass
+#                     else:
+#                         # Simple nested: e.g., profile[photo]
+#                         field_name = key[len("profile[") : -1]
+#                         if key in self.context["request"].FILES:
+#                             profile_data[field_name] = self.context["request"].FILES[key]
+#                         else:
+#                             profile_data[field_name] = data.get(key)
+#                 else:
+#                     # Top-level fields (e.g., email, first_name)
+#                     mutable_data[key] = data.get(key)
+#         else:
+#             # JSON case (no files)
+#             mutable_data = dict(data)
+#             profile_data = mutable_data.get("profile", {})
+
+#         logger.info(f"Parsed profile data: {profile_data}")
+#         mutable_data["profile"] = profile_data
+#         return super().to_internal_value(mutable_data)
+
+#     def to_representation(self, instance):
+#         data = super().to_representation(instance)
+#         if instance.client_profile:
+#             data["profile"] = ClientProfileSerializer(instance.client_profile).data
+#         else:
+#             data["profile"] = None
+#         return data
+
+#     def update(self, instance, validated_data):
+#         profile_data = validated_data.pop("profile", {})
+#         instance = super().update(instance, validated_data)
+
+#         if instance.client_profile:
+#             profile_serializer = ClientProfileSerializer(instance.client_profile, data=profile_data, partial=True, context=self.context)
+#             profile_serializer.is_valid(raise_exception=True)
+#             profile_serializer.save()
+#         return instance
+
 
 
 class ClientDetailSerializer(serializers.ModelSerializer):
@@ -1843,24 +2008,45 @@ class ClientDetailSerializer(serializers.ModelSerializer):
         return super().to_internal_value(mutable_data)
 
     def to_representation(self, instance):
+        """
+        FIXED: Safely check for client_profile existence to avoid RelatedObjectDoesNotExist error
+        """
         data = super().to_representation(instance)
-        if instance.client_profile:
-            data["profile"] = ClientProfileSerializer(instance.client_profile).data
-        else:
+        
+        # Safe check using hasattr() or try-except
+        try:
+            if hasattr(instance, 'client_profile') and instance.client_profile:
+                data["profile"] = ClientProfileSerializer(instance.client_profile).data
+            else:
+                data["profile"] = None
+        except ClientProfile.DoesNotExist:
+            # This exception is raised when accessing instance.client_profile on a user without one
             data["profile"] = None
+            logger.warning(f"User {instance.email} does not have a client_profile")
+        
         return data
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop("profile", {})
         instance = super().update(instance, validated_data)
 
-        if instance.client_profile:
-            profile_serializer = ClientProfileSerializer(instance.client_profile, data=profile_data, partial=True, context=self.context)
-            profile_serializer.is_valid(raise_exception=True)
-            profile_serializer.save()
+        # Safe check before updating profile
+        try:
+            if hasattr(instance, 'client_profile') and instance.client_profile:
+                profile_serializer = ClientProfileSerializer(
+                    instance.client_profile, 
+                    data=profile_data, 
+                    partial=True, 
+                    context=self.context
+                )
+                profile_serializer.is_valid(raise_exception=True)
+                profile_serializer.save()
+        except ClientProfile.DoesNotExist:
+            logger.warning(f"Cannot update client_profile for user {instance.email} - profile does not exist")
+        
         return instance
 
-
+        
 class ClientCreateSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer(required=True)
     password = serializers.CharField(write_only=True, required=True, min_length=8)

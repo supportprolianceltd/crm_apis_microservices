@@ -568,7 +568,7 @@ class CustomTokenSerializer(serializers.Serializer):
             "tenant_schema": user.tenant.schema_name,
             "tenant_domain": tenant_domain,
             "has_accepted_terms": has_accepted_terms,
-            "user_type": "global" if isinstance(user, GlobalUser) else "tenant",
+            "user_type": "global" if isinstance(user, GlobalUser) else "ordinary",
             "email": user.email,
             "type": "access",
             "exp": (timezone.now() + timedelta(minutes=180)).timestamp(),

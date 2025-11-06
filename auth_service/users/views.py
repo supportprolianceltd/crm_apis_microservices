@@ -6,6 +6,7 @@ import secrets
 import string
 import random
 import uuid
+import urllib.parse
 from django_tenants.utils import get_public_schema_name
 from collections import defaultdict
 from datetime import datetime, timedelta

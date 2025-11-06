@@ -9,6 +9,7 @@ import { DisruptionService } from '../services/disruption.service';
 import { NotificationService } from '../services/notification.service';
 import { GeocodingService } from '../services/geocoding.service';
 import { MatchingService } from '../services/matching.service';
+import { generateUniqueRequestId } from '../utils/idGenerator';
 import { 
   RosterWithAssignments, 
   OptimizationStatus,
@@ -585,8 +586,20 @@ export class RosterController {
 
       logger.info('Adding emergency visit', { tenantId, clientId });
 
+      logger.info('Adding emergency visit', { tenantId, clientId });
+
+      // ✅ Generate unique ID before creating
+      const requestId = await generateUniqueRequestId(async (id: string) => {
+        const existing = await this.prisma.externalRequest.findUnique({
+          where: { id },
+          select: { id: true }
+        });
+        return !!existing;
+      });
+
       const visit = await this.prisma.externalRequest.create({
         data: {
+          id: requestId, // ✅ Add the ID here
           tenantId,
           subject: 'Emergency Visit',
           content: 'Emergency care visit',
@@ -1064,7 +1077,7 @@ swapAssignments = async (req: Request, res: Response): Promise<void> => {
             newCarerId: assignmentB.carerId,
             previousTime: assignmentA.scheduledTime,
             newTime: assignmentA.scheduledTime, // Time stays same, carer changes
-            changedBy: userId,
+            changedBy: userId, // This should be the authenticated user's ID
             changedByEmail: userEmail,
             reason: reason || 'Manual swap via coordinator',
             constraintOverrides: forceOverride ? {
@@ -1082,7 +1095,7 @@ swapAssignments = async (req: Request, res: Response): Promise<void> => {
             newCarerId: assignmentA.carerId,
             previousTime: assignmentB.scheduledTime,
             newTime: assignmentB.scheduledTime,
-            changedBy: userId,
+            changedBy: userId, // This should be the authenticated user's ID
             changedByEmail: userEmail,
             reason: reason || 'Manual swap via coordinator',
             constraintOverrides: forceOverride ? {

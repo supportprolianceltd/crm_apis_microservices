@@ -7,6 +7,7 @@ import { ClusteringService } from '../services/clustering.service';
 import { ConstraintsService } from '../services/constraints.service';
 import { TravelService } from '../services/travel.service';
 import { logger, logServiceError } from '../utils/logger';
+import { generateUniqueRequestId } from '../utils/idGenerator';
 import { 
   CreateRequestPayload, 
   UpdateRequestPayload, 
@@ -69,23 +70,37 @@ export class RequestController {
   /**
    * Create a new request with creator tracking
    */
+// Import the ID generator
+
+  /**
+   * Create a new request with creator tracking and custom ID
+   */
   createRequest = async (req: Request, res: Response): Promise<void> => {
     try {
       const user = (req as any).user;
       const tenantId = user?.tenantId?.toString();
-      
+    
       // Validate request body
       const validatedData = createRequestSchema.parse(req.body);
-
+      
+      // Generate unique request ID
+      const requestId = await generateUniqueRequestId(async (id: string) => {
+        const existing = await this.prisma.externalRequest.findUnique({
+          where: { id },
+          select: { id: true }
+        });
+        return !!existing;
+      });
+      
       // Geocode the address
       const geocoded = await this.geocodingService.geocodeAddress(
-        validatedData.address, 
+        validatedData.address,
         validatedData.postcode
       );
 
       let clusterId: string | undefined;
       let cluster: any = null;
-
+      
       // Find or create cluster if we have coordinates
       if (process.env.AUTO_ASSIGN_REQUESTS === 'true' && geocoded?.latitude && geocoded?.longitude) {
         try {
@@ -100,8 +115,9 @@ export class RequestController {
         }
       }
 
-      // Create the request with creator information
+      // Create the request with creator information and custom ID
       const createData: any = {
+        id: requestId, // Use our custom generated ID
         tenantId,
         subject: validatedData.subject,
         content: validatedData.content,
@@ -120,11 +136,11 @@ export class RequestController {
         notes: validatedData.notes,
         status: RequestStatus.PENDING,
         sendToRostering: false,
-        // NEW: Track creator information
+        // Track creator information
         createdBy: user?.id,
         createdByEmail: user?.email,
-        createdByFirstName: user?.firstName,
-        createdByLastName: user?.lastName
+        createdByFirstName: user?.firstName || user?.first_name,
+        createdByLastName: user?.lastName || user?.last_name
       };
 
       // If we have a cluster, connect the relation
@@ -140,7 +156,7 @@ export class RequestController {
       if (geocoded?.latitude && geocoded?.longitude) {
         try {
           await this.prisma.$executeRaw`
-            UPDATE external_requests 
+            UPDATE external_requests
             SET location = ST_SetSRID(ST_MakePoint(${geocoded.longitude}, ${geocoded.latitude}), 4326)::geography
             WHERE id = ${request.id}
           `;
@@ -151,19 +167,19 @@ export class RequestController {
 
       // Update cluster stats if assigned to a cluster
       if (clusterId) {
-        this.clusteringService.updateClusterStats(clusterId).catch(error => 
+        this.clusteringService.updateClusterStats(clusterId).catch(error =>
           logger.warn('Failed to update cluster stats', { error, clusterId })
         );
       }
 
       // Start auto-matching in the background
-      this.matchingService.autoMatchRequest(request.id).catch(error => 
+      this.matchingService.autoMatchRequest(request.id).catch(error =>
         logServiceError('Request', 'autoMatch', error, { requestId: request.id })
       );
 
-      logger.info(`Created request: ${request.id}`, { 
-        tenantId, 
-        requestId: request.id, 
+      logger.info(`Created request: ${request.id}`, {
+        tenantId,
+        requestId: request.id,
         clusterId: clusterId || 'none',
         clusterName: cluster?.name || 'none',
         createdBy: user?.email
@@ -179,7 +195,6 @@ export class RequestController {
         } : null,
         message: 'Request created successfully'
       });
-
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({
@@ -189,7 +204,6 @@ export class RequestController {
         });
         return;
       }
-
       logServiceError('Request', 'createRequest', error, { tenantId: req.user?.tenantId });
       res.status(500).json({
         success: false,
@@ -379,8 +393,8 @@ export class RequestController {
         // NEW: Track updater information
         updatedBy: user?.id,
         updatedByEmail: user?.email,
-        updatedByFirstName: user?.firstName,
-        updatedByLastName: user?.lastName
+        updatedByFirstName: user?.firstName || user?.first_name,
+        updatedByLastName: user?.lastName || user?.last_name
       };
 
       // If address changed, re-geocode
@@ -751,8 +765,8 @@ export class RequestController {
         // NEW: Track approver information
         approvedBy: user?.id,
         approvedByEmail: user?.email,
-        approvedByFirstName: user?.firstName,
-        approvedByLastName: user?.lastName
+        approvedByFirstName: user?.firstName || user?.first_name,
+        approvedByLastName: user?.lastName || user?.last_name
       };
 
       // Handle sendToRostering flag

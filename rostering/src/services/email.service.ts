@@ -4,6 +4,7 @@ import { simpleParser, ParsedMail } from 'mailparser';
 import { logger, logServiceError } from '../utils/logger';
 import { TenantEmailConfigService } from './tenant-email-config.service';
 import { NotificationService } from './notification.service';
+import { generateUniqueRequestId } from '../utils/idGenerator';
 import { 
   EmailConfig, 
   ParsedEmail, 
@@ -600,9 +601,20 @@ export class EmailService {
         }
       }
 
+
       // Create the request first
+      // ✅ Generate unique ID before creating
+      const requestId = await generateUniqueRequestId(async (id: string) => {
+        const existing = await this.prisma.externalRequest.findUnique({
+          where: { id },
+          select: { id: true }
+        });
+        return !!existing;
+      });
+
       const request = await this.prisma.externalRequest.create({
         data: {
+          id: requestId, // ✅ Add the ID here
           tenantId,
           subject: email.subject,
           content: email.content,
@@ -622,7 +634,7 @@ export class EmailService {
           emailMessageId: email.messageId,
           emailThreadId: email.threadId,
           status: 'PENDING',
-           sendToRostering: false
+          sendToRostering: false
         }
       });
 

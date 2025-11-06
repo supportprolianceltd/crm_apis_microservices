@@ -17,57 +17,54 @@ datasource db {
 // ─────────────────────────────────────────────
 
 model ExternalRequest {
-  id                 String                                 @id @default(cuid())
-  tenantId           String
-  subject            String
-  content            String                                 @db.Text
-  requestorEmail     String
-  requestorName      String?
-  requestorPhone     String?
-  address            String
-  postcode           String
-  location           Unsupported("geography(POINT, 4326)")?
-  latitude           Float?
-  longitude          Float?
-  urgency            RequestUrgency                         @default(MEDIUM)
-  status             RequestStatus                          @default(PENDING)
-  requirements       String?                                @db.Text
-  estimatedDuration  Int?
+  id String @id // Remove @default(cuid()), we'll generate custom IDs
+  tenantId String
+  subject String
+  content String @db.Text
+  requestorEmail String
+  requestorName String?
+  requestorPhone String?
+  address String
+  postcode String
+  location Unsupported("geography(POINT, 4326)")?
+  latitude Float?
+  longitude Float?
+  urgency RequestUrgency @default(MEDIUM)
+  status RequestStatus @default(PENDING)
+  requirements String? @db.Text
+  estimatedDuration Int?
   scheduledStartTime DateTime?
-  scheduledEndTime   DateTime?
-  notes              String?                                @db.Text
-  emailMessageId     String?
-  emailThreadId      String?
-  
+  scheduledEndTime DateTime?
+  notes String? @db.Text
+  emailMessageId String?
+  emailThreadId String?
+ 
   // Existing approval fields
-  approvedBy         String?
-  approvedAt         DateTime?
+  approvedBy String?
+  approvedAt DateTime?
+ 
+  // Detailed user tracking for creation
+  createdBy String? @map("created_by")
+  createdByEmail String? @map("created_by_email")
+  createdByFirstName String? @map("created_by_first_name")
+  createdByLastName String? @map("created_by_last_name")
+ 
+  // Detailed user tracking for approval
+  approvedByEmail String? @map("approved_by_email")
+  approvedByFirstName String? @map("approved_by_first_name")
+  approvedByLastName String? @map("approved_by_last_name")
+ 
+  sendToRostering Boolean
+  clusterId String?
+  cluster Cluster? @relation(fields: [clusterId], references: [id])
+  matches RequestCarerMatch[]
+  timesheetEntries TimesheetEntry[]
+  invoiceLineItems InvoiceLineItem[]
+  assignments Assignment[] @relation("VisitAssignments")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  processedAt DateTime?
   
-  // NEW: Detailed user tracking for creation
-  createdBy          String?   @map("created_by")
-  createdByEmail     String?   @map("created_by_email")
-  createdByFirstName String?   @map("created_by_first_name")
-  createdByLastName  String?   @map("created_by_last_name")
-  
-  // NEW: Detailed user tracking for approval
-  approvedByEmail     String?  @map("approved_by_email")
-  approvedByFirstName String?  @map("approved_by_first_name")
-  approvedByLastName  String?  @map("approved_by_last_name")
-  
-  sendToRostering    Boolean
-
-  clusterId          String?
-  cluster            Cluster?                               @relation(fields: [clusterId], references: [id])
-
-  matches            RequestCarerMatch[]
-  timesheetEntries   TimesheetEntry[]
-  invoiceLineItems   InvoiceLineItem[]
-  assignments        Assignment[]                           @relation("VisitAssignments")
-
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  processedAt        DateTime?
-
   @@index([tenantId])
   @@index([status])
   @@index([urgency])
@@ -77,8 +74,11 @@ model ExternalRequest {
   @@index([clusterId])
   @@index([createdBy])
   @@index([approvedBy])
+  // NEW: Composite index for efficient lookup by date pattern
+  @@index([id(ops: raw("varchar_pattern_ops"))])
   @@map("external_requests")
 }
+
 
 
 model Carer {

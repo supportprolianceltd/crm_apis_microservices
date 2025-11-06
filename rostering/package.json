@@ -2,7 +2,6 @@
   "name": "rostering-service",
   "version": "2.0.0",
   "description": "AI-powered rostering system with real-time operations",
-
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
@@ -38,6 +37,7 @@
     "imapflow": "^1.1.1",
     "jsonwebtoken": "^9.0.2",
     "mailparser": "^3.7.5",
+    "nanoid": "^5.1.6",
     "node-cron": "^4.2.1",
     "node-rsa": "^1.1.1",
     "socket.io": "^4.8.1",
