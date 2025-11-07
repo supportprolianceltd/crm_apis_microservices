@@ -26,7 +26,7 @@ const publicPaths = ["/api-docs", "/health", "/socket.io/", "/api/schema/"];
 // Simple user class to match the Python implementation
 class SimpleUser {
   constructor(payload) {
-    this.id = payload.user_id || payload.sub;
+    this.id = payload.sub;
     this.tenant_id = payload.tenant_id;
     this.role = payload.role;
     this.email = payload.email || "";
@@ -49,8 +49,9 @@ class SimpleUser {
 // Helper function to ensure user and tenant exist in the database
 async function ensureUserAndTenant(payload) {
   try {
-    const tenantId = parseInt(payload.tenant_id, 10);
-    const userId = parseInt(payload.user.id || payload.sub, 10);
+    // Use the IDs directly from the token (don't parse as integers)
+    const tenantId = payload.tenant_id;
+    const userId = payload.sub; // Use 'sub' directly as user ID
 
     console.log(tenantId, userId);
 
@@ -118,10 +119,16 @@ export const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
+    console.log("Token received, starting verification...");
 
     try {
       let payload;
       const unverifiedHeader = jwt.decode(token, { complete: true })?.header;
+      const unverifiedPayload = jwt.decode(token);
+
+      console.log("Unverified token payload:", unverifiedPayload);
+      console.log("Token header:", unverifiedHeader);
+
 
       // Try RS256 verification if KID is present
       if (unverifiedHeader?.kid) {
@@ -144,9 +151,16 @@ export const authMiddleware = async (req, res, next) => {
             timeout: 5000,
           });
 
+          console.log("Public key response status:", response.status);
+
+
           if (response.status === 200 && response.data?.public_key) {
             const publicKey = response.data.public_key;
+            console.log("Public key received, length:", publicKey.length);
             payload = jwt.verify(token, publicKey, { algorithms: ["RS256"] });
+            console.log("RS256 verification successful");
+          }else {
+            console.warn("Invalid public key response:", response.data);
           }
         } catch (rsaError) {
           console.error(
@@ -159,8 +173,17 @@ export const authMiddleware = async (req, res, next) => {
 
       // Fallback to HS256 if RS256 failed or no KID
       if (!payload) {
+        console.log("Attempting HS256 verification...");
         payload = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
+        console.log("HS256 verification successful");
       }
+
+      console.log("Verified payload structure:", {
+        sub: payload.sub,
+        tenant_id: payload.tenant_id,
+        email: payload.email,
+        keys: Object.keys(payload)
+      });
 
       // Ensure user and tenant exist in the database
       const { user, tenant } = await ensureUserAndTenant(payload);
@@ -178,6 +201,7 @@ export const authMiddleware = async (req, res, next) => {
       };
       req.jwt_payload = payload;
 
+      console.log("Authentication successful for user:", user.id);
       return next();
     } catch (error) {
       if (error.name === "TokenExpiredError") {

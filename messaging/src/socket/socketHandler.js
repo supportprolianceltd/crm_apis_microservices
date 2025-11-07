@@ -55,6 +55,7 @@ export const initializeSocket = (io) => {
     // Handle authentication (this runs after socketAuth middleware)
     socket.on("authenticate", async ({ token }, callback) => {
       try {
+        console.log("A user has been authenticated");
         // The socketAuth middleware should have already validated the token
         // and set socket.user and socket.tenant
 
@@ -62,14 +63,37 @@ export const initializeSocket = (io) => {
           throw new Error("Authentication failed - no user context");
         }
 
-        // Update user presence
-        await prisma.user.update({
-          where: { id: socket.user.id },
-          data: {
-            online: true,
-            lastSeen: null,
-          },
-        });
+        // Ensure user exists in messaging database
+          const existingUser = await prisma.user.findUnique({
+            where: { id: socket.user.id }
+          });
+          
+          if (!existingUser) {
+            // Create user from auth service data
+            await prisma.user.create({
+              data: {
+                id: socket.user.id,
+                email: socket.user.email,
+                username: socket.user.username,
+                firstName: socket.user.firstName,
+                lastName: socket.user.lastName,
+                role: socket.user.role,
+                tenantId: socket.tenant.id,
+                online: true,
+                lastSeen: null,
+              }
+            });
+            console.log("A user has been added to the messaging database");
+          } else {
+            // Update existing user
+            await prisma.user.update({
+              where: { id: socket.user.id },
+              data: {
+                online: true,
+                lastSeen: null,
+              },
+            });
+          }
 
         // Join user's presence room
         socket.join(`user_${socket.user.id}`);

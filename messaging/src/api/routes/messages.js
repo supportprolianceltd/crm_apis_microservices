@@ -1,6 +1,6 @@
 import { Router } from "express";
-import prisma from "../config/prisma.js";
-import { ChatService } from "../services/chatService.js";
+import prisma from "../../config/prisma.js";
+import { ChatService } from "../../services/chatService.js";
 
 const messagesRouter = Router();
 
