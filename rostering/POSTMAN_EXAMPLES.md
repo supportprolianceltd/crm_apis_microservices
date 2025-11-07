@@ -38,6 +38,112 @@
 
 ## Visit Management
 
+### Create Public Visit Request
+**Purpose:** Creates a new visit request publicly without authentication. The tenant ID is encoded in the request body. The request will be geocoded, assigned to a cluster (if AUTO_ASSIGN_REQUESTS=true), and automatically matched with available carers. **Data Sources:** Creates ExternalRequest record, geocodes address, assigns to cluster, triggers auto-matching.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/requests/public`
+**Headers:** None (public endpoint)
+
+**Request Body:**
+```json
+{
+  "tenantId": "your-tenant-id-here",
+  "subject": "Weekly Personal Care Visit",
+  "content": "Client requires assistance with personal care, medication management, and light housekeeping. Client has mobility issues and requires hoist assistance.",
+  "requestorEmail": "coordinator@hospital.com",
+  "requestorName": "Dr. Sarah Johnson",
+  "requestorPhone": "+447123456789",
+  "address": "123 Main Street, London, SW1A 1AA",
+  "postcode": "SW1A 1AA",
+  "urgency": "MEDIUM",
+  "requirements": "Personal Care, Medication Administration, Hoist Operation, Manual Handling",
+  "estimatedDuration": 60,
+  "scheduledStartTime": "2025-11-05T09:00:00Z",
+  "scheduledEndTime": "2025-11-05T10:00:00Z",
+  "notes": "Client prefers female carers. Previous carer was Christine Williams.",
+  "availabilityRequirements": {
+    "monday": [
+      { "start": "08:00", "end": "09:00" },
+      { "start": "12:00", "end": "14:00" },
+      { "start": "16:00", "end": "21:00" }
+    ],
+    "tuesday": [
+      { "start": "08:00", "end": "09:00" },
+      { "start": "12:00", "end": "14:00" },
+      { "start": "16:00", "end": "21:00" }
+    ],
+    "wednesday": null,
+    "thursday": null,
+    "friday": [
+      { "start": "08:00", "end": "09:00" },
+      { "start": "12:00", "end": "14:00" },
+      { "start": "16:00", "end": "21:00" }
+    ],
+    "saturday": null,
+    "sunday": null
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "REQ-20251106-97ZZF",
+    "tenantId": "your-tenant-id-here",
+    "subject": "Weekly Personal Care Visit",
+    "content": "Client requires assistance with personal care, medication management, and light housekeeping. Client has mobility issues and requires hoist assistance.",
+    "requestorEmail": "coordinator@hospital.com",
+    "requestorName": "Dr. Sarah Johnson",
+    "requestorPhone": "+447123456789",
+    "address": "123 Main Street, London, SW1A 1AA",
+    "postcode": "SW1A 1AA",
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "urgency": "MEDIUM",
+    "status": "PENDING",
+    "requirements": "Personal Care, Medication Administration, Hoist Operation, Manual Handling",
+    "estimatedDuration": 60,
+    "scheduledStartTime": "2025-11-05T09:00:00.000Z",
+    "scheduledEndTime": "2025-11-05T10:00:00.000Z",
+    "notes": "Client prefers female carers. Previous carer was Christine Williams.",
+    "availabilityRequirements": {
+      "monday": [
+        { "start": "08:00", "end": "09:00" },
+        { "start": "12:00", "end": "14:00" },
+        { "start": "16:00", "end": "21:00" }
+      ],
+      "tuesday": [
+        { "start": "08:00", "end": "09:00" },
+        { "start": "12:00", "end": "14:00" },
+        { "start": "16:00", "end": "21:00" }
+      ],
+      "wednesday": null,
+      "thursday": null,
+      "friday": [
+        { "start": "08:00", "end": "09:00" },
+        { "start": "12:00", "end": "14:00" },
+        { "start": "16:00", "end": "21:00" }
+      ],
+      "saturday": null,
+      "sunday": null
+    },
+    "sendToRostering": false,
+    "createdAt": "2025-11-04T14:16:12.000Z",
+    "updatedAt": "2025-11-04T14:16:12.000Z"
+  },
+  "cluster": {
+    "id": "cluster_123",
+    "name": "Central London",
+    "location": "51.5074, -0.1278"
+  },
+  "message": "Request created successfully"
+}
+```
+
+---
+
 ### Create Visit Request
 **Purpose:** Creates a new visit request for rostering. The request will be geocoded, assigned to a cluster (if AUTO_ASSIGN_REQUESTS=true), and automatically matched with available carers. **Data Sources:** Creates ExternalRequest record, geocodes address, assigns to cluster, triggers auto-matching.
 **Method:** POST
@@ -59,7 +165,28 @@
   "estimatedDuration": 60,
   "scheduledStartTime": "2025-11-05T09:00:00Z",
   "scheduledEndTime": "2025-11-05T10:00:00Z",
-  "notes": "Client prefers female carers. Previous carer was Christine Williams."
+  "notes": "Client prefers female carers. Previous carer was Christine Williams.",
+  "availabilityRequirements": {
+    "monday": [
+      { "start": "08:00", "end": "09:00" },
+      { "start": "12:00", "end": "14:00" },
+      { "start": "16:00", "end": "21:00" }
+    ],
+    "tuesday": [
+      { "start": "08:00", "end": "09:00" },
+      { "start": "12:00", "end": "14:00" },
+      { "start": "16:00", "end": "21:00" }
+    ],
+    "wednesday": null,
+    "thursday": null,
+    "friday": [
+      { "start": "08:00", "end": "09:00" },
+      { "start": "12:00", "end": "14:00" },
+      { "start": "16:00", "end": "21:00" }
+    ],
+    "saturday": null,
+    "sunday": null
+  }
 }
 ```
 

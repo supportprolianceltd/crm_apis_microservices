@@ -432,7 +432,7 @@ class RosteringServer {
     // ========== AUTHENTICATED ROUTES ==========
 
     // Core business routes
-    this.app.use('/api/rostering/requests', authenticate, createRequestRoutes(this.requestController!));
+    this.app.use('/api/rostering/requests', createRequestRoutes(this.requestController!));
     this.app.use('/api/rostering/carers', authenticate, createCarerRoutes(this.carerController!));
     this.app.use('/api/rostering/visits', authenticate, createVisitRoutes(this.visitController!));
     this.app.use('/api/rostering/careplans', authenticate, createCarePlanRoutes(this.carePlanController!));

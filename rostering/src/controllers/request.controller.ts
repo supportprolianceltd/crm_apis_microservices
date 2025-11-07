@@ -32,8 +32,9 @@ const createRequestSchema = z.object({
   estimatedDuration: z.number().int().positive().optional(),
   scheduledStartTime: z.string().datetime().optional(),
   scheduledEndTime: z.string().datetime().optional(),
-  recurrencePattern: z.string().optional(),
-  notes: z.string().optional()
+  recurrencePattern: z.string().nullable().optional(),
+  notes: z.string().optional(),
+  availabilityRequirements: z.any().optional()
 });
 
 const updateRequestSchema = createRequestSchema.partial().omit({}).extend({
@@ -76,6 +77,153 @@ export class RequestController {
    * Create a new request with creator tracking
    */
 // Import the ID generator
+
+  /**
+   * Create a new request publicly (no authentication required)
+   * Tenant ID is encoded in the request body
+   */
+  createPublicRequest = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // Validate request body (same schema as authenticated version)
+      const validatedData = createRequestSchema.parse(req.body);
+
+      // Extract tenantId from request body (required for public endpoint)
+      const tenantId = req.body.tenantId;
+      if (!tenantId || typeof tenantId !== 'string') {
+        res.status(400).json({
+          success: false,
+          error: 'Tenant ID is required in request body'
+        });
+        return;
+      }
+
+      // Generate unique request ID
+      const requestId = await generateUniqueRequestId(async (id: string) => {
+        const existing = await this.prisma.externalRequest.findUnique({
+          where: { id },
+          select: { id: true }
+        });
+        return !!existing;
+      });
+
+      // Geocode the address
+      const geocoded = await this.geocodingService.geocodeAddress(
+        validatedData.address,
+        validatedData.postcode
+      );
+
+      let clusterId: string | undefined;
+      let cluster: any = null;
+
+      // Find or create cluster if we have coordinates
+      if (process.env.AUTO_ASSIGN_REQUESTS === 'true' && geocoded?.latitude && geocoded?.longitude) {
+        try {
+          cluster = await this.clusteringService.findOrCreateClusterForLocation(
+            tenantId,
+            geocoded.latitude,
+            geocoded.longitude
+          );
+          clusterId = cluster?.id;
+        } catch (error) {
+          logger.warn('Failed to assign cluster, continuing without cluster', { error });
+        }
+      }
+
+      // Create the request with public access (no user tracking)
+      const createData: any = {
+        id: requestId, // Use our custom generated ID
+        tenantId,
+        subject: validatedData.subject,
+        content: validatedData.content,
+        requestorEmail: validatedData.requestorEmail,
+        requestorName: validatedData.requestorName,
+        requestorPhone: validatedData.requestorPhone,
+        address: validatedData.address,
+        postcode: validatedData.postcode || '',
+        latitude: geocoded?.latitude,
+        longitude: geocoded?.longitude,
+        urgency: validatedData.urgency || 'MEDIUM',
+        requirements: validatedData.requirements,
+        requiredSkills: validatedData.requiredSkills || [],
+        estimatedDuration: validatedData.estimatedDuration,
+        scheduledStartTime: validatedData.scheduledStartTime ? new Date(validatedData.scheduledStartTime) : undefined,
+        scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
+        recurrencePattern: validatedData.recurrencePattern,
+        notes: validatedData.notes,
+        availabilityRequirements: validatedData.availabilityRequirements,
+        status: RequestStatus.PENDING,
+        sendToRostering: false
+        // Note: No creator tracking for public requests
+      };
+
+      // If we have a cluster, connect the relation
+      if (clusterId) {
+        createData.cluster = { connect: { id: clusterId } };
+      }
+
+      const request = await this.prisma.externalRequest.create({
+        data: createData
+      });
+
+      // Update PostGIS location field using raw SQL
+      if (geocoded?.latitude && geocoded?.longitude) {
+        try {
+          await this.prisma.$executeRaw`
+            UPDATE external_requests
+            SET location = ST_SetSRID(ST_MakePoint(${geocoded.longitude}, ${geocoded.latitude}), 4326)::geography
+            WHERE id = ${request.id}
+          `;
+        } catch (error) {
+          logger.warn('Failed to set PostGIS location', { error, requestId: request.id });
+        }
+      }
+
+      // Update cluster stats if assigned to a cluster
+      if (clusterId) {
+        this.clusteringService.updateClusterStats(clusterId).catch(error =>
+          logger.warn('Failed to update cluster stats', { error, clusterId })
+        );
+      }
+
+      // Start auto-matching in the background
+      this.matchingService.autoMatchRequest(request.id).catch(error =>
+        logServiceError('Request', 'autoMatch', error, { requestId: request.id })
+      );
+
+      logger.info(`Created public request: ${request.id}`, {
+        tenantId,
+        requestId: request.id,
+        clusterId: clusterId || 'none',
+        clusterName: cluster?.name || 'none'
+      });
+
+      res.status(201).json({
+        success: true,
+        data: request,
+        cluster: cluster ? {
+          id: cluster.id,
+          name: cluster.name,
+          location: `${cluster.latitude}, ${cluster.longitude}`
+        } : null,
+        message: 'Request created successfully'
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          error: 'Validation error',
+          details: error.errors
+        });
+        return;
+      }
+      logServiceError('Request', 'createPublicRequest', error, { tenantId: req.body?.tenantId });
+      res.status(500).json({
+        success: false,
+        error: 'Failed to create request',
+        message: 'Internal server error'
+      });
+    }
+  };
 
   /**
    * Create a new request with creator tracking and custom ID
@@ -141,6 +289,7 @@ export class RequestController {
         scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
         recurrencePattern: validatedData.recurrencePattern,
         notes: validatedData.notes,
+        availabilityRequirements: validatedData.availabilityRequirements,
         status: RequestStatus.PENDING,
         sendToRostering: false,
         // Track creator information
@@ -804,33 +953,34 @@ export class RequestController {
         });
 
         visit = await this.prisma.visit.create({
-          data: {
-            id: visitId, // Use generated readable ID
-            tenantId: existingRequest.tenantId,
-            externalRequestId: existingRequest.id,
-            subject: existingRequest.subject,
-            content: existingRequest.content,
-            requestorEmail: existingRequest.requestorEmail,
-            requestorName: existingRequest.requestorName,
-            requestorPhone: existingRequest.requestorPhone,
-            address: existingRequest.address,
-            postcode: existingRequest.postcode,
-            latitude: existingRequest.latitude,
-            longitude: existingRequest.longitude,
-            scheduledStartTime: existingRequest.scheduledStartTime,
-            scheduledEndTime: existingRequest.scheduledEndTime,
-            estimatedDuration: existingRequest.estimatedDuration,
-            recurrencePattern: (existingRequest as any).recurrencePattern,
-            urgency: existingRequest.urgency,
-            requirements: existingRequest.requirements,
-            requiredSkills: (existingRequest as any).requiredSkills || [],
-            notes: existingRequest.notes,
-            status: 'SCHEDULED',
-            clusterId: existingRequest.clusterId,
-            createdBy: user?.id,
-            createdByEmail: user?.email
-          }
-        });
+           data: {
+             id: visitId, // Use generated readable ID
+             tenantId: existingRequest.tenantId,
+             externalRequestId: existingRequest.id,
+             subject: existingRequest.subject,
+             content: existingRequest.content,
+             requestorEmail: existingRequest.requestorEmail,
+             requestorName: existingRequest.requestorName,
+             requestorPhone: existingRequest.requestorPhone,
+             address: existingRequest.address,
+             postcode: existingRequest.postcode,
+             latitude: existingRequest.latitude,
+             longitude: existingRequest.longitude,
+             scheduledStartTime: existingRequest.scheduledStartTime,
+             scheduledEndTime: existingRequest.scheduledEndTime,
+             estimatedDuration: existingRequest.estimatedDuration,
+             recurrencePattern: (existingRequest as any).recurrencePattern,
+             urgency: existingRequest.urgency,
+             requirements: existingRequest.requirements,
+             requiredSkills: (existingRequest as any).requiredSkills || [],
+             notes: existingRequest.notes,
+             availabilityRequirements: (existingRequest as any).availabilityRequirements,
+             status: 'SCHEDULED',
+             clusterId: existingRequest.clusterId,
+             createdBy: user?.id,
+             createdByEmail: user?.email
+           }
+         });
       }
 
       // Kick off matching again in background

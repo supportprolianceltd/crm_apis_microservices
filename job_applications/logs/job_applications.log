@@ -1756,3 +1756,207 @@ def screen_resumes_task(job_requisition_id, document_type, num_candidates, appli
 2025-11-07 06:36:00,785 [ERROR] job_applications: Error fetching requisitions page: HTTPConnectionPool(host='talent-engine', port=8002): Max retries exceeded with url: /api/talent-engine/requisitions/upcoming/public/jobs/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x7aa5be5f45d0>: Failed to resolve 'talent-engine' ([Errno -2] Name or service not known)"))
 2025-11-07 06:36:00,793 [INFO] job_applications: Total open requisitions fetched: 0
 2025-11-07 06:36:00,809 [INFO] job_applications: No open requisitions found
+2025-11-07 08:13:44,807 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:13:44,834 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:13:44,906 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:13:45,041 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:13:45,128 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:13:45,221 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:13:45,232 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:14:23,131 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:14:23,134 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:14:23,137 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:14:23,204 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:14:23,210 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:14:23,252 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:14:23,254 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:14:23,281 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:14:23,283 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:14:23,286 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:14:23,330 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:14:23,334 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:14:23,379 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:14:23,382 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:14:23,386 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:14:26,946 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:14:26,946 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:14:26,980 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:14:26,983 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:14:26,986 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:14:27,163 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:14:27,167 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:14:27,526 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:14:27,530 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:14:27,533 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:14:30,982 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:14:30,982 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:28:11,555 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:28:11,560 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:28:11,569 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:28:11,626 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:28:11,633 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:28:11,688 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:28:11,691 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:28:11,759 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:28:11,761 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:28:11,765 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:28:11,854 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:28:11,867 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:28:11,922 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:28:11,924 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:28:11,931 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:28:15,472 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:28:15,472 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:28:22,667 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:28:22,670 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:28:22,676 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:28:22,762 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:28:22,773 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:28:22,888 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:28:22,893 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:28:22,952 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:28:22,954 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:28:22,958 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:28:23,012 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:28:23,017 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:28:23,074 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:28:23,077 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:28:23,082 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:28:26,633 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:28:26,633 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:29:32,851 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:29:32,878 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:29:32,902 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:29:33,096 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:29:33,108 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:29:33,204 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:29:33,207 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:29:33,254 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:29:33,256 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:29:33,259 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:29:33,314 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:29:33,319 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:29:33,378 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:29:33,381 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:29:33,386 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:29:36,880 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:29:36,880 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:29:38,435 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:29:38,440 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:29:38,457 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:29:38,643 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:29:38,665 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:29:38,875 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:29:38,881 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:29:38,963 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:29:38,970 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:29:38,977 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:29:39,081 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:29:39,093 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:29:39,216 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:29:39,229 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:29:39,236 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:29:42,682 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:29:42,682 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:30:48,681 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:30:48,686 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:30:48,704 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:30:48,906 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:30:48,916 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:30:49,031 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:30:49,040 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:30:49,189 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:30:49,195 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:30:49,201 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:30:49,297 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:30:49,304 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:30:49,370 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:30:49,373 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:30:49,378 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:30:52,926 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:30:52,926 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:30:54,075 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:30:54,077 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:30:54,080 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:30:54,126 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:30:54,130 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:30:54,177 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:30:54,179 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:30:54,210 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:30:54,212 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:30:54,214 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:30:54,257 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:30:54,260 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:30:54,302 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:30:54,304 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:30:54,307 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:30:57,852 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:30:57,852 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:32:03,642 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:32:03,644 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:32:03,649 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:32:03,731 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:32:03,738 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:32:04,375 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:32:04,378 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:32:04,425 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:32:04,428 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:32:04,432 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:32:04,489 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:32:04,494 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:32:04,947 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:32:04,949 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:32:04,954 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:32:11,590 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:32:11,590 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:32:11,629 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:32:11,630 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:32:11,633 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:32:11,685 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:32:11,691 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:32:11,794 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:32:11,799 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:32:11,835 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:32:11,837 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:32:11,840 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:32:11,895 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:32:11,901 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:32:11,977 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:32:11,980 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:32:11,985 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:32:15,575 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:32:15,575 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:49:17,638 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:49:17,644 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:49:17,653 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:49:17,850 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:49:17,884 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:49:17,965 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:49:17,969 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:49:18,042 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:49:18,046 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:49:18,051 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:49:18,113 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:49:18,117 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:49:18,186 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:49:18,191 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:49:18,204 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:49:21,687 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:49:21,687 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:49:23,188 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:49:23,190 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:49:23,194 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:49:23,257 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:49:23,261 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:49:23,338 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:49:23,341 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:49:23,427 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-07 08:49:23,429 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-07 08:49:23,434 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:49:23,521 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-07 08:49:23,528 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-07 08:49:23,613 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-07 08:49:23,619 [INFO] job_applications: Set schema to: appbrew
+2025-11-07 08:49:23,629 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-07 08:49:27,071 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 08:49:27,071 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/

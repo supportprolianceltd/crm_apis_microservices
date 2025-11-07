@@ -61,6 +61,10 @@ model ExternalRequest {
   cluster Cluster? @relation(fields: [clusterId], references: [id])
   matches RequestCarerMatch[]
   visits Visit[] // Link to created visits
+
+  // Availability requirements (optional)
+  availabilityRequirements Json?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   processedAt DateTime?
@@ -108,6 +112,9 @@ model Visit {
   requirements String? @db.Text
   requiredSkills String[] @default([])
   notes String? @db.Text
+
+  // Availability requirements (optional)
+  availabilityRequirements Json?
 
   // Status and lifecycle
   status VisitStatus @default(SCHEDULED)
