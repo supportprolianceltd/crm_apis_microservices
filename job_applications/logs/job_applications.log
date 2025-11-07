@@ -1539,3 +1539,220 @@ def screen_resumes_task(job_requisition_id, document_type, num_candidates, appli
 def chunks(task, it, n):
     return 1
 
+2025-11-06 16:58:33,875 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-06 16:58:33,948 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-06 16:58:34,120 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 16:58:34,298 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-06 16:58:34,548 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 16:58:34,706 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-06 16:58:34,723 [INFO] job_applications: Set schema to: appbrew
+2025-11-06 16:59:12,121 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-06 16:59:12,123 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-06 16:59:12,127 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 16:59:12,172 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-06 16:59:12,177 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 16:59:12,227 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-06 16:59:12,238 [INFO] job_applications: Set schema to: appbrew
+2025-11-06 16:59:12,274 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-06 16:59:12,276 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-06 16:59:12,279 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 16:59:12,333 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-06 16:59:12,338 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 16:59:12,412 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-06 16:59:12,415 [INFO] job_applications: Set schema to: appbrew
+2025-11-06 16:59:12,420 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-06 16:59:16,299 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-06 16:59:16,299 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-06 16:59:16,342 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-06 16:59:16,344 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-06 16:59:16,347 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 16:59:16,398 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-06 16:59:16,404 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 16:59:16,484 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-06 16:59:16,487 [INFO] job_applications: Set schema to: appbrew
+2025-11-06 16:59:16,492 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-06 16:59:20,200 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-06 16:59:20,200 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-06 17:18:18,145 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-06 17:18:18,198 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-06 17:18:18,286 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 17:18:18,382 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-06 17:18:18,466 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 17:18:18,528 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-06 17:18:18,547 [INFO] job_applications: Set schema to: appbrew
+2025-11-06 17:18:19,157 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-06 17:18:19,160 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-06 17:18:19,170 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 17:18:19,258 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-06 17:18:19,266 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 17:18:19,329 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-06 17:18:19,333 [INFO] job_applications: Set schema to: appbrew
+2025-11-06 17:18:19,380 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-06 17:18:23,118 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-06 17:18:23,118 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-06 17:18:24,035 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-06 17:18:24,038 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-06 17:18:24,040 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 17:18:24,081 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-06 17:18:24,085 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 17:18:24,121 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-06 17:18:24,124 [INFO] job_applications: Set schema to: appbrew
+2025-11-06 17:18:24,155 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-11-06 17:18:24,157 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4
+2025-11-06 17:18:24,159 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 17:18:24,199 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/7f620edf62c8485595101829f6640fa7/?tenant_id=4 HTTP/1.1" 200 477
+2025-11-06 17:18:24,203 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-11-06 17:18:24,247 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/94419e00-ba9a-4601-a663-6a5544e1035a/ HTTP/1.1" 200 650
+2025-11-06 17:18:24,248 [INFO] job_applications: Set schema to: appbrew
+2025-11-06 17:18:24,252 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-11-06 17:18:29,192 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-06 17:18:29,192 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-07 06:34:01,325 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-07 06:34:01,339 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-07 06:34:01,344 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-07 06:34:01,349 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-07 06:34:01,350 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-07 06:34:01,363 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-07 06:34:02,807 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-07 06:34:02,867 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-07 06:34:02,914 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-07 06:35:33,534 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-11-07 06:35:33,535 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-11-07 06:35:33,538 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-11-07 06:35:33,538 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-11-07 06:35:33,543 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-11-07 06:35:33,546 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-11-07 06:35:33,546 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-11-07 06:35:33,549 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-11-07 06:35:33,553 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-11-07 06:35:33,557 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-11-07 06:35:33,552 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-11-07 06:35:33,560 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-11-07 06:35:33,562 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-11-07 06:35:33,565 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-11-07 06:35:33,568 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-11-07 06:35:33,575 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-11-07 06:35:33,580 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-11-07 06:35:33,584 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-11-07 06:35:33,585 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-11-07 06:35:33,592 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-11-07 06:35:33,595 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-11-07 06:35:33,598 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-11-07 06:35:33,601 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-11-07 06:35:33,604 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-11-07 06:35:33,607 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-11-07 06:35:33,610 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-11-07 06:35:33,612 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-11-07 06:35:33,616 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-11-07 06:35:33,618 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-11-07 06:35:33,619 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-11-07 06:35:33,622 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-11-07 06:35:33,622 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-11-07 06:35:33,627 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-11-07 06:35:33,631 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-11-07 06:35:56,882 [INFO] job_applications: 🚀 Starting daily background CV vetting with full workflow
+2025-11-07 06:36:00,785 [ERROR] job_applications: Error fetching requisitions page: HTTPConnectionPool(host='talent-engine', port=8002): Max retries exceeded with url: /api/talent-engine/requisitions/upcoming/public/jobs/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x7aa5be5f45d0>: Failed to resolve 'talent-engine' ([Errno -2] Name or service not known)"))
+2025-11-07 06:36:00,793 [INFO] job_applications: Total open requisitions fetched: 0
+2025-11-07 06:36:00,809 [INFO] job_applications: No open requisitions found

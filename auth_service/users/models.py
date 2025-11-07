@@ -969,7 +969,6 @@ class SkillDetail(models.Model):
         return f"{self.skill_name} - {self.user_profile.user.email}"
 
 
-
 class EmploymentDetail(models.Model):
 
     SALARY_RATE_CHOICES = [

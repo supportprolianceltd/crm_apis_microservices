@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { PrismaClient, VisitStatus, Prisma } from '@prisma/client';
 import { logger, logServiceError } from '../utils/logger';
-import { generateUniqueRequestId } from '../utils/idGenerator';
+import { generateUniqueVisitId } from '../utils/idGenerator';
 
 // Validation schemas
 const createVisitSchema = z.object({
@@ -28,7 +28,12 @@ const createVisitSchema = z.object({
 });
 
 const updateVisitSchema = createVisitSchema.partial().omit({ externalRequestId: true }).extend({
-  status: z.enum(['SCHEDULED', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'NO_SHOW']).optional()
+  status: z.enum(['SCHEDULED', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'NO_SHOW']).optional(),
+  isActive: z.boolean().optional(),
+  assignmentStatus: z.enum(['PENDING', 'OFFERED', 'ACCEPTED', 'DECLINED']).optional(),
+  assignedAt: z.string().datetime().optional(),
+  travelFromPrevious: z.number().int().optional(),
+  complianceChecks: z.any().optional()
 });
 
 const searchVisitsSchema = z.object({
@@ -77,8 +82,8 @@ export class VisitController {
         return;
       }
 
-      // Generate unique visit ID using the same generator as ExternalRequest
-      const visitId = await generateUniqueRequestId(async (id: string) => {
+      // Generate unique visit ID using the visit generator
+      const visitId = await generateUniqueVisitId(async (id: string) => {
         const existing = await this.prisma.visit.findUnique({
           where: { id },
           select: { id: true }
@@ -286,9 +291,9 @@ export class VisitController {
       const skip = (page - 1) * limit;
 
       const [total, visits] = await Promise.all([
-        this.prisma.visit.count({ where: { tenantId } }),
+        this.prisma.visit.count({ where: { tenantId, isActive: true } }),
         this.prisma.visit.findMany({
-          where: { tenantId },
+          where: { tenantId, isActive: true },
           skip,
           take: limit,
           orderBy: {
@@ -356,6 +361,7 @@ export class VisitController {
 
       const whereClause: any = {
         tenantId,
+        isActive: true,
         ...(validatedQuery.status && { status: validatedQuery.status }),
         ...(validatedQuery.urgency && { urgency: validatedQuery.urgency }),
         ...(validatedQuery.postcode && { postcode: { contains: validatedQuery.postcode, mode: 'insensitive' } }),

@@ -10,7 +10,7 @@
 **Request Body:**
 ```json
 {
-  "email": "support@prolianceltd.com",
+  "email": "support@appbrew.com",
   "password": "qwerty"
 }
 ```
@@ -102,7 +102,7 @@
 ### Approve Visit Request
 **Purpose:** Approves a pending visit request, changing its status to APPROVED and making it available for rostering. **Data Sources:** Updates ExternalRequest status, triggers auto-matching, and sets sendToRostering flag.
 **Method:** POST
-**URL:** `http://localhost:9090/api/rostering/requests/cmhkia2qc000acas105a1zwkw/approve`
+**URL:** `http://localhost:9090/api/rostering/requests/REQ-20251106-97ZZF/approve`
 **Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
 
 **Request Body:**
@@ -128,6 +128,206 @@
     "updatedAt": "2025-11-04T14:16:14.000Z"
   },
   "message": "Request approved and set to processing"
+}
+```
+
+### Check Request Feasibility
+**Purpose:** Analyzes which carers can handle a specific visit request based on skills, availability, and schedule compatibility. **Data Sources:** Queries auth service for carer profiles, checks skills matching against required skills, validates availability against request time, and optionally checks for schedule conflicts.
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/requests/REQ-20251106-97ZZF/feasibility?includeScheduleCheck=true`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "requestId": "REQ-20251106-97ZZF",
+    "requestDetails": {
+      "subject": "Morning Dementia Care Support - Mr. Adewale Johnson",
+      "scheduledStartTime": "2025-11-10T08:00:00.000Z",
+      "scheduledEndTime": "2025-11-10T11:00:00.000Z",
+      "estimatedDuration": 180,
+      "requiredSkills": [
+        "Dementia Care",
+        "Patient Hygiene Assistance",
+        "Medication Administration",
+        "First Aid & CPR"
+      ],
+      "requirements": "Carer must be experienced in dementia and personal care, have valid DBS, and be available weekday mornings."
+    },
+    "summary": {
+      "totalCarers": 6,
+      "eligibleCarers": 1,
+      "ineligibleCarers": 5,
+      "checkedSchedule": true
+    },
+    "eligibleCarers": [
+      {
+        "carerId": 50,
+        "carerName": "Jane Doe",
+        "email": "ekeneonwon@appbrew.com",
+        "skills": [
+          {
+            "id": 1,
+            "skill_name": "Patient Hygiene Assistance",
+            "proficiency_level": "expert",
+            "description": "Experienced in assisting elderly patients with bathing, grooming, and personal care routines.",
+            "acquired_date": "2010-01-01",
+            "years_of_experience": 15,
+            "certificate": null,
+            "certificate_url": null,
+            "last_updated_by_id": "2",
+            "last_updated_by": {
+              "id": 2,
+              "email": "support@appbrew.com",
+              "first_name": "Abib",
+              "last_name": "Achmed"
+            }
+          },
+          {
+            "id": 2,
+            "skill_name": "Medication Administration",
+            "proficiency_level": "advanced",
+            "description": "Trained and certified in safe administration of oral, topical, and injectable medications.",
+            "acquired_date": "2012-05-15",
+            "years_of_experience": 13,
+            "certificate": null,
+            "certificate_url": null,
+            "last_updated_by_id": "2",
+            "last_updated_by": {
+              "id": 2,
+              "email": "support@appbrew.com",
+              "first_name": "Abib",
+              "last_name": "Achmed"
+            }
+          },
+          {
+            "id": 3,
+            "skill_name": "First Aid & CPR",
+            "proficiency_level": "expert",
+            "description": "Certified in emergency first aid and cardiopulmonary resuscitation (CPR).",
+            "acquired_date": "2015-03-20",
+            "years_of_experience": 10,
+            "certificate": null,
+            "certificate_url": null,
+            "last_updated_by_id": "2",
+            "last_updated_by": {
+              "id": 2,
+              "email": "support@appbrew.com",
+              "first_name": "Abib",
+              "last_name": "Achmed"
+            }
+          },
+          {
+            "id": 4,
+            "skill_name": "Dementia Care",
+            "proficiency_level": "intermediate",
+            "description": "Specialized training in supporting patients with Alzheimer's and other forms of dementia.",
+            "acquired_date": "2018-11-10",
+            "years_of_experience": 7,
+            "certificate": null,
+            "certificate_url": null,
+            "last_updated_by_id": "2",
+            "last_updated_by": {
+              "id": 2,
+              "email": "support@appbrew.com",
+              "first_name": "Abib",
+              "last_name": "Achmed"
+            }
+          }
+        ],
+        "skillsMatch": {
+          "hasRequiredSkills": true,
+          "missingSkills": [],
+          "matchingSkills": [
+            "dementia care",
+            "patient hygiene assistance",
+            "medication administration",
+            "first aid & cpr"
+          ],
+          "requirementsMatch": true
+        },
+        "availability": {
+          "isAvailable": true,
+          "conflicts": [],
+          "availableHours": {
+            "friday": {
+              "end": "14:00",
+              "start": "08:00",
+              "available": true
+            },
+            "monday": {
+              "end": "16:00",
+              "start": "08:00",
+              "available": true
+            },
+            "sunday": {
+              "available": false
+            },
+            "tuesday": {
+              "end": "16:00",
+              "start": "08:00",
+              "available": true
+            },
+            "saturday": {
+              "available": false
+            },
+            "thursday": {
+              "end": "17:00",
+              "start": "09:00",
+              "available": true
+            },
+            "wednesday": {
+              "available": false
+            }
+          }
+        },
+        "scheduleCheck": {
+          "hasConflicts": false,
+          "conflicts": [],
+          "conflictCount": 0
+        },
+        "overallEligible": true
+      }
+    ],
+    "ineligibleCarers": [
+      {
+        "carerId": 48,
+        "carerName": "Gerard Pique",
+        "email": "gerard.pique@blaugrana-care.com",
+        "skills": [],
+        "skillsMatch": {
+          "hasRequiredSkills": false,
+          "missingSkills": [
+            "dementia care",
+            "patient hygiene assistance",
+            "medication administration",
+            "first aid & cpr"
+          ],
+          "matchingSkills": [],
+          "requirementsMatch": false
+        },
+        "availability": {
+          "isAvailable": false,
+          "conflicts": [
+            "Request time (8:00-11:00) is outside carer availability (22:00-6:00) on monday"
+          ],
+          "availableHours": {
+            "monday": "10pm-6am",
+            "sunday": "10pm-6am"
+          }
+        },
+        "scheduleCheck": {
+          "hasConflicts": false,
+          "conflicts": [],
+          "conflictCount": 0
+        },
+        "overallEligible": false
+      }
+    ]
+  },
+  "message": "Found 1 eligible carers out of 6 total carers"
 }
 ```
 
@@ -176,6 +376,382 @@
     "hasNext": false,
     "hasPrev": false
   }
+}
+```
+
+---
+
+## Visit Management
+
+### List Visits
+**Purpose:** Retrieves paginated list of visits for the tenant with optional filtering. Only returns active visits (isActive: true). **Data Sources:** Queries Visit table with optional status, date, and search filters, including assigned carer information when available.
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/visits?page=1&limit=20&status=SCHEDULED`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": "visit-123",
+      "tenantId": "tenant-456",
+      "externalRequestId": "req-789",
+      "subject": "Weekly Personal Care Visit",
+      "content": "Client requires assistance with personal care and medication",
+      "requestorEmail": "coordinator@hospital.com",
+      "requestorName": "Dr. Sarah Johnson",
+      "address": "123 Main Street, London, SW1A 1AA",
+      "postcode": "SW1A 1AA",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "urgency": "MEDIUM",
+      "status": "ASSIGNED",
+      "isActive": true,
+      "assignmentStatus": "ACCEPTED",
+      "assignedAt": "2025-11-05T10:30:00.000Z",
+      "travelFromPrevious": 15,
+      "complianceChecks": {
+        "wtdCompliant": true,
+        "restPeriodOK": true,
+        "travelTimeOK": true,
+        "skillsMatch": true
+      },
+      "scheduledStartTime": "2025-11-05T09:00:00.000Z",
+      "scheduledEndTime": "2025-11-05T10:00:00.000Z",
+      "estimatedDuration": 60,
+      "createdAt": "2025-11-04T14:16:12.000Z",
+      "updatedAt": "2025-11-05T10:30:00.000Z",
+      "assignedCarerId": "carer-123",
+      "assignedCarerFirstName": "Jane",
+      "assignedCarerLastName": "Doe",
+      "assignedCarerEmail": "jane.doe@example.com",
+      "assignedCarerSkills": ["Dementia Care", "Personal Care", "Medication Admin"],
+      "assignedCarerAvailability": {
+        "monday": {"start": "08:00", "end": "16:00", "available": true},
+        "tuesday": {"start": "08:00", "end": "16:00", "available": true},
+        "wednesday": {"start": "09:00", "end": "17:00", "available": true}
+      },
+      "externalRequest": {
+        "id": "req-789",
+        "subject": "Weekly Personal Care Request",
+        "status": "APPROVED"
+      },
+      "cluster": {
+        "id": "cluster-123",
+        "name": "Central London"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "pages": 1,
+    "hasNext": false,
+    "hasPrev": false
+  }
+}
+```
+
+### Get Visit by ID
+**Purpose:** Retrieves detailed information for a specific visit including assigned carer data when available. **Data Sources:** Queries Visit table with related ExternalRequest and Cluster data, including denormalized carer information.
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/visits/VISIT-20251106-5777K`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Request Body:**
+```json
+{
+  "assignmentStatus": "OFFERED",
+  "travelFromPrevious": 20,
+  "complianceChecks": {
+    "wtdCompliant": true,
+    "restPeriodOK": true,
+    "travelTimeOK": true,
+    "skillsMatch": true,
+    "warnings": ["Optimized by OR-Tools"]
+  },
+  "notes": "Visit offered to carer for acceptance"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "visit-123",
+    "tenantId": "tenant-456",
+    "externalRequestId": "req-789",
+    "subject": "Weekly Personal Care Visit",
+    "content": "Client requires assistance with personal care and medication",
+    "requestorEmail": "coordinator@hospital.com",
+    "requestorName": "Dr. Sarah Johnson",
+    "address": "123 Main Street, London, SW1A 1AA",
+    "postcode": "SW1A 1AA",
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "urgency": "MEDIUM",
+    "status": "ASSIGNED",
+    "isActive": true,
+    "assignmentStatus": "ACCEPTED",
+    "assignedAt": "2025-11-05T10:30:00.000Z",
+    "travelFromPrevious": 15,
+    "complianceChecks": {
+      "wtdCompliant": true,
+      "restPeriodOK": true,
+      "travelTimeOK": true,
+      "skillsMatch": true
+    },
+    "scheduledStartTime": "2025-11-05T09:00:00.000Z",
+    "scheduledEndTime": "2025-11-05T10:00:00.000Z",
+    "estimatedDuration": 60,
+    "createdAt": "2025-11-04T14:16:12.000Z",
+    "updatedAt": "2025-11-05T10:30:00.000Z",
+    "assignedCarerId": "carer-123",
+    "assignedCarerFirstName": "Jane",
+    "assignedCarerLastName": "Doe",
+    "assignedCarerEmail": "jane.doe@example.com",
+    "assignedCarerSkills": ["Dementia Care", "Personal Care", "Medication Admin"],
+    "assignedCarerAvailability": {
+      "monday": {"start": "08:00", "end": "16:00", "available": true},
+      "tuesday": {"start": "08:00", "end": "16:00", "available": true},
+      "wednesday": {"start": "09:00", "end": "17:00", "available": true}
+    },
+    "externalRequest": {
+      "id": "req-789",
+      "subject": "Weekly Personal Care Request",
+      "status": "APPROVED",
+      "approvedAt": "2025-11-04T15:00:00.000Z"
+    },
+    "assignments": [
+      {
+        "id": "assignment-456",
+        "carerId": "carer-123",
+        "scheduledTime": "2025-11-05T09:00:00.000Z",
+        "status": "ACCEPTED"
+      }
+    ],
+    "cluster": {
+      "id": "cluster-123",
+      "name": "Central London"
+    }
+  }
+}
+```
+
+### Update Visit
+**Purpose:** Updates visit information including assignment status, compliance checks, and carer assignment details. **Data Sources:** Updates Visit record with new field values, including denormalized carer data when assignment status changes.
+**Method:** PUT
+**URL:** `http://localhost:9090/api/rostering/visits/VISIT-20251106-5777K`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Request Body:**
+```json
+{
+  "assignmentStatus": "OFFERED",
+  "travelFromPrevious": 20,
+  "complianceChecks": {
+    "wtdCompliant": true,
+    "restPeriodOK": true,
+    "travelTimeOK": true,
+    "skillsMatch": true,
+    "warnings": ["Optimized by OR-Tools"]
+  },
+  "notes": "Visit offered to carer for acceptance"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "visit-123",
+    "assignmentStatus": "OFFERED",
+    "travelFromPrevious": 20,
+    "complianceChecks": {
+      "wtdCompliant": true,
+      "restPeriodOK": true,
+      "travelTimeOK": true,
+      "skillsMatch": true,
+      "warnings": ["Optimized by OR-Tools"]
+    },
+    "notes": "Visit offered to carer for acceptance",
+    "updatedAt": "2025-11-05T11:00:00.000Z"
+  },
+  "message": "Visit updated successfully"
+}
+```
+
+### Search Visits
+**Purpose:** Searches visits with advanced filtering options. Only returns active visits. **Data Sources:** Queries Visit table with multiple filter criteria including assignment status, date ranges, and carer information.
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/visits/search?assignmentStatus=ACCEPTED&dateFrom=2025-11-01T00:00:00Z&dateTo=2025-11-30T23:59:59Z`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "visit-123",
+      "subject": "Weekly Personal Care Visit",
+      "assignmentStatus": "ACCEPTED",
+      "assignedCarerFirstName": "Jane",
+      "assignedCarerLastName": "Doe",
+      "scheduledStartTime": "2025-11-05T09:00:00.000Z",
+      "status": "ASSIGNED",
+      "isActive": true
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "pages": 1,
+    "hasNext": false,
+    "hasPrev": false
+  }
+}
+```
+
+### Get Visits by Status
+**Purpose:** Retrieves all visits with a specific status. Only returns active visits. **Data Sources:** Queries Visit table filtered by status and tenant, including assigned carer information.
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/visits/status/ASSIGNED`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "VISIT-20251106-5777K",
+      "subject": "Weekly Personal Care Visit",
+      "assignmentStatus": "ACCEPTED",
+      "assignedCarerFirstName": "Jane",
+      "assignedCarerLastName": "Doe",
+      "assignedCarerEmail": "jane.doe@example.com",
+      "scheduledStartTime": "2025-11-05T09:00:00.000Z",
+      "status": "ASSIGNED",
+      "isActive": true,
+      "cluster": {
+        "id": "cluster-123",
+        "name": "Central London"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Carer Assignment Management
+
+### Accept Visit Offer
+**Purpose:** Allows a carer to accept a visit offer that has been assigned to them. Updates visit assignment status and populates assigned carer information. **Data Sources:** Updates Visit record with ACCEPTED status and denormalizes carer data from auth service.
+**Method:** PUT
+**URL:** `http://localhost:9090/api/rostering/carers/carer-123/visits/VISIT-20251106-5777K/accept`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "visit-456",
+    "assignmentStatus": "ACCEPTED",
+    "assignedAt": "2025-11-05T14:30:00.000Z",
+    "status": "ASSIGNED",
+    "assignedCarerId": "carer-123",
+    "assignedCarerFirstName": "Jane",
+    "assignedCarerLastName": "Doe",
+    "assignedCarerEmail": "jane.doe@example.com",
+    "assignedCarerSkills": ["Dementia Care", "Personal Care", "Medication Admin"],
+    "assignedCarerAvailability": {
+      "monday": {"start": "08:00", "end": "16:00", "available": true},
+      "tuesday": {"start": "08:00", "end": "16:00", "available": true}
+    },
+    "updatedAt": "2025-11-05T14:30:00.000Z"
+  },
+  "message": "Visit offer accepted successfully"
+}
+```
+
+### Decline Visit Offer
+**Purpose:** Allows a carer to decline a visit offer with an optional reason. Updates visit assignment status and stores decline information. **Data Sources:** Updates Visit record with DECLINED status and stores decline reason in complianceChecks.
+**Method:** PUT
+**URL:** `http://localhost:9090/api/rostering/carers/carer-123/visits/VISIT-20251106-5777K/decline`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Request Body:**
+```json
+{
+  "reason": "Schedule conflict with existing appointment"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "VISIT-20251106-5777K",
+    "assignmentStatus": "DECLINED",
+    "complianceChecks": {
+      "declinedReason": "Schedule conflict with existing appointment",
+      "declinedAt": "2025-11-05T14:35:00.000Z",
+      "declinedBy": "carer-123"
+    },
+    "updatedAt": "2025-11-05T14:35:00.000Z"
+  },
+  "message": "Visit offer declined successfully"
+}
+```
+
+### Get Offered Visits for Carer
+**Purpose:** Retrieves all visit offers currently available for a specific carer to accept or decline. **Data Sources:** Queries Visit table for records with assignmentStatus=OFFERED and isActive=true for the specified carer.
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/carers/carer-123/visits/offered`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "VISIT-20251106-5777K",
+      "subject": "Weekly Personal Care Visit",
+      "content": "Client requires assistance with personal care and medication",
+      "address": "123 Main Street, London, SW1A 1AA",
+      "scheduledStartTime": "2025-11-05T09:00:00.000Z",
+      "scheduledEndTime": "2025-11-05T10:00:00.000Z",
+      "estimatedDuration": 60,
+      "urgency": "MEDIUM",
+      "assignmentStatus": "OFFERED",
+      "travelFromPrevious": 15,
+      "complianceChecks": {
+        "wtdCompliant": true,
+        "restPeriodOK": true,
+        "travelTimeOK": true,
+        "skillsMatch": true
+      },
+      "externalRequest": {
+        "id": "req-789",
+        "subject": "Weekly Personal Care Request",
+        "status": "APPROVED"
+      },
+      "cluster": {
+        "id": "cluster-123",
+        "name": "Central London"
+      }
+    }
+  ]
 }
 ```
 

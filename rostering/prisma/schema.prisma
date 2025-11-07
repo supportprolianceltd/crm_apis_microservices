@@ -111,6 +111,20 @@ model Visit {
 
   // Status and lifecycle
   status VisitStatus @default(SCHEDULED)
+  isActive Boolean @default(true)
+  assignmentStatus AssignmentStatus @default(PENDING)
+  assignedAt DateTime?
+  travelFromPrevious Int?
+  complianceChecks Json?
+
+  // Assigned carer information (denormalized for performance)
+  assignedCarerId String?
+  assignedCarerFirstName String?
+  assignedCarerLastName String?
+  assignedCarerEmail String?
+  assignedCarerSkills String[] @default([])
+  assignedCarerAvailability Json?
+
   clusterId String?
   cluster Cluster? @relation(fields: [clusterId], references: [id])
 

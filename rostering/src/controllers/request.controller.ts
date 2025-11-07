@@ -8,7 +8,7 @@ import { ConstraintsService } from '../services/constraints.service';
 import { TravelService } from '../services/travel.service';
 import { CarerService } from '../services/carer.service';
 import { logger, logServiceError } from '../utils/logger';
-import { generateUniqueRequestId } from '../utils/idGenerator';
+import { generateUniqueRequestId, generateUniqueVisitId } from '../utils/idGenerator';
 import {
   CreateRequestPayload,
   UpdateRequestPayload,
@@ -794,8 +794,8 @@ export class RequestController {
       // Create a Visit record for the approved request only if it has a scheduled start time
       let visit = null;
       if (existingRequest.scheduledStartTime) {
-        // Generate unique visit ID using the same generator as ExternalRequest
-        const visitId = await generateUniqueRequestId(async (id: string) => {
+        // Generate unique visit ID using the visit generator
+        const visitId = await generateUniqueVisitId(async (id: string) => {
           const existing = await this.prisma.visit.findUnique({
             where: { id },
             select: { id: true }
