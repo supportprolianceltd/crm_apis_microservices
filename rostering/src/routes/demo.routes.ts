@@ -19,6 +19,7 @@ const demoController = new DemoController(prisma);
  *         schema:
  *           type: string
  *         description: Tenant ID (default: '4')
+ *         required: false
  *     responses:
  *       200:
  *         description: Demo data seeded successfully
@@ -39,6 +40,7 @@ router.post('/seed-all', demoController.seedAll);
  *         schema:
  *           type: string
  *         description: Tenant ID (default: '4')
+ *         required: false
  *     responses:
  *       200:
  *         description: Demo status retrieved successfully
@@ -59,6 +61,7 @@ router.get('/status', demoController.getDemoStatus);
  *         schema:
  *           type: string
  *         description: Tenant ID (default: '4')
+ *         required: false
  *     responses:
  *       200:
  *         description: Demo data cleared successfully

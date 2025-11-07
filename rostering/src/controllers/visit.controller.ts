@@ -6,7 +6,7 @@ import { generateUniqueVisitId } from '../utils/idGenerator';
 
 // Validation schemas
 const createVisitSchema = z.object({
-  externalRequestId: z.string().min(1, 'External request ID is required'),
+  externalRequestId: z.string().min(1, 'External request ID is required').optional(),
   subject: z.string().min(1, 'Subject is required'),
   content: z.string().min(1, 'Content is required'),
   requestorEmail: z.string().email('Valid email is required'),
@@ -22,7 +22,7 @@ const createVisitSchema = z.object({
   estimatedDuration: z.number().int().positive().optional(),
   scheduledStartTime: z.string().datetime(),
   scheduledEndTime: z.string().datetime().optional(),
-  recurrencePattern: z.string().optional(),
+  recurrencePattern: z.string().nullable().optional(),
   notes: z.string().optional(),
   clusterId: z.string().optional()
 });
@@ -66,20 +66,23 @@ export class VisitController {
       // Validate request body
       const validatedData = createVisitSchema.parse(req.body);
 
-      // Verify external request exists and belongs to tenant
-      const externalRequest = await this.prisma.externalRequest.findFirst({
-        where: {
-          id: validatedData.externalRequestId,
-          tenantId
-        }
-      });
-
-      if (!externalRequest) {
-        res.status(404).json({
-          success: false,
-          error: 'External request not found'
+      // Verify external request exists and belongs to tenant (only if provided)
+      let externalRequest = null;
+      if (validatedData.externalRequestId) {
+        externalRequest = await this.prisma.externalRequest.findFirst({
+          where: {
+            id: validatedData.externalRequestId,
+            tenantId
+          }
         });
-        return;
+
+        if (!externalRequest) {
+          res.status(404).json({
+            success: false,
+            error: 'External request not found'
+          });
+          return;
+        }
       }
 
       // Generate unique visit ID using the visit generator
@@ -92,33 +95,43 @@ export class VisitController {
       });
 
       // Create the visit
+      const visitData: any = {
+        id: visitId, // Use generated readable ID
+        tenantId,
+        subject: validatedData.subject,
+        content: validatedData.content,
+        requestorEmail: validatedData.requestorEmail,
+        requestorName: validatedData.requestorName,
+        requestorPhone: validatedData.requestorPhone,
+        address: validatedData.address,
+        postcode: validatedData.postcode || '',
+        latitude: validatedData.latitude,
+        longitude: validatedData.longitude,
+        urgency: validatedData.urgency || 'MEDIUM',
+        requirements: validatedData.requirements,
+        requiredSkills: validatedData.requiredSkills || [],
+        estimatedDuration: validatedData.estimatedDuration,
+        scheduledStartTime: new Date(validatedData.scheduledStartTime),
+        scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
+        recurrencePattern: validatedData.recurrencePattern,
+        notes: validatedData.notes,
+        status: VisitStatus.SCHEDULED,
+        createdBy: user?.id,
+        createdByEmail: user?.email
+      };
+
+      // Only add externalRequestId if provided
+      if (validatedData.externalRequestId) {
+        visitData.externalRequestId = validatedData.externalRequestId;
+      }
+
+      // Only add clusterId if provided
+      if (validatedData.clusterId) {
+        visitData.clusterId = validatedData.clusterId;
+      }
+
       const visit = await this.prisma.visit.create({
-        data: {
-          id: visitId, // Use generated readable ID
-          tenantId,
-          externalRequestId: validatedData.externalRequestId,
-          subject: validatedData.subject,
-          content: validatedData.content,
-          requestorEmail: validatedData.requestorEmail,
-          requestorName: validatedData.requestorName,
-          requestorPhone: validatedData.requestorPhone,
-          address: validatedData.address,
-          postcode: validatedData.postcode || '',
-          latitude: validatedData.latitude,
-          longitude: validatedData.longitude,
-          urgency: validatedData.urgency || 'MEDIUM',
-          requirements: validatedData.requirements,
-          requiredSkills: validatedData.requiredSkills || [],
-          estimatedDuration: validatedData.estimatedDuration,
-          scheduledStartTime: new Date(validatedData.scheduledStartTime),
-          scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
-          recurrencePattern: validatedData.recurrencePattern,
-          notes: validatedData.notes,
-          status: VisitStatus.SCHEDULED,
-          clusterId: validatedData.clusterId,
-          createdBy: user?.id,
-          createdByEmail: user?.email
-        }
+        data: visitData
       });
 
       logger.info(`Created visit: ${visit.id}`, {
@@ -142,11 +155,12 @@ export class VisitController {
         });
         return;
       }
+      console.error('Visit creation error:', error);
       logServiceError('Visit', 'createVisit', error, { tenantId: req.user?.tenantId });
       res.status(500).json({
         success: false,
         error: 'Failed to create visit',
-        message: 'Internal server error'
+        message: error instanceof Error ? error.message : 'Internal server error'
       });
     }
   };
@@ -501,47 +515,114 @@ export class VisitController {
   };
 
   /**
-   * Get visits by status
-   */
-  getVisitsByStatus = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const user = (req as any).user;
-      const tenantId = user?.tenantId?.toString();
-      const statusParam = (req.params.status || '').toUpperCase();
+    * Get visits by status
+    */
+   getVisitsByStatus = async (req: Request, res: Response): Promise<void> => {
+     try {
+       const user = (req as any).user;
+       const tenantId = user?.tenantId?.toString();
+       const statusParam = (req.params.status || '').toUpperCase();
 
-      const validStatuses = Object.values(VisitStatus) as string[];
-      if (!validStatuses.includes(statusParam)) {
-        res.status(400).json({ success: false, error: 'Invalid status', valid: validStatuses });
-        return;
-      }
+       const validStatuses = Object.values(VisitStatus) as string[];
+       if (!validStatuses.includes(statusParam)) {
+         res.status(400).json({ success: false, error: 'Invalid status', valid: validStatuses });
+         return;
+       }
 
-      const visits = await this.prisma.visit.findMany({
-        where: {
-          tenantId,
-          status: statusParam as VisitStatus
-        },
-        orderBy: { scheduledStartTime: 'desc' },
-        include: {
-          externalRequest: {
-            select: {
-              id: true,
-              subject: true,
-              status: true
-            }
-          },
-          cluster: {
-            select: {
-              id: true,
-              name: true
-            }
-          }
-        }
-      });
+       const visits = await this.prisma.visit.findMany({
+         where: {
+           tenantId,
+           status: statusParam as VisitStatus
+         },
+         orderBy: { scheduledStartTime: 'desc' },
+         include: {
+           externalRequest: {
+             select: {
+               id: true,
+               subject: true,
+               status: true
+             }
+           },
+           cluster: {
+             select: {
+               id: true,
+               name: true
+             }
+           }
+         }
+       });
 
-      res.json({ success: true, data: visits });
-    } catch (error) {
-      logServiceError('Visit', 'getVisitsByStatus', error, { status: req.params.status, tenantId: req.user?.tenantId });
-      res.status(500).json({ success: false, error: 'Failed to get visits by status' });
-    }
-  };
-}
+       res.json({ success: true, data: visits });
+     } catch (error) {
+       logServiceError('Visit', 'getVisitsByStatus', error, { status: req.params.status, tenantId: req.user?.tenantId });
+       res.status(500).json({ success: false, error: 'Failed to get visits by status' });
+     }
+   };
+
+   /**
+    * Get visits by client ID (requestorEmail)
+    */
+   getVisitsByClient = async (req: Request, res: Response): Promise<void> => {
+     try {
+       const user = (req as any).user;
+       const tenantId = user?.tenantId?.toString();
+       const clientId = req.params.clientId;
+
+       if (!clientId) {
+         res.status(400).json({
+           success: false,
+           error: 'Client ID is required'
+         });
+         return;
+       }
+
+       const visits = await this.prisma.visit.findMany({
+         where: {
+           tenantId,
+           requestorEmail: clientId,
+           isActive: true
+         },
+         orderBy: { scheduledStartTime: 'desc' },
+         include: {
+           externalRequest: {
+             select: {
+               id: true,
+               subject: true,
+               status: true,
+               approvedAt: true
+             }
+           },
+           cluster: {
+             select: {
+               id: true,
+               name: true
+             }
+           },
+           assignments: {
+             select: {
+               id: true,
+               carerId: true,
+               scheduledTime: true,
+               status: true
+             },
+             orderBy: { scheduledTime: 'asc' }
+           }
+         }
+       });
+
+       res.json({
+         success: true,
+         data: visits,
+         clientId,
+         total: visits.length
+       });
+
+     } catch (error) {
+       logServiceError('Visit', 'getVisitsByClient', error, { clientId: req.params.clientId });
+       res.status(500).json({
+         success: false,
+         error: 'Failed to get visits by client'
+       });
+     }
+   };
+ }

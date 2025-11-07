@@ -13,6 +13,7 @@ export function createVisitRoutes(visitController: VisitController): Router {
   router.get('/', visitController.listVisits);
   router.post('/', visitController.createVisit);
   router.get('/search', visitController.searchVisits);
+  router.get('/client/:clientId', visitController.getVisitsByClient);
   router.get('/:id', visitController.getVisit);
   router.put('/:id', visitController.updateVisit);
   router.delete('/:id', visitController.deleteVisit);

@@ -86,8 +86,8 @@ model ExternalRequest {
 model Visit {
    id String @id // Remove @default(cuid()), we'll generate custom IDs
    tenantId String
-  externalRequestId String @map("external_request_id")
-  externalRequest ExternalRequest @relation(fields: [externalRequestId], references: [id], onDelete: Cascade)
+   externalRequestId String? @map("external_request_id")  // Add ? to make it optional
+   externalRequest ExternalRequest? @relation(fields: [externalRequestId], references: [id], onDelete: Cascade)  // Also make relation optional
 
   // Core visit details
   subject String

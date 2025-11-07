@@ -38,6 +38,361 @@
 
 ## Visit Management
 
+### Create Visit
+**Purpose:** Creates a new visit directly (not from an approved request). Useful for emergency visits or manual scheduling.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/visits`
+
+**Request Body:**
+```json
+{
+  "subject": "Emergency Personal Care Visit",
+  "content": "Client requires immediate personal care assistance due to family emergency",
+  "requestorEmail": "client@example.com",
+  "requestorName": "John Smith",
+  "requestorPhone": "+447123456789",
+  "address": "123 Main Street, London, SW1A 1AA",
+  "postcode": "SW1A 1AA",
+  "latitude": 51.5074,
+  "longitude": -0.1278,
+  "urgency": "HIGH",
+  "requirements": "Personal Care, Emergency Response",
+  "requiredSkills": ["Personal Care", "Emergency Response"],
+  "estimatedDuration": 60,
+  "scheduledStartTime": "2025-11-07T10:00:00Z",
+  "scheduledEndTime": "2025-11-07T11:00:00Z",
+  "recurrencePattern": null,
+  "notes": "Emergency visit - family requested immediate assistance",
+  "clusterId": "cluster-123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "VISIT-20251106-ABC123",
+    "subject": "Emergency Personal Care Visit",
+    "content": "Client requires immediate personal care assistance due to family emergency",
+    "requestorEmail": "client@example.com",
+    "requestorName": "John Smith",
+    "requestorPhone": "+447123456789",
+    "address": "123 Main Street, London, SW1A 1AA",
+    "postcode": "SW1A 1AA",
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "urgency": "HIGH",
+    "requirements": "Personal Care, Emergency Response",
+    "requiredSkills": ["Personal Care", "Emergency Response"],
+    "estimatedDuration": 60,
+    "scheduledStartTime": "2025-11-07T10:00:00Z",
+    "scheduledEndTime": "2025-11-07T11:00:00Z",
+    "recurrencePattern": null,
+    "notes": "Emergency visit - family requested immediate assistance",
+    "status": "SCHEDULED",
+    "clusterId": "cluster-123",
+    "createdBy": "user-123",
+    "createdByEmail": "coordinator@hospital.com",
+    "createdAt": "2025-11-07T10:00:00.000Z",
+    "updatedAt": "2025-11-07T10:00:00.000Z"
+  },
+  "message": "Visit created successfully"
+}
+```
+
+---
+
+### Get Visits by Client ID
+**Purpose:** Retrieves all visits for a specific client using their email address (requestorEmail).
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/visits/client/{clientId}`
+
+**Example URL:** `http://localhost:9090/api/rostering/visits/client/client@example.com`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "VISIT-20251106-ABC123",
+      "subject": "Weekly Personal Care Visit",
+      "scheduledStartTime": "2025-11-07T10:00:00.000Z",
+      "status": "SCHEDULED",
+      "externalRequest": {
+        "id": "REQ-20251106-97ZZF",
+        "subject": "Care request",
+        "status": "APPROVED",
+        "approvedAt": "2025-11-06T15:30:00.000Z"
+      },
+      "cluster": {
+        "id": "cluster-123",
+        "name": "North London"
+      },
+      "assignments": [
+        {
+          "id": "assignment-123",
+          "carerId": "carer-456",
+          "scheduledTime": "2025-11-07T10:00:00.000Z",
+          "status": "ACCEPTED"
+        }
+      ]
+    }
+  ],
+  "clientId": "client@example.com",
+  "total": 1
+}
+```
+
+---
+
+### Assign Carer to Visit
+**Purpose:** Manually assign a carer to a specific visit. This creates an assignment record linking the carer to the visit with scheduled times. The assignment will proceed even if skills don't match or availability requirements aren't met, but warnings will be generated.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/roster/assignments`
+
+**Request Body:**
+```json
+{
+  "visitId": "VISIT-20251106-ABC123",
+  "carerId": "carer-456",
+  "scheduledTime": "2025-11-07T10:00:00Z"
+}
+```
+
+**Response (Successful with warnings):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "assignment-123",
+    "visitId": "VISIT-20251106-ABC123",
+    "carerId": "carer-456",
+    "scheduledTime": "2025-11-07T10:00:00.000Z",
+    "estimatedEndTime": "2025-11-07T11:00:00.000Z",
+    "status": "PENDING",
+    "travelFromPrevious": 0,
+    "manuallyAssigned": true,
+    "warnings": [
+      "Carer does not have all required skills",
+      "Request time (10:00-11:00) does not match required availability slots for monday"
+    ],
+    "errors": []
+  },
+  "message": "Assignment created with warnings"
+}
+```
+
+**Response (Successful without warnings):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "assignment-123",
+    "visitId": "VISIT-20251106-ABC123",
+    "carerId": "carer-456",
+    "scheduledTime": "2025-11-07T10:00:00.000Z",
+    "estimatedEndTime": "2025-11-07T11:00:00.000Z",
+    "status": "PENDING",
+    "travelFromPrevious": 0,
+    "manuallyAssigned": true,
+    "warnings": [],
+    "errors": []
+  },
+  "message": "Assignment created successfully"
+}
+```
+
+---
+
+### Generate Roster with Automatic Assignments
+**Purpose:** Generate a complete roster for a date range with automatic carer assignments using optimization algorithms. This creates assignments for all eligible visits.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/roster/generate`
+
+**Request Body:**
+```json
+{
+  "startDate": "2025-11-07T00:00:00Z",
+  "endDate": "2025-11-07T23:59:59Z",
+  "strategy": "BALANCED",
+  "includeTravelOptimization": true,
+  "maxTravelTimeMinutes": 30
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "roster": {
+      "id": "roster-123",
+      "name": "Auto-generated Roster 2025-11-07",
+      "startDate": "2025-11-07T00:00:00.000Z",
+      "endDate": "2025-11-07T23:59:59.000Z",
+      "status": "DRAFT",
+      "totalAssignments": 15,
+      "totalTravelMinutes": 45,
+      "continuityScore": 78.5,
+      "qualityScore": 85.2
+    },
+    "assignments": [
+      {
+        "id": "assignment-123",
+        "visitId": "VISIT-20251106-ABC123",
+        "carerId": "carer-456",
+        "scheduledTime": "2025-11-07T10:00:00.000Z",
+        "estimatedEndTime": "2025-11-07T11:00:00.000Z",
+        "travelFromPrevious": 5,
+        "status": "PENDING"
+      }
+    ],
+    "metrics": {
+      "totalTravelTime": 45,
+      "continuityScore": 78.5,
+      "violations": {
+        "hard": 0,
+        "soft": 2
+      }
+    }
+  },
+  "message": "Roster generated successfully with 15 assignments"
+}
+```
+
+---
+
+### Publish Roster for Carer Acceptance
+**Purpose:** Publish a generated roster to carers for acceptance. Carers will receive notifications and can accept or decline their assignments.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/roster/{rosterId}/publish`
+
+**Request Body:**
+```json
+{
+  "acceptanceDeadline": "2025-11-06T18:00:00Z",
+  "notificationChannels": ["push", "email"],
+  "notes": "Please accept assignments by 6 PM"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "publication": {
+      "id": "publication-123",
+      "rosterId": "roster-123",
+      "status": "ACTIVE",
+      "acceptanceDeadline": "2025-11-06T18:00:00.000Z",
+      "totalAssignments": 15,
+      "acceptedCount": 0,
+      "declinedCount": 0,
+      "pendingCount": 15
+    },
+    "notificationsSent": 8,
+    "carersNotified": 8
+  },
+  "message": "Roster published successfully"
+}
+```
+
+---
+
+### Accept Assignment (by Carer)
+**Purpose:** Carer accepts a published assignment. This confirms the carer will perform the visit.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/publications/assignments/{assignmentId}/accept`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "assignment": {
+      "id": "assignment-123",
+      "visitId": "VISIT-20251106-ABC123",
+      "carerId": "carer-456",
+      "status": "ACCEPTED",
+      "acceptedAt": "2025-11-06T14:30:00.000Z"
+    }
+  },
+  "message": "Assignment accepted successfully"
+}
+```
+
+---
+
+### Decline Assignment (by Carer)
+**Purpose:** Carer declines a published assignment with an optional reason.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/publications/assignments/{assignmentId}/decline`
+
+**Request Body:**
+```json
+{
+  "reason": "Prior commitment"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "assignment": {
+      "id": "assignment-123",
+      "visitId": "VISIT-20251106-ABC123",
+      "carerId": "carer-456",
+      "status": "DECLINED",
+      "declineReason": "Prior commitment",
+      "declinedAt": "2025-11-06T14:30:00.000Z"
+    }
+  },
+  "message": "Assignment declined"
+}
+```
+
+---
+
+### Reassign Visit to Different Carer
+**Purpose:** Move an existing assignment from one carer to another. Useful for handling carer unavailability or optimization.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/roster/reassign`
+
+**Request Body:**
+```json
+{
+  "assignmentId": "assignment-123",
+  "newCarerId": "carer-789"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "oldAssignment": {
+      "id": "assignment-123",
+      "carerId": "carer-456",
+      "status": "CANCELLED"
+    },
+    "newAssignment": {
+      "id": "assignment-456",
+      "carerId": "carer-789",
+      "status": "PENDING"
+    }
+  },
+  "message": "Visit reassigned successfully"
+}
+```
+
+---
+
 ### Create Public Visit Request
 **Purpose:** Creates a new visit request publicly without authentication. The tenant ID is encoded in the request body. The request will be geocoded, assigned to a cluster (if AUTO_ASSIGN_REQUESTS=true), and automatically matched with available carers. **Data Sources:** Creates ExternalRequest record, geocodes address, assigns to cluster, triggers auto-matching.
 **Method:** POST
@@ -144,6 +499,75 @@
 
 ---
 
+### Create Visit
+**Purpose:** Creates a new visit directly (bypassing the request approval process). Useful for emergency visits or when you need to create visits programmatically. **Data Sources:** Creates Visit record directly with provided details, links to external request if specified.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/visits`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Request Body:**
+```json
+{
+  "subject": "Emergency Personal Care Visit",
+  "content": "Client requires immediate personal care assistance due to family emergency",
+  "requestorEmail": "client@example.com",
+  "requestorName": "John Smith",
+  "requestorPhone": "+447123456789",
+  "address": "123 Main Street, London, SW1A 1AA",
+  "postcode": "SW1A 1AA",
+  "latitude": 51.5074,
+  "longitude": -0.1278,
+  "urgency": "HIGH",
+  "requirements": "Personal Care, Emergency Response",
+  "requiredSkills": ["Personal Care", "Emergency Response"],
+  "estimatedDuration": 60,
+  "scheduledStartTime": "2025-11-07T10:00:00Z",
+  "scheduledEndTime": "2025-11-07T11:00:00Z",
+  "recurrencePattern": null,
+  "notes": "Emergency visit - family requested immediate assistance",
+  "clusterId": "cluster-123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "VISIT-20251107-ABC123",
+    "tenantId": "b2d8305b-bccf-4570-8d04-4ae5b1ddba8e",
+    "externalRequestId": "REQ-20251106-97ZZF",
+    "subject": "Emergency Personal Care Visit",
+    "content": "Client requires immediate personal care assistance due to family emergency",
+    "requestorEmail": "client@example.com",
+    "requestorName": "John Smith",
+    "requestorPhone": "+447123456789",
+    "address": "123 Main Street, London, SW1A 1AA",
+    "postcode": "SW1A 1AA",
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "urgency": "HIGH",
+    "status": "SCHEDULED",
+    "isActive": true,
+    "requirements": "Personal Care, Emergency Response",
+    "requiredSkills": ["Personal Care", "Emergency Response"],
+    "estimatedDuration": 60,
+    "scheduledStartTime": "2025-11-07T10:00:00.000Z",
+    "scheduledEndTime": "2025-11-07T11:00:00.000Z",
+    "recurrencePattern": null,
+    "notes": "Emergency visit - family requested immediate assistance",
+    "clusterId": "cluster-123",
+    "createdAt": "2025-11-07T09:00:00.000Z",
+    "updatedAt": "2025-11-07T09:00:00.000Z",
+    "createdBy": "coordinator-123",
+    "createdByEmail": "coordinator@hospital.com"
+  },
+  "message": "Visit created successfully"
+}
+```
+
+---
+
 ### Create Visit Request
 **Purpose:** Creates a new visit request for rostering. The request will be geocoded, assigned to a cluster (if AUTO_ASSIGN_REQUESTS=true), and automatically matched with available carers. **Data Sources:** Creates ExternalRequest record, geocodes address, assigns to cluster, triggers auto-matching.
 **Method:** POST
@@ -195,7 +619,7 @@
 {
   "success": true,
   "data": {
-    "id": "cmhkia2qc000acas105a1zwkw",
+    "id": "REQ-20251106-97ZZF",
     "tenantId": "b2d8305b-bccf-4570-8d04-4ae5b1ddba8e",
     "subject": "Weekly Personal Care Visit",
     "content": "Client requires assistance with personal care, medication management, and light housekeeping. Client has mobility issues and requires hoist assistance.",
@@ -246,7 +670,7 @@
 {
   "success": true,
   "data": {
-    "id": "cmhkia2qc000acas105a1zwkw",
+    "id": "REQ-20251106-97ZZF",
     "status": "APPROVED",
     "approvedBy": "coordinator@hospital.com",
     "approvedAt": "2025-11-04T14:16:14.000Z",
@@ -469,7 +893,7 @@
 {
   "data": [
     {
-      "id": "cmhkia2qc000acas105a1zwkw",
+      "id": "REQ-20251106-97ZZF",
       "subject": "Weekly Personal Care Visit",
       "requestorEmail": "coordinator@hospital.com",
       "address": "123 Main Street, London, SW1A 1AA",
@@ -772,6 +1196,64 @@
       }
     }
   ]
+}
+```
+
+### Get Visits by Client ID
+**Purpose:** Retrieves all visits for a specific client using their email address (client ID). Only returns active visits. **Data Sources:** Queries Visit table filtered by requestorEmail (client identifier) and tenant, including related external request and assignment information.
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/visits/client/client@example.com`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "VISIT-20251106-5777K",
+      "tenantId": "b2d8305b-bccf-4570-8d04-4ae5b1ddba8e",
+      "externalRequestId": "REQ-20251106-97ZZF",
+      "subject": "Weekly Personal Care Visit",
+      "content": "Client requires assistance with personal care and medication",
+      "requestorEmail": "client@example.com",
+      "requestorName": "John Smith",
+      "address": "123 Main Street, London, SW1A 1AA",
+      "postcode": "SW1A 1AA",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "urgency": "MEDIUM",
+      "status": "ASSIGNED",
+      "isActive": true,
+      "assignmentStatus": "ACCEPTED",
+      "assignedAt": "2025-11-05T10:30:00.000Z",
+      "scheduledStartTime": "2025-11-05T09:00:00.000Z",
+      "scheduledEndTime": "2025-11-05T10:00:00.000Z",
+      "estimatedDuration": 60,
+      "createdAt": "2025-11-04T14:16:12.000Z",
+      "updatedAt": "2025-11-05T10:30:00.000Z",
+      "externalRequest": {
+        "id": "REQ-20251106-97ZZF",
+        "subject": "Weekly Personal Care Request",
+        "status": "APPROVED",
+        "approvedAt": "2025-11-04T15:00:00.000Z"
+      },
+      "assignments": [
+        {
+          "id": "assignment-456",
+          "carerId": "carer-123",
+          "scheduledTime": "2025-11-05T09:00:00.000Z",
+          "status": "ACCEPTED"
+        }
+      ],
+      "cluster": {
+        "id": "cluster-123",
+        "name": "Central London"
+      }
+    }
+  ],
+  "clientId": "client@example.com",
+  "total": 1
 }
 ```
 

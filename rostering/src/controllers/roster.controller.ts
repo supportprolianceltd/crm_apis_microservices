@@ -356,17 +356,53 @@ export class RosterController {
         return;
       }
 
-      res.json({
-        success: true,
+      // Validate skills and availability requirements
+      const warnings: string[] = [];
+      const errors: string[] = [];
+
+      // Check skills match
+      const hasSkills = this.checkSkillsMatch(visit.requirements, carer.skills);
+      if (!hasSkills) {
+        warnings.push('Carer does not have all required skills');
+      }
+
+      // Check availability requirements if specified
+      if (visit.availabilityRequirements) {
+        const availabilityCheck = this.checkAvailabilityRequirements(
+          carer,
+          new Date(scheduledTime),
+          visit.availabilityRequirements
+        );
+        if (!availabilityCheck.isAvailable) {
+          warnings.push(`Availability mismatch: ${availabilityCheck.conflicts.join(', ')}`);
+        }
+      }
+
+      // Create the assignment using unchecked create to avoid relation constraints
+      const assignment = await this.prisma.assignment.create({
         data: {
-          id: `assignment_${Date.now()}`,
+          tenantId,
           visitId,
           carerId,
           scheduledTime: new Date(scheduledTime),
-          status: 'pending',
-          createdAt: new Date()
+          estimatedEndTime: visit.scheduledEndTime ? new Date(visit.scheduledEndTime) : new Date(new Date(scheduledTime).getTime() + (visit.estimatedDuration || 60) * 60000),
+          status: 'PENDING',
+          travelFromPrevious: 0,
+          manuallyAssigned: true,
+          warnings: warnings.length > 0 ? warnings : []
+        } as any
+      });
+
+      res.json({
+        success: true,
+        data: {
+          ...assignment,
+          warnings,
+          errors
         },
-        message: 'Assignment created successfully'
+        message: warnings.length > 0
+          ? 'Assignment created with warnings'
+          : 'Assignment created successfully'
       });
 
     } catch (error) {
@@ -451,6 +487,101 @@ export class RosterController {
     if (!requirements) return true;
     const reqLower = requirements.toLowerCase();
     return carerSkills.some(skill => reqLower.includes(skill.toLowerCase()));
+  }
+
+  private checkAvailabilityRequirements(carer: any, requestStart: Date, availabilityRequirements: any) {
+    const carerAvailability = carer.availability || {};
+
+    // Get the day of the week for the request
+    const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const requestDay = daysOfWeek[requestStart.getDay()].toLowerCase();
+
+    // Check if carer has availability for this day
+    const dayAvailability = carerAvailability[requestDay];
+    if (!dayAvailability) {
+      return {
+        isAvailable: false,
+        conflicts: [`No availability configured for ${requestDay}`]
+      };
+    }
+
+    // Check availability requirements from the request if provided
+    if (availabilityRequirements && availabilityRequirements[requestDay]) {
+      const requiredSlots = availabilityRequirements[requestDay];
+      if (requiredSlots && Array.isArray(requiredSlots)) {
+        // Check if the request time overlaps with any required slot
+        const requestStartTime = requestStart.toTimeString().slice(0, 5); // HH:MM format
+        const requestEndTime = new Date(requestStart.getTime() + (60 * 60000)).toTimeString().slice(0, 5); // Assume 1 hour duration
+
+        let overlapsWithRequirement = false;
+        for (const slot of requiredSlots) {
+          if (slot.start && slot.end) {
+            // Check if request time overlaps with this required slot
+            if (requestStartTime <= slot.end && requestEndTime >= slot.start) {
+              overlapsWithRequirement = true;
+              break;
+            }
+          }
+        }
+
+        if (!overlapsWithRequirement) {
+          return {
+            isAvailable: false,
+            conflicts: [`Request time (${requestStartTime}-${requestEndTime}) does not match required availability slots for ${requestDay}`]
+          };
+        }
+      }
+    }
+
+    // Check carer's own availability
+    if (typeof dayAvailability === 'object' && dayAvailability.available !== false) {
+      const startTime = dayAvailability.start;
+      const endTime = dayAvailability.end;
+
+      if (!startTime || !endTime) {
+        return {
+          isAvailable: false,
+          conflicts: [`Invalid availability object for ${requestDay}: missing start or end time`]
+        };
+      }
+
+      // Parse time strings (e.g., "08:00", "14:00")
+      const [startHourStr] = startTime.split(':');
+      const [endHourStr] = endTime.split(':');
+
+      const startHour24 = parseInt(startHourStr);
+      const endHour24 = parseInt(endHourStr);
+
+      if (isNaN(startHour24) || isNaN(endHour24)) {
+        return {
+          isAvailable: false,
+          conflicts: [`Invalid time format for ${requestDay}: ${startTime} - ${endTime}`]
+        };
+      }
+
+      // Get request times in hours
+      const requestStartHour = requestStart.getHours();
+      const requestEndHour = new Date(requestStart.getTime() + (60 * 60000)).getHours();
+
+      // Check if request falls within availability
+      const isAvailable = requestStartHour >= startHour24 && requestEndHour <= endHour24;
+
+      const conflicts = [];
+      if (!isAvailable) {
+        conflicts.push(`Request time (${requestStartHour}:00-${requestEndHour}:00) is outside carer availability (${startHour24}:00-${endHour24}:00) on ${requestDay}`);
+      }
+
+      return {
+        isAvailable,
+        conflicts
+      };
+    }
+
+    // If neither object nor string format
+    return {
+      isAvailable: false,
+      conflicts: [`Unsupported availability format for ${requestDay}`]
+    };
   }
 
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
