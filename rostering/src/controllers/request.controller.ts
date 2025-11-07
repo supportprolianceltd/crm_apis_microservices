@@ -1071,6 +1071,9 @@ export class RequestController {
       const requestEndTime = existingRequest.scheduledEndTime ||
         new Date(requestStartTime.getTime() + (existingRequest.estimatedDuration || 60) * 60 * 1000);
 
+      // Get availability requirements from the request
+      const availabilityRequirements = (existingRequest as any).availabilityRequirements;
+
       // Check each carer for skills match and availability
       const feasibilityResults = await Promise.all(
         allCarers.map(async (carer) => {
@@ -1078,11 +1081,12 @@ export class RequestController {
           const carerSkills = carer.profile?.skill_details || [];
           const skillsMatch = this.checkSkillsMatch(carerSkills, requiredSkills, requirements);
 
-          // 2. Check availability based on profile availability
+          // 2. Check availability based on profile availability and request availability requirements
           const availabilityCheck = this.checkCarerAvailability(
             carer,
             requestStartTime,
-            requestEndTime
+            requestEndTime,
+            availabilityRequirements
           );
 
           // 3. Optional: Advanced scheduling check using existing assignments
@@ -1265,22 +1269,50 @@ export class RequestController {
 
 
   /**
-   * Check carer availability based on profile availability data
+   * Check carer availability based on profile availability data and request availability requirements
    */
-  private checkCarerAvailability(carer: any, requestStart: Date, requestEnd: Date) {
-    const availability = carer.profile?.availability || {};
+  private checkCarerAvailability(carer: any, requestStart: Date, requestEnd: Date, availabilityRequirements?: any) {
+    const carerAvailability = carer.profile?.availability || {};
 
     // Get the day of the week for the request
     const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const requestDay = daysOfWeek[requestStart.getDay()].toLowerCase();
 
     // Check if carer has availability for this day
-    const dayAvailability = availability[requestDay];
+    const dayAvailability = carerAvailability[requestDay];
     if (!dayAvailability) {
       return {
         isAvailable: false,
         conflicts: [`No availability configured for ${requestDay}`]
       };
+    }
+
+    // Check availability requirements from the request if provided
+    if (availabilityRequirements && availabilityRequirements[requestDay]) {
+      const requiredSlots = availabilityRequirements[requestDay];
+      if (requiredSlots && Array.isArray(requiredSlots)) {
+        // Check if the request time overlaps with any required slot
+        const requestStartTime = requestStart.toTimeString().slice(0, 5); // HH:MM format
+        const requestEndTime = requestEnd.toTimeString().slice(0, 5); // HH:MM format
+
+        let overlapsWithRequirement = false;
+        for (const slot of requiredSlots) {
+          if (slot.start && slot.end) {
+            // Check if request time overlaps with this required slot
+            if (requestStartTime <= slot.end && requestEndTime >= slot.start) {
+              overlapsWithRequirement = true;
+              break;
+            }
+          }
+        }
+
+        if (!overlapsWithRequirement) {
+          return {
+            isAvailable: false,
+            conflicts: [`Request time (${requestStartTime}-${requestEndTime}) does not match required availability slots for ${requestDay}`]
+          };
+        }
+      }
     }
 
     // Handle new object format: { start: "08:00", end: "14:00", available: true }
