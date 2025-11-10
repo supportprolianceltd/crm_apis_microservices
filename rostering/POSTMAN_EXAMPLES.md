@@ -2039,6 +2039,756 @@
 
 ---
 
+## Cluster Assignment & Distance Calculation
+
+### Get Intelligent Cluster Suggestions for Client
+**Purpose:** Retrieves intelligent cluster suggestions for a specific client based on distance, skill compatibility, time windows, and carer availability. Uses multi-factor scoring algorithm to rank clusters by suitability. **Data Sources:** Queries ClientClusterDistance cache, geocodes client postcode if needed, analyzes cluster metrics and carer availability.
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/clusters/clients/{clientId}/suggestions?maxSuggestions=3&maxDistanceKm=50&includeInactiveClusters=false`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Query Parameters:**
+- `maxSuggestions` (optional): Maximum number of suggestions to return (default: 3)
+- `maxDistanceKm` (optional): Maximum distance in kilometers to consider (default: 50)
+- `includeInactiveClusters` (optional): Include clusters with no active requests (default: false)
+
+**Example URL:** `http://localhost:9090/api/rostering/clusters/clients/REQ-20251106-97ZZF/suggestions?maxSuggestions=3&maxDistanceKm=25`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "clientId": "REQ-20251106-97ZZF",
+    "clientName": "Weekly Personal Care Visit",
+    "clientPostcode": "SW1A 1AA",
+    "clientCoordinates": {
+      "latitude": 51.5074,
+      "longitude": -0.1278
+    },
+    "suggestions": [
+      {
+        "clusterId": "cluster_123",
+        "clusterName": "Central London Hub",
+        "distanceKm": 2.3,
+        "centroidCoordinates": {
+          "latitude": 51.5080,
+          "longitude": -0.1280
+        },
+        "score": 87.5,
+        "reasoning": [
+          "Within 5km - good proximity",
+          "Excellent skill coverage available",
+          "Time windows align well",
+          "Good carer availability"
+        ],
+        "availableCarers": 5,
+        "timeCompatibility": 0.9,
+        "skillMatch": 0.85
+      },
+      {
+        "clusterId": "cluster_456",
+        "clusterName": "Westminster District",
+        "distanceKm": 1.8,
+        "centroidCoordinates": {
+          "latitude": 51.4994,
+          "longitude": -0.1245
+        },
+        "score": 82.3,
+        "reasoning": [
+          "Within 2km - excellent proximity",
+          "Good skill coverage available",
+          "Time windows partially compatible",
+          "Limited carer availability"
+        ],
+        "availableCarers": 2,
+        "timeCompatibility": 0.7,
+        "skillMatch": 0.8
+      },
+      {
+        "clusterId": "cluster_789",
+        "clusterName": "South Bank Area",
+        "distanceKm": 4.1,
+        "centroidCoordinates": {
+          "latitude": 51.5055,
+          "longitude": -0.0754
+        },
+        "score": 75.8,
+        "reasoning": [
+          "Within 5km - good proximity",
+          "Limited skill coverage - may need additional training",
+          "Time windows may conflict",
+          "Good carer availability"
+        ],
+        "availableCarers": 4,
+        "timeCompatibility": 0.6,
+        "skillMatch": 0.4
+      }
+    ],
+    "topSuggestion": {
+      "clusterId": "cluster_123",
+      "clusterName": "Central London Hub",
+      "distanceKm": 2.3,
+      "centroidCoordinates": {
+        "latitude": 51.5080,
+        "longitude": -0.1280
+      },
+      "score": 87.5,
+      "reasoning": [
+        "Within 5km - good proximity",
+        "Excellent skill coverage available",
+        "Time windows align well",
+        "Good carer availability"
+      ],
+      "availableCarers": 5,
+      "timeCompatibility": 0.9,
+      "skillMatch": 0.85
+    }
+  }
+}
+```
+
+---
+
+### Get Batch Cluster Suggestions for Multiple Clients
+**Purpose:** Processes multiple clients simultaneously to get cluster suggestions, optimizing for batch geocoding and distance calculations. Useful for bulk assignment workflows. **Data Sources:** Batch processes ClientClusterDistance cache, geocodes postcodes in batches, analyzes cluster metrics for all clients.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/clusters/clients/batch-suggestions?maxSuggestions=3&maxDistanceKm=50&includeInactiveClusters=false`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Query Parameters:**
+- `maxSuggestions` (optional): Maximum number of suggestions per client (default: 3)
+- `maxDistanceKm` (optional): Maximum distance in kilometers to consider (default: 50)
+- `includeInactiveClusters` (optional): Include clusters with no active requests (default: false)
+
+**Request Body:**
+```json
+{
+  "clientIds": [
+    "REQ-20251106-97ZZF",
+    "REQ-20251106-98XZY",
+    "REQ-20251106-99ABC"
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "clientId": "REQ-20251106-97ZZF",
+      "clientName": "Weekly Personal Care Visit",
+      "clientPostcode": "SW1A 1AA",
+      "clientCoordinates": {
+        "latitude": 51.5074,
+        "longitude": -0.1278
+      },
+      "suggestions": [
+        {
+          "clusterId": "cluster_123",
+          "clusterName": "Central London Hub",
+          "distanceKm": 2.3,
+          "centroidCoordinates": {
+            "latitude": 51.5080,
+            "longitude": -0.1280
+          },
+          "score": 87.5,
+          "reasoning": [
+            "Within 5km - good proximity",
+            "Excellent skill coverage available",
+            "Time windows align well",
+            "Good carer availability"
+          ],
+          "availableCarers": 5,
+          "timeCompatibility": 0.9,
+          "skillMatch": 0.85
+        }
+      ],
+      "topSuggestion": {
+        "clusterId": "cluster_123",
+        "clusterName": "Central London Hub",
+        "distanceKm": 2.3,
+        "centroidCoordinates": {
+          "latitude": 51.5080,
+          "longitude": -0.1280
+        },
+        "score": 87.5,
+        "reasoning": [
+          "Within 5km - good proximity",
+          "Excellent skill coverage available",
+          "Time windows align well",
+          "Good carer availability"
+        ],
+        "availableCarers": 5,
+        "timeCompatibility": 0.9,
+        "skillMatch": 0.85
+      }
+    },
+    {
+      "clientId": "REQ-20251106-98XZY",
+      "clientName": "Dementia Care Support",
+      "clientPostcode": "N1 9AL",
+      "clientCoordinates": {
+        "latitude": 51.5308,
+        "longitude": -0.0973
+      },
+      "suggestions": [
+        {
+          "clusterId": "cluster_456",
+          "clusterName": "North London District",
+          "distanceKm": 1.2,
+          "centroidCoordinates": {
+            "latitude": 51.5280,
+            "longitude": -0.0990
+          },
+          "score": 91.2,
+          "reasoning": [
+            "Within 2km - excellent proximity",
+            "Excellent skill coverage available",
+            "Time windows align well",
+            "Good carer availability"
+          ],
+          "availableCarers": 6,
+          "timeCompatibility": 0.95,
+          "skillMatch": 0.9
+        }
+      ],
+      "topSuggestion": {
+        "clusterId": "cluster_456",
+        "clusterName": "North London District",
+        "distanceKm": 1.2,
+        "centroidCoordinates": {
+          "latitude": 51.5280,
+          "longitude": -0.0990
+        },
+        "score": 91.2,
+        "reasoning": [
+          "Within 2km - excellent proximity",
+          "Excellent skill coverage available",
+          "Time windows align well",
+          "Good carer availability"
+        ],
+        "availableCarers": 6,
+        "timeCompatibility": 0.95,
+        "skillMatch": 0.9
+      }
+    },
+    {
+      "clientId": "REQ-20251106-99ABC",
+      "clientName": "Medication Management",
+      "clientPostcode": "SE1 7HR",
+      "clientCoordinates": {
+        "latitude": 51.4994,
+        "longitude": -0.1245
+      },
+      "suggestions": [
+        {
+          "clusterId": "cluster_789",
+          "clusterName": "Southwark Area",
+          "distanceKm": 0.8,
+          "centroidCoordinates": {
+            "latitude": 51.4980,
+            "longitude": -0.1250
+          },
+          "score": 89.7,
+          "reasoning": [
+            "Within 2km - excellent proximity",
+            "Good skill coverage available",
+            "Time windows align well",
+            "Excellent carer availability"
+          ],
+          "availableCarers": 8,
+          "timeCompatibility": 0.85,
+          "skillMatch": 0.75
+        }
+      ],
+      "topSuggestion": {
+        "clusterId": "cluster_789",
+        "clusterName": "Southwark Area",
+        "distanceKm": 0.8,
+        "centroidCoordinates": {
+          "latitude": 51.4980,
+          "longitude": -0.1250
+        },
+        "score": 89.7,
+        "reasoning": [
+          "Within 2km - excellent proximity",
+          "Good skill coverage available",
+          "Time windows align well",
+          "Excellent carer availability"
+        ],
+        "availableCarers": 8,
+        "timeCompatibility": 0.85,
+        "skillMatch": 0.75
+      }
+    }
+  ],
+  "summary": {
+    "totalClients": 3,
+    "processedClients": 3,
+    "averageSuggestionsPerClient": 1,
+    "averageDistanceKm": 1.43,
+    "averageScore": 89.47
+  }
+}
+```
+
+---
+
+### Assign Visit to Cluster
+**Purpose:** Assigns an existing visit to a different cluster by updating the visit's clusterId. This reassigns visits between clusters and updates cluster statistics. **Data Sources:** Updates Visit record clusterId, updates statistics for both old and new clusters.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/clusters/{clusterId}/assign-visit/{visitId}`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Example URL:** `http://localhost:9090/api/rostering/clusters/cluster-456/assign-visit/VISIT-20251108-ABC123`
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "data": {
+    "visit": {
+      "id": "VISIT-20251108-ABC123",
+      "tenantId": "tenant-456",
+      "subject": "Weekly Personal Care Visit",
+      "clusterId": "cluster-456",
+      "status": "SCHEDULED",
+      "updatedAt": "2025-11-08T08:50:00.000Z"
+    },
+    "cluster": {
+      "id": "cluster-456",
+      "name": "North London District",
+      "previousClusterId": "cluster-123"
+    }
+  },
+  "message": "Visit reassigned to cluster 'North London District' successfully"
+}
+```
+
+**Response (Already Assigned):**
+```json
+{
+  "success": false,
+  "error": "Visit is already assigned to this cluster",
+  "visitId": "VISIT-20251108-ABC123",
+  "currentClusterId": "cluster-456"
+}
+```
+
+---
+
+### Batch Assign Visits to Clusters
+**Purpose:** Reassigns multiple existing visits to different clusters in a single operation. Useful for bulk cluster rebalancing and optimization. **Data Sources:** Batch updates Visit records with new clusterId values, updates statistics for all affected clusters.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/clusters/batch-assign-visits`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Request Body:**
+```json
+{
+  "assignments": [
+    {
+      "clusterId": "cluster-456",
+      "visitId": "VISIT-20251108-ABC123"
+    },
+    {
+      "clusterId": "cluster-789",
+      "visitId": "VISIT-20251108-DEF456"
+    },
+    {
+      "clusterId": "cluster-123",
+      "visitId": "VISIT-20251108-GHI789"
+    }
+  ]
+}
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "data": {
+    "successful": [
+      {
+        "assignment": {
+          "clusterId": "cluster-456",
+          "visitId": "VISIT-20251108-ABC123"
+        },
+        "visit": {
+          "id": "VISIT-20251108-ABC123",
+          "subject": "Weekly Personal Care Visit",
+          "clusterId": "cluster-456",
+          "status": "SCHEDULED",
+          "updatedAt": "2025-11-08T08:55:00.000Z"
+        },
+        "cluster": {
+          "id": "cluster-456",
+          "name": "North London District",
+          "previousClusterId": "cluster-123"
+        },
+        "success": true
+      },
+      {
+        "assignment": {
+          "clusterId": "cluster-789",
+          "visitId": "VISIT-20251108-DEF456"
+        },
+        "visit": {
+          "id": "VISIT-20251108-DEF456",
+          "subject": "Dementia Care Support",
+          "clusterId": "cluster-789",
+          "status": "SCHEDULED",
+          "updatedAt": "2025-11-08T08:55:00.000Z"
+        },
+        "cluster": {
+          "id": "cluster-789",
+          "name": "Southwark Area",
+          "previousClusterId": "cluster-456"
+        },
+        "success": true
+      }
+    ],
+    "failed": [
+      {
+        "assignment": {
+          "clusterId": "cluster-123",
+          "visitId": "VISIT-20251108-GHI789"
+        },
+        "error": "Visit is already assigned to this cluster",
+        "currentClusterId": "cluster-123"
+      }
+    ],
+    "summary": {
+      "total": 3,
+      "successful": 2,
+      "failed": 1,
+      "affectedClusters": ["cluster-123", "cluster-456", "cluster-789"]
+    }
+  },
+  "message": "Batch reassignment completed: 2 successful, 1 failed"
+}
+```
+
+---
+
+### Get Cluster Distance Analytics
+**Purpose:** Retrieves distance analytics showing client-to-cluster distribution, average distances by region, and optimization opportunities. **Data Sources:** Aggregates ClientClusterDistance cache data, analyzes geographic patterns and distance distributions.
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/clusters/analytics/distances?period=30days`
+**Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Query Parameters:**
+- `period` (optional): Time period for analysis (default: 30days, options: 7days, 30days, 90days)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "period": {
+      "start": "2025-10-09T00:00:00.000Z",
+      "end": "2025-11-08T23:59:59.000Z"
+    },
+    "distanceMetrics": {
+      "totalCalculations": 1247,
+      "averageDistanceKm": 3.2,
+      "medianDistanceKm": 2.8,
+      "distanceDistribution": {
+        "0-1km": 234,
+        "1-2km": 345,
+        "2-5km": 423,
+        "5-10km": 198,
+        "10km+": 47
+      },
+      "longestDistance": {
+        "clientPostcode": "SW1A 1AA",
+        "clusterId": "cluster_999",
+        "distanceKm": 15.7
+      },
+      "shortestDistance": {
+        "clientPostcode": "N1 9AL",
+        "clusterId": "cluster_456",
+        "distanceKm": 0.3
+      }
+    },
+    "regionalAnalysis": {
+      "Central London": {
+        "clientCount": 156,
+        "averageDistanceKm": 1.8,
+        "clusters": ["cluster_123", "cluster_456"]
+      },
+      "North London": {
+        "clientCount": 89,
+        "averageDistanceKm": 2.1,
+        "clusters": ["cluster_789", "cluster_012"]
+      },
+      "South London": {
+        "clientCount": 67,
+        "averageDistanceKm": 3.4,
+        "clusters": ["cluster_345", "cluster_678"]
+      }
+    },
+    "optimizationOpportunities": [
+      {
+        "type": "new_cluster",
+        "region": "East London",
+        "clientCount": 45,
+        "averageDistanceToNearest": 8.2,
+        "recommendedLocation": {
+          "latitude": 51.5074,
+          "longitude": -0.0678
+        }
+      },
+      {
+        "type": "cluster_expansion",
+        "clusterId": "cluster_999",
+        "currentRadiusKm": 5.0,
+        "recommendedRadiusKm": 7.5,
+        "additionalClients": 23
+      }
+    ],
+    "cachePerformance": {
+      "hitRate": 0.87,
+      "totalQueries": 1456,
+      "cacheHits": 1267,
+      "cacheMisses": 189,
+      "averageResponseTimeMs": 45
+    },
+    "lastUpdated": "2025-11-08T08:35:00.000Z"
+  }
+}
+```
+
+---
+
+## Travel Matrix API
+
+### Calculate Travel Time and Distance
+**Purpose:** Calculates travel time and distance between two locations using Google Maps API with intelligent caching and precision levels. Supports address, postcode, and coordinate inputs with automatic geocoding.
+**Method:** POST
+**URL:** `http://localhost:9090/api/rostering/travel-matrix/calculate`
+
+**Request Body:**
+```json
+{
+  "from": {
+    "address": "123 Main Street, London, SW1A 1AA",
+    "postcode": "SW1A 1AA",
+    "latitude": 51.5074,
+    "longitude": -0.1278
+  },
+  "to": {
+    "address": "456 High Street, Manchester, M1 1AA",
+    "postcode": "M1 1AA",
+    "latitude": 53.4808,
+    "longitude": -2.2426
+  },
+  "mode": "driving",
+  "forceRefresh": false
+}
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "data": {
+    "distance": {
+      "meters": 262187,
+      "kilometers": 262.187,
+      "text": "262 km"
+    },
+    "duration": {
+      "seconds": 10260,
+      "minutes": 171,
+      "text": "171 mins"
+    },
+    "trafficDuration": {
+      "seconds": 10800,
+      "minutes": 180,
+      "text": "180 mins"
+    },
+    "from": {
+      "address": "123 Main Street, London, SW1A 1AA",
+      "postcode": "SW1A 1AA",
+      "geocoded": "123 Main St, London SW1A 1AA, UK",
+      "coordinates": {
+        "latitude": 51.5074,
+        "longitude": -0.1278
+      }
+    },
+    "to": {
+      "address": "456 High Street, Manchester, M1 1AA",
+      "postcode": "M1 1AA",
+      "geocoded": "456 High St, Manchester M1 1AA, UK",
+      "coordinates": {
+        "latitude": 53.4808,
+        "longitude": -2.2426
+      }
+    },
+    "mode": "driving",
+    "precisionLevel": "ADDRESS",
+    "cached": false,
+    "calculatedAt": "2025-11-10T15:30:00.000Z",
+    "expiresAt": "2025-11-10T16:30:00.000Z",
+    "warnings": []
+  }
+}
+```
+
+**Response (Cached):**
+```json
+{
+  "success": true,
+  "data": {
+    "distance": {
+      "meters": 262187,
+      "kilometers": 262.187,
+      "text": "262 km"
+    },
+    "duration": {
+      "seconds": 10260,
+      "minutes": 171,
+      "text": "171 mins"
+    },
+    "from": {
+      "address": "123 Main Street, London, SW1A 1AA",
+      "postcode": "SW1A 1AA",
+      "geocoded": "123 Main St, London SW1A 1AA, UK",
+      "coordinates": {
+        "latitude": 51.5074,
+        "longitude": -0.1278
+      }
+    },
+    "to": {
+      "address": "456 High Street, Manchester, M1 1AA",
+      "postcode": "M1 1AA",
+      "geocoded": "456 High St, Manchester M1 1AA, UK",
+      "coordinates": {
+        "latitude": 53.4808,
+        "longitude": -2.2426
+      }
+    },
+    "mode": "driving",
+    "precisionLevel": "ADDRESS",
+    "cached": true,
+    "calculatedAt": "2025-11-10T15:25:00.000Z",
+    "expiresAt": "2025-11-10T16:25:00.000Z",
+    "warnings": []
+  }
+}
+```
+
+**Response (Postcode Precision):**
+```json
+{
+  "success": true,
+  "data": {
+    "distance": {
+      "meters": 260000,
+      "kilometers": 260,
+      "text": "260 km"
+    },
+    "duration": {
+      "seconds": 10080,
+      "minutes": 168,
+      "text": "168 mins"
+    },
+    "from": {
+      "postcode": "SW1A 1AA",
+      "geocoded": "SW1A 1AA, UK",
+      "coordinates": {
+        "latitude": 51.5074,
+        "longitude": -0.1278
+      }
+    },
+    "to": {
+      "postcode": "M1 1AA",
+      "geocoded": "M1 1AA, UK",
+      "coordinates": {
+        "latitude": 53.4808,
+        "longitude": -2.2426
+      }
+    },
+    "mode": "driving",
+    "precisionLevel": "POSTCODE",
+    "cached": false,
+    "calculatedAt": "2025-11-10T15:30:00.000Z",
+    "expiresAt": "2025-11-11T15:30:00.000Z",
+    "warnings": [
+      {
+        "type": "APPROXIMATE_LOCATION",
+        "message": "Using postcode centroid - actual distance may vary by ±200-500m",
+        "severity": "info"
+      }
+    ]
+  }
+}
+```
+
+**Response (Error - Invalid Input):**
+```json
+{
+  "success": false,
+  "error": "Travel Calculation Failed",
+  "message": "Travel calculation failed: Invalid \"from\" location: must provide address, postcode, or coordinates",
+  "stack": "Error: Travel calculation failed: Invalid \"from\" location: must provide address, postcode, or coordinates\n    at EnhancedTravelService.calculateTravel (/app/dist/services/enhanced-travel.service.js:52:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async EnhancedTravelMatrixController.calculateTravel (/app/dist/controllers/enhanced-travel-matrix.controller.js:20:32)"
+}
+```
+
+**Response (Error - Google Maps API):**
+```json
+{
+  "success": false,
+  "error": "Travel Calculation Failed",
+  "message": "Travel calculation failed: Google Maps API error: REQUEST_DENIED - You must use an API key to authenticate each request to Google Maps Platform APIs. For additional information, please refer to http://g.co/dev/maps-no-account",
+  "stack": "Error: Travel calculation failed: Google Maps API error: REQUEST_DENIED - You must use an API key to authenticate each request to Google Maps Platform APIs. For additional information, please refer to http://g.co/dev/maps-no-account\n    at EnhancedTravelService.calculateTravel (/app/dist/services/enhanced-travel.service.js:52:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async EnhancedTravelMatrixController.calculateTravel (/app/dist/controllers/enhanced-travel-matrix.controller.js:20:32)"
+}
+```
+
+### Get Travel Matrix Cache Statistics
+**Purpose:** Retrieves statistics about the travel matrix cache including hit rates, precision levels, and expiry information.
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/travel-matrix/cache/stats`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "total": 1250,
+    "byPrecision": {
+      "address": 450,
+      "postcode": 700,
+      "coordinates": 100
+    },
+    "expired": 45,
+    "active": 1205
+  }
+}
+```
+
+### Clean Up Expired Travel Matrix Cache
+**Purpose:** Removes expired travel matrix cache entries to free up database space.
+**Method:** DELETE
+**URL:** `http://localhost:9090/api/rostering/travel-matrix/cache/cleanup`
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Cleaned up 45 expired cache entries",
+  "data": {
+    "deletedCount": 45
+  }
+}
+```
+
+---
+
 ## Error Responses
 
 ### Authentication Error

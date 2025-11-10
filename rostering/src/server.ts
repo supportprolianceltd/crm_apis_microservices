@@ -42,6 +42,9 @@ import { createClusterMetricsRoutes } from './routes/cluster-metrics.routes';
 import { createDemoRoutes } from './routes/demo.routes';
 import { createSettlementRoutes } from './routes/settlement.routes';
 
+// ADD THIS IMPORT
+import { createEnhancedTravelMatrixRoutes } from './routes/enhanced-travel-matrix.routes';
+
 // Import services
 import { ConstraintsService } from './services/constraints.service';
 import { TravelService } from './services/travel.service';
@@ -446,7 +449,10 @@ class RosteringServer {
 
     // Data & validation routes
     this.app.use('/api/rostering/data-validation', authenticate, createDataValidationRoutes(this.prisma!));
-    this.app.use('/api/rostering/travel-matrix', authenticate, createTravelMatrixRoutes(this.prisma!));
+
+    this.app.use('/api/rostering/travel-matrix', authenticate, createEnhancedTravelMatrixRoutes(this.prisma!));
+
+
     this.app.use('/api/rostering/eligibility', authenticate, createEligibilityRoutes(this.prisma!));
     this.app.use('/api/rostering/cluster-metrics', authenticate, createClusterMetricsRoutes(this.prisma!));
 
@@ -463,6 +469,15 @@ class RosteringServer {
     this.app.use('/api/rostering/settlement', authenticate, createSettlementRoutes(this.prisma!));
 
     // ========== UTILITY & TEST ROUTES ==========
+
+        // Add this route to your server.ts file in the setupRoutes() method
+    this.app.get('/api/rostering/debug/env', (req: Request, res: Response) => {
+      res.json({
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ? 'SET (but hidden)' : 'NOT SET',
+        nodeEnv: process.env.NODE_ENV,
+        allEnvKeys: Object.keys(process.env).filter(key => key.includes('GOOGLE') || key.includes('MAPS'))
+      });
+    });
 
     // Service status endpoint
     this.app.get('/api/rostering/status', authenticate, (req: Request, res: Response) => {

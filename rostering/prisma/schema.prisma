@@ -6,11 +6,13 @@ generator client {
   previewFeatures = ["postgresqlExtensions"]
 }
 
+
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   extensions = [postgis]
 }
+
 
 // ─────────────────────────────────────────────
 // CORE MODELS
@@ -178,8 +180,8 @@ model Carer {
   isActive           Boolean  @default(true)
   maxTravelDistance  Int      @default(10000)
   availabilityHours  Json?
-  skills             String[]
-  languages          String[]
+  skills             String[] @default([])
+  languages          String[] @default([])
 
   qualification      String?
   experience         Int?
@@ -334,6 +336,7 @@ model Cluster {
   carers             Carer[]
   clusterAssignments ClusterAssignment[]
   visits             Visit[]
+  clientClusterDistances ClientClusterDistance[]
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -889,17 +892,45 @@ model RosteringConstraints {
 
 model TravelMatrixCache {
   id                     String   @id @default(cuid())
-  fromPostcode           String   @map("from_postcode")
-  toPostcode             String   @map("to_postcode")
-  distanceMeters         Int?     @map("distance_meters")
-  durationSeconds        Int?     @map("duration_seconds")
+  
+  // Input identifiers (what user requested)
+  fromAddress           String?   @map("from_address")
+  fromPostcode          String    @map("from_postcode")
+  toAddress             String?   @map("to_address")
+  toPostcode            String    @map("to_postcode")
+  
+  // Geocoded results from Google
+  fromLatitude          Float?    @map("from_latitude")
+  fromLongitude         Float?    @map("from_longitude")
+  toLatitude            Float?    @map("to_latitude")
+  toLongitude           Float?    @map("to_longitude")
+  
+  // Distance/duration results
+  distanceMeters        Int?      @map("distance_meters")
+  durationSeconds       Int?      @map("duration_seconds")
   trafficDurationSeconds Int?     @map("traffic_duration_seconds")
-  mode                   String   @default("driving")
-  calculatedAt           DateTime @default(now()) @map("calculated_at")
-
-  @@unique([fromPostcode, toPostcode, mode])
+  
+  mode                  String    @default("driving")
+  
+  // Cache metadata
+  precisionLevel        PrecisionLevel @default(POSTCODE) @map("precision_level")
+  calculatedAt          DateTime  @default(now()) @map("calculated_at")
+  expiresAt             DateTime  @map("expires_at")
+  
+  // Add composite unique constraint
+  @@unique([fromAddress, toAddress, mode], name: "address_pair_mode")
+  @@unique([fromPostcode, toPostcode, mode], name: "postcode_pair_mode")
+  @@index([fromPostcode, toPostcode])
+  @@index([expiresAt])
   @@map("travel_matrix_cache")
 }
+
+enum PrecisionLevel {
+  COORDINATES  // Coordinates provided
+  ADDRESS      // Full address geocoded
+  POSTCODE     // Postcode centroid used
+}
+
 
 // ─────────────────────────────────────────────
 // ROSTER GENERATION
@@ -1139,10 +1170,27 @@ model TravelMatrix {
   distanceMeters   Int      @map("distance_meters")
   lastUpdated      DateTime @default(now()) @map("last_updated")
   expiresAt        DateTime @map("expires_at")
-  
+
   @@unique([fromPostcode, toPostcode])
   @@index([expiresAt])
   @@map("travel_matrix")
+}
+
+model ClientClusterDistance {
+  id               String   @id @default(cuid())
+  clientPostcode   String   @map("client_postcode")
+  clusterId        String   @map("cluster_id")
+  distanceKm       Float    @map("distance_km")
+  lastUpdated      DateTime @default(now()) @map("last_updated")
+  expiresAt        DateTime @map("expires_at")
+
+  cluster          Cluster  @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+
+  @@unique([clientPostcode, clusterId])
+  @@index([clientPostcode])
+  @@index([clusterId])
+  @@index([expiresAt])
+  @@map("client_cluster_distances")
 }
 
 model VisitEligibility {

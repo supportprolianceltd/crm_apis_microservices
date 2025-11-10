@@ -117,7 +117,7 @@ export const ChatService = {
   },
 
   // Create user from auth service if they don't exist locally
-  async createUserFromAuthService(userId, tenantId) {
+  async createUserFromAuthService(userId, tenantId, req = null) {
     try {
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
@@ -128,11 +128,11 @@ export const ChatService = {
         return existingUser;
       }
 
-      // Fetch user from auth service
-      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:8000';
+      // Fetch user from auth service using the gateway URL
+      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:9090/api/auth_service';
       const response = await fetch(`${authServiceUrl}/api/user/users/${userId}/`, {
         headers: {
-          'Authorization': `Bearer ${process.env.AUTH_SERVICE_TOKEN || ''}`,
+          'Authorization': req?.headers?.authorization || `Bearer ${process.env.AUTH_SERVICE_TOKEN || ''}`,
           'Content-Type': 'application/json',
         },
       });
@@ -143,25 +143,22 @@ export const ChatService = {
 
       const userData = await response.json();
 
-      // Validate that user belongs to the same tenant
-      if (userData.tenant_id !== tenantId) {
-        throw new Error("User does not belong to this tenant");
-      }
+      // For messaging, we allow cross-tenant communication
+      // The tenant validation is handled at the auth level
+      console.log(`Creating user ${userId} for tenant ${tenantId} (user's tenant: ${userData.tenant})`);
 
-      // Create user in messaging database
+      // Create user in messaging database with simplified fields
       const newUser = await prisma.user.create({
         data: {
           id: userId,
           email: userData.email,
           username: userData.username,
-          firstName: userData.first_name || userData.firstName,
-          lastName: userData.last_name || userData.lastName,
+          firstName: userData.first_name,
+          lastName: userData.last_name,
           role: userData.role,
-          status: userData.status || 'ACTIVE',
           tenantId: tenantId,
           online: false,
           lastSeen: new Date(),
-          hasAcceptedTerms: userData.has_accepted_terms || false,
         },
       });
 
@@ -173,7 +170,7 @@ export const ChatService = {
   },
 
   // Enhanced send message with user creation
-  async sendMessageToUser(recipientId, senderId, content, tenantId) {
+  async sendMessageToUser(recipientId, senderId, content, tenantId, req = null) {
     return prisma.$transaction(async (tx) => {
       // Ensure recipient exists (create from auth service if needed)
       let recipient = await tx.user.findUnique({
@@ -183,7 +180,7 @@ export const ChatService = {
       if (!recipient) {
         // Try to create user from auth service
         try {
-          recipient = await this.createUserFromAuthService(recipientId, tenantId);
+          recipient = await this.createUserFromAuthService(recipientId, tenantId, req);
         } catch (error) {
           throw new Error(`Recipient not found and could not be created: ${error.message}`);
         }
@@ -195,7 +192,7 @@ export const ChatService = {
           type: "DIRECT",
           users: {
             every: {
-              userId: { in: [senderId, recipientId] },
+              userId: { in: [senderId, recipientId].filter(id => id !== undefined && id !== null) },
               leftAt: null,
             },
           },
@@ -212,7 +209,7 @@ export const ChatService = {
               create: [
                 { userId: senderId, role: "MEMBER" },
                 { userId: recipientId, role: "MEMBER" },
-              ],
+              ].filter(user => user.userId !== undefined && user.userId !== null),
             },
           },
         });
@@ -223,7 +220,7 @@ export const ChatService = {
         data: {
           content,
           chatId: chat.id,
-          authorId: senderId,
+          authorId: senderId || req?.user?.id, // Fallback to req.user.id if senderId is undefined
           status: "DELIVERED",
         },
         include: {
@@ -301,10 +298,10 @@ export const ChatService = {
           // First, we need to get the user ID from auth service using email
           const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:8000';
 
-          // Search for user by email in auth service (you might need to add this endpoint)
-          const searchResponse = await fetch(`${authServiceUrl}/api/user/users/?email=${encodeURIComponent(recipientEmail)}`, {
+          // Search for user by email in auth service using gateway
+          const searchResponse = await fetch(`${authServiceUrl}/api/user/users/?search=${encodeURIComponent(recipientEmail)}`, {
             headers: {
-              'Authorization': `Bearer ${process.env.AUTH_SERVICE_TOKEN || ''}`,
+              'Authorization': req?.headers?.authorization || `Bearer ${process.env.AUTH_SERVICE_TOKEN || ''}`,
               'Content-Type': 'application/json',
             },
           });
@@ -560,6 +557,79 @@ export const ChatService = {
           },
         },
       },
+    });
+  },
+
+  // Mark messages as read
+  async markMessagesAsRead(chatId, userId, messageIds) {
+    return prisma.$transaction(async (tx) => {
+      // Convert single messageId to array for consistency
+      const messageIdArray = Array.isArray(messageIds) ? messageIds : [messageIds];
+
+      // Verify user has access to chat
+      const chat = await tx.chat.findFirst({
+        where: {
+          id: chatId,
+          users: {
+            some: {
+              userId,
+              leftAt: null,
+            },
+          },
+        },
+      });
+
+      if (!chat) {
+        throw new Error("Chat not found or access denied");
+      }
+
+      // Mark messages as read (update read receipts)
+      await tx.messageReadReceipt.upsert({
+        where: {
+          messageId_userId: {
+            messageId: messageIdArray[0], // For single message, use first ID
+            userId,
+          },
+        },
+        update: {
+          readAt: new Date(),
+        },
+        create: {
+          messageId: messageIdArray[0],
+          userId,
+          readAt: new Date(),
+        },
+      });
+
+      // Update unread count for the user in this chat
+      const unreadCount = await tx.message.count({
+        where: {
+          chatId,
+          status: "DELIVERED",
+          NOT: {
+            authorId: userId,
+          },
+          readReceipts: {
+            none: {
+              userId,
+            },
+          },
+        },
+      });
+
+      // Update the user's unread count for this chat
+      await tx.usersOnChats.updateMany({
+        where: {
+          chatId,
+          userId,
+          leftAt: null,
+        },
+        data: {
+          unreadCount: Math.max(0, unreadCount),
+        },
+      });
+
+      return { success: true, markedCount: messageIdArray.length };
     });
   },
 

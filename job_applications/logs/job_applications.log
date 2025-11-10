@@ -1960,3 +1960,305 @@ def screen_resumes_task(job_requisition_id, document_type, num_candidates, appli
 2025-11-07 08:49:23,629 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
 2025-11-07 08:49:27,071 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
 2025-11-07 08:49:27,071 [ERROR] django.request: Service Unavailable: /api/applications-engine/published-requisitions-with-shortlisted/
+2025-11-08 07:42:11,789 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-08 07:42:11,790 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-08 07:42:11,814 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-08 07:42:11,814 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-08 07:42:11,862 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-08 07:42:11,863 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-08 07:42:12,137 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-08 07:42:12,141 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-08 07:42:12,158 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-08 07:43:51,099 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-11-08 07:43:51,106 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-11-08 07:43:51,110 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-11-08 07:43:51,123 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-11-08 07:43:51,111 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-11-08 07:43:51,126 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-11-08 07:43:51,139 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-11-08 07:43:51,141 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-11-08 07:43:51,142 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-11-08 07:43:51,155 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-11-08 07:43:51,155 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-11-08 07:43:51,159 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-11-08 07:43:51,159 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-11-08 07:43:51,163 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-11-08 07:43:51,171 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-11-08 07:43:51,189 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-11-08 07:43:51,184 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-11-08 07:43:51,193 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-11-08 07:43:51,193 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-11-08 07:43:51,205 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-11-08 07:43:51,204 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-11-08 07:43:51,211 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-11-08 07:43:51,213 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-11-08 07:43:51,219 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-11-08 07:43:51,220 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-11-08 07:43:51,223 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-11-08 07:43:51,225 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-11-08 07:43:51,229 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-11-08 07:43:51,258 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-11-08 07:43:51,265 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-11-08 07:43:51,267 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-11-08 07:43:51,270 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-11-08 07:43:51,278 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-11-08 07:43:51,283 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-11-08 07:44:20,551 [INFO] job_applications: 🚀 Starting daily background CV vetting with full workflow
+2025-11-08 07:44:24,601 [ERROR] job_applications: Error fetching requisitions page: HTTPConnectionPool(host='talent-engine', port=8002): Max retries exceeded with url: /api/talent-engine/requisitions/upcoming/public/jobs/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x786663814410>: Failed to resolve 'talent-engine' ([Errno -5] No address associated with hostname)"))
+2025-11-08 07:44:24,676 [INFO] job_applications: Total open requisitions fetched: 0
+2025-11-08 07:44:24,710 [INFO] job_applications: No open requisitions found
+2025-11-09 12:22:58,404 [INFO] job_applications: 🚀 Starting daily background CV vetting with full workflow
+2025-11-09 12:23:03,622 [ERROR] job_applications: Error fetching requisitions page: HTTPConnectionPool(host='talent-engine', port=8002): Max retries exceeded with url: /api/talent-engine/requisitions/upcoming/public/jobs/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x786663826910>: Failed to resolve 'talent-engine' ([Errno -2] Name or service not known)"))
+2025-11-09 12:23:03,633 [INFO] job_applications: Total open requisitions fetched: 0
+2025-11-09 12:23:03,635 [INFO] job_applications: No open requisitions found
+2025-11-10 07:08:36,942 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-10 07:08:36,956 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-10 07:08:36,989 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-10 07:08:37,248 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-10 07:08:37,276 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-10 07:08:37,292 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-10 07:08:37,796 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-10 07:08:37,834 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-10 07:08:37,847 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-10 07:10:09,853 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-11-10 07:10:09,845 [DEBUG] celery.utils.functional: 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-11-10 07:10:09,858 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-11-10 07:10:09,866 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-11-10 07:10:09,858 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-11-10 07:10:09,884 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-11-10 07:10:09,889 [DEBUG] celery.utils.functional: 
+def chain(*args, **kwargs):
+    return 1
+
+2025-11-10 07:10:09,902 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-11-10 07:10:09,889 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-11-10 07:10:09,907 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-11-10 07:10:09,923 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-11-10 07:10:09,935 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-11-10 07:10:09,931 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-11-10 07:10:09,949 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-11-10 07:10:09,962 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-11-10 07:10:09,978 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-11-10 07:10:09,963 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-11-10 07:10:09,981 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-11-10 07:10:09,999 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-11-10 07:10:09,998 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
+    return 1
+
+2025-11-10 07:10:10,022 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-11-10 07:10:10,012 [DEBUG] celery.utils.functional: 
+def auto_screen_all_applications():
+    return 1
+
+2025-11-10 07:10:10,047 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-11-10 07:10:10,027 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-11-10 07:10:10,062 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-11-10 07:10:10,075 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-11-10 07:10:10,077 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-11-10 07:10:10,089 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-11-10 07:10:10,092 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-11-10 07:10:10,101 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-11-10 07:10:10,107 [DEBUG] celery.utils.functional: 
+def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
+    return 1
+
+2025-11-10 07:10:10,112 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-11-10 07:10:10,149 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-11-10 07:10:10,157 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-11-10 07:10:22,874 [INFO] job_applications: 🚀 Starting daily background CV vetting with full workflow
+2025-11-10 07:10:27,488 [ERROR] job_applications: Error fetching requisitions page: HTTPConnectionPool(host='talent-engine', port=8002): Max retries exceeded with url: /api/talent-engine/requisitions/upcoming/public/jobs/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x7aadee1cbfd0>: Failed to resolve 'talent-engine' ([Errno -5] No address associated with hostname)"))
+2025-11-10 07:10:27,490 [INFO] job_applications: Total open requisitions fetched: 0
+2025-11-10 07:10:27,492 [INFO] job_applications: No open requisitions found

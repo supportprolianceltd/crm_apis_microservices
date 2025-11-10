@@ -1,6 +1,6 @@
 import { Router } from "express";
-import prisma from "../config/prisma.js";
-import { ChatService } from "../services/chatService.js";
+import prisma from "../../config/prisma.js";
+import { ChatService } from "../../services/chatService.js";
 
 const messagesRouter = Router();
 
@@ -13,7 +13,7 @@ messagesRouter.post("/send", async (req, res) => {
     if (!recipientId || !content) {
       return res.status(400).json({ status: "error", message: "recipientId and content are required" });
     }
-    const result = await ChatService.sendMessageToUser(recipientId, senderId, content, tenantId);
+    const result = await ChatService.sendMessageToUser(recipientId, senderId, content, tenantId, req);
     res.status(201).json({ status: "success", data: result });
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });

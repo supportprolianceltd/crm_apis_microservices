@@ -34,18 +34,26 @@ export function createClusterRoutes(prisma: PrismaClient) {
   router.post('/:clusterId/assign-request/:requestId', clusterController.assignRequestToCluster.bind(clusterController));
 
   router.post('/:clusterId/assign-carer/:carerId', clusterController.assignCarerToSpecificCluster.bind(clusterController));
-
+  
   router.get('/carers/:carerId/assignment', clusterController.getCarerClusterAssignment.bind(clusterController));
-
+  
   router.delete('/carers/:carerId/cluster', clusterController.removeCarerFromCluster.bind(clusterController));
-
-
-    // NEW: AI Clustering endpoint
-  router.post('/generate', clusterController.generateClusters.bind(clusterController));
-    // NEW: Optimized AI Clustering endpoint
-  router.post('/generate/optimized', clusterController.generateOptimizedClusters.bind(clusterController));
-
-  return router;
+  
+  // Visit assignment endpoints
+  router.post('/:clusterId/assign-visit/:requestId', clusterController.assignVisitToCluster.bind(clusterController));
+  router.post('/batch-assign-visits', clusterController.batchAssignVisitsToClusters.bind(clusterController));
+  
+  
+      // NEW: AI Clustering endpoint
+     router.post('/generate', clusterController.generateClusters.bind(clusterController));
+      // NEW: Optimized AI Clustering endpoint
+     router.post('/generate/optimized', clusterController.generateOptimizedClusters.bind(clusterController));
+ 
+    // NEW: Client cluster suggestions
+    router.get('/clients/:clientId/suggestions', clusterController.getClientClusterSuggestions.bind(clusterController));
+    router.post('/clients/batch-suggestions', clusterController.getBatchClientClusterSuggestions.bind(clusterController));
+ 
+    return router;
 }
 
 

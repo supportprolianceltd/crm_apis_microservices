@@ -48,7 +48,7 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
-app.use("/api/v1", apiRoutes);
+app.use("/api/messaging", apiRoutes);
 
 // Initialize WebSocket
 initializeSocket(io);
