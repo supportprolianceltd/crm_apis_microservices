@@ -26,7 +26,7 @@ const publicPaths = ["/api-docs", "/health", "/socket.io/", "/api/schema/"];
 // Simple user class to match the Python implementation
 class SimpleUser {
   constructor(payload) {
-    this.id = payload.user_id || payload.sub;
+    this.id = payload.id || payload.user_id || payload.sub;
     this.tenant_id = payload.tenant_id;
     this.role = payload.role;
     this.email = payload.email || "";

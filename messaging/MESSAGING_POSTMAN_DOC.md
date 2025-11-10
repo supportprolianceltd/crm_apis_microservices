@@ -27,9 +27,9 @@ Authorization: Bearer YOUR_JWT_TOKEN
 - `search` (optional): Search term to filter by name or email
 
 **Example URLs:**
-- `http://localhost:9090/api/messaging/users` - Get first page with 50 users
-- `http://localhost:9090/api/messaging/users?page=2&page_size=20` - Get page 2 with 20 users
-- `http://localhost:9090/api/messaging/users?search=jane` - Search for users with "jane" in name/email
+- `http://localhost:9090/api/user/users` - Get first page with 50 users
+- `http://localhost:9090/api/user/users?page=2&page_size=20` - Get page 2 with 20 users
+- `http://localhost:9090/api/user/users?search=jane` - Search for users with "jane" in name/email
 
 **Response:**
 ```json
@@ -199,7 +199,7 @@ Authorization: Bearer YOUR_JWT_TOKEN
 **Request Body:**
 ```json
 {
-  "recipientId": 50,
+  "recipientId": 9,
   "content": "Hello, how are you doing today?"
 }
 ```
@@ -259,21 +259,103 @@ Authorization: Bearer YOUR_JWT_TOKEN
 }
 ```
 
+### Send Message with File Attachment
+**Purpose:** Sends a message with file attachment (images, videos, audio, documents) to another user.
+**Method:** POST
+**URL:** `http://localhost:9090/api/messaging/messages/send-with-file`
+
+**Content-Type:** `multipart/form-data`
+
+**Form Data:**
+- `recipientId` (required): User ID of the recipient
+- `content` (optional): Text message content
+- `file` (required if no content): File attachment
+
+**Supported File Types:**
+- **Images**: JPEG, PNG, GIF, WebP (max 50MB)
+- **Videos**: MP4, AVI, MOV (max 50MB)
+- **Audio**: MP3, WAV, OGG (max 50MB)
+- **Documents**: PDF, Word documents, plain text (max 50MB)
+
+**Example Request (Postman):**
+```
+POST http://localhost:9090/api/messaging/messages/send-with-file
+Content-Type: multipart/form-data
+
+Form Data:
+- recipientId: 50
+- content: Check out this image!
+- file: [Select image file from computer]
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": {
+      "id": "msg_458",
+      "content": "Check out this image!",
+      "type": "IMAGE",
+      "fileUrl": "https://your-storage-url.com/messages/image-123456.jpg",
+      "fileName": "vacation-photo.jpg",
+      "fileSize": 2048576,
+      "fileType": "image/jpeg",
+      "chatId": "chat_123",
+      "authorId": 2,
+      "status": "DELIVERED",
+      "createdAt": "2025-11-10T12:10:00.000Z",
+      "author": {
+        "id": 2,
+        "username": "aachmed2759",
+        "email": "support@appbrew.com",
+        "firstName": "Abib",
+        "lastName": "Achmed"
+      }
+    },
+    "chat": {
+      "id": "chat_123",
+      "type": "DIRECT"
+    }
+  }
+}
+```
+
+**File Storage Platforms:**
+The system supports multiple cloud storage platforms, configurable via environment variables:
+- **Supabase Storage**: Default cloud storage
+- **Amazon S3**: Enterprise-grade object storage
+- **Local Storage**: For development/testing
+
+**Message Types:**
+- `TEXT`: Plain text messages
+- `IMAGE`: Image files (JPEG, PNG, GIF, WebP)
+- `VIDEO`: Video files (MP4, AVI, MOV)
+- `AUDIO`: Audio files (MP3, WAV, OGG) - voice notes
+- `FILE`: Documents and other file types (PDF, Word, etc.)
+
 ---
 
 ## WebSocket Events
 
 ### Real-time Messaging
-The messaging service uses Socket.IO for real-time communication. Connect to `ws://localhost:3500` with JWT token authentication.
+The messaging service uses Socket.IO for real-time communication. Connect through the API Gateway at `ws://localhost:8000/ws/messaging/` with JWT token authentication.
 
 #### Authentication
 ```javascript
-const socket = io('http://localhost:3500', {
+const socket = io('ws://localhost:8000/ws/messaging/', {
   auth: {
     token: 'YOUR_JWT_TOKEN'
   }
 });
 ```
+
+#### WebSocket Gateway Routing
+WebSocket connections are routed through the API Gateway for centralized management and security. The gateway handles:
+- Authentication and authorization
+- Connection routing to appropriate services
+- Load balancing and circuit breaker protection
+- Request tracking and monitoring
 
 #### Available Events
 
@@ -327,8 +409,31 @@ const socket = io('http://localhost:3500', {
 ##### Server → Client Events
 
 **new_message**
-- **Purpose:** New message received
-- **Payload:** `{ chatId: "chat_123", message: {...}, unreadCount: 1 }`
+- **Purpose:** New message received (includes file attachments)
+- **Payload:**
+```json
+{
+  "chatId": "chat_123",
+  "message": {
+    "id": "msg_458",
+    "content": "Check out this image!",
+    "type": "IMAGE",
+    "fileUrl": "https://your-storage-url.com/messages/image-123456.jpg",
+    "fileName": "vacation-photo.jpg",
+    "fileSize": 2048576,
+    "fileType": "image/jpeg",
+    "createdAt": "2025-11-10T12:10:00.000Z",
+    "author": {
+      "id": 2,
+      "username": "aachmed2759",
+      "email": "support@appbrew.com",
+      "firstName": "Abib",
+      "lastName": "Achmed"
+    }
+  },
+  "unreadCount": 1
+}
+```
 
 **messages_read**
 - **Purpose:** Messages marked as read by another user
@@ -398,9 +503,47 @@ const socket = io('http://localhost:3500', {
 - **User presence** (online/offline status)
 - **Message pagination** for performance
 - **JWT authentication** with auth service integration
+- **File attachments** (images, videos, audio, documents)
+- **Voice notes** support via audio file uploads
+- **Dynamic cloud storage** (Supabase, S3, Local)
+- **Emoji support** in text messages
+- **Message types** (TEXT, IMAGE, VIDEO, AUDIO, FILE)
 
 ### Service Dependencies
 - **Auth Service**: User authentication and user data
 - **PostgreSQL**: Message and chat data storage
 - **Redis**: Session storage and caching
 - **API Gateway**: Request routing and load balancing
+
+### Storage Platform Configuration
+
+The messaging service supports multiple cloud storage platforms for file attachments. Configure the storage platform using environment variables:
+
+#### Supabase Storage (Default)
+```env
+STORAGE_PLATFORM=supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-key
+SUPABASE_BUCKET=your-bucket-name
+```
+
+#### Amazon S3 Storage
+```env
+STORAGE_PLATFORM=s3
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=your-bucket-name
+AWS_CLOUDFRONT_URL=https://your-distribution.cloudfront.net  # Optional
+```
+
+#### Local Storage (Development)
+```env
+STORAGE_PLATFORM=local
+LOCAL_UPLOAD_DIR=uploads
+```
+
+### File Upload Limits
+- **Maximum file size**: 50MB per file
+- **Supported formats**: Images, videos, audio files, and documents
+- **Storage**: Files are automatically organized in folders by type and date

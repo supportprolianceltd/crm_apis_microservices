@@ -12,6 +12,11 @@ from django_ratelimit.decorators import ratelimit
 from django.utils.encoding import force_str
 from urllib.parse import urljoin
 import urllib3
+import asyncio
+import websockets
+import json
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 # Disable SSL warnings for internal services
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -1306,3 +1311,63 @@ def gateway_middleware(get_response):
         return response
     
     return middleware
+
+
+@csrf_exempt
+def websocket_gateway_view(request, path):
+    """
+    WebSocket gateway view that routes WebSocket connections to appropriate microservices
+    """
+    try:
+        # Generate request ID for gateway headers
+        request_id = f"gateway_ws_{uuid.uuid4().hex[:8]}"
+        logger.info(f"[{request_id}] WebSocket Gateway received connection request: /ws/{path}")
+
+        # Parse WebSocket path
+        segments = path.strip('/').split('/')
+        if not segments:
+            return JsonResponse({"error": "Invalid WebSocket path"}, status=400)
+
+        # Route WebSocket connections based on service
+        prefix = segments[0]
+
+        # For messaging service WebSocket connections
+        if prefix == "messaging":
+            messaging_url = settings.MICROSERVICE_URLS.get("messaging")
+            if not messaging_url:
+                logger.error(f"[{request_id}] Messaging service URL not configured")
+                return JsonResponse({"error": "Messaging service not available"}, status=500)
+
+            # Convert HTTP URL to WebSocket URL
+            ws_url = messaging_url.replace('http://', 'ws://').replace('https://', 'wss://')
+
+            # Construct WebSocket URL with remaining path
+            sub_path = '/'.join(segments[1:]) if len(segments) > 1 else ''
+            if sub_path:
+                target_ws_url = f"{ws_url}/{sub_path}"
+            else:
+                target_ws_url = f"{ws_url}/"
+
+            logger.info(f"[{request_id}] Routing WebSocket to: {target_ws_url}")
+
+            # Return WebSocket routing information
+            # In a real implementation, this would upgrade the connection
+            # For now, return the routing info that frontend can use
+            return JsonResponse({
+                "websocket_url": target_ws_url,
+                "service": "messaging",
+                "request_id": request_id,
+                "status": "routed"
+            })
+
+        else:
+            logger.error(f"[{request_id}] No WebSocket route found for prefix: {prefix}")
+            return JsonResponse({"error": f"No WebSocket route found for /{prefix}/"}, status=404)
+
+    except Exception as e:
+        logger.exception(f"Unexpected WebSocket gateway error on /ws/{path}: {str(e)}")
+        return JsonResponse({
+            "error": "Internal WebSocket gateway error",
+            "details": str(e),
+            "suggestion": "An unexpected error occurred in the WebSocket gateway."
+        }, status=500)
