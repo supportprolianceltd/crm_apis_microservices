@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -42,14 +43,15 @@ model User {
 
 model Chat {
   id          String         @id @default(cuid())
+  chatId      String         @unique @default("")
   name        String?
-  type        ChatType      @default(DIRECT) 
-  avatar      String?       
+  type        ChatType      @default(DIRECT)
+  avatar      String?
   users       UsersOnChats[] @relation("ChatUsers")
   messages    Message[]      @relation("ChatMessages")
   lastMessageId String?     // Simple foreign key reference (no relation needed)
-  tenantId    Int?          
-  tenant      Tenant?       @relation("TenantChats", fields: [tenantId], references: [id]) 
+  tenantId    Int?
+  tenant      Tenant?       @relation("TenantChats", fields: [tenantId], references: [id])
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
@@ -70,7 +72,13 @@ model UsersOnChats {
 
 model Message {
   id        String   @id @default(cuid())
-  content   String
+  messageId String   @unique
+  content   String?
+  type      MessageType @default(TEXT)
+  fileUrl   String?
+  fileName  String?
+  fileSize  Int?
+  fileType  String?
   chatId    String
   chat      Chat     @relation("ChatMessages", fields: [chatId], references: [id])
   authorId  Int
@@ -90,4 +98,12 @@ enum MessageStatus {
   SENT
   DELIVERED
   READ
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
 }

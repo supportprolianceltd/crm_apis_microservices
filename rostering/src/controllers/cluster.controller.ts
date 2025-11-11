@@ -538,6 +538,219 @@ export class ClusterController {
     }
   }
 
+  /**
+   * Assign an existing visit to a cluster
+   * POST /clusters/:clusterId/assign-visit/:visitId
+   */
+  public async assignVisitToCluster(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) {
+        return res.status(403).json({ error: 'tenantId missing from auth context' });
+      }
+
+      const { clusterId, visitId } = req.params as { clusterId?: string; visitId?: string };
+      if (!clusterId || !visitId) {
+        return res.status(400).json({ error: 'clusterId and visitId are required in path' });
+      }
+
+      // Verify cluster belongs to tenant
+      const cluster = await (this.prisma as any).cluster.findFirst({
+        where: { id: clusterId, tenantId: tenantId.toString() }
+      });
+      if (!cluster) {
+        return res.status(404).json({ error: 'Cluster not found' });
+      }
+
+      // Verify visit belongs to tenant and exists
+      const existingVisit = await (this.prisma as any).visit.findFirst({
+        where: { id: visitId, tenantId: tenantId.toString() }
+      });
+      if (!existingVisit) {
+        return res.status(404).json({ error: 'Visit not found' });
+      }
+
+      // Check if visit is already assigned to this cluster
+      if (existingVisit.clusterId === clusterId) {
+        return res.status(409).json({
+          error: 'Visit is already assigned to this cluster',
+          visitId: existingVisit.id,
+          currentClusterId: existingVisit.clusterId
+        });
+      }
+
+      // Get the old cluster ID for statistics update
+      const oldClusterId = existingVisit.clusterId;
+
+      // Update the visit with the new cluster assignment
+      const updatedVisit = await (this.prisma as any).visit.update({
+        where: { id: visitId },
+        data: {
+          clusterId: clusterId,
+          updatedAt: new Date()
+        }
+      });
+
+      // Update cluster statistics for both old and new clusters
+      if (oldClusterId) {
+        this.clusteringService.updateClusterStats(oldClusterId).catch((err) =>
+          console.error(`updateClusterStats failed for old cluster ${oldClusterId}`, err)
+        );
+      }
+      this.clusteringService.updateClusterStats(clusterId).catch((err) =>
+        console.error(`updateClusterStats failed for new cluster ${clusterId}`, err)
+      );
+
+      return res.json({
+        success: true,
+        data: {
+          visit: updatedVisit,
+          cluster: {
+            id: cluster.id,
+            name: cluster.name,
+            previousClusterId: oldClusterId
+          }
+        },
+        message: `Visit reassigned to cluster '${cluster.name}' successfully`
+      });
+    } catch (error: any) {
+      console.error('assignVisitToCluster error', error);
+      return res.status(500).json({
+        error: 'Failed to assign visit to cluster',
+        details: error?.message
+      });
+    }
+  }
+
+  /**
+   * Batch assign multiple existing visits to clusters
+   * POST /clusters/batch-assign-visits
+   */
+  public async batchAssignVisitsToClusters(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) {
+        return res.status(403).json({ error: 'tenantId missing from auth context' });
+      }
+
+      const { assignments } = req.body;
+      if (!Array.isArray(assignments) || assignments.length === 0) {
+        return res.status(400).json({ error: 'assignments array is required' });
+      }
+
+      const results = [];
+      const errors = [];
+      const affectedClusters = new Set<string>();
+
+      for (const assignment of assignments) {
+        try {
+          const { clusterId, visitId } = assignment;
+
+          if (!clusterId || !visitId) {
+            errors.push({
+              assignment,
+              error: 'clusterId and visitId are required'
+            });
+            continue;
+          }
+
+          // Verify cluster belongs to tenant
+          const cluster = await (this.prisma as any).cluster.findFirst({
+            where: { id: clusterId, tenantId: tenantId.toString() }
+          });
+          if (!cluster) {
+            errors.push({
+              assignment,
+              error: 'Cluster not found'
+            });
+            continue;
+          }
+
+          // Verify visit belongs to tenant and exists
+          const existingVisit = await (this.prisma as any).visit.findFirst({
+            where: { id: visitId, tenantId: tenantId.toString() }
+          });
+          if (!existingVisit) {
+            errors.push({
+              assignment,
+              error: 'Visit not found'
+            });
+            continue;
+          }
+
+          // Check if visit is already assigned to this cluster
+          if (existingVisit.clusterId === clusterId) {
+            errors.push({
+              assignment,
+              error: 'Visit is already assigned to this cluster',
+              currentClusterId: existingVisit.clusterId
+            });
+            continue;
+          }
+
+          // Track old cluster for statistics update
+          const oldClusterId = existingVisit.clusterId;
+          if (oldClusterId) affectedClusters.add(oldClusterId);
+          affectedClusters.add(clusterId);
+
+          // Update the visit with the new cluster assignment
+          const updatedVisit = await (this.prisma as any).visit.update({
+            where: { id: visitId },
+            data: {
+              clusterId: clusterId,
+              updatedAt: new Date()
+            }
+          });
+
+          results.push({
+            assignment,
+            visit: updatedVisit,
+            cluster: {
+              id: cluster.id,
+              name: cluster.name,
+              previousClusterId: oldClusterId
+            },
+            success: true
+          });
+
+        } catch (error: any) {
+          errors.push({
+            assignment,
+            error: error.message
+          });
+        }
+      }
+
+      // Update cluster statistics for all affected clusters
+      for (const clusterId of affectedClusters) {
+        this.clusteringService.updateClusterStats(clusterId).catch((err) =>
+          console.error(`updateClusterStats failed for cluster ${clusterId}`, err)
+        );
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          successful: results,
+          failed: errors,
+          summary: {
+            total: assignments.length,
+            successful: results.length,
+            failed: errors.length,
+            affectedClusters: Array.from(affectedClusters)
+          }
+        },
+        message: `Batch reassignment completed: ${results.length} successful, ${errors.length} failed`
+      });
+    } catch (error: any) {
+      console.error('batchAssignVisitsToClusters error', error);
+      return res.status(500).json({
+        error: 'Failed to batch assign visits to clusters',
+        details: error?.message
+      });
+    }
+  }
+
   // private isValidPostcode(postcode: string): boolean {
   //   // Basic UK postcode validation - adjust for your region if needed
   //   const ukPostcodeRegex = /^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$/i;
@@ -833,8 +1046,8 @@ public async generateOptimizedClusters(req: Request, res: Response) {
     const constraintsService = new ConstraintsService(this.prisma);
     const travelService = new TravelService(this.prisma);
     const clusteringService = new ClusteringService(
-      this.prisma, 
-      constraintsService, 
+      this.prisma,
+      constraintsService,
       travelService
     );
 
@@ -860,7 +1073,7 @@ public async generateOptimizedClusters(req: Request, res: Response) {
       // Use regular method and create compatible result structure
       const clusters = await clusteringService.generateClusters(tenantId.toString(), params);
       const metrics = clusteringService.calculateOverallQualityMetrics(clusters);
-      
+
       result = {
         clusters,
         metrics: {
@@ -873,11 +1086,11 @@ public async generateOptimizedClusters(req: Request, res: Response) {
             workloadBalance: 0
           }
         },
-        actions: { 
-          clustersSplit: 0, 
-          clustersMerged: 0, 
-          outliersRemoved: 0, 
-          visitsReassigned: 0 
+        actions: {
+          clustersSplit: 0,
+          clustersMerged: 0,
+          outliersRemoved: 0,
+          visitsReassigned: 0
         }
       };
     }
@@ -885,16 +1098,119 @@ public async generateOptimizedClusters(req: Request, res: Response) {
     return res.json({
       success: true,
       data: result,
-      message: enableOptimization ? 
+      message: enableOptimization ?
         `Generated ${result.clusters.length} optimized clusters` :
         `Generated ${result.clusters.length} raw clusters`
     });
 
   } catch (error: any) {
     console.error('generateOptimizedClusters error', error);
-    return res.status(500).json({ 
-      error: 'Failed to generate clusters', 
-      details: error.message 
+    return res.status(500).json({
+      error: 'Failed to generate clusters',
+      details: error.message
+    });
+  }
+}
+
+/**
+ * Get intelligent cluster suggestions for a client
+ */
+public async getClientClusterSuggestions(req: Request, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      return res.status(403).json({ error: 'tenantId missing from auth context' });
+    }
+
+    const { clientId } = req.params;
+    const {
+      maxSuggestions = 3,
+      maxDistanceKm = 50,
+      includeInactiveClusters = false
+    } = req.query;
+
+    if (!clientId) {
+      return res.status(400).json({ error: 'clientId required in path' });
+    }
+
+    // Import the service dynamically to avoid circular dependencies
+    const { ClientClusterDistanceService } = await import('../services/client-cluster-distance.service');
+    const distanceService = new ClientClusterDistanceService(this.prisma);
+
+    const suggestions = await distanceService.getClusterSuggestions(
+      clientId,
+      tenantId.toString(),
+      {
+        maxSuggestions: Number(maxSuggestions),
+        maxDistanceKm: Number(maxDistanceKm),
+        includeInactiveClusters: includeInactiveClusters === 'true'
+      }
+    );
+
+    return res.json({
+      success: true,
+      data: suggestions
+    });
+  } catch (error: any) {
+    console.error('getClientClusterSuggestions error', error);
+    return res.status(500).json({
+      error: 'Failed to get cluster suggestions',
+      details: error.message
+    });
+  }
+}
+
+/**
+ * Get batch cluster suggestions for multiple clients
+ */
+public async getBatchClientClusterSuggestions(req: Request, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      return res.status(403).json({ error: 'tenantId missing from auth context' });
+    }
+
+    const { clientIds } = req.body;
+    const {
+      maxSuggestions = 3,
+      maxDistanceKm = 50,
+      includeInactiveClusters = false
+    } = req.query;
+
+    if (!Array.isArray(clientIds) || clientIds.length === 0) {
+      return res.status(400).json({ error: 'clientIds array required in body' });
+    }
+
+    // Import the service dynamically to avoid circular dependencies
+    const { ClientClusterDistanceService } = await import('../services/client-cluster-distance.service');
+    const distanceService = new ClientClusterDistanceService(this.prisma);
+
+    const suggestions = await distanceService.getBatchClusterSuggestions(
+      clientIds,
+      tenantId.toString(),
+      {
+        maxSuggestions: Number(maxSuggestions),
+        maxDistanceKm: Number(maxDistanceKm),
+        includeInactiveClusters: includeInactiveClusters === 'true'
+      }
+    );
+
+    return res.json({
+      success: true,
+      data: suggestions,
+      summary: {
+        totalClients: clientIds.length,
+        processedClients: suggestions.length,
+        averageSuggestionsPerClient: suggestions.length > 0
+          ? suggestions.reduce((sum, s) => sum + s.suggestions.length, 0) / suggestions.length
+          : 0
+      }
+    });
+  } catch (error: any) {
+    console.error('getBatchClientClusterSuggestions error', error);
+    return res.status(500).json({
+      error: 'Failed to get batch cluster suggestions',
+      details: error.message
     });
   }
 }

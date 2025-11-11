@@ -69,13 +69,11 @@ export class TravelService {
     toPostcode: string,
     mode: string
   ) {
-    return await this.prisma.travelMatrixCache.findUnique({
+    return await this.prisma.travelMatrixCache.findFirst({
       where: {
-        fromPostcode_toPostcode_mode: {
-          fromPostcode,
-          toPostcode,
-          mode
-        }
+        fromPostcode,
+        toPostcode,
+        mode
       }
     });
   }
@@ -139,29 +137,37 @@ export class TravelService {
     result: { distanceMeters: number; durationSeconds: number; trafficDurationSeconds?: number }
   ) {
     try {
-        await this.prisma.travelMatrixCache.upsert({
-        where: {
-            fromPostcode_toPostcode_mode: {
+        const existing = await this.prisma.travelMatrixCache.findFirst({
+          where: {
             fromPostcode,
             toPostcode,
             mode
-            }
-        },
-        update: {
-            distanceMeters: result.distanceMeters ?? 0,
-            durationSeconds: result.durationSeconds ?? 0,
-            trafficDurationSeconds: result.trafficDurationSeconds ?? null,
-            calculatedAt: new Date()
-        },
-        create: {
-            fromPostcode,
-            toPostcode,
-            mode,
-            distanceMeters: result.distanceMeters ?? 0,
-            durationSeconds: result.durationSeconds ?? 0,
-            trafficDurationSeconds: result.trafficDurationSeconds ?? null
-        }
+          }
         });
+
+        if (existing) {
+          await this.prisma.travelMatrixCache.update({
+            where: { id: existing.id },
+            data: {
+              distanceMeters: result.distanceMeters ?? 0,
+              durationSeconds: result.durationSeconds ?? 0,
+              trafficDurationSeconds: result.trafficDurationSeconds ?? null,
+              calculatedAt: new Date()
+            }
+          });
+        } else {
+          await this.prisma.travelMatrixCache.create({
+            data: {
+              fromPostcode,
+              toPostcode,
+              mode,
+              distanceMeters: result.distanceMeters ?? 0,
+              durationSeconds: result.durationSeconds ?? 0,
+              trafficDurationSeconds: result.trafficDurationSeconds ?? null,
+              expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1 hour expiry
+            }
+          });
+        }
 
     } catch (error) {
       logger.error('Failed to cache travel time:', error);

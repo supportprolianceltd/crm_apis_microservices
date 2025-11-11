@@ -15,5 +15,10 @@ export function createCarerRoutes(carerController: CarerController): Router {
   router.get('/:id', carerController.getCarer);
   router.get('/:id/availability', carerController.getCarerAvailability);
 
+  // Visit assignment operations for carers
+  router.put('/:carerId/visits/:visitId/accept', carerController.acceptVisitOffer);
+  router.put('/:carerId/visits/:visitId/decline', carerController.declineVisitOffer);
+  router.get('/:carerId/visits/offered', carerController.getOfferedVisits);
+
   return router;
 }

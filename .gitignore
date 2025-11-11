@@ -323,6 +323,7 @@ hr_service/venv/
 hr_service/.env
 job_applications/venv/
 job_applications/.env
+rostering/docker-compose.yml
 auth_service/venv/
 auth_service/logs/
 auth_service/.env

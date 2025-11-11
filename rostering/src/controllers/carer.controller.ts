@@ -254,6 +254,248 @@ export class CarerController {
   };
 
   /**
+   * Accept a visit offer
+   */
+  acceptVisitOffer = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
+      const { carerId, visitId } = req.params;
+      const authToken = req.headers.authorization?.replace('Bearer ', '');
+
+      if (!authToken) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+
+      // Verify the carer belongs to the tenant
+      const carer = await this.prisma.carer.findFirst({
+        where: {
+          id: carerId,
+          tenantId
+        }
+      });
+
+      if (!carer) {
+        res.status(404).json({
+          success: false,
+          error: 'Carer not found'
+        });
+        return;
+      }
+
+      // Verify the visit exists and is offered to this carer
+      const visit = await this.prisma.visit.findFirst({
+        where: {
+          id: visitId,
+          tenantId,
+          assignmentStatus: 'OFFERED'
+        }
+      });
+
+      if (!visit) {
+        res.status(404).json({
+          success: false,
+          error: 'Visit not found or not offered'
+        });
+        return;
+      }
+
+      // Get carer details from auth service
+      const carerDetails = await this.carerService.getCarerById(authToken, carerId);
+
+      // Update visit assignment status and populate assigned carer data
+      const updatedVisit = await this.prisma.visit.update({
+        where: { id: visitId },
+        data: {
+          assignmentStatus: 'ACCEPTED',
+          assignedAt: new Date(),
+          status: 'ASSIGNED',
+          assignedCarerId: carerId,
+          assignedCarerFirstName: carerDetails?.first_name || carerDetails?.firstName,
+          assignedCarerLastName: carerDetails?.last_name || carerDetails?.lastName,
+          assignedCarerEmail: carerDetails?.email,
+          assignedCarerSkills: carerDetails?.profile?.skill_details?.map((skill: any) =>
+            typeof skill === 'string' ? skill : skill.skill_name || ''
+          ).filter((name: string) => name.trim() !== '') || [],
+          assignedCarerAvailability: carerDetails?.profile?.availability || {}
+        }
+      });
+
+      logger.info(`Visit offer accepted: ${visitId}`, {
+        tenantId,
+        carerId,
+        visitId
+      });
+
+      res.json({
+        success: true,
+        data: updatedVisit,
+        message: 'Visit offer accepted successfully'
+      });
+
+    } catch (error) {
+      logServiceError('Carer', 'acceptVisitOffer', error, {
+        carerId: req.params.carerId,
+        visitId: req.params.visitId
+      });
+      res.status(500).json({
+        success: false,
+        error: 'Failed to accept visit offer'
+      });
+    }
+  };
+
+  /**
+   * Decline a visit offer
+   */
+  declineVisitOffer = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
+      const { carerId, visitId } = req.params;
+      const { reason } = req.body;
+
+      // Verify the carer belongs to the tenant
+      const carer = await this.prisma.carer.findFirst({
+        where: {
+          id: carerId,
+          tenantId
+        }
+      });
+
+      if (!carer) {
+        res.status(404).json({
+          success: false,
+          error: 'Carer not found'
+        });
+        return;
+      }
+
+      // Verify the visit exists and is offered to this carer
+      const visit = await this.prisma.visit.findFirst({
+        where: {
+          id: visitId,
+          tenantId,
+          assignmentStatus: 'OFFERED'
+        }
+      });
+
+      if (!visit) {
+        res.status(404).json({
+          success: false,
+          error: 'Visit not found or not offered'
+        });
+        return;
+      }
+
+      // Update visit assignment status
+      const updatedVisit = await this.prisma.visit.update({
+        where: { id: visitId },
+        data: {
+          assignmentStatus: 'DECLINED',
+          complianceChecks: {
+            declinedReason: reason || 'No reason provided',
+            declinedAt: new Date(),
+            declinedBy: carerId
+          }
+        }
+      });
+
+      logger.info(`Visit offer declined: ${visitId}`, {
+        tenantId,
+        carerId,
+        visitId,
+        reason
+      });
+
+      res.json({
+        success: true,
+        data: updatedVisit,
+        message: 'Visit offer declined successfully'
+      });
+
+    } catch (error) {
+      logServiceError('Carer', 'declineVisitOffer', error, {
+        carerId: req.params.carerId,
+        visitId: req.params.visitId
+      });
+      res.status(500).json({
+        success: false,
+        error: 'Failed to decline visit offer'
+      });
+    }
+  };
+
+  /**
+   * Get offered visits for a carer
+   */
+  getOfferedVisits = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const user = (req as any).user;
+      const tenantId = user?.tenantId?.toString();
+      const { carerId } = req.params;
+
+      // Verify the carer belongs to the tenant
+      const carer = await this.prisma.carer.findFirst({
+        where: {
+          id: carerId,
+          tenantId
+        }
+      });
+
+      if (!carer) {
+        res.status(404).json({
+          success: false,
+          error: 'Carer not found'
+        });
+        return;
+      }
+
+      // Get offered visits for this carer
+      const offeredVisits = await this.prisma.visit.findMany({
+        where: {
+          tenantId,
+          assignmentStatus: 'OFFERED',
+          isActive: true
+        },
+        include: {
+          externalRequest: {
+            select: {
+              id: true,
+              subject: true,
+              status: true
+            }
+          },
+          cluster: {
+            select: {
+              id: true,
+              name: true
+            }
+          }
+        },
+        orderBy: {
+          scheduledStartTime: 'asc'
+        }
+      });
+
+      res.json({
+        success: true,
+        data: offeredVisits
+      });
+
+    } catch (error) {
+      logServiceError('Carer', 'getOfferedVisits', error, {
+        carerId: req.params.carerId
+      });
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get offered visits'
+      });
+    }
+  };
+
+  /**
    * Note: Carer updates and deletion are handled through
    * the auth service sync process. This controller provides
    * limited write access for testing/demo purposes.
