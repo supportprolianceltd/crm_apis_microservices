@@ -37,6 +37,7 @@ const io = new Server(server, {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static("public"));
+app.use('/uploads', express.static('uploads')); // Serve uploaded files
 app.use(authMiddleware);
 
 // API Documentation
@@ -48,7 +49,7 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
-app.use("/api/v1", apiRoutes);
+app.use("/api/messaging", apiRoutes);
 
 // Initialize WebSocket
 initializeSocket(io);

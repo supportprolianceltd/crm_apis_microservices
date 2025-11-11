@@ -5,7 +5,10 @@ import { authenticate, ensureTenantAccess } from '../middleware/auth.middleware'
 export function createRequestRoutes(requestController: RequestController): Router {
   const router = Router();
 
-  // Apply authentication to all routes
+  // Public endpoint for creating requests (no authentication required)
+  router.post('/public', requestController.createPublicRequest);
+
+  // Apply authentication to all other routes
   router.use(authenticate);
   router.use(ensureTenantAccess);
 

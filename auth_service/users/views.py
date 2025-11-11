@@ -166,9 +166,6 @@ class CustomPagination(PageNumberPagination):
         return response
 
 
-
-# utils/tenant_helpers.py   (or at the top of your views file)
-# utils/tenant_helpers.py
 from collections import defaultdict
 from django_tenants.utils import get_public_schema_name, tenant_context
 from rest_framework import generics, permissions, status
@@ -213,7 +210,6 @@ def get_root_admin(tenant):
     except Exception as exc:
         logger.error(f"Failed to fetch root-admin for {tenant.schema_name}: {exc}")
     return None
-
 
 
 @method_decorator(cache_page(60 * 5), name='dispatch')   # 5-minute cache
