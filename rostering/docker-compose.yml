@@ -10,22 +10,6 @@ services:
 
     env_file:
       - .env  # This will load all variables from the .env file
-
-    environment:
-      NODE_ENV: development
-      PORT: 3005
-      DATABASE_URL: postgresql://postgres:password@rostering-db:5432/rostering_dev
-      REDIS_URL: redis://rostering-redis:6379
-      AUTH_SERVICE_URL: http://auth-service:8001
-      JWT_SECRET: "django-insecure-va=ok0r=3)*b@ekd_c^+zkz&d)@*sd3sm$t(1o-n$yj)zwfked"
-      NOMINATIM_URL: https://nominatim.openstreetmap.org
-      DEFAULT_MATCHING_RADIUS: 5000
-      EMAIL_POLLING_INTERVAL: 5
-      LOG_LEVEL: debug
-      # NEW: Python optimizer URL
-      PYTHON_OPTIMIZER_URL: http://ortools-optimizer:5000
-      USE_PYTHON_OPTIMIZER: "true"
-      GOOGLE_MAPS_API_KEY: "AIzaSyDJZrf1fjQYrYWsAhoRDMqnERJacy8R3ss"
     depends_on:
       rostering-db:
         condition: service_healthy
@@ -53,9 +37,10 @@ services:
     container_name: ortools-optimizer
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
-      PYTHONUNBUFFERED: 1
-      LOG_LEVEL: INFO
+      LOG_LEVEL: ${ORTOOLS_LOG_LEVEL}
     networks:
       - auth_service_default
     restart: unless-stopped
@@ -78,11 +63,8 @@ services:
   rostering-db:
     image: postgis/postgis:15-3.3
     container_name: rostering-db
-    environment:
-      POSTGRES_DB: rostering_dev
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    env_file:
+      - .env
     ports:
       - "5450:5432"
     volumes:
@@ -119,9 +101,8 @@ services:
     container_name: rostering-adminer
     ports:
       - "8083:8080"
-    environment:
-      ADMINER_DEFAULT_SERVER: rostering-db
-      ADMINER_DESIGN: lucas
+    env_file:
+      - .env
     networks:
       - auth_service_default
     restart: unless-stopped
@@ -133,10 +114,8 @@ services:
     container_name: rostering-redis-commander
     ports:
       - "8084:8081"
-    environment:
-      REDIS_HOSTS: "local:rostering-redis:6379"
-      HTTP_USER: admin
-      HTTP_PASSWORD: admin
+    env_file:
+      - .env
     networks:
       - auth_service_default
     restart: unless-stopped
