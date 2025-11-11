@@ -1,10 +1,11 @@
 import express from "express";
+import prisma from "../../config/prisma.js";
 import chatsController from "../controllers/chatsController.js";
 const router = express.Router();
 
 /**
  * @swagger
- * /api/chats:
+ * /api/messaging/chats:
  *   get:
  *     summary: Get all chats for the authenticated user
  *     tags: [Chats]
@@ -18,7 +19,96 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.get("/", chatsController.getChatsController);
+router.get("/", async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const tenantId = req.tenant?.id;
+
+    const chats = await prisma.chat.findMany({
+      where: {
+        users: {
+          some: {
+            userId,
+            leftAt: null,
+          },
+        },
+        ...(tenantId ? { tenantId } : {}),
+      },
+      include: {
+        users: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                email: true,
+                online: true,
+                lastSeen: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+        messages: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 1, // Get latest message
+        },
+        _count: {
+          select: {
+            messages: {
+              where: {
+                status: "DELIVERED",
+                NOT: {
+                  authorId: userId,
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+
+    // Format the response
+    const formattedChats = chats.map((chat) => {
+      const otherParticipants = chat.users
+        .filter((p) => p.userId !== userId)
+        .map((p) => p.user);
+
+      return {
+        id: chat.id,
+        name:
+          chat.name ||
+          otherParticipants
+            .map(
+              (u) =>
+                u.username || `${u.firstName} ${u.lastName}`.trim() || u.email
+            )
+            .join(", "),
+        type: chat.type || "DIRECT",
+        unreadCount:
+          chat.users.find((u) => u.userId === userId)?.unreadCount || 0,
+        participants: chat.users.map((u) => u.user),
+        lastMessage: chat.messages[0] || null,
+        updatedAt: chat.updatedAt,
+      };
+    });
+
+    res.json({ status: "success", data: formattedChats });
+  } catch (error) {
+    console.error('Error in getChats:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch chats',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
 
 /**
  * @swagger

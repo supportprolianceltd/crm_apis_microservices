@@ -19,7 +19,7 @@ datasource db {
 // ─────────────────────────────────────────────
 
 model ExternalRequest {
-  id String @id // Remove @default(cuid()), we'll generate custom IDs
+  id String @id // Custom generated IDs
   tenantId String
   subject String
   content String @db.Text
@@ -43,28 +43,31 @@ model ExternalRequest {
   emailMessageId String?
   emailThreadId String?
  
-  // Existing approval fields
+  // Approval fields
   approvedBy String?
   approvedAt DateTime?
+  approvedByEmail String? @map("approved_by_email")
+  approvedByFirstName String? @map("approved_by_first_name")
+  approvedByLastName String? @map("approved_by_last_name")
  
-  // Detailed user tracking for creation
+  // Creation tracking
   createdBy String? @map("created_by")
   createdByEmail String? @map("created_by_email")
   createdByFirstName String? @map("created_by_first_name")
   createdByLastName String? @map("created_by_last_name")
  
-  // Detailed user tracking for approval
-  approvedByEmail String? @map("approved_by_email")
-  approvedByFirstName String? @map("approved_by_first_name")
-  approvedByLastName String? @map("approved_by_last_name")
+  // UPDATE TRACKING (ADD THESE FIELDS)
+  updatedBy String? @map("updated_by")
+  updatedByEmail String? @map("updated_by_email")
+  updatedByFirstName String? @map("updated_by_first_name")
+  updatedByLastName String? @map("updated_by_last_name")
  
   sendToRostering Boolean
   clusterId String?
   cluster Cluster? @relation(fields: [clusterId], references: [id])
   matches RequestCarerMatch[]
-  visits Visit[] // Link to created visits
+  visits Visit[]
 
-  // Availability requirements (optional)
   availabilityRequirements Json?
 
   createdAt DateTime @default(now())
@@ -80,7 +83,7 @@ model ExternalRequest {
   @@index([clusterId])
   @@index([createdBy])
   @@index([approvedBy])
-  // NEW: Composite index for efficient lookup by date pattern
+  @@index([updatedBy])
   @@index([id(ops: raw("varchar_pattern_ops"))])
   @@map("external_requests")
 }

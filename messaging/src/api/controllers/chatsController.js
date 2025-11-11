@@ -32,20 +32,21 @@ const getOrCreateDirectChatController = async (req, res) => {
     const { participantId } = req.body;
     const userId = req.user.id;
     const tenantId = req.tenant?.id;
+    const authToken = req.headers.authorization;
 
     if (!participantId) {
-      return res.status(400).json({ 
-        status: 'error', 
-        message: 'Participant ID is required' 
+      return res.status(400).json({
+        status: 'error',
+        message: 'Participant ID is required'
       });
     }
 
-    const chat = await ChatService.getOrCreateDirectChat(userId, participantId, tenantId);
+    const chat = await ChatService.getOrCreateDirectChat(userId, participantId, tenantId, authToken);
     res.status(200).json({ status: 'success', data: chat });
   } catch (error) {
     console.error('Error in getOrCreateDirectChatController:', error);
-    res.status(500).json({ 
-      status: 'error', 
+    res.status(500).json({
+      status: 'error',
       message: 'Failed to create or get direct chat',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });

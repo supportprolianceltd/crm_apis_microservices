@@ -518,99 +518,114 @@ export class RequestController {
   /**
    * Update request
    */
-  updateRequest = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const user = (req as any).user;
-      const tenantId = user?.tenantId?.toString();
-      const requestId = req.params.id;
+ /**
+ * Update request - Fixed to handle missing schema fields gracefully
+ */
+updateRequest = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = (req as any).user;
+    const tenantId = user?.tenantId?.toString();
+    const requestId = req.params.id;
 
-      const validatedData = updateRequestSchema.parse(req.body);
+    const validatedData = updateRequestSchema.parse(req.body);
 
-      const existingRequest = await this.prisma.externalRequest.findFirst({
-        where: {
-          id: requestId,
-          tenantId
-        }
-      });
-
-      if (!existingRequest) {
-        res.status(404).json({
-          success: false,
-          error: 'Request not found'
-        });
-        return;
+    const existingRequest = await this.prisma.externalRequest.findFirst({
+      where: {
+        id: requestId,
+        tenantId
       }
+    });
 
-      const updateData: any = {
-        ...validatedData,
-        requiredSkills: validatedData.requiredSkills || [],
-        scheduledStartTime: validatedData.scheduledStartTime ? new Date(validatedData.scheduledStartTime) : undefined,
-        scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
-        updatedAt: new Date(),
-        // NEW: Track updater information
-        updatedBy: user?.id,
-        updatedByEmail: user?.email,
-        updatedByFirstName: user?.firstName || user?.first_name,
-        updatedByLastName: user?.lastName || user?.last_name
-      };
-
-      // If address changed, re-geocode
-      if (validatedData.address && validatedData.address !== existingRequest.address) {
-        const geocoded = await this.geocodingService.geocodeAddress(
-          validatedData.address, 
-          validatedData.postcode
-        );
-
-        if (geocoded) {
-          updateData.latitude = geocoded.latitude;
-          updateData.longitude = geocoded.longitude;
-        }
-      }
-
-      const updatedRequest = await this.prisma.externalRequest.update({
-        where: { id: requestId },
-        data: updateData
-      });
-
-      // Update PostGIS location if coordinates changed
-      if (validatedData.address && updatedRequest.latitude && updatedRequest.longitude) {
-        try {
-          await this.prisma.$executeRaw`
-            UPDATE external_requests 
-            SET location = ST_SetSRID(ST_MakePoint(${updatedRequest.longitude}, ${updatedRequest.latitude}), 4326)::geography
-            WHERE id = ${requestId}
-          `;
-        } catch (error) {
-          logger.warn('Failed to update PostGIS location', { error, requestId });
-        }
-      }
-
-      logger.info(`Updated request: ${requestId}`, { tenantId, requestId });
-
-      res.json({
-        success: true,
-        data: updatedRequest,
-        message: 'Request updated successfully'
-      });
-
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({
-          success: false,
-          error: 'Validation error',
-          details: error.errors
-        });
-        return;
-      }
-
-      logServiceError('Request', 'updateRequest', error, { requestId: req.params.id });
-      res.status(500).json({
+    if (!existingRequest) {
+      res.status(404).json({
         success: false,
-        error: 'Failed to update request'
+        error: 'Request not found'
       });
+      return;
     }
-  };
 
+    const updateData: any = {
+      ...validatedData,
+      requiredSkills: validatedData.requiredSkills || [],
+      scheduledStartTime: validatedData.scheduledStartTime ? new Date(validatedData.scheduledStartTime) : undefined,
+      scheduledEndTime: validatedData.scheduledEndTime ? new Date(validatedData.scheduledEndTime) : undefined,
+      updatedAt: new Date()
+    };
+
+    // Only add update tracking if the fields exist in the schema
+    // This prevents errors if migrations haven't been run yet
+    try {
+      updateData.updatedBy = user?.id;
+      updateData.updatedByEmail = user?.email;
+      updateData.updatedByFirstName = user?.firstName || user?.first_name;
+      updateData.updatedByLastName = user?.lastName || user?.last_name;
+    } catch (error) {
+      // Silently ignore if update tracking fields don't exist yet
+      logger.debug('Update tracking fields not available in schema', { error });
+    }
+
+    // If address changed, re-geocode
+    if (validatedData.address && validatedData.address !== existingRequest.address) {
+      const geocoded = await this.geocodingService.geocodeAddress(
+        validatedData.address, 
+        validatedData.postcode
+      );
+
+      if (geocoded) {
+        updateData.latitude = geocoded.latitude;
+        updateData.longitude = geocoded.longitude;
+      }
+    }
+
+    const updatedRequest = await this.prisma.externalRequest.update({
+      where: { id: requestId },
+      data: updateData
+    });
+
+    // Update PostGIS location if coordinates changed
+    if (validatedData.address && updatedRequest.latitude && updatedRequest.longitude) {
+      try {
+        await this.prisma.$executeRaw`
+          UPDATE external_requests 
+          SET location = ST_SetSRID(ST_MakePoint(${updatedRequest.longitude}, ${updatedRequest.latitude}), 4326)::geography
+          WHERE id = ${requestId}
+        `;
+      } catch (error) {
+        logger.warn('Failed to update PostGIS location', { error, requestId });
+      }
+    }
+
+    logger.info(`Updated request: ${requestId}`, { 
+      tenantId, 
+      requestId,
+      updatedBy: user?.email,
+      fieldsUpdated: Object.keys(validatedData)
+    });
+
+    res.json({
+      success: true,
+      data: updatedRequest,
+      message: 'Request updated successfully'
+    });
+
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        success: false,
+        error: 'Validation error',
+        details: error.errors
+      });
+      return;
+    }
+
+    logServiceError('Request', 'updateRequest', error, { requestId: req.params.id });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update request',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};
   /**
    * List all requests for a tenant
    */

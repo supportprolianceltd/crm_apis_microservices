@@ -1,5 +1,7 @@
 import prisma from "../config/prisma.js";
 import { FileStorageService } from "./fileStorageService.js";
+import axios from "axios";
+import { AUTH_SERVICE_URL } from "../config/config.js";
 
 // Function to generate custom ID (for messages and chats)
 function generateCustomId(prefix) {
@@ -120,9 +122,78 @@ export const ChatService = {
     }
   },
 
-  // Create or get existing direct chat between two users
-  async getOrCreateDirectChat(userId, participantId, tenantId) {
+  // Ensure user exists in messaging database, fetch from auth service if needed
+  async ensureUserExists(userId, tenantId, authToken = null) {
     try {
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (existingUser) {
+        return existingUser;
+      }
+
+      // User doesn't exist, try to fetch from auth service
+      console.log(`User ${userId} not found in messaging DB, fetching from auth service`);
+
+      try {
+        const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8001';
+        const headers = {
+          'Content-Type': 'application/json',
+        };
+
+        // Use auth token if provided
+        if (authToken) {
+          headers['Authorization'] = authToken;
+        }
+
+        const response = await axios.get(`${authServiceUrl}/api/user/users/${userId}`, {
+          headers,
+          timeout: 5000,
+        });
+
+        if (response.data && response.data.length > 0) {
+          const authUser = response.data[0];
+
+          // Create user in messaging database
+          const newUser = await prisma.user.create({
+            data: {
+              id: authUser.id,
+              email: authUser.email,
+              username: authUser.username || authUser.email?.split("@")[0] || `user_${authUser.id}`,
+              firstName: authUser.first_name || "",
+              lastName: authUser.last_name || "",
+              role: authUser.role || "user",
+              tenantId: tenantId,
+            }
+          });
+
+          console.log(`Created user ${userId} in messaging database`);
+          return newUser;
+        } else {
+          throw new Error(`User ${userId} not found in auth service`);
+        }
+      } catch (authError) {
+        console.error("Could not fetch user from auth service:", authError.message);
+        // If the user doesn't exist in auth service, throw a specific error
+        if (authError.message.includes('User') && authError.message.includes('not found')) {
+          throw new Error(`Participant user (ID: ${userId}) does not exist`);
+        }
+        throw new Error(`Failed to fetch user ${userId} from auth service`);
+      }
+    } catch (error) {
+      console.error('Error in ensureUserExists:', error);
+      throw error;
+    }
+  },
+
+  // Create or get existing direct chat between two users
+  async getOrCreateDirectChat(userId, participantId, tenantId, authToken = null) {
+    try {
+      // Ensure the participant user exists in the messaging database
+      await this.ensureUserExists(participantId, tenantId, authToken);
+
       // Check if a direct chat already exists between these users
       const existingChat = await prisma.usersOnChats.findFirst({
         where: {
