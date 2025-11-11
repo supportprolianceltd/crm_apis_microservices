@@ -67,10 +67,3 @@ networks:
 volumes:
   messaging_postgres_data:
   redis_data:
-
-
-
-
-
-
-

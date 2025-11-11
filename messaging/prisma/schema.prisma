@@ -25,7 +25,7 @@ model Tenant {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
+  id            String         @id
   email         String         @unique
   username      String?
   online        Boolean        @default(false)
@@ -59,13 +59,13 @@ model Chat {
 
 model UsersOnChats {
   user        User     @relation("UserChats", fields: [userId], references: [id])
-  userId      Int
+  userId      String
   chat        Chat     @relation("ChatUsers", fields: [chatId], references: [id])
   chatId      String
   assignedAt  DateTime @default(now())
-  leftAt      DateTime? 
-  unreadCount Int       @default(0)  
-  role        String    @default("MEMBER") 
+  leftAt      DateTime?
+  unreadCount Int       @default(0)
+  role        String    @default("MEMBER")
 
   @@id([userId, chatId])
 }
@@ -81,7 +81,7 @@ model Message {
   fileType  String?
   chatId    String
   chat      Chat     @relation("ChatMessages", fields: [chatId], references: [id])
-  authorId  Int
+  authorId  String
   author    User     @relation("UserMessages", fields: [authorId], references: [id])
   status    MessageStatus @default(SENT)
   readAt    DateTime?

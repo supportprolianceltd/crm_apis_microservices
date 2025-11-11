@@ -17,8 +17,7 @@ COPY . .
 RUN npx prisma generate
 
 # Make ports available to the world outside this container
-EXPOSE 3500
-EXPOSE 3501
+EXPOSE 3000
 
 # Define the command to run the app
 # Run migrations and then start the application

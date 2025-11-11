@@ -1314,6 +1314,129 @@ def gateway_middleware(get_response):
 
 
 @csrf_exempt
+def socketio_gateway_view(request, path):
+    """
+    Socket.IO gateway view that proxies Socket.IO polling requests to messaging service
+    """
+    try:
+        # Generate request ID for gateway headers
+        request_id = f"gateway_socketio_{uuid.uuid4().hex[:8]}"
+        logger.info(f"[{request_id}] Socket.IO Gateway received request: /socket.io/{path}")
+
+        # Get messaging service URL
+        messaging_url = settings.MICROSERVICE_URLS.get("messaging")
+        if not messaging_url:
+            logger.error(f"[{request_id}] Messaging service URL not configured")
+            return JsonResponse({"error": "Messaging service not available"}, status=500)
+
+        # Construct forward URL for Socket.IO polling
+        if path:
+            forward_url = f"{messaging_url}/socket.io/{path}"
+        else:
+            forward_url = f"{messaging_url}/socket.io/"
+
+        logger.info(f"[{request_id}] Forwarding Socket.IO request to: {forward_url}")
+
+        # Prepare headers for forwarding
+        excluded_headers = {
+            'host', 'content-length', 'content-encoding',
+            'transfer-encoding', 'connection', 'x-forwarded-for',
+            'x-real-ip', 'x-forwarded-proto'
+        }
+
+        headers = {}
+        for key, value in request.headers.items():
+            key_lower = key.lower()
+            if key_lower not in excluded_headers:
+                headers[key] = value
+
+        # Set proper Host header
+        try:
+            host_without_scheme = messaging_url.split('//')[-1].split('/')[0]
+            headers['Host'] = host_without_scheme
+        except Exception as e:
+            logger.warning(f"[{request_id}] Failed to parse host from messaging URL: {str(e)}")
+
+        # Add gateway headers
+        headers['X-Gateway-Request-ID'] = request_id
+        headers['X-Gateway-Service'] = 'messaging'
+
+        # Read request body
+        try:
+            body = request.body
+        except Exception as e:
+            logger.warning(f"[{request_id}] Error reading request body: {str(e)}")
+            body = None
+
+        # Forward the request to messaging service
+        try:
+            request_kwargs = {
+                'method': request.method,
+                'url': forward_url,
+                'headers': headers,
+                'params': request.GET,
+                'timeout': 30,  # Shorter timeout for real-time requests
+                'verify': False,
+                'stream': True,
+            }
+
+            if request.method in ['POST', 'PUT', 'PATCH'] and body:
+                request_kwargs['data'] = body
+
+            response = session.request(**request_kwargs)
+
+        except requests.exceptions.Timeout as e:
+            logger.error(f"[{request_id}] Socket.IO gateway timeout: {str(e)}")
+            return JsonResponse({"error": "Request timeout"}, status=504)
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[{request_id}] Socket.IO gateway error: {str(e)}")
+            return JsonResponse({"error": "Service unavailable"}, status=502)
+
+        # Stream response content
+        response_content = b''
+        for chunk in response.iter_content(chunk_size=8192):
+            response_content += chunk
+
+        # Prepare response headers
+        excluded_response_headers = {
+            'content-encoding', 'transfer-encoding', 'connection',
+            'keep-alive', 'proxy-authenticate', 'proxy-authorization'
+        }
+
+        response_headers = {}
+        for key, value in response.headers.items():
+            key_lower = key.lower()
+            if key_lower not in excluded_response_headers:
+                response_headers[key] = value
+
+        # Add gateway headers
+        response_headers['X-Gateway-Request-ID'] = request_id
+        response_headers['X-Gateway-Service'] = 'messaging'
+
+        # Create Django response
+        django_response = HttpResponse(
+            content=response_content,
+            status=response.status_code,
+            content_type=response.headers.get('Content-Type', 'application/json')
+        )
+
+        # Set headers
+        for key, value in response_headers.items():
+            django_response[key] = value
+
+        logger.info(f"[{request_id}] Socket.IO gateway forwarded: {request.method} /socket.io/{path} -> {response.status_code}")
+        return django_response
+
+    except Exception as e:
+        logger.exception(f"Unexpected Socket.IO gateway error on /socket.io/{path}: {str(e)}")
+        return JsonResponse({
+            "error": "Internal Socket.IO gateway error",
+            "details": str(e),
+        }, status=500)
+
+
+@csrf_exempt
 def websocket_gateway_view(request, path):
     """
     WebSocket gateway view that routes WebSocket connections to appropriate microservices

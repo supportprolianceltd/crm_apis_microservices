@@ -34,7 +34,8 @@ const createRequestSchema = z.object({
   scheduledEndTime: z.string().datetime().optional(),
   recurrencePattern: z.string().nullable().optional(),
   notes: z.string().optional(),
-  availabilityRequirements: z.any().optional()
+  availabilityRequirements: z.any().optional(),
+  requestTypes: z.string().optional()
 });
 
 const updateRequestSchema = createRequestSchema.partial().omit({}).extend({
@@ -151,6 +152,7 @@ export class RequestController {
         recurrencePattern: validatedData.recurrencePattern,
         notes: validatedData.notes,
         availabilityRequirements: validatedData.availabilityRequirements,
+        requestTypes: validatedData.requestTypes,
         status: RequestStatus.PENDING,
         sendToRostering: false
         // Note: No creator tracking for public requests
@@ -290,6 +292,7 @@ export class RequestController {
         recurrencePattern: validatedData.recurrencePattern,
         notes: validatedData.notes,
         availabilityRequirements: validatedData.availabilityRequirements,
+        requestTypes: validatedData.requestTypes,
         status: RequestStatus.PENDING,
         sendToRostering: false,
         // Track creator information
@@ -1092,6 +1095,9 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
       // Check each carer for skills match and availability
       const feasibilityResults = await Promise.all(
         allCarers.map(async (carer) => {
+          // 0. Check employment status
+          const employmentCheck = this.checkEmploymentStatus(carer, requestStartTime);
+
           // 1. Check skills match using carer skills from profile
           const carerSkills = carer.profile?.skill_details || [];
           const skillsMatch = this.checkSkillsMatch(carerSkills, requiredSkills, requirements);
@@ -1117,6 +1123,10 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
             carerId: carer.id,
             carerName: `${carer.first_name || 'Unknown'} ${carer.last_name || 'Carer'}`,
             email: carer.email,
+            employment: {
+              isEmployed: employmentCheck.isEmployed,
+              reason: employmentCheck.reason
+            },
             skills: carer.profile?.skill_details || [], // Skills from carer profile
             skillsMatch: {
               hasRequiredSkills: skillsMatch.hasSomeRequired,
@@ -1134,7 +1144,7 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
               conflicts: scheduleConflicts,
               conflictCount: scheduleConflicts.length
             } : null,
-            overallEligible: skillsMatch.hasSomeRequired && availabilityCheck.isAvailable && (includeScheduleCheck !== 'true' || scheduleConflicts.length === 0)
+            overallEligible: employmentCheck.isEmployed && skillsMatch.hasSomeRequired && availabilityCheck.isAvailable && (includeScheduleCheck !== 'true' || scheduleConflicts.length === 0)
           };
         })
       );
@@ -1282,6 +1292,34 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
     return conflicts;
   }
 
+
+  /**
+   * Check if carer is employed during the request time
+   */
+  private checkEmploymentStatus(carer: any, requestTime: Date): { isEmployed: boolean; reason: string } {
+    const employmentDetails = carer.profile?.employment_details || [];
+    if (employmentDetails.length === 0) {
+      return { isEmployed: true, reason: '' }; // Assume employed if no details
+    }
+
+    for (const employment of employmentDetails) {
+      const startDate = employment.employment_start_date ? new Date(employment.employment_start_date) : null;
+      const endDate = employment.employment_end_date ? new Date(employment.employment_end_date) : null;
+
+      // Check if request time is within employment period
+      const isAfterStart = !startDate || requestTime >= startDate;
+      const isBeforeEnd = !endDate || requestTime <= endDate;
+
+      if (isAfterStart && isBeforeEnd) {
+        return { isEmployed: true, reason: '' };
+      }
+    }
+
+    return {
+      isEmployed: false,
+      reason: `Not employed during request time (${requestTime.toISOString().split('T')[0]})`
+    };
+  }
 
   /**
    * Check carer availability based on profile availability data and request availability requirements

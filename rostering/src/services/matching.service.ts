@@ -160,11 +160,12 @@ export class MatchingService {
         id: c.id?.toString() ?? c.user_id ?? c.auth_user_id ?? null,
         latitude: c.latitude ?? c.location?.lat ?? c.profile?.location?.lat ?? null,
         longitude: c.longitude ?? c.location?.lng ?? c.profile?.location?.lng ?? null,
-        skills: c.profile?.professional_qualifications ?? c.skills ?? [],
+        skills: c.profile?.skill_details ?? c.profile?.professional_qualifications ?? c.skills ?? [],
         languages: c.profile?.languages ?? c.languages ?? [],
         maxTravelDistance: c.profile?.maxTravelDistance ?? c.maxTravelDistance ?? c.profile?.max_travel_distance ?? 10000,
         isActive: (c.status ? c.status === 'active' : true),
-        experience: c.profile?.experience_years ?? c.experience ?? 0
+        experience: c.profile?.experience_years ?? c.experience ?? 0,
+        employmentDetails: c.profile?.employment_details ?? []
       })).filter(carer => carer.id !== null);
 
       logger.debug(`🎯 Final result: Found ${carers.length} potential carers for request: ${request.id}`);
@@ -175,6 +176,38 @@ export class MatchingService {
       logServiceError('Matching', 'findPotentialCarers', error, { requestId: request.id });
       return [];
     }
+  }
+
+  /**
+   * Check if carer is employed during the request time
+   */
+  private checkEmploymentStatus(carer: any, requestTime: Date | null): { isEmployed: boolean; reason: string } {
+    if (!requestTime) {
+      return { isEmployed: true, reason: '' };
+    }
+
+    const employmentDetails = carer.employmentDetails || [];
+    if (employmentDetails.length === 0) {
+      return { isEmployed: true, reason: '' }; // Assume employed if no details
+    }
+
+    for (const employment of employmentDetails) {
+      const startDate = employment.employment_start_date ? new Date(employment.employment_start_date) : null;
+      const endDate = employment.employment_end_date ? new Date(employment.employment_end_date) : null;
+
+      // Check if request time is within employment period
+      const isAfterStart = !startDate || requestTime >= startDate;
+      const isBeforeEnd = !endDate || requestTime <= endDate;
+
+      if (isAfterStart && isBeforeEnd) {
+        return { isEmployed: true, reason: '' };
+      }
+    }
+
+    return {
+      isEmployed: false,
+      reason: `Not employed during request time (${requestTime.toISOString().split('T')[0]})`
+    };
   }
 
   /**
@@ -222,10 +255,21 @@ export class MatchingService {
       return { carer, distance, matchScore: 0, reasoning };
     }
 
+    // Check employment status
+    const employmentCheck = this.checkEmploymentStatus(carer, request.scheduledStartTime);
+    if (!employmentCheck.isEmployed) {
+      reasoning.push(employmentCheck.reason);
+      return { carer, distance, matchScore: 0, reasoning };
+    }
+
     // Skills matching
     if (criteria.requiredSkills && criteria.requiredSkills.length > 0) {
-      const matchedSkills = criteria.requiredSkills.filter(skill => 
-        carer.skills.includes(skill)
+      const matchedSkills = criteria.requiredSkills.filter(skill =>
+        carer.skills.some((carerSkill: any) =>
+          typeof carerSkill === 'string'
+            ? carerSkill.toLowerCase().includes(skill.toLowerCase()) || skill.toLowerCase().includes(carerSkill.toLowerCase())
+            : carerSkill.skill_name?.toLowerCase().includes(skill.toLowerCase()) || skill.toLowerCase().includes(carerSkill.skill_name?.toLowerCase())
+        )
       );
       const skillsScore = (matchedSkills.length / criteria.requiredSkills.length) * 100;
       score += skillsScore * 0.3; // 30% weight
@@ -342,8 +386,15 @@ export class MatchingService {
    */
   async autoMatchRequest(requestId: string): Promise<boolean> {
     try {
+      // Get the request to extract requiredSkills
+      const request = await this.prisma.externalRequest.findUnique({
+        where: { id: requestId },
+        select: { requiredSkills: true }
+      });
+
       const criteria: MatchingCriteria = {
         maxDistance: parseInt(process.env.DEFAULT_MATCHING_RADIUS || '5000'),
+        requiredSkills: request?.requiredSkills || [],
         availabilityRequired: false
       };
 

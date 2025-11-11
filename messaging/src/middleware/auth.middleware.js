@@ -51,31 +51,15 @@ async function ensureUserAndTenant(payload) {
   try {
     const tenantId = parseInt(payload.tenant_id, 10);
 
-    // The JWT token uses email as the subject (sub), but we need a numeric user ID
-    // We'll need to fetch the user ID from the auth service or use a different approach
-    // For now, let's try to get user info from the auth service
-
     console.log("Payload sub (email):", payload.sub);
     console.log("Looking for user with email:", payload.email);
 
-    // First, try to find existing user by email
-    let existingUser = await prisma.user.findFirst({
-      where: {
-        email: payload.email,
-        tenantId: tenantId,
-      },
-    });
+    // Use the user ID from the JWT payload directly (it's already a string)
+    // The JWT contains the user ID as a string from the auth service
+    let userId = payload.id || payload.user_id || payload.sub;
 
-    let userId;
-    if (existingUser) {
-      userId = existingUser.id;
-      console.log("Found existing user:", userId);
-    } else {
-      // If user doesn't exist, we need to create them
-      // For now, let's assign a temporary ID or fetch from auth service
-      console.log("User not found, need to create or fetch from auth service");
-
-      // Try to get user details from auth service
+    // If it's still not a string, try to fetch from auth service
+    if (!userId || typeof userId !== 'string') {
       try {
         const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:9090/api/auth_service';
         const response = await axios.get(`${authServiceUrl}/api/user/users/?email=${encodeURIComponent(payload.email)}`, {
@@ -90,19 +74,13 @@ async function ensureUserAndTenant(payload) {
         }
       } catch (authError) {
         console.error("Could not fetch user from auth service:", authError.message);
-        // Fallback: create a temporary user ID based on email hash or similar
-        // This is not ideal but allows the service to work
-        userId = Math.abs(payload.email.split('').reduce((a, b) => {
-          a = ((a << 5) - a) + b.charCodeAt(0);
-          return a & a;
-        }, 0));
-        console.log("Using fallback user ID:", userId);
+        throw new Error(`Could not determine user ID for ${payload.email}`);
       }
     }
 
     console.log("Final tenantId:", tenantId, "userId:", userId);
 
-    if (isNaN(tenantId) || isNaN(userId)) {
+    if (isNaN(tenantId) || !userId) {
       throw new Error("Invalid user or tenant ID in token");
     }
 
@@ -153,31 +131,37 @@ async function ensureUserAndTenant(payload) {
 
 export const authMiddleware = async (req, res, next) => {
   try {
+    console.log(`[AUTH] Processing request: ${req.method} ${req.path}`);
     // Skip authentication for public paths
     if (publicPaths.some((path) => req.path.startsWith(path))) {
+      console.log(`[AUTH] Skipping auth for public path: ${req.path}`);
       return next();
     }
 
     // Get token from header
     const authHeader = req.headers.authorization || "";
     if (!authHeader.startsWith("Bearer ")) {
-      console.warn("No Bearer token provided");
+      console.warn("[AUTH] No Bearer token provided");
       return next();
     }
 
     const token = authHeader.split(" ")[1];
+    console.log(`[AUTH] Token present, length: ${token.length}`);
 
     try {
       let payload;
       const unverifiedHeader = jwt.decode(token, { complete: true })?.header;
+      console.log(`[AUTH] Unverified header:`, unverifiedHeader);
 
       // Try RS256 verification if KID is present
       if (unverifiedHeader?.kid) {
+        console.log(`[AUTH] KID present: ${unverifiedHeader.kid}, attempting RS256`);
         const unverifiedPayload = jwt.decode(token);
         const tenantId = unverifiedPayload?.tenant_id;
+        console.log(`[AUTH] Tenant ID from token: ${tenantId}`);
 
         if (!tenantId) {
-          console.warn("No tenant_id in token");
+          console.warn("[AUTH] No tenant_id in token");
           return next(
             new AuthenticationFailed("Invalid token: Missing tenant_id")
           );
@@ -185,35 +169,45 @@ export const authMiddleware = async (req, res, next) => {
 
         try {
           const publicKeyUrl = `${AUTH_SERVICE_URL}/api/public-key/${unverifiedHeader.kid}/?tenant_id=${tenantId}`;
-          console.log(`Fetching public key from: ${publicKeyUrl}`);
+          console.log(`[AUTH] Fetching public key from: ${publicKeyUrl}`);
 
           const response = await axios.get(publicKeyUrl, {
             headers: { Authorization: `Bearer ${token}` },
             timeout: 5000,
           });
 
+          console.log(`[AUTH] Public key response status: ${response.status}`);
           if (response.status === 200 && response.data?.public_key) {
             const publicKey = response.data.public_key;
+            console.log(`[AUTH] Public key fetched, length: ${publicKey.length}`);
             payload = jwt.verify(token, publicKey, { algorithms: ["RS256"] });
+            console.log(`[AUTH] RS256 verification successful`);
+          } else {
+            console.warn(`[AUTH] Invalid response from public key endpoint: ${response.status}`);
           }
         } catch (rsaError) {
           console.error(
-            "RS256 verification failed, falling back to HS256:",
+            "[AUTH] RS256 verification failed, falling back to HS256:",
             rsaError.message
           );
           // Continue to HS256 fallback
         }
+      } else {
+        console.log(`[AUTH] No KID in header, using HS256`);
       }
 
       // Fallback to HS256 if RS256 failed or no KID
       if (!payload) {
+        console.log(`[AUTH] Attempting HS256 verification with JWT_SECRET: ${JWT_SECRET ? 'present' : 'NOT SET'}`);
         payload = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
+        console.log(`[AUTH] HS256 verification successful`);
       }
 
-      console.log("Decoded JWT payload:", JSON.stringify(payload, null, 2));
+      console.log("[AUTH] Decoded JWT payload:", JSON.stringify(payload, null, 2));
 
       // Ensure user and tenant exist in the database
       const { user, tenant } = await ensureUserAndTenant(payload);
+      console.log(`[AUTH] User and tenant ensured: user=${user.id}, tenant=${tenant.id}`);
 
       // Attach user and tenant to request
       req.user = new SimpleUser({
@@ -228,18 +222,20 @@ export const authMiddleware = async (req, res, next) => {
       };
       req.jwt_payload = payload;
 
+      console.log(`[AUTH] Authentication successful for user: ${req.user.id}`);
       return next();
     } catch (error) {
+      console.error(`[AUTH] JWT verification error: ${error.name} - ${error.message}`);
       if (error.name === "TokenExpiredError") {
         return next(new UnauthorizedError("Token expired"));
       } else if (error.name === "JsonWebTokenError") {
         return next(new UnauthorizedError("Invalid token"));
       }
-      console.error("Authentication error:", error);
+      console.error("[AUTH] Authentication error:", error);
       return next(new AuthenticationFailed("Authentication failed"));
     }
   } catch (error) {
-    console.error("Unexpected error in auth middleware:", error);
+    console.error("[AUTH] Unexpected error in auth middleware:", error);
     return next(new AuthenticationFailed("Authentication error"));
   }
 };

@@ -90,7 +90,7 @@ export class EligibilityService {
     let score = 0;
 
     // Check skills
-    const skillsMatch = this.checkSkillsMatch(visit.requirements, carer.skills);
+    const skillsMatch = this.checkSkillsMatch(visit.requiredSkills || [], carer.skills);
     if (!skillsMatch) {
       reasons.push('Missing required skills');
     } else {
@@ -140,16 +140,14 @@ export class EligibilityService {
     };
   }
 
-  private checkSkillsMatch(requirements: string | null, carerSkills: string[]): boolean {
-    if (!requirements) return true;
-    
-    const requiredSkills = this.extractSkills(requirements);
-    if (requiredSkills.length === 0) return true;
-    
+  private checkSkillsMatch(requiredSkills: string[], carerSkills: string[]): boolean {
+    if (!requiredSkills || requiredSkills.length === 0) return true;
+
     const carerSkillsLower = carerSkills.map(s => s.toLowerCase());
-    
-    return requiredSkills.every(requiredSkill => 
-      carerSkillsLower.some(carerSkill => carerSkill.includes(requiredSkill))
+    const requiredSkillsLower = requiredSkills.map(s => s.toLowerCase());
+
+    return requiredSkillsLower.every(requiredSkill =>
+      carerSkillsLower.some(carerSkill => carerSkill.includes(requiredSkill) || requiredSkill.includes(carerSkill))
     );
   }
 

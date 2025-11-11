@@ -1,4 +1,4 @@
-//C:\Users\CPT-003\Desktop\CRM\crm_apis_microservices\rostering\src\types\index.ts
+///C:\Users\CPT-003\Desktop\CRM\crm_apis_microservices\rostering\src\types\index.ts
 // Database model types
 export interface ExternalRequest {
   id: string;
@@ -24,6 +24,7 @@ export interface ExternalRequest {
   notes?: string;
   emailMessageId?: string;
   emailThreadId?: string;
+  requestTypes?: string;
   createdAt: Date;
   updatedAt: Date;
   processedAt?: Date;
@@ -189,6 +190,7 @@ export interface CreateRequestPayload {
   scheduledEndTime?: string;
   recurrencePattern?: string;
   notes?: string;
+  requestTypes?: string;
 }
 
 export interface UpdateRequestPayload {
@@ -207,6 +209,7 @@ export interface UpdateRequestPayload {
   scheduledEndTime?: string;
   recurrencePattern?: string;
   notes?: string;
+  requestTypes?: string;
 }
 
 export interface CreateCarerPayload {

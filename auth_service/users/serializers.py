@@ -1330,24 +1330,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "permission_levels": {"required": False, "allow_null": True},
         }
 
-    # def get_last_updated_by(self, obj):
-    #     if obj.last_updated_by_id:
-    #         try:
-    #             user_data = get_user_data_from_jwt(self.context['request'])
-    #             if str(user_data['id']) == str(obj.last_updated_by_id):
-    #                 return {
-    #                     'id': user_data['id'],
-    #                     'email': user_data['email'],
-    #                     'first_name': user_data['first_name'],
-    #                     'last_name': user_data['last_name']
-    #                 }
-    #             logger.warning(f"Access denied to last_updated_by details for {obj.last_updated_by_id}")
-    #             return None
-    #         except Exception as e:
-    #             logger.error(f"Error fetching last_updated_by {obj.last_updated_by_id}: {str(e)}")
-    #             return None
-    #     logger.warning(f"No last_updated_by_id provided for {obj}")
-    #     return None
 
     def to_internal_value(self, data):
         logger.info(f"Raw payload in UserCreateSerializer: {dict(data)}")
@@ -1369,7 +1351,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 "driving_risk_assessments",
                 "legal_work_eligibilities",
                 "other_user_documents",
-                "skill_details",
             ]
 
             for field in nested_fields:
@@ -1382,6 +1363,11 @@ class UserCreateSerializer(serializers.ModelSerializer):
                     if "][" in key:
                         parts = key.split("[")
                         field_name = parts[1][:-1]  # e.g., professional_qualifications
+
+                        # CRITICAL FIX: Map "skills" to "skill_details" 
+                        if field_name == "skills":
+                            field_name = "skill_details"
+   
                         index = int(parts[2][:-1])  # e.g., 0
                         sub_field = parts[3][:-1]  # e.g., image_file
 

@@ -123,7 +123,7 @@ export const ChatService = {
   },
 
   // Ensure user exists in messaging database, fetch from auth service if needed
-  async ensureUserExists(userId, tenantId, authToken = null) {
+  async ensureUserExists(userId, tenantId, authToken = null, userData = null) {
     try {
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
@@ -134,37 +134,62 @@ export const ChatService = {
         return existingUser;
       }
 
-      // User doesn't exist, try to fetch from auth service
-      console.log(`User ${userId} not found in messaging DB, fetching from auth service`);
+      // User doesn't exist, create from JWT data or fetch from auth service
+      console.log(`User ${userId} not found in messaging DB, creating from JWT data`);
 
       try {
-        const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8001';
-        const headers = {
-          'Content-Type': 'application/json',
-        };
+        let userInfo = userData;
 
-        // Use auth token if provided
-        if (authToken) {
-          headers['Authorization'] = authToken;
+        // If no userData provided, try to fetch from auth service
+        if (!userInfo) {
+          const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8001';
+          const headers = {
+            'Content-Type': 'application/json',
+          };
+
+          // Use auth token if provided
+          if (authToken) {
+            headers['Authorization'] = authToken;
+          }
+
+          try {
+            // First try to fetch user by ID
+            const response = await axios.get(`${authServiceUrl}/api/user/users/?id=${encodeURIComponent(userId)}`, {
+              headers,
+              timeout: 5000,
+            });
+
+            if (response.data && response.data.results && response.data.results.length > 0) {
+              userInfo = response.data.results[0];
+            }
+          } catch (idError) {
+            console.log(`Could not fetch user by ID ${userId}, trying by email`);
+            // If that fails, try by email (assuming userId might be email)
+            try {
+              const response = await axios.get(`${authServiceUrl}/api/user/users/?email=${encodeURIComponent(userId)}`, {
+                headers,
+                timeout: 5000,
+              });
+
+              if (response.data && response.data.results && response.data.results.length > 0) {
+                userInfo = response.data.results[0];
+              }
+            } catch (emailError) {
+              console.error("Could not fetch user by email either:", emailError.message);
+            }
+          }
         }
 
-        const response = await axios.get(`${authServiceUrl}/api/user/users/${userId}`, {
-          headers,
-          timeout: 5000,
-        });
-
-        if (response.data && response.data.length > 0) {
-          const authUser = response.data[0];
-
+        if (userInfo) {
           // Create user in messaging database
           const newUser = await prisma.user.create({
             data: {
-              id: authUser.id,
-              email: authUser.email,
-              username: authUser.username || authUser.email?.split("@")[0] || `user_${authUser.id}`,
-              firstName: authUser.first_name || "",
-              lastName: authUser.last_name || "",
-              role: authUser.role || "user",
+              id: userInfo.id || userId,
+              email: userInfo.email || userId,
+              username: userInfo.username || userInfo.email?.split("@")[0] || `user_${userId}`,
+              firstName: userInfo.first_name || userInfo.firstName || "",
+              lastName: userInfo.last_name || userInfo.lastName || "",
+              role: userInfo.role || "user",
               tenantId: tenantId,
             }
           });
@@ -172,15 +197,47 @@ export const ChatService = {
           console.log(`Created user ${userId} in messaging database`);
           return newUser;
         } else {
-          throw new Error(`User ${userId} not found in auth service`);
+          // Create minimal user from JWT data if available
+          if (userData) {
+            const newUser = await prisma.user.create({
+              data: {
+                id: userData.id || userId,
+                email: userData.email || userId,
+                username: userData.username || userData.email?.split("@")[0] || `user_${userId}`,
+                firstName: userData.firstName || "",
+                lastName: userData.lastName || "",
+                role: userData.role || "user",
+                tenantId: tenantId,
+              }
+            });
+
+            console.log(`Created user ${userId} in messaging database from JWT data`);
+            return newUser;
+          }
+
+          throw new Error(`User ${userId} not found in auth service and no JWT data provided`);
         }
       } catch (authError) {
         console.error("Could not fetch user from auth service:", authError.message);
-        // If the user doesn't exist in auth service, throw a specific error
-        if (authError.message.includes('User') && authError.message.includes('not found')) {
-          throw new Error(`Participant user (ID: ${userId}) does not exist`);
+        // If we have JWT data, create user anyway
+        if (userData) {
+          const newUser = await prisma.user.create({
+            data: {
+              id: userData.id || userId,
+              email: userData.email || userId,
+              username: userData.username || userData.email?.split("@")[0] || `user_${userId}`,
+              firstName: userData.firstName || "",
+              lastName: userData.lastName || "",
+              role: userData.role || "user",
+              tenantId: tenantId,
+            }
+          });
+
+          console.log(`Created user ${userId} in messaging database from JWT data (fallback)`);
+          return newUser;
         }
-        throw new Error(`Failed to fetch user ${userId} from auth service`);
+
+        throw new Error(`Failed to create user ${userId}`);
       }
     } catch (error) {
       console.error('Error in ensureUserExists:', error);
@@ -189,10 +246,10 @@ export const ChatService = {
   },
 
   // Create or get existing direct chat between two users
-  async getOrCreateDirectChat(userId, participantId, tenantId, authToken = null) {
+  async getOrCreateDirectChat(userId, participantId, tenantId, authToken = null, participantData = null) {
     try {
       // Ensure the participant user exists in the messaging database
-      await this.ensureUserExists(participantId, tenantId, authToken);
+      await this.ensureUserExists(participantId, tenantId, authToken, participantData);
 
       // Check if a direct chat already exists between these users
       const existingChat = await prisma.usersOnChats.findFirst({
@@ -432,6 +489,126 @@ export const ChatService = {
     } catch (error) {
       console.error('Error in sendMessageToUser:', error);
       throw new Error('Failed to send message');
+    }
+  },
+
+  // Send message to an existing chat
+  async sendMessageToChat(chatId, senderId, content, tenantId, req) {
+    try {
+      // Verify user has access to the chat
+      const userChat = await prisma.usersOnChats.findUnique({
+        where: {
+          userId_chatId: {
+            userId: senderId,
+            chatId: chatId
+          }
+        }
+      });
+
+      if (!userChat) {
+        throw new Error('Chat not found or access denied');
+      }
+
+      // Generate unique message ID
+      const messageId = generateMessageId();
+
+      // Get author details from request (from JWT token)
+      const authorDetails = req?.user ? {
+        id: req.user.id,
+        username: req.user.username,
+        email: req.user.email,
+        firstName: req.user.firstName || "",
+        lastName: req.user.lastName || ""
+      } : null;
+
+      // Create the message
+      const message = await prisma.message.create({
+        data: {
+          messageId: messageId,
+          content: content,
+          chatId: chatId,
+          authorId: senderId,
+          status: 'DELIVERED'
+        }
+      });
+
+      // Update chat's last message
+      await prisma.chat.update({
+        where: { id: chatId },
+        data: {
+          lastMessageId: message.id,
+          updatedAt: new Date()
+        }
+      });
+
+      // Increment unread count for other participants
+      await prisma.usersOnChats.updateMany({
+        where: {
+          chatId: chatId,
+          userId: {
+            not: senderId
+          }
+        },
+        data: {
+          unreadCount: {
+            increment: 1
+          }
+        }
+      });
+
+      // Emit real-time event if socket is available
+      if (req && req.io) {
+        // Get all participants except sender
+        const participants = await prisma.usersOnChats.findMany({
+          where: {
+            chatId: chatId,
+            userId: {
+              not: senderId
+            }
+          },
+          select: {
+            userId: true
+          }
+        });
+
+        // Emit to all participants
+        participants.forEach(participant => {
+          req.io.to(`user_${participant.userId}`).emit('new_message', {
+            chatId: chatId,
+            message: {
+              id: message.messageId,
+              content: message.content,
+              type: message.type,
+              fileUrl: message.fileUrl,
+              fileName: message.fileName,
+              fileSize: message.fileSize,
+              fileType: message.fileType,
+              createdAt: message.createdAt,
+              author: authorDetails
+            },
+            unreadCount: 1
+          });
+        });
+      }
+
+      return {
+        message: {
+          id: message.messageId,
+          content: message.content,
+          chatId: message.chatId,
+          authorId: message.authorId,
+          status: message.status,
+          createdAt: message.createdAt,
+          author: authorDetails
+        },
+        chat: {
+          id: chatId,
+          type: 'DIRECT' // Assuming direct chat for now
+        }
+      };
+    } catch (error) {
+      console.error('Error in sendMessageToChat:', error);
+      throw new Error('Failed to send message to chat');
     }
   },
 

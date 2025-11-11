@@ -160,17 +160,28 @@ const upload = multer({
   }
 });
 
-// Send a message to a user (by userId)
+// Send a message to a user (by userId) or to an existing chat
 messagesRouter.post("/send", async (req, res) => {
   try {
-    const { recipientId, content } = req.body;
+    const { recipientId, chatId, content } = req.body;
     const senderId = req.user.id;
     const tenantId = req.tenant?.id;
-    if (!recipientId || !content) {
-      return res.status(400).json({ status: "error", message: "recipientId and content are required" });
+
+    if (!content) {
+      return res.status(400).json({ status: "error", message: "content is required" });
     }
-    const result = await ChatService.sendMessageToUser(recipientId, senderId, content, tenantId, req);
-    res.status(201).json({ status: "success", data: result });
+
+    if (chatId) {
+      // Send message to existing chat
+      const result = await ChatService.sendMessageToChat(chatId, senderId, content, tenantId, req);
+      res.status(201).json({ status: "success", data: result });
+    } else if (recipientId) {
+      // Send message to user (creates chat if needed)
+      const result = await ChatService.sendMessageToUser(recipientId, senderId, content, tenantId, req);
+      res.status(201).json({ status: "success", data: result });
+    } else {
+      return res.status(400).json({ status: "error", message: "Either recipientId or chatId is required" });
+    }
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });
   }

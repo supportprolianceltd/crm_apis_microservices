@@ -19,29 +19,30 @@ datasource db {
 // ─────────────────────────────────────────────
 
 model ExternalRequest {
-  id String @id // Custom generated IDs
-  tenantId String
-  subject String
-  content String @db.Text
-  requestorEmail String
-  requestorName String?
-  requestorPhone String?
-  address String
-  postcode String
-  location Unsupported("geography(POINT, 4326)")?
-  latitude Float?
-  longitude Float?
-  urgency RequestUrgency @default(MEDIUM)
-  status RequestStatus @default(PENDING)
-  requirements        String? @db.Text
-  requiredSkills      String[] @default([])
-  estimatedDuration   Int?
-  scheduledStartTime  DateTime?
-  scheduledEndTime    DateTime?
-  recurrencePattern   String?
-  notes               String? @db.Text
-  emailMessageId String?
-  emailThreadId String?
+   id String @id // Custom generated IDs
+   tenantId String
+   subject String
+   content String @db.Text
+   requestorEmail String
+   requestorName String?
+   requestorPhone String?
+   address String
+   postcode String
+   location Unsupported("geography(POINT, 4326)")?
+   latitude Float?
+   longitude Float?
+   urgency RequestUrgency @default(MEDIUM)
+   status RequestStatus @default(PENDING)
+   requirements        String? @db.Text
+   requiredSkills      String[] @default([])
+   estimatedDuration   Int?
+   scheduledStartTime  DateTime?
+   scheduledEndTime    DateTime?
+   recurrencePattern   String?
+   notes               String? @db.Text
+   emailMessageId String?
+   emailThreadId String?
+   requestTypes String?
  
   // Approval fields
   approvedBy String?

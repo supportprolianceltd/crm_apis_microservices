@@ -558,6 +558,8 @@ class CustomTokenSerializer(serializers.Serializer):
         access_payload = {
             "jti": str(uuid.uuid4()),
             "sub": user.email,
+            "first_name": user.last_name,
+            "last_name": user.last_name,
             "username": username,
             "role": role,
             "status": status,

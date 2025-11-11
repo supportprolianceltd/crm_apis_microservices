@@ -1,16 +1,3 @@
-# # gateway/urls.py
-# from django.urls import re_path, path
-# from .views import api_gateway_view, health_check
-
-# urlpatterns = [
-#     #path('api/docs/', multi_docs_view, name='multi-docs'),
-#     re_path(r'^api/(?P<path>.*)$', api_gateway_view),
-#     path('health/', health_check, name='health_check'),
-# ]
-
-
-
-
 from django.urls import path, re_path
 from . import views
 
@@ -20,6 +7,7 @@ urlpatterns = [
     path('circuit-breaker/status/', views.circuit_breaker_status, name='circuit_breaker_status'),
     path('circuit-breaker/reset/<str:service_name>/', views.reset_circuit_breaker, name='reset_circuit_breaker'),
     re_path(r'^ws/(?P<path>.*)$', views.websocket_gateway_view, name='websocket_gateway'),
+    re_path(r'^socket\.io/(?P<path>.*)$', views.socketio_gateway_view, name='socketio_gateway'),
     re_path(r'^api/(?P<path>.*)$', views.api_gateway_view, name='api_gateway'),
 ]
 
