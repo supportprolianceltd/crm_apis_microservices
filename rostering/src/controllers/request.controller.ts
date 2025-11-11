@@ -1137,6 +1137,7 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
             availability: {
               isAvailable: availabilityCheck.isAvailable,
               conflicts: availabilityCheck.conflicts,
+              suggestions: availabilityCheck.suggestions,
               availableHours: carer.profile?.availability || {}
             },
             scheduleCheck: includeScheduleCheck === 'true' ? {
@@ -1148,6 +1149,34 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
           };
         })
       );
+
+      // Collect all alternative suggestions from all carers
+      const alternativeOptions: any[] = [];
+      feasibilityResults.forEach(result => {
+        if (result.availability.suggestions && result.availability.suggestions.length > 0) {
+          result.availability.suggestions.forEach((suggestion: any) => {
+            alternativeOptions.push({
+              carerId: result.carerId,
+              carerName: result.carerName,
+              email: result.email,
+              skillsMatch: result.skillsMatch,
+              day: suggestion.day,
+              date: suggestion.date,
+              startTime: suggestion.startTime,
+              endTime: suggestion.endTime,
+              duration: suggestion.duration,
+              isPrimaryTime: false // Mark as alternative
+            });
+          });
+        }
+      });
+
+      // Sort alternative options by date and time
+      alternativeOptions.sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.startTime.localeCompare(b.startTime);
+      });
 
       // Sort by eligibility (eligible first, then by skill match quality)
       feasibilityResults.sort((a, b) => {
@@ -1177,12 +1206,14 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
             totalCarers: allCarers.length,
             eligibleCarers: eligibleCarers.length,
             ineligibleCarers: ineligibleCarers.length,
+            alternativeOptions: alternativeOptions.length,
             checkedSchedule: includeScheduleCheck === 'true'
           },
           eligibleCarers,
-          ineligibleCarers
+          ineligibleCarers,
+          alternativeOptions: alternativeOptions.slice(0, 20) // Limit to top 20 alternatives
         },
-        message: `Found ${eligibleCarers.length} eligible carers out of ${allCarers.length} total carers`
+        message: `Found ${eligibleCarers.length} eligible carers and ${alternativeOptions.length} alternative options out of ${allCarers.length} total carers`
       });
 
     } catch (error) {
@@ -1322,7 +1353,7 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
   }
 
   /**
-   * Check carer availability based on profile availability data and request availability requirements
+   * Check carer availability based on profile availability data and suggest alternatives
    */
   private checkCarerAvailability(carer: any, requestStart: Date, requestEnd: Date, availabilityRequirements?: any) {
     const carerAvailability = carer.profile?.availability || {};
@@ -1333,41 +1364,52 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
 
     // Check if carer has availability for this day
     const dayAvailability = carerAvailability[requestDay];
-    if (!dayAvailability) {
-      return {
-        isAvailable: false,
-        conflicts: [`No availability configured for ${requestDay}`]
-      };
+    const hasAvailabilityForRequestDay = !!dayAvailability;
+
+    let isAvailable = false;
+    const conflicts: string[] = [];
+    const suggestions: any[] = [];
+
+    // Check primary availability match
+    if (hasAvailabilityForRequestDay) {
+      const availabilityResult = this.checkSpecificDayAvailability(dayAvailability, requestStart, requestEnd, requestDay);
+      isAvailable = availabilityResult.isAvailable;
+      if (!isAvailable) {
+        conflicts.push(...availabilityResult.conflicts);
+      }
+    } else {
+      conflicts.push(`No availability configured for ${requestDay}`);
     }
 
-    // Check availability requirements from the request if provided
-    if (availabilityRequirements && availabilityRequirements[requestDay]) {
-      const requiredSlots = availabilityRequirements[requestDay];
-      if (requiredSlots && Array.isArray(requiredSlots)) {
-        // Check if the request time overlaps with any required slot
-        const requestStartTime = requestStart.toTimeString().slice(0, 5); // HH:MM format
-        const requestEndTime = requestEnd.toTimeString().slice(0, 5); // HH:MM format
+    // Generate suggestions for other available days
+    const requestDurationHours = (requestEnd.getTime() - requestStart.getTime()) / (1000 * 60 * 60);
 
-        let overlapsWithRequirement = false;
-        for (const slot of requiredSlots) {
-          if (slot.start && slot.end) {
-            // Check if request time overlaps with this required slot
-            if (requestStartTime <= slot.end && requestEndTime >= slot.start) {
-              overlapsWithRequirement = true;
-              break;
-            }
-          }
-        }
+    for (const [dayName, dayAvail] of Object.entries(carerAvailability)) {
+      if (!dayAvail || dayName === requestDay) continue;
 
-        if (!overlapsWithRequirement) {
-          return {
-            isAvailable: false,
-            conflicts: [`Request time (${requestStartTime}-${requestEndTime}) does not match required availability slots for ${requestDay}`]
-          };
+      try {
+        const suggestion = this.generateTimeSuggestion(dayAvail, dayName, requestDurationHours, requestStart);
+        if (suggestion) {
+          suggestions.push(suggestion);
         }
+      } catch (error) {
+        // Skip invalid availability formats
+        continue;
       }
     }
 
+    return {
+      isAvailable,
+      conflicts,
+      suggestions: suggestions.slice(0, 3), // Limit to top 3 suggestions
+      availableHours: carerAvailability
+    };
+  }
+
+  /**
+   * Check availability for a specific day
+   */
+  private checkSpecificDayAvailability(dayAvailability: any, requestStart: Date, requestEnd: Date, requestDay: string) {
     // Handle new object format: { start: "08:00", end: "14:00", available: true }
     if (typeof dayAvailability === 'object' && dayAvailability.available !== false) {
       const startTime = dayAvailability.start;
@@ -1406,10 +1448,7 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
         conflicts.push(`Request time (${requestStartHour}:00-${requestEndHour}:00) is outside carer availability (${startHour24}:00-${endHour24}:00) on ${requestDay}`);
       }
 
-      return {
-        isAvailable,
-        conflicts
-      };
+      return { isAvailable, conflicts };
     }
 
     // Fallback: Handle old string format (e.g., "8am-6pm") for backward compatibility
@@ -1444,16 +1483,81 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
         conflicts.push(`Request time (${requestStartHour}:00-${requestEndHour}:00) is outside carer availability (${startHour24}:00-${endHour24}:00) on ${requestDay}`);
       }
 
-      return {
-        isAvailable,
-        conflicts
-      };
+      return { isAvailable, conflicts };
     }
 
     // If neither object nor string format
     return {
       isAvailable: false,
       conflicts: [`Unsupported availability format for ${requestDay}`]
+    };
+  }
+
+  /**
+   * Generate time suggestions based on carer's availability
+   */
+  private generateTimeSuggestion(dayAvailability: any, dayName: string, requestDurationHours: number, originalRequestStart: Date) {
+    let startHour24: number, endHour24: number;
+
+    // Parse availability based on format
+    if (typeof dayAvailability === 'object' && dayAvailability.available !== false) {
+      const [startHourStr] = (dayAvailability.start || '').split(':');
+      const [endHourStr] = (dayAvailability.end || '').split(':');
+      startHour24 = parseInt(startHourStr);
+      endHour24 = parseInt(endHourStr);
+    } else if (typeof dayAvailability === 'string') {
+      const timeRangeMatch = dayAvailability.match(/(\d+)(am|pm)-(\d+)(am|pm)/i);
+      if (!timeRangeMatch) return null;
+
+      const [, startHour, startPeriod, endHour, endPeriod] = timeRangeMatch;
+      startHour24 = parseInt(startHour);
+      endHour24 = parseInt(endHour);
+
+      // Convert to 24-hour format
+      if (startPeriod.toLowerCase() === 'pm' && startHour24 !== 12) startHour24 += 12;
+      if (startPeriod.toLowerCase() === 'am' && startHour24 === 12) startHour24 = 0;
+      if (endPeriod.toLowerCase() === 'pm' && endHour24 !== 12) endHour24 += 12;
+      if (endPeriod.toLowerCase() === 'am' && endHour24 === 12) endHour24 = 0;
+    } else {
+      return null;
+    }
+
+    if (isNaN(startHour24) || isNaN(endHour24)) return null;
+
+    // Calculate available duration
+    const availableDuration = endHour24 - startHour24;
+    if (availableDuration < requestDurationHours) return null; // Not enough time
+
+    // Find the next occurrence of this day
+    const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const targetDayIndex = daysOfWeek.indexOf(dayName);
+    const currentDayIndex = originalRequestStart.getDay();
+
+    let daysAhead = targetDayIndex - currentDayIndex;
+    if (daysAhead <= 0) daysAhead += 7; // Next week if same day or past
+
+    const suggestedDate = new Date(originalRequestStart);
+    suggestedDate.setDate(suggestedDate.getDate() + daysAhead);
+
+    // Suggest the earliest possible time in their availability window
+    const suggestedStart = new Date(suggestedDate);
+    suggestedStart.setHours(startHour24, 0, 0, 0);
+
+    const suggestedEnd = new Date(suggestedStart);
+    suggestedEnd.setHours(suggestedStart.getHours() + requestDurationHours);
+
+    // Make sure it fits within their availability
+    if (suggestedEnd.getHours() > endHour24) {
+      suggestedStart.setHours(endHour24 - requestDurationHours, 0, 0, 0);
+      suggestedEnd.setHours(endHour24, 0, 0, 0);
+    }
+
+    return {
+      day: dayName,
+      date: suggestedDate.toISOString().split('T')[0],
+      startTime: `${suggestedStart.getHours().toString().padStart(2, '0')}:00`,
+      endTime: `${suggestedEnd.getHours().toString().padStart(2, '0')}:00`,
+      duration: requestDurationHours
     };
   }
 

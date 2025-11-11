@@ -806,6 +806,7 @@
         "availability": {
           "isAvailable": true,
           "conflicts": [],
+          "suggestions": [],
           "availableHours": {
             "friday": {
               "end": "14:00",
@@ -868,6 +869,22 @@
           "conflicts": [
             "Request time (8:00-11:00) is outside carer availability (22:00-6:00) on monday"
           ],
+          "suggestions": [
+            {
+              "day": "tuesday",
+              "date": "2025-11-12",
+              "startTime": "08:00",
+              "endTime": "11:00",
+              "duration": 3
+            },
+            {
+              "day": "wednesday",
+              "date": "2025-11-13",
+              "startTime": "08:00",
+              "endTime": "11:00",
+              "duration": 3
+            }
+          ],
           "availableHours": {
             "monday": "10pm-6am",
             "sunday": "10pm-6am"
@@ -880,9 +897,45 @@
         },
         "overallEligible": false
       }
+    ],
+    "alternativeOptions": [
+      {
+        "carerId": 48,
+        "carerName": "John Smith",
+        "email": "john.smith@careagency.com",
+        "skillsMatch": {
+          "hasRequiredSkills": true,
+          "missingSkills": [],
+          "matchingSkills": ["Personal Care", "Medication Management"],
+          "requirementsMatch": true
+        },
+        "day": "tuesday",
+        "date": "2025-11-12",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "duration": 3,
+        "isPrimaryTime": false
+      },
+      {
+        "carerId": 52,
+        "carerName": "Emma Wilson",
+        "email": "emma.wilson@careagency.com",
+        "skillsMatch": {
+          "hasRequiredSkills": true,
+          "missingSkills": [],
+          "matchingSkills": ["Personal Care"],
+          "requirementsMatch": true
+        },
+        "day": "wednesday",
+        "date": "2025-11-13",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "duration": 3,
+        "isPrimaryTime": false
+      }
     ]
   },
-  "message": "Found 1 eligible carers out of 6 total carers"
+  "message": "Found 1 eligible carers and 2 alternative options out of 6 total carers"
 }
 ```
 

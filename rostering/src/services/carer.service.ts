@@ -16,7 +16,7 @@ export class CarerService {
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
     console.log(`Calling: ${this.authServiceUrl}/api/user/users/`);
-    
+
     const response = await fetch(`${this.authServiceUrl}/api/user/users/`, {
       method: 'GET',
       headers
@@ -48,8 +48,8 @@ export class CarerService {
 
     console.log(`Processing ${users.length} users from auth service`);
 
-    // Filter for carers only
-    const carers = users.filter((user: any) => 
+    // Filter for carers only (keep role filtering, remove tenant filtering)
+    const carers = users.filter((user: any) =>
       user.role === 'carer' && user.status === 'active'
     );
 
