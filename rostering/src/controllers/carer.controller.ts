@@ -94,8 +94,26 @@ export class CarerController {
         // Validate query parameters
         const validatedQuery = searchCarersSchema.parse(req.query);
 
-        // Get all carers from auth service
-        const allCarers = await this.carerService.getCarers(authToken, tenantId);
+        // Pagination values (compute early so we can optimize fetch)
+        const page = validatedQuery.page || 1;
+        const limit = validatedQuery.limit || 20;
+        const skip = (page - 1) * limit;
+
+        // Determine if the request includes filters. If there are no filters,
+        // we can ask getCarers to stop after skip+limit items to avoid fetching
+        // the entire user list. If filters are present we must fetch all and
+        // then filter locally to remain correct.
+        const hasFilters = Boolean(
+          validatedQuery.postcode ||
+          (validatedQuery.skills && validatedQuery.skills.length > 0) ||
+          (validatedQuery.languages && validatedQuery.languages.length > 0) ||
+          validatedQuery.isActive !== undefined
+        );
+
+        // Get carers from auth service. If no filters, request only enough items
+        // to satisfy the requested page (skip + limit) to improve performance.
+        const fetchOptions = hasFilters ? undefined : { maxItems: skip + limit };
+        const allCarers = await this.carerService.getCarers(authToken, tenantId, fetchOptions);
 
         // Apply filters manually since we're getting all data from auth service
         let filteredCarers = allCarers;
@@ -129,12 +147,9 @@ export class CarerController {
           );
         }
 
-        // Paginate results
-        const page = validatedQuery.page || 1;
-        const limit = validatedQuery.limit || 20;
-        const skip = (page - 1) * limit;
-        
-        const paginatedCarers = filteredCarers.slice(skip, skip + limit);
+  // Paginate results
+  // (page/limit/skip already computed above)
+  const paginatedCarers = filteredCarers.slice(skip, skip + limit);
         const total = filteredCarers.length;
         const totalPages = Math.ceil(total / limit);
 
