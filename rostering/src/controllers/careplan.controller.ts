@@ -74,6 +74,7 @@ export class CarePlanController {
       if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
 
       const payload = req.body || {};
+      console.log(`Attempting to create careplan for tenant ${tenantId}`)
       const errors = validateCreatePayload(payload);
       if (errors.length) return res.status(400).json({ errors });
 
@@ -213,11 +214,16 @@ export class CarePlanController {
       // create the care plan with nested relations when present
       // Prisma client types may be out-of-date in dev; cast to any so the code compiles until `prisma generate` is run
       const created = await (this.prisma as any).carePlan.create({ data, include: includeShape });
+      console.log("Careplan created successfully")
 
       return res.status(201).json(created);
     } catch (error: any) {
       console.error('createCarePlan error', error);
-      return res.status(500).json({ error: getUserFriendlyError(error) });
+      // Return the raw error details for debugging (message + optional stack in non-production)
+      const errPayload = error instanceof Error
+        ? { message: error.message, stack: error.stack }
+        : error;
+      return res.status(500).json({ error: errPayload });
     }
   }
 
@@ -355,7 +361,10 @@ export class CarePlanController {
       return res.json(updated);
     } catch (error: any) {
       console.error('updateCarePlan error', error);
-      return res.status(500).json({ error: getUserFriendlyError(error) });
+      const errPayload = error instanceof Error
+        ? { message: error.message, stack: error.stack }
+        : error;
+      return res.status(500).json({ error: errPayload });
     }
   }
 
