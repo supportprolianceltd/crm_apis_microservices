@@ -7,6 +7,9 @@ export function createTaskRoutes(controller: TaskController) {
   // Create a new task
   router.post('/', (req, res) => controller.createTask(req, res));
 
+  // List all tenant tasks (supports pagination and filters)
+  router.get('/', (req, res) => controller.listTenantTasks(req, res));
+
   // Get single task by ID
   router.get('/:taskId', (req, res) => controller.getTaskById(req, res));
 

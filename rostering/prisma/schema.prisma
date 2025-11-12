@@ -791,9 +791,10 @@ model AgreedCareSchedule {
 model AgreedCareSlot {
   id         String   @id @default(cuid())
   scheduleId String
-  // time values stored as HH:MM strings to match frontend payload
-  startTime  String
-  endTime    String
+  // time values stored as SQL TIME (HH:MM:SS). Use @db.Time to map to Postgres time type.
+  // Prisma maps native SQL TIME to a DateTime field with @db.Time. Values will be handled as times.
+  startTime  DateTime @db.Time
+  endTime    DateTime @db.Time
   externalId String? // original client-provided id like "monday-default-0"
   position   Int? // ordering index within the day's slots
   createdAt  DateTime @default(now())

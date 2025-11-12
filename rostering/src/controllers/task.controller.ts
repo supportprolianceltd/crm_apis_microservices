@@ -25,9 +25,16 @@ export class TaskController {
     this.prisma = prisma;
   }
 
-  // Convert "HH:MM" to minutes since midnight (0-1439). Returns null for malformed strings.
-  private timeStringToMinutes(hhmm: string): number | null {
-    if (!hhmm || typeof hhmm !== 'string') return null;
+  // Convert a time representation to minutes since midnight (0-1439).
+  // Accepts "HH:MM" or "HH:MM:SS" strings, or Date objects (where only the time component is used).
+  private timeStringToMinutes(hhmm: string | Date): number | null {
+    if (!hhmm) return null;
+    if (hhmm instanceof Date) {
+      const hh = hhmm.getHours();
+      const mm = hhmm.getMinutes();
+      return hh * 60 + mm;
+    }
+    if (typeof hhmm !== 'string') return null;
     const parts = hhmm.split(':');
     if (parts.length < 2) return null;
     const hh = parseInt(parts[0], 10);
@@ -438,6 +445,60 @@ export class TaskController {
     } catch (error: any) {
       console.error('getTasksByCarer error', error);
       return res.status(500).json({ error: 'Failed to fetch tasks for carer', details: error?.message });
+    }
+  }
+
+  // List all tasks for the requesting tenant with optional pagination and filters
+  public async listTenantTasks(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId ?? (req.query && req.query.tenantId);
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const page = parseInt((req.query.page as string) || '1', 10);
+      const pageSize = parseInt((req.query.pageSize as string) || '50', 10);
+      const skip = (Math.max(page, 1) - 1) * pageSize;
+
+      // Optional filters
+      const relatedTable = req.query.relatedTable as string | undefined;
+      const status = req.query.status as string | undefined;
+      const carePlanId = req.query.carePlanId as string | undefined;
+      const clientId = req.query.clientId as string | undefined;
+
+      const where: any = { tenantId: tenantId.toString() };
+
+      if (relatedTable) where.relatedTable = relatedTable;
+      if (status) where.status = status;
+      if (carePlanId) where.carePlanId = carePlanId;
+
+      // If clientId is supplied, resolve to carePlanIds
+      if (clientId) {
+        const cps = await (this.prisma as any).carePlan.findMany({ where: { tenantId: tenantId.toString(), clientId }, select: { id: true } });
+        const cpIds = cps.map((c: any) => c.id);
+        if (!cpIds.length) return res.json({ items: [], total: 0, page, pageSize });
+        where.carePlanId = { in: cpIds };
+      }
+
+      const [items, total] = await Promise.all([
+        (this.prisma as any).task.findMany({
+          where,
+          include: {
+            carePlan: { select: { id: true, clientId: true, title: true } }
+          },
+          orderBy: [
+            { status: 'asc' },
+            { dueDate: 'asc' },
+            { createdAt: 'desc' }
+          ],
+          skip,
+          take: pageSize,
+        }),
+        (this.prisma as any).task.count({ where })
+      ]);
+
+      return res.json({ items, total, page, pageSize });
+    } catch (error: any) {
+      console.error('listTenantTasks error', error);
+      return res.status(500).json({ error: 'Failed to list tenant tasks', details: error?.message });
     }
   }
 
