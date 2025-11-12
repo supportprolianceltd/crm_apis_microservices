@@ -166,12 +166,39 @@ export class CarePlanController {
       // Medical information is nested and may include arrays
       if (payload.medicalInfo) {
         const mi: any = { ...payload.medicalInfo, tenantId: tenantId.toString() };
+
+        // medications: filter out completely empty entries and only attach nested create when non-empty
         if (Array.isArray(payload.medicalInfo.medications) && payload.medicalInfo.medications.length) {
-          mi.medications = { create: payload.medicalInfo.medications.map((m: any) => ({ ...m, tenantId: tenantId.toString() })) };
+          const meds = payload.medicalInfo.medications
+            .map((m: any) => ({ ...m, tenantId: tenantId.toString() }))
+            .filter((m: any) => m && (
+              (m.drugName && String(m.drugName).trim() !== '') ||
+              (m.dosage && String(m.dosage).trim() !== '') ||
+              (m.frequency && String(m.frequency).trim() !== '')
+            ));
+          if (meds.length) {
+            mi.medications = { create: meds };
+          } else {
+            delete mi.medications;
+          }
+        } else {
+          delete mi.medications;
         }
+
+        // clientAllergies: only attach when non-empty
         if (Array.isArray(payload.medicalInfo.clientAllergies) && payload.medicalInfo.clientAllergies.length) {
-          mi.clientAllergies = { create: payload.medicalInfo.clientAllergies.map((a: any) => ({ ...a, tenantId: tenantId.toString() })) };
+          const allergies = payload.medicalInfo.clientAllergies
+            .map((a: any) => ({ ...a, tenantId: tenantId.toString() }))
+            .filter(Boolean);
+          if (allergies.length) {
+            mi.clientAllergies = { create: allergies };
+          } else {
+            delete mi.clientAllergies;
+          }
+        } else {
+          delete mi.clientAllergies;
         }
+
         data.medicalInfo = { create: mi };
       }
 
