@@ -25,6 +25,74 @@ export class TaskController {
     this.prisma = prisma;
   }
 
+  // Convert "HH:MM" to minutes since midnight (0-1439). Returns null for malformed strings.
+  private timeStringToMinutes(hhmm: string): number | null {
+    if (!hhmm || typeof hhmm !== 'string') return null;
+    const parts = hhmm.split(':');
+    if (parts.length < 2) return null;
+    const hh = parseInt(parts[0], 10);
+    const mm = parseInt(parts[1], 10);
+    if (isNaN(hh) || isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+    return hh * 60 + mm;
+  }
+
+  // Map JS Date to DayOfWeek enum string used in DB (MONDAY..SUNDAY)
+  private dayOfWeekString(d: Date): string {
+    const dow = d.getDay(); // 0 = Sunday, 1 = Monday ...
+    switch (dow) {
+      case 1: return 'MONDAY';
+      case 2: return 'TUESDAY';
+      case 3: return 'WEDNESDAY';
+      case 4: return 'THURSDAY';
+      case 5: return 'FRIDAY';
+      case 6: return 'SATURDAY';
+      default: return 'SUNDAY';
+    }
+  }
+
+  // Check whether a given start (and optional end) Date falls within any agreed slot for that day.
+  // schedules: array of AgreedCareSchedule objects, each containing `day` and `slots` array with startTime/endTime strings.
+  private isWithinAgreedSlots(start: Date, end: Date | null, schedules: any[] | undefined) {
+    // If there are no schedules, treat as unrestricted
+    if (!schedules || !Array.isArray(schedules) || schedules.length === 0) return { ok: true };
+
+    const dayStr = this.dayOfWeekString(start);
+    const matching = schedules.find((s: any) => s && s.day === dayStr && (s.enabled === undefined || s.enabled));
+    if (!matching) {
+      // Build allowed days summary
+      const daysWithSlots = schedules
+        .filter((s: any) => s && (s.enabled === undefined || s.enabled) && Array.isArray(s.slots) && s.slots.length)
+        .map((s: any) => s.day + ':' + (s.slots || []).map((sl: any) => `${sl.startTime}-${sl.endTime}`).join(',')).slice(0, 10);
+      return { ok: false, reason: `No agreed windows for ${dayStr}`, allowed: daysWithSlots };
+    }
+
+    const slots = Array.isArray(matching.slots) ? matching.slots : [];
+    if (slots.length === 0) return { ok: false, reason: `No slots defined for ${dayStr}`, allowed: [] };
+
+    const startMinutes = start.getHours() * 60 + start.getMinutes();
+    let endMinutes: number | null = null;
+    if (end) {
+      if (end.getDate() !== start.getDate() || end.getMonth() !== start.getMonth() || end.getFullYear() !== start.getFullYear()) {
+        return { ok: false, reason: 'Task spans multiple days which is not supported by agreed slots' };
+      }
+      endMinutes = end.getHours() * 60 + end.getMinutes();
+    }
+
+    const allowedSlots: string[] = [];
+    for (const sl of slots) {
+      const sMin = this.timeStringToMinutes(sl.startTime);
+      const eMin = this.timeStringToMinutes(sl.endTime);
+      if (sMin === null || eMin === null) continue;
+      allowedSlots.push(`${sl.startTime}-${sl.endTime}`);
+      // Check containment: start >= sMin && (no end || end <= eMin)
+      if (startMinutes >= sMin && (endMinutes === null || endMinutes <= eMin)) {
+        return { ok: true, slot: `${sl.startTime}-${sl.endTime}` };
+      }
+    }
+
+    return { ok: false, reason: `Requested time not within any agreed slots for ${dayStr}`, allowed: allowedSlots };
+  }
+
   private validateCreatePayload(body: any) {
     const errors: string[] = [];
     if (!body) errors.push('body required');
@@ -67,9 +135,18 @@ export class TaskController {
       if (errors.length) return res.status(400).json({ errors });
 
       // Verify the care plan exists and belongs to this tenant
+      // Also load careRequirements -> schedules -> slots so we can validate agreed windows
       const carePlan = await (this.prisma as any).carePlan.findUnique({
         where: { id: payload.carePlanId },
-        select: { id: true, tenantId: true, clientId: true }
+        include: {
+          careRequirements: {
+            include: {
+              schedules: {
+                include: { slots: true }
+              }
+            }
+          }
+        }
       });
 
       if (!carePlan) {
@@ -78,6 +155,20 @@ export class TaskController {
 
       if (carePlan.tenantId !== tenantId.toString()) {
         return res.status(403).json({ error: 'Access denied to this care plan' });
+      }
+
+      // If start/due times are provided, validate against the client's agreed care schedule slots
+      if (payload.startDate) {
+        const start = new Date(payload.startDate);
+        if (isNaN(start.getTime())) return res.status(400).json({ error: 'Invalid startDate' });
+        const end = payload.dueDate ? new Date(payload.dueDate) : null;
+        if (end && isNaN(end.getTime())) return res.status(400).json({ error: 'Invalid dueDate' });
+
+        const schedules = carePlan.careRequirements ? (Array.isArray(carePlan.careRequirements.schedules) ? carePlan.careRequirements.schedules : []) : [];
+        const check = this.isWithinAgreedSlots(start, end, schedules);
+        if (!check.ok) {
+          return res.status(400).json({ success: false, error: 'Outside agreed care windows', details: check });
+        }
       }
 
       const data: any = {
