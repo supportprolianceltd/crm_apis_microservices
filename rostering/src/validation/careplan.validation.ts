@@ -118,9 +118,6 @@ const CARE_PLAN_STATUS = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
     if (!('toiletingSupport' in obj) || typeof obj.toiletingSupport !== 'string') {
       errors.push('personalCare.toiletingSupport is required and must be a string');
     }
-    if (!('additionalNotes' in obj) || typeof obj.additionalNotes !== 'string') {
-      errors.push('personalCare.additionalNotes is required and must be a string');
-    }
     if (!('continenceCare' in obj) || typeof obj.continenceCare !== 'string') {
       errors.push('personalCare.continenceCare is required and must be a string');
     }
@@ -152,9 +149,6 @@ const CARE_PLAN_STATUS = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
     }
     if (!('canTheyWash' in obj) || typeof obj.canTheyWash !== 'string') {
       errors.push('everydayActivityPlan.canTheyWash is required and must be a string');
-    }
-    if (!('additionalNotes' in obj) || typeof obj.additionalNotes !== 'string') {
-      errors.push('everydayActivityPlan.additionalNotes is required and must be a string');
     }
     if (!('communityAccessNeeds' in obj) || typeof obj.communityAccessNeeds !== 'string') {
       errors.push('everydayActivityPlan.communityAccessNeeds is required and must be a string');
@@ -197,9 +191,6 @@ const CARE_PLAN_STATUS = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
     if (!('canTravelAlone' in obj) || typeof obj.canTravelAlone !== 'string') {
       errors.push('fallsAndMobility.canTravelAlone is required and must be a string');
     }
-    if (!('mobilityAdditionalNotes' in obj) || typeof obj.mobilityAdditionalNotes !== 'string') {
-      errors.push('fallsAndMobility.mobilityAdditionalNotes is required and must be a string');
-    }
     if (!('visionStatus' in obj) || typeof obj.visionStatus !== 'string') {
       errors.push('fallsAndMobility.visionStatus is required and must be a string');
     }
@@ -208,9 +199,6 @@ const CARE_PLAN_STATUS = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
     }
     if (!('hearingStatus' in obj) || typeof obj.hearingStatus !== 'string') {
       errors.push('fallsAndMobility.hearingStatus is required and must be a string');
-    }
-    if (!('sensoryAdditionalNotes' in obj) || typeof obj.sensoryAdditionalNotes !== 'string') {
-      errors.push('fallsAndMobility.sensoryAdditionalNotes is required and must be a string');
     }
     // Optional: otherMobilitySupport
     if ('otherMobilitySupport' in obj && typeof obj.otherMobilitySupport !== 'string') {
@@ -251,9 +239,6 @@ const CARE_PLAN_STATUS = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
     }
     if (!('houseKeepingSupport' in obj) || typeof obj.houseKeepingSupport !== 'boolean') {
       errors.push('psychologicalInfo.houseKeepingSupport is required and must be a boolean');
-    }
-    if (!('houseKeepingAdditionalNotes' in obj) || typeof obj.houseKeepingAdditionalNotes !== 'string') {
-      errors.push('psychologicalInfo.houseKeepingAdditionalNotes is required and must be a string');
     }
     return errors;
   }
@@ -541,14 +526,8 @@ function validateLegalRequirement(obj: any): string[] {
         if (!('primaryDiagnosis' in obj) || typeof obj.primaryDiagnosis !== 'string') {
           errors.push('medicalInfo.primaryDiagnosis is required and must be a string');
         }
-        if (!('primaryAdditionalNotes' in obj) || typeof obj.primaryAdditionalNotes !== 'string') {
-          errors.push('medicalInfo.primaryAdditionalNotes is required and must be a string');
-        }
         if (!('secondaryDiagnoses' in obj) || typeof obj.secondaryDiagnoses !== 'string') {
           errors.push('medicalInfo.secondaryDiagnoses is required and must be a string');
-        }
-        if (!('secondaryAdditionalNotes' in obj) || typeof obj.secondaryAdditionalNotes !== 'string') {
-          errors.push('medicalInfo.secondaryAdditionalNotes is required and must be a string');
         }
         if (!('pastMedicalHistory' in obj) || typeof obj.pastMedicalHistory !== 'string') {
           errors.push('medicalInfo.pastMedicalHistory is required and must be a string');
@@ -625,9 +604,6 @@ function validateLegalRequirement(obj: any): string[] {
         }
         if (!('HospitalContact' in obj) || typeof obj.HospitalContact !== 'string') {
           errors.push('medicalInfo.HospitalContact is required and must be a string');
-        }
-        if (!('EmergencyCareNotes' in obj) || typeof obj.EmergencyCareNotes !== 'string') {
-          errors.push('medicalInfo.EmergencyCareNotes is required and must be a string');
         }
         if ('medicalReportUpload' in obj && typeof obj.medicalReportUpload !== 'string') {
           errors.push('medicalInfo.medicalReportUpload must be a string');

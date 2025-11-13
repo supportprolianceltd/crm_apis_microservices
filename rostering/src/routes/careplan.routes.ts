@@ -9,6 +9,9 @@ export function createCarePlanRoutes(controller: CarePlanController) {
   // List care plans for tenant (supports ?page & ?pageSize)
   router.get('/', (req, res) => controller.listCarePlans(req, res));
 
+  // Get a single care plan by id
+  router.get('/:id', (req, res) => controller.getCarePlanById(req, res));
+
   // Get care plans by clientId
   router.get('/client/:clientId', (req, res) => controller.getCarePlansByClient(req, res));
 

@@ -479,6 +479,43 @@ export class CarePlanController {
     }
   }
 
+  // Get a single care plan by ID
+  public async getCarePlanById(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId ?? (req.query && req.query.tenantId);
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const id = req.params.id || req.params['carePlanId'];
+      if (!id) return res.status(400).json({ error: 'carePlan id required in path' });
+
+      const includeShape = {
+        carers: true,
+        riskAssessment: true,
+        personalCare: true,
+        everydayActivityPlan: true,
+        fallsAndMobility: true,
+        psychologicalInfo: true,
+        foodHydration: true,
+        routine: true,
+        cultureValues: true,
+        bodyMap: true,
+        legalRequirement: true,
+        careRequirements: { include: { schedules: { include: { slots: true } } } },
+        medicalInfo: { include: { medications: true, clientAllergies: true } },
+        movingHandling: { include: { IntakeLog: true } },
+      } as const;
+
+      const plan = await (this.prisma as any).carePlan.findUnique({ where: { id }, include: includeShape });
+      if (!plan) return res.status(404).json({ error: 'Care plan not found' });
+      if (plan.tenantId !== tenantId.toString()) return res.status(403).json({ error: 'Access denied to this care plan' });
+
+      return res.json(plan);
+    } catch (error: any) {
+      console.error('getCarePlanById error', error);
+      return res.status(500).json({ error: 'Failed to fetch care plan', details: error?.message });
+    }
+  }
+
   // Get care plans by carerId (find carePlanIds from CarePlanCarer)
   public async getCarePlansByCarer(req: Request, res: Response) {
     try {

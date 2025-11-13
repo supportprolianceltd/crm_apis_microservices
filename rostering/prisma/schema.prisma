@@ -436,7 +436,7 @@ model PersonalCare {
   bowelControl             String
   bladderControl           String
   toiletingSupport         String
-  additionalNotes          String            @db.Text
+  additionalNotes          String?            @db.Text
   continenceCare           String
   mobilityAssistance       String
   preferredLanguage        String
@@ -455,7 +455,7 @@ model EverydayActivityPlan {
   canTheyShop                   String
   canTheyCall                   String
   canTheyWash                   String
-  additionalNotes               String @db.Text
+  additionalNotes               String? @db.Text
   communityAccessNeeds          String
   ExerciseandMobilityActivities String
 
@@ -478,11 +478,11 @@ model FallsAndMobility {
   canTransfer             String
   canuseStairs            String
   canTravelAlone          String
-  mobilityAdditionalNotes String          @db.Text
+  mobilityAdditionalNotes String?          @db.Text
   visionStatus            String
   speechStatus            String
   hearingStatus           String
-  sensoryAdditionalNotes  String          @db.Text
+  sensoryAdditionalNotes  String?          @db.Text
 
   carePlan                CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
@@ -495,9 +495,9 @@ model MedicalInformation {
   tenantId                      String
   carePlanId                    String  @unique
   primaryDiagnosis              String
-  primaryAdditionalNotes        String  @db.Text
+  primaryAdditionalNotes        String?  @db.Text
   secondaryDiagnoses            String
-  secondaryAdditionalNotes      String  @db.Text
+  secondaryAdditionalNotes      String?  @db.Text
   pastMedicalHistory            String
   medicalSupport                Boolean @default(false)
   breathingDifficulty           Boolean @default(false)
@@ -518,7 +518,7 @@ model MedicalInformation {
   supportContactPhone               String
   specialistContact                 String
   HospitalContact                   String
-  EmergencyCareNotes                String
+  EmergencyCareNotes                String?
   medicalReportUpload               String?
   knownAllergies                    Boolean         @default(false)
   clientAllergies                   ClientAllergy[]
@@ -577,7 +577,7 @@ model PsychologicalInformation {
   specifyMemoryStatus         String
   canTheyDoHouseKeeping       String
   houseKeepingSupport         Boolean @default(false)
-  houseKeepingAdditionalNotes String  @db.Text
+  houseKeepingAdditionalNotes String?  @db.Text
 
   carePlan                    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
@@ -755,6 +755,13 @@ model CareRequirements {
 
   @@index([tenantId])
   @@index([carePlanId])
+}
+
+
+enum careType {
+  SINGLEHANDEDCALL
+  DOUBLEHANDEDCALL
+  SPECIALCARE
 }
 
 // Enum for days of week used by AgreedCareSchedule
