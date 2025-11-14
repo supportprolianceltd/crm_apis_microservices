@@ -35,13 +35,12 @@ def get_user_data_from_jwt(request):
     token = auth_header.split(" ")[1]
     try:
         payload = jwt.decode(token, options={"verify_signature": False})
-        user_data = payload.get("user", {})
         return {
-            'email': user_data.get('email', ''),
-            'first_name': user_data.get('first_name', ''),
-            'last_name': user_data.get('last_name', ''),
-            'job_role': user_data.get('job_role', ''),
-            'id': user_data.get('id', None)
+            'email': payload.get('email', ''),
+            'first_name': payload.get('first_name', ''),
+            'last_name': payload.get('last_name', ''),
+            'job_role': payload.get('job_role', ''),
+            'id': payload.get('id', None)
         }
     except Exception as e:
         logger.error(f"Failed to decode JWT for user data: {str(e)}")
@@ -76,373 +75,6 @@ class ComplianceItemSerializer(serializers.Serializer):
             if user_data.get('tenant_id') != tenant_id:
                 raise serializers.ValidationError({"checked_by_id": "User does not belong to this tenant."})
         return data
-
-
-# # talent_engine/serializers.py
-# class JobRequisitionSerializer(serializers.ModelSerializer):
-#     advert_banner_url = serializers.SerializerMethodField()
-
-#     tenant_id = serializers.CharField(max_length=36, read_only=True)
-#     branch_id = serializers.CharField(max_length=36, allow_null=True, required=False)
-#     department_id = serializers.CharField(max_length=36, allow_null=True, required=False)
-#     requested_by_id = serializers.CharField(max_length=36, read_only=True)
-#     created_by_id = serializers.CharField(max_length=36, read_only=True)
-#     updated_by_id = serializers.CharField(max_length=36, read_only=True)
-#     approved_by_id = serializers.CharField(max_length=36, read_only=True)
-#     requested_by = serializers.SerializerMethodField()
-#     created_by = serializers.SerializerMethodField()
-#     updated_by = serializers.SerializerMethodField()
-#     approved_by = serializers.SerializerMethodField()
-#     tenant_domain = serializers.SerializerMethodField()
-#     # compliance_checklist = serializers.SerializerMethodField()
-#     # compliance_checklist = ComplianceItemSerializer(many=True, required=False)
-#     branch_name = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = JobRequisition
-#         fields = [
-#             'id', 'requisition_number', 'num_of_applications', 'job_requisition_code', 'job_application_code', 'tenant_id', 'tenant_domain',
-#             'branch_id', 'branch_name', 'department_id', 'title', 'unique_link', 'status', 'role', 'requested_by',
-#             'requested_by_id', 'created_by', 'created_by_id', 'updated_by', 'updated_by_id', 'approved_by',
-#             'approved_by_id', 'company_name', 'company_address', 'job_type', 'position_type', 'location_type',
-#             'job_location', 'interview_location', 'salary_range', 'salary_range_min', 'salary_range_max',
-#             'job_description', 'requirements', 'qualification_requirement', 'experience_requirement',
-#             'knowledge_requirement', 'number_of_candidates', 'urgency_level', 'reason', 'comment', 'deadline_date',
-#             'start_date', 'responsibilities', 'documents_required', 'compliance_checklist', 'last_compliance_check',
-#             'checked_by', 'advert_banner', 'advert_banner_url', 'requested_date', 'publish_status', 'is_deleted', 'created_at', 'updated_at',
-#             'approval_workflow', 'current_approval_stage', 'approval_date', 'time_to_fill_days'
-#         ]
-#         read_only_fields = [
-#             'id', 'requisition_number', 'job_requisition_code', 'job_application_code', 'tenant_id', 'tenant_domain',
-#             'requested_by_id', 'created_by_id', 'updated_by_id', 'approved_by_id', 'requested_date', 'is_deleted',
-#             'created_at', 'updated_at', 'branch_name', 'last_compliance_check', 'checked_by'
-#         ]
-       
-
-#     def get_advert_banner_url(self, obj):
-#         storage_type = getattr(settings, 'STORAGE_TYPE', 'local').lower()
-#         if storage_type == 'local':
-#             if obj.advert_banner:
-#                 return obj.advert_banner.url
-#             return None
-#         else:
-#             # For remote storage, use the public URL field
-#             return obj.advert_banner_url
-
-
-#     @extend_schema_field({
-#         'type': 'object',
-#         'properties': {
-#             'email': {'type': 'string'},
-#             'first_name': {'type': 'string'},
-#             'last_name': {'type': 'string'},
-#             'job_role': {'type': 'string'}
-#         }
-#     })
-#     def get_requested_by(self, obj):
-#         if obj.requested_by_id:
-#             try:
-#                 user_response = requests.get(
-#                     f'{settings.AUTH_SERVICE_URL}/api/user/users/{obj.requested_by_id}/',
-#                     headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-#                 )
-#                 if user_response.status_code == 200:
-#                     user_data = user_response.json()
-#                     return {
-#                         'email': user_data.get('email', ''),
-#                         'first_name': user_data.get('first_name', ''),
-#                         'last_name': user_data.get('last_name', ''),
-#                         'job_role': user_data.get('job_role', '')
-#                     }
-#                 logger.error(f"Failed to fetch user {obj.requested_by_id} from auth_service")
-#             except Exception as e:
-#                 logger.error(f"Error fetching requested_by {obj.requested_by_id}: {str(e)}")
-#         return None
-
-
-#     @extend_schema_field({
-#         'type': 'object',
-#         'properties': {
-#             'email': {'type': 'string'},
-#             'first_name': {'type': 'string'},
-#             'last_name': {'type': 'string'},
-#             'job_role': {'type': 'string'}
-#         }
-#     })
-#     def get_created_by(self, obj):
-#         if obj.created_by_id:
-#             try:
-#                 user_response = requests.get(
-#                     f'{settings.AUTH_SERVICE_URL}/api/user/users/{obj.created_by_id}/',
-#                     headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-#                 )
-#                 if user_response.status_code == 200:
-#                     user_data = user_response.json()
-#                     return {
-#                         'email': user_data.get('email', ''),
-#                         'first_name': user_data.get('first_name', ''),
-#                         'last_name': user_data.get('last_name', ''),
-#                         'job_role': user_data.get('job_role', '')
-#                     }
-#                 logger.error(f"Failed to fetch user {obj.created_by_id} from auth_service")
-#             except Exception as e:
-#                 logger.error(f"Error fetching created_by {obj.created_by_id}: {str(e)}")
-#         return None
-
-
-#     @extend_schema_field({
-#         'type': 'object',
-#         'properties': {
-#             'email': {'type': 'string'},
-#             'first_name': {'type': 'string'},
-#             'last_name': {'type': 'string'},
-#             'job_role': {'type': 'string'}
-#         }
-#     })
-#     def get_updated_by(self, obj):
-#         if obj.updated_by_id:
-#             try:
-#                 user_response = requests.get(
-#                     f'{settings.AUTH_SERVICE_URL}/api/user/users/{obj.updated_by_id}/',
-#                     headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-#                 )
-#                 if user_response.status_code == 200:
-#                     user_data = user_response.json()
-#                     return {
-#                         'email': user_data.get('email', ''),
-#                         'first_name': user_data.get('first_name', ''),
-#                         'last_name': user_data.get('last_name', ''),
-#                         'job_role': user_data.get('job_role', '')
-#                     }
-#                 logger.error(f"Failed to fetch user {obj.updated_by_id} from auth_service")
-#             except Exception as e:
-#                 logger.error(f"Error fetching updated_by {obj.updated_by_id}: {str(e)}")
-#         return None
-
-
-#     @extend_schema_field({
-#         'type': 'object',
-#         'properties': {
-#             'email': {'type': 'string'},
-#             'first_name': {'type': 'string'},
-#             'last_name': {'type': 'string'},
-#             'job_role': {'type': 'string'}
-#         }
-#     })
-#     def get_approved_by(self, obj):
-#         if obj.approved_by_id:
-#             try:
-#                 user_response = requests.get(
-#                     f'{settings.AUTH_SERVICE_URL}/api/user/users/{obj.approved_by_id}/',
-#                     headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-#                 )
-#                 if user_response.status_code == 200:
-#                     user_data = user_response.json()
-#                     return {
-#                         'email': user_data.get('email', ''),
-#                         'first_name': user_data.get('first_name', ''),
-#                         'last_name': user_data.get('last_name', ''),
-#                         'job_role': user_data.get('job_role', '')
-#                     }
-#                 logger.error(f"Failed to fetch user {obj.approved_by_id} from auth_service")
-#             except Exception as e:
-#                 logger.error(f"Error fetching approved_by {obj.approved_by_id}: {str(e)}")
-#         return None
-
-#     @extend_schema_field(str)
-#     def get_tenant_domain(self, obj):
-#         try:
-#             tenant_id = get_tenant_id_from_jwt(self.context['request'])
-#             tenant_response = requests.get(
-#                 f'{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{tenant_id}/',
-#                 headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-#             )
-#             if tenant_response.status_code == 200:
-#                 tenant_data = tenant_response.json()
-#                 domains = tenant_data.get('domains', [])
-#                 primary_domain = next((d['domain'] for d in domains if d.get('is_primary')), None)
-#                 return primary_domain
-#             logger.error(f"Failed to fetch tenant {obj.tenant_id} from auth_service")
-#         except Exception as e:
-#             logger.error(f"Error fetching tenant domain for {obj.tenant_id}: {str(e)}")
-#         return None
-
-
-#     @extend_schema_field(str)
-#     def get_branch_name(self, obj):
-#         if obj.branch_id:
-#             try:
-#                 branch_response = requests.get(
-#                     f'{settings.AUTH_SERVICE_URL}/api/tenant/branches/{obj.branch_id}/',
-#                     headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-#                 )
-#                 if branch_response.status_code == 200:
-#                     return branch_response.json().get('name', '')
-#                 logger.error(f"Failed to fetch branch {obj.branch_id} from auth_service")
-#             except Exception as e:
-#                 logger.error(f"Error fetching branch name for {obj.branch_id}: {str(e)}")
-#         return None
-
-
-
-#     def validate(self, data):
-#         tenant_id = get_tenant_id_from_jwt(self.context['request'])
-
-    
-
-#         if data.get('tenant_unique_id', tenant_id) != tenant_id:
-#             raise serializers.ValidationError({"tenant_unique_id": "Tenant ID mismatch."})
-        
-#         # data['tenant_unique_id'] = tenant_id  # ✅ Inject it into validated data
-
-#         # Validate branch_id
-#         if data.get('branch_id'):
-#             branch_response = requests.get(
-#                 f'{settings.AUTH_SERVICE_URL}/api/tenant/branches/{data["branch_id"]}/',
-#                 headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-#             )
-#             if branch_response.status_code != 200:
-#                 raise serializers.ValidationError({"branch_id": "Invalid branch ID."})
-#             branch_data = branch_response.json()
-#             if branch_data['tenant_unique_id'] != tenant_id:
-#                 raise serializers.ValidationError({"branch_id": "Branch does not belong to this tenant."})
-
-#         # Validate department_id
-#         if data.get('department_id'):
-#             dept_response = requests.get(
-#                 f'{settings.AUTH_SERVICE_URL}/api/departments/{data["department_id"]}/',
-#                 headers={'Authorization': f'Bearer {self.context["request"].META.get("HTTP_AUTHORIZATION", "").split(" ")[1]}'}
-#             )
-#             if dept_response.status_code != 200:
-#                 raise serializers.ValidationError({"department_id": "Invalid department ID."})
-#             dept_data = dept_response.json()
-#             if dept_data['tenant_unique_id'] != tenant_id:
-#                 raise serializers.ValidationError({"department_id": "Department does not belong to this tenant."})
-
-#         # logger.info(f"THIS IS THE {data} WE GOT")
-#         return data
-
-
-
-
-#     # def validate_compliance_checklist(self, value):
-#     #     if not isinstance(value, list):
-#     #         raise serializers.ValidationError("Compliance checklist must be a list.")
-#     #     for item in value:
-#     #         if not isinstance(item, dict) or not item.get("name"):
-#     #             raise serializers.ValidationError("Each compliance item must be a dictionary with a 'name' field.")
-#     #         serializer = ComplianceItemSerializer(data=item, context=self.context)
-#     #         serializer.is_valid(raise_exception=True)
-#     #     return value
-
-#     def validate_requirements(self, value):
-#         if not isinstance(value, list):
-#             raise serializers.ValidationError("Requirements must be a list.")
-#         return value
-
-#     def validate_responsibilities(self, value):
-#         if not isinstance(value, list):
-#             raise serializers.ValidationError("Responsibilities must be a list.")
-#         return value
-#     def validate_compliance_checklist(self, value):
-#         if not isinstance(value, list):
-#             raise serializers.ValidationError("compliance_checklist must be a list.")
-#         return value
-
-#     def validate_documents_required(self, value):
-#         if not isinstance(value, list):
-#             raise serializers.ValidationError("Documents required must be a list.")
-#         return value
-
-#     def validate_approval_workflow(self, value):
-#         if not isinstance(value, dict):
-#             raise serializers.ValidationError("Approval workflow must be a dictionary.")
-#         return value
-
-#     def create(self, validated_data):
-#         tenant_id = get_tenant_id_from_jwt(self.context['request'])
-#         validated_data['tenant_id'] = tenant_id  # <- inject here instead of validate()
-#         logger.info(f"THIS IS THE validated_data recieved in the created method {validated_data} WE GOT")
-#         # Map 'branch' to 'branch_id' if present
-#         if 'branch' in validated_data:
-#             validated_data['branch_id'] = validated_data.pop('branch')
-#         # Ensure tenant_id is always a string
-#         if 'tenant_id' in validated_data:
-#             validated_data['tenant_id'] = str(validated_data['tenant_id'])
-
-#         # Fetch tenant name from auth_service
-#         request = self.context.get('request')
-#         tenant_name = None
-#         if request and 'tenant_id' in validated_data:
-#             try:
-#                 tenant_response = requests.get(
-#                     f"{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{validated_data['tenant_id']}/",
-#                     headers={'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
-#                 )
-#                 if tenant_response.status_code == 200:
-#                     tenant_data = tenant_response.json()
-#                     tenant_name = tenant_data.get('name')
-#             except Exception as e:
-#                 logger.error(f"Error fetching tenant name for {validated_data['tenant_id']}: {str(e)}")
-#         if tenant_name:
-#             validated_data['tenant_name'] = tenant_name
-
-#         # compliance_checklist = validated_data.pop('compliance_checklist', [])
-#         advert_banner_file = validated_data.pop('advert_banner', None)
-#         instance = super().create(validated_data)
-#         # for item in compliance_checklist:
-#         #     instance.add_compliance_item(
-#         #         name=item["name"],
-#         #         description=item.get("description", ""),
-#         #         required=item.get("required", True)
-#         #     )
-#         # Handle advert_banner upload after instance is created (so instance.id exists)
-#         self._handle_advert_banner_upload(instance, advert_banner_file)
-#         return instance
-
-#     def update(self, instance, validated_data):
-#         request = self.context.get('request')
-#         # logger.info(f"JobRequisition update request data: {getattr(request, 'data', {})}")
-#         # logger.info(f"advert_banner in request.FILES: {getattr(request, 'FILES', {}).get('advert_banner')}")
-#         # logger.info(f"advert_banner in validated_data: {validated_data.get('advert_banner')}")
-
-#         if 'branch' in validated_data:
-#             validated_data['branch_id'] = validated_data.pop('branch')
-#         if 'tenant_id' in validated_data:
-#             validated_data['tenant_id'] = str(validated_data['tenant_id'])
-
-#         # compliance_checklist = validated_data.pop('compliance_checklist', None)
-#         advert_banner_file = validated_data.pop('advert_banner', None)
-#         instance = super().update(instance, validated_data)
-
-#         # if compliance_checklist is not None:
-#         #     # Directly assign the validated list
-#         #     instance.compliance_checklist = compliance_checklist
-#         #     instance.save(update_fields=['compliance_checklist'])
-
-#         self._handle_advert_banner_upload(instance, advert_banner_file)
-#         return instance
-    
-#     def _handle_advert_banner_upload(self, instance, advert_banner_file):
-#         if advert_banner_file:
-#             from utils.storage import get_storage_service
-#             import uuid
-#             ext = advert_banner_file.name.split('.')[-1]
-#             file_name = f"advert_banners/{instance.tenant_id}/{instance.id}_{uuid.uuid4()}.{ext}"
-#             content_type = getattr(advert_banner_file, 'content_type', 'application/octet-stream')
-#             storage_type = getattr(settings, 'STORAGE_TYPE', 'local').lower()
-#             if storage_type == 'local':
-#                 instance.advert_banner.save(file_name, advert_banner_file, save=True)
-#             else:
-#                 storage = get_storage_service(storage_type)
-#                 upload_success = storage.upload_file(advert_banner_file, file_name, content_type)
-#                 if not upload_success:
-#                     raise serializers.ValidationError({"advert_banner": "Failed to upload advert banner."})
-#                 public_url = storage.get_public_url(file_name)
-#                 instance.advert_banner_url = public_url  # <-- Save to advert_banner_url
-#                 instance.advert_banner = None            # <-- Clear advert_banner field
-#                 instance.save(update_fields=["advert_banner_url", "advert_banner"])
-
 
 
 
@@ -557,17 +189,35 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
         # Updated: Return stored data—no HTTP call
         return obj.tenant_domain
 
+    # def validate(self, data):
+    #     tenant_id = get_tenant_id_from_jwt(self.context['request'])
+
+    #     if data.get('tenant_unique_id', tenant_id) != tenant_id:
+    #         raise serializers.ValidationError({"tenant_unique_id": "Tenant ID mismatch."})
+        
+    #     # data['tenant_unique_id'] = tenant_id  # ✅ Inject it into validated data
+
+      
+
+    #     # logger.info(f"THIS IS THE {data} WE GOT")
+    #     return data
+
+
     def validate(self, data):
-        tenant_id = get_tenant_id_from_jwt(self.context['request'])
+        logger.info("=== JobRequisitionSerializer.validate called ===")
+        logger.info(f"Request in context: {self.context.get('request')}")
+        logger.info(f"JWT payload available: {hasattr(self.context.get('request'), 'jwt_payload')}")
+        
+        try:
+            tenant_id = get_tenant_id_from_jwt(self.context['request'])
+            logger.info(f"tenant_id from JWT: {tenant_id}")
+        except Exception as e:
+            logger.error(f"Error getting tenant_id from JWT: {str(e)}")
+            raise
 
         if data.get('tenant_unique_id', tenant_id) != tenant_id:
             raise serializers.ValidationError({"tenant_unique_id": "Tenant ID mismatch."})
         
-        # data['tenant_unique_id'] = tenant_id  # ✅ Inject it into validated data
-
-      
-
-        # logger.info(f"THIS IS THE {data} WE GOT")
         return data
 
     def validate_requirements(self, value):
@@ -594,28 +244,6 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
         if not isinstance(value, dict):
             raise serializers.ValidationError("Approval workflow must be a dictionary.")
         return value
-
-
-    # def create(self, validated_data):
-    #         tenant_id = get_tenant_id_from_jwt(self.context['request'])
-    #         validated_data['tenant_id'] = tenant_id  # <- inject here instead of validate()
-    #         logger.info(f"THIS IS THE validated_data recieved in the created method {validated_data} WE GOT")
-    #         # Ensure tenant_id is always a string
-    #         if 'tenant_id' in validated_data:
-    #             validated_data['tenant_id'] = str(validated_data['tenant_id'])
-
-    #         # compliance_checklist = validated_data.pop('compliance_checklist', [])
-    #         advert_banner_file = validated_data.pop('advert_banner', None)
-    #         instance = super().create(validated_data)
-    #         # for item in compliance_checklist:
-    #         #     instance.add_compliance_item(
-    #         #         name=item["name"],
-    #         #         description=item.get("description", ""),
-    #         #         required=item.get("required", True)
-    #         #     )
-    #         # Handle advert_banner upload after instance is created (so instance.id exists)
-    #         self._handle_advert_banner_upload(instance, advert_banner_file)
-    #         return instance
 
 
 
@@ -766,7 +394,7 @@ class JobRequisitionBulkCreateSerializer(serializers.Serializer):
         
         jwt_payload = self.context.get('request').jwt_payload if self.context.get('request') else {}
         tenant_id = jwt_payload.get('tenant_unique_id')
-        user_id = jwt_payload.get('user', {}).get('id')
+        user_id = jwt_payload.get('id')
         role = jwt_payload.get('role')
         # branch = jwt_payload.get('user', {}).get('branch')
 
@@ -1040,10 +668,10 @@ class RequestSerializer(serializers.ModelSerializer):
 
         try:
             jwt_payload = getattr(self.context['request'], 'jwt_payload', {})
-            current_user_id = jwt_payload.get('user', {}).get('id')
-            
+            current_user_id = jwt_payload.get('id')
+
             if str(current_user_id) == str(obj.requested_by_id):
-                user_data = jwt_payload.get('user', {})
+                user_data = jwt_payload
                 return {
                     'email': user_data.get('email', ''),
                     'first_name': user_data.get('first_name', ''),

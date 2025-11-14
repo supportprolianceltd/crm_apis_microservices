@@ -711,6 +711,12 @@
       ],
       "requirements": "Carer must be experienced in dementia and personal care, have valid DBS, and be available weekday mornings."
     },
+
+
+    // CRITERIA
+    // NEW Clients= 0 or Existsing=100, available carers(5) within the same cluster=100, , IF ITS LESS THEN = 50, known cluster=, not existing cluster 0, available carers within the  skill set=100
+
+
     "summary": {
       "totalCarers": 6,
       "eligibleCarers": 1,

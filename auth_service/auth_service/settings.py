@@ -59,8 +59,10 @@ elif IS_STAGING:
 else:  # development
     FRONTEND_URLS = [
         "http://localhost:5173",
+        "http://localhost:4000",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
+        "http://localhost:4000",
         "http://localhost:3001",
         "http://127.0.0.1:3000",
     ]
@@ -122,6 +124,7 @@ if IS_DEVELOPMENT:
         "http://localhost:5173",
         "http://127.0.0.1:5173", 
         "http://localhost:3000",
+        "http://localhost:4000",
         "http://127.0.0.1:3000",
     ])
 
@@ -430,7 +433,6 @@ SUPABASE_URL = env("SUPABASE_URL", default="")
 SUPABASE_KEY = env("SUPABASE_KEY", default="")
 SUPABASE_BUCKET = env("SUPABASE_BUCKET", default="")
 STORAGE_TYPE = env("STORAGE_TYPE", default="supabase")
-
 
 # #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 # # ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158

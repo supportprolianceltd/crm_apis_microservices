@@ -136,6 +136,7 @@ GATEWAY_TIMEOUTS = {
     'health': 30,
     'auth': 60,
     'notifications': 30,
+    'project-manager': 120,
 }
 
 GATEWAY_RETRIES = {
@@ -204,6 +205,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 # Explicitly include other origins
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:4000",
     "http://localhost:8000",
     "http://localhost:3001",
     "https://crm-frontend-react.vercel.app",
@@ -238,6 +240,7 @@ LMS_APP_URL = env.str("LMS_APP_URL", default="http://lms-app:8004")
 NOTIFICATIONS_SERVICE_URL = env.str("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
 HR_SERVICE_URL = env.str("HR_SERVICE_URL", default="http://hr:8004")
 ROSTERING_SERVICE_URL = env.str("ROSTERING_SERVICE_URL", default="http://rostering:3005")
+PROJECT_MANAGER_URL = env.str("PROJECT_MANAGER_URL", default="http://project-manager:8005")
 
 
 # ======================== ROUTE CONFIGURATION ========================
@@ -256,6 +259,7 @@ MICROSERVICE_URLS = {
     "notifications": NOTIFICATIONS_SERVICE_URL,
     "hr": HR_SERVICE_URL,
     "rostering": ROSTERING_SERVICE_URL,
+    "project-manager": PROJECT_MANAGER_URL,
 }
 
 # Register all auth routes under auth service
@@ -280,6 +284,8 @@ PUBLIC_PATHS = [
     "hr/public/health/", "rostering/public/health/",
     "rostering/api/v1/health", "reviews/public/submit/",
     "rostering/docs", "rostering/docs/",
+    "project-manager/api/docs/", "project-manager/api/schema/",
+    "project-manager/api/health/",
 ]
 
 

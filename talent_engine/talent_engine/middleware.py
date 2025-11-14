@@ -39,8 +39,8 @@ public_paths = [
 
 class SimpleUser:
     def __init__(self, payload):
-        self.pk = payload.get('user', {}).get('id')
-        self.username = payload.get('user', {}).get('username', '')
+        self.pk = payload.get('id')
+        self.username = payload.get('username', '')
         self.email = payload.get('email', '')
         self.role = payload.get('role', '')
         self.tenant_id = payload.get('tenant_id')
