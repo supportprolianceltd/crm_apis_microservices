@@ -21,5 +21,8 @@ export function createCarePlanRoutes(controller: CarePlanController) {
   // Update an existing care plan (upsert careRequirements + schedules/slots when provided)
   router.patch('/:id', (req, res) => controller.updateCarePlan(req, res));
 
+  // Delete a care plan
+  router.delete('/:id', (req, res) => controller.deleteCarePlan(req, res));
+
   return router;
 }
