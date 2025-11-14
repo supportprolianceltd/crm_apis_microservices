@@ -1,0 +1,12 @@
+# Drop DB (connect to the postgres server inside the container)
+docker exec -i rostering-db psql -U postgres -c "DROP DATABASE IF EXISTS rostering_dev;"
+
+# terminate other connections to the DB, then drop
+docker exec -i rostering-db psql -U postgres -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'rostering_dev' AND pid <> pg_backend_pid();"
+docker exec -i rostering-db psql -U postgres -c "DROP DATABASE IF EXISTS rostering_dev;"
+
+# Create DB
+docker exec -i rostering-db psql -U postgres -c "CREATE DATABASE rostering_dev OWNER postgres;"
+
+# Enable PostGIS extensions inside the newly created DB
+docker exec -i rostering-db psql -U postgres -d rostering_dev -c "CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS postgis_topology;"

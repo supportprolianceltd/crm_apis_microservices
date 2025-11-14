@@ -838,6 +838,7 @@ model Task {
   id             String @id @default(cuid())
   tenantId       String
   carePlanId     String
+  carerId        String?
   relatedTable   String
   relatedId      String
   title          String
@@ -852,6 +853,11 @@ model Task {
   additionalNotes String?    @db.Text
 
   carePlan       CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
+  carerVisitId   String?
+  carerVisit     CarerVisit? @relation(fields: [carerVisitId], references: [id], onDelete: Cascade)
+
+  // When true the task was pushed into a CarerVisit at creation time
+  pushToVisit    Boolean @default(false)
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -861,7 +867,42 @@ model Task {
   @@index([relatedTable, relatedId])
   @@index([status])
   @@index([dueDate])
+  @@index([carerVisitId])
+  @@index([carerId])
   @@map("tasks")
+}
+
+model CarerVisit {
+  id          String   @id @default(cuid())
+  tenantId    String
+  // carerId is nullable: visits may exist before a carer is assigned
+  carerId     String?
+  // optional reference to originating care plan
+  carePlanId  String?
+  // visit start/end times for scheduling
+  startDate   DateTime?
+  endDate     DateTime?
+  // visit lifecycle status
+  status      VisitStatus @default(SCHEDULED)
+  // timestamps for clocking in/out
+  clockInAt   DateTime?
+  clockOutAt  DateTime?
+  // optional note recorded when clocking out
+  clockOutNote String? @db.Text
+  // flag to mark visits auto-generated from care plans
+  generatedFromCarePlan Boolean @default(false)
+  // when a carer is assigned to the visit
+  assignedAt  DateTime?
+  tasks       Task[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([carePlanId])
+  @@index([carerId])
+  @@index([generatedFromCarePlan])
+  @@map("carer_visits")
 }
 
 // ─────────────────────────────────────────────

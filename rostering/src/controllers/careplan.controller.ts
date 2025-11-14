@@ -68,6 +68,76 @@ export class CarePlanController {
     return isNaN(d.getTime()) ? null : d;
   }
 
+  // Generate CarerVisit rows for a care plan using its careRequirements.schedules slots
+  // Uses a rolling window (default 12 weeks from window start).
+  private async generateVisitsForCarePlan(carePlan: any, tenantId: string) {
+    try {
+      if (!carePlan || !carePlan.careRequirements || !Array.isArray(carePlan.careRequirements.schedules)) return;
+
+  const ROLLING_WEEKS = 1; // reduced from 12 weeks to 1-week rolling window per request
+      const schedules = carePlan.careRequirements.schedules.filter((s: any) => s && s.enabled && Array.isArray(s.slots) && s.slots.length);
+      if (!schedules.length) return;
+
+      const now = new Date();
+      const planStart = carePlan.startDate ? new Date(carePlan.startDate) : now;
+      // windowStart is the later of planStart and today
+      const windowStart = planStart > now ? planStart : now;
+      const windowEndCandidate = new Date(windowStart.getTime() + ROLLING_WEEKS * 7 * 24 * 60 * 60 * 1000);
+      const planEnd = carePlan.endDate ? new Date(carePlan.endDate) : windowEndCandidate;
+      const windowEnd = planEnd < windowEndCandidate ? planEnd : windowEndCandidate;
+
+      // Map day enum to JS weekday number (0=Sunday..6=Saturday)
+      const dayOfWeekMap: Record<string, number> = { SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3, THURSDAY: 4, FRIDAY: 5, SATURDAY: 6 };
+
+      const visitsToCreate: any[] = [];
+
+      // Iterate each date in the window (UTC days)
+      for (let cur = new Date(Date.UTC(windowStart.getUTCFullYear(), windowStart.getUTCMonth(), windowStart.getUTCDate())); cur <= windowEnd; cur.setUTCDate(cur.getUTCDate() + 1)) {
+        const weekday = cur.getUTCDay();
+
+        for (const sched of schedules) {
+          const schedDay = sched.day as string;
+          if (dayOfWeekMap[schedDay] !== weekday) continue;
+
+          for (const slot of sched.slots) {
+            // slot.startTime and endTime are stored as TIME mapped to Date objects (date portion is epoch)
+            const slotStart = new Date(slot.startTime);
+            const slotEnd = new Date(slot.endTime);
+
+            const visitStart = new Date(Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth(), cur.getUTCDate(), slotStart.getUTCHours(), slotStart.getUTCMinutes(), slotStart.getUTCSeconds()));
+            const visitEnd = new Date(Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth(), cur.getUTCDate(), slotEnd.getUTCHours(), slotEnd.getUTCMinutes(), slotEnd.getUTCSeconds()));
+
+            // Only create visits that fall within windowStart..windowEnd
+            if (visitEnd < windowStart || visitStart > windowEnd) continue;
+
+            visitsToCreate.push({
+              tenantId: tenantId.toString(),
+              carePlanId: carePlan.id,
+              startDate: visitStart,
+              endDate: visitEnd,
+              generatedFromCarePlan: true,
+            });
+          }
+        }
+      }
+
+      if (visitsToCreate.length) {
+        // create in batches to avoid too-large single insert
+        const BATCH = 200;
+        for (let i = 0; i < visitsToCreate.length; i += BATCH) {
+          const batch = visitsToCreate.slice(i, i + BATCH);
+          try {
+            await (this.prisma as any).carerVisit.createMany({ data: batch });
+          } catch (e) {
+            console.error('Failed to create carer visits batch', e);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('generateVisitsForCarePlan error', e);
+    }
+  }
+
   public async createCarePlan(req: Request, res: Response) {
     try {
       const tenantId = req.user?.tenantId ?? (req.body && req.body.tenantId);
@@ -221,7 +291,7 @@ export class CarePlanController {
       }
 
       // include shape for returning full nested relations
-      const includeShape = {
+      let includeShape: any = {
         carers: true,
         riskAssessment: true,
         personalCare: true,
@@ -236,12 +306,29 @@ export class CarePlanController {
         careRequirements: { include: { schedules: { include: { slots: true } } } },
         medicalInfo: { include: { medications: true, clientAllergies: true } },
         movingHandling: { include: { IntakeLog: true } },
-      } as const;
+      };
+
+      // Optional: include carer visits for this care plan when requested via query ?includeVisits=true
+      try {
+        const includeVisits = String(req.query.includeVisits || '').toLowerCase();
+        if (includeVisits === 'true' || includeVisits === '1') {
+          includeShape.carerVisits = { include: { tasks: true } };
+        }
+      } catch (e) {
+        // ignore and proceed without visits
+      }
 
       // create the care plan with nested relations when present
       // Prisma client types may be out-of-date in dev; cast to any so the code compiles until `prisma generate` is run
       const created = await (this.prisma as any).carePlan.create({ data, include: includeShape });
       console.log("Careplan created successfully")
+
+      // Generate CarerVisit instances for initial rolling window (non-blocking for caller)
+      try {
+        await this.generateVisitsForCarePlan(created, tenantId.toString());
+      } catch (e) {
+        console.error('Error generating visits for care plan', e);
+      }
 
       return res.status(201).json(created);
     } catch (error: any) {
@@ -385,6 +472,18 @@ export class CarePlanController {
       } as const;
 
       const updated = await (this.prisma as any).carePlan.findUnique({ where: { id }, include: includeShape });
+
+      // If schedules or dates changed, reconcile generated visits for this care plan
+      if (payload.careRequirements || payload.startDate !== undefined || payload.endDate !== undefined) {
+        try {
+          // delete previously generated visits for this care plan and recreate for the rolling window
+          await (this.prisma as any).carerVisit.deleteMany({ where: { tenantId: tenantId.toString(), carePlanId: id, generatedFromCarePlan: true } });
+          await this.generateVisitsForCarePlan(updated, tenantId.toString());
+        } catch (e) {
+          console.error('Failed to reconcile generated visits for care plan update', e);
+        }
+      }
+
       return res.json(updated);
     } catch (error: any) {
       console.error('updateCarePlan error', error);
@@ -560,6 +659,39 @@ export class CarePlanController {
     } catch (error: any) {
       console.error('getCarePlansByCarer error', error);
       return res.status(500).json({ error: 'Failed to fetch care plans by carer', details: error?.message });
+    }
+  }
+
+  // Delete a care plan and related generated visits
+  public async deleteCarePlan(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId ?? (req.query && req.query.tenantId);
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const id = req.params.id;
+      if (!id) return res.status(400).json({ error: 'carePlan id required in path' });
+
+      // Verify the care plan exists and belongs to this tenant
+      const plan = await (this.prisma as any).carePlan.findUnique({ where: { id }, select: { id: true, tenantId: true } });
+      if (!plan) return res.status(404).json({ error: 'Care plan not found' });
+      if (plan.tenantId !== tenantId.toString()) return res.status(403).json({ error: 'Access denied to this care plan' });
+
+      // Transaction: delete any CarerVisit rows linked to this care plan (including generated ones), then delete the care plan
+      await (this.prisma as any).$transaction(async (tx: any) => {
+        try {
+          await tx.carerVisit.deleteMany({ where: { tenantId: tenantId.toString(), carePlanId: id } });
+        } catch (e) {
+          // log and continue - deletion of visits should not block care plan deletion
+          console.error('Failed to delete carer visits for care plan', id, e);
+        }
+
+        await tx.carePlan.delete({ where: { id } });
+      });
+
+      return res.status(204).send();
+    } catch (error: any) {
+      console.error('deleteCarePlan error', error);
+      return res.status(500).json({ error: 'Failed to delete care plan', details: getUserFriendlyError(error) });
     }
   }
 }
