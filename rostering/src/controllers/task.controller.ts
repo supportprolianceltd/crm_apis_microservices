@@ -992,19 +992,62 @@ export class TaskController {
       if (Array.isArray(payload.riskCategory))
         updateData.riskCategory = payload.riskCategory;
 
-      const updated = await (this.prisma as any).task.update({
-        where: { id: taskId },
-        data: updateData,
-        include: {
-          carePlan: {
-            select: {
-              id: true,
-              clientId: true,
-              title: true,
+      let updated: any = null;
+
+      // If we have update fields, apply them. If not (e.g. caller only sent pushToVisit), fetch the existing task so we can continue.
+      if (Object.keys(updateData).length > 0) {
+        updated = await (this.prisma as any).task.update({
+          where: { id: taskId },
+          data: updateData,
+          include: {
+            carePlan: {
+              select: {
+                id: true,
+                clientId: true,
+                title: true,
+              },
             },
           },
-        },
-      });
+        });
+      } else {
+        updated = await (this.prisma as any).task.findUnique({
+          where: { id: taskId },
+          include: { carePlan: { select: { id: true, clientId: true, title: true } } },
+        });
+        if (!updated) return res.status(404).json({ error: 'Task not found after update' });
+      }
+
+      // If caller requested pushToVisit on update, attempt to attach to an existing CarerVisit
+      if (payload && payload.pushToVisit) {
+        // Use the task values (may have been updated above)
+        const taskStart: Date | null = updated.startDate ? new Date(updated.startDate) : null;
+        const taskEnd: Date | null = updated.dueDate ? new Date(updated.dueDate) : null;
+
+        if (!taskStart) {
+          return res.status(400).json({ error: 'pushToVisit requires task.startDate to be set' });
+        }
+
+        const visitWhere: any = {
+          tenantId: tenantId.toString(),
+          carePlanId: updated.carePlanId,
+          startDate: { lte: taskStart },
+        };
+        if (taskEnd) visitWhere.endDate = { gte: taskEnd };
+        else visitWhere.endDate = { gte: taskStart };
+
+        const matched = await (this.prisma as any).carerVisit.findFirst({ where: visitWhere, orderBy: { startDate: 'asc' } });
+        if (!matched) {
+          return res.status(400).json({ error: 'No matching visit found for the provided task times; create visits via care plan schedules or admin.' });
+        }
+
+        const attached = await (this.prisma as any).task.update({
+          where: { id: taskId },
+          data: { carerVisitId: matched.id, pushToVisit: true },
+          include: { carePlan: { select: { id: true, clientId: true, title: true } } },
+        });
+
+        return res.json(attached);
+      }
 
       return res.json(updated);
     } catch (error: any) {
