@@ -427,20 +427,20 @@ model PersonalCare {
   id                       String            @id @default(cuid())
   tenantId                 String
   carePlanId               String            @unique
-  bathingAndShowering      BathingAssistance
-  oralHygiene              String
-  maintainThemselves       String
-  dressThemselves          String
+  bathingAndShowering      BathingAssistance?
+  oralHygiene              String?
+  maintainThemselves       String?
+  dressThemselves          String?
   groomingNeeds            String[]          @default([])
-  toiletUsage              String
-  bowelControl             String
-  bladderControl           String
-  toiletingSupport         String
+  toiletUsage              String?
+  bowelControl             String?
+  bladderControl           String?
+  toiletingSupport         String?
   additionalNotes          String?            @db.Text
-  continenceCare           String
-  mobilityAssistance       String
-  preferredLanguage        String
-  communicationStyleNeeds  String
+  continenceCare           String?
+  mobilityAssistance       String?
+  preferredLanguage        String?
+  communicationStyleNeeds  String?
 
   carePlan                 CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
@@ -452,12 +452,12 @@ model EverydayActivityPlan {
   id                            String @id @default(cuid())
   tenantId                      String
   carePlanId                    String @unique
-  canTheyShop                   String
-  canTheyCall                   String
-  canTheyWash                   String
+  canTheyShop                   String?
+  canTheyCall                   String?
+  canTheyWash                   String?
   additionalNotes               String? @db.Text
-  communityAccessNeeds          String
-  ExerciseandMobilityActivities String
+  communityAccessNeeds          String?
+  ExerciseandMobilityActivities String?
 
   carePlan                      CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
@@ -470,18 +470,18 @@ model FallsAndMobility {
   tenantId                String
   carePlanId              String          @unique
   fallenBefore            Boolean         @default(false)
-  timesFallen             Int
-  mobilityLevel           MobilityLevel
-  mobilitySupport         MobilitySupport
+  timesFallen             Int?
+  mobilityLevel           MobilityLevel?
+  mobilitySupport         MobilitySupport?
   otherMobilitySupport    String?
-  activeAsTheyLikeToBe    String
-  canTransfer             String
-  canuseStairs            String
-  canTravelAlone          String
+  activeAsTheyLikeToBe    String?
+  canTransfer             String?
+  canuseStairs            String?
+  canTravelAlone          String?
   mobilityAdditionalNotes String?          @db.Text
-  visionStatus            String
-  speechStatus            String
-  hearingStatus           String
+  visionStatus            String?
+  speechStatus            String?
+  hearingStatus           String?
   sensoryAdditionalNotes  String?          @db.Text
 
   carePlan                CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
@@ -494,30 +494,30 @@ model MedicalInformation {
   id                            String  @id @default(cuid())
   tenantId                      String
   carePlanId                    String  @unique
-  primaryDiagnosis              String
+  primaryDiagnosis              String?
   primaryAdditionalNotes        String?  @db.Text
-  secondaryDiagnoses            String
+  secondaryDiagnoses            String?
   secondaryAdditionalNotes      String?  @db.Text
-  pastMedicalHistory            String
+  pastMedicalHistory            String?
   medicalSupport                Boolean @default(false)
   breathingDifficulty           Boolean @default(false)
-  breathingSupportNeed          String
+  breathingSupportNeed          String?
   useAirWayManagementEquipment  Boolean @default(false)
   specifyAirwayEquipment        String?
   airwayEquipmentRisk           String?
-  airWayEquipmentMitigationPlan String
+  airWayEquipmentMitigationPlan String?
   haveSkinPressureSores         Boolean @default(false)
   skinPressureConcerningIssues  Boolean @default(false)
   skinAdditionalInformation     String? @db.Text
-  currentHealthStatus           String
+  currentHealthStatus           String?
 
   raisedSafeGuardingIssue           Boolean         @default(false)
   safeGuardingAdditionalInformation String?         @db.Text
   medications                       Medication[]
-  primaryDoctor                     String
-  supportContactPhone               String
-  specialistContact                 String
-  HospitalContact                   String
+  primaryDoctor                     String?
+  supportContactPhone               String?
+  specialistContact                 String?
+  HospitalContact                   String?
   EmergencyCareNotes                String?
   medicalReportUpload               String?
   knownAllergies                    Boolean         @default(false)
@@ -567,15 +567,15 @@ model PsychologicalInformation {
   id                          String  @id @default(cuid())
   tenantId                    String
   carePlanId                  String  @unique
-  healthLevelSatisfaction     String
-  healthMotivationalLevel     String
-  sleepMood                   String
-  specifySleepMood            String
-  sleepStatus                 String
+  healthLevelSatisfaction     String?
+  healthMotivationalLevel     String?
+  sleepMood                   String?
+  specifySleepMood            String?
+  sleepStatus                 String?
   anyoneWorriedAboutMemory    Boolean @default(false)
-  memoryStatus                String
-  specifyMemoryStatus         String
-  canTheyDoHouseKeeping       String
+  memoryStatus                String?
+  specifyMemoryStatus         String?
+  canTheyDoHouseKeeping       String?
   houseKeepingSupport         Boolean @default(false)
   houseKeepingAdditionalNotes String?  @db.Text
 
@@ -589,24 +589,24 @@ model FoodNutritionHydration {
   id                                    String  @id @default(cuid())
   tenantId                              String
   carePlanId                            String  @unique
-  dietaryRequirements                   String
-  foodOrDrinkAllergies                  Boolean @default(false)
-  foodAllergiesSpecification            String
-  allergiesImpact                       String
-  favouriteFoods                        String
-  foodTextures                          String
-  appetiteLevel                         String
-  swallowingDifficulties                String
-  medicationsAffectingSwallowing        String
-  specifyMedicationsAffectingSwallowing String
-  canFeedSelf                           String
-  canPrepareLightMeals                  String
-  canCookMeals                          String
-  clientFoodGiver                       String
-  mealtimeSupport                       String
-  hydrationSchedule                     String
-  strongDislikes                        String
-  fluidPreferences                      String
+  dietaryRequirements                   String?
+  foodOrDrinkAllergies                  Boolean? @default(false)
+  foodAllergiesSpecification            String?
+  allergiesImpact                       String?
+  favouriteFoods                        String?
+  foodTextures                          String?
+  appetiteLevel                         String?
+  swallowingDifficulties                String?
+  medicationsAffectingSwallowing        String?
+  specifyMedicationsAffectingSwallowing String?
+  canFeedSelf                           String?
+  canPrepareLightMeals                  String?
+  canCookMeals                          String?
+  clientFoodGiver                       String?
+  mealtimeSupport                       String?
+  hydrationSchedule                     String?
+  strongDislikes                        String?
+  fluidPreferences                      String?
 
   carePlan                              CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
@@ -618,22 +618,22 @@ model RoutinePreference {
   id                             String           @id @default(cuid())
   tenantId                       String
   carePlanId                     String           @unique
-  PersonalBiography              String
-  haveJob                        Boolean          @default(false)
-  aboutJob                       String
-  haveImportantPerson            Boolean          @default(false)
-  aboutImportantPerson           String
-  significantPersonHasLocation   Boolean          @default(false)
-  importantPersonLocationEffects String
-  canMaintainOralHygiene         String
+  PersonalBiography              String?
+  haveJob                        Boolean?         @default(false)
+  aboutJob                       String?
+  haveImportantPerson            Boolean?         @default(false)
+  aboutImportantPerson           String?
+  significantPersonHasLocation   Boolean?         @default(false)
+  importantPersonLocationEffects String?
+  canMaintainOralHygiene         String?
   careGiverGenderPreference      GenderPreference @default(NO_PREFERENCE)
-  autonomyPreference             String
-  dailyRoutine                   String
-  haveSpecificImportantRoutine   Boolean          @default(false)
-  haveDislikes                   Boolean          @default(false)
-  dislikesEffect                 String
-  haveHobbiesRoutines            Boolean          @default(false)
-  hobbiesRoutinesEffect          String
+  autonomyPreference             String?
+  dailyRoutine                   String?
+  haveSpecificImportantRoutine   Boolean?         @default(false)
+  haveDislikes                   Boolean?         @default(false)
+  dislikesEffect                 String?
+  haveHobbiesRoutines            Boolean?         @default(false)
+  hobbiesRoutinesEffect          String?
 
   carePlan                       CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
@@ -645,25 +645,25 @@ model CultureValues {
   id                                  String   @id @default(cuid())
   tenantId                            String
   carePlanId                          String   @unique
-  religiousBackground                 String
-  ethnicGroup                         String
-  culturalAccommodation               String
-  sexualityandRelationshipPreferences String
-  sexImpartingCareNeeds               String
-  preferredLanguage                   String
+  religiousBackground                 String?
+  ethnicGroup                         String?
+  culturalAccommodation               String?
+  sexualityandRelationshipPreferences String?
+  sexImpartingCareNeeds               String?
+  preferredLanguage                   String?
   communicationStyleNeeds             String[] @default([])
-  preferredMethodOfCommunication      String
-  keyFamilyMembers                    String
-  receivesInformalCare                Boolean  @default(false)
+  preferredMethodOfCommunication      String?
+  keyFamilyMembers                    String?
+  receivesInformalCare                Boolean?  @default(false)
   informalCareByWho                   String?
   supportMethodByInformalCare         String?
   concernsOnInformalCare              String?
-  specifyConcernsOnInformalCare       String
-  receivesFormalCare                  Boolean  @default(false)
+  specifyConcernsOnInformalCare       String?
+  receivesFormalCare                  Boolean?  @default(false)
   specifyFormalCare                   String?
-  socialGroupAndCommunity             String
+  socialGroupAndCommunity             String?
   emotionalSupportNeeds               String[] @default([])
-  mentalWellbeingTracking             Boolean  @default(false)
+  mentalWellbeingTracking             Boolean?  @default(false)
 
   carePlan                            CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
@@ -675,19 +675,19 @@ model BodyMap {
   id                          String   @id @default(cuid())
   tenantId                    String
   carePlanId                  String   @unique
-  visitFrequency              String
-  carePlanReviewDate          DateTime
-  invoicingCycle              String
-  fundingAndInsuranceDetails  String
-  assignedCareManager         String
-  initialClinicalObservations Boolean  @default(false)
-  initialSkinIntegrity        Boolean  @default(false)
-  type                        String
-  size                        String
-  locationDescription         String
-  dateFirstObserved           DateTime
-  weight                      String
-  height                      String
+  visitFrequency              String?
+  carePlanReviewDate          DateTime?
+  invoicingCycle              String?
+  fundingAndInsuranceDetails  String?
+  assignedCareManager         String?
+  initialClinicalObservations Boolean?  @default(false)
+  initialSkinIntegrity        Boolean?  @default(false)
+  type                        String?
+  size                        String?
+  locationDescription         String?
+  dateFirstObserved           DateTime?
+  weight                      String?
+  height                      String?
 
   carePlan                    CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
 
@@ -699,27 +699,27 @@ model MovingHandling {
   id                              String      @id @default(cuid())
   tenantId                        String
   carePlanId                      String      @unique
-  equipmentsNeeds                 String
-  anyPainDuringRestingAndMovement String
-  anyCognitiveImpairment          String
-  behaviouralChanges              Boolean     @default(false)
-  describeBehaviouralChanges      String
-  walkIndependently               Boolean     @default(false)
-  manageStairs                    Boolean     @default(false)
-  sittingToStandingDependence     String
-  limitedSittingBalance           Boolean     @default(false)
-  turnInBed                       Boolean     @default(false)
-  lyingToSittingDependence        Boolean     @default(false)
-  gettingUpFromChairDependence    String
-  bathOrShower                    String
-  chairToCommodeOrBed             Boolean     @default(false)
-  profilingBedAndMattress         Boolean     @default(false)
+  equipmentsNeeds                 String?
+  anyPainDuringRestingAndMovement String?
+  anyCognitiveImpairment          String?
+  behaviouralChanges              Boolean?     @default(false)
+  describeBehaviouralChanges      String?
+  walkIndependently               Boolean?     @default(false)
+  manageStairs                    Boolean?     @default(false)
+  sittingToStandingDependence     String?
+  limitedSittingBalance           Boolean?     @default(false)
+  turnInBed                       Boolean?     @default(false)
+  lyingToSittingDependence        Boolean?     @default(false)
+  gettingUpFromChairDependence    String?
+  bathOrShower                    String?
+  chairToCommodeOrBed             Boolean?     @default(false)
+  profilingBedAndMattress         Boolean?     @default(false)
   transferRisks                   String[]    @default([])
   behaviouralChallenges           String[]    @default([])
-  riskManagementPlan              String
-  locationRiskReview              String
-  EvacuationPlanRequired          Boolean     @default(false)
-  dailyGoal                       String
+  riskManagementPlan              String?
+  locationRiskReview              String?
+  EvacuationPlanRequired          Boolean?     @default(false)
+  dailyGoal                       String?
   IntakeLog                       IntakeLog[]
 
   carePlan                        CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Cascade)
@@ -746,7 +746,7 @@ model CareRequirements {
   id         String @id @default(cuid())
   tenantId   String
   carePlanId String @unique
-  careType   String
+  careType   String?
 
   // Normalized schedule: one AgreedCareSchedule per day for this CareRequirements
   schedules AgreedCareSchedule[]
@@ -817,13 +817,13 @@ model LegalRequirement {
   id                            String   @id @default(cuid())
   tenantId                      String
   carePlanId                    String   @unique
-  attorneyInPlace               Boolean  @default(false)
-  attorneyType                  String
-  attorneyName                  String
-  attorneyContact               String
-  attorneyEmail                 String
-  solicitor                     String
-  certificateNumber             String
+  attorneyInPlace               Boolean?  @default(false)
+  attorneyType                  String?
+  attorneyName                  String?
+  attorneyContact               String?
+  attorneyEmail                 String?
+  solicitor                     String?
+  certificateNumber             String?
   certificateUpload             String?
   digitalConsentsAndPermissions String[] @default([])
   consertUpload                 String?

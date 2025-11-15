@@ -30,8 +30,8 @@ export function createTaskRoutes(controller: TaskController) {
   // Get single task by ID
   router.get('/:taskId', (req, res) => controller.getTaskById(req, res));
 
-  // Update a task
-  router.put('/:taskId', (req, res) => controller.updateTask(req, res));
+  // Update a task (partial updates supported) - use PATCH
+  router.patch('/:taskId', (req, res) => controller.updateTask(req, res));
 
   // Delete a task
   router.delete('/:taskId', (req, res) => controller.deleteTask(req, res));
