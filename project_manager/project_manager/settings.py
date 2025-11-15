@@ -161,6 +161,7 @@ CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
     "http://localhost:5173",
     "https://crm-frontend-react.vercel.app",
     "https://technicalglobaladministrator.e3os.co.uk",
+    "https://task-manager-two-plum.vercel.app",
     "https://loan-app-puce.vercel.app",
     "https://e3os.ai",
     "https://e3os.care",

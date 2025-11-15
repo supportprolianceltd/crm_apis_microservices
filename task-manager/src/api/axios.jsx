@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:9090/api/project-manager/api';
+const API_BASE =  'https://server1.prolianceltd.com/api/project-manager/api';
 
 const instance = axios.create({
   baseURL: API_BASE,

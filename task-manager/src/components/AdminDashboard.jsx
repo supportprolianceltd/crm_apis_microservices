@@ -1250,6 +1250,8 @@ const CreateTaskModal = ({ onClose, onTaskCreated }) => {
     priority: 'medium',
     status: 'not_started'
   });
+
+
   const [loading, setLoading] = useState(false);
   const [calculatedDays, setCalculatedDays] = useState(null);
   const [users, setUsers] = useState([]);
@@ -1270,10 +1272,19 @@ const CreateTaskModal = ({ onClose, onTaskCreated }) => {
     fetchUsers();
   }, []);
 
-  // Reset modal state when opened
-  useEffect(() => {
-    resetModal();
-  }, []);
+// Reset form when modal opens
+useEffect(() => {
+  setFormData({
+    title: '',
+    description: '',
+    assigned_to_id: '',
+    start_date: '',
+    due_date: '',
+    priority: 'medium',
+    status: 'not_started'
+  });
+  setCalculatedDays(null);
+}, []);
 
   const calculateDays = (startDate, endDate) => {
     if (!startDate || !endDate) {
