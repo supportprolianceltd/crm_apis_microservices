@@ -196,9 +196,9 @@ with tenant_context(tenant):
         email='support@appbrew.com',
         password='qwerty',
         role='staff',
-        first_name='Abib',
-        last_name='Achmed',
-        job_role=' Frontend Developer',
+        first_name='Ahmed',
+        last_name='Mahummed',
+        job_role=' Backend Developer',
         tenant=tenant
     )
 

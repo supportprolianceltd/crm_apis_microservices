@@ -2259,6 +2259,11 @@ class DocumentSerializer(serializers.ModelSerializer):
     permission_action = serializers.ChoiceField(choices=['add', 'remove', 'replace', 'update_level'], required=False, write_only=True)
     file = serializers.FileField(required=False, allow_null=True)
 
+    def to_internal_value(self, data):
+        ret = super().to_internal_value(data)
+        ret.pop('id', None)
+        return ret
+
     class Meta:
         model = Document
         fields = [

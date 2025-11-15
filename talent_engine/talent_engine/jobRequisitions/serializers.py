@@ -1,7 +1,5 @@
 import jwt
 from rest_framework.exceptions import ValidationError
-
-# talent_engine/serializers.py
 import logging
 import requests
 from django.conf import settings
@@ -13,7 +11,6 @@ from .models import JobRequisition, VideoSession, Participant, Request
 
 logger = logging.getLogger('talent_engine')
 
-
 def get_tenant_id_from_jwt(request):
     auth_header = request.META.get("HTTP_AUTHORIZATION", "")
     if not auth_header.startswith("Bearer "):
@@ -21,10 +18,9 @@ def get_tenant_id_from_jwt(request):
     token = auth_header.split(" ")[1]
     try:
         payload = jwt.decode(token, options={"verify_signature": False})
-        return payload.get("tenant_unique_id")
+        return payload.get("tenant_schema")
     except Exception:
         raise ValidationError("Invalid JWT token.")
-
 
 
 def get_user_data_from_jwt(request):
@@ -39,7 +35,7 @@ def get_user_data_from_jwt(request):
             'email': payload.get('email', ''),
             'first_name': payload.get('first_name', ''),
             'last_name': payload.get('last_name', ''),
-            'job_role': payload.get('job_role', ''),
+            'job_role': payload.get('role', ''),
             'id': payload.get('id', None)
         }
     except Exception as e:
@@ -80,7 +76,6 @@ class ComplianceItemSerializer(serializers.Serializer):
 
 class JobRequisitionSerializer(serializers.ModelSerializer):
     advert_banner_url = serializers.SerializerMethodField()
-
     tenant_id = serializers.CharField(max_length=36, read_only=True)
     department_id = serializers.CharField(max_length=36, allow_null=True, required=False)
     requested_by_id = serializers.CharField(max_length=36, read_only=True)
@@ -189,35 +184,12 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
         # Updated: Return stored data—no HTTP call
         return obj.tenant_domain
 
-    # def validate(self, data):
-    #     tenant_id = get_tenant_id_from_jwt(self.context['request'])
-
-    #     if data.get('tenant_unique_id', tenant_id) != tenant_id:
-    #         raise serializers.ValidationError({"tenant_unique_id": "Tenant ID mismatch."})
-        
-    #     # data['tenant_unique_id'] = tenant_id  # ✅ Inject it into validated data
-
-      
-
-    #     # logger.info(f"THIS IS THE {data} WE GOT")
-    #     return data
-
-
     def validate(self, data):
-        logger.info("=== JobRequisitionSerializer.validate called ===")
-        logger.info(f"Request in context: {self.context.get('request')}")
-        logger.info(f"JWT payload available: {hasattr(self.context.get('request'), 'jwt_payload')}")
-        
-        try:
-            tenant_id = get_tenant_id_from_jwt(self.context['request'])
-            logger.info(f"tenant_id from JWT: {tenant_id}")
-        except Exception as e:
-            logger.error(f"Error getting tenant_id from JWT: {str(e)}")
-            raise
+        tenant_id = get_tenant_id_from_jwt(self.context['request'])
 
-        if data.get('tenant_unique_id', tenant_id) != tenant_id:
-            raise serializers.ValidationError({"tenant_unique_id": "Tenant ID mismatch."})
-        
+        if data.get('tenant_schema', tenant_id) != tenant_id:
+            raise serializers.ValidationError({"tenant_schema": "Tenant ID mismatch."})
+   
         return data
 
     def validate_requirements(self, value):
@@ -246,16 +218,15 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
         return value
 
 
-
     def create(self, validated_data):
         request = self.context['request']
         jwt_payload = getattr(request, 'jwt_payload', {})
 
-        tenant_id = jwt_payload.get('tenant_unique_id')
+        tenant_id = jwt_payload.get('tenant_schema')
         tenant_schema = jwt_payload.get('tenant_schema', 'TENANT').upper()[:3]  # e.g., 'PRO'
 
         if not tenant_id:
-            raise serializers.ValidationError("Missing tenant_unique_id in token.")
+            raise serializers.ValidationError("Missing tenant_schema in token.")
 
         validated_data['tenant_id'] = tenant_id  # Inject tenant_id
 
@@ -275,8 +246,6 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
             last_number = 0
 
         next_number = str(last_number + 1).zfill(4)  # e.g., 0001
-
-        # Generate codes
         requisition_id = f"{tenant_schema}-{next_number}"
         job_requisition_code = f"{tenant_schema}-JR-{next_number}"
         job_application_code = f"{tenant_schema}-JA-{next_number}"
@@ -306,21 +275,11 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         request = self.context.get('request')
-        # logger.info(f"JobRequisition update request data: {getattr(request, 'data', {})}")
-        # logger.info(f"advert_banner in request.FILES: {getattr(request, 'FILES', {}).get('advert_banner')}")
-        # logger.info(f"advert_banner in validated_data: {validated_data.get('advert_banner')}")
-
         if 'tenant_id' in validated_data:
             validated_data['tenant_id'] = str(validated_data['tenant_id'])
-
-        # compliance_checklist = validated_data.pop('compliance_checklist', None)
         advert_banner_file = validated_data.pop('advert_banner', None)
         instance = super().update(instance, validated_data)
 
-        # if compliance_checklist is not None:
-        #     # Directly assign the validated list
-        #     instance.compliance_checklist = compliance_checklist
-        #     instance.save(update_fields=['compliance_checklist'])
 
         self._handle_advert_banner_upload(instance, advert_banner_file)
         return instance
@@ -344,9 +303,6 @@ class JobRequisitionSerializer(serializers.ModelSerializer):
                 instance.advert_banner_url = public_url  # <-- Save to advert_banner_url
                 instance.advert_banner = None            # <-- Clear advert_banner field
                 instance.save(update_fields=["advert_banner_url", "advert_banner"])
-
-
-
 
 
 
@@ -393,13 +349,12 @@ class JobRequisitionBulkCreateSerializer(serializers.Serializer):
             validated_data_list = [validated_data_list]
         
         jwt_payload = self.context.get('request').jwt_payload if self.context.get('request') else {}
-        tenant_id = jwt_payload.get('tenant_unique_id')
+        tenant_id = jwt_payload.get('tenant_schema')
         user_id = jwt_payload.get('id')
         role = jwt_payload.get('role')
-        # branch = jwt_payload.get('user', {}).get('branch')
 
         if not tenant_id or not user_id:
-            raise serializers.ValidationError("Missing tenant_unique_id or user_id in token.")
+            raise serializers.ValidationError("Missing tenant_schema or user_id in token.")
 
         requisitions = []
 
@@ -671,18 +626,17 @@ class RequestSerializer(serializers.ModelSerializer):
             current_user_id = jwt_payload.get('id')
 
             if str(current_user_id) == str(obj.requested_by_id):
-                user_data = jwt_payload
                 return {
-                    'email': user_data.get('email', ''),
-                    'first_name': user_data.get('first_name', ''),
-                    'last_name': user_data.get('last_name', ''),
-                    'job_role': user_data.get('job_role', '')
+                    'email': jwt_payload.get('email', ''),
+                    'first_name': jwt_payload.get('first_name', ''),
+                    'last_name': jwt_payload.get('last_name', ''),
+                    'job_role': jwt_payload.get('role', '')
                 }
             
             # Fallback to database if user is not the current user
             from .models import CustomUser
             try:
-                user = CustomUser.objects.get(id=obj.requested_by_id, tenant_id=jwt_payload.get('tenant_unique_id'))
+                user = CustomUser.objects.get(id=obj.requested_by_id, tenant_id=jwt_payload.get('tenant_schema'))
                 return {
                     'email': user.email,
                     'first_name': user.first_name,
@@ -744,7 +698,7 @@ class RequestSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         jwt_payload = getattr(self.context['request'], 'jwt_payload', {})
-        tenant_id = jwt_payload.get('tenant_unique_id')
+        tenant_id = jwt_payload.get('tenant_schema')
         
         if not tenant_id:
             raise serializers.ValidationError({"tenant_id": "Tenant ID not found in request."})
