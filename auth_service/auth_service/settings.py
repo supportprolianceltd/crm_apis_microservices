@@ -440,3 +440,6 @@ STORAGE_TYPE = env("STORAGE_TYPE", default="supabase")
 # # ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 
 # PASSWORD: Kd8k{tq|5?mQeB Health Care, Professional Services
+# #USERNAME: aekene-onwon8027
+# #PASSWORD: qwerty
+

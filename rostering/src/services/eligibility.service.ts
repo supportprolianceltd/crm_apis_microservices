@@ -13,12 +13,25 @@ export interface EligibilityResult {
   reasons: string[];
 }
 
+// Simple in-memory cache
+const eligibilityCache = new Map<string, { result: EligibilityResult[], timestamp: number }>();
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+
 export class EligibilityService {
   constructor(private prisma: PrismaClient) {}
 
   async precomputeEligibility(tenantId: string, visitId: string): Promise<EligibilityResult[]> {
+    // Check cache first
+    const cacheKey = `${tenantId}:${visitId}`;
+    const cached = eligibilityCache.get(cacheKey);
+    
+    if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+      logger.info('Returning cached eligibility results', { visitId, age: Date.now() - cached.timestamp });
+      return cached.result;
+    }
+
     const [visit, carers] = await Promise.all([
-      this.prisma.externalRequest.findUnique({
+      this.prisma.visit.findUnique({
         where: { id: visitId, tenantId }
       }),
       this.prisma.carer.findMany({
@@ -35,55 +48,39 @@ export class EligibilityService {
     for (const carer of carers) {
       const result = await this.checkCarerEligibility(visit, carer);
       eligibilityResults.push(result);
-
-      // Store in eligibility table - commented out as visitEligibility doesn't exist in schema
-      // await this.prisma.visitEligibility.upsert({
-      //   where: {
-      //     visitId_carerId: {
-      //       visitId,
-      //       carerId: carer.id
-      //     }
-      //   },
-      //   update: {
-      //     eligible: result.eligible,
-      //     score: result.score,
-      //     skillsMatch: result.skillsMatch,
-      //     credentialsValid: result.credentialsValid,
-      //     available: result.available,
-      //     preferencesMatch: result.preferencesMatch,
-      //     travelTime: result.travelTime,
-      //     lastCalculated: new Date()
-      //   },
-      //   create: {
-      //     tenantId,
-      //     visitId,
-      //     carerId: carer.id,
-      //     eligible: result.eligible,
-      //     score: result.score,
-      //     skillsMatch: result.skillsMatch,
-      //     credentialsValid: result.credentialsValid,
-      //     available: result.available,
-      //     preferencesMatch: result.preferencesMatch,
-      //     travelTime: result.travelTime,
-      //     lastCalculated: new Date()
-      //   }
-      // });
     }
+
+    const sortedResults = eligibilityResults.sort((a, b) => b.score - a.score);
+    
+    // Cache the results
+    eligibilityCache.set(cacheKey, {
+      result: sortedResults,
+      timestamp: Date.now()
+    });
 
     logger.info('Eligibility pre-computation completed', {
       visitId,
       totalCarers: carers.length,
-      eligibleCount: eligibilityResults.filter(r => r.eligible).length
+      eligibleCount: eligibilityResults.filter(r => r.eligible).length,
+      cached: true
     });
 
-    return eligibilityResults.sort((a, b) => b.score - a.score);
+    return sortedResults;
   }
 
   async getEligibleCarers(visitId: string): Promise<EligibilityResult[]> {
-    // Since visitEligibility doesn't exist, return empty array for now
-    // This would need to be implemented differently based on the actual schema
+    // Try to find in cache across all tenants
+    for (const [key, value] of eligibilityCache.entries()) {
+      if (key.endsWith(`:${visitId}`) && (Date.now() - value.timestamp) < CACHE_TTL) {
+        return value.result.filter(r => r.eligible);
+      }
+    }
+    
+    // If not cached, return empty (caller should precompute first)
+    logger.warn('Eligibility not pre-computed for visit', { visitId });
     return [];
   }
+
 
   private async checkCarerEligibility(visit: any, carer: any): Promise<EligibilityResult> {
     const reasons: string[] = [];

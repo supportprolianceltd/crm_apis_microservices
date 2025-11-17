@@ -30526,3 +30526,1962 @@ ImportError: cannot import name 'user_tasks' from 'tasks.views' (/app/tasks/view
 2025-11-13 07:55:14,684 [INFO] project_manager: ✓ Schema set to: appbrew
 2025-11-13 07:55:14,686 [INFO] project_manager: Calling view with user: aachmed2759
 2025-11-13 07:55:14,688 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:28,271 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:28,273 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:28,275 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:28,277 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:28,279 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:28,280 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:28,419 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-15 10:11:28,422 [INFO] project_manager: User: AnonymousUser
+2025-11-15 10:11:28,424 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:28,426 [INFO] project_manager: User is_authenticated: False
+2025-11-15 10:11:28,427 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-15 10:11:28,429 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-15 10:11:28,435 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks
+2025-11-15 10:11:28,490 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:28,491 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:28,492 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:28,493 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:28,494 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:28,495 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:28,506 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-15 10:11:28,507 [INFO] project_manager: User: AnonymousUser
+2025-11-15 10:11:28,508 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:28,509 [INFO] project_manager: User is_authenticated: False
+2025-11-15 10:11:28,510 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-15 10:11:28,511 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-15 10:11:28,512 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks
+2025-11-15 10:11:34,236 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:34,237 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:34,238 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:34,240 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:34,241 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:34,242 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:34,334 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:34,336 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:34,337 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:34,338 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:34,339 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:34,341 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:34,343 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:34,344 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:34,577 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:34,578 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:11:34,579 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:34,580 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:34,582 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:34,583 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:11:34,616 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:34,617 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:34,618 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:34,620 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:34,621 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:34,622 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:34,623 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:34,624 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:34,658 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:34,660 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:34,661 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:34,662 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:34,663 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:34,664 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:34,700 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:34,701 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:34,702 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:34,704 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:34,705 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:34,706 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:34,707 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:34,708 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:34,730 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:34,731 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:11:34,732 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:34,734 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:34,735 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:34,736 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:11:34,773 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:34,774 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:34,775 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:34,776 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:34,777 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:34,779 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:34,780 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:34,781 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:34,803 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:34,804 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:11:34,805 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:34,806 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:34,807 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:34,809 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:11:34,856 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:34,857 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:34,859 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:34,860 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:34,862 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:34,863 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:34,864 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:34,865 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:34,883 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:34,885 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:11:34,886 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:34,887 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:34,888 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:34,889 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:11:34,924 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:34,925 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:34,926 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:34,928 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:34,929 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:34,930 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:34,931 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:34,932 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:34,963 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:34,965 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:11:34,966 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:34,967 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:34,969 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:34,970 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:11:35,005 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:35,007 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:35,008 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:35,009 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:35,011 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:35,012 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:35,013 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:35,014 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:35,035 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:35,036 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:11:35,037 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:35,039 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:35,040 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:35,041 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:11:35,075 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:35,076 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:35,078 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:35,079 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:35,080 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:35,081 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:35,082 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:35,083 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:35,103 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:35,105 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:11:35,106 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:35,107 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:35,108 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:35,109 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:11:35,142 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:35,143 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:35,145 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:35,146 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:35,147 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:35,148 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:35,149 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:35,150 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:35,167 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:35,168 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:11:35,169 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:35,171 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:35,172 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:35,173 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:11:35,204 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:35,206 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:35,207 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:35,208 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:35,210 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:35,211 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:35,212 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:35,213 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:35,247 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:35,248 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:11:35,250 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:35,251 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:35,253 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:35,254 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:11:35,296 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:35,298 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:35,299 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:35,300 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:35,302 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:35,303 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:35,304 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:35,305 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:35,333 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:35,334 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:11:35,334 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:35,335 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:35,336 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:35,337 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:11:35,376 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:35,384 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:35,388 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:35,392 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:35,394 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:35,396 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:35,398 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:35,400 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:42,004 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:42,006 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:42,007 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:42,008 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:42,010 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:42,013 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:42,064 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:42,066 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:42,067 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:42,068 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:42,069 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:42,070 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:42,071 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:42,072 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:42,095 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:42,096 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:11:42,097 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:42,098 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:42,099 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:42,100 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:11:42,132 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:42,133 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:42,133 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:42,134 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:42,135 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:42,136 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:42,137 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:42,137 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:42,164 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:42,165 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:42,165 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:42,166 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:42,167 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:42,168 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:11:42,197 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:42,198 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:42,199 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:42,200 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:42,201 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:42,202 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:42,203 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:42,204 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:42,221 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:42,222 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:11:42,223 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:42,224 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:42,225 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:42,225 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:11:42,253 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:42,254 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:42,256 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:42,257 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:42,258 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:42,259 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:42,260 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:42,261 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:59,056 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:59,058 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/users/1/tasks
+2025-11-15 10:11:59,059 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:59,060 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:59,061 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:59,062 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/users/1/tasks
+2025-11-15 10:11:59,090 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:59,091 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:59,092 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:59,093 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:59,094 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:59,095 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:59,096 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:59,097 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:11:59,115 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:11:59,116 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/users/1/tasks/
+2025-11-15 10:11:59,117 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:11:59,118 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:11:59,119 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:11:59,121 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/users/1/tasks/
+2025-11-15 10:11:59,148 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:11:59,150 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:11:59,151 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:11:59,153 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:11:59,154 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:11:59,155 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:11:59,156 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:11:59,157 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:12:05,437 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:12:05,439 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:12:05,440 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:12:05,441 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:12:05,443 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:12:05,445 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:12:05,491 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:12:05,493 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:12:05,494 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:12:05,495 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:12:05,496 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:12:05,497 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:12:05,498 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:12:05,499 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:12:05,519 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:12:05,520 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:12:05,522 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:12:05,523 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:12:05,524 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:12:05,525 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:12:05,556 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:12:05,558 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:12:05,559 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:12:05,560 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:12:05,561 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:12:05,563 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:12:05,564 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:12:05,565 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:12:05,595 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:12:05,597 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:12:05,598 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:12:05,599 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:12:05,600 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:12:05,601 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:12:05,640 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:12:05,644 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:12:05,648 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:12:05,652 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:12:05,656 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:12:05,660 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:12:05,664 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:12:05,668 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:12:05,708 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:12:05,709 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:12:05,710 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:12:05,711 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:12:05,712 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:12:05,713 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:12:05,743 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:12:05,744 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:12:05,746 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:12:05,747 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:12:05,748 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:12:05,749 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:12:05,750 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:12:05,751 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:12:44,528 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:12:44,529 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:12:44,530 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:12:44,531 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:12:44,532 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:12:44,533 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:12:44,589 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:12:44,591 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:12:44,592 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:12:44,594 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:12:44,595 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:12:44,596 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:12:44,597 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:12:44,598 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:12:44,623 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:12:44,624 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:12:44,625 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:12:44,626 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:12:44,627 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:12:44,628 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:12:44,661 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:12:44,662 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:12:44,663 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:12:44,664 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:12:44,665 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:12:44,667 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:12:44,668 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:12:44,669 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:12:44,696 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:12:44,698 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:12:44,699 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:12:44,700 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:12:44,701 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:12:44,703 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:12:44,738 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:12:44,739 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:12:44,740 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:12:44,741 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:12:44,742 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:12:44,744 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:12:44,745 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:12:44,746 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:12:44,768 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:12:44,769 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:12:44,771 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:12:44,772 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:12:44,773 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:12:44,774 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:12:44,807 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:12:44,809 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:12:44,810 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:12:44,811 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:12:44,812 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:12:44,813 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:12:44,814 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:12:44,815 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:19,731 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:19,732 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:19,734 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:19,735 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:19,736 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:19,737 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:19,783 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:19,785 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:19,786 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:19,787 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:19,788 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:19,789 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:19,790 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:19,791 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:19,817 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:19,818 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:19,820 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:19,821 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:19,822 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:19,823 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:19,863 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:19,864 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:19,866 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:19,867 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:19,868 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:19,870 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:19,871 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:19,872 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:19,915 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:19,916 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:19,918 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:19,934 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:19,935 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:19,937 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:19,977 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:19,978 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:19,979 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:19,980 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:19,981 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:19,982 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:19,983 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:19,984 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:20,008 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:20,009 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:20,010 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:20,011 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:20,012 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:20,013 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:20,047 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:20,048 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:20,050 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:20,051 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:20,052 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:20,053 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:20,055 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:20,056 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:27,183 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:27,184 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:27,185 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:27,187 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:27,189 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:27,191 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:27,305 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:27,306 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:27,308 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:27,309 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:27,310 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:27,312 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:27,313 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:27,315 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:27,359 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:27,361 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:27,363 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:27,368 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:27,369 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:27,372 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:27,506 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:27,508 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:27,511 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:27,514 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:27,515 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:27,517 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:27,518 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:27,520 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:27,574 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:27,576 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:27,577 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:27,579 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:27,581 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:27,583 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:27,739 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:27,741 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:27,742 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:27,744 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:27,745 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:27,747 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:27,748 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:27,750 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:27,777 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:27,779 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:13:27,781 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:27,782 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:27,784 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:27,785 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:13:27,831 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:27,833 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:27,835 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:27,836 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:27,838 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:27,840 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:27,841 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:27,843 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:27,879 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:27,883 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:27,889 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:27,892 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:27,894 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:27,896 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:27,976 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:27,978 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:27,980 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:27,982 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:27,983 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:27,984 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:27,985 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:27,986 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:28,011 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:28,012 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:13:28,014 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:28,015 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:28,016 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:28,018 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:13:28,056 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:28,057 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:28,058 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:28,059 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:28,061 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:28,062 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:28,063 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:28,064 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:28,100 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:28,102 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:13:28,103 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:28,105 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:28,106 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:28,107 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:13:28,147 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:28,149 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:28,150 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:28,152 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:28,153 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:28,155 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:28,156 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:28,158 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:28,186 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:28,188 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:13:28,190 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:28,191 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:28,193 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:28,195 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:13:28,240 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:28,242 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:28,244 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:28,245 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:28,247 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:28,249 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:28,250 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:28,252 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:28,291 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:28,292 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:13:28,294 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:28,296 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:28,297 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:28,299 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:13:28,344 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:28,346 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:28,347 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:28,349 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:28,350 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:28,352 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:28,353 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:28,355 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:28,379 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:28,380 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:13:28,382 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:28,383 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:28,385 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:28,387 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:13:28,430 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:28,431 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:28,433 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:28,434 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:28,436 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:28,437 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:28,439 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:28,441 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:28,492 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:28,494 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:13:28,496 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:28,498 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:28,499 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:28,501 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:13:28,581 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:28,583 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:28,585 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:28,587 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:28,590 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:28,592 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:28,594 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:28,596 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:28,652 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:28,653 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:13:28,655 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:28,656 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:28,658 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:28,660 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:13:28,711 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:28,713 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:28,714 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:28,716 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:28,718 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:28,720 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:28,722 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:28,724 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:34,341 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:34,342 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:34,343 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:34,345 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:34,346 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:34,347 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:34,392 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:34,393 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:34,394 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:34,396 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:34,397 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:34,398 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:34,399 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:34,400 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:34,424 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:34,426 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:34,427 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:34,429 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:34,430 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:34,431 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:34,468 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:34,470 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:34,471 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:34,473 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:34,474 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:34,475 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:34,477 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:34,478 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:34,509 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:34,511 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:34,512 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:34,513 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:34,514 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:34,516 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:13:34,551 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:34,553 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:34,554 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:34,555 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:34,557 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:34,558 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:34,559 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:34,560 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:13:34,582 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:13:34,584 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:34,585 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:13:34,586 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:13:34,587 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:13:34,588 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:13:34,620 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:13:34,621 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:13:34,623 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:13:34,624 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:13:34,625 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:13:34,626 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:13:34,627 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:13:34,628 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:47,478 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:47,481 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:21:47,484 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:47,486 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:47,487 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:47,490 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:21:47,636 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:47,639 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:47,641 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:47,643 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:47,645 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:47,648 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:47,650 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:47,652 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:47,733 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:47,735 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:21:47,737 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:47,738 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:47,740 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:47,742 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:21:47,908 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:47,910 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:47,912 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:47,914 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:47,916 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:47,918 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:47,920 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:47,923 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:48,009 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:48,012 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:21:48,014 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:48,019 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:48,021 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:48,025 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:21:48,311 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:48,313 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:48,314 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:48,317 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:48,318 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:48,320 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:48,321 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:48,323 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:48,358 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:48,360 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:21:48,361 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:48,363 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:48,364 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:48,366 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:21:48,425 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:48,427 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:48,428 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:48,430 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:48,432 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:48,433 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:48,436 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:48,438 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:48,475 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:48,477 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:21:48,478 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:48,480 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:48,481 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:48,483 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:21:48,530 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:48,532 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:48,534 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:48,535 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:48,537 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:48,538 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:48,540 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:48,542 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:48,574 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:48,576 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:21:48,578 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:48,579 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:48,581 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:48,583 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:21:48,631 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:48,634 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:48,635 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:48,637 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:48,639 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:48,640 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:48,642 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:48,644 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:48,695 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:48,697 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:21:48,698 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:48,700 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:48,702 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:48,703 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:21:48,755 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:48,757 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:48,759 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:48,761 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:48,762 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:48,764 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:48,765 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:48,767 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:48,801 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:48,803 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:21:48,804 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:48,805 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:48,807 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:48,809 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:21:48,858 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:48,860 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:48,861 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:48,862 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:48,864 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:48,865 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:48,866 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:48,868 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:48,898 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:48,900 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:21:48,901 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:48,902 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:48,904 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:48,905 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:21:48,950 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:48,952 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:48,953 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:48,955 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:48,956 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:48,958 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:48,960 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:48,961 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:48,987 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:48,989 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:21:48,990 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:48,992 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:48,993 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:48,994 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:21:49,040 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:49,042 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:49,044 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:49,045 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:49,047 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:49,048 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:49,050 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:49,052 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:49,108 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:49,110 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:21:49,112 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:49,113 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:49,115 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:49,117 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:21:49,174 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:49,176 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:49,178 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:49,179 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:49,181 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:49,183 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:49,185 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:49,186 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:21:49,225 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:21:49,227 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:21:49,229 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:21:49,230 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:21:49,232 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:21:49,234 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:21:49,283 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:21:49,285 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:21:49,287 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:21:49,288 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:21:49,290 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:21:49,291 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:21:49,293 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:21:49,295 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:24:54,584 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:24:54,598 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:24:54,628 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:24:54,631 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:24:54,643 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:24:54,647 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:24:54,955 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:24:54,957 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:24:54,961 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:24:54,963 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:24:54,966 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:24:54,969 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:24:54,972 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:24:54,978 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:24:55,081 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:24:55,083 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:24:55,087 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:24:55,098 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:24:55,101 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:24:55,103 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:24:55,497 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:24:55,500 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:24:55,503 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:24:55,505 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:24:55,543 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:24:55,546 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:24:55,548 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:24:55,550 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:24:56,132 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:24:56,141 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:24:56,150 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:24:56,154 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:24:56,163 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:24:56,171 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:24:56,985 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:24:56,995 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:24:57,000 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:24:57,002 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:24:57,005 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:24:57,007 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:24:57,009 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:24:57,011 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:24:57,070 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:24:57,072 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:24:57,074 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:24:57,076 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:24:57,078 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:24:57,080 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:24:57,163 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:24:57,165 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:24:57,168 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:24:57,170 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:24:57,172 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:24:57,174 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:24:57,176 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:24:57,178 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:24:57,261 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:24:57,264 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:24:57,266 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:24:57,268 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:24:57,271 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:24:57,273 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:24:57,340 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:24:57,342 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:24:57,344 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:24:57,347 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:24:57,348 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:24:57,350 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:24:57,352 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:24:57,353 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:24:57,404 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:24:57,406 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:24:57,408 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:24:57,410 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:24:57,412 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:24:57,415 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:24:57,497 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:24:57,499 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:24:57,501 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:24:57,503 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:24:57,506 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:24:57,508 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:24:57,511 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:24:57,513 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:25:11,735 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:25:11,739 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:25:11,742 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:25:11,744 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:25:11,746 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:25:11,747 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:25:11,847 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:25:11,858 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:25:11,860 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:25:11,864 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:25:11,867 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:25:11,871 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:25:11,872 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:25:11,874 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:25:11,965 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:25:11,966 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:25:11,969 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:25:11,973 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:25:11,980 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:25:11,985 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:25:12,151 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:25:12,153 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:25:12,164 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:25:12,167 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:25:12,171 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:25:12,178 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:25:12,182 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:25:12,187 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:25:12,280 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:25:12,282 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:25:12,284 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:25:12,286 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:25:12,289 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:25:12,292 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:25:12,353 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:25:12,354 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:25:12,356 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:25:12,357 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:25:12,359 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:25:12,360 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:25:12,362 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:25:12,363 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:25:12,398 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:25:12,400 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:25:12,402 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:25:12,404 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:25:12,405 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:25:12,406 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:25:12,455 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:25:12,456 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:25:12,458 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:25:12,459 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:25:12,460 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:25:12,462 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:25:12,464 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:25:12,466 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:07,497 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:07,499 [INFO] project_manager: Method: POST, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:07,501 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:07,503 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:07,505 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:07,507 [INFO] project_manager: Method: POST, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:07,576 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:07,578 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:07,580 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:07,583 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:07,587 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:07,588 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:07,590 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:07,592 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:07,595 [INFO] project_manager: 
+2025-11-15 10:27:07,598 [INFO] project_manager: =============================================================
+2025-11-15 10:27:07,600 [INFO] project_manager: ========== CREATE TASK REQUEST START ==========
+2025-11-15 10:27:07,602 [INFO] project_manager: =============================================================
+2025-11-15 10:27:07,604 [INFO] project_manager: Method: POST
+2025-11-15 10:27:07,605 [INFO] project_manager: Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:07,607 [INFO] project_manager: Request data: {'title': 'qwerty', 'description': "// Reset form when modal opens\nuseEffect(() => {\n  setFormData({\n    title: '',\n    description: '',\n    assigned_to_id: '',\n    start_date: '',\n    due_date: '',\n    priority: 'medium',\n    status: 'not_started'\n  });\n  setCalculatedDays(null);\n}, []);// Reset form when modal opens\nuseEffect(() => {\n  setFormData({\n    title: '',\n    description: '',\n    assigned_to_id: '',\n    start_date: '',\n    due_date: '',\n    priority: 'medium',\n    status: 'not_started'\n  });\n  setCalculatedDays(null);\n}, []);// Reset form when modal opens\nuseEffect(() => {\n  setFormData({\n    title: '',\n    description: '',\n    assigned_to_id: '',\n    start_date: '',\n    due_date: '',\n    priority: 'medium',\n    status: 'not_started'\n  });\n  setCalculatedDays(null);\n}, []);", 'assigned_to_id': '1', 'start_date': '2025-11-27', 'due_date': '2025-11-29', 'priority': 'low', 'status': 'in_progress'}
+2025-11-15 10:27:07,609 [INFO] project_manager: ========== GET_CURRENT_USER_INFO START ==========
+2025-11-15 10:27:07,611 [INFO] project_manager: ✓✓✓ Successfully extracted user from validated JWT payload: {'id': 'support@appbrew.com', 'first_name': 'Mahummed', 'last_name': 'Mahummed', 'email': 'support@appbrew.com', 'username': 'amahummed7808', 'role': 'co-admin'} ✓✓✓
+2025-11-15 10:27:07,612 [INFO] project_manager: ========== GET_CURRENT_USER_INFO END ==========
+2025-11-15 10:27:07,613 [INFO] project_manager: ✓ Current user authenticated: {'id': 'support@appbrew.com', 'first_name': 'Mahummed', 'last_name': 'Mahummed', 'email': 'support@appbrew.com', 'username': 'amahummed7808', 'role': 'co-admin'}
+2025-11-15 10:27:07,620 [INFO] project_manager: ✓ Request data validated
+2025-11-15 10:27:07,622 [INFO] project_manager: Fetching details for assigned user: 1
+2025-11-15 10:27:07,657 [WARNING] project_manager: ⚠ Assigned user not found: 1, leaving task unassigned
+2025-11-15 10:27:07,659 [INFO] project_manager: ✓ Task left unassigned due to user not found
+2025-11-15 10:27:07,660 [INFO] project_manager: ✓ Assigned user details: {'first_name': '', 'last_name': '', 'email': ''}
+2025-11-15 10:27:07,662 [INFO] project_manager: Creating task with data: {'title': 'qwerty', 'description': "// Reset form when modal opens\nuseEffect(() => {\n  setFormData({\n    title: '',\n    description: '',\n    assigned_to_id: '',\n    start_date: '',\n    due_date: '',\n    priority: 'medium',\n    status: 'not_started'\n  });\n  setCalculatedDays(null);\n}, []);// Reset form when modal opens\nuseEffect(() => {\n  setFormData({\n    title: '',\n    description: '',\n    assigned_to_id: '',\n    start_date: '',\n    due_date: '',\n    priority: 'medium',\n    status: 'not_started'\n  });\n  setCalculatedDays(null);\n}, []);// Reset form when modal opens\nuseEffect(() => {\n  setFormData({\n    title: '',\n    description: '',\n    assigned_to_id: '',\n    start_date: '',\n    due_date: '',\n    priority: 'medium',\n    status: 'not_started'\n  });\n  setCalculatedDays(null);\n}, []);", 'assigned_to_id': None, 'start_date': datetime.date(2025, 11, 27), 'due_date': datetime.date(2025, 11, 29), 'priority': 'low', 'status': 'in_progress', 'assigned_by_id': 'support@appbrew.com', 'assigned_by_first_name': 'Mahummed', 'assigned_by_last_name': 'Mahummed', 'assigned_by_email': 'support@appbrew.com', 'assigned_to_first_name': '', 'assigned_to_last_name': '', 'assigned_to_email': ''}
+2025-11-15 10:27:07,692 [INFO] project_manager: ✓✓✓ Task created successfully! ID: APP-TASK-000001 ✓✓✓
+2025-11-15 10:27:07,694 [INFO] project_manager: =============================================================
+2025-11-15 10:27:07,695 [INFO] project_manager: ========== CREATE TASK REQUEST END ==========
+2025-11-15 10:27:07,696 [INFO] project_manager: =============================================================
+2025-11-15 10:27:07,770 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:07,771 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:07,773 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:07,774 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:07,776 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:07,778 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:07,864 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:07,866 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:07,868 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:07,870 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:07,872 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:07,874 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:07,876 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:07,879 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:07,930 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:07,932 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:07,933 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:07,935 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:07,936 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:07,938 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:08,057 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:08,059 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:08,061 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:08,062 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:08,064 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:08,065 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:08,067 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:08,068 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:08,138 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:08,139 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:27:08,141 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:08,143 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:08,144 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:08,146 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:27:08,204 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:08,206 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:08,208 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:08,210 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:08,211 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:08,213 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:08,214 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:08,217 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:08,261 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:08,263 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:27:08,265 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:08,267 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:08,268 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:08,270 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:27:08,322 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:08,323 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:08,325 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:08,326 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:08,328 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:08,330 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:08,331 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:08,333 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:08,381 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:08,383 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:27:08,384 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:08,386 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:08,387 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:08,389 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:27:08,445 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:08,447 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:08,448 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:08,450 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:08,451 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:08,453 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:08,455 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:08,456 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:08,516 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:08,518 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:27:08,520 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:08,522 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:08,523 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:08,525 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:27:08,578 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:08,580 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:08,581 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:08,583 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:08,584 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:08,586 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:08,587 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:08,588 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:08,657 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:08,658 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:08,659 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:08,661 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:08,663 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:08,665 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:08,719 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:08,720 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:08,722 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:08,723 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:08,725 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:08,726 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:08,728 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:08,729 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:08,765 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:08,767 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:08,768 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:08,770 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:08,771 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:08,773 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:08,818 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:08,820 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:08,821 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:08,823 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:08,824 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:08,826 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:08,827 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:08,829 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:08,880 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:08,882 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:08,884 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:08,885 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:08,887 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:08,888 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:08,966 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:08,969 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:08,971 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:08,976 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:08,978 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:08,980 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:08,982 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:08,985 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:09,043 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:09,045 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:09,048 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:09,049 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:09,051 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:09,053 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:09,123 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:09,125 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:09,126 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:09,128 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:09,130 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:09,132 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:09,134 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:09,135 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:14,497 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:14,498 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:14,500 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:14,501 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:14,503 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:14,504 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:14,535 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:14,536 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:14,537 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:14,538 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:14,539 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:14,540 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:14,541 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:14,542 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:14,561 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:14,562 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:14,563 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:14,564 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:14,565 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:14,566 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:14,596 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:14,597 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:14,598 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:14,599 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:14,600 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:14,601 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:14,602 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:14,603 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:14,635 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:14,636 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:14,637 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:14,638 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:14,639 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:14,640 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:14,673 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:14,674 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:14,675 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:14,676 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:14,678 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:14,679 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:14,680 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:14,681 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:14,708 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:14,710 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:14,711 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:14,712 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:14,714 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:14,715 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:14,750 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:14,752 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:14,753 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:14,754 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:14,755 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:14,757 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:14,758 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:14,760 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:18,540 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:18,542 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:18,543 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:18,544 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:18,545 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:18,546 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:18,590 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:18,591 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:18,592 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:18,593 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:18,594 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:18,595 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:18,597 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:18,598 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:18,617 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:18,618 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:18,620 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:18,621 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:18,622 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:18,624 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:18,653 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:18,655 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:18,656 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:18,657 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:18,658 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:18,659 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:18,660 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:18,660 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:18,690 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:18,691 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:18,692 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:18,693 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:18,695 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:18,696 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:27:18,730 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:18,731 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:18,733 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:18,735 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:18,736 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:18,737 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:18,738 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:18,739 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:27:18,759 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:27:18,760 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:18,762 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:27:18,763 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:27:18,764 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:27:18,766 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:27:18,795 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:27:18,796 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:27:18,797 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:27:18,799 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:27:18,800 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:27:18,801 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:27:18,802 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:27:18,803 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:33:33,957 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:33:33,960 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:33:33,962 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:33:33,964 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:33:33,965 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:33:33,967 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:33:34,062 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:33:34,064 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:33:34,065 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:33:34,067 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:33:34,068 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:33:34,070 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:33:34,071 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:33:34,074 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:33:34,116 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:33:34,117 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:33:34,119 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:33:34,121 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:33:34,123 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:33:34,125 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:33:34,177 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:33:34,179 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:33:34,180 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:33:34,182 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:33:34,183 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:33:34,185 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:33:34,187 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:33:34,208 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:33:34,328 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:33:34,338 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:33:34,340 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:33:34,344 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:33:34,351 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:33:34,353 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:33:34,448 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:33:34,451 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:33:34,453 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:33:34,455 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:33:34,457 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:33:34,466 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:33:34,469 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:33:34,471 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:33:34,540 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:33:34,543 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:33:34,545 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:33:34,547 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:33:34,549 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:33:34,551 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:33:34,636 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:33:34,646 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:33:34,651 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:33:34,660 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:33:34,664 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:33:34,667 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:33:34,673 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:33:34,677 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:34:21,155 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:34:21,157 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:34:21,159 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:34:21,161 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:34:21,163 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:34:21,168 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:34:21,277 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:34:21,280 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:34:21,283 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:34:21,285 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:34:21,286 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:34:21,288 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:34:21,290 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:34:21,292 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:34:21,358 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:34:21,361 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:34:21,363 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:34:21,365 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:34:21,368 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:34:21,371 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:34:21,469 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:34:21,481 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:34:21,483 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:34:21,485 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:34:21,493 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:34:21,495 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:34:21,498 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:34:21,500 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:34:21,616 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:34:21,627 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:34:21,629 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:34:21,634 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:34:21,642 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:34:21,644 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:34:21,770 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:34:21,781 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:34:21,786 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:34:21,790 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:34:21,802 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:34:21,809 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:34:21,857 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:34:21,939 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:34:22,126 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:34:22,154 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:34:22,216 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:34:22,249 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:34:22,255 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:34:22,280 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:34:22,507 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:34:22,510 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:34:22,515 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:34:22,517 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:34:22,526 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:34:22,532 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:34:22,535 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:34:22,536 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:35:10,471 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:35:10,473 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:35:10,475 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:35:10,477 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:35:10,479 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:35:10,481 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:35:10,609 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:35:10,612 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:35:10,614 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:35:10,616 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:35:10,623 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:35:10,628 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:35:10,631 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:35:10,633 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:35:10,711 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:35:10,714 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:35:10,716 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:35:10,718 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:35:10,720 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:35:10,722 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:35:10,795 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:35:10,798 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:35:10,801 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:35:10,803 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:35:10,805 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:35:10,807 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:35:10,812 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:35:10,817 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:36:35,443 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:36:35,446 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:36:35,448 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:36:35,450 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:36:35,452 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:36:35,454 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:36:35,775 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:36:35,785 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:36:35,792 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:36:35,795 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:36:35,799 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:36:35,804 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:36:35,806 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:36:35,808 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:36:35,876 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:36:35,878 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:36:35,882 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:36:35,887 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:36:35,890 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:36:35,892 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:36:35,963 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:36:35,965 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:36:35,967 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:36:35,969 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:36:35,971 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:36:35,972 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:36:35,974 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:36:35,977 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:36:36,054 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:36:36,056 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:36:36,059 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:36:36,064 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:36:36,068 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:36:36,070 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:36:36,181 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:36:36,184 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:36:36,189 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:36:36,193 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:36:36,197 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:36:36,199 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:36:36,203 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:36:36,207 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:36:36,326 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:36:36,342 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:36:36,346 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:36:36,354 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:36:36,355 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:36:36,358 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:36:36,726 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:36:36,743 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:36:36,763 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:36:36,789 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:36:36,804 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:36:36,830 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:36:36,895 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:36:36,909 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:36:41,298 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:36:41,299 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:36:41,301 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:36:41,303 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:36:41,305 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:36:41,306 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:36:41,378 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:36:41,380 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:36:41,381 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:36:41,384 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:36:41,386 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:36:41,388 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:36:41,390 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:36:41,391 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:36:41,431 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:36:41,433 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:36:41,436 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:36:41,437 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:36:41,439 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:36:41,440 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:36:41,502 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:36:41,504 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:36:41,506 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:36:41,507 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:36:41,509 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:36:41,511 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:36:41,513 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:36:41,515 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:36:41,575 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:36:41,577 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:36:41,579 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:36:41,580 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:36:41,584 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:36:41,591 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:36:41,697 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:36:41,699 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:36:41,701 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:36:41,708 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:36:41,712 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:36:41,715 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:36:41,717 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:36:41,720 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:36:41,785 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:36:41,799 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:36:41,805 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:36:41,810 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:36:41,812 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:36:41,814 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:36:41,899 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:36:41,902 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:36:41,905 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:36:41,907 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:36:41,909 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:36:41,911 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:36:41,913 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:36:41,915 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:38:48,635 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:38:48,640 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:38:48,642 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:38:48,644 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:38:48,647 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:38:48,649 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:38:48,771 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:38:48,774 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:38:48,778 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:38:48,781 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:38:48,783 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:38:48,785 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:38:48,787 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:38:48,790 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:38:48,856 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:38:48,858 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:38:48,861 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:38:48,864 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:38:48,866 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:38:48,868 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:38:49,133 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:38:49,149 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:38:49,168 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:38:49,177 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:38:49,186 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:38:49,188 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:38:49,191 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:38:49,197 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:38:49,376 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:38:49,378 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:38:49,381 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:38:49,383 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:38:49,385 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:38:49,390 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:38:49,472 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:38:49,487 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:38:49,500 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:38:49,511 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:38:49,558 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:38:49,562 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:38:49,572 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:38:49,575 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:38:49,744 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:38:49,748 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:38:49,750 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:38:49,752 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:38:49,755 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:38:49,759 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:38:49,849 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:38:49,852 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:38:49,855 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:38:49,858 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:38:49,859 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:38:49,861 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:38:49,863 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:38:49,866 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:38:49,952 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:38:49,955 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:38:49,957 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:38:49,959 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:38:49,962 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:38:49,964 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:38:50,064 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:38:50,076 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:38:50,084 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:38:50,094 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:38:50,101 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:38:50,117 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:38:50,119 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:38:50,123 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:38:50,203 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:38:50,211 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:38:50,222 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:38:50,254 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:38:50,263 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:38:50,266 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:38:50,439 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:38:50,446 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:38:50,449 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:38:50,456 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:38:50,460 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:38:50,466 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:38:50,470 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:38:50,474 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:02,581 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:02,583 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:02,587 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:02,591 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:02,593 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:02,595 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:02,639 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:02,640 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:02,642 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:02,643 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:02,645 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:02,646 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:02,648 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:02,649 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:02,686 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:02,688 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:02,689 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:02,690 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:02,692 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:02,693 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:02,798 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:02,815 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:02,817 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:02,820 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:02,823 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:02,824 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:02,828 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:02,830 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:02,887 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:02,890 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:02,892 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:02,893 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:02,898 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:02,900 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:03,039 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:03,041 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:03,042 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:03,043 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:03,044 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:03,046 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:03,048 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:03,049 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:03,077 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:03,079 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:40:03,080 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:03,082 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:03,083 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:03,084 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:40:03,136 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:03,138 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:03,139 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:03,141 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:03,143 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:03,146 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:03,147 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:03,149 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:03,194 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:03,197 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:03,199 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:03,201 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:03,205 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:03,208 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:03,307 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:03,310 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:03,313 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:03,322 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:03,327 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:03,340 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:03,344 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:03,351 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:03,460 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:03,468 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:40:03,474 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:03,477 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:03,480 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:03,485 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:40:03,588 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:03,590 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:03,592 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:03,594 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:03,598 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:03,601 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:03,603 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:03,606 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:03,699 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:03,701 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:40:03,703 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:03,706 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:03,712 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:03,715 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports
+2025-11-15 10:40:03,800 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:03,809 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:03,817 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:03,829 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:03,832 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:03,833 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:03,835 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:03,837 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:03,885 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:03,888 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:40:03,892 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:03,896 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:03,898 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:03,900 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:40:03,958 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:03,960 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:03,962 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:03,963 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:03,964 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:03,966 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:03,968 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:03,969 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:04,002 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:04,004 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:40:04,005 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:04,007 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:04,008 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:04,010 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/reports/
+2025-11-15 10:40:04,058 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:04,060 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:04,061 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:04,062 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:04,064 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:04,066 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:04,067 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:04,068 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:04,095 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:04,097 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:40:04,098 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:04,100 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:04,102 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:04,104 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:40:04,154 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:04,156 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:04,157 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:04,158 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:04,160 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:04,161 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:04,163 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:04,164 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:04,213 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:04,215 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:40:04,217 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:04,218 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:04,220 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:04,222 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments
+2025-11-15 10:40:04,283 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:04,284 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:04,285 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:04,287 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:04,288 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:04,290 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:04,292 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:04,294 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:04,332 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:04,333 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:40:04,335 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:04,339 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:04,341 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:04,343 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/comments/
+2025-11-15 10:40:04,389 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:04,391 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:04,392 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:04,394 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:04,395 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:04,397 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:04,399 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:04,401 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:12,764 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:12,766 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:12,767 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:12,770 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:12,772 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:12,774 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:12,843 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:12,844 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:12,847 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:12,848 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:12,850 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:12,852 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:12,853 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:12,855 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:12,906 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:12,908 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:12,909 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:12,911 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:12,913 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:12,915 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:12,988 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:12,994 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:12,996 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:12,998 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:12,999 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:13,001 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:13,003 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:13,005 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:13,091 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:13,098 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:13,101 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:13,107 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:13,110 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:13,114 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:13,212 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:13,216 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:13,218 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:13,220 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:13,225 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:13,228 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:13,230 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:13,232 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:13,307 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:13,309 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:13,311 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:13,313 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:13,317 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:13,319 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:13,397 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:13,408 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:13,410 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:13,414 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:13,417 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:13,421 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:13,425 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:13,426 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:35,048 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:35,050 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:35,051 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:35,053 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:35,054 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:35,055 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:35,094 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:35,096 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:35,098 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:35,099 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:35,100 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:35,101 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:35,103 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:35,104 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:35,137 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:35,139 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:35,141 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:35,142 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:35,143 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:35,145 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:35,189 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:35,191 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:35,192 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:35,194 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:35,195 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:35,196 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:35,198 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:35,199 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:35,258 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:35,260 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:35,262 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:35,264 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:35,265 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:35,267 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:35,345 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:35,347 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:35,349 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:35,351 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:35,352 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:35,354 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:35,356 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:35,359 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:35,429 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:35,431 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:35,433 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:35,435 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:35,438 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:35,439 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/
+2025-11-15 10:40:35,532 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-15 10:40:35,548 [INFO] project_manager: User: amahummed7808
+2025-11-15 10:40:35,550 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:35,552 [INFO] project_manager: User is_authenticated: True
+2025-11-15 10:40:35,554 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-15 10:40:35,560 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-15 10:40:35,561 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-15 10:40:35,563 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-15 10:40:37,110 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:37,145 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:37,166 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:37,169 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:37,183 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:37,240 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:37,322 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-15 10:40:37,327 [INFO] project_manager: User: AnonymousUser
+2025-11-15 10:40:37,395 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:37,414 [INFO] project_manager: User is_authenticated: False
+2025-11-15 10:40:37,420 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-15 10:40:37,444 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-15 10:40:37,460 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks
+2025-11-15 10:40:37,600 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:37,614 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:37,616 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:37,629 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:37,639 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:37,657 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-15 10:40:37,663 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-15 10:40:37,668 [INFO] project_manager: User: AnonymousUser
+2025-11-15 10:40:37,671 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:37,686 [INFO] project_manager: User is_authenticated: False
+2025-11-15 10:40:37,697 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-15 10:40:37,706 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-15 10:40:37,712 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks
+2025-11-15 10:40:50,379 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:50,387 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:50,449 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:50,487 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:50,507 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:50,543 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:50,655 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-15 10:40:50,658 [INFO] project_manager: User: AnonymousUser
+2025-11-15 10:40:50,660 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:50,662 [INFO] project_manager: User is_authenticated: False
+2025-11-15 10:40:50,664 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-15 10:40:50,671 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-15 10:40:50,674 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:50,841 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:50,864 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:50,867 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:50,879 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:50,899 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:50,915 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:51,032 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-15 10:40:51,062 [INFO] project_manager: User: AnonymousUser
+2025-11-15 10:40:51,079 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:51,083 [INFO] project_manager: User is_authenticated: False
+2025-11-15 10:40:51,103 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-15 10:40:51,105 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-15 10:40:51,109 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:51,280 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:51,296 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:51,299 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:51,302 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:51,307 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:51,313 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:51,391 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-15 10:40:51,399 [INFO] project_manager: User: AnonymousUser
+2025-11-15 10:40:51,402 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:51,411 [INFO] project_manager: User is_authenticated: False
+2025-11-15 10:40:51,418 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-15 10:40:51,430 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-15 10:40:51,433 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:51,537 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-15 10:40:51,599 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:51,611 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-15 10:40:51,633 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-15 10:40:51,636 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-15 10:40:51,639 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks/my_tasks
+2025-11-15 10:40:51,685 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-15 10:40:51,687 [INFO] project_manager: User: AnonymousUser
+2025-11-15 10:40:51,689 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-15 10:40:51,691 [INFO] project_manager: User is_authenticated: False
+2025-11-15 10:40:51,695 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-15 10:40:51,697 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-15 10:40:51,700 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks/my_tasks

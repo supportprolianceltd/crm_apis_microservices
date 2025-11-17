@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareMatch Pro | Carer Matching Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c5aa0;
+            --primary-light: #4a7bc8;
+            --primary-dark: #1e3d72;
+            --secondary: #4caf50;
+            --secondary-light: #6fbf73;
+            --secondary-dark: #357a38;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --info: #2196f3;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Authentication Section */
+        .auth-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .auth-header p {
+            color: var(--gray);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-success {
+            background-color: var(--secondary);
+        }
+
+        .btn-success:hover {
+            background-color: var(--secondary-dark);
+        }
+
+        /* Dashboard Section */
+        .dashboard-section {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 22px;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 28px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            padding: 30px 0;
+        }
+
+        .dashboard-header {
+            margin-bottom: 30px;
+        }
+
+        .dashboard-header h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header p {
+            color: var(--gray);
+            max-width: 800px;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .summary-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .summary-card-title {
+            font-size: 14px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .summary-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .summary-card-icon.eligible {
+            background-color: var(--secondary);
+        }
+
+        .summary-card-icon.ineligible {
+            background-color: var(--danger);
+        }
+
+        .summary-card-icon.total {
+            background-color: var(--primary);
+        }
+
+        .summary-card-icon.alternative {
+            background-color: var(--info);
+        }
+
+        .summary-card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .summary-card-description {
+            font-size: 14px;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        /* Request Details */
+        .request-details {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .request-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .skill-tag {
+            background-color: var(--primary-light);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* Carer Lists */
+        .carer-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-light);
+            margin-bottom: 20px;
+        }
+
+        .carer-tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--gray);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .carer-tab.active {
+            color: var(--primary);
+        }
+
+        .carer-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+        }
+
+        .carer-tab:hover {
+            color: var(--primary);
+        }
+
+        .carer-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .carer-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .carer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .carer-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .carer-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .carer-score {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .score-badge {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .score-badge.high {
+            background-color: var(--secondary);
+        }
+
+        .score-badge.medium {
+            background-color: var(--warning);
+        }
+
+        .score-badge.low {
+            background-color: var(--danger);
+        }
+
+        .carer-body {
+            padding: 20px;
+        }
+
+        .carer-details {
+            margin-bottom: 15px;
+        }
+
+        .carer-detail {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            width: 120px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .detail-value {
+            flex: 1;
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .skills-match {
+            margin-bottom: 15px;
+        }
+
+        .match-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .match-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .match-item {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .match-item.matched {
+            background-color: var(--secondary-light);
+            color: white;
+        }
+
+        .match-item.missing {
+            background-color: var(--gray-light);
+            color: var(--gray);
+        }
+
+        .carer-footer {
+            padding: 15px 20px;
+            background-color: var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .availability-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.available {
+            background-color: var(--secondary);
+        }
+
+        .status-dot.unavailable {
+            background-color: var(--danger);
+        }
+
+        .view-details-btn {
+            background: none;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .view-details-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Alternative Options */
+        .alternative-options {
+            margin-top: 40px;
+        }
+
+        .alternatives-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .alternative-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .alternative-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .alternative-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .alternative-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .alternative-time {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .alternative-body {
+            margin-bottom: 15px;
+        }
+
+        .alternative-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--gray-light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .carer-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .request-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-card {
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .carer-tabs {
+                flex-direction: column;
+            }
+            
+            .carer-tab {
+                text-align: left;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Section -->
+    <section class="auth-section" id="authSection">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>CareMatch Pro</h1>
+                <p>Enter your access token to view carer matching results</p>
+            </div>
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="token">Access Token</label>
+                    <input type="password" id="token" class="form-control" placeholder="Enter your access token" required>
+                </div>
+                <button type="submit" class="btn btn-block">Access Dashboard</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section class="dashboard-section" id="dashboardSection">
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <i class="fas fa-hands-helping"></i>
+                        <span>CareMatch Pro</span>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar">AD</div>
+                        <button class="logout-btn" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+            <div class="container">
+                <div class="dashboard-header">
+                    <h1>Carer Matching Results</h1>
+                    <p>Review eligible carers, their skills match, availability, and alternative scheduling options.</p>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="summary-card-header">
+                            <div class="summary-card-title">Total Carers</div>
+                            <div class="summary-card-icon total">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                        <div class="summary-card-value" id="totalCarers">0</div>
+                        <div class="summary-card-description">Pre-filtered carers</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-card-header">
+                            <div class="summary-card-title">Eligible Carers</div>
+                            <div class="summary-card-icon eligible">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="summary-card-value" id="eligibleCarers">0</div>
+                        <div class="summary-card-description">Available & qualified</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-card-header">
+                            <div class="summary-card-title">Ineligible Carers</div>
+                            <div class="summary-card-icon ineligible">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                        </div>
+                        <div class="summary-card-value" id="ineligibleCarers">0</div>
+                        <div class="summary-card-description">Not available or unqualified</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-card-header">
+                            <div class="summary-card-title">Alternative Options</div>
+                            <div class="summary-card-icon alternative">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                        <div class="summary-card-value" id="alternativeOptions">0</div>
+                        <div class="summary-card-description">Different times/dates</div>
+                    </div>
+                </div>
+
+                <!-- Request Details -->
+                <div class="request-details">
+                    <h2 class="section-title">Request Details</h2>
+                    <div class="request-info">
+                        <div class="info-item">
+                            <div class="info-label">Request ID</div>
+                            <div class="info-value" id="requestId">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Subject</div>
+                            <div class="info-value" id="requestSubject">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Scheduled Time</div>
+                            <div class="info-value" id="requestTime">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Duration</div>
+                            <div class="info-value" id="requestDuration">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Required Skills</div>
+                            <div class="skills-list" id="requiredSkills"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Requirements</div>
+                            <div class="info-value" id="requestRequirements">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carer Lists -->
+                <div class="carer-tabs">
+                    <button class="carer-tab active" data-tab="eligible">Eligible Carers</button>
+                    <button class="carer-tab" data-tab="ineligible">Ineligible Carers</button>
+                </div>
+
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner"></div>
+                </div>
+
+                <div class="carer-list" id="eligibleCarerList"></div>
+                <div class="carer-list" id="ineligibleCarerList" style="display: none;"></div>
+
+                <!-- Alternative Options -->
+                <div class="alternative-options">
+                    <h2 class="section-title">Alternative Scheduling Options</h2>
+                    <div class="alternatives-list" id="alternativesList"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Sample data (in a real app, this would come from an API)
+        const sampleData = {
+            "success": true,
+            "data": {
+                "requestId": "REQ-20251117-Y3JSL",
+                "requestDetails": {
+                    "subject": "Morning Dementia Care Support - Mr. Adewale Johnson",
+                    "scheduledStartTime": "2025-11-10T08:00:00.000Z",
+                    "scheduledEndTime": "2025-11-10T11:00:00.000Z",
+                    "estimatedDuration": 180,
+                    "requiredSkills": [
+                        "Dementia Care",
+                        "Patient Hygiene Assistance",
+                        "Medication Administration",
+                        "First Aid & CPR"
+                    ],
+                    "requirements": "Carer must be experienced in dementia and personal care, have valid DBS, and be available weekday mornings. Patient can be resistant to care sometimes."
+                },
+                "summary": {
+                    "totalCarers": 11,
+                    "preFilteredCarers": 11,
+                    "eligibleCarers": 6,
+                    "ineligibleCarers": 5,
+                    "alternativeOptions": 32,
+                    "checkedSchedule": true,
+                    "scoringUsed": true
+                },
+                "eligibleCarers": [
+                    {
+                        "carerId": 9,
+                        "carerName": "David Rodriguez",
+                        "email": "david.rodriguez@careagency.com",
+                        "employment": {
+                            "isEmployed": true,
+                            "reason": ""
+                        },
+                        "skills": [
+                            {
+                                "id": 20,
+                                "skill_name": "Dementia Care",
+                                "proficiency_level": "expert",
+                                "description": "Specialized in challenging dementia behaviors and advanced care techniques",
+                                "acquired_date": "2005-08-15",
+                                "years_of_experience": 18,
+                                "certificate": null,
+                                "certificate_url": null,
+                                "last_updated_by_id": "1",
+                                "last_updated_by": {
+                                    "id": 1,
+                                    "email": "support@appbrew.com",
+                                    "first_name": "Ahmed",
+                                    "last_name": "Mahummed"
+                                }
+                            }
+                        ],
+                        "skillsMatch": {
+                            "hasSomeRequired": true,
+                            "missingSkills": [],
+                            "matchingSkills": [
+                                "dementia care",
+                                "patient hygiene assistance",
+                                "medication administration",
+                                "first aid & cpr"
+                            ],
+                            "requirementsMatch": true
+                        },
+                        "availability": {
+                            "isAvailable": true,
+                            "conflicts": [],
+                            "suggestions": [
+                                {
+                                    "day": "friday",
+                                    "date": "2025-11-14",
+                                    "startTime": "06:00",
+                                    "endTime": "09:00",
+                                    "duration": 3
+                                }
+                            ],
+                            "availableHours": {
+                                "friday": {
+                                    "end": "20:00",
+                                    "start": "06:00",
+                                    "available": true
+                                }
+                            }
+                        },
+                        "cluster": {
+                            "carerId": 9,
+                            "visitClusterId": null,
+                            "sameCluster": false,
+                            "bonus": 0
+                        },
+                        "continuity": {
+                            "bonus": 0,
+                            "previousVisits": 0
+                        },
+                        "workload": {
+                            "currentWeeklyHours": 0,
+                            "utilizationPercent": 0,
+                            "penalty": 0
+                        },
+                        "score": 60,
+                        "overallEligible": true
+                    }
+                ],
+                "ineligibleCarers": [
+                    {
+                        "carerId": 7,
+                        "carerName": "Michael Brown",
+                        "email": "michael.brown@careagency.com",
+                        "employment": {
+                            "isEmployed": true,
+                            "reason": ""
+                        },
+                        "skills": [
+                            {
+                                "id": 11,
+                                "skill_name": "Patient Hygiene Assistance",
+                                "proficiency_level": "intermediate",
+                                "description": "Personal care assistance including bathing and grooming",
+                                "acquired_date": "2021-06-10",
+                                "years_of_experience": 3,
+                                "certificate": null,
+                                "certificate_url": null,
+                                "last_updated_by_id": "1",
+                                "last_updated_by": {
+                                    "id": 1,
+                                    "email": "support@appbrew.com",
+                                    "first_name": "Ahmed",
+                                    "last_name": "Mahummed"
+                                }
+                            }
+                        ],
+                        "skillsMatch": {
+                            "hasSomeRequired": true,
+                            "missingSkills": [
+                                "dementia care",
+                                "medication administration"
+                            ],
+                            "matchingSkills": [
+                                "patient hygiene assistance",
+                                "first aid & cpr"
+                            ],
+                            "requirementsMatch": false
+                        },
+                        "availability": {
+                            "isAvailable": false,
+                            "conflicts": [
+                                "Request time (8:00-11:00) is outside carer availability (10:00-18:00) on monday"
+                            ],
+                            "suggestions": [
+                                {
+                                    "day": "friday",
+                                    "date": "2025-11-14",
+                                    "startTime": "10:00",
+                                    "endTime": "13:00",
+                                    "duration": 3
+                                }
+                            ],
+                            "availableHours": {
+                                "friday": {
+                                    "end": "18:00",
+                                    "start": "10:00",
+                                    "available": true
+                                }
+                            }
+                        },
+                        "cluster": {
+                            "carerId": 7,
+                            "visitClusterId": null,
+                            "sameCluster": false,
+                            "bonus": 0
+                        },
+                        "continuity": {
+                            "bonus": 0,
+                            "previousVisits": 0
+                        },
+                        "workload": {
+                            "currentWeeklyHours": 0,
+                            "utilizationPercent": 0,
+                            "penalty": 0
+                        },
+                        "score": 40,
+                        "overallEligible": false
+                    }
+                ],
+                "alternativeOptions": [
+                    {
+                        "carerId": 9,
+                        "carerName": "David Rodriguez",
+                        "email": "david.rodriguez@careagency.com",
+                        "score": 60,
+                        "skillsMatch": {
+                            "hasSomeRequired": true,
+                            "missingSkills": [],
+                            "matchingSkills": [
+                                "dementia care",
+                                "patient hygiene assistance",
+                                "medication administration",
+                                "first aid & cpr"
+                            ],
+                            "requirementsMatch": true
+                        },
+                        "day": "tuesday",
+                        "date": "2025-11-11",
+                        "startTime": "06:00",
+                        "endTime": "09:00",
+                        "duration": 3,
+                        "isPrimaryTime": false
+                    }
+                ]
+            },
+            "message": "Found 6 eligible carers with scores (max 100 points). Pre-filtered 11 to 11 candidates."
+        };
+
+        // DOM Elements
+        const authSection = document.getElementById('authSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        const authForm = document.getElementById('authForm');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        
+        // Summary elements
+        const totalCarers = document.getElementById('totalCarers');
+        const eligibleCarers = document.getElementById('eligibleCarers');
+        const ineligibleCarers = document.getElementById('ineligibleCarers');
+        const alternativeOptions = document.getElementById('alternativeOptions');
+        
+        // Request details elements
+        const requestId = document.getElementById('requestId');
+        const requestSubject = document.getElementById('requestSubject');
+        const requestTime = document.getElementById('requestTime');
+        const requestDuration = document.getElementById('requestDuration');
+        const requiredSkills = document.getElementById('requiredSkills');
+        const requestRequirements = document.getElementById('requestRequirements');
+        
+        // Carer list elements
+        const eligibleCarerList = document.getElementById('eligibleCarerList');
+        const ineligibleCarerList = document.getElementById('ineligibleCarerList');
+        const alternativesList = document.getElementById('alternativesList');
+        
+        // Tab elements
+        const carerTabs = document.querySelectorAll('.carer-tab');
+
+        // Format date and time
+        function formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleDateString('en-GB', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Format duration
+        function formatDuration(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}h ${mins > 0 ? `${mins}m` : ''}`;
+        }
+
+        // Get score badge class
+        function getScoreClass(score) {
+            if (score >= 70) return 'high';
+            if (score >= 40) return 'medium';
+            return 'low';
+        }
+
+        // Render carer card
+        function renderCarerCard(carer, isEligible = true) {
+            const scoreClass = getScoreClass(carer.score);
+            
+            return `
+                <div class="carer-card">
+                    <div class="carer-header">
+                        <div class="carer-name">${carer.carerName}</div>
+                        <div class="carer-score">
+                            <div class="score-badge ${scoreClass}">${carer.score}</div>
+                            <span>Score</span>
+                        </div>
+                    </div>
+                    <div class="carer-body">
+                        <div class="carer-details">
+                            <div class="carer-detail">
+                                <div class="detail-label">Email:</div>
+                                <div class="detail-value">${carer.email}</div>
+                            </div>
+                            <div class="carer-detail">
+                                <div class="detail-label">Employment:</div>
+                                <div class="detail-value">${carer.employment.isEmployed ? 'Active' : 'Inactive'}</div>
+                            </div>
+                        </div>
+                        <div class="skills-match">
+                            <div class="match-title">Skills Match</div>
+                            <div class="match-list">
+                                ${carer.skillsMatch.matchingSkills.map(skill => 
+                                    `<div class="match-item matched">${skill}</div>`
+                                ).join('')}
+                                ${carer.skillsMatch.missingSkills.map(skill => 
+                                    `<div class="match-item missing">${skill}</div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carer-footer">
+                        <div class="availability-status">
+                            <div class="status-dot ${carer.availability.isAvailable ? 'available' : 'unavailable'}"></div>
+                            <span>${carer.availability.isAvailable ? 'Available' : 'Unavailable'}</span>
+                        </div>
+                        <button class="view-details-btn">View Details</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render alternative option card
+        function renderAlternativeCard(option) {
+            const scoreClass = getScoreClass(option.score);
+            
+            return `
+                <div class="alternative-card">
+                    <div class="alternative-header">
+                        <div class="alternative-name">${option.carerName}</div>
+                        <div class="alternative-time">${option.day}, ${option.date}</div>
+                    </div>
+                    <div class="alternative-body">
+                        <div class="skills-match">
+                            <div class="match-title">Skills Match</div>
+                            <div class="match-list">
+                                ${option.skillsMatch.matchingSkills.map(skill => 
+                                    `<div class="match-item matched">${skill}</div>`
+                                ).join('')}
+                                ${option.skillsMatch.missingSkills.map(skill => 
+                                    `<div class="match-item missing">${skill}</div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        <div class="carer-detail">
+                            <div class="detail-label">Time:</div>
+                            <div class="detail-value">${option.startTime} - ${option.endTime}</div>
+                        </div>
+                    </div>
+                    <div class="alternative-footer">
+                        <div class="carer-score">
+                            <div class="score-badge ${scoreClass}">${option.score}</div>
+                            <span>Score</span>
+                        </div>
+                        <button class="view-details-btn">Select Option</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Populate dashboard with data
+        function populateDashboard(data) {
+            const request = data.data.requestDetails;
+            const summary = data.data.summary;
+            
+            // Update summary cards
+            totalCarers.textContent = summary.totalCarers;
+            eligibleCarers.textContent = summary.eligibleCarers;
+            ineligibleCarers.textContent = summary.ineligibleCarers;
+            alternativeOptions.textContent = summary.alternativeOptions;
+            
+            // Update request details
+            requestId.textContent = data.data.requestId;
+            requestSubject.textContent = request.subject;
+            requestTime.textContent = `${formatDateTime(request.scheduledStartTime)} - ${formatDateTime(request.scheduledEndTime)}`;
+            requestDuration.textContent = formatDuration(request.estimatedDuration);
+            requestRequirements.textContent = request.requirements;
+            
+            // Update required skills
+            requiredSkills.innerHTML = request.requiredSkills.map(skill => 
+                `<div class="skill-tag">${skill}</div>`
+            ).join('');
+            
+            // Render eligible carers
+            eligibleCarerList.innerHTML = data.data.eligibleCarers.map(carer => 
+                renderCarerCard(carer, true)
+            ).join('');
+            
+            // Render ineligible carers
+            ineligibleCarerList.innerHTML = data.data.ineligibleCarers.map(carer => 
+                renderCarerCard(carer, false)
+            ).join('');
+            
+            // Render alternative options
+            alternativesList.innerHTML = data.data.alternativeOptions.map(option => 
+                renderAlternativeCard(option)
+            ).join('');
+        }
+
+        // Event Listeners
+        authForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const token = document.getElementById('token').value;
+            
+            // In a real app, you would validate the token with your backend
+            if (token) {
+                // Show loading spinner
+                loadingSpinner.style.display = 'flex';
+                
+                // Simulate API call delay
+                setTimeout(() => {
+                    // Hide auth section, show dashboard
+                    authSection.style.display = 'none';
+                    dashboardSection.style.display = 'block';
+                    
+                    // Populate dashboard with sample data
+                    populateDashboard(sampleData);
+                    
+                    // Hide loading spinner
+                    loadingSpinner.style.display = 'none';
+                }, 1500);
+            } else {
+                alert('Please enter a valid token');
+            }
+        });
+
+        logoutBtn.addEventListener('click', function() {
+            // Hide dashboard, show auth section
+            dashboardSection.style.display = 'none';
+            authSection.style.display = 'flex';
+            
+            // Clear token field
+            document.getElementById('token').value = '';
+        });
+
+        // Tab switching
+        carerTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                carerTabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Show/hide appropriate carer list
+                const tabName = this.getAttribute('data-tab');
+                if (tabName === 'eligible') {
+                    eligibleCarerList.style.display = 'grid';
+                    ineligibleCarerList.style.display = 'none';
+                } else {
+                    eligibleCarerList.style.display = 'none';
+                    ineligibleCarerList.style.display = 'grid';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -686,265 +686,178 @@
 }
 ```
 
-### Check Request Feasibility
-**Purpose:** Analyzes which carers can handle a specific visit request based on skills, availability, and schedule compatibility. **Data Sources:** Queries auth service for carer profiles, checks skills matching against required skills, validates availability against request time, and optionally checks for schedule conflicts.
-**Method:** GET
-**URL:** `http://localhost:9090/api/rostering/requests/REQ-20251106-97ZZF/feasibility?includeScheduleCheck=true`
+
+### **Check Request Feasibility with Comprehensive Scoring**
+
+**Purpose:** Analyzes which carers can handle a specific visit request using a comprehensive scoring system (max 100 points) that evaluates:
+- **Skills matching** (40 points)
+- **Availability** (20 points) 
+- **Cluster proximity** (15 points)
+- **Continuity of care** (10 points)
+- **Workload penalties** (up to -20 points)
+
+**Method:** GET  
+**URL:** `http://localhost:9090/api/rostering/requests/{requestId}/feasibility?includeScheduleCheck=true`  
 **Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
 
-**Response:**
+**Query Parameters:**
+- `includeScheduleCheck` (optional): Set to `true` to include detailed schedule conflict checking
+
+---
+
+## **Response Structure with Scoring Details**
+
+### **Summary Section**
 ```json
-{
-  "success": true,
-  "data": {
-    "requestId": "REQ-20251106-97ZZF",
-    "requestDetails": {
-      "subject": "Morning Dementia Care Support - Mr. Adewale Johnson",
-      "scheduledStartTime": "2025-11-10T08:00:00.000Z",
-      "scheduledEndTime": "2025-11-10T11:00:00.000Z",
-      "estimatedDuration": 180,
-      "requiredSkills": [
-        "Dementia Care",
-        "Patient Hygiene Assistance",
-        "Medication Administration",
-        "First Aid & CPR"
-      ],
-      "requirements": "Carer must be experienced in dementia and personal care, have valid DBS, and be available weekday mornings."
-    },
-
-
-    // CRITERIA
-    // NEW Clients= 0 or Existsing=100, available carers(5) within the same cluster=100, , IF ITS LESS THEN = 50, known cluster=, not existing cluster 0, available carers within the  skill set=100
-
-
-    "summary": {
-      "totalCarers": 6,
-      "eligibleCarers": 1,
-      "ineligibleCarers": 5,
-      "checkedSchedule": true
-    },
-    "eligibleCarers": [
-      {
-        "carerId": 50,
-        "carerName": "Jane Doe",
-        "email": "ekeneonwon@appbrew.com",
-        "skills": [
-          {
-            "id": 1,
-            "skill_name": "Patient Hygiene Assistance",
-            "proficiency_level": "expert",
-            "description": "Experienced in assisting elderly patients with bathing, grooming, and personal care routines.",
-            "acquired_date": "2010-01-01",
-            "years_of_experience": 15,
-            "certificate": null,
-            "certificate_url": null,
-            "last_updated_by_id": "2",
-            "last_updated_by": {
-              "id": 2,
-              "email": "support@appbrew.com",
-              "first_name": "Abib",
-              "last_name": "Achmed"
-            }
-          },
-          {
-            "id": 2,
-            "skill_name": "Medication Administration",
-            "proficiency_level": "advanced",
-            "description": "Trained and certified in safe administration of oral, topical, and injectable medications.",
-            "acquired_date": "2012-05-15",
-            "years_of_experience": 13,
-            "certificate": null,
-            "certificate_url": null,
-            "last_updated_by_id": "2",
-            "last_updated_by": {
-              "id": 2,
-              "email": "support@appbrew.com",
-              "first_name": "Abib",
-              "last_name": "Achmed"
-            }
-          },
-          {
-            "id": 3,
-            "skill_name": "First Aid & CPR",
-            "proficiency_level": "expert",
-            "description": "Certified in emergency first aid and cardiopulmonary resuscitation (CPR).",
-            "acquired_date": "2015-03-20",
-            "years_of_experience": 10,
-            "certificate": null,
-            "certificate_url": null,
-            "last_updated_by_id": "2",
-            "last_updated_by": {
-              "id": 2,
-              "email": "support@appbrew.com",
-              "first_name": "Abib",
-              "last_name": "Achmed"
-            }
-          },
-          {
-            "id": 4,
-            "skill_name": "Dementia Care",
-            "proficiency_level": "intermediate",
-            "description": "Specialized training in supporting patients with Alzheimer's and other forms of dementia.",
-            "acquired_date": "2018-11-10",
-            "years_of_experience": 7,
-            "certificate": null,
-            "certificate_url": null,
-            "last_updated_by_id": "2",
-            "last_updated_by": {
-              "id": 2,
-              "email": "support@appbrew.com",
-              "first_name": "Abib",
-              "last_name": "Achmed"
-            }
-          }
-        ],
-        "skillsMatch": {
-          "hasRequiredSkills": true,
-          "missingSkills": [],
-          "matchingSkills": [
-            "dementia care",
-            "patient hygiene assistance",
-            "medication administration",
-            "first aid & cpr"
-          ],
-          "requirementsMatch": true
-        },
-        "availability": {
-          "isAvailable": true,
-          "conflicts": [],
-          "suggestions": [],
-          "availableHours": {
-            "friday": {
-              "end": "14:00",
-              "start": "08:00",
-              "available": true
-            },
-            "monday": {
-              "end": "16:00",
-              "start": "08:00",
-              "available": true
-            },
-            "sunday": {
-              "available": false
-            },
-            "tuesday": {
-              "end": "16:00",
-              "start": "08:00",
-              "available": true
-            },
-            "saturday": {
-              "available": false
-            },
-            "thursday": {
-              "end": "17:00",
-              "start": "09:00",
-              "available": true
-            },
-            "wednesday": {
-              "available": false
-            }
-          }
-        },
-        "scheduleCheck": {
-          "hasConflicts": false,
-          "conflicts": [],
-          "conflictCount": 0
-        },
-        "overallEligible": true
-      }
-    ],
-    "ineligibleCarers": [
-      {
-        "carerId": 48,
-        "carerName": "Gerard Pique",
-        "email": "gerard.pique@blaugrana-care.com",
-        "skills": [],
-        "skillsMatch": {
-          "hasRequiredSkills": false,
-          "missingSkills": [
-            "dementia care",
-            "patient hygiene assistance",
-            "medication administration",
-            "first aid & cpr"
-          ],
-          "matchingSkills": [],
-          "requirementsMatch": false
-        },
-        "availability": {
-          "isAvailable": false,
-          "conflicts": [
-            "Request time (8:00-11:00) is outside carer availability (22:00-6:00) on monday"
-          ],
-          "suggestions": [
-            {
-              "day": "tuesday",
-              "date": "2025-11-12",
-              "startTime": "08:00",
-              "endTime": "11:00",
-              "duration": 3
-            },
-            {
-              "day": "wednesday",
-              "date": "2025-11-13",
-              "startTime": "08:00",
-              "endTime": "11:00",
-              "duration": 3
-            }
-          ],
-          "availableHours": {
-            "monday": "10pm-6am",
-            "sunday": "10pm-6am"
-          }
-        },
-        "scheduleCheck": {
-          "hasConflicts": false,
-          "conflicts": [],
-          "conflictCount": 0
-        },
-        "overallEligible": false
-      }
-    ],
-    "alternativeOptions": [
-      {
-        "carerId": 48,
-        "carerName": "John Smith",
-        "email": "john.smith@careagency.com",
-        "skillsMatch": {
-          "hasRequiredSkills": true,
-          "missingSkills": [],
-          "matchingSkills": ["Personal Care", "Medication Management"],
-          "requirementsMatch": true
-        },
-        "day": "tuesday",
-        "date": "2025-11-12",
-        "startTime": "14:00",
-        "endTime": "17:00",
-        "duration": 3,
-        "isPrimaryTime": false
-      },
-      {
-        "carerId": 52,
-        "carerName": "Emma Wilson",
-        "email": "emma.wilson@careagency.com",
-        "skillsMatch": {
-          "hasRequiredSkills": true,
-          "missingSkills": [],
-          "matchingSkills": ["Personal Care"],
-          "requirementsMatch": true
-        },
-        "day": "wednesday",
-        "date": "2025-11-13",
-        "startTime": "09:00",
-        "endTime": "12:00",
-        "duration": 3,
-        "isPrimaryTime": false
-      }
-    ]
-  },
-  "message": "Found 1 eligible carers and 2 alternative options out of 6 total carers"
+"summary": {
+  "totalCarers": 25,
+  "preFilteredCarers": 20,
+  "eligibleCarers": 3,
+  "ineligibleCarers": 17,
+  "alternativeOptions": 8,
+  "checkedSchedule": true,
+  "scoringUsed": true  // Indicates comprehensive scoring is active
 }
 ```
 
+### **Eligible Carers with Full Scoring Breakdown**
+Each eligible carer includes complete scoring details:
+
+```json
+{
+  "carerId": "carer-123",
+  "carerName": "Jane Doe",
+  "email": "jane.doe@careagency.com",
+  
+  // SCORING COMPONENTS:
+  "employment": {
+    "isEmployed": true,  // Blocking requirement - must be true
+    "reason": ""
+  },
+  
+  "skillsMatch": {
+    "hasSomeRequired": true,      // +40 points if true
+    "missingSkills": ["Medication Administration", "First Aid & CPR"],
+    "matchingSkills": ["dementia care", "patient hygiene assistance"],
+    "requirementsMatch": true
+  },
+  
+  "availability": {
+    "isAvailable": true,          // +20 points if true
+    "conflicts": [],
+    "suggestions": [],
+    "availableHours": { ... }
+  },
+  
+  "cluster": {
+    "carerClusterId": "cluster-central",
+    "visitClusterId": "cluster-central",
+    "sameCluster": true,          // +15 points if true
+    "bonus": 15
+  },
+  
+  "continuity": {
+    "bonus": 10,                  // Up to +10 points
+    "previousVisits": 2           // 2 visits × 5 points = 10 points
+  },
+  
+  "workload": {
+    "currentWeeklyHours": 32.5,
+    "utilizationPercent": 67.7,
+    "penalty": 0                  // No penalty for moderate workload
+  },
+  
+  // FINAL SCORE CALCULATION:
+  "score": 85,                    // 40 + 20 + 15 + 10 + 0 = 85
+  "overallEligible": true
+}
+```
+
+### **Score Calculation Example**
+```
+Skills Match:      40 ✅ (hasSomeRequired: true)
+Availability:      20 ✅ (isAvailable: true)  
+Cluster Bonus:     15 ✅ (sameCluster: true)
+Continuity:        10 ✅ (2 previous visits × 5)
+Workload Penalty:   0 ✅ (32.5 hours - no penalty)
+─────────────────────────────────────────────
+TOTAL SCORE:       85 ✅
+```
+
+### **Ineligible Carers with Reasons**
+Shows why carers were excluded and their partial scores:
+
+```json
+{
+  "carerId": "carer-456",
+  "carerName": "John Smith",
+  "score": 0,
+  "overallEligible": false,
+  "skillsMatch": {
+    "hasSomeRequired": false,     // ❌ Missing required skills = 0 points
+    "missingSkills": ["Dementia Care", "Patient Hygiene Assistance", ...],
+    "matchingSkills": []
+  },
+  "availability": {
+    "isAvailable": false,         // ❌ Not available = 0 points
+    "conflicts": ["Request time (8:00-11:00) is outside carer availability..."]
+  },
+  "workload": {
+    "currentWeeklyHours": 45.0,
+    "penalty": 20                 // ⚠️ High workload penalty
+  }
+}
+```
+
+### **Alternative Time Suggestions**
+When carers aren't available at the requested time but have other availability:
+
+```json
+"alternativeOptions": [
+  {
+    "carerId": "carer-789",
+    "carerName": "Emma Wilson",
+    "score": 75,                  // Score for alternative time slot
+    "skillsMatch": { ... },
+    "day": "tuesday",
+    "date": "2025-11-11",
+    "startTime": "09:00",
+    "endTime": "12:00",
+    "duration": 3,
+    "isPrimaryTime": false
+  }
+]
+```
+
+---
+
+## **Key Features Visible in Response**
+
+✅ **Full scoring breakdown** for each carer  
+✅ **Individual component scores** (skills, availability, cluster, continuity, workload)  
+✅ **Detailed eligibility reasons** for ineligible carers  
+✅ **Alternative time suggestions** with scoring  
+✅ **Workload utilization percentages**  
+✅ **Skill matching details** (exact matches and missing skills)  
+✅ **Cluster assignment information**  
+✅ **Continuity history** (previous visits count)  
+
+---
+
+## **Scoring Thresholds & Eligibility**
+
+- **Overall Eligible**: Requires ALL of:
+  - ✅ `employment.isEmployed: true` (blocking requirement)
+  - ✅ `skillsMatch.hasSomeRequired: true` (+40 points)
+  - ✅ `availability.isAvailable: true` (+20 points)
+
+- **No minimum score threshold** - eligibility is binary based on the three requirements above
+- **Higher scores** indicate better matches considering cluster, continuity, and workload factors
+
+
+
+
+The API provides complete transparency into the matching logic, making it easy to understand why specific carers were selected or excluded.
 ### Get Visit Requests
 **Purpose:** Retrieves paginated list of visit requests for the tenant with optional filtering. **Data Sources:** Queries ExternalRequest table with optional status, date, and search filters.
 **Method:** GET

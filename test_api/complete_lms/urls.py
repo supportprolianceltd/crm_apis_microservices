@@ -1,10 +1,7 @@
 from django.urls import path, include
-from django.contrib import admin
 from django.http import JsonResponse
 from django.conf import settings
 from django.conf.urls.static import static
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
 
@@ -20,9 +17,7 @@ def root_view(request):
         'message': 'Welcome to LUMINA Care OS API',
         'endpoints': {
             'tenants': '/api/lms/tenant/tenants/',
-            'users': '/api/lms//users/',
             'docs': '/api/lms/docs/',
-            'token': '/api/lms/token/',
             'schedules': '/api/lms/schedule/',
             'courses': '/api/lms/courses/',
             'messaging': '/api/lms/messaging/',

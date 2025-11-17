@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'  # Obsolete
 
 services:
   lms-db:
@@ -6,9 +6,9 @@ services:
     container_name: lms_db
     restart: always
     environment:
-      POSTGRES_DB: multi_tenant_lms
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: qwerty
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - lms_db_data:/var/lib/postgresql/data
     ports:
@@ -30,12 +30,12 @@ services:
     env_file:
       - .env
     environment:
-      - DATABASE_URL=postgres://postgres:qwerty@lms-db:5432/multi_tenant_lms
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DEBUG=True
-      - ALLOWED_HOSTS=localhost,127.0.0.1,lms-app,0.0.0.0,*
-      - FRONTEND_URL=http://localhost:5173
+      - DEBUG=${DEBUG}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - FRONTEND_URL=${FRONTEND_URL}
     ports:
       - "8004:8004"
     command: gunicorn --bind 0.0.0.0:8004 complete_lms.wsgi:application
@@ -57,16 +57,14 @@ services:
     env_file:
       - .env
     environment:
-      - DATABASE_URL=postgres://postgres:qwerty@lms-db:5432/multi_tenant_lms
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
     entrypoint: ["/app/consumer-entrypoint.sh"]
     depends_on:
       lms-db:
         condition: service_healthy
       redis:
         condition: service_started
-      kafka:
-        condition: service_healthy
     networks:
       - auth_service_default
     mem_limit: 1g
@@ -80,27 +78,27 @@ services:
     networks:
       - auth_service_default
 
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: lms_kafka
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
-      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
-      KAFKA_SUPER_USERS: User:lms_consumer;User:auth-service
-    ports:
-      - "9093:9092"
-    healthcheck:
-      test: ["CMD", "/opt/kafka/bin/kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - auth_service_default
+  # kafka:
+  #   image: confluentinc/cp-kafka:7.5.0
+  #   container_name: lms_kafka
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  #     KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+  #     KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+  #     KAFKA_SUPER_USERS: User:lms_consumer;User:auth-service
+  #   ports:
+  #     - "9093:9092"
+  #   healthcheck:
+  #     test: ["CMD", "/opt/kafka/bin/kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - auth_service_default
 
   # zookeeper:
   #   image: confluentinc/cp-zookeeper:7.5.0
