@@ -67,6 +67,7 @@ else:  # development
         "http://localhost:4000",
         "http://localhost:3001",
         "http://127.0.0.1:3000",
+         "https://dev.e3os.co.uk",
     ]
     DEFAULT_FRONTEND_URL = "http://localhost:5173"
     REVIEWS_QR_BASE_URL = "http://localhost:5173"
