@@ -112,6 +112,17 @@ from .utils import get_daily_usage
 
 # Logger
 logger = logging.getLogger("users")
+from collections import defaultdict
+from django_tenants.utils import get_public_schema_name, tenant_context
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
+from django.core.cache import cache
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CustomPagination(PageNumberPagination):
@@ -166,17 +177,7 @@ class CustomPagination(PageNumberPagination):
         return response
 
 
-from collections import defaultdict
-from django_tenants.utils import get_public_schema_name, tenant_context
-from rest_framework import generics, permissions, status
-from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle
-from django.core.cache import cache
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-import logging
 
-logger = logging.getLogger(__name__)
 
 def get_tenant_domains(tenant):
     """
@@ -997,7 +998,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         with tenant_context(tenant):
             instance = self.get_object()
-            if not (user.is_superuser or user.role == "admin"):
+            if not (user.role == "root-admin" or user.role == "co-admin"):
                 raise PermissionDenied("You do not have permission to delete users.")
             self.perform_destroy(instance)
             # Invalidate on delete

@@ -686,178 +686,358 @@
 }
 ```
 
+### Check Request Feasibility
+**Purpose:** Analyzes which carers can handle a specific visit request based on skills, availability, and schedule compatibility. **Data Sources:** Queries auth service for carer profiles, checks skills matching against required skills, validates availability against request time, and optionally checks for schedule conflicts.
 
-### **Check Request Feasibility with Comprehensive Scoring**
+**Eligibility Criteria:**
+The system evaluates carers using a comprehensive scoring algorithm (maximum 100 points) that considers multiple factors:
 
-**Purpose:** Analyzes which carers can handle a specific visit request using a comprehensive scoring system (max 100 points) that evaluates:
-- **Skills matching** (40 points)
-- **Availability** (20 points) 
-- **Cluster proximity** (15 points)
-- **Continuity of care** (10 points)
-- **Workload penalties** (up to -20 points)
+- **Skills Match (30 points max):** Carers must possess required skills. Points awarded based on skill proficiency levels and match completeness.
+- **Availability (25 points max):** Must be available during the requested time slot. Points based on schedule compatibility and flexibility.
+- **Distance & Travel (20 points max):** Calculated using Google Maps API with traffic awareness. Shorter travel times receive higher scores, with bonuses for feasible routes.
+- **Cluster Proximity (10 points max):** Preference given to carers in the same geographic cluster as the visit location.
+- **Continuity (10 points max):** Bonus points for carers who have previously visited the same client, promoting relationship continuity.
+- **Workload Balance (5 points max):** Penalty applied for carers approaching weekly hour limits to ensure fair distribution.
 
-**Method:** GET  
-**URL:** `http://localhost:9090/api/rostering/requests/{requestId}/feasibility?includeScheduleCheck=true`  
+Carers must meet minimum thresholds in skills and availability to be considered eligible. Distance calculations use carer address/postcode data with precision levels (ADDRESS/POSTCODE). The system provides alternative scheduling options when primary time slots are unavailable.
+
+**Method:** GET
+**URL:** `http://localhost:9090/api/rostering/requests/REQ-20251106-97ZZF/feasibility?includeScheduleCheck=true`
 **Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
 
-**Query Parameters:**
-- `includeScheduleCheck` (optional): Set to `true` to include detailed schedule conflict checking
-
----
-
-## **Response Structure with Scoring Details**
-
-### **Summary Section**
-```json
-"summary": {
-  "totalCarers": 25,
-  "preFilteredCarers": 20,
-  "eligibleCarers": 3,
-  "ineligibleCarers": 17,
-  "alternativeOptions": 8,
-  "checkedSchedule": true,
-  "scoringUsed": true  // Indicates comprehensive scoring is active
-}
-```
-
-### **Eligible Carers with Full Scoring Breakdown**
-Each eligible carer includes complete scoring details:
-
+**Response:**
 ```json
 {
-  "carerId": "carer-123",
-  "carerName": "Jane Doe",
-  "email": "jane.doe@careagency.com",
-  
-  // SCORING COMPONENTS:
-  "employment": {
-    "isEmployed": true,  // Blocking requirement - must be true
-    "reason": ""
+  "success": true,
+  "data": {
+    "requestId": "REQ-20251117-Y3JSL",
+    "requestDetails": {
+      "subject": "Morning Dementia Care Support - Mr. Adewale Johnson",
+      "scheduledStartTime": "2025-11-10T08:00:00.000Z",
+      "scheduledEndTime": "2025-11-10T11:00:00.000Z",
+      "estimatedDuration": 180,
+      "requiredSkills": [],
+      "requirements": "Carer must be experienced in dementia and personal care, have valid DBS, and be available weekday mornings. Patient can be resistant to care sometimes."
+    },
+    "summary": {
+      "totalCarers": 11,
+      "preFilteredCarers": 11,
+      "eligibleCarers": 6,
+      "ineligibleCarers": 5,
+      "alternativeOptions": 32,
+      "checkedSchedule": true,
+      "scoringUsed": true
+    },
+    "eligibleCarers": [
+      {
+        "carerId": 9,
+        "carerName": "David Rodriguez",
+        "email": "david.rodriguez@careagency.com",
+        "employment": {
+          "isEmployed": true,
+          "reason": ""
+        },
+        "skills": [
+          {
+            "id": 20,
+            "skill_name": "Dementia Care",
+            "proficiency_level": "expert",
+            "description": "Specialized in challenging dementia behaviors and advanced care techniques",
+            "acquired_date": "2005-08-15",
+            "years_of_experience": 18,
+            "certificate": null,
+            "certificate_url": null,
+            "last_updated_by_id": "1",
+            "last_updated_by": {
+              "id": 1,
+              "email": "support@appbrew.com",
+              "first_name": "Ahmed",
+              "last_name": "Mahummed"
+            }
+          }
+        ],
+        "skillsMatch": {
+          "hasSomeRequired": true,
+          "missingSkills": [],
+          "matchingSkills": [],
+          "requirementsMatch": true
+        },
+        "availability": {
+          "isAvailable": true,
+          "conflicts": [],
+          "suggestions": [
+            {
+              "day": "friday",
+              "date": "2025-11-14",
+              "startTime": "06:00",
+              "endTime": "09:00",
+              "duration": 3
+            },
+            {
+              "day": "tuesday",
+              "date": "2025-11-11",
+              "startTime": "06:00",
+              "endTime": "09:00",
+              "duration": 3
+            }
+          ],
+          "availableHours": {
+            "friday": {
+              "end": "20:00",
+              "start": "06:00",
+              "available": true
+            },
+            "monday": {
+              "end": "20:00",
+              "start": "06:00",
+              "available": true
+            },
+            "sunday": {
+              "available": false
+            },
+            "tuesday": {
+              "end": "20:00",
+              "start": "06:00",
+              "available": true
+            },
+            "saturday": {
+              "end": "16:00",
+              "start": "08:00",
+              "available": true
+            },
+            "thursday": {
+              "end": "20:00",
+              "start": "06:00",
+              "available": true
+            },
+            "wednesday": {
+              "end": "20:00",
+              "start": "06:00",
+              "available": true
+            }
+          }
+        },
+        "distance": {
+          "method": "google_maps",
+          "precisionLevel": "ADDRESS",
+          "carerLocation": {
+            "address": "987 Care Circle",
+            "postcode": "SE1 7AB",
+            "city": "London",
+            "geocoded": "987 Care Circle, London",
+            "coordinates": {
+              "latitude": 0,
+              "longitude": 0
+            }
+          },
+          "visitLocation": {
+            "address": "45 Park Lane, London W1K 7TJ, UK",
+            "postcode": "W1K 7TJ",
+            "geocoded": "45 Park Lane, London W1K 7TJ, UK",
+            "coordinates": {
+              "latitude": 0,
+              "longitude": 0
+            }
+          },
+          "distanceKm": 2.1,
+          "distanceMeters": 2102,
+          "travelTimeMinutes": 14,
+          "bufferMinutes": 3,
+          "totalTravelTime": 17,
+          "trafficAware": true,
+          "estimatedSpeedKmh": 9,
+          "bonus": 22,
+          "feasibility": "feasible",
+          "cached": false,
+          "calculatedAt": "2025-11-17T15:46:47.884Z",
+          "warnings": []
+        },
+        "cluster": {
+          "carerId": 9,
+          "visitClusterId": null,
+          "sameCluster": false
+        },
+        "continuity": {
+          "bonus": 0,
+          "previousVisits": 0
+        },
+        "workload": {
+          "currentWeeklyHours": 0,
+          "utilizationPercent": 0,
+          "penalty": 0
+        },
+        "score": 82,
+        "overallEligible": true
+      }
+    ],
+    "ineligibleCarers": [
+      {
+        "carerId": 7,
+        "carerName": "Michael Brown",
+        "email": "michael.brown@careagency.com",
+        "employment": {
+          "isEmployed": true,
+          "reason": ""
+        },
+        "skills": [
+          {
+            "id": 11,
+            "skill_name": "Patient Hygiene Assistance",
+            "proficiency_level": "intermediate",
+            "description": "Personal care assistance including bathing and grooming",
+            "acquired_date": "2021-06-10",
+            "years_of_experience": 3,
+            "certificate": null,
+            "certificate_url": null,
+            "last_updated_by_id": "1",
+            "last_updated_by": {
+              "id": 1,
+              "email": "support@appbrew.com",
+              "first_name": "Ahmed",
+              "last_name": "Mahummed"
+            }
+          }
+        ],
+        "skillsMatch": {
+          "hasSomeRequired": true,
+          "missingSkills": [],
+          "matchingSkills": [],
+          "requirementsMatch": false
+        },
+        "availability": {
+          "isAvailable": false,
+          "conflicts": [
+            "Request time (8:00-11:00) is outside carer availability (10:00-18:00) on monday"
+          ],
+          "suggestions": [
+            {
+              "day": "friday",
+              "date": "2025-11-14",
+              "startTime": "10:00",
+              "endTime": "13:00",
+              "duration": 3
+            },
+            {
+              "day": "tuesday",
+              "date": "2025-11-11",
+              "startTime": "10:00",
+              "endTime": "13:00",
+              "duration": 3
+            }
+          ],
+          "availableHours": {
+            "friday": {
+              "end": "18:00",
+              "start": "10:00",
+              "available": true
+            },
+            "monday": {
+              "end": "18:00",
+              "start": "10:00",
+              "available": true
+            },
+            "sunday": {
+              "available": false
+            },
+            "tuesday": {
+              "end": "18:00",
+              "start": "10:00",
+              "available": true
+            },
+            "saturday": {
+              "end": "16:00",
+              "start": "08:00",
+              "available": true
+            },
+            "thursday": {
+              "end": "18:00",
+              "start": "10:00",
+              "available": true
+            },
+            "wednesday": {
+              "end": "18:00",
+              "start": "10:00",
+              "available": true
+            }
+          }
+        },
+        "distance": {
+          "method": "google_maps",
+          "precisionLevel": "ADDRESS",
+          "carerLocation": {
+            "address": "321 Care Lane",
+            "postcode": "SW1A 2BB",
+            "city": "London",
+            "geocoded": "321 Care Lane, London",
+            "coordinates": {
+              "latitude": 0,
+              "longitude": 0
+            }
+          },
+          "visitLocation": {
+            "address": "45 Park Lane, London W1K 7TJ, UK",
+            "postcode": "W1K 7TJ",
+            "geocoded": "45 Park Lane, London W1K 7TJ, UK",
+            "coordinates": {
+              "latitude": 0,
+              "longitude": 0
+            }
+          },
+          "distanceKm": 2.1,
+          "distanceMeters": 2113,
+          "travelTimeMinutes": 13,
+          "bufferMinutes": 3,
+          "totalTravelTime": 16,
+          "trafficAware": true,
+          "estimatedSpeedKmh": 9.7,
+          "bonus": 22,
+          "feasibility": "feasible",
+          "cached": false,
+          "calculatedAt": "2025-11-17T15:46:47.565Z",
+          "warnings": []
+        },
+        "cluster": {
+          "carerId": 7,
+          "visitClusterId": null,
+          "sameCluster": false
+        },
+        "continuity": {
+          "bonus": 0,
+          "previousVisits": 0
+        },
+        "workload": {
+          "currentWeeklyHours": 0,
+          "utilizationPercent": 0,
+          "penalty": 0
+        },
+        "score": 62,
+        "overallEligible": false
+      }
+    ],
+    "alternativeOptions": [
+      {
+        "carerId": 9,
+        "carerName": "David Rodriguez",
+        "email": "david.rodriguez@careagency.com",
+        "score": 82,
+        "skillsMatch": {
+          "hasSomeRequired": true,
+          "missingSkills": [],
+          "matchingSkills": [],
+          "requirementsMatch": true
+        },
+        "day": "tuesday",
+        "date": "2025-11-11",
+        "startTime": "06:00",
+        "endTime": "09:00",
+        "duration": 3,
+        "isPrimaryTime": false
+      }
+    ]
   },
-  
-  "skillsMatch": {
-    "hasSomeRequired": true,      // +40 points if true
-    "missingSkills": ["Medication Administration", "First Aid & CPR"],
-    "matchingSkills": ["dementia care", "patient hygiene assistance"],
-    "requirementsMatch": true
-  },
-  
-  "availability": {
-    "isAvailable": true,          // +20 points if true
-    "conflicts": [],
-    "suggestions": [],
-    "availableHours": { ... }
-  },
-  
-  "cluster": {
-    "carerClusterId": "cluster-central",
-    "visitClusterId": "cluster-central",
-    "sameCluster": true,          // +15 points if true
-    "bonus": 15
-  },
-  
-  "continuity": {
-    "bonus": 10,                  // Up to +10 points
-    "previousVisits": 2           // 2 visits × 5 points = 10 points
-  },
-  
-  "workload": {
-    "currentWeeklyHours": 32.5,
-    "utilizationPercent": 67.7,
-    "penalty": 0                  // No penalty for moderate workload
-  },
-  
-  // FINAL SCORE CALCULATION:
-  "score": 85,                    // 40 + 20 + 15 + 10 + 0 = 85
-  "overallEligible": true
+  "message": "Found 6 eligible carers with comprehensive scoring (max 100 points). Distance calculations use carer sip_code/address data. Pre-filtered 11 to 11 candidates."
 }
 ```
-
-### **Score Calculation Example**
-```
-Skills Match:      40 ✅ (hasSomeRequired: true)
-Availability:      20 ✅ (isAvailable: true)  
-Cluster Bonus:     15 ✅ (sameCluster: true)
-Continuity:        10 ✅ (2 previous visits × 5)
-Workload Penalty:   0 ✅ (32.5 hours - no penalty)
-─────────────────────────────────────────────
-TOTAL SCORE:       85 ✅
-```
-
-### **Ineligible Carers with Reasons**
-Shows why carers were excluded and their partial scores:
-
-```json
-{
-  "carerId": "carer-456",
-  "carerName": "John Smith",
-  "score": 0,
-  "overallEligible": false,
-  "skillsMatch": {
-    "hasSomeRequired": false,     // ❌ Missing required skills = 0 points
-    "missingSkills": ["Dementia Care", "Patient Hygiene Assistance", ...],
-    "matchingSkills": []
-  },
-  "availability": {
-    "isAvailable": false,         // ❌ Not available = 0 points
-    "conflicts": ["Request time (8:00-11:00) is outside carer availability..."]
-  },
-  "workload": {
-    "currentWeeklyHours": 45.0,
-    "penalty": 20                 // ⚠️ High workload penalty
-  }
-}
-```
-
-### **Alternative Time Suggestions**
-When carers aren't available at the requested time but have other availability:
-
-```json
-"alternativeOptions": [
-  {
-    "carerId": "carer-789",
-    "carerName": "Emma Wilson",
-    "score": 75,                  // Score for alternative time slot
-    "skillsMatch": { ... },
-    "day": "tuesday",
-    "date": "2025-11-11",
-    "startTime": "09:00",
-    "endTime": "12:00",
-    "duration": 3,
-    "isPrimaryTime": false
-  }
-]
-```
-
----
-
-## **Key Features Visible in Response**
-
-✅ **Full scoring breakdown** for each carer  
-✅ **Individual component scores** (skills, availability, cluster, continuity, workload)  
-✅ **Detailed eligibility reasons** for ineligible carers  
-✅ **Alternative time suggestions** with scoring  
-✅ **Workload utilization percentages**  
-✅ **Skill matching details** (exact matches and missing skills)  
-✅ **Cluster assignment information**  
-✅ **Continuity history** (previous visits count)  
-
----
-
-## **Scoring Thresholds & Eligibility**
-
-- **Overall Eligible**: Requires ALL of:
-  - ✅ `employment.isEmployed: true` (blocking requirement)
-  - ✅ `skillsMatch.hasSomeRequired: true` (+40 points)
-  - ✅ `availability.isAvailable: true` (+20 points)
-
-- **No minimum score threshold** - eligibility is binary based on the three requirements above
-- **Higher scores** indicate better matches considering cluster, continuity, and workload factors
-
-
-
-
-The API provides complete transparency into the matching logic, making it easy to understand why specific carers were selected or excluded.
 ### Get Visit Requests
 **Purpose:** Retrieves paginated list of visit requests for the tenant with optional filtering. **Data Sources:** Queries ExternalRequest table with optional status, date, and search filters.
 **Method:** GET
@@ -2725,6 +2905,8 @@ The API provides complete transparency into the matching logic, making it easy t
   "stack": "Error: Travel calculation failed: Google Maps API error: REQUEST_DENIED - You must use an API key to authenticate each request to Google Maps Platform APIs. For additional information, please refer to http://g.co/dev/maps-no-account\n    at EnhancedTravelService.calculateTravel (/app/dist/services/enhanced-travel.service.js:52:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async EnhancedTravelMatrixController.calculateTravel (/app/dist/controllers/enhanced-travel-matrix.controller.js:20:32)"
 }
 ```
+
+
 
 ### Get Travel Matrix Cache Statistics
 **Purpose:** Retrieves statistics about the travel matrix cache including hit rates, precision levels, and expiry information.

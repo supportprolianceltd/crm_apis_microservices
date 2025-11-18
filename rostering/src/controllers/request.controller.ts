@@ -7,7 +7,9 @@ import { ClusteringService } from '../services/clustering.service';
 import { ConstraintsService } from '../services/constraints.service';
 import { TravelService } from '../services/travel.service';
 import { CarerService } from '../services/carer.service';
+import { EnhancedTravelService } from '../services/enhanced-travel.service';
 import { logger, logServiceError } from '../utils/logger';
+
 import { generateUniqueRequestId, generateUniqueVisitId } from '../utils/idGenerator';
 import {
   CreateRequestPayload,
@@ -60,6 +62,7 @@ export class RequestController {
   private matchingService: MatchingService;
   private clusteringService: ClusteringService;
   private carerService: CarerService;
+  private enhancedTravelService: EnhancedTravelService;
 
   constructor(
     prisma: PrismaClient,
@@ -70,6 +73,7 @@ export class RequestController {
     this.geocodingService = geocodingService;
     this.matchingService = matchingService;
     this.carerService = new CarerService();
+    this.enhancedTravelService = new EnhancedTravelService(prisma);
     const constraintsService = new ConstraintsService(prisma);
     const travelService = new TravelService(prisma);
     this.clusteringService = new ClusteringService(prisma, constraintsService, travelService);
@@ -1175,7 +1179,7 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
             ineligibleCarers: ineligibleCarers.slice(0, 10), // Top 10 ineligible
             alternativeOptions: alternativeOptions.slice(0, 20) // Top 20 alternatives
           },
-          message: `Found ${eligibleCarers.length} eligible carers with scores (max 100 points). Pre-filtered ${allCarers.length} to ${preFilteredCarers.length} candidates.`
+          message: `Found ${eligibleCarers.length} eligible carers with comprehensive scoring (max 100 points). Distance calculations use carer sip_code/address data. Pre-filtered ${allCarers.length} to ${preFilteredCarers.length} candidates.`
         });
 
       } catch (error) {
@@ -1605,106 +1609,239 @@ private preFilterCarers(carers: any[], visit: any): any[] {
 /**
  * Check individual carer eligibility with scoring
  */
-private async checkCarerEligibilityWithScore(
-  carer: any, 
-  visit: any,
-  authToken: string
-): Promise<any> {
-  let score = 0;
-  
-  // 0. Employment status (blocking)
-  const employmentCheck = this.checkEmploymentStatus(carer, visit.scheduledStartTime);
-  if (!employmentCheck.isEmployed) {
+/**
+   * Check individual carer eligibility with scoring and Google Maps distance calculation
+   */
+  private async checkCarerEligibilityWithScore(
+    carer: any, 
+    visit: any,
+    authToken: string
+  ): Promise<any> {
+    let score = 0;
+    
+    // 0. Employment status (blocking)
+    const employmentCheck = this.checkEmploymentStatus(carer, visit.scheduledStartTime);
+    if (!employmentCheck.isEmployed) {
+      return {
+        carerId: carer.id,
+        carerName: `${carer.first_name || 'Unknown'} ${carer.last_name || 'Carer'}`,
+        email: carer.email,
+        overallEligible: false,
+        score: 0,
+        employment: employmentCheck,
+        skillsMatch: { hasSomeRequired: false, missingSkills: [], matchingSkills: [], requirementsMatch: false },
+        availability: { isAvailable: false, conflicts: ['Not employed during visit time'], suggestions: [] }
+      };
+    }
+    
+    // 1. Skills match (40 points)
+    const carerSkills = carer.profile?.skill_details || [];
+    const requiredSkills = (visit as any).requiredSkills || [];
+    const requirements = visit.requirements || '';
+    const skillsMatch = this.checkSkillsMatch(carerSkills, requiredSkills, requirements);
+    
+    if (skillsMatch.hasSomeRequired) {
+      score += 40;
+    }
+    
+    // 2. Availability check (20 points)
+    const requestStartTime = visit.scheduledStartTime!;
+    const requestEndTime = visit.scheduledEndTime ||
+      new Date(requestStartTime.getTime() + (visit.estimatedDuration || 60) * 60 * 1000);
+    const availabilityRequirements = (visit as any).availabilityRequirements;
+    
+    const availabilityCheck = this.checkCarerAvailability(
+      carer,
+      requestStartTime,
+      requestEndTime,
+      availabilityRequirements
+    );
+    
+    if (availabilityCheck.isAvailable) {
+      score += 20;
+    }
+    
+    // 3. ENHANCED DISTANCE CALCULATION (25 points max) - USING GOOGLE MAPS API
+    let distanceBonus = 0;
+    let distanceInfo = null;
+
+    try {
+      // Extract carer and visit location data
+      const carerAddress = carer.profile?.street || carer.profile?.address || '';
+      const carerPostcode = carer.profile?.zip_code || carer.profile?.postcode || '';
+      const carerCity = carer.profile?.city || '';
+      const requestAddress = visit.address || '';
+      const requestPostcode = visit.postcode || '';
+
+      if (carerPostcode && requestPostcode) {
+        logger.info(`Calculating distance for carer ${carer.id} to visit ${visit.id}`, {
+          carerPostcode,
+          requestPostcode,
+          hasCarerAddress: !!carerAddress,
+          hasRequestAddress: !!requestAddress
+        });
+
+        // Use Enhanced Travel Service for accurate Google Maps calculation
+        const travelRequest = {
+          from: {
+            address: carerAddress ? `${carerAddress}, ${carerCity}` : undefined,
+            postcode: carerPostcode
+          },
+          to: {
+            address: requestAddress || undefined,
+            postcode: requestPostcode
+          },
+          mode: 'driving' as const,
+          forceRefresh: false // Use cache if available
+        };
+
+        const travelResult = await this.enhancedTravelService.calculateTravel(travelRequest);
+
+        // Extract distance and travel time from Google Maps result
+        const distanceKm = travelResult.distance.kilometers;
+        const baseTravelTimeMinutes = travelResult.duration.minutes;
+        const trafficTimeMinutes = travelResult.trafficDuration?.minutes || baseTravelTimeMinutes;
+
+        // Calculate buffer time for parking, preparation, etc.
+        const bufferMinutes = Math.min(Math.max(Math.round(distanceKm * 1.5), 3), 10);
+        const totalTravelTime = trafficTimeMinutes + bufferMinutes;
+
+        // Enhanced distance bonus with granular scoring (25 points max)
+        if (distanceKm <= 2) {
+          distanceBonus = 25; // Excellent - Very close
+        } else if (distanceKm <= 4) {
+          distanceBonus = 22; // Excellent - Close
+        } else if (distanceKm <= 6) {
+          distanceBonus = 19; // Very good
+        } else if (distanceKm <= 8) {
+          distanceBonus = 16; // Good
+        } else if (distanceKm <= 10) {
+          distanceBonus = 13; // Acceptable
+        } else if (distanceKm <= 15) {
+          distanceBonus = 10; // Moderate
+        } else if (distanceKm <= 20) {
+          distanceBonus = 6; // Marginal
+        } else if (distanceKm <= 25) {
+          distanceBonus = 3; // Poor but possible
+        } else if (distanceKm <= 30) {
+          distanceBonus = 1; // Very poor
+        } else {
+          distanceBonus = 0; // Too far
+        }
+
+        distanceInfo = {
+          method: 'google_maps',
+          precisionLevel: travelResult.precisionLevel,
+          carerLocation: {
+            address: carerAddress?.substring(0, 50),
+            postcode: carerPostcode,
+            city: carerCity,
+            geocoded: travelResult.from.geocoded?.substring(0, 50),
+            coordinates: travelResult.from.coordinates
+          },
+          visitLocation: {
+            address: requestAddress?.substring(0, 50),
+            postcode: requestPostcode,
+            geocoded: travelResult.to.geocoded?.substring(0, 50),
+            coordinates: travelResult.to.coordinates
+          },
+          distanceKm: Math.round(distanceKm * 10) / 10,
+          distanceMeters: travelResult.distance.meters,
+          travelTimeMinutes: trafficTimeMinutes,
+          bufferMinutes,
+          totalTravelTime,
+          trafficAware: !!travelResult.trafficDuration,
+          estimatedSpeedKmh: Math.round((distanceKm / (trafficTimeMinutes / 60)) * 10) / 10,
+          bonus: distanceBonus,
+          feasibility: distanceKm <= 30 ? 'feasible' : 'not_feasible',
+          cached: travelResult.cached,
+          calculatedAt: travelResult.calculatedAt,
+          warnings: travelResult.warnings || []
+        };
+
+        score += distanceBonus;
+
+        logger.info(`Distance calculated successfully for carer ${carer.id}`, {
+          distanceKm,
+          travelTimeMinutes: trafficTimeMinutes,
+          bonus: distanceBonus,
+          cached: travelResult.cached
+        });
+
+      } else {
+        logger.warn('Missing location data for distance calculation', {
+          carerId: carer.id,
+          hasCarerPostcode: !!carerPostcode,
+          hasRequestPostcode: !!requestPostcode,
+          visitId: visit.id
+        });
+      }
+    } catch (error) {
+      logger.error('Failed to calculate distance using Enhanced Travel Service', {
+        error: error instanceof Error ? error.message : String(error),
+        carerId: carer.id,
+        visitId: visit.id,
+        carerPostcode: carer.profile?.zip_code || carer.profile?.postcode,
+        requestPostcode: visit.postcode
+      });
+      
+      // Fallback: Try cluster-based distance if available
+      if (!distanceInfo && visit.clusterId && carer.profile?.clusterId) {
+        if (visit.clusterId === carer.profile.clusterId) {
+          distanceBonus = 15; // Same cluster fallback
+          score += distanceBonus;
+          distanceInfo = {
+            method: 'cluster_fallback',
+            sameCluster: true,
+            bonus: distanceBonus,
+            feasibility: 'feasible',
+            note: 'Distance calculation failed, using cluster proximity'
+          };
+        }
+      }
+    }
+    
+    // 4. Continuity of care (10 points)
+    const continuityBonus = await this.calculateContinuityBonus(carer.id, visit);
+    score += continuityBonus;
+    
+    // 5. Workload balancing (deduct up to 20 points for overload)
+    const weeklyHours = await this.getCarerWeeklyHours(carer.id, visit.scheduledStartTime);
+    const workloadPenalty = this.calculateWorkloadPenalty(weeklyHours);
+    score -= workloadPenalty;
+    
+    const overallEligible = employmentCheck.isEmployed && 
+                            skillsMatch.hasSomeRequired && 
+                            availabilityCheck.isAvailable;
+    
     return {
       carerId: carer.id,
       carerName: `${carer.first_name || 'Unknown'} ${carer.last_name || 'Carer'}`,
       email: carer.email,
-      overallEligible: false,
-      score: 0,
       employment: employmentCheck,
-      skillsMatch: { hasSomeRequired: false, missingSkills: [], matchingSkills: [], requirementsMatch: false },
-      availability: { isAvailable: false, conflicts: ['Not employed during visit time'], suggestions: [] }
+      skills: carerSkills,
+      skillsMatch,
+      availability: availabilityCheck,
+      distance: distanceInfo,
+      cluster: {
+        carerId: carer.id,
+        carerClusterId: carer.profile?.clusterId,
+        visitClusterId: visit.clusterId,
+        sameCluster: visit.clusterId === carer.profile?.clusterId
+      },
+      continuity: {
+        bonus: continuityBonus,
+        previousVisits: continuityBonus > 0 ? Math.floor(continuityBonus / 5) : 0
+      },
+      workload: {
+        currentWeeklyHours: weeklyHours,
+        utilizationPercent: (weeklyHours / 48) * 100,
+        penalty: workloadPenalty
+      },
+      score,
+      overallEligible
     };
   }
-  
-  // 1. Skills match (40 points)
-  const carerSkills = carer.profile?.skill_details || [];
-  const requiredSkills = (visit as any).requiredSkills || [];
-  const requirements = visit.requirements || '';
-  const skillsMatch = this.checkSkillsMatch(carerSkills, requiredSkills, requirements);
-  
-  if (skillsMatch.hasSomeRequired) {
-    score += 40;
-  }
-  
-  // 2. Availability check (20 points)
-  const requestStartTime = visit.scheduledStartTime!;
-  const requestEndTime = visit.scheduledEndTime ||
-    new Date(requestStartTime.getTime() + (visit.estimatedDuration || 60) * 60 * 1000);
-  const availabilityRequirements = (visit as any).availabilityRequirements;
-  
-  const availabilityCheck = this.checkCarerAvailability(
-    carer,
-    requestStartTime,
-    requestEndTime,
-    availabilityRequirements
-  );
-  
-  if (availabilityCheck.isAvailable) {
-    score += 20;
-  }
-  
-  // 3. Cluster proximity (15 points)
-  let clusterBonus = 0;
-  if (visit.clusterId && carer.profile?.clusterId) {
-    if (visit.clusterId === carer.profile.clusterId) {
-      clusterBonus = 15; // Same cluster
-      score += clusterBonus;
-    }
-    // TODO: Add nearby cluster bonus using cluster distance calculation
-  }
-  
-  // 4. Continuity of care (10 points) - check if carer has served this client before
-  const continuityBonus = await this.calculateContinuityBonus(carer.id, visit);
-  score += continuityBonus;
-  
-  // 5. Workload balancing (deduct up to 20 points for overload)
-  const weeklyHours = await this.getCarerWeeklyHours(carer.id, visit.scheduledStartTime);
-  const workloadPenalty = this.calculateWorkloadPenalty(weeklyHours);
-  score -= workloadPenalty;
-  
-  const overallEligible = employmentCheck.isEmployed && 
-                          skillsMatch.hasSomeRequired && 
-                          availabilityCheck.isAvailable;
-  
-  return {
-    carerId: carer.id,
-    carerName: `${carer.first_name || 'Unknown'} ${carer.last_name || 'Carer'}`,
-    email: carer.email,
-    employment: employmentCheck,
-    skills: carerSkills,
-    skillsMatch,
-    availability: availabilityCheck,
-    cluster: {
-      carerId: carer.id,
-      carerClusterId: carer.profile?.clusterId,
-      visitClusterId: visit.clusterId,
-      sameCluster: visit.clusterId === carer.profile?.clusterId,
-      bonus: clusterBonus
-    },
-    continuity: {
-      bonus: continuityBonus,
-      previousVisits: continuityBonus > 0 ? Math.floor(continuityBonus / 5) : 0
-    },
-    workload: {
-      currentWeeklyHours: weeklyHours,
-      utilizationPercent: (weeklyHours / 48) * 100,
-      penalty: workloadPenalty
-    },
-    score,
-    overallEligible
-  };
-}
 
 /**
  * Calculate continuity bonus - carers who have served this client before

@@ -193,12 +193,12 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='appbrew')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='support@appbrew.com',
+        email='info@appbrew.com',
         password='qwerty',
         role='staff',
-        first_name='Ahmed',
-        last_name='Mahummed',
-        job_role=' Backend Developer',
+        first_name='Marian',
+        last_name='Goodness',
+        job_role='Stfware Tester',
         tenant=tenant
     )
 
