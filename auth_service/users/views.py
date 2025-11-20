@@ -1356,7 +1356,7 @@ class PublicRegisterView(generics.CreateAPIView):
                     self.email = 'public@system.com'
                     self.first_name = 'Public'
                     self.last_name = 'Registration'
-                    self.role = 'admin'
+                    self.role = 'user'
                     self.tenant = tenant
                     self.is_superuser = False
                 
@@ -3463,89 +3463,6 @@ class RSAKeyPairCreateView(APIView):
 
 
 
-# class RSAKeyPairCreateView(APIView):
-#     """
-#     Create an RSA key pair for a tenant (by tenant_id or schema_name).
-#     Returns tenant metadata (domains, root-admin) in the same format as list views.
-#     Restricted to superusers only.
-#     """
-#     permission_classes = [IsAdminUser]
-
-#     def post(self, request):
-#         tenant_id = request.data.get("tenant_id")
-#         schema_name = request.data.get("schema_name")
-
-#         # === Input Validation ===
-#         if not tenant_id and not schema_name:
-#             logger.error("RSAKeyPair create: No tenant_id or schema_name provided")
-#             return Response(
-#                 {
-#                     "status": "error",
-#                     "message": "Either 'tenant_id' or 'schema_name' is required",
-#                 },
-#                 status=status.HTTP_400_BAD_REQUEST,
-#             )
-
-#         try:
-#             # === Fetch Tenant (public schema) ===
-#             if tenant_id:
-#                 tenant = Tenant.objects.get(id=tenant_id)
-#             else:
-#                 tenant = Tenant.objects.get(schema_name=schema_name)
-
-#             # === Get Domains & Root Admin (using shared helpers) ===
-#             domains = get_tenant_domains(tenant)
-#             root_admin = get_root_admin(tenant)
-
-#             # === Generate RSA Key Pair ===
-#             private_pem, public_pem = generate_rsa_keypair()
-
-#             # === Create Key Pair inside tenant schema ===
-#             with tenant_context(tenant):
-#                 keypair = RSAKeyPair.objects.create(
-#                     tenant=tenant,
-#                     private_key_pem=private_pem,
-#                     public_key_pem=public_pem,
-#                     active=True,
-#                 )
-#                 logger.info(
-#                     f"RSAKeyPair created for tenant: {tenant.schema_name}, kid: {keypair.kid}"
-#                 )
-
-#             # === Build Consistent Response ===
-#             response_data = {
-#                 "status": "success",
-#                 "message": f"RSAKeyPair created successfully for tenant '{tenant.name}'",
-#                 "data": {
-#                     "tenant_id": tenant.id,
-#                     "tenant_schema": tenant.schema_name,
-#                     "tenant_name": tenant.name,
-#                     "unique_id": str(tenant.unique_id) if tenant.unique_id else None,
-#                     "primary_domain": domains["primary_domain"],
-#                     "all_domains": domains["all_domains"],
-#                     "status": tenant.status,
-#                     "root_admin": root_admin,
-#                     "kid": keypair.kid,
-#                     "public_key": public_pem,
-#                     "created_at": keypair.created_at.isoformat(),
-#                 },
-#             }
-
-#             return Response(response_data, status=status.HTTP_201_CREATED)
-
-#         except Tenant.DoesNotExist:
-#             logger.error(f"Tenant not found: tenant_id={tenant_id}, schema_name={schema_name}")
-#             return Response(
-#                 {"status": "error", "message": "Tenant not found"},
-#                 status=status.HTTP_404_NOT_FOUND,
-#             )
-
-#         except Exception as e:
-#             logger.error(f"Unexpected error in RSAKeyPairCreateView: {str(e)}", exc_info=True)
-#             return Response(
-#                 {"status": "error", "message": "Failed to create RSA key pair"},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             )
 
 
 class GroupViewSet(viewsets.ModelViewSet):

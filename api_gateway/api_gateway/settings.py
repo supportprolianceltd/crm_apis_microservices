@@ -249,7 +249,7 @@ PROJECT_MANAGER_URL = env.str("PROJECT_MANAGER_URL", default="http://project-man
 AUTH_ROUTES = [
     "token", "token/refresh", "token/validate", "login", "logout",
     "debug-cookies", "test-cookies", "simple-cookie-test",
-    "verify-2fa", "docs", "doc", "user", "tenant", "public-key", "jitsi", "reviews",
+    "verify-2fa", "docs", "doc", "user", "tenant", "public-key", "jitsi", "reviews", "investments",
 ]
 
 MICROSERVICE_URLS = {

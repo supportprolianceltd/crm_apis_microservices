@@ -208,6 +208,7 @@ TENANT_APPS = [
     "rest_framework_simplejwt",
     "users",
     "reviews",
+    "investments",
 ]
 
 INSTALLED_APPS = list(SHARED_APPS) + [
@@ -436,6 +437,18 @@ SUPABASE_URL = env("SUPABASE_URL", default="")
 SUPABASE_KEY = env("SUPABASE_KEY", default="")
 SUPABASE_BUCKET = env("SUPABASE_BUCKET", default="")
 STORAGE_TYPE = env("STORAGE_TYPE", default="supabase")
+
+# Add to settings.py
+CELERY_BEAT_SCHEDULE = {
+    'accrue-monthly-roi': {
+        'task': 'investments.tasks.accrue_monthly_roi',
+        'schedule': crontab(0, 0, day_of_month='1'),  # 1st of every month
+    },
+    'send-roi-notifications': {
+        'task': 'investments.tasks.send_roi_due_notifications', 
+        'schedule': crontab(0, 0, day_of_month='25'),  # 25th of every month
+    },
+}
 
 # #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 # # ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
