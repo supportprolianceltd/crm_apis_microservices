@@ -4,6 +4,21 @@ import { PrismaClient } from '@prisma/client';
 export class TaskController {
   private prisma: PrismaClient;
 
+  // Map careType enum to assignment capacity (null means unlimited)
+  private careTypeCapacity(ct?: string | null): number | null {
+    if (!ct) return null;
+    switch (ct) {
+      case 'SINGLE_HANDED_CALL':
+        return 1;
+      case 'DOUBLE_HANDED_CALL':
+        return 2;
+      case 'SPECIALCARE':
+        return null;
+      default:
+        return null;
+    }
+  }
+
   // Valid table names that tasks can be related to
   private validRelatedTables = [
     "RiskAssessment",
@@ -1225,16 +1240,41 @@ export class TaskController {
           });
         }
 
-        // Attach the carerVisit id to the task and update carerId
-        const updateData: any = {
-          ...baseUpdate,
-          carerVisitId: cv.id,
-        };
+        // Enforce per-visit capacity using CarerVisitAssignee join table
+        // Ensure the assignee doesn't already exist
+        const already = await prismaTx.carerVisitAssignee.findFirst({ where: { carerVisitId: cv.id, carerId } });
+        if (!already) {
+          // Determine effective careType: visit.careType (if present) else fallback to carePlan.careRequirements.careType
+          let effectiveCareType: string | null = null;
+          if (cv.careType) effectiveCareType = cv.careType;
+          else if (cv.carePlanId) {
+            try {
+              const cp = await prismaTx.carePlan.findUnique({ where: { id: cv.carePlanId }, include: { careRequirements: true } });
+              if (cp && cp.careRequirements && cp.careRequirements.careType) effectiveCareType = cp.careRequirements.careType;
+            } catch (e) {
+              // ignore
+            }
+          }
 
-        const updated = await prismaTx.task.update({
-          where: { id: taskId },
-          data: updateData,
-        });
+          const cap = this.careTypeCapacity(effectiveCareType);
+          if (typeof cap === 'number') {
+            const existingCount = await prismaTx.carerVisitAssignee.count({ where: { tenantId: tenantId.toString(), carerVisitId: cv.id } });
+            if (existingCount >= cap) {
+              throw new Error(`Visit assignment limit reached for careType=${effectiveCareType}`);
+            }
+          }
+
+          await prismaTx.carerVisitAssignee.create({ data: { tenantId: tenantId.toString(), carerVisitId: cv.id, carerId } });
+          // For backward compatibility, populate carerId on the carerVisit if this is the first assignee
+          const totalAfter = await prismaTx.carerVisitAssignee.count({ where: { tenantId: tenantId.toString(), carerVisitId: cv.id } });
+          if (!cv.carerId && totalAfter === 1) {
+            await prismaTx.carerVisit.update({ where: { id: cv.id }, data: { carerId, assignedAt: new Date() } });
+          }
+        }
+
+        // Attach the carerVisit id to the task and update carerId
+        const updateData: any = { ...baseUpdate, carerVisitId: cv.id };
+        const updated = await prismaTx.task.update({ where: { id: taskId }, data: updateData });
 
         return { updated, carerVisit: cv };
       });
@@ -1285,26 +1325,62 @@ export class TaskController {
       if (existingVisit.tenantId !== tenantId.toString())
         return res.status(403).json({ error: "Access denied to this visit" });
 
-      // Transaction: update visit, optionally update tasks attached to the visit
-      const result = await this.prisma.$transaction(async (prismaTx) => {
-        const updatedVisit = await prismaTx.carerVisit.update({
-          where: { id: visitId },
-          data: { carerId, assignedAt: new Date() },
+      // Transaction: create assignee while enforcing capacity, optionally propagate to tasks
+      try {
+        const result = await this.prisma.$transaction(async (prismaTx) => {
+          const visit = await prismaTx.carerVisit.findUnique({ where: { id: visitId } });
+          if (!visit) throw new Error('Visit not found in transaction');
+
+          // Determine effective careType
+          let effectiveCareType: string | null = null;
+          if (visit.careType) effectiveCareType = visit.careType;
+          else if (visit.carePlanId) {
+            try {
+              const cp = await prismaTx.carePlan.findUnique({ where: { id: visit.carePlanId }, include: { careRequirements: true } });
+              if (cp && cp.careRequirements && cp.careRequirements.careType) effectiveCareType = cp.careRequirements.careType;
+            } catch (e) {
+              // ignore
+            }
+          }
+
+          const cap = this.careTypeCapacity(effectiveCareType);
+
+          // if cap is a number, check current assignee count
+          if (typeof cap === 'number') {
+            const existingCount = await prismaTx.carerVisitAssignee.count({ where: { tenantId: tenantId.toString(), carerVisitId: visitId } });
+            const alreadyAssigned = await prismaTx.carerVisitAssignee.findFirst({ where: { carerVisitId: visitId, carerId } });
+            if (!alreadyAssigned && existingCount >= cap) {
+              throw new Error(`Visit assignment limit reached for careType=${effectiveCareType}`);
+            }
+          }
+
+          // Create assignee if not already assigned
+          const alreadyAssigned = await prismaTx.carerVisitAssignee.findFirst({ where: { carerVisitId: visitId, carerId } });
+          if (!alreadyAssigned) {
+            await prismaTx.carerVisitAssignee.create({ data: { tenantId: tenantId.toString(), carerVisitId: visitId, carerId } });
+          }
+
+          // Optionally update denormalized carerId on visit when first assignee
+          const totalCount = await prismaTx.carerVisitAssignee.count({ where: { tenantId: tenantId.toString(), carerVisitId: visitId } });
+          let updatedVisit: any = visit;
+          if (!visit.carerId && totalCount === 1) {
+            updatedVisit = await prismaTx.carerVisit.update({ where: { id: visitId }, data: { carerId, assignedAt: new Date() } });
+          }
+
+          let tasksUpdated = 0;
+          if (shouldPropagate) {
+            const upd = await prismaTx.task.updateMany({ where: { carerVisitId: visitId }, data: { carerId } });
+            tasksUpdated = upd.count || 0;
+          }
+
+          return { updatedVisit, tasksUpdated };
         });
 
-        let tasksUpdated = 0;
-        if (shouldPropagate) {
-          const upd = await prismaTx.task.updateMany({
-            where: { carerVisitId: visitId },
-            data: { carerId },
-          });
-          tasksUpdated = upd.count || 0;
-        }
-
-        return { updatedVisit, tasksUpdated };
-      });
-
-      return res.json(result);
+        return res.json(result);
+      } catch (err: any) {
+        console.error('assignCarerToVisit transaction error', err);
+        return res.status(400).json({ error: err?.message || 'Failed to assign carer to visit' });
+      }
     } catch (error: any) {
       console.error("assignCarerToVisit error", error);
       return res

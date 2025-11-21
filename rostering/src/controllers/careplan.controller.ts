@@ -1,5 +1,7 @@
 // Enum values from schema.prisma
 const CARE_PLAN_STATUS = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
+// Allowed careType enum values (must match prisma enum `careType`)
+const ALLOWED_CARE_TYPES = ['SINGLE_HANDED_CALL', 'DOUBLE_HANDED_CALL', 'SPECIALCARE'];
 
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
@@ -69,22 +71,50 @@ export class CarePlanController {
   }
 
   // Generate CarerVisit rows for a care plan using its careRequirements.schedules slots
-  // Uses a rolling window (default 12 weeks from window start).
-  private async generateVisitsForCarePlan(carePlan: any, tenantId: string) {
+  // Window selection rules (priority):
+  // 1) If careRequirements.contractStart/contractEnd provided they act as hard bounds for generation.
+  // 2) If careRequirements.rollingWeeks is provided it overrides default rolling window length.
+  // 3) A caller may pass an explicit rollingWeeksParam into this method (highest override).
+  private async generateVisitsForCarePlan(carePlan: any, tenantId: string, rollingWeeksParam?: number) {
     try {
       if (!carePlan || !carePlan.careRequirements || !Array.isArray(carePlan.careRequirements.schedules)) return;
+      // Determine rolling weeks: priority - explicit param > careRequirements.rollingWeeks > default
+      const DEFAULT_ROLLING_WEEKS = 1;
+      const cr = carePlan.careRequirements || {};
+      const rollingWeeks = (typeof rollingWeeksParam === 'number' && rollingWeeksParam > 0)
+        ? Math.floor(rollingWeeksParam)
+        : (typeof cr.rollingWeeks === 'number' && cr.rollingWeeks > 0 ? Math.floor(cr.rollingWeeks) : DEFAULT_ROLLING_WEEKS);
 
-  const ROLLING_WEEKS = 1; // reduced from 12 weeks to 1-week rolling window per request
-      const schedules = carePlan.careRequirements.schedules.filter((s: any) => s && s.enabled && Array.isArray(s.slots) && s.slots.length);
+      const schedules = (carePlan.careRequirements.schedules || []).filter((s: any) => s && s.enabled && Array.isArray(s.slots) && s.slots.length);
       if (!schedules.length) return;
 
       const now = new Date();
       const planStart = carePlan.startDate ? new Date(carePlan.startDate) : now;
-      // windowStart is the later of planStart and today
-      const windowStart = planStart > now ? planStart : now;
-      const windowEndCandidate = new Date(windowStart.getTime() + ROLLING_WEEKS * 7 * 24 * 60 * 60 * 1000);
-      const planEnd = carePlan.endDate ? new Date(carePlan.endDate) : windowEndCandidate;
-      const windowEnd = planEnd < windowEndCandidate ? planEnd : windowEndCandidate;
+      // Use contractStart/contractEnd from careRequirements as optional hard bounds.
+      // If either contractStart or contractEnd is provided, the contract bounds take priority
+      // over the rollingWeeks window (i.e. we generate only between contractStart/contractEnd
+      // intersected with plan start/end and today as needed).
+      const contractStart = cr.contractStart ? new Date(cr.contractStart) : null;
+      const contractEnd = cr.contractEnd ? new Date(cr.contractEnd) : null;
+
+      const hasContractBounds = Boolean(contractStart || contractEnd);
+
+      // Pick window start: must be at least today and planStart, and contractStart if provided
+      let windowStart = planStart > now ? planStart : now;
+      if (contractStart && contractStart > windowStart) windowStart = contractStart;
+
+      const planEnd = carePlan.endDate ? new Date(carePlan.endDate) : null;
+
+      let windowEnd: Date;
+      if (hasContractBounds) {
+        // Use contract bounds (if provided) intersected with planEnd (if provided)
+        windowEnd = contractEnd ? new Date(contractEnd) : (planEnd ? new Date(planEnd) : new Date(windowStart.getTime() + rollingWeeks * 7 * 24 * 60 * 60 * 1000));
+        if (planEnd && planEnd < windowEnd) windowEnd = planEnd;
+      } else {
+        // No contract bounds: use rollingWeeks window (from windowStart) but do not extend past planEnd (if present)
+        const windowEndCandidate = new Date(windowStart.getTime() + rollingWeeks * 7 * 24 * 60 * 60 * 1000);
+        windowEnd = planEnd ? (planEnd < windowEndCandidate ? planEnd : windowEndCandidate) : windowEndCandidate;
+      }
 
       // Map day enum to JS weekday number (0=Sunday..6=Saturday)
       const dayOfWeekMap: Record<string, number> = { SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3, THURSDAY: 4, FRIDAY: 5, SATURDAY: 6 };
@@ -116,6 +146,8 @@ export class CarePlanController {
               startDate: visitStart,
               endDate: visitEnd,
               generatedFromCarePlan: true,
+              // inherit careType from care plan when present
+              careType: (carePlan.careRequirements && ALLOWED_CARE_TYPES.includes(carePlan.careRequirements.careType)) ? carePlan.careRequirements.careType : undefined,
             });
           }
         }
@@ -179,7 +211,20 @@ export class CarePlanController {
       attachNested('legalRequirement', payload.legalRequirement ? { ...payload.legalRequirement, tenantId: tenantId.toString() } : undefined);
       // careRequirements needs special handling so we can persist normalized AgreedCareSchedule + AgreedCareSlot rows
       if (payload.careRequirements) {
-        const cr: any = { tenantId: tenantId.toString(), careType: payload.careRequirements.careType };
+        const cr: any = { tenantId: tenantId.toString() };
+        if (payload.careRequirements.careType !== undefined && payload.careRequirements.careType !== null) {
+          if (typeof payload.careRequirements.careType === 'string' && ALLOWED_CARE_TYPES.includes(payload.careRequirements.careType)) {
+            cr.careType = payload.careRequirements.careType;
+          } else {
+            // invalid careType should have been caught by validation, but guard here to avoid Prisma errors
+            console.warn('Ignoring invalid careRequirements.careType value on create:', payload.careRequirements.careType);
+          }
+        }
+
+        // Persist optional contract bounds and rolling window when provided
+        if (payload.careRequirements.contractStart) cr.contractStart = this.toDateOrNull(payload.careRequirements.contractStart);
+        if (payload.careRequirements.contractEnd) cr.contractEnd = this.toDateOrNull(payload.careRequirements.contractEnd);
+        if (typeof payload.careRequirements.rollingWeeks === 'number') cr.rollingWeeks = Math.max(0, Math.floor(payload.careRequirements.rollingWeeks));
 
         // Build schedules if provided. Support either an array `schedules` or an object `agreedCareVisits` keyed by day name.
         const schedulesCreate: any[] = [];
@@ -423,11 +468,17 @@ export class CarePlanController {
             tenantId: tenantId.toString(),
             carePlanId: id,
           };
-          if (cr.careType !== undefined) createObj.careType = cr.careType;
+          if (cr.careType !== undefined && ALLOWED_CARE_TYPES.includes(cr.careType)) createObj.careType = cr.careType;
+          if (cr.contractStart !== undefined) createObj.contractStart = this.toDateOrNull(cr.contractStart);
+          if (cr.contractEnd !== undefined) createObj.contractEnd = this.toDateOrNull(cr.contractEnd);
+          if (cr.rollingWeeks !== undefined) createObj.rollingWeeks = typeof cr.rollingWeeks === 'number' ? Math.max(0, Math.floor(cr.rollingWeeks)) : null;
           if (schedulesCreate.length) createObj.schedules = { create: schedulesCreate };
 
           const updateObj: any = {};
-          if (cr.careType !== undefined) updateObj.careType = cr.careType;
+          if (cr.careType !== undefined && ALLOWED_CARE_TYPES.includes(cr.careType)) updateObj.careType = cr.careType;
+          if (cr.contractStart !== undefined) updateObj.contractStart = this.toDateOrNull(cr.contractStart);
+          if (cr.contractEnd !== undefined) updateObj.contractEnd = this.toDateOrNull(cr.contractEnd);
+          if (cr.rollingWeeks !== undefined) updateObj.rollingWeeks = typeof cr.rollingWeeks === 'number' ? Math.max(0, Math.floor(cr.rollingWeeks)) : null;
           if (schedulesCreate.length) updateObj.schedules = { deleteMany: {}, create: schedulesCreate };
 
           await tx.careRequirements.upsert({

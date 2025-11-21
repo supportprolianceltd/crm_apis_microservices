@@ -341,6 +341,7 @@ model Cluster {
   clusterAssignments ClusterAssignment[]
   visits             Visit[]
   clientClusterDistances ClientClusterDistance[]
+  clusterAgreedCareSchedules ClusterAgreedCareSchedule[]
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -746,7 +747,13 @@ model CareRequirements {
   id         String @id @default(cuid())
   tenantId   String
   carePlanId String @unique
-  careType   String?
+  careType   careType?
+  // Optional contract boundaries for generated visits. When present these act as hard bounds
+  // for visit generation (contractStart <= generated visits <= contractEnd).
+  contractStart DateTime?
+  contractEnd   DateTime?
+  // Optional per-care-requirements override for how many rolling weeks to generate
+  rollingWeeks  Int?
 
   // Normalized schedule: one AgreedCareSchedule per day for this CareRequirements
   schedules AgreedCareSchedule[]
@@ -759,8 +766,8 @@ model CareRequirements {
 
 
 enum careType {
-  SINGLEHANDEDCALL
-  DOUBLEHANDEDCALL
+  SINGLE_HANDED_CALL
+  DOUBLE_HANDED_CALL
   SPECIALCARE
 }
 
@@ -789,10 +796,30 @@ model AgreedCareSchedule {
   // Relations
   careRequirements CareRequirements @relation(fields: [careRequirementsId], references: [id], onDelete: Cascade)
   slots            AgreedCareSlot[]
+  clusterAgreedCareSchedules ClusterAgreedCareSchedule[]
 
   @@unique([careRequirementsId, day])
   @@index([tenantId])
   @@index([careRequirementsId])
+}
+
+model ClusterAgreedCareSchedule {
+  id                      String   @id @default(cuid())
+  tenantId                String
+  clusterId               String
+  agreedCareScheduleId    String
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  // Relations
+  cluster                 Cluster  @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  agreedCareSchedule      AgreedCareSchedule @relation(fields: [agreedCareScheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, clusterId, agreedCareScheduleId], name: "tenant_cluster_schedule_unique")
+  @@index([tenantId])
+  @@index([clusterId])
+  @@index([agreedCareScheduleId])
+  @@map("cluster_agreed_care_schedules")
 }
 
 model AgreedCareSlot {
@@ -875,6 +902,7 @@ model Task {
 model CarerVisit {
   id          String   @id @default(cuid())
   tenantId    String
+  careType    careType?
   // carerId is nullable: visits may exist before a carer is assigned
   carerId     String?
   // optional reference to originating care plan
@@ -894,6 +922,7 @@ model CarerVisit {
   // when a carer is assigned to the visit
   assignedAt  DateTime?
   tasks       Task[]
+  assignees   CarerVisitAssignee[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -903,6 +932,20 @@ model CarerVisit {
   @@index([carerId])
   @@index([generatedFromCarePlan])
   @@map("carer_visits")
+}
+
+model CarerVisitAssignee {
+  id           String   @id @default(cuid())
+  tenantId     String
+  carerVisitId String
+  carerId      String
+  assignedAt   DateTime @default(now())
+
+  carerVisit   CarerVisit @relation(fields: [carerVisitId], references: [id], onDelete: Cascade)
+
+  @@unique([carerVisitId, carerId])
+  @@index([tenantId, carerVisitId])
+  @@map("carer_visit_assignees")
 }
 
 // ─────────────────────────────────────────────
