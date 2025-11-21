@@ -11,7 +11,7 @@ from django.utils import timezone
 from django_tenants.utils import tenant_context
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-
+from decimal import Decimal
 # Local imports
 from core.models import Branch, Domain, Tenant, GlobalActivity
 from utils.supabase import upload_file_dynamic
@@ -725,6 +725,7 @@ class OtherUserDocumentsSerializer(serializers.ModelSerializer):
 
 class InvestmentDetailSerializer(serializers.ModelSerializer):
     last_updated_by = serializers.SerializerMethodField()
+    monthly_interest_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = InvestmentDetail
@@ -737,6 +738,11 @@ class InvestmentDetailSerializer(serializers.ModelSerializer):
 
     def get_last_updated_by(self, obj):
         return get_last_updated_by(self, obj)
+    
+    def get_monthly_interest_amount(self, obj):
+        """Calculate monthly interest: (40% of principal) / 12"""
+        return (obj.principal_amount * Decimal('0.40')) / 12
+    
 
     def create(self, validated_data, **kwargs):
         user_data = get_user_data_from_jwt(self.context['request'])
@@ -893,6 +899,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "availability",  # New field added
             "work_phone",
             "personal_phone",
+            "policy_number",
             "gender",
             "dob",
             "street",
@@ -1005,6 +1012,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 "drivers_licence_issuing_authority",
                 "drivers_licence_policy_number",
                 "work_phone",
+                "policy_number",
                 "personal_phone",
                 "gender",
                 "dob",
@@ -1445,7 +1453,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
             # Create profile using UserProfileSerializer - it will handle nested objects
             profile_serializer = UserProfileSerializer(data=profile_data, context=self.context)
             profile_serializer.is_valid(raise_exception=True)
-            profile_serializer.save(user=user)
+            profile = profile_serializer.save(user=user)
+
+            # Generate policy_number for investors
+            if user.role == 'investor':
+                policy_number = self._generate_policy_number(user)
+                profile.policy_number = policy_number
+                profile.save(update_fields=['policy_number'])
+                logger.info(f"Assigned policy number {policy_number} to new investor {user.email}")
 
             return user
 
@@ -1500,7 +1515,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     def _generate_policy_number(self, user):
         """Generate policy number: PREFIX-XXXXXX where PREFIX is first 3 letters of tenant name (upper), XXXXXX is 6-digit sequential per tenant."""
-        prefix = user.tenant.name[:3].upper()
+        tenant_name = user.tenant.name or 'APP'
+        prefix = tenant_name[:3].upper()
         # Count existing investors in tenant (includes current user)
         count = CustomUser.objects.filter(tenant=user.tenant, role='investor').count()
         return f"{prefix}-{count:06d}"
@@ -2258,6 +2274,11 @@ class DocumentSerializer(serializers.ModelSerializer):
     permissions_write = DocumentPermissionWriteSerializer(many=True, required=False, write_only=True)
     permission_action = serializers.ChoiceField(choices=['add', 'remove', 'replace', 'update_level'], required=False, write_only=True)
     file = serializers.FileField(required=False, allow_null=True)
+
+    def to_internal_value(self, data):
+        ret = super().to_internal_value(data)
+        ret.pop('id', None)
+        return ret
 
     class Meta:
         model = Document

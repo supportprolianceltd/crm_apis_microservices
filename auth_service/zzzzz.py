@@ -178,12 +178,12 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='prince.godson@prolianceltd.com',
+        email='tegaokorare91@gmail.com',
         password='qwerty',
-        role='admin',
-        first_name='Prince',
-        last_name='Godson',
-        job_role=' Frontend Developer',
+        role='staff',
+        first_name='Tega',
+        last_name='Okorare',
+        job_role=' Backend Developer',
         tenant=tenant
     )
     
@@ -193,12 +193,12 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='appbrew')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='support@appbrew.com',
+        email='info@appbrew.com',
         password='qwerty',
         role='staff',
-        first_name='Abib',
-        last_name='Achmed',
-        job_role=' Frontend Developer',
+        first_name='Marian',
+        last_name='Goodness',
+        job_role='Stfware Tester',
         tenant=tenant
     )
 
@@ -208,12 +208,12 @@ from users.models import CustomUser
 from django_tenants.utils import tenant_context
 
 # Get the tenant
-tenant = Tenant.objects.get(schema_name='rodimine')
+tenant = Tenant.objects.get(schema_name='proliance')
 
 # Enter tenant context
 with tenant_context(tenant):
     try:
-        user = CustomUser.objects.get(email='support@rodimine.com')
+        user = CustomUser.objects.get(email='ekenehanson@gmail.com')
         user.delete()
         print("User deleted successfully.")
     except CustomUser.DoesNotExist:

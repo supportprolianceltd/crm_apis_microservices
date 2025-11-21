@@ -7,7 +7,9 @@ import { ClusteringService } from '../services/clustering.service';
 import { ConstraintsService } from '../services/constraints.service';
 import { TravelService } from '../services/travel.service';
 import { CarerService } from '../services/carer.service';
+import { EnhancedTravelService } from '../services/enhanced-travel.service';
 import { logger, logServiceError } from '../utils/logger';
+
 import { generateUniqueRequestId, generateUniqueVisitId } from '../utils/idGenerator';
 import {
   CreateRequestPayload,
@@ -39,7 +41,8 @@ const createRequestSchema = z.object({
 });
 
 const updateRequestSchema = createRequestSchema.partial().omit({}).extend({
-  status: z.enum(['PENDING', 'PROCESSING', 'MATCHED', 'APPROVED', 'COMPLETED', 'DECLINED', 'FAILED']).optional()
+  status: z.enum(['PENDING', 'PROCESSING', 'MATCHED', 'APPROVED', 'COMPLETED', 'DECLINED', 'FAILED']).optional(),
+  sendToRostering: z.union([z.boolean(), z.string()]).optional()
 });
 
 const searchRequestsSchema = z.object({
@@ -59,6 +62,7 @@ export class RequestController {
   private matchingService: MatchingService;
   private clusteringService: ClusteringService;
   private carerService: CarerService;
+  private enhancedTravelService: EnhancedTravelService;
 
   constructor(
     prisma: PrismaClient,
@@ -69,6 +73,7 @@ export class RequestController {
     this.geocodingService = geocodingService;
     this.matchingService = matchingService;
     this.carerService = new CarerService();
+    this.enhancedTravelService = new EnhancedTravelService(prisma);
     const constraintsService = new ConstraintsService(prisma);
     const travelService = new TravelService(prisma);
     this.clusteringService = new ClusteringService(prisma, constraintsService, travelService);
@@ -555,6 +560,12 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
       updatedAt: new Date()
     };
 
+    // Handle sendToRostering flag conversion from string to boolean
+    if (typeof validatedData.sendToRostering === 'string') {
+      const lower = validatedData.sendToRostering.trim().toLowerCase();
+      updateData.sendToRostering = lower === 'true';
+    }
+
     // Only add update tracking if the fields exist in the schema
     // This prevents errors if migrations haven't been run yet
     try {
@@ -1025,205 +1036,160 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
     }
   };
 
+
   /**
-   * Check request feasibility - which carers can handle this request
-   */
-  checkRequestFeasibility = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const user = (req as any).user;
-      const tenantId = user?.tenantId?.toString();
-      const requestId = req.params.id;
-      const { includeScheduleCheck } = req.query as { includeScheduleCheck?: string };
-
-      const existingRequest = await this.prisma.externalRequest.findFirst({
-        where: { id: requestId, tenantId }
-      });
-
-      if (!existingRequest) {
-        res.status(404).json({ success: false, error: 'Request not found' });
-        return;
-      }
-
-      if (!existingRequest.scheduledStartTime) {
-        res.status(400).json({
-          success: false,
-          error: 'Request must have scheduled start time for feasibility check'
-        });
-        return;
-      }
-
-      // Get all carers from auth service using CarerService
-      const authToken = req.headers?.authorization?.split?.(' ')?.[1];
-      if (!authToken) {
-        res.status(401).json({ success: false, error: 'Authorization token required' });
-        return;
-      }
-
-      let allCarers: any[] = [];
+     * Check request feasibility - which carers can handle this request (WITH BATCHING)
+     */
+    checkRequestFeasibility = async (req: Request, res: Response): Promise<void> => {
       try {
-        logger.info('Fetching carers from auth service');
+        const user = (req as any).user;
+        const tenantId = user?.tenantId?.toString();
+        const requestId = req.params.id;
+        const { includeScheduleCheck } = req.query as { includeScheduleCheck?: string };
 
-        // Get carers directly from auth service using CarerService
-        allCarers = await this.carerService.getCarers(authToken, tenantId);
-
-        logger.info(`Fetched ${allCarers.length} carers from auth service`);
-      } catch (error) {
-        logger.error('Failed to fetch carers from auth service', {
-          error: error instanceof Error ? error.message : String(error),
-          tenantId,
-          hasAuthToken: !!authToken
+        const existingRequest = await this.prisma.externalRequest.findFirst({
+          where: { id: requestId, tenantId }
         });
+
+        if (!existingRequest) {
+          res.status(404).json({ success: false, error: 'Request not found' });
+          return;
+        }
+
+        if (!existingRequest.scheduledStartTime) {
+          res.status(400).json({
+            success: false,
+            error: 'Request must have scheduled start time for feasibility check'
+          });
+          return;
+        }
+
+        // Get all carers from auth service
+        const authToken = req.headers?.authorization?.split?.(' ')?.[1];
+        if (!authToken) {
+          res.status(401).json({ success: false, error: 'Authorization token required' });
+          return;
+        }
+
+        let allCarers: any[] = [];
+        try {
+          logger.info('Fetching carers from auth service');
+          allCarers = await this.carerService.getCarers(authToken, tenantId);
+          logger.info(`Fetched ${allCarers.length} carers from auth service`);
+        } catch (error) {
+          logger.error('Failed to fetch carers from auth service', {
+            error: error instanceof Error ? error.message : String(error),
+            tenantId
+          });
+          res.status(500).json({
+            success: false,
+            error: 'Failed to fetch carer data from auth service',
+            details: error instanceof Error ? error.message : 'Unknown error'
+          });
+          return;
+        }
+
+        // STEP 1: Pre-filter with cheap checks
+        const preFilteredCarers = this.preFilterCarers(allCarers, existingRequest);
+        logger.info(`Pre-filtered to ${preFilteredCarers.length} carers from ${allCarers.length} total`);
+
+        // STEP 2: Process in batches to avoid overwhelming the system
+        const BATCH_SIZE = 20;
+        const eligibleCarers: any[] = [];
+        const ineligibleCarers: any[] = [];
+        
+        for (let i = 0; i < preFilteredCarers.length; i += BATCH_SIZE) {
+          const batch = preFilteredCarers.slice(i, i + BATCH_SIZE);
+          
+          const batchResults = await Promise.all(
+            batch.map(carer => this.checkCarerEligibilityWithScore(carer, existingRequest, authToken))
+          );
+          
+          // Separate eligible and ineligible
+          batchResults.forEach(result => {
+            if (result.overallEligible) {
+              eligibleCarers.push(result);
+            } else {
+              ineligibleCarers.push(result);
+            }
+          });
+          
+          // Early exit if we have enough eligible carers (10+)
+          if (eligibleCarers.length >= 10) {
+            logger.info(`Early exit: Found ${eligibleCarers.length} eligible carers`);
+            break;
+          }
+        }
+
+        // STEP 3: Sort by score
+        eligibleCarers.sort((a, b) => b.score - a.score);
+        ineligibleCarers.sort((a, b) => b.score - a.score);
+
+        // STEP 4: Collect alternative suggestions
+        const alternativeOptions: any[] = [];
+        [...eligibleCarers, ...ineligibleCarers].forEach(result => {
+          if (result.availability.suggestions && result.availability.suggestions.length > 0) {
+            result.availability.suggestions.forEach((suggestion: any) => {
+              alternativeOptions.push({
+                carerId: result.carerId,
+                carerName: result.carerName,
+                email: result.email,
+                score: result.score,
+                skillsMatch: result.skillsMatch,
+                day: suggestion.day,
+                date: suggestion.date,
+                startTime: suggestion.startTime,
+                endTime: suggestion.endTime,
+                duration: suggestion.duration,
+                isPrimaryTime: false
+              });
+            });
+          }
+        });
+
+        // Sort alternatives by date and score
+        alternativeOptions.sort((a, b) => {
+          const dateCompare = a.date.localeCompare(b.date);
+          if (dateCompare !== 0) return dateCompare;
+          return b.score - a.score;
+        });
+
+        res.json({
+          success: true,
+          data: {
+            requestId,
+            requestDetails: {
+              subject: existingRequest.subject,
+              scheduledStartTime: existingRequest.scheduledStartTime,
+              scheduledEndTime: existingRequest.scheduledEndTime,
+              estimatedDuration: existingRequest.estimatedDuration,
+              requiredSkills: (existingRequest as any).requiredSkills || [],
+              requirements: existingRequest.requirements
+            },
+            summary: {
+              totalCarers: allCarers.length,
+              preFilteredCarers: preFilteredCarers.length,
+              eligibleCarers: eligibleCarers.length,
+              ineligibleCarers: ineligibleCarers.length,
+              alternativeOptions: alternativeOptions.length,
+              checkedSchedule: includeScheduleCheck === 'true',
+              scoringUsed: true
+            },
+            eligibleCarers: eligibleCarers.slice(0, 20), // Top 20
+            ineligibleCarers: ineligibleCarers.slice(0, 10), // Top 10 ineligible
+            alternativeOptions: alternativeOptions.slice(0, 20) // Top 20 alternatives
+          },
+          message: `Found ${eligibleCarers.length} eligible carers with comprehensive scoring (max 100 points). Distance calculations use carer sip_code/address data. Pre-filtered ${allCarers.length} to ${preFilteredCarers.length} candidates.`
+        });
+
+      } catch (error) {
+        logServiceError('Request', 'checkRequestFeasibility', error, { requestId: req.params.id });
         res.status(500).json({
           success: false,
-          error: 'Failed to fetch carer data from auth service',
-          details: error instanceof Error ? error.message : 'Unknown error'
+          error: 'Failed to check request feasibility'
         });
-        return;
       }
-
-      const requiredSkills = (existingRequest as any).requiredSkills || [];
-      const requirements = existingRequest.requirements || '';
-
-      // Ensure we have valid dates (already checked above but TypeScript needs reassurance)
-      const requestStartTime = existingRequest.scheduledStartTime!;
-      const requestEndTime = existingRequest.scheduledEndTime ||
-        new Date(requestStartTime.getTime() + (existingRequest.estimatedDuration || 60) * 60 * 1000);
-
-      // Get availability requirements from the request
-      const availabilityRequirements = (existingRequest as any).availabilityRequirements;
-
-      // Check each carer for skills match and availability
-      const feasibilityResults = await Promise.all(
-        allCarers.map(async (carer) => {
-          // 0. Check employment status
-          const employmentCheck = this.checkEmploymentStatus(carer, requestStartTime);
-
-          // 1. Check skills match using carer skills from profile
-          const carerSkills = carer.profile?.skill_details || [];
-          const skillsMatch = this.checkSkillsMatch(carerSkills, requiredSkills, requirements);
-
-          // 2. Check availability based on profile availability and request availability requirements
-          const availabilityCheck = this.checkCarerAvailability(
-            carer,
-            requestStartTime,
-            requestEndTime,
-            availabilityRequirements
-          );
-
-          // 3. Optional: Advanced scheduling check using existing assignments
-          // Note: Schedule conflicts check is not available when using external carer API
-          let scheduleConflicts: any[] = [];
-          if (includeScheduleCheck === 'true') {
-            // Since we're using external carer API, we don't have assignment data
-            // This would need to be implemented by calling another API endpoint
-            scheduleConflicts = [];
-          }
-
-          return {
-            carerId: carer.id,
-            carerName: `${carer.first_name || 'Unknown'} ${carer.last_name || 'Carer'}`,
-            email: carer.email,
-            employment: {
-              isEmployed: employmentCheck.isEmployed,
-              reason: employmentCheck.reason
-            },
-            skills: carer.profile?.skill_details || [], // Skills from carer profile
-            skillsMatch: {
-              hasRequiredSkills: skillsMatch.hasSomeRequired,
-              missingSkills: skillsMatch.missingSkills,
-              matchingSkills: skillsMatch.matchingSkills,
-              requirementsMatch: skillsMatch.requirementsMatch
-            },
-            availability: {
-              isAvailable: availabilityCheck.isAvailable,
-              conflicts: availabilityCheck.conflicts,
-              suggestions: availabilityCheck.suggestions,
-              availableHours: carer.profile?.availability || {}
-            },
-            scheduleCheck: includeScheduleCheck === 'true' ? {
-              hasConflicts: scheduleConflicts.length > 0,
-              conflicts: scheduleConflicts,
-              conflictCount: scheduleConflicts.length
-            } : null,
-            overallEligible: employmentCheck.isEmployed && skillsMatch.hasSomeRequired && availabilityCheck.isAvailable && (includeScheduleCheck !== 'true' || scheduleConflicts.length === 0)
-          };
-        })
-      );
-
-      // Collect all alternative suggestions from all carers
-      const alternativeOptions: any[] = [];
-      feasibilityResults.forEach(result => {
-        if (result.availability.suggestions && result.availability.suggestions.length > 0) {
-          result.availability.suggestions.forEach((suggestion: any) => {
-            alternativeOptions.push({
-              carerId: result.carerId,
-              carerName: result.carerName,
-              email: result.email,
-              skillsMatch: result.skillsMatch,
-              day: suggestion.day,
-              date: suggestion.date,
-              startTime: suggestion.startTime,
-              endTime: suggestion.endTime,
-              duration: suggestion.duration,
-              isPrimaryTime: false // Mark as alternative
-            });
-          });
-        }
-      });
-
-      // Sort alternative options by date and time
-      alternativeOptions.sort((a, b) => {
-        const dateCompare = a.date.localeCompare(b.date);
-        if (dateCompare !== 0) return dateCompare;
-        return a.startTime.localeCompare(b.startTime);
-      });
-
-      // Sort by eligibility (eligible first, then by skill match quality)
-      feasibilityResults.sort((a, b) => {
-        if (a.overallEligible !== b.overallEligible) {
-          return b.overallEligible ? 1 : -1;
-        }
-        // If both eligible or both ineligible, sort by matching skills count
-        return b.skillsMatch.matchingSkills.length - a.skillsMatch.matchingSkills.length;
-      });
-
-      const eligibleCarers = feasibilityResults.filter(r => r.overallEligible);
-      const ineligibleCarers = feasibilityResults.filter(r => !r.overallEligible);
-
-      res.json({
-        success: true,
-        data: {
-          requestId,
-          requestDetails: {
-            subject: existingRequest.subject,
-            scheduledStartTime: existingRequest.scheduledStartTime,
-            scheduledEndTime: existingRequest.scheduledEndTime,
-            estimatedDuration: existingRequest.estimatedDuration,
-            requiredSkills,
-            requirements
-          },
-          summary: {
-            totalCarers: allCarers.length,
-            eligibleCarers: eligibleCarers.length,
-            ineligibleCarers: ineligibleCarers.length,
-            alternativeOptions: alternativeOptions.length,
-            checkedSchedule: includeScheduleCheck === 'true'
-          },
-          eligibleCarers,
-          ineligibleCarers,
-          alternativeOptions: alternativeOptions.slice(0, 20) // Limit to top 20 alternatives
-        },
-        message: `Found ${eligibleCarers.length} eligible carers and ${alternativeOptions.length} alternative options out of ${allCarers.length} total carers`
-      });
-
-    } catch (error) {
-      logServiceError('Request', 'checkRequestFeasibility', error, { requestId: req.params.id });
-      res.status(500).json({
-        success: false,
-        error: 'Failed to check request feasibility'
-      });
-    }
-  };
+    };
 
   /**
    * Helper method to check if carer skills match requirements
@@ -1616,4 +1582,334 @@ updateRequest = async (req: Request, res: Response): Promise<void> => {
       res.status(500).json({ success: false, error: 'Failed to decline request' });
     }
   };
+
+  /**
+ * Pre-filter carers with cheap checks before detailed eligibility
+ */
+private preFilterCarers(carers: any[], visit: any): any[] {
+  return carers.filter(carer => {
+    // 1. Quick employment check
+    const employmentCheck = this.checkEmploymentStatus(carer, visit.scheduledStartTime);
+    if (!employmentCheck.isEmployed) {
+      return false;
+    }
+    
+    // 2. Quick geographic check (if cluster-based)
+    if (visit.clusterId && carer.profile?.clusterId) {
+      // Only include carers from same or nearby clusters
+      // For now, we'll be permissive since we don't have distance data
+      // In production, you'd check cluster distance here
+      return true;
+    }
+    
+    return true;
+  });
+}
+
+/**
+ * Check individual carer eligibility with scoring
+ */
+/**
+   * Check individual carer eligibility with scoring and Google Maps distance calculation
+   */
+  private async checkCarerEligibilityWithScore(
+    carer: any, 
+    visit: any,
+    authToken: string
+  ): Promise<any> {
+    let score = 0;
+    
+    // 0. Employment status (blocking)
+    const employmentCheck = this.checkEmploymentStatus(carer, visit.scheduledStartTime);
+    if (!employmentCheck.isEmployed) {
+      return {
+        carerId: carer.id,
+        carerName: `${carer.first_name || 'Unknown'} ${carer.last_name || 'Carer'}`,
+        email: carer.email,
+        overallEligible: false,
+        score: 0,
+        employment: employmentCheck,
+        skillsMatch: { hasSomeRequired: false, missingSkills: [], matchingSkills: [], requirementsMatch: false },
+        availability: { isAvailable: false, conflicts: ['Not employed during visit time'], suggestions: [] }
+      };
+    }
+    
+    // 1. Skills match (40 points)
+    const carerSkills = carer.profile?.skill_details || [];
+    const requiredSkills = (visit as any).requiredSkills || [];
+    const requirements = visit.requirements || '';
+    const skillsMatch = this.checkSkillsMatch(carerSkills, requiredSkills, requirements);
+    
+    if (skillsMatch.hasSomeRequired) {
+      score += 40;
+    }
+    
+    // 2. Availability check (20 points)
+    const requestStartTime = visit.scheduledStartTime!;
+    const requestEndTime = visit.scheduledEndTime ||
+      new Date(requestStartTime.getTime() + (visit.estimatedDuration || 60) * 60 * 1000);
+    const availabilityRequirements = (visit as any).availabilityRequirements;
+    
+    const availabilityCheck = this.checkCarerAvailability(
+      carer,
+      requestStartTime,
+      requestEndTime,
+      availabilityRequirements
+    );
+    
+    if (availabilityCheck.isAvailable) {
+      score += 20;
+    }
+    
+    // 3. ENHANCED DISTANCE CALCULATION (25 points max) - USING GOOGLE MAPS API
+    let distanceBonus = 0;
+    let distanceInfo = null;
+
+    try {
+      // Extract carer and visit location data
+      const carerAddress = carer.profile?.street || carer.profile?.address || '';
+      const carerPostcode = carer.profile?.zip_code || carer.profile?.postcode || '';
+      const carerCity = carer.profile?.city || '';
+      const requestAddress = visit.address || '';
+      const requestPostcode = visit.postcode || '';
+
+      if (carerPostcode && requestPostcode) {
+        logger.info(`Calculating distance for carer ${carer.id} to visit ${visit.id}`, {
+          carerPostcode,
+          requestPostcode,
+          hasCarerAddress: !!carerAddress,
+          hasRequestAddress: !!requestAddress
+        });
+
+        // Use Enhanced Travel Service for accurate Google Maps calculation
+        const travelRequest = {
+          from: {
+            address: carerAddress ? `${carerAddress}, ${carerCity}` : undefined,
+            postcode: carerPostcode
+          },
+          to: {
+            address: requestAddress || undefined,
+            postcode: requestPostcode
+          },
+          mode: 'driving' as const,
+          forceRefresh: false // Use cache if available
+        };
+
+        const travelResult = await this.enhancedTravelService.calculateTravel(travelRequest);
+
+        // Extract distance and travel time from Google Maps result
+        const distanceKm = travelResult.distance.kilometers;
+        const baseTravelTimeMinutes = travelResult.duration.minutes;
+        const trafficTimeMinutes = travelResult.trafficDuration?.minutes || baseTravelTimeMinutes;
+
+        // Calculate buffer time for parking, preparation, etc.
+        const bufferMinutes = Math.min(Math.max(Math.round(distanceKm * 1.5), 3), 10);
+        const totalTravelTime = trafficTimeMinutes + bufferMinutes;
+
+        // Enhanced distance bonus with granular scoring (25 points max)
+        if (distanceKm <= 2) {
+          distanceBonus = 25; // Excellent - Very close
+        } else if (distanceKm <= 4) {
+          distanceBonus = 22; // Excellent - Close
+        } else if (distanceKm <= 6) {
+          distanceBonus = 19; // Very good
+        } else if (distanceKm <= 8) {
+          distanceBonus = 16; // Good
+        } else if (distanceKm <= 10) {
+          distanceBonus = 13; // Acceptable
+        } else if (distanceKm <= 15) {
+          distanceBonus = 10; // Moderate
+        } else if (distanceKm <= 20) {
+          distanceBonus = 6; // Marginal
+        } else if (distanceKm <= 25) {
+          distanceBonus = 3; // Poor but possible
+        } else if (distanceKm <= 30) {
+          distanceBonus = 1; // Very poor
+        } else {
+          distanceBonus = 0; // Too far
+        }
+
+        distanceInfo = {
+          method: 'google_maps',
+          precisionLevel: travelResult.precisionLevel,
+          carerLocation: {
+            address: carerAddress?.substring(0, 50),
+            postcode: carerPostcode,
+            city: carerCity,
+            geocoded: travelResult.from.geocoded?.substring(0, 50),
+            coordinates: travelResult.from.coordinates
+          },
+          visitLocation: {
+            address: requestAddress?.substring(0, 50),
+            postcode: requestPostcode,
+            geocoded: travelResult.to.geocoded?.substring(0, 50),
+            coordinates: travelResult.to.coordinates
+          },
+          distanceKm: Math.round(distanceKm * 10) / 10,
+          distanceMeters: travelResult.distance.meters,
+          travelTimeMinutes: trafficTimeMinutes,
+          bufferMinutes,
+          totalTravelTime,
+          trafficAware: !!travelResult.trafficDuration,
+          estimatedSpeedKmh: Math.round((distanceKm / (trafficTimeMinutes / 60)) * 10) / 10,
+          bonus: distanceBonus,
+          feasibility: distanceKm <= 30 ? 'feasible' : 'not_feasible',
+          cached: travelResult.cached,
+          calculatedAt: travelResult.calculatedAt,
+          warnings: travelResult.warnings || []
+        };
+
+        score += distanceBonus;
+
+        logger.info(`Distance calculated successfully for carer ${carer.id}`, {
+          distanceKm,
+          travelTimeMinutes: trafficTimeMinutes,
+          bonus: distanceBonus,
+          cached: travelResult.cached
+        });
+
+      } else {
+        logger.warn('Missing location data for distance calculation', {
+          carerId: carer.id,
+          hasCarerPostcode: !!carerPostcode,
+          hasRequestPostcode: !!requestPostcode,
+          visitId: visit.id
+        });
+      }
+    } catch (error) {
+      logger.error('Failed to calculate distance using Enhanced Travel Service', {
+        error: error instanceof Error ? error.message : String(error),
+        carerId: carer.id,
+        visitId: visit.id,
+        carerPostcode: carer.profile?.zip_code || carer.profile?.postcode,
+        requestPostcode: visit.postcode
+      });
+      
+      // Fallback: Try cluster-based distance if available
+      if (!distanceInfo && visit.clusterId && carer.profile?.clusterId) {
+        if (visit.clusterId === carer.profile.clusterId) {
+          distanceBonus = 15; // Same cluster fallback
+          score += distanceBonus;
+          distanceInfo = {
+            method: 'cluster_fallback',
+            sameCluster: true,
+            bonus: distanceBonus,
+            feasibility: 'feasible',
+            note: 'Distance calculation failed, using cluster proximity'
+          };
+        }
+      }
+    }
+    
+    // 4. Continuity of care (10 points)
+    const continuityBonus = await this.calculateContinuityBonus(carer.id, visit);
+    score += continuityBonus;
+    
+    // 5. Workload balancing (deduct up to 20 points for overload)
+    const weeklyHours = await this.getCarerWeeklyHours(carer.id, visit.scheduledStartTime);
+    const workloadPenalty = this.calculateWorkloadPenalty(weeklyHours);
+    score -= workloadPenalty;
+    
+    const overallEligible = employmentCheck.isEmployed && 
+                            skillsMatch.hasSomeRequired && 
+                            availabilityCheck.isAvailable;
+    
+    return {
+      carerId: carer.id,
+      carerName: `${carer.first_name || 'Unknown'} ${carer.last_name || 'Carer'}`,
+      email: carer.email,
+      employment: employmentCheck,
+      skills: carerSkills,
+      skillsMatch,
+      availability: availabilityCheck,
+      distance: distanceInfo,
+      cluster: {
+        carerId: carer.id,
+        carerClusterId: carer.profile?.clusterId,
+        visitClusterId: visit.clusterId,
+        sameCluster: visit.clusterId === carer.profile?.clusterId
+      },
+      continuity: {
+        bonus: continuityBonus,
+        previousVisits: continuityBonus > 0 ? Math.floor(continuityBonus / 5) : 0
+      },
+      workload: {
+        currentWeeklyHours: weeklyHours,
+        utilizationPercent: (weeklyHours / 48) * 100,
+        penalty: workloadPenalty
+      },
+      score,
+      overallEligible
+    };
+  }
+
+/**
+ * Calculate continuity bonus - carers who have served this client before
+ */
+private async calculateContinuityBonus(carerId: string, visit: any): Promise<number> {
+  try {
+    // Check if carer has completed visits for this client before
+    const previousVisits = await this.prisma.visit.count({
+      where: {
+        assignedCarerId: carerId,
+        requestorEmail: visit.requestorEmail,
+        status: 'COMPLETED'
+      }
+    });
+    
+    if (previousVisits > 0) {
+      return Math.min(previousVisits * 5, 20); // Max 20 points for continuity
+    }
+  } catch (error) {
+    logger.warn('Failed to calculate continuity bonus', { error, carerId, visitId: visit.id });
+  }
+  
+  return 0;
+}
+
+/**
+ * Get carer's weekly hours
+ */
+private async getCarerWeeklyHours(carerId: string, referenceDate: Date): Promise<number> {
+  try {
+    const weekStart = this.getWeekStart(referenceDate);
+    const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+    
+    const assignments = await this.prisma.assignment.findMany({
+      where: {
+        carerId,
+        scheduledTime: { gte: weekStart, lt: weekEnd },
+        status: { in: ['ACCEPTED', 'COMPLETED'] }
+      },
+      include: { visit: true }
+    });
+    
+    return assignments.reduce((total, a) => {
+      return total + ((a.visit.estimatedDuration || 60) / 60);
+    }, 0);
+  } catch (error) {
+    logger.warn('Failed to get carer weekly hours', { error, carerId });
+    return 0;
+  }
+}
+
+/**
+ * Get start of week for a given date
+ */
+private getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+  return new Date(d.setDate(diff));
+}
+
+/**
+ * Calculate workload penalty based on weekly hours
+ */
+private calculateWorkloadPenalty(weeklyHours: number): number {
+  if (weeklyHours >= 45) return 20; // Near WTD limit
+  if (weeklyHours >= 40) return 10; // High workload
+  if (weeklyHours >= 35) return 5;  // Moderate workload
+  return 0; // Low workload - no penalty
+}
 }

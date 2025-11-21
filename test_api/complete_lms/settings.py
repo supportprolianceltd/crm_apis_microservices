@@ -2,6 +2,7 @@
 import django.http.request
 from django.db.backends.signals import connection_created
 import os
+from datetime import timedelta
 from pathlib import Path
 import environ
 from django.core.exceptions import ImproperlyConfigured
@@ -12,27 +13,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-PUBLIC_SCHEMA_NAME = 'public'
-PUBLIC_SCHEMA_URLCONF = 'complete_lms.urls_public'
+DATABASE_ROUTERS = []
 
-SHARED_APPS = [
-    'django_tenants',
-    'shared',
+INSTALLED_APPS = [
     'django.contrib.contenttypes',
-]
-
-TENANT_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
+    'corsheaders',
     'django.contrib.auth',
     'django.contrib.staticfiles',
-    'corsheaders',
     'rest_framework',
     'drf_spectacular',
     'drf_yasg',
     'django_filters',
-    'django_extensions',
-    'auditlog',
     'courses',
     'activitylog',
     'schedule',
@@ -43,14 +36,9 @@ TENANT_APPS = [
     'advert',
     'ai_chat',
     'carts',
+    'auditlog',
+    'django_extensions',
 ]
-
-INSTALLED_APPS = SHARED_APPS + TENANT_APPS
-
-TENANT_MODEL = "shared.Tenant"
-TENANT_DOMAIN_MODEL = "shared.Domain"
-
-DATABASE_ROUTERS = ['django_tenants.routers.TenantSyncRouter']
 
 # drf-spectacular
 SPECTACULAR_SETTINGS = {
@@ -94,7 +82,7 @@ DATABASES = {
         'ENGINE': env('DB_ENGINE', default='django_tenants.postgresql_backend'),
         'NAME': env('DB_NAME', default='multi_tenant_lms'),
         'USER': env('DB_USER', default='postgres'),
-        'PASSWORD': env('DB_PASSWORD', default='qwerty'),
+        'PASSWORD': env('DB_PASSWORD'),
         'HOST': env('DB_HOST', default='lms-db'),
         'PORT': env('DB_PORT', default='5432'),
         'CONN_MAX_AGE': 60,
@@ -105,6 +93,7 @@ if not DATABASES['default']['ENGINE']:
     raise ImproperlyConfigured("DATABASES['default']['ENGINE'] must be set.")
 
 MIDDLEWARE = [
+    'complete_lms.middleware.DatabaseConnectionMiddleware',
     'complete_lms.middleware.MicroserviceRS256JWTMiddleware',
     'complete_lms.middleware.CustomTenantSchemaMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -133,14 +122,21 @@ REST_FRAMEWORK = {
     ],
 }
 
+# SIMPLE_JWT = {
+#     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
+#     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+#     "AUTH_HEADER_TYPES": ("Bearer",),
+#     "BLACKLIST_AFTER_ROTATION": True,
+# }
+
 # External Services
 AUTH_SERVICE_URL = env('AUTH_SERVICE_URL', default='http://auth-service:8001')
 JOB_APPLICATIONS_URL = env('JOB_APPLICATIONS_URL', default='http://job-applications:8003')
 NOTIFICATIONS_SERVICE_URL = env('NOTIFICATIONS_SERVICE_URL', default='http://app:3001')
 
-SUPABASE_URL = env('SUPABASE_URL', default='')
-SUPABASE_KEY = env('SUPABASE_KEY', default='')
-SUPABASE_BUCKET = env('SUPABASE_BUCKET', default='')
+SUPABASE_URL = env('SUPABASE_URL')
+SUPABASE_KEY = env('SUPABASE_KEY')
+SUPABASE_BUCKET = env('SUPABASE_BUCKET')
 
 STORAGE_TYPE = env('STORAGE_TYPE', default='supabase')
 

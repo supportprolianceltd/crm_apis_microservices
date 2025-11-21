@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/tenant/', include('core.urls')),
     path('api/user/', include('users.urls')),
     path('api/reviews/', include('reviews.urls')),  # This should point to your reviews/urls.py
+    path('api/investments/', include('investments.urls')),
 
     # 2FA endpoints
     path('api/login/', LoginWith2FAView.as_view(), name='login_with_2fa'),

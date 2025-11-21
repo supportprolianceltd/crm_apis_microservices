@@ -131,6 +131,34 @@ class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
                 raise AuthenticationFailed("Public key not found.")
 
             payload = jwt.decode(token, public_key, algorithms=["RS256"])
+
+            # --- Normalize common claim names so views can rely on a single shape ---
+            # Ensure tenant_unique_id exists (views expect this key)
+            if 'tenant_unique_id' not in payload or not payload.get('tenant_unique_id'):
+                # Fall back to alternative names that tokens might contain
+                fallback_tenant = payload.get('tenant_id') or payload.get('tenant_uuid') or payload.get('tenant')
+                if fallback_tenant is not None:
+                    payload['tenant_unique_id'] = str(fallback_tenant)
+
+            # Ensure there's a user object with an id (many tokens put id at top-level)
+            if 'user' not in payload or not isinstance(payload.get('user'), dict):
+                user_obj = {}
+                # Possible top-level fields
+                user_id = payload.get('user_id') or payload.get('id') or None
+                if user_id is not None:
+                    user_obj['id'] = user_id
+                # copy some common user fields if present
+                for k in ('email', 'first_name', 'last_name', 'username', 'job_role', 'branch'):
+                    if payload.get(k) is not None:
+                        user_obj[k] = payload.get(k)
+                # attach if we collected any info
+                if user_obj:
+                    payload['user'] = user_obj
+
+            # Tenant schema fallback: some tokens use 'tenant_schema' already, keep as-is
+            if 'tenant_schema' not in payload and payload.get('tenant'):
+                payload['tenant_schema'] = payload.get('tenant')
+
             request.jwt_payload = payload
             request.user = SimpleUser(payload)  # Set custom user
             logger.info(f"Set request.user: {request.user}, is_authenticated={request.user.is_authenticated}")

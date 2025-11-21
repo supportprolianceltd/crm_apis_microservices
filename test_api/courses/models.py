@@ -60,7 +60,8 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, blank=True)
     description = models.TextField(blank=True)
-    created_by_id = models.CharField(max_length=36, blank=True, null=True)  # From auth-service
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Categories"
@@ -82,7 +83,7 @@ class Category(models.Model):
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
             tenant_name=self.tenant_name,
-            user_id=self.created_by_id,
+            user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='category_created' if is_new else 'category_updated',
             details=f"Category {self.name} {'created' if is_new else 'updated'}",
             status='success'
@@ -94,13 +95,15 @@ class Category(models.Model):
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
             tenant_name=tenant_name,
-            user_id=self.created_by_id,
+            user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='category_deleted',
             details=f"Category {self.name} deleted",
             status='success'
         )
         logger.info(f"[Tenant {self.tenant_id}] Category {self.id} deleted: {self.name}")
         super().delete(*args, **kwargs)
+
+
 
 class Course(models.Model):
     STATUS_CHOICES = [
@@ -150,7 +153,8 @@ class Course(models.Model):
     thumbnail_url = models.CharField(max_length=1024, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by_id = models.CharField(max_length=36, blank=True, null=True)  # From auth-service
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
     learning_outcomes = models.JSONField(default=list)
     prerequisites = models.JSONField(default=list)
     completion_hours = models.PositiveIntegerField(default=0, help_text="Estimated hours to complete the course")
@@ -163,7 +167,7 @@ class Course(models.Model):
         unique_together = ['tenant_id', 'code']
         indexes = [
             models.Index(fields=['tenant_id', 'slug'], name='idx_crs_tenant_slug'),
-            models.Index(fields=['created_by_id'], name='idx_crs_created_by'),
+            # models.Index(fields=['created_by_id'], name='idx_crs_created_by'),
         ]
 
     def __str__(self):
@@ -201,7 +205,7 @@ class Course(models.Model):
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
             tenant_name=self.tenant_name,
-            user_id=self.created_by_id,
+            user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='course_created' if is_new else 'course_updated',
             details=f"Course {self.title} {'created' if is_new else 'updated'}",
             status='success'
@@ -213,7 +217,7 @@ class Course(models.Model):
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
             tenant_name=tenant_name,
-            user_id=self.created_by_id,
+            user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='course_deleted',
             details=f"Course {self.title} deleted",
             status='success'
@@ -232,6 +236,8 @@ class Module(models.Model):
     description = models.TextField(blank=True)
     order = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ['order']
@@ -291,6 +297,8 @@ class Lesson(models.Model):
     content_text = models.TextField(blank=True)
     order = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ['order']
@@ -356,6 +364,8 @@ class Resource(models.Model):
     file = models.FileField(upload_to=resource_file_path, blank=True, null=True)
     file_url = models.CharField(max_length=1024, blank=True, null=True)
     order = models.PositiveIntegerField(default=0)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ['order']
@@ -400,6 +410,8 @@ class Instructor(models.Model):
     bio = models.TextField(blank=True)
     expertise = models.ManyToManyField(Category, blank=True)
     is_active = models.BooleanField(default=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -449,6 +461,8 @@ class CourseInstructor(models.Model):
     assignment_type = models.CharField(max_length=20, choices=ASSIGNMENT_CHOICES, default='all')
     is_active = models.BooleanField(default=True)
     modules = models.ManyToManyField(Module, blank=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         unique_together = ['course', 'instructor_id']
@@ -504,6 +518,8 @@ class CertificateTemplate(models.Model):
     require_all_modules = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         unique_together = ('course',)
@@ -566,6 +582,8 @@ class SCORMxAPISettings(models.Model):
     track_progress = models.BooleanField(default=True)
     package = models.FileField(upload_to=scorm_package_path, null=True, blank=True, max_length=255)
     package_url = models.CharField(max_length=1024, blank=True, null=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -612,6 +630,8 @@ class SCORMTracking(models.Model):
     completed = models.BooleanField(default=False)
     raw_data = models.JSONField(default=dict, blank=True)
     last_updated = models.DateTimeField(auto_now=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         unique_together = ['tenant_id', 'user_id', 'course']
@@ -661,7 +681,9 @@ class LearningPath(models.Model):
     order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by_id = models.CharField(max_length=36, blank=True, null=True)  # From auth-service
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
+    updated_by_id = models.CharField(max_length=36, blank=True, null=True)  # From auth-service
 
     class Meta:
         ordering = ['order']
@@ -680,7 +702,7 @@ class LearningPath(models.Model):
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
             tenant_name=self.tenant_name,
-            user_id=self.created_by_id,
+            user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='learningpath_created' if is_new else 'learningpath_updated',
             details=f"LearningPath {self.title} {'created' if is_new else 'updated'}",
             status='success'
@@ -692,7 +714,7 @@ class LearningPath(models.Model):
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
             tenant_name=tenant_name,
-            user_id=self.created_by_id,
+            user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='learningpath_deleted',
             details=f"LearningPath {self.title} deleted",
             status='success'
@@ -709,6 +731,8 @@ class LessonProgress(models.Model):
     is_completed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
     started_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         unique_together = ['tenant_id', 'user_id', 'lesson']
@@ -757,6 +781,8 @@ class Enrollment(models.Model):
     started_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         unique_together = ['tenant_id', 'user_id', 'course']
@@ -814,6 +840,8 @@ class Certificate(models.Model):
     certificate_id = models.CharField(max_length=50)
     pdf_file = models.FileField(null=True, blank=True, max_length=255)
     pdf_file_url = models.CharField(max_length=1024, blank=True, null=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -863,6 +891,8 @@ class CourseRating(models.Model):
     review = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         unique_together = ['tenant_id', 'user_id', 'course']
@@ -913,6 +943,8 @@ class Badge(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -965,6 +997,8 @@ class UserPoints(models.Model):
         ('discussion', 'Discussion Participation'),
     ])
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         unique_together = ['tenant_id', 'user_id', 'course', 'activity_type']
@@ -1011,6 +1045,8 @@ class UserBadge(models.Model):
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
     awarded_at = models.DateTimeField(auto_now_add=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         unique_together = ['tenant_id', 'user_id', 'badge', 'course']
@@ -1058,6 +1094,8 @@ class FAQ(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ['order', 'created_at']
@@ -1105,8 +1143,9 @@ class Assignment(models.Model):
     instructions_file = models.FileField(upload_to=assignment_instructions_path, blank=True, null=True)
     instructions_file_url = models.CharField(max_length=1024, blank=True, null=True)
     due_date = models.DateTimeField()
-    created_by_id = models.CharField(max_length=36, blank=True, null=True)  # From auth-service
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -1122,7 +1161,7 @@ class Assignment(models.Model):
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
             tenant_name=self.course.tenant_name or get_tenant_name(self.course.tenant_id),
-            user_id=self.created_by_id,
+            user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='assignment_created' if is_new else 'assignment_updated',
             details=f"Assignment {self.title} for course {self.course.title} {'created' if is_new else 'updated'}",
             status='success'
@@ -1134,7 +1173,7 @@ class Assignment(models.Model):
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
             tenant_name=tenant_name,
-            user_id=self.created_by_id,
+            user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='assignment_deleted',
             details=f"Assignment {self.title} for course {self.course.title} deleted",
             status='success'
@@ -1155,6 +1194,8 @@ class AssignmentSubmission(models.Model):
     grade = models.PositiveIntegerField(null=True, blank=True)
     feedback = models.TextField(blank=True)
     is_graded = models.BooleanField(default=False)
+    created_by = models.JSONField(null=True, blank=True)
+    last_edited_by = models.JSONField(null=True, blank=True)
 
     class Meta:
         unique_together = ['tenant_id', 'student_id', 'assignment']

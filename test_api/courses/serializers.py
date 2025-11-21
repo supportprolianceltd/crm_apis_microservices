@@ -84,33 +84,39 @@ class FAQSerializer(serializers.ModelSerializer):
         )
         return instance
 
+
 class CategorySerializer(serializers.ModelSerializer):
-    tenant_id = serializers.CharField(write_only=True)
+    tenant_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     tenant_name = serializers.CharField(read_only=True)
-    created_by_id = serializers.CharField(write_only=True)
     created_by_name = serializers.CharField(read_only=True)
     course_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Category
-        fields = ['id', 'tenant_id', 'tenant_name', 'name', 'slug', 'description', 'created_by_id', 'created_by_name', 'course_count']
-        read_only_fields = ['slug', 'created_by_name', 'course_count', 'tenant_name']
+        fields = ['id', 'tenant_id', 'tenant_name', 'name', 'slug', 'description', 'created_by_name', 'created_by', 'last_edited_by', 'course_count']
+        read_only_fields = ['slug', 'created_by_name', 'created_by', 'last_edited_by', 'course_count', 'tenant_name']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
-        validate_user_id(attrs['created_by_id'], attrs['tenant_id'])
+        # Get tenant info from context (set by the view)
+        request = self.context.get('request')
+        if request and hasattr(request, 'jwt_payload'):
+            # Always set tenant info from JWT, regardless of what's in the request data
+            attrs['tenant_id'] = request.jwt_payload.get('tenant_id')
+            attrs['tenant_name'] = request.jwt_payload.get('tenant_name')
+        elif 'tenant_id' not in attrs:
+            # If no JWT and no tenant_id provided, raise error
+            raise serializers.ValidationError("Tenant information is required")
         return attrs
 
     def create(self, validated_data):
-        tenant_id = validated_data.get('tenant_id')
+        tenant_id = validated_data.pop('tenant_id')
         tenant_name = validated_data.pop('tenant_name')
-        created_by_id = validated_data.get('created_by_id')
         validated_data['slug'] = slugify(validated_data['name'])
         instance = super().create(validated_data)
         ActivityLog.objects.create(
             tenant_id=tenant_id,
             tenant_name=tenant_name,
-            user_id=created_by_id,
+            user_id=instance.created_by.get('id') if instance.created_by else None,
             activity_type='category_created',
             details=f"Category {instance.name} created",
             status='success'
@@ -118,37 +124,28 @@ class CategorySerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        tenant_id = validated_data.get('tenant_id')
-        tenant_name = validated_data.pop('tenant_name')
-        created_by_id = validated_data.get('created_by_id')
+        tenant_id = validated_data.pop('tenant_id', None)
+        tenant_name = validated_data.pop('tenant_name', None)
         if 'name' in validated_data:
             validated_data['slug'] = slugify(validated_data['name'])
         instance = super().update(instance, validated_data)
-        ActivityLog.objects.create(
-            tenant_id=tenant_id,
-            tenant_name=tenant_name,
-            user_id=created_by_id,
-            activity_type='category_updated',
-            details=f"Category {instance.name} updated",
-            status='success'
-        )
+        if tenant_id and tenant_name:
+            ActivityLog.objects.create(
+                tenant_id=tenant_id,
+                tenant_name=tenant_name,
+                user_id=instance.last_edited_by.get('id') if instance.last_edited_by else None,
+                activity_type='category_updated',
+                details=f"Category {instance.name} updated",
+                status='success'
+            )
         return instance
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        if instance.created_by_id:
-            try:
-                response = requests.get(
-                    f"{settings.AUTH_SERVICE_URL}/api/user/users/{instance.created_by_id}/",
-                    headers={"X-Tenant-ID": instance.tenant_id},
-                    timeout=5
-                )
-                if response.status_code == 200:
-                    user_data = response.json()
-                    representation['created_by_name'] = user_data.get('username', '')
-            except requests.RequestException as e:
-                logger.error(f"Failed to fetch created_by_name for user {instance.created_by_id}: {str(e)}")
-                representation['created_by_name'] = ''
+        if instance.created_by:
+            representation['created_by_name'] = instance.created_by.get('username', '')
+        else:
+            representation['created_by_name'] = ''
         return representation
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -166,7 +163,6 @@ class LessonSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'tenant_name', 'content_file_url']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
         lesson_type = attrs.get('lesson_type', self.instance.lesson_type if self.instance else None)
         module = attrs.get('module', self.instance.module if self.instance else None)
         order = attrs.get('order', None)
@@ -258,7 +254,6 @@ class ModuleSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -300,7 +295,6 @@ class ResourceSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'file_url']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -410,7 +404,6 @@ class CertificateTemplateSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'logo_url', 'signature_url']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -512,7 +505,6 @@ class SCORMxAPISettingsSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'package_url']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -577,7 +569,6 @@ class SCORMxAPISettingsSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     tenant_id = serializers.CharField(write_only=True)
     tenant_name = serializers.CharField(read_only=True)
-    created_by_id = serializers.CharField(write_only=True)
     created_by_name = serializers.CharField(read_only=True)
     thumbnail_url = serializers.CharField(read_only=True)
     scorm_settings = SCORMxAPISettingsSerializer(read_only=True)
@@ -608,15 +599,13 @@ class CourseSerializer(serializers.ModelSerializer):
             'id', 'tenant_id', 'tenant_name', 'title', 'learning_outcomes', 'prerequisites', 'slug', 'code',
             'description', 'is_free', 'short_description', 'category', 'category_id', 'level', 'status',
             'duration', 'price', 'discount_price', 'currency', 'thumbnail', 'thumbnail_url', 'faq_count',
-            'faqs', 'created_at', 'updated_at', 'created_by_id', 'created_by_name', 'completion_hours',
+            'faqs', 'created_at', 'updated_at', 'created_by_name', 'created_by', 'last_edited_by', 'completion_hours',
             'current_price', 'course_type', 'modules', 'resources', 'course_instructors', 'certificate_settings',
             'scorm_settings', 'scorm_launch_path', 'total_enrollments'
         ]
-        read_only_fields = ['tenant_name', 'created_by_name', 'thumbnail_url', 'scorm_launch_path']
+        read_only_fields = ['tenant_name', 'created_by_name', 'created_by', 'last_edited_by', 'thumbnail_url', 'scorm_launch_path']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
-        validate_user_id(attrs['created_by_id'], attrs['tenant_id'])
         return attrs
 
     def get_course_instructors(self, obj):
@@ -641,19 +630,10 @@ class CourseSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['thumbnail_url'] = instance.thumbnail_url or ''
-        if instance.created_by_id:
-            try:
-                response = requests.get(
-                    f"{settings.AUTH_SERVICE_URL}/api/user/users/{instance.created_by_id}/",
-                    headers={"X-Tenant-ID": instance.tenant_id},
-                    timeout=5
-                )
-                if response.status_code == 200:
-                    user_data = response.json()
-                    representation['created_by_name'] = user_data.get('username', '')
-            except requests.RequestException as e:
-                logger.error(f"Failed to fetch created_by_name for user {instance.created_by_id}: {str(e)}")
-                representation['created_by_name'] = ''
+        if instance.created_by:
+            representation['created_by_name'] = instance.created_by.get('username', '')
+        else:
+            representation['created_by_name'] = ''
         if 'learning_outcomes' in representation:
             representation['learning_outcomes'] = self.flatten_array(representation['learning_outcomes'])
         if 'prerequisites' in representation:
@@ -681,7 +661,7 @@ class CourseSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tenant_id = validated_data.pop('tenant_id')
         tenant_name = validated_data.pop('tenant_name')
-        created_by_id = validated_data.pop('created_by_id')
+      
         thumbnail_file = validated_data.pop('thumbnail', None)
         if 'slug' not in validated_data or not validated_data['slug']:
             validated_data['slug'] = slugify(validated_data['title'])
@@ -697,7 +677,7 @@ class CourseSerializer(serializers.ModelSerializer):
                 ActivityLog.objects.create(
                     tenant_id=tenant_id,
                     tenant_name=tenant_name,
-                    user_id=created_by_id,
+                   
                     activity_type='course_created',
                     details=f"Course {instance.title} created",
                     status='success'
@@ -738,10 +718,13 @@ class CourseSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Failed to upload thumbnail")
         return instance
 
+
+
+
+
 class LearningPathSerializer(serializers.ModelSerializer):
     tenant_id = serializers.CharField(write_only=True)
     tenant_name = serializers.CharField(read_only=True)
-    created_by_id = serializers.CharField(write_only=True)
     created_by_name = serializers.CharField(read_only=True)
     courses = CourseSerializer(many=True, read_only=True)
     course_ids = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all(), many=True, source='courses', write_only=True)
@@ -750,13 +733,11 @@ class LearningPathSerializer(serializers.ModelSerializer):
         model = LearningPath
         fields = [
             'id', 'tenant_id', 'tenant_name', 'title', 'description', 'courses', 'course_ids',
-            'is_active', 'order', 'created_at', 'updated_at', 'created_by_id', 'created_by_name'
+            'is_active', 'order', 'created_at', 'updated_at', 'created_by_name', 'created_by', 'last_edited_by'
         ]
-        read_only_fields = ['tenant_name', 'created_by_name']
+        read_only_fields = ['tenant_name', 'created_by_name', 'created_by', 'last_edited_by']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
-        validate_user_id(attrs['created_by_id'], attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -791,20 +772,12 @@ class LearningPathSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        if instance.created_by_id:
-            try:
-                response = requests.get(
-                    f"{settings.AUTH_SERVICE_URL}/api/user/users/{instance.created_by_id}/",
-                    headers={"X-Tenant-ID": instance.tenant_id},
-                    timeout=5
-                )
-                if response.status_code == 200:
-                    user_data = response.json()
-                    representation['created_by_name'] = user_data.get('username', '')
-            except requests.RequestException as e:
-                logger.error(f"Failed to fetch created_by_name for user {instance.created_by_id}: {str(e)}")
-                representation['created_by_name'] = ''
+        if instance.created_by:
+            representation['created_by_name'] = instance.created_by.get('username', '')
+        else:
+            representation['created_by_name'] = ''
         return representation
+
 
 class EnrollmentCourseSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
@@ -830,8 +803,6 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'user_name', 'enrolled_at']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
-        validate_user_id(attrs['user_id'], attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -889,8 +860,6 @@ class BulkEnrollmentSerializer(serializers.Serializer):
     course_id = serializers.IntegerField(required=False)
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
-        validate_user_id(attrs['user_id'], attrs['tenant_id'])
         if 'course_id' in attrs and not Course.objects.filter(id=attrs['course_id'], status='Published').exists():
             raise serializers.ValidationError("Course does not exist or is not published")
         return attrs
@@ -928,7 +897,6 @@ class CertificateSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'user_name', 'issued_at', 'certificate_id', 'pdf_file_url']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -1019,8 +987,6 @@ class CourseRatingSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'user_name', 'created_at', 'updated_at']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
-        validate_user_id(attrs['user_id'], attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -1084,7 +1050,6 @@ class BadgeSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'image_url', 'created_at', 'updated_at']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -1161,8 +1126,6 @@ class UserPointsSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'user_name', 'created_at']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
-        validate_user_id(attrs['user_id'], attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -1228,8 +1191,6 @@ class UserBadgeSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'user_name', 'awarded_at']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
-        validate_user_id(attrs['user_id'], attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):
@@ -1282,7 +1243,7 @@ class UserBadgeSerializer(serializers.ModelSerializer):
 class AssignmentSerializer(serializers.ModelSerializer):
     tenant_id = serializers.CharField(write_only=True)
     tenant_name = serializers.CharField(read_only=True)
-    created_by_id = serializers.CharField(write_only=True)
+    created_by_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     created_by_name = serializers.CharField(read_only=True)
     course_name = serializers.CharField(source='course.title', read_only=True)
     module_name = serializers.CharField(source='module.title', read_only=True, allow_null=True)
@@ -1292,14 +1253,12 @@ class AssignmentSerializer(serializers.ModelSerializer):
         model = Assignment
         fields = [
             'id', 'tenant_id', 'tenant_name', 'course', 'module', 'title', 'description',
-            'instructions_file', 'instructions_file_url', 'due_date', 'created_by_id',
-            'created_by_name', 'created_at', 'course_name', 'module_name'
+            'instructions_file', 'instructions_file_url', 'due_date',
+            'created_by_name', 'created_by', 'last_edited_by', 'created_at', 'course_name', 'module_name'
         ]
-        read_only_fields = ['tenant_name', 'created_by_name', 'created_at', 'course_name', 'module_name', 'instructions_file_url']
+        read_only_fields = ['tenant_name', 'created_by_name', 'created_by', 'last_edited_by', 'created_at', 'course_name', 'module_name', 'instructions_file_url']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
-        validate_user_id(attrs['created_by_id'], attrs['tenant_id'])
         course = attrs.get('course', self.instance.course if self.instance else None)
         module = attrs.get('module', self.instance.module if self.instance else None)
         title = attrs.get('title', self.instance.title if self.instance else None)
@@ -1321,7 +1280,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
             raise serializers.ValidationError("An assignment with this title already exists for this module/course.")
-        
+
         return attrs
 
     def create(self, validated_data):
@@ -1383,19 +1342,10 @@ class AssignmentSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['instructions_file_url'] = instance.instructions_file_url or ''
-        if instance.created_by_id:
-            try:
-                response = requests.get(
-                    f"{settings.AUTH_SERVICE_URL}/api/user/users/{instance.created_by_id}/",
-                    headers={"X-Tenant-ID": instance.course.tenant_id},
-                    timeout=5
-                )
-                if response.status_code == 200:
-                    user_data = response.json()
-                    representation['created_by_name'] = user_data.get('username', '')
-            except requests.RequestException as e:
-                logger.error(f"Failed to fetch created_by_name for user {instance.created_by_id}: {str(e)}")
-                representation['created_by_name'] = ''
+        if instance.created_by:
+            representation['created_by_name'] = instance.created_by.get('username', '')
+        else:
+            representation['created_by_name'] = ''
         return representation
 
 class AssignmentBriefSerializer(serializers.ModelSerializer):
@@ -1410,7 +1360,6 @@ class AssignmentBriefSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'course_name', 'module_name']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
         return attrs
 
 class AssignmentSubmissionSerializer(serializers.ModelSerializer):
@@ -1431,8 +1380,6 @@ class AssignmentSubmissionSerializer(serializers.ModelSerializer):
         read_only_fields = ['tenant_name', 'student_name', 'submitted_at', 'grade', 'feedback', 'is_graded', 'submission_file_url']
 
     def validate(self, attrs):
-        attrs['tenant_name'] = validate_tenant_id(attrs['tenant_id'])
-        validate_user_id(attrs['student_id'], attrs['tenant_id'])
         return attrs
 
     def create(self, validated_data):

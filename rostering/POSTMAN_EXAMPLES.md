@@ -688,6 +688,19 @@
 
 ### Check Request Feasibility
 **Purpose:** Analyzes which carers can handle a specific visit request based on skills, availability, and schedule compatibility. **Data Sources:** Queries auth service for carer profiles, checks skills matching against required skills, validates availability against request time, and optionally checks for schedule conflicts.
+
+**Eligibility Criteria:**
+The system evaluates carers using a comprehensive scoring algorithm (maximum 100 points) that considers multiple factors:
+
+- **Skills Match (30 points max):** Carers must possess required skills. Points awarded based on skill proficiency levels and match completeness.
+- **Availability (25 points max):** Must be available during the requested time slot. Points based on schedule compatibility and flexibility.
+- **Distance & Travel (20 points max):** Calculated using Google Maps API with traffic awareness. Shorter travel times receive higher scores, with bonuses for feasible routes.
+- **Cluster Proximity (10 points max):** Preference given to carers in the same geographic cluster as the visit location.
+- **Continuity (10 points max):** Bonus points for carers who have previously visited the same client, promoting relationship continuity.
+- **Workload Balance (5 points max):** Penalty applied for carers approaching weekly hour limits to ensure fair distribution.
+
+Carers must meet minimum thresholds in skills and availability to be considered eligible. Distance calculations use carer address/postcode data with precision levels (ADDRESS/POSTCODE). The system provides alternative scheduling options when primary time slots are unavailable.
+
 **Method:** GET
 **URL:** `http://localhost:9090/api/rostering/requests/REQ-20251106-97ZZF/feasibility?includeScheduleCheck=true`
 **Headers:** `Authorization: Bearer YOUR_JWT_TOKEN`
@@ -697,248 +710,334 @@
 {
   "success": true,
   "data": {
-    "requestId": "REQ-20251106-97ZZF",
+    "requestId": "REQ-20251117-Y3JSL",
     "requestDetails": {
       "subject": "Morning Dementia Care Support - Mr. Adewale Johnson",
       "scheduledStartTime": "2025-11-10T08:00:00.000Z",
       "scheduledEndTime": "2025-11-10T11:00:00.000Z",
       "estimatedDuration": 180,
-      "requiredSkills": [
-        "Dementia Care",
-        "Patient Hygiene Assistance",
-        "Medication Administration",
-        "First Aid & CPR"
-      ],
-      "requirements": "Carer must be experienced in dementia and personal care, have valid DBS, and be available weekday mornings."
+      "requiredSkills": [],
+      "requirements": "Carer must be experienced in dementia and personal care, have valid DBS, and be available weekday mornings. Patient can be resistant to care sometimes."
     },
     "summary": {
-      "totalCarers": 6,
-      "eligibleCarers": 1,
+      "totalCarers": 11,
+      "preFilteredCarers": 11,
+      "eligibleCarers": 6,
       "ineligibleCarers": 5,
-      "checkedSchedule": true
+      "alternativeOptions": 32,
+      "checkedSchedule": true,
+      "scoringUsed": true
     },
     "eligibleCarers": [
       {
-        "carerId": 50,
-        "carerName": "Jane Doe",
-        "email": "ekeneonwon@appbrew.com",
+        "carerId": 9,
+        "carerName": "David Rodriguez",
+        "email": "david.rodriguez@careagency.com",
+        "employment": {
+          "isEmployed": true,
+          "reason": ""
+        },
         "skills": [
           {
-            "id": 1,
-            "skill_name": "Patient Hygiene Assistance",
-            "proficiency_level": "expert",
-            "description": "Experienced in assisting elderly patients with bathing, grooming, and personal care routines.",
-            "acquired_date": "2010-01-01",
-            "years_of_experience": 15,
-            "certificate": null,
-            "certificate_url": null,
-            "last_updated_by_id": "2",
-            "last_updated_by": {
-              "id": 2,
-              "email": "support@appbrew.com",
-              "first_name": "Abib",
-              "last_name": "Achmed"
-            }
-          },
-          {
-            "id": 2,
-            "skill_name": "Medication Administration",
-            "proficiency_level": "advanced",
-            "description": "Trained and certified in safe administration of oral, topical, and injectable medications.",
-            "acquired_date": "2012-05-15",
-            "years_of_experience": 13,
-            "certificate": null,
-            "certificate_url": null,
-            "last_updated_by_id": "2",
-            "last_updated_by": {
-              "id": 2,
-              "email": "support@appbrew.com",
-              "first_name": "Abib",
-              "last_name": "Achmed"
-            }
-          },
-          {
-            "id": 3,
-            "skill_name": "First Aid & CPR",
-            "proficiency_level": "expert",
-            "description": "Certified in emergency first aid and cardiopulmonary resuscitation (CPR).",
-            "acquired_date": "2015-03-20",
-            "years_of_experience": 10,
-            "certificate": null,
-            "certificate_url": null,
-            "last_updated_by_id": "2",
-            "last_updated_by": {
-              "id": 2,
-              "email": "support@appbrew.com",
-              "first_name": "Abib",
-              "last_name": "Achmed"
-            }
-          },
-          {
-            "id": 4,
+            "id": 20,
             "skill_name": "Dementia Care",
-            "proficiency_level": "intermediate",
-            "description": "Specialized training in supporting patients with Alzheimer's and other forms of dementia.",
-            "acquired_date": "2018-11-10",
-            "years_of_experience": 7,
+            "proficiency_level": "expert",
+            "description": "Specialized in challenging dementia behaviors and advanced care techniques",
+            "acquired_date": "2005-08-15",
+            "years_of_experience": 18,
             "certificate": null,
             "certificate_url": null,
-            "last_updated_by_id": "2",
+            "last_updated_by_id": "1",
             "last_updated_by": {
-              "id": 2,
+              "id": 1,
               "email": "support@appbrew.com",
-              "first_name": "Abib",
-              "last_name": "Achmed"
+              "first_name": "Ahmed",
+              "last_name": "Mahummed"
             }
           }
         ],
         "skillsMatch": {
-          "hasRequiredSkills": true,
+          "hasSomeRequired": true,
           "missingSkills": [],
-          "matchingSkills": [
-            "dementia care",
-            "patient hygiene assistance",
-            "medication administration",
-            "first aid & cpr"
-          ],
+          "matchingSkills": [],
           "requirementsMatch": true
         },
         "availability": {
           "isAvailable": true,
           "conflicts": [],
-          "suggestions": [],
+          "suggestions": [
+            {
+              "day": "friday",
+              "date": "2025-11-14",
+              "startTime": "06:00",
+              "endTime": "09:00",
+              "duration": 3
+            },
+            {
+              "day": "tuesday",
+              "date": "2025-11-11",
+              "startTime": "06:00",
+              "endTime": "09:00",
+              "duration": 3
+            }
+          ],
           "availableHours": {
             "friday": {
-              "end": "14:00",
-              "start": "08:00",
+              "end": "20:00",
+              "start": "06:00",
               "available": true
             },
             "monday": {
-              "end": "16:00",
-              "start": "08:00",
+              "end": "20:00",
+              "start": "06:00",
               "available": true
             },
             "sunday": {
               "available": false
             },
             "tuesday": {
+              "end": "20:00",
+              "start": "06:00",
+              "available": true
+            },
+            "saturday": {
               "end": "16:00",
               "start": "08:00",
               "available": true
             },
-            "saturday": {
-              "available": false
-            },
             "thursday": {
-              "end": "17:00",
-              "start": "09:00",
+              "end": "20:00",
+              "start": "06:00",
               "available": true
             },
             "wednesday": {
-              "available": false
+              "end": "20:00",
+              "start": "06:00",
+              "available": true
             }
           }
         },
-        "scheduleCheck": {
-          "hasConflicts": false,
-          "conflicts": [],
-          "conflictCount": 0
+        "distance": {
+          "method": "google_maps",
+          "precisionLevel": "ADDRESS",
+          "carerLocation": {
+            "address": "987 Care Circle",
+            "postcode": "SE1 7AB",
+            "city": "London",
+            "geocoded": "987 Care Circle, London",
+            "coordinates": {
+              "latitude": 0,
+              "longitude": 0
+            }
+          },
+          "visitLocation": {
+            "address": "45 Park Lane, London W1K 7TJ, UK",
+            "postcode": "W1K 7TJ",
+            "geocoded": "45 Park Lane, London W1K 7TJ, UK",
+            "coordinates": {
+              "latitude": 0,
+              "longitude": 0
+            }
+          },
+          "distanceKm": 2.1,
+          "distanceMeters": 2102,
+          "travelTimeMinutes": 14,
+          "bufferMinutes": 3,
+          "totalTravelTime": 17,
+          "trafficAware": true,
+          "estimatedSpeedKmh": 9,
+          "bonus": 22,
+          "feasibility": "feasible",
+          "cached": false,
+          "calculatedAt": "2025-11-17T15:46:47.884Z",
+          "warnings": []
         },
+        "cluster": {
+          "carerId": 9,
+          "visitClusterId": null,
+          "sameCluster": false
+        },
+        "continuity": {
+          "bonus": 0,
+          "previousVisits": 0
+        },
+        "workload": {
+          "currentWeeklyHours": 0,
+          "utilizationPercent": 0,
+          "penalty": 0
+        },
+        "score": 82,
         "overallEligible": true
       }
     ],
     "ineligibleCarers": [
       {
-        "carerId": 48,
-        "carerName": "Gerard Pique",
-        "email": "gerard.pique@blaugrana-care.com",
-        "skills": [],
+        "carerId": 7,
+        "carerName": "Michael Brown",
+        "email": "michael.brown@careagency.com",
+        "employment": {
+          "isEmployed": true,
+          "reason": ""
+        },
+        "skills": [
+          {
+            "id": 11,
+            "skill_name": "Patient Hygiene Assistance",
+            "proficiency_level": "intermediate",
+            "description": "Personal care assistance including bathing and grooming",
+            "acquired_date": "2021-06-10",
+            "years_of_experience": 3,
+            "certificate": null,
+            "certificate_url": null,
+            "last_updated_by_id": "1",
+            "last_updated_by": {
+              "id": 1,
+              "email": "support@appbrew.com",
+              "first_name": "Ahmed",
+              "last_name": "Mahummed"
+            }
+          }
+        ],
         "skillsMatch": {
-          "hasRequiredSkills": false,
-          "missingSkills": [
-            "dementia care",
-            "patient hygiene assistance",
-            "medication administration",
-            "first aid & cpr"
-          ],
+          "hasSomeRequired": true,
+          "missingSkills": [],
           "matchingSkills": [],
           "requirementsMatch": false
         },
         "availability": {
           "isAvailable": false,
           "conflicts": [
-            "Request time (8:00-11:00) is outside carer availability (22:00-6:00) on monday"
+            "Request time (8:00-11:00) is outside carer availability (10:00-18:00) on monday"
           ],
           "suggestions": [
             {
-              "day": "tuesday",
-              "date": "2025-11-12",
-              "startTime": "08:00",
-              "endTime": "11:00",
+              "day": "friday",
+              "date": "2025-11-14",
+              "startTime": "10:00",
+              "endTime": "13:00",
               "duration": 3
             },
             {
-              "day": "wednesday",
-              "date": "2025-11-13",
-              "startTime": "08:00",
-              "endTime": "11:00",
+              "day": "tuesday",
+              "date": "2025-11-11",
+              "startTime": "10:00",
+              "endTime": "13:00",
               "duration": 3
             }
           ],
           "availableHours": {
-            "monday": "10pm-6am",
-            "sunday": "10pm-6am"
+            "friday": {
+              "end": "18:00",
+              "start": "10:00",
+              "available": true
+            },
+            "monday": {
+              "end": "18:00",
+              "start": "10:00",
+              "available": true
+            },
+            "sunday": {
+              "available": false
+            },
+            "tuesday": {
+              "end": "18:00",
+              "start": "10:00",
+              "available": true
+            },
+            "saturday": {
+              "end": "16:00",
+              "start": "08:00",
+              "available": true
+            },
+            "thursday": {
+              "end": "18:00",
+              "start": "10:00",
+              "available": true
+            },
+            "wednesday": {
+              "end": "18:00",
+              "start": "10:00",
+              "available": true
+            }
           }
         },
-        "scheduleCheck": {
-          "hasConflicts": false,
-          "conflicts": [],
-          "conflictCount": 0
+        "distance": {
+          "method": "google_maps",
+          "precisionLevel": "ADDRESS",
+          "carerLocation": {
+            "address": "321 Care Lane",
+            "postcode": "SW1A 2BB",
+            "city": "London",
+            "geocoded": "321 Care Lane, London",
+            "coordinates": {
+              "latitude": 0,
+              "longitude": 0
+            }
+          },
+          "visitLocation": {
+            "address": "45 Park Lane, London W1K 7TJ, UK",
+            "postcode": "W1K 7TJ",
+            "geocoded": "45 Park Lane, London W1K 7TJ, UK",
+            "coordinates": {
+              "latitude": 0,
+              "longitude": 0
+            }
+          },
+          "distanceKm": 2.1,
+          "distanceMeters": 2113,
+          "travelTimeMinutes": 13,
+          "bufferMinutes": 3,
+          "totalTravelTime": 16,
+          "trafficAware": true,
+          "estimatedSpeedKmh": 9.7,
+          "bonus": 22,
+          "feasibility": "feasible",
+          "cached": false,
+          "calculatedAt": "2025-11-17T15:46:47.565Z",
+          "warnings": []
         },
+        "cluster": {
+          "carerId": 7,
+          "visitClusterId": null,
+          "sameCluster": false
+        },
+        "continuity": {
+          "bonus": 0,
+          "previousVisits": 0
+        },
+        "workload": {
+          "currentWeeklyHours": 0,
+          "utilizationPercent": 0,
+          "penalty": 0
+        },
+        "score": 62,
         "overallEligible": false
       }
     ],
     "alternativeOptions": [
       {
-        "carerId": 48,
-        "carerName": "John Smith",
-        "email": "john.smith@careagency.com",
+        "carerId": 9,
+        "carerName": "David Rodriguez",
+        "email": "david.rodriguez@careagency.com",
+        "score": 82,
         "skillsMatch": {
-          "hasRequiredSkills": true,
+          "hasSomeRequired": true,
           "missingSkills": [],
-          "matchingSkills": ["Personal Care", "Medication Management"],
+          "matchingSkills": [],
           "requirementsMatch": true
         },
         "day": "tuesday",
-        "date": "2025-11-12",
-        "startTime": "14:00",
-        "endTime": "17:00",
-        "duration": 3,
-        "isPrimaryTime": false
-      },
-      {
-        "carerId": 52,
-        "carerName": "Emma Wilson",
-        "email": "emma.wilson@careagency.com",
-        "skillsMatch": {
-          "hasRequiredSkills": true,
-          "missingSkills": [],
-          "matchingSkills": ["Personal Care"],
-          "requirementsMatch": true
-        },
-        "day": "wednesday",
-        "date": "2025-11-13",
-        "startTime": "09:00",
-        "endTime": "12:00",
+        "date": "2025-11-11",
+        "startTime": "06:00",
+        "endTime": "09:00",
         "duration": 3,
         "isPrimaryTime": false
       }
     ]
   },
-  "message": "Found 1 eligible carers and 2 alternative options out of 6 total carers"
+  "message": "Found 6 eligible carers with comprehensive scoring (max 100 points). Distance calculations use carer sip_code/address data. Pre-filtered 11 to 11 candidates."
 }
 ```
-
 ### Get Visit Requests
 **Purpose:** Retrieves paginated list of visit requests for the tenant with optional filtering. **Data Sources:** Queries ExternalRequest table with optional status, date, and search filters.
 **Method:** GET
@@ -2806,6 +2905,8 @@
   "stack": "Error: Travel calculation failed: Google Maps API error: REQUEST_DENIED - You must use an API key to authenticate each request to Google Maps Platform APIs. For additional information, please refer to http://g.co/dev/maps-no-account\n    at EnhancedTravelService.calculateTravel (/app/dist/services/enhanced-travel.service.js:52:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async EnhancedTravelMatrixController.calculateTravel (/app/dist/controllers/enhanced-travel-matrix.controller.js:20:32)"
 }
 ```
+
+
 
 ### Get Travel Matrix Cache Statistics
 **Purpose:** Retrieves statistics about the travel matrix cache including hit rates, precision levels, and expiry information.

@@ -41,6 +41,7 @@ if IS_PRODUCTION:
         "https://e3os.co.uk",
         "https://crm-frontend-react.vercel.app",
         "https://loan-management-theta.vercel.app",
+        "https://task-manager-two-plum.vercel.app",
         "https://technicalglobaladministrator.e3os.co.uk",
         "https://dev.e3os.co.uk",
         "https://e3os.co.uk"
@@ -51,6 +52,7 @@ elif IS_STAGING:
         "https://e3os.co.uk",
         "https://crm-frontend-react.vercel.app",
        "https://loan-management-theta.vercel.app",
+       "https://task-manager-two-plum.vercel.app",
         "https://technicalglobaladministrator.e3os.co.uk",
         "https://dev.e3os.co.uk",
         "https://e3os.co.uk"
@@ -59,10 +61,13 @@ elif IS_STAGING:
 else:  # development
     FRONTEND_URLS = [
         "http://localhost:5173",
+        "http://localhost:4000",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
+        "http://localhost:4000",
         "http://localhost:3001",
         "http://127.0.0.1:3000",
+         "https://dev.e3os.co.uk",
     ]
     DEFAULT_FRONTEND_URL = "http://localhost:5173"
     REVIEWS_QR_BASE_URL = "http://localhost:5173"
@@ -122,6 +127,7 @@ if IS_DEVELOPMENT:
         "http://localhost:5173",
         "http://127.0.0.1:5173", 
         "http://localhost:3000",
+        "http://localhost:4000",
         "http://127.0.0.1:3000",
     ])
 
@@ -202,6 +208,7 @@ TENANT_APPS = [
     "rest_framework_simplejwt",
     "users",
     "reviews",
+    "investments",
 ]
 
 INSTALLED_APPS = list(SHARED_APPS) + [
@@ -431,8 +438,22 @@ SUPABASE_KEY = env("SUPABASE_KEY", default="")
 SUPABASE_BUCKET = env("SUPABASE_BUCKET", default="")
 STORAGE_TYPE = env("STORAGE_TYPE", default="supabase")
 
+# Add to settings.py
+CELERY_BEAT_SCHEDULE = {
+    'accrue-monthly-roi': {
+        'task': 'investments.tasks.accrue_monthly_roi',
+        'schedule': crontab(0, 0, day_of_month='1'),  # 1st of every month
+    },
+    'send-roi-notifications': {
+        'task': 'investments.tasks.send_roi_due_notifications', 
+        'schedule': crontab(0, 0, day_of_month='25'),  # 25th of every month
+    },
+}
 
 # #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 # # ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 
-# PASSWORD: Kd8k{tq|5?mQeB
+# PASSWORD: Kd8k{tq|5?mQeB Health Care, Professional Services
+# #USERNAME: aekene-onwon8027
+# #PASSWORD: qwerty
+
