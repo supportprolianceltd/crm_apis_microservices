@@ -22,10 +22,16 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = []  # Empty list means no permission checks
 
+    def perform_create(self, serializer):
+        serializer.save(tenant=self.request.user.tenant)
+
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = []  # Empty list means no permission checks
+
+    def perform_create(self, serializer):
+        serializer.save(tenant=self.request.user.tenant)
 
 class ArticleViewSet(viewsets.ModelViewSet):
     permission_classes = []  # Empty list means no permission checks
@@ -100,7 +106,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-        serializer = self.get_serializer(data=request.data, context={'current_user': current_user})
+        serializer = self.get_serializer(data=request.data, context={'current_user': current_user, 'request': request})
         serializer.is_valid(raise_exception=True)
         article = serializer.save()
 

@@ -2600,3 +2600,66 @@
 2025-11-24 07:20:34,409 [INFO] gateway: [gateway_e27b0e0c] Forwarding to: http://auth-service:8001/api/tenant/tenants/ (Service: tenant)
 2025-11-24 07:20:34,411 [INFO] gateway: [gateway_e27b0e0c] Forwarding request to: http://auth-service:8001/api/tenant/tenants/ with timeout: 300s
 2025-11-24 07:20:52,358 [INFO] gateway: [gateway_e27b0e0c] Gateway forwarded: POST /api/tenant/tenants/ -> 201 (Service: tenant)
+2025-11-24 08:41:07,241 [INFO] gateway: [gateway_8d25b2ce] Gateway received request: GET /api/project-manager/api/knowledge/categories/
+2025-11-24 08:41:07,269 [INFO] gateway: [gateway_8d25b2ce] Forwarding to: http://project-manager:8005/api/project-manager/api/knowledge/categories (Service: project-manager)
+2025-11-24 08:41:07,284 [INFO] gateway: [gateway_8d25b2ce] Forwarding request to: http://project-manager:8005/api/project-manager/api/knowledge/categories with timeout: 300s
+2025-11-24 08:41:07,554 [INFO] gateway: [gateway_8d25b2ce] Gateway forwarded: GET /api/project-manager/api/knowledge/categories/ -> 403 (Service: project-manager)
+2025-11-24 08:41:07,572 [WARNING] django.request: Forbidden: /api/project-manager/api/knowledge/categories/
+2025-11-24 08:46:00,247 [INFO] gateway: [gateway_cb9ae1be] Gateway received request: GET /api/project-manager/api/knowledge/categories/
+2025-11-24 08:46:00,248 [INFO] gateway: [gateway_cb9ae1be] Forwarding to: http://project-manager:8005/api/project-manager/api/knowledge/categories (Service: project-manager)
+2025-11-24 08:46:00,250 [INFO] gateway: [gateway_cb9ae1be] Forwarding request to: http://project-manager:8005/api/project-manager/api/knowledge/categories with timeout: 300s
+2025-11-24 08:46:02,030 [INFO] gateway: [gateway_cb9ae1be] Gateway forwarded: GET /api/project-manager/api/knowledge/categories/ -> 200 (Service: project-manager)
+2025-11-24 09:41:47,360 [INFO] gateway: [gateway_e592c837] Gateway received request: GET /api/project-manager/api/knowledge/categories/
+2025-11-24 09:41:47,368 [INFO] gateway: [gateway_e592c837] Forwarding to: http://project-manager:8005/api/project-manager/api/knowledge/categories (Service: project-manager)
+2025-11-24 09:41:47,373 [INFO] gateway: [gateway_e592c837] Forwarding request to: http://project-manager:8005/api/project-manager/api/knowledge/categories with timeout: 300s
+2025-11-24 09:41:48,225 [INFO] gateway: [gateway_e592c837] Gateway forwarded: GET /api/project-manager/api/knowledge/categories/ -> 404 (Service: project-manager)
+2025-11-24 09:41:48,236 [WARNING] django.request: Not Found: /api/project-manager/api/knowledge/categories/
+2025-11-24 09:49:30,041 [INFO] gateway: [gateway_e735351e] Gateway received request: GET /api/project-manager/api/knowledge/categories/
+2025-11-24 09:49:30,045 [INFO] gateway: [gateway_e735351e] Forwarding to: http://project-manager:8005/api/project-manager/api/knowledge/categories (Service: project-manager)
+2025-11-24 09:49:30,049 [INFO] gateway: [gateway_e735351e] Forwarding request to: http://project-manager:8005/api/project-manager/api/knowledge/categories with timeout: 300s
+2025-11-24 09:49:30,491 [INFO] gateway: [gateway_e735351e] Gateway forwarded: GET /api/project-manager/api/knowledge/categories/ -> 404 (Service: project-manager)
+2025-11-24 09:49:30,503 [WARNING] django.request: Not Found: /api/project-manager/api/knowledge/categories/
+2025-11-24 09:54:12,910 [INFO] gateway: [gateway_0a58a7a0] Gateway received request: GET /api/project-manager/api/articles/
+2025-11-24 09:54:12,912 [INFO] gateway: [gateway_0a58a7a0] Forwarding to: http://project-manager:8005/api/project-manager/api/articles (Service: project-manager)
+2025-11-24 09:54:12,913 [INFO] gateway: [gateway_0a58a7a0] Forwarding request to: http://project-manager:8005/api/project-manager/api/articles with timeout: 300s
+2025-11-24 09:54:13,418 [INFO] gateway: [gateway_0a58a7a0] Gateway forwarded: GET /api/project-manager/api/articles/ -> 200 (Service: project-manager)
+2025-11-24 09:55:58,185 [INFO] gateway: [gateway_238658a7] Gateway received request: GET /api/project-manager/api/articles/featured/
+2025-11-24 09:55:58,245 [INFO] gateway: [gateway_238658a7] Forwarding to: http://project-manager:8005/api/project-manager/api/articles/featured (Service: project-manager)
+2025-11-24 09:55:58,271 [INFO] gateway: [gateway_62aae792] Gateway received request: GET /api/project-manager/api/tags/
+2025-11-24 09:55:58,271 [INFO] gateway: [gateway_238658a7] Forwarding request to: http://project-manager:8005/api/project-manager/api/articles/featured with timeout: 300s
+2025-11-24 09:55:58,306 [INFO] gateway: [gateway_62aae792] Forwarding to: http://project-manager:8005/api/project-manager/api/tags (Service: project-manager)
+2025-11-24 09:55:58,329 [INFO] gateway: [gateway_62aae792] Forwarding request to: http://project-manager:8005/api/project-manager/api/tags with timeout: 300s
+2025-11-24 09:55:59,049 [INFO] gateway: [gateway_238658a7] Gateway forwarded: GET /api/project-manager/api/articles/featured/ -> 403 (Service: project-manager)
+2025-11-24 09:55:59,070 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/featured/
+2025-11-24 09:55:59,114 [INFO] gateway: [gateway_646b23b7] Gateway received request: GET /api/project-manager/api/articles/published/
+2025-11-24 09:55:59,118 [INFO] gateway: [gateway_646b23b7] Forwarding to: http://project-manager:8005/api/project-manager/api/articles/published (Service: project-manager)
+2025-11-24 09:55:59,120 [INFO] gateway: [gateway_646b23b7] Forwarding request to: http://project-manager:8005/api/project-manager/api/articles/published with timeout: 300s
+2025-11-24 09:55:59,270 [INFO] gateway: [gateway_62aae792] Gateway forwarded: GET /api/project-manager/api/tags/ -> 403 (Service: project-manager)
+2025-11-24 09:55:59,273 [WARNING] django.request: Forbidden: /api/project-manager/api/tags/
+2025-11-24 09:55:59,287 [INFO] gateway: [gateway_0894ff55] Gateway received request: GET /api/project-manager/api/categories/
+2025-11-24 09:55:59,290 [INFO] gateway: [gateway_0894ff55] Forwarding to: http://project-manager:8005/api/project-manager/api/categories (Service: project-manager)
+2025-11-24 09:55:59,291 [INFO] gateway: [gateway_0894ff55] Forwarding request to: http://project-manager:8005/api/project-manager/api/categories with timeout: 300s
+2025-11-24 09:55:59,459 [INFO] gateway: [gateway_646b23b7] Gateway forwarded: GET /api/project-manager/api/articles/published/ -> 403 (Service: project-manager)
+2025-11-24 09:55:59,461 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/published/
+2025-11-24 09:55:59,755 [INFO] gateway: [gateway_0894ff55] Gateway forwarded: GET /api/project-manager/api/categories/ -> 403 (Service: project-manager)
+2025-11-24 09:55:59,757 [WARNING] django.request: Forbidden: /api/project-manager/api/categories/
+2025-11-24 09:55:59,883 [INFO] gateway: [gateway_03359e35] Gateway received request: GET /api/project-manager/api/articles/featured/
+2025-11-24 09:55:59,887 [INFO] gateway: [gateway_71b49ce3] Gateway received request: GET /api/project-manager/api/categories/
+2025-11-24 09:55:59,887 [INFO] gateway: [gateway_03359e35] Forwarding to: http://project-manager:8005/api/project-manager/api/articles/featured (Service: project-manager)
+2025-11-24 09:55:59,889 [INFO] gateway: [gateway_71b49ce3] Forwarding to: http://project-manager:8005/api/project-manager/api/categories (Service: project-manager)
+2025-11-24 09:55:59,890 [INFO] gateway: [gateway_03359e35] Forwarding request to: http://project-manager:8005/api/project-manager/api/articles/featured with timeout: 300s
+2025-11-24 09:55:59,891 [INFO] gateway: [gateway_71b49ce3] Forwarding request to: http://project-manager:8005/api/project-manager/api/categories with timeout: 300s
+2025-11-24 09:56:00,105 [INFO] gateway: [gateway_03359e35] Gateway forwarded: GET /api/project-manager/api/articles/featured/ -> 403 (Service: project-manager)
+2025-11-24 09:56:00,107 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/featured/
+2025-11-24 09:56:00,117 [INFO] gateway: [gateway_09eed3e7] Gateway received request: GET /api/project-manager/api/articles/published/
+2025-11-24 09:56:00,126 [INFO] gateway: [gateway_09eed3e7] Forwarding to: http://project-manager:8005/api/project-manager/api/articles/published (Service: project-manager)
+2025-11-24 09:56:00,135 [INFO] gateway: [gateway_09eed3e7] Forwarding request to: http://project-manager:8005/api/project-manager/api/articles/published with timeout: 300s
+2025-11-24 09:56:00,414 [INFO] gateway: [gateway_71b49ce3] Gateway forwarded: GET /api/project-manager/api/categories/ -> 403 (Service: project-manager)
+2025-11-24 09:56:00,425 [WARNING] django.request: Forbidden: /api/project-manager/api/categories/
+2025-11-24 09:56:00,431 [INFO] gateway: [gateway_ae601aa3] Gateway received request: GET /api/project-manager/api/tags/
+2025-11-24 09:56:00,437 [INFO] gateway: [gateway_ae601aa3] Forwarding to: http://project-manager:8005/api/project-manager/api/tags (Service: project-manager)
+2025-11-24 09:56:00,440 [INFO] gateway: [gateway_ae601aa3] Forwarding request to: http://project-manager:8005/api/project-manager/api/tags with timeout: 300s
+2025-11-24 09:56:00,547 [INFO] gateway: [gateway_09eed3e7] Gateway forwarded: GET /api/project-manager/api/articles/published/ -> 403 (Service: project-manager)
+2025-11-24 09:56:00,558 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/published/
+2025-11-24 09:56:00,697 [INFO] gateway: [gateway_ae601aa3] Gateway forwarded: GET /api/project-manager/api/tags/ -> 403 (Service: project-manager)
+2025-11-24 09:56:00,702 [WARNING] django.request: Forbidden: /api/project-manager/api/tags/
