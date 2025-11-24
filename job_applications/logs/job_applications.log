@@ -9178,3 +9178,12 @@ def backend_cleanup():
 2025-11-24 06:50:41,251 [ERROR] job_applications: Error fetching requisitions page: HTTPConnectionPool(host='talent-engine', port=8002): Max retries exceeded with url: /api/talent-engine/requisitions/upcoming/public/jobs/ (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x72591bc03fd0>: Failed to resolve 'talent-engine' ([Errno -2] Name or service not known)"))
 2025-11-24 06:50:41,252 [INFO] job_applications: Total open requisitions fetched: 0
 2025-11-24 06:50:41,254 [INFO] job_applications: No open requisitions found
+2025-11-24 11:32:04,134 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-24 11:32:04,141 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-24 11:32:04,147 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-24 11:32:04,359 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-24 11:32:04,363 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-24 11:32:04,367 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-24 11:32:05,026 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-11-24 11:32:05,029 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-11-24 11:32:05,035 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'

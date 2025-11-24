@@ -22,16 +22,82 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = []  # Empty list means no permission checks
 
+    def get_current_user_info(self):
+        """
+        Extract user info from JWT payload that was already validated by middleware.
+        """
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        if jwt_payload:
+            user_info = {
+                'id': jwt_payload.get('sub'),
+                'first_name': jwt_payload.get('first_name', ''),
+                'last_name': jwt_payload.get('last_name', ''),
+                'email': jwt_payload.get('email', ''),
+                'username': jwt_payload.get('username', ''),
+                'role': jwt_payload.get('role', ''),
+                'tenant': jwt_payload.get('tenant', ''),
+            }
+            return user_info
+        return None
+
+    def create(self, request, *args, **kwargs):
+        current_user = self.get_current_user_info()
+        if not current_user:
+            return Response(
+                {'detail': 'Authentication required'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def perform_create(self, serializer):
-        serializer.save(tenant=self.request.user.tenant)
+        # This method is now handled in create() method above
+        pass
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = []  # Empty list means no permission checks
 
+    def get_current_user_info(self):
+        """
+        Extract user info from JWT payload that was already validated by middleware.
+        """
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        if jwt_payload:
+            user_info = {
+                'id': jwt_payload.get('sub'),
+                'first_name': jwt_payload.get('first_name', ''),
+                'last_name': jwt_payload.get('last_name', ''),
+                'email': jwt_payload.get('email', ''),
+                'username': jwt_payload.get('username', ''),
+                'role': jwt_payload.get('role', ''),
+                'tenant': jwt_payload.get('tenant', ''),
+            }
+            return user_info
+        return None
+
+    def create(self, request, *args, **kwargs):
+        current_user = self.get_current_user_info()
+        if not current_user:
+            return Response(
+                {'detail': 'Authentication required'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def perform_create(self, serializer):
-        serializer.save(tenant=self.request.user.tenant)
+        # This method is now handled in create() method above
+        pass
 
 class ArticleViewSet(viewsets.ModelViewSet):
     permission_classes = []  # Empty list means no permission checks

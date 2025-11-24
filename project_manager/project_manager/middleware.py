@@ -16,6 +16,8 @@ public_paths = [
     '/api/docs/',
     '/api/schema/',
     '/api/health/',
+    # Temporarily allow knowledge base endpoints for development
+    '/api/knowledge-base/',
 ]
 
 # Paths that require authentication but not tenant schema
@@ -168,21 +170,26 @@ def get_jwt_user(request):
 
         # Fetch public key from auth service
         public_key_url = f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/?tenant_id={tenant_id}"
-        
-        resp = requests.get(
-            public_key_url,
-            headers={'Authorization': auth},
-            timeout=5
-        )
-        
-        if resp.status_code != 200:
-            logger.error(f"✗ Could not fetch public key: {resp.status_code}")
-            request._jwt_user_cache = AnonymousUser()
-            return request._jwt_user_cache
 
-        public_key = resp.json().get("public_key")
-        if not public_key:
-            logger.error("✗ Public key not found in response")
+        try:
+            resp = requests.get(
+                public_key_url,
+                headers={'Authorization': auth},
+                timeout=5
+            )
+
+            if resp.status_code != 200:
+                logger.warning(f"✗ Could not fetch public key: {resp.status_code} - falling back to AnonymousUser")
+                request._jwt_user_cache = AnonymousUser()
+                return request._jwt_user_cache
+
+            public_key = resp.json().get("public_key")
+            if not public_key:
+                logger.warning("✗ Public key not found in response - falling back to AnonymousUser")
+                request._jwt_user_cache = AnonymousUser()
+                return request._jwt_user_cache
+        except requests.RequestException as e:
+            logger.warning(f"✗ Public key request failed: {str(e)} - falling back to AnonymousUser")
             request._jwt_user_cache = AnonymousUser()
             return request._jwt_user_cache
 
@@ -258,6 +265,18 @@ class CustomTenantSchemaMiddleware:
                 return response
             except Exception as e:
                 logger.error(f"✗ Schema switch failed for public endpoint: {str(e)}")
+                return JsonResponse({'error': 'Database configuration error'}, status=500)
+
+        # Handle knowledge base endpoints (temporary for development)
+        if request.path.startswith('/api/knowledge-base/'):
+            logger.info("Knowledge base endpoint - using public schema")
+            try:
+                connection.set_schema_to_public()
+                response = self.get_response(request)
+                connection.set_schema_to_public()
+                return response
+            except Exception as e:
+                logger.error(f"✗ Schema switch failed for knowledge base endpoint: {str(e)}")
                 return JsonResponse({'error': 'Database configuration error'}, status=500)
 
         # Handle auth-only endpoints (require JWT but not tenant schema)
