@@ -342,6 +342,7 @@ model Cluster {
   visits             Visit[]
   clientClusterDistances ClientClusterDistance[]
   clusterAgreedCareSchedules ClusterAgreedCareSchedule[]
+  clusterClients     ClusterClient[]
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -820,6 +821,24 @@ model ClusterAgreedCareSchedule {
   @@index([clusterId])
   @@index([agreedCareScheduleId])
   @@map("cluster_agreed_care_schedules")
+}
+
+model ClusterClient {
+  id        String   @id @default(cuid())
+  tenantId  String
+  clusterId String
+  clientId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  cluster   Cluster  @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, clusterId, clientId], name: "tenant_cluster_client_unique")
+  @@index([tenantId])
+  @@index([clusterId])
+  @@index([clientId])
+  @@map("cluster_clients")
 }
 
 model AgreedCareSlot {

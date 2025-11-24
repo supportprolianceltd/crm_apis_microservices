@@ -733,6 +733,91 @@ export class ClusterController {
   }
 
   /**
+   * Assign a client to a cluster (persist link)
+   * POST /clusters/:clusterId/assign-client/:clientId
+   */
+  public async assignClientToCluster(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const { clusterId, clientId } = req.params as { clusterId?: string; clientId?: string };
+      if (!clusterId || !clientId) return res.status(400).json({ error: 'clusterId and clientId are required in path' });
+
+      // Verify cluster belongs to tenant
+      const cluster = await (this.prisma as any).cluster.findFirst({ where: { id: clusterId, tenantId: tenantId.toString() } });
+      if (!cluster) return res.status(404).json({ error: 'Cluster not found' });
+
+      // Validate client exists in auth service
+      const authHeader = req.headers.authorization as string | undefined;
+      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+      const { ClientService } = await import('../services/client.service');
+      const clientService = new ClientService();
+      const client = await clientService.getClientById(token, clientId);
+      if (!client) return res.status(404).json({ error: 'Client not found in auth service' });
+
+      // Idempotent create: skip if already linked
+      const existingLink = await (this.prisma as any).clusterClient.findFirst({
+        where: { tenantId: tenantId.toString(), clusterId: clusterId, clientId }
+      });
+
+      if (existingLink) {
+        return res.json({ success: true, message: 'Client already assigned to cluster', data: existingLink });
+      }
+
+      const created = await (this.prisma as any).clusterClient.create({ data: { tenantId: tenantId.toString(), clusterId, clientId } });
+
+      // Update cluster statistics asynchronously
+      this.clusteringService.updateClusterStats(clusterId).catch((err) => console.error('updateClusterStats after assign client failed', err));
+
+      return res.status(201).json({ success: true, message: 'Client assigned to cluster', data: created });
+    } catch (error: any) {
+      console.error('assignClientToCluster error', error);
+      return res.status(500).json({ error: 'Failed to assign client to cluster', details: error?.message });
+    }
+  }
+
+  /**
+   * List clients assigned to a cluster and enrich via auth service
+   * GET /clusters/:clusterId/clients
+   */
+  public async listClusterClients(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const { clusterId } = req.params as { clusterId?: string };
+      if (!clusterId) return res.status(400).json({ error: 'clusterId required in path' });
+
+      const cluster = await (this.prisma as any).cluster.findFirst({ where: { id: clusterId, tenantId: tenantId.toString() } });
+      if (!cluster) return res.status(404).json({ error: 'Cluster not found' });
+
+      const links = await (this.prisma as any).clusterClient.findMany({ where: { tenantId: tenantId.toString(), clusterId }, select: { clientId: true } });
+      const clientIds = links.map((l: any) => l.clientId).filter(Boolean);
+
+      const authHeader = req.headers.authorization as string | undefined;
+      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+
+      let clients: any[] = [];
+      if (clientIds.length > 0) {
+        const { ClientService } = await import('../services/client.service');
+        const clientService = new ClientService();
+        try {
+          clients = await clientService.getClientsByIds(token, clientIds) as any[];
+        } catch (err) {
+          console.error('Failed to fetch clients from auth service', err);
+          clients = clientIds.map((id: string) => ({ id }));
+        }
+      }
+
+      return res.json({ clusterId, clusterName: cluster.name, clients });
+    } catch (error: any) {
+      console.error('listClusterClients error', error);
+      return res.status(500).json({ error: 'Failed to list cluster clients', details: error?.message });
+    }
+  }
+
+  /**
    * Batch assign multiple existing visits to clusters
    * POST /clusters/batch-assign-visits
    */
