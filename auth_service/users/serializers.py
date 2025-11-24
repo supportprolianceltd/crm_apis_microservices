@@ -2214,10 +2214,14 @@ class DocumentPermissionSerializer(serializers.ModelSerializer):
         model = DocumentPermission
         fields = ["user_id", "email", "first_name", "last_name", "role", "permission_level", "created_at"]
         read_only_fields = ["created_at"]
+
+
 class DocumentPermissionWriteSerializer(serializers.Serializer):
     user_id = serializers.CharField(max_length=255, required=False, allow_blank=False)
     email = serializers.EmailField(required=False, allow_blank=False)
     permission_level = serializers.ChoiceField(choices=DocumentPermission.PERMISSION_CHOICES, required=False)
+
+
 class DocumentVersionSerializer(serializers.ModelSerializer):
     created_by = serializers.SerializerMethodField()
 
@@ -2264,7 +2268,9 @@ class DocumentPermissionSerializer(serializers.ModelSerializer):
         fields = ["user_id", "email", "first_name", "last_name", "role", "permission_level", "created_at"]
         read_only_fields = ["created_at"]
 
+
 class DocumentSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
     uploaded_by = serializers.SerializerMethodField()
     updated_by = serializers.SerializerMethodField()
     last_updated_by = serializers.SerializerMethodField()
@@ -2275,10 +2281,31 @@ class DocumentSerializer(serializers.ModelSerializer):
     permission_action = serializers.ChoiceField(choices=['add', 'remove', 'replace', 'update_level'], required=False, write_only=True)
     file = serializers.FileField(required=False, allow_null=True)
 
+    # def to_internal_value(self, data):
+    #     data = dict(data)
+    #     data.pop('id', None)
+    #     # Flatten single-value lists for multipart/form-data
+    #     for key, value in data.items():
+    #         if isinstance(value, list) and len(value) == 1:
+    #             data[key] = value[0]
+    #     ret = super().to_internal_value(data)
+    #     return ret
+
     def to_internal_value(self, data):
-        ret = super().to_internal_value(data)
-        ret.pop('id', None)
+        # data is Immutable QueryDict in multipart → make it mutable
+        mutable_data = data.copy()
+
+        # Remove id completely so DRF never sees it
+        mutable_data.pop('id', None)
+
+        # Flatten single-item lists (file, title, etc. come as lists in multipart)
+        for key, value in mutable_data.items():
+            if isinstance(value, list) and len(value) == 1:
+                mutable_data[key] = value[0]
+
+        ret = super().to_internal_value(mutable_data)
         return ret
+
 
     class Meta:
         model = Document
@@ -2420,11 +2447,13 @@ class DocumentSerializer(serializers.ModelSerializer):
         # Validate uploaded_by_id and updated_by_id if provided
         if "uploaded_by_id" in data:
             try:
+                # Try numeric ID first, fallback will be handled by exceptions
                 user = CustomUser.objects.get(id=data["uploaded_by_id"])
                 user_tenant_uuid = str(Tenant.objects.get(id=user.tenant_id).unique_id)
                 if user_tenant_uuid != str(tenant_id):
                     raise serializers.ValidationError({"uploaded_by_id": "User does not belong to this tenant."})
-            except (CustomUser.DoesNotExist, Tenant.DoesNotExist):
+            except (CustomUser.DoesNotExist, Tenant.DoesNotExist, ValueError):
+                # ValueError can happen if a non-numeric value (e.g., UUID) was passed for an integer PK
                 raise serializers.ValidationError({"uploaded_by_id": "Invalid user ID."})
         if "updated_by_id" in data:
             try:
@@ -2432,7 +2461,7 @@ class DocumentSerializer(serializers.ModelSerializer):
                 user_tenant_uuid = str(Tenant.objects.get(id=user.tenant_id).unique_id)
                 if user_tenant_uuid != str(tenant_id):
                     raise serializers.ValidationError({"updated_by_id": "User does not belong to this tenant."})
-            except (CustomUser.DoesNotExist, Tenant.DoesNotExist):
+            except (CustomUser.DoesNotExist, Tenant.DoesNotExist, ValueError):
                 raise serializers.ValidationError({"updated_by_id": "Invalid user ID."})
         # Validate permissions_write users belong to tenant
         permissions_write = data.get('permissions_write', [])
@@ -2506,6 +2535,8 @@ class DocumentSerializer(serializers.ModelSerializer):
         validated_data["uploaded_by_id"] = str(current_user["id"])
         validated_data["updated_by_id"] = str(current_user["id"])
         validated_data["last_updated_by_id"] = str(current_user["id"])
+        # Ensure 'id' is not in validated_data
+        validated_data.pop('id', None)
 
         if file:
             logger.info(f"Uploading document file: {file.name}")
@@ -2534,21 +2565,36 @@ class DocumentSerializer(serializers.ModelSerializer):
         
         # Automatically grant full access to creator
         try:
-            creator = CustomUser.objects.get(id=validated_data["uploaded_by_id"])
-            creator_permission = DocumentPermission(
-                document=document,
-                user_id=str(creator.id),
-                email=creator.email,
-                first_name=creator.first_name,
-                last_name=creator.last_name,
-                role=getattr(creator.profile, 'job_role', '') if hasattr(creator, 'profile') else '',
-                permission_level='view_download',
-                tenant_id=tenant_id
-            )
-            creator_permission.save()
-            logger.info(f"Automatically granted full access to creator {creator.email} for document {document.title}")
-        except CustomUser.DoesNotExist:
-            logger.error(f"Creator user {validated_data['uploaded_by_id']} not found")
+            # First try numeric ID lookup (common case). If that fails due to non-numeric value,
+            # fall back to resolving by email from the token payload to avoid a 500 error.
+            creator = None
+            creator_id_val = validated_data.get("uploaded_by_id")
+            try:
+                creator = CustomUser.objects.get(id=int(creator_id_val))
+            except (ValueError, TypeError, CustomUser.DoesNotExist):
+                # Fallback: try to resolve by email from current_user payload
+                try:
+                    creator = CustomUser.objects.get(email=current_user.get("email"))
+                except CustomUser.DoesNotExist:
+                    creator = None
+
+            if creator:
+                creator_permission = DocumentPermission(
+                    document=document,
+                    user_id=str(creator.id),
+                    email=creator.email,
+                    first_name=creator.first_name,
+                    last_name=creator.last_name,
+                    role=getattr(creator.profile, 'job_role', '') if hasattr(creator, 'profile') else '',
+                    permission_level='view_download',
+                    tenant_id=tenant_id
+                )
+                creator_permission.save()
+                logger.info(f"Automatically granted full access to creator {creator.email} for document {document.title}")
+            else:
+                logger.error(f"Creator user {validated_data.get('uploaded_by_id')} not found or could not be resolved")
+        except Exception as e:
+            logger.error(f"Error granting creator permission: {str(e)}")
         
         # Handle additional permissions
         if resolved_permissions:
@@ -2802,6 +2848,7 @@ class DocumentSerializer(serializers.ModelSerializer):
                     logger.info(f"Updated {updated_count} permission levels for document {instance.title}")
         
         return instance
+
 
 class UserDocumentAccessSerializer(serializers.ModelSerializer):
     document = DocumentSerializer(read_only=True)

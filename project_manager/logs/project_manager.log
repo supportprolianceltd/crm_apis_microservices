@@ -32485,3 +32485,74 @@ ImportError: cannot import name 'user_tasks' from 'tasks.views' (/app/tasks/view
 2025-11-15 10:40:51,695 [WARNING] project_manager: ✗ No jwt_payload found on request
 2025-11-15 10:40:51,697 [ERROR] project_manager: ✗ Tenant schema missing
 2025-11-15 10:40:51,700 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks/my_tasks
+2025-11-24 08:41:07,501 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 08:41:07,505 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 08:41:07,507 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 08:41:07,509 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 08:41:07,512 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 08:41:07,514 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 08:41:07,515 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 08:41:07,517 [INFO] project_manager: User: AnonymousUser
+2025-11-24 08:41:07,518 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 08:41:07,520 [INFO] project_manager: User is_authenticated: False
+2025-11-24 08:41:07,521 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 08:41:07,523 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 08:41:07,531 [WARNING] django.request: Forbidden: /api/project-manager/api/knowledge/categories
+2025-11-24 08:46:00,287 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 08:46:00,289 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 08:46:00,291 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 08:46:00,294 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 08:46:00,295 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 08:46:00,297 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 08:46:01,443 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-24 08:46:01,445 [INFO] project_manager: User: amahummed7808
+2025-11-24 08:46:01,447 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 08:46:01,449 [INFO] project_manager: User is_authenticated: True
+2025-11-24 08:46:01,451 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-24 08:46:01,453 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-24 08:46:01,455 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-24 08:46:01,457 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-24 08:46:01,932 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 08:46:01,934 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories/
+2025-11-24 08:46:01,936 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 08:46:01,939 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 08:46:01,941 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 08:46:01,943 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories/
+2025-11-24 08:46:02,007 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-24 08:46:02,010 [INFO] project_manager: User: amahummed7808
+2025-11-24 08:46:02,012 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 08:46:02,013 [INFO] project_manager: User is_authenticated: True
+2025-11-24 08:46:02,015 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-24 08:46:02,017 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-24 08:46:02,019 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-24 08:46:02,022 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-24 09:41:47,447 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:41:47,449 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 09:41:47,450 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:41:47,451 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:41:47,452 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:41:47,453 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 09:41:47,824 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-24 09:41:47,826 [INFO] project_manager: User: amahummed7808
+2025-11-24 09:41:47,827 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:41:47,828 [INFO] project_manager: User is_authenticated: True
+2025-11-24 09:41:47,830 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-24 09:41:47,831 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-24 09:41:47,833 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-24 09:41:47,834 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-24 09:41:48,204 [WARNING] django.request: Not Found: /api/project-manager/api/knowledge/categories
+2025-11-24 09:49:30,087 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:49:30,089 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 09:49:30,090 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:49:30,092 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:49:30,093 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:49:30,094 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 09:49:30,246 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-24 09:49:30,248 [INFO] project_manager: User: amahummed7808
+2025-11-24 09:49:30,250 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:49:30,251 [INFO] project_manager: User is_authenticated: True
+2025-11-24 09:49:30,252 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-24 09:49:30,254 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-24 09:49:30,255 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-24 09:49:30,256 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-24 09:49:30,481 [WARNING] django.request: Not Found: /api/project-manager/api/knowledge/categories

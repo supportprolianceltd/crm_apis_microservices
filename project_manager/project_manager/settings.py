@@ -1,7 +1,7 @@
 # drf-spectacular: Add Bearer token security scheme for Swagger UI
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Project Manager API',
-    'DESCRIPTION': 'API documentation for Project Manager microservice',
+    'DESCRIPTION': 'API documentation for Project Manager microservice including Tasks and Knowledge Base',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'SWAGGER_UI_SETTINGS': {
@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_filters',
     'tasks',
+    'knowledge_base',
     'django_extensions',
 ]
 

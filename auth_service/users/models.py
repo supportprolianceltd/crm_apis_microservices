@@ -1508,6 +1508,8 @@ class Document(models.Model):
     class Meta:
         unique_together = ('tenant_id', 'document_number')
 
+
+
 class DocumentVersion(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='versions')
     version = models.IntegerField()
@@ -1596,4 +1598,5 @@ class GroupMembership(models.Model):
 
     def __str__(self):
         return f"{self.user.email} in {self.group.name}"
+
 

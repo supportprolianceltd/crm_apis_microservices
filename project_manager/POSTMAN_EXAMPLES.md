@@ -1,4 +1,4 @@
-# 📮 Postman Request Examples - Project Manager Service
+# 📮 Postman Request Examples - Project Manager Service (Tasks & Knowledge Base)
 
 ## Authentication
 
@@ -777,3 +777,319 @@ Both AdminDashboard and Dashboard components include uniform pagination controls
 - Items per page information
 - Loading states during pagination
 - Consistent styling and behavior across components
+
+---
+
+## Knowledge Base Management
+
+The Knowledge Base API follows the same gateway routing pattern as the Task Management API, providing a comprehensive content management system with categories, tags, and rich articles.
+
+### Create Category
+**Purpose:** Creates a new category for organizing articles.
+**Method:** POST
+**URL:** `http://localhost:9090/api/project-manager/api/categories/`
+
+**Production URL:** `https://server1.prolianceltd.com/api/project-manager/api/categories/`
+
+**Request Body:**
+```json
+{
+  "name": "Technology",
+  "description": "Articles about technology, programming, and software development"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "name": "Technology",
+  "description": "Articles about technology, programming, and software development",
+  "created_at": "2025-11-24T08:30:00.000Z",
+  "updated_at": "2025-11-24T08:30:00.000Z"
+}
+```
+
+---
+
+### Get All Categories
+**Purpose:** Retrieves all categories for organizing articles.
+**Method:** GET
+**URL:** `http://localhost:9090/api/project-manager/api/categories/`
+
+**Response:**
+```json
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Technology",
+    "description": "Articles about technology, programming, and software development",
+    "created_at": "2025-11-24T08:30:00.000Z",
+    "updated_at": "2025-11-24T08:30:00.000Z"
+  },
+  {
+    "id": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+    "name": "Business",
+    "description": "Business strategy, management, and entrepreneurship articles",
+    "created_at": "2025-11-24T08:35:00.000Z",
+    "updated_at": "2025-11-24T08:35:00.000Z"
+  }
+]
+```
+
+---
+
+### Create Tag
+**Purpose:** Creates a new tag for flexible article categorization.
+**Method:** POST
+**URL:** `http://localhost:9090/api/project-manager/api/tags/`
+
+**Request Body:**
+```json
+{
+  "name": "django"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "c3d4e5f6-g7h8-9012-cdef-345678901234",
+  "name": "django",
+  "created_at": "2025-11-24T08:40:00.000Z"
+}
+```
+
+---
+
+### Get All Tags
+**Purpose:** Retrieves all available tags.
+**Method:** GET
+**URL:** `http://localhost:9090/api/project-manager/api/tags/`
+
+**Response:**
+```json
+[
+  {
+    "id": "c3d4e5f6-g7h8-9012-cdef-345678901234",
+    "name": "django",
+    "created_at": "2025-11-24T08:40:00.000Z"
+  },
+  {
+    "id": "d4e5f6g7-h8i9-0123-def0-456789012345",
+    "name": "react",
+    "created_at": "2025-11-24T08:45:00.000Z"
+  }
+]
+```
+
+---
+
+### Create Article
+**Purpose:** Creates a new article with rich content and metadata.
+**Method:** POST
+**URL:** `http://localhost:9090/api/project-manager/api/articles/`
+
+**Production URL:** `https://server1.prolianceltd.com/api/project-manager/api/articles/`
+
+**Request Body:**
+```json
+{
+  "title": "Getting Started with Django REST Framework",
+  "content": "<h1>Introduction</h1><p>Django REST Framework is a powerful toolkit for building Web APIs...</p>",
+  "excerpt": "Learn how to build robust APIs with Django REST Framework",
+  "category": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "tags": ["django", "api", "python"],
+  "status": "published",
+  "featured_image": "https://example.com/django-rest-framework.jpg",
+  "reading_time": 5,
+  "published_at": "2025-11-24T09:00:00.000Z"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "e5f6g7h8-i9j0-1234-ef01-567890123456",
+  "title": "Getting Started with Django REST Framework",
+  "slug": "getting-started-with-django-rest-framework",
+  "content": "<h1>Introduction</h1><p>Django REST Framework is a powerful toolkit for building Web APIs...</p>",
+  "excerpt": "Learn how to build robust APIs with Django REST Framework",
+  "author_id": "user-123",
+  "author_first_name": "John",
+  "author_last_name": "Doe",
+  "author_email": "john.doe@company.com",
+  "category": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "category_name": "Technology",
+  "tags": ["c3d4e5f6-g7h8-9012-cdef-345678901234", "d4e5f6g7-h8i9-0123-def0-456789012345"],
+  "tags_list": ["django", "api"],
+  "status": "published",
+  "featured_image": "https://example.com/django-rest-framework.jpg",
+  "reading_time": 5,
+  "view_count": 0,
+  "published_at": "2025-11-24T09:00:00.000Z",
+  "created_at": "2025-11-24T08:50:00.000Z",
+  "updated_at": "2025-11-24T08:50:00.000Z"
+}
+```
+
+---
+
+### Get All Articles
+**Purpose:** Retrieves articles with optional filtering and pagination.
+**Method:** GET
+**URL:** `http://localhost:9090/api/project-manager/api/articles/`
+
+**Production URL:** `https://server1.prolianceltd.com/api/project-manager/api/articles/`
+
+**Optional Query Parameters:**
+- `status`: Filter by status (draft, published, archived)
+- `category`: Filter by category ID
+- `author`: Filter by author ID
+- `search`: Full-text search in title, content, and excerpt
+- `tags`: Filter by tag names (comma-separated)
+- `page`: Page number for pagination
+- `page_size`: Items per page (default: 20, max: 100)
+
+**Example URLs:**
+- All articles: `http://localhost:9090/api/project-manager/api/articles/`
+- Published only: `http://localhost:9090/api/project-manager/api/articles/?status=published`
+- By category: `http://localhost:9090/api/project-manager/api/articles/?category=a1b2c3d4-e5f6-7890-abcd-ef1234567890`
+- Search: `http://localhost:9090/api/project-manager/api/articles/?search=django`
+- By tags: `http://localhost:9090/api/project-manager/api/articles/?tags=django,api`
+
+**Response:**
+```json
+{
+  "count": 25,
+  "next": "http://localhost:9090/api/project-manager/api/articles/?page=2",
+  "previous": null,
+  "results": [
+    {
+      "id": "e5f6g7h8-i9j0-1234-ef01-567890123456",
+      "title": "Getting Started with Django REST Framework",
+      "slug": "getting-started-with-django-rest-framework",
+      "excerpt": "Learn how to build robust APIs with Django REST Framework",
+      "author_name": "John Doe",
+      "category_name": "Technology",
+      "status": "published",
+      "published_at": "2025-11-24T09:00:00.000Z",
+      "created_at": "2025-11-24T08:50:00.000Z",
+      "view_count": 42,
+      "tags_count": 3
+    }
+  ]
+}
+```
+
+---
+
+### Get Published Articles
+**Purpose:** Retrieves only published articles for public consumption.
+**Method:** GET
+**URL:** `http://localhost:9090/api/project-manager/api/articles/published/`
+
+**Response:** Same pagination format as Get All Articles, but filtered to published status only.
+
+---
+
+### Get My Articles
+**Purpose:** Retrieves articles authored by the current user.
+**Method:** GET
+**URL:** `http://localhost:9090/api/project-manager/api/articles/my_articles/`
+
+**Response:** Same pagination format as Get All Articles, but filtered to current user's articles.
+
+---
+
+### Get Featured Articles
+**Purpose:** Retrieves featured articles (published with featured images).
+**Method:** GET
+**URL:** `http://localhost:9090/api/project-manager/api/articles/featured/`
+
+**Response:**
+```json
+[
+  {
+    "id": "e5f6g7h8-i9j0-1234-ef01-567890123456",
+    "title": "Getting Started with Django REST Framework",
+    "slug": "getting-started-with-django-rest-framework",
+    "excerpt": "Learn how to build robust APIs with Django REST Framework",
+    "author_name": "John Doe",
+    "category_name": "Technology",
+    "published_at": "2025-11-24T09:00:00.000Z",
+    "created_at": "2025-11-24T08:50:00.000Z",
+    "view_count": 42,
+    "tags_count": 3
+  }
+]
+```
+
+---
+
+### Get Article by ID
+**Purpose:** Retrieves detailed information for a specific article.
+**Method:** GET
+**URL:** `http://localhost:9090/api/project-manager/api/articles/{article_id}/`
+
+**Example URL:** `http://localhost:9090/api/project-manager/api/articles/e5f6g7h8-i9j0-1234-ef01-567890123456/`
+
+**Response:**
+```json
+{
+  "id": "e5f6g7h8-i9j0-1234-ef01-567890123456",
+  "title": "Getting Started with Django REST Framework",
+  "slug": "getting-started-with-django-rest-framework",
+  "content": "<h1>Introduction</h1><p>Django REST Framework is a powerful toolkit for building Web APIs...</p>",
+  "excerpt": "Learn how to build robust APIs with Django REST Framework",
+  "author_id": "user-123",
+  "author_first_name": "John",
+  "author_last_name": "Doe",
+  "author_email": "john.doe@company.com",
+  "category": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "category_name": "Technology",
+  "tags": ["c3d4e5f6-g7h8-9012-cdef-345678901234", "d4e5f6g7-h8i9-0123-def0-456789012345"],
+  "tags_list": ["django", "api"],
+  "status": "published",
+  "featured_image": "https://example.com/django-rest-framework.jpg",
+  "reading_time": 5,
+  "view_count": 42,
+  "published_at": "2025-11-24T09:00:00.000Z",
+  "created_at": "2025-11-24T08:50:00.000Z",
+  "updated_at": "2025-11-24T08:50:00.000Z"
+}
+```
+
+---
+
+### Update Article
+**Purpose:** Updates an existing article.
+**Method:** PUT
+**URL:** `http://localhost:9090/api/project-manager/api/articles/{article_id}/`
+
+**Request Body:** Same as Create Article, but all fields are optional for partial updates.
+
+**Response:** Updated article object.
+
+---
+
+### Delete Article
+**Purpose:** Deletes an article.
+**Method:** DELETE
+**URL:** `http://localhost:9090/api/project-manager/api/articles/{article_id}/`
+
+**Response:** 204 No Content
+
+---
+
+### Increment Article View Count
+**Purpose:** Increments the view count when an article is read.
+**Method:** POST
+**URL:** `http://localhost:9090/api/project-manager/api/articles/{article_id}/increment_view/`
+
+**Response:**
+```json
+{
+  "view_count": 43
+}
+```

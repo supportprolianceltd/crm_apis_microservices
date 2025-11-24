@@ -19,6 +19,8 @@ def root_view(request):
             'tenants': '/api/tenant/tenants',
             'users': '/api/user/users',
             'reviews': '/api/reviews/',
+            'investments': '/api/investments/',
+            'events': '/api/events/events/',
             'docs': '/api/docs/',
             'token': '/api/token/',
             'environment_info': '/api/environment-info/'
@@ -32,6 +34,7 @@ urlpatterns = [
     path('api/user/', include('users.urls')),
     path('api/reviews/', include('reviews.urls')),  # This should point to your reviews/urls.py
     path('api/investments/', include('investments.urls')),
+    path('api/events/', include('events.urls')),
 
     # 2FA endpoints
     path('api/login/', LoginWith2FAView.as_view(), name='login_with_2fa'),
