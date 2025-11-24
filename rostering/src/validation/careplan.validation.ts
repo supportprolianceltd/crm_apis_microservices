@@ -374,8 +374,31 @@ const CARE_PLAN_STATUS = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
     const errors: string[] = [];
     if (!obj) return errors;
     // All CareRequirements fields are optional now; validate only when present
-    if ('careType' in obj && typeof obj.careType !== 'string') {
-      errors.push('careRequirements.careType must be a string');
+    const allowedCareTypes = [
+      'SINGLE_HANDED_CALL',
+      'DOUBLE_HANDED_CALL',
+      'SPECIALCARE'
+    ];
+    if ('careType' in obj && obj.careType !== undefined && obj.careType !== null) {
+      if (typeof obj.careType !== 'string' || !allowedCareTypes.includes(obj.careType)) {
+        errors.push(`careRequirements.careType must be one of: ${allowedCareTypes.join(', ')}`);
+      }
+    }
+    // Optional contract bounds (ISO date strings) and rollingWeeks (non-negative integer)
+    if ('contractStart' in obj && obj.contractStart !== undefined && obj.contractStart !== null) {
+      if (isNaN(Date.parse(obj.contractStart))) {
+        errors.push('careRequirements.contractStart must be a valid date string');
+      }
+    }
+    if ('contractEnd' in obj && obj.contractEnd !== undefined && obj.contractEnd !== null) {
+      if (isNaN(Date.parse(obj.contractEnd))) {
+        errors.push('careRequirements.contractEnd must be a valid date string');
+      }
+    }
+    if ('rollingWeeks' in obj && obj.rollingWeeks !== undefined && obj.rollingWeeks !== null) {
+      if (typeof obj.rollingWeeks !== 'number' || !Number.isFinite(obj.rollingWeeks) || obj.rollingWeeks < 0) {
+        errors.push('careRequirements.rollingWeeks must be a non-negative number');
+      }
     }
     return errors;
   } 

@@ -161,6 +161,20 @@ export class ClusterController {
         return res.status(404).json({ error: 'Cluster not found' });
       }
 
+      // Load linked schedules and extract distinct clientIds
+      const scheduleLinks = await (this.prisma as any).clusterAgreedCareSchedule.findMany({
+        where: { clusterId: clusterId, tenantId: tenantId.toString() },
+        select: {
+          agreedCareSchedule: { select: { careRequirements: { select: { carePlan: { select: { clientId: true } } } } } }
+        }
+      });
+
+      const linkedClientIds = Array.from(new Set(
+        scheduleLinks
+          .map((s: any) => s?.agreedCareSchedule?.careRequirements?.carePlan?.clientId)
+          .filter((id: any) => !!id)
+      ));
+
       // Get carer assignments from clustering service
       const assignments = await this.clusteringService.getCarerAssignmentsInCluster(clusterId);
       
@@ -191,7 +205,8 @@ export class ClusterController {
 
       return res.json({
         ...cluster,
-        carerAssignments: carersWithDetails
+        carerAssignments: carersWithDetails,
+        linkedClientIds
       });
     } catch (error: any) {
       console.error('getClusterDetails error', error);
@@ -619,6 +634,101 @@ export class ClusterController {
         error: 'Failed to assign visit to cluster',
         details: error?.message
       });
+    }
+  }
+
+  /**
+   * Assign an AgreedCareSchedule to a Cluster (idempotent)
+   * POST /clusters/:clusterId/assign-agreed-care-schedule/:scheduleId
+   */
+  public async assignAgreedCareScheduleToCluster(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const { clusterId, scheduleId } = req.params as { clusterId?: string; scheduleId?: string };
+      if (!clusterId || !scheduleId) return res.status(400).json({ error: 'clusterId and scheduleId are required in path' });
+
+      // Verify cluster belongs to tenant
+      const cluster = await (this.prisma as any).cluster.findFirst({ where: { id: clusterId, tenantId: tenantId.toString() } });
+      if (!cluster) return res.status(404).json({ error: 'Cluster not found' });
+
+      // Verify schedule belongs to tenant
+      const schedule = await (this.prisma as any).agreedCareSchedule.findFirst({ where: { id: scheduleId, tenantId: tenantId.toString() } });
+      if (!schedule) return res.status(404).json({ error: 'AgreedCareSchedule not found' });
+
+      // Idempotent create: skip if already linked
+      const existingLink = await (this.prisma as any).clusterAgreedCareSchedule.findFirst({
+        where: {
+          tenantId: tenantId.toString(),
+          clusterId: clusterId,
+          agreedCareScheduleId: scheduleId
+        }
+      });
+
+      if (existingLink) {
+        return res.json({ success: true, message: 'Schedule already assigned to cluster', data: existingLink });
+      }
+
+      const created = await (this.prisma as any).clusterAgreedCareSchedule.create({
+        data: {
+          tenantId: tenantId.toString(),
+          clusterId: clusterId,
+          agreedCareScheduleId: scheduleId
+        }
+      });
+
+      this.clusteringService.updateClusterStats(clusterId).catch((err) => console.error('updateClusterStats after assign schedule failed', err));
+
+      return res.status(201).json({ success: true, message: 'Schedule assigned to cluster', data: created });
+    } catch (error: any) {
+      console.error('assignAgreedCareScheduleToCluster error', error);
+      return res.status(500).json({ error: 'Failed to assign schedule to cluster', details: error?.message });
+    }
+  }
+
+  /**
+   * List AgreedCareSchedules linked to a Cluster
+   * GET /clusters/:clusterId/agreedschedules
+   */
+  public async getClusterAgreedSchedules(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const { clusterId } = req.params as { clusterId?: string };
+      if (!clusterId) return res.status(400).json({ error: 'clusterId required in path' });
+
+      const cluster = await (this.prisma as any).cluster.findFirst({ where: { id: clusterId, tenantId: tenantId.toString() } });
+      if (!cluster) return res.status(404).json({ error: 'Cluster not found' });
+
+      const links = await (this.prisma as any).clusterAgreedCareSchedule.findMany({
+        where: { tenantId: tenantId.toString(), clusterId },
+        include: {
+          agreedCareSchedule: {
+            include: {
+              careRequirements: {
+                include: { carePlan: true }
+              }
+            }
+          }
+        }
+      });
+
+      const schedules = links.map((l: any) => ({
+        id: l.agreedCareSchedule?.id,
+        day: l.agreedCareSchedule?.day,
+        enabled: l.agreedCareSchedule?.enabled,
+        careRequirementsId: l.agreedCareSchedule?.careRequirementsId,
+        carePlanId: l.agreedCareSchedule?.careRequirements?.carePlan?.id || null,
+        carePlanClientId: l.agreedCareSchedule?.careRequirements?.carePlan?.clientId || null,
+        linkedAt: l.createdAt
+      }));
+
+      return res.json({ clusterId, clusterName: cluster.name, schedules });
+    } catch (error: any) {
+      console.error('getClusterAgreedSchedules error', error);
+      return res.status(500).json({ error: 'Failed to fetch cluster agreed schedules', details: error?.message });
     }
   }
 
