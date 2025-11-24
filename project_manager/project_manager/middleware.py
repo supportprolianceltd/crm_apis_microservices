@@ -18,6 +18,11 @@ public_paths = [
     '/api/health/',
 ]
 
+# Paths that require authentication but not tenant schema
+auth_only_paths = [
+    '/api/project-manager/api/',
+]
+
 
 class SimpleUser:
     """
@@ -255,6 +260,18 @@ class CustomTenantSchemaMiddleware:
                 logger.error(f"✗ Schema switch failed for public endpoint: {str(e)}")
                 return JsonResponse({'error': 'Database configuration error'}, status=500)
 
+        # Handle auth-only endpoints (require JWT but not tenant schema)
+        if any(request.path.startswith(path) for path in auth_only_paths):
+            logger.info("Auth-only endpoint - using public schema")
+            try:
+                connection.set_schema_to_public()
+                response = self.get_response(request)
+                connection.set_schema_to_public()
+                return response
+            except Exception as e:
+                logger.error(f"✗ Schema switch failed for auth-only endpoint: {str(e)}")
+                return JsonResponse({'error': 'Database configuration error'}, status=500)
+
         # Get tenant schema from JWT payload
         jwt_payload = getattr(request, 'jwt_payload', None)
         tenant_schema = None
@@ -262,6 +279,25 @@ class CustomTenantSchemaMiddleware:
         if jwt_payload:
             tenant_schema = jwt_payload.get('tenant_schema')
             logger.info(f"✓ Found tenant_schema in JWT: {tenant_schema}")
+            if not tenant_schema:
+                # Try to get tenant_id and fetch schema from auth-service
+                tenant_id = jwt_payload.get('tenant_id')
+                if tenant_id:
+                    try:
+                        tenant_url = f"{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{tenant_id}/"
+                        resp = requests.get(
+                            tenant_url,
+                            headers={'Authorization': request.headers.get('Authorization', '')},
+                            timeout=5
+                        )
+                        if resp.status_code == 200:
+                            tenant_data = resp.json()
+                            tenant_schema = tenant_data.get('schema_name')
+                            logger.info(f"✓ Fetched tenant_schema from auth-service: {tenant_schema}")
+                        else:
+                            logger.error(f"✗ Failed to fetch tenant from auth-service: {resp.status_code}")
+                    except Exception as e:
+                        logger.error(f"✗ Failed to fetch tenant schema: {str(e)}")
         else:
             logger.warning("✗ No jwt_payload found on request")
 

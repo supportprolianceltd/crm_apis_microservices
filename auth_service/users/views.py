@@ -122,6 +122,21 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 import logging
 
+from .constants import (
+    ErrorMessages, LogMessages, ResponseKeys, ResponseStatuses, FieldNames,
+    StatusValues, ActionNames, URLPaths, QueryParams, EventTypes, DefaultValues,
+    SerializerFields, ModelNames, PermissionMessages, CacheKeys, FilePaths,
+    ContentTypes, HTTPMethods, Algorithms, JWTKeys, Headers, OrderingFields,
+    LookupFields, ContextKeys, DetailsKeys, URLParams, MetaAttributes,
+    JWKSKeys, ExportFormats, DateFormats, SecurityActions, ActivityActions,
+    SystemHealthMetrics, TrendValues, SystemStatus, ProfileFields,
+    PrefetchFields, SelectFields, ValuesFields, AnnotateFields, OrderByFields,
+    FilterFields, ExcludeFields, UpdateFields, CreateFields, EventPayloadKeys,
+    NotificationURLs, RandomChoices, StringFormats, LambdaDefaults,PublicUserDefaults,
+    SortedKeys, GroupedKeys, ResponseDataKeys, SerializerContextKeys,
+    SerializerDataKeys, RequestMetaKeys, RequestDataKeys, RequestQueryParams,
+    RequestFiles, RequestHeaders
+)
 logger = logging.getLogger(__name__)
 
 
@@ -177,8 +192,6 @@ class CustomPagination(PageNumberPagination):
         return response
 
 
-
-
 def get_tenant_domains(tenant):
     """
     Return primary domain and list of all domains for a tenant.
@@ -196,20 +209,20 @@ def get_root_admin(tenant):
     try:
         with tenant_context(tenant):
             admin = (
-                CustomUser.objects.filter(tenant=tenant, role="root-admin")
-                .select_related("profile")
+                CustomUser.objects.filter(tenant=tenant, role=StatusValues.ROOT_ADMIN)
+                .select_related(FieldNames.PROFILE)
                 .first()
             )
             if admin:
                 return {
-                    "id": admin.id,
-                    "email": admin.email,
-                    "first_name": admin.first_name,
-                    "last_name": admin.last_name,
-                    "role": admin.role,
+                    ResponseKeys.ID: admin.id,
+                    ResponseKeys.EMAIL: admin.email,
+                    ResponseKeys.FIRST_NAME: admin.first_name,
+                    ResponseKeys.LAST_NAME: admin.last_name,
+                    ResponseKeys.ROLE: admin.role,
                 }
     except Exception as exc:
-        logger.error(f"Failed to fetch root-admin for {tenant.schema_name}: {exc}")
+        logger.error(LogMessages.USER_NOT_FOUND.format("", tenant.schema_name, exc))
     return None
 
 
@@ -224,24 +237,18 @@ class AllTenantsUsersListView(generics.ListAPIView):
     serializer_class = CustomUserListSerializer
 
     def list(self, request, *args, **kwargs):
-        cache_key = "public_all_tenants_users"
+        cache_key = CacheKeys.PUBLIC_ALL_TENANTS_USERS
         data = cache.get(cache_key)
         if data:
             return Response(data)
 
-        EXCLUDED_SCHEMAS = {get_public_schema_name(), 'auth-service'}
+        EXCLUDED_SCHEMAS = DefaultValues.EXCLUDED_SCHEMAS
 
-        tenants_data = defaultdict(
-            lambda: {
-                "users": [], "unique_id": None, "name": None,
-                "primary_domain": None, "all_domains": [], "status": None,
-                "root_admin": None, "created_at": None,
-            }
-        )
+        tenants_data = defaultdict(LambdaDefaults.DEFAULT_DICT)
 
         # ---- 1. Fetch client tenants -------------------------------------------------
         tenants = (
-            Tenant.objects.prefetch_related('domains')
+            Tenant.objects.prefetch_related(PrefetchFields.DOMAINS)
             .exclude(schema_name__in=EXCLUDED_SCHEMAS)
         )
         total_tenants = tenants.count()
@@ -252,25 +259,25 @@ class AllTenantsUsersListView(generics.ListAPIView):
                 # users inside the tenant schema
                 with tenant_context(tenant):
                     users = CustomUser.objects.filter(tenant=tenant) \
-                        .select_related("profile", "tenant", "branch") \
-                        .prefetch_related("profile__skill_details")
+                        .select_related(PrefetchFields.PROFILE, PrefetchFields.TENANT, PrefetchFields.BRANCH) \
+                        .prefetch_related(PrefetchFields.PROFILE__SKILL_DETAILS_SHORT)
 
                     tenants_data[tenant.schema_name]["users"].extend(users)
 
                 # tenant meta (still in public schema)
                 tenants_data[tenant.schema_name].update(
                     {
-                        "unique_id": str(tenant.unique_id) if tenant.unique_id else None,
-                        "name": tenant.name,
-                        "status": tenant.status,
-                        "created_at": tenant.created_at.isoformat() if tenant.created_at else None,
+                        GroupedKeys.UNIQUE_ID: str(tenant.unique_id) if tenant.unique_id else None,
+                        GroupedKeys.NAME: tenant.name,
+                        GroupedKeys.STATUS: tenant.status,
+                        GroupedKeys.CREATED_AT: tenant.created_at.isoformat() if tenant.created_at else None,
                     }
                 )
                 tenants_data[tenant.schema_name].update(get_tenant_domains(tenant))
-                tenants_data[tenant.schema_name]["root_admin"] = get_root_admin(tenant)
+                tenants_data[tenant.schema_name][GroupedKeys.ROOT_ADMIN] = get_root_admin(tenant)
 
             except Exception as exc:
-                logger.error(f"Error processing tenant {tenant.schema_name}: {exc}")
+                logger.error(LogMessages.ERROR_PROCESSING_TENANT.format(tenant.schema_name, exc))
                 continue
 
         # ---- 3. Serialize -----------------------------------------------------------
@@ -294,27 +301,27 @@ class AllTenantsUsersListView(generics.ListAPIView):
         sorted_tenants = sorted(grouped.items())
 
         response_data = {
-            "tenants": [
+            ResponseDataKeys.TENANTS: [
                 {
-                    "schema_name": schema,
-                    "name": info["name"],
-                    "primary_domain": info["primary_domain"],
-                    "all_domains": info["all_domains"],
-                    "status": info["status"],
-                    "root_admin": info["root_admin"],
-                    "unique_id": info["unique_id"],
-                    "count": info["count"],
-                    "created_at": info["created_at"],
-                    "users": info["users"],
+                    GroupedKeys.SCHEMA_NAME: schema,
+                    GroupedKeys.NAME: info[GroupedKeys.NAME],
+                    GroupedKeys.PRIMARY_DOMAIN: info[GroupedKeys.PRIMARY_DOMAIN],
+                    GroupedKeys.ALL_DOMAINS: info[GroupedKeys.ALL_DOMAINS],
+                    GroupedKeys.STATUS: info[GroupedKeys.STATUS],
+                    GroupedKeys.ROOT_ADMIN: info[GroupedKeys.ROOT_ADMIN],
+                    GroupedKeys.UNIQUE_ID: info[GroupedKeys.UNIQUE_ID],
+                    GroupedKeys.COUNT: info[GroupedKeys.COUNT],
+                    GroupedKeys.CREATED_AT: info[GroupedKeys.CREATED_AT],
+                    GroupedKeys.USERS: info[GroupedKeys.USERS],
                 }
                 for schema, info in sorted_tenants
             ],
-            "total_count": sum(info["count"] for info in grouped.values()),
-            "total_tenants": total_tenants,
+            ResponseDataKeys.TOTAL_COUNT: sum(info[GroupedKeys.COUNT] for info in grouped.values()),
+            ResponseDataKeys.TOTAL_TENANTS: total_tenants,
         }
 
         # cache the heavy result
-        cache.set(cache_key, response_data, timeout=60 * 5)
+        cache.set(cache_key, response_data, timeout=DefaultValues.CACHE_TIMEOUT_5_MIN)
         return Response(response_data)
 
 @method_decorator(cache_page(60 * 5), name='dispatch')
@@ -328,21 +335,14 @@ class AllTenantNamesUsersListView(generics.ListAPIView):
     pagination_class = CustomPagination
 
     def list(self, request, *args, **kwargs):
-        cache_key = "public_all_tenants_users_paginated"
+        cache_key = CacheKeys.PUBLIC_ALL_TENANTS_USERS_PAGINATED
         data = cache.get(cache_key)
         if data:
             return Response(data)
 
-        EXCLUDED_SCHEMAS = {get_public_schema_name(), 'auth-service'}
+        EXCLUDED_SCHEMAS = DefaultValues.EXCLUDED_SCHEMAS
 
-        tenants_data = defaultdict(
-            lambda: {
-                "users": [], "unique_id": None, "name": None,
-                "primary_domain": None,
-                "all_domains": [], "status": None,
-                "root_admin": None, "created_at": None,
-            }
-        )
+        tenants_data = defaultdict(LambdaDefaults.DEFAULT_DICT)
 
         tenants = (
             Tenant.objects.prefetch_related('domains')
@@ -354,7 +354,7 @@ class AllTenantNamesUsersListView(generics.ListAPIView):
             try:
                 with tenant_context(tenant):
                     users = CustomUser.objects.filter(tenant=tenant) \
-                        .prefetch_related("profile", "tenant", "branch", "profile__skill_details")
+                        .prefetch_related(PrefetchFields.PROFILE, PrefetchFields.TENANT, PrefetchFields.BRANCH, PrefetchFields.PROFILE__SKILL_DETAILS_SHORT)
                     tenants_data[tenant.schema_name]["users"].extend(users)
 
                 tenants_data[tenant.schema_name].update(
@@ -374,17 +374,17 @@ class AllTenantNamesUsersListView(generics.ListAPIView):
 
         grouped = {}
         for schema, data in tenants_data.items():
-            users_list = sorted(data["users"], key=lambda u: u.email)
+            users_list = sorted(data[GroupedKeys.USERS], key=SortedKeys.EMAIL)
             grouped[schema] = {
-                "unique_id": data["unique_id"],
-                "name": data["name"],
-                "primary_domain": data["primary_domain"],
-                "all_domains": data["all_domains"],
-                "status": data["status"],
-                "root_admin": data["root_admin"],
-                "count": len(users_list),
-                "created_at": data["created_at"],
-                "users": self.get_serializer(
+                GroupedKeys.UNIQUE_ID: data[GroupedKeys.UNIQUE_ID],
+                GroupedKeys.NAME: data[GroupedKeys.NAME],
+                GroupedKeys.PRIMARY_DOMAIN: data[GroupedKeys.PRIMARY_DOMAIN],
+                GroupedKeys.ALL_DOMAINS: data[GroupedKeys.ALL_DOMAINS],
+                GroupedKeys.STATUS: data[GroupedKeys.STATUS],
+                GroupedKeys.ROOT_ADMIN: data[GroupedKeys.ROOT_ADMIN],
+                GroupedKeys.COUNT: len(users_list),
+                GroupedKeys.CREATED_AT: data[GroupedKeys.CREATED_AT],
+                GroupedKeys.USERS: self.get_serializer(
                     users_list, many=True, context=self.get_serializer_context()
                 ).data,
             }
@@ -392,16 +392,16 @@ class AllTenantNamesUsersListView(generics.ListAPIView):
         sorted_tenants = sorted(grouped.items())
         tenants_list = [
             {
-                "schema_name": schema,
-                "name": info["name"],
-                "primary_domain": info["primary_domain"],
-                "all_domains": info["all_domains"],
-                "status": info["status"],
-                "root_admin": info["root_admin"],
-                "unique_id": info["unique_id"],
-                "count": info["count"],
-                "created_at": info["created_at"],
-                "users": info["users"],
+                ResponseDataKeys.SCHEMA_NAME: schema,
+                ResponseDataKeys.NAME: info[GroupedKeys.NAME],
+                ResponseDataKeys.PRIMARY_DOMAIN: info[GroupedKeys.PRIMARY_DOMAIN],
+                ResponseDataKeys.ALL_DOMAINS: info[GroupedKeys.ALL_DOMAINS],
+                ResponseDataKeys.STATUS: info[GroupedKeys.STATUS],
+                ResponseDataKeys.ROOT_ADMIN: info[GroupedKeys.ROOT_ADMIN],
+                ResponseDataKeys.UNIQUE_ID: info[GroupedKeys.UNIQUE_ID],
+                ResponseDataKeys.COUNT: info[GroupedKeys.COUNT],
+                ResponseDataKeys.CREATED_AT: info[GroupedKeys.CREATED_AT],
+                ResponseDataKeys.USERS: info[GroupedKeys.USERS],
             }
             for schema, info in sorted_tenants
         ]
@@ -431,18 +431,18 @@ class TermsAndConditionsView(APIView):
         with tenant_context(tenant):
             user = request.user
             if user.has_accepted_terms:
-                logger.info(f"User {user.email} has already accepted terms and conditions.")
+                logger.info(LogMessages.USER_HAS_ALREADY_ACCEPTED_TERMS.format(user.email))
                 return Response(
-                    {"status": "success", "message": "Terms and conditions already accepted."},
-                    status=status.HTTP_200_OK,
+                    {ResponseKeys.STATUS: ResponseStatuses.SUCCESS, ResponseKeys.MESSAGE: "Terms and conditions already accepted."},
+                    status=DefaultValues.INDEX_200_OK,
                 )
 
             user.has_accepted_terms = True
             user.save()
-            logger.info(f"User {user.email} accepted terms and conditions for tenant {tenant.schema_name}.")
+            logger.info(LogMessages.USER_ACCEPTED_TERMS.format(user.email, tenant.schema_name))
             return Response(
-                {"status": "success", "message": "Terms and conditions accepted successfully."},
-                status=status.HTTP_200_OK,
+                {ResponseKeys.STATUS: ResponseStatuses.SUCCESS, ResponseKeys.MESSAGE: "Terms and conditions accepted successfully."},
+                status=DefaultValues.INDEX_200_OK,
             )
 
 
@@ -450,23 +450,22 @@ class UserPasswordRegenerateView(APIView):
     def post(self, request, user_id=None):
         # Accept user_id from URL or request data
         if user_id is None:
-            user_id = request.data.get("user_id")
+            user_id = request.data.get(RequestDataKeys.USER_ID)
         if not user_id:
-            return Response({"detail": "user_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({ResponseKeys.DETAIL: ErrorMessages.USER_ID_IS_REQUIRED}, status=DefaultValues.INDEX_400_BAD_REQUEST)
 
         try:
             user = CustomUser.objects.get(id=user_id)
         except CustomUser.DoesNotExist:
-            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({ResponseKeys.DETAIL: ErrorMessages.USER_NOT_FOUND}, status=DefaultValues.INDEX_404_NOT_FOUND)
 
         # Generate a strong password
-        alphabet = string.ascii_letters + string.digits + string.punctuation
-        password = "".join(secrets.choice(alphabet) for _ in range(20))
+        password = "".join(secrets.choice(RandomChoices.ASCII_LETTERS_DIGITS) for _ in range(DefaultValues.INDEX_20))
 
         user.set_password(password)
         user.save()
 
-        return Response({"user_id": user.id, "email": user.email, "new_password": password}, status=status.HTTP_200_OK)
+        return Response({ResponseKeys.USER_ID: user.id, ResponseKeys.EMAIL: user.email, ResponseKeys.NEW_PASSWORD: password}, status=DefaultValues.INDEX_200_OK)
 
 
 class PasswordResetRequestView(generics.GenericAPIView):
@@ -474,101 +473,101 @@ class PasswordResetRequestView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        logger.info(f"Processing password reset request with data: {request.data}")
+        logger.info(LogMessages.PROCESSING_PASSWORD_RESET_REQUEST.format(request.data))
 
         # Validate serializer
         serializer = self.get_serializer(data=request.data, context={"request": request})
         if not serializer.is_valid():
-            logger.error(f"Serializer validation failed: {serializer.errors}")
-            return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            logger.error(LogMessages.SERIALIZER_VALIDATION_FAILED.format(serializer.errors))
+            return Response({ResponseKeys.ERROR: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         email = serializer.validated_data["email"]
         ip_address = request.META.get("REMOTE_ADDR")
         user_agent = request.META.get("HTTP_USER_AGENT", "")
-        logger.info(f"Processing password reset for email: {email}")
+        logger.info(LogMessages.PROCESSING_PASSWORD_RESET_FOR_EMAIL.format(email))
 
         # Extract tenant using email domain
         try:
             email_domain = email.split('@')[1]
-            logger.debug(f"Email domain: {email_domain}")
+            logger.debug(LogMessages.EMAIL_DOMAIN.format(email_domain))
             domain = Domain.objects.filter(domain=email_domain).first()
             if not domain:
-                logger.error(f"No domain found for email domain: {email_domain}")
+                logger.error(LogMessages.NO_DOMAIN_FOUND_FOR_EMAIL_DOMAIN.format(email_domain))
                 UserActivity.objects.create(
                     user=None,
                     tenant=Tenant.objects.first(),
                     action="password_reset_request",
                     performed_by=None,
-                    details={"reason": f"No tenant found for email domain: {email_domain}"},
+                    details={"reason": ErrorMessages.NO_TENANT_FOUND_FOR_EMAIL_DOMAIN.format(email_domain)},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"error": f"No tenant found for email domain: {email_domain}"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({ResponseKeys.ERROR: ErrorMessages.NO_TENANT_FOUND_FOR_EMAIL_DOMAIN.format(email_domain)}, status=status.HTTP_404_NOT_FOUND)
 
             tenant = domain.tenant
-            logger.info(f"Found tenant: {tenant.schema_name} for email domain: {email_domain}")
+            logger.info(LogMessages.FOUND_TENANT_FOR_EMAIL_DOMAIN.format(tenant.schema_name, email_domain))
         except (ValueError, IndexError) as e:
-            logger.error(f"Invalid email format: {email}, error: {str(e)}")
+            logger.error(ErrorMessages.INVALID_EMAIL_FORMAT.format(email, str(e)))
             UserActivity.objects.create(
                 user=None,
                 tenant=Tenant.objects.first(),
                 action="password_reset_request",
                 performed_by=None,
-                details={"reason": f"Invalid email format: {str(e)}"},
+                details={"reason": ErrorMessages.INVALID_EMAIL_FORMAT.format("", str(e))},
                 ip_address=ip_address,
                 user_agent=user_agent,
                 success=False,
             )
-            return Response({"error": "Invalid email format"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({ResponseKeys.ERROR: ErrorMessages.INVALID_EMAIL_FORMAT.format("", "")}, status=status.HTTP_400_BAD_REQUEST)
 
         # Perform DB operations in the tenant schema
         with tenant_context(tenant):
             try:
                 user = CustomUser.objects.get(email=email, tenant=tenant)
             except CustomUser.DoesNotExist:
-                logger.warning(f"No user found with email {email} in tenant {tenant.schema_name}")
+                logger.warning(LogMessages.USER_WITH_EMAIL_NOT_FOUND.format(email, tenant.schema_name))
                 UserActivity.objects.create(
                     user=None,
                     tenant=tenant,
                     action="password_reset_request",
                     performed_by=None,
-                    details={"reason": f"No user found with email {email}"},
+                    details={"reason": ErrorMessages.NO_USER_FOUND_WITH_EMAIL},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"error": "No user found with this email"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({ResponseKeys.ERROR: ErrorMessages.NO_USER_FOUND_WITH_EMAIL}, status=status.HTTP_404_NOT_FOUND)
 
             # Check if user is locked or suspended
             if user.is_locked or user.status == "suspended" or not user.is_active:
-                logger.warning(f"User {email} is locked or suspended in tenant {tenant.schema_name}")
+                logger.warning(LogMessages.USER_LOCKED_OR_SUSPENDED.format(email, tenant.schema_name))
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
                     action="password_reset_request",
                     performed_by=None,
-                    details={"reason": "Account locked or suspended"},
+                    details={"reason": ErrorMessages.ACCOUNT_LOCKED_OR_SUSPENDED},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"error": "Account is locked or suspended"}, status=status.HTTP_403_FORBIDDEN)
+                return Response({ResponseKeys.ERROR: ErrorMessages.ACCOUNT_LOCKED_OR_SUSPENDED}, status=status.HTTP_403_FORBIDDEN)
 
             # Check if IP is blocked
             if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
-                logger.warning(f"IP {ip_address} is blocked for tenant {tenant.schema_name}")
+                logger.warning(LogMessages.IP_BLOCKED.format(ip_address, tenant.schema_name))
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
                     action="password_reset_request",
                     performed_by=None,
-                    details={"reason": "IP address blocked"},
+                    details={"reason": ErrorMessages.THIS_IP_ADDRESS_IS_BLOCKED},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"error": "This IP address is blocked"}, status=status.HTTP_403_FORBIDDEN)
+                return Response({ResponseKeys.ERROR: ErrorMessages.THIS_IP_ADDRESS_IS_BLOCKED}, status=status.HTTP_403_FORBIDDEN)
 
             # Create password reset token
             token = str(uuid.uuid4())
@@ -579,7 +578,7 @@ class PasswordResetRequestView(generics.GenericAPIView):
                 token=token,
                 expires_at=expires_at
             )
-            logger.info(f"Password reset token created for user {email} in tenant {tenant.schema_name}")
+            logger.info(LogMessages.PASSWORD_RESET_TOKEN_CREATED.format(email, tenant.schema_name))
 
             # Send notification to external service
             event_payload = {
@@ -587,7 +586,7 @@ class PasswordResetRequestView(generics.GenericAPIView):
                     "event_id": str(uuid.uuid4()),
                     "event_type": "user.password.reset.requested",
                     "event_version": "1.0",
-                    "created_at": timezone.now().isoformat(),   
+                    "created_at": timezone.now().isoformat(),
                     "source": "auth-service",
                     "tenant_id": str(tenant.unique_id),
                 },
@@ -610,9 +609,9 @@ class PasswordResetRequestView(generics.GenericAPIView):
                     timeout=5
                 )
                 response.raise_for_status()
-                logger.info(f"Notification sent for password reset: {user.email}, Status: {response.status_code}")
+                logger.info(LogMessages.NOTIFICATION_SENT_FOR_PASSWORD_RESET.format(user.email, response.status_code))
             except requests.exceptions.RequestException as e:
-                logger.error(f"Failed to send password reset notification for {user.email}: {str(e)}")
+                logger.error(LogMessages.FAILED_TO_SEND_PASSWORD_RESET_NOTIFICATION.format(user.email, str(e)))
 
             # # Log activity
             # UserActivity.objects.create(
@@ -628,9 +627,9 @@ class PasswordResetRequestView(generics.GenericAPIView):
 
         return Response(
             {
-                "detail": "Password reset token generated successfully.",
-                "tenant_schema": tenant.schema_name,
-                "email": email
+                ResponseKeys.DETAIL: LogMessages.PASSWORD_RESET_TOKEN_GENERATED_SUCCESSFULLY,
+                ResponseKeys.TENANT_SCHEMA: tenant.schema_name,
+                ResponseKeys.EMAIL: email
             },
             status=status.HTTP_200_OK
         )
@@ -641,11 +640,11 @@ class PasswordResetConfirmView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        logger.info(f"Processing password reset confirmation with data: {request.data}")
-        
+        logger.info(LogMessages.PROCESSING_PASSWORD_RESET_CONFIRMATION.format(request.data))
+
         serializer = self.get_serializer(data=request.data, context={"request": request})
         if not serializer.is_valid():
-            logger.error(f"Validation failed for password reset confirmation: {serializer.errors}")
+            logger.error(LogMessages.VALIDATION_FAILED_FOR_PASSWORD_RESET_CONFIRMATION.format(serializer.errors))
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         token = serializer.validated_data["token"]
@@ -655,70 +654,70 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 
         # The middleware has already set the tenant based on the token
         tenant = request.tenant
-        logger.info(f"Processing password reset confirmation in tenant: {tenant.schema_name}")
+        logger.info(LogMessages.PROCESSING_PASSWORD_RESET_CONFIRMATION_IN_TENANT.format(tenant.schema_name))
 
         try:
             # Token already used?
             reset_token = PasswordResetToken.objects.select_related('user').filter(token=token).first()
             if not reset_token:
-                logger.warning(f"Invalid token {token} in schema {tenant.schema_name}")
+                logger.warning(LogMessages.INVALID_TOKEN.format(token, tenant.schema_name))
                 UserActivity.objects.create(
                     user=None,
                     tenant=tenant,
                     action="password_reset_confirm",
                     performed_by=None,
-                    details={"reason": "Invalid token"},
+                    details={"reason": ErrorMessages.INVALID_TOKEN},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({ResponseKeys.DETAIL: ErrorMessages.INVALID_OR_EXPIRED_TOKEN}, status=status.HTTP_400_BAD_REQUEST)
 
             if reset_token.used:
-                logger.warning(f"Token {token} already used in schema {tenant.schema_name}")
+                logger.warning(LogMessages.TOKEN_ALREADY_USED.format(token, tenant.schema_name))
                 UserActivity.objects.create(
                     user=reset_token.user,
                     tenant=tenant,
                     action="password_reset_confirm",
                     performed_by=None,
-                    details={"reason": "Token already used"},
+                    details={"reason": ErrorMessages.THIS_TOKEN_HAS_ALREADY_BEEN_USED},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"detail": "This token has already been used."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({ResponseKeys.DETAIL: ErrorMessages.THIS_TOKEN_HAS_ALREADY_BEEN_USED}, status=status.HTTP_400_BAD_REQUEST)
 
             # Token expired?
             if reset_token.expires_at < timezone.now():
-                logger.warning(f"Token {token} expired in schema {tenant.schema_name}")
+                logger.warning(LogMessages.TOKEN_EXPIRED.format(token, tenant.schema_name))
                 UserActivity.objects.create(
                     user=reset_token.user,
                     tenant=tenant,
                     action="password_reset_confirm",
                     performed_by=None,
-                    details={"reason": "Token expired"},
+                    details={"reason": ErrorMessages.THIS_TOKEN_HAS_EXPIRED},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"detail": "This token has expired."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({ResponseKeys.DETAIL: ErrorMessages.THIS_TOKEN_HAS_EXPIRED}, status=status.HTTP_400_BAD_REQUEST)
 
             user = reset_token.user
 
             # Additional user checks
             if user.is_locked or user.status == "suspended" or not user.is_active:
-                logger.warning(f"User {user.email} is locked or suspended in tenant {tenant.schema_name}")
+                logger.warning(LogMessages.USER_LOCKED_OR_SUSPENDED.format(user.email, tenant.schema_name))
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
                     action="password_reset_confirm",
                     performed_by=None,
-                    details={"reason": "Account locked or suspended"},
+                    details={"reason": ErrorMessages.ACCOUNT_IS_LOCKED_OR_SUSPENDED},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"detail": "Account is locked or suspended."}, status=status.HTTP_403_FORBIDDEN)
+                return Response({ResponseKeys.DETAIL: ErrorMessages.ACCOUNT_IS_LOCKED_OR_SUSPENDED}, status=status.HTTP_403_FORBIDDEN)
 
             with transaction.atomic():
                 user.set_password(new_password)
@@ -728,7 +727,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
                 reset_token.used = True
                 reset_token.save()
 
-                logger.info(f"Password reset successful for user {user.email} in tenant {tenant.schema_name}")
+                logger.info(LogMessages.PASSWORD_RESET_SUCCESSFUL.format(user.email, tenant.schema_name))
 
                 # Send notification to external service
                 event_payload = {
@@ -753,9 +752,9 @@ class PasswordResetConfirmView(generics.GenericAPIView):
                         timeout=5
                     )
                     response.raise_for_status()
-                    logger.info(f"Notification sent for password reset confirmation: {user.email}, Status: {response.status_code}")
+                    logger.info(LogMessages.NOTIFICATION_SENT_FOR_PASSWORD_RESET_CONFIRMATION.format(user.email, response.status_code))
                 except requests.exceptions.RequestException as e:
-                    logger.error(f"Failed to send password reset confirmation notification for {user.email}: {str(e)}")
+                    logger.error(LogMessages.FAILED_TO_SEND_PASSWORD_RESET_CONFIRMATION_NOTIFICATION.format(user.email, str(e)))
 
                 # Log successful activity
                 UserActivity.objects.create(
@@ -769,10 +768,10 @@ class PasswordResetConfirmView(generics.GenericAPIView):
                     success=True,
                 )
 
-            return Response({"detail": "Password reset successfully."}, status=status.HTTP_200_OK)
+            return Response({ResponseKeys.DETAIL: ErrorMessages.PASSWORD_RESET_SUCCESSFULLY}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.exception(f"Error during password reset confirmation in schema {tenant.schema_name}: {str(e)}")
+            logger.exception(LogMessages.ERROR_DURING_PASSWORD_RESET_CONFIRMATION.format(tenant.schema_name, str(e)))
             UserActivity.objects.create(
                 user=None,
                 tenant=tenant,
@@ -783,7 +782,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
                 user_agent=user_agent,
                 success=False,
             )
-            return Response({"detail": "Password reset failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({ResponseKeys.DETAIL: ErrorMessages.PASSWORD_RESET_FAILED}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -916,11 +915,11 @@ class UserViewSet(viewsets.ModelViewSet):
             logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
             try:
                 # Generate a unique event ID in the format 'evt-<uuid>'
-                event_id = f"evt-{str(uuid.uuid4())[:8]}"
+                event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                 # Get user agent from request
-                user_agent = self.request.META.get("HTTP_USER_AGENT", "Unknown")
+                user_agent = self.request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
                 # Define company name (assuming tenant name or a custom field)
-                company_name = tenant.name if hasattr(tenant, 'name') else "Unknown Company"
+                company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
                 # Define login link (customize as needed)
                 login_link = settings.WEB_PAGE_URL
 
@@ -936,7 +935,7 @@ class UserViewSet(viewsets.ModelViewSet):
                         "event_type": "user.account.created",
                         "event_id": event_id,
                         "created_at": timezone.now().isoformat(),
-                        "source": "auth-service",
+                        EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
                     },
                     "data": {
                         "user_email": user_obj.email,
@@ -1246,11 +1245,11 @@ class UserViewSet(viewsets.ModelViewSet):
                         logger.info(f"🎯 Sending user creation event for {user_obj.email} to notification service.")
                         try:
                             # Generate a unique event ID in the format 'evt-<uuid>'
-                            event_id = f"evt-{str(uuid.uuid4())[:8]}"
+                            event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                             # Get user agent from request
-                            user_agent = request.META.get("HTTP_USER_AGENT", "Unknown")
+                            user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
                             # Define company name (assuming tenant name or a custom field)
-                            company_name = tenant.name if hasattr(tenant, 'name') else "Unknown Company"
+                            company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
                             # Define login link (customize as needed)
                             login_link = "https://learn.prolianceltd.com/home/login"
 
@@ -1260,7 +1259,7 @@ class UserViewSet(viewsets.ModelViewSet):
                                     "event_type": "user.account.created",
                                     "event_id": event_id,
                                     "created_at": timezone.now().isoformat(),
-                                    "source": "auth-service",
+                                    EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
                                 },
                                 "data": {
                                     "user_email": user_obj.email,
@@ -1330,12 +1329,12 @@ class PublicRegisterView(generics.CreateAPIView):
             else:
                 flattened_data[k] = v
         
-        tenant_id = flattened_data.get('tenant_id')
-        tenant_schema = flattened_data.get('tenant_schema')
+        tenant_id = flattened_data.get(RequestDataKeys.TENANT_ID)
+        tenant_schema = flattened_data.get(RequestDataKeys.TENANT_SCHEMA)
         
         if not tenant_id or not tenant_schema:
             return Response(
-                {'error': 'tenant_id and tenant_schema are required for public registration.'},
+                {ResponseKeys.ERROR: ErrorMessages.TENANT_ID_AND_SCHEMA_ARE_REQUIRED},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -1344,7 +1343,7 @@ class PublicRegisterView(generics.CreateAPIView):
             tenant = Tenant.objects.get(unique_id=tenant_id, schema_name=tenant_schema)
         except Tenant.DoesNotExist:
             return Response(
-                {'error': 'Invalid tenant information.'},
+                {ResponseKeys.ERROR: ErrorMessages.INVALID_TENANT_INFORMATION},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -1352,11 +1351,11 @@ class PublicRegisterView(generics.CreateAPIView):
             # Create a minimal mock user to satisfy serializer requirements
             class SimpleUser:
                 def __init__(self):
-                    self.id = 'public-system'
-                    self.email = 'public@system.com'
-                    self.first_name = 'Public'
-                    self.last_name = 'Registration'
-                    self.role = 'user'
+                    self.id = PublicUserDefaults.ID
+                    self.email = PublicUserDefaults.EMAIL
+                    self.first_name = PublicUserDefaults.FIRST_NAME
+                    self.last_name = PublicUserDefaults.LAST_NAME
+                    self.role = PublicUserDefaults.ROLE
                     self.tenant = tenant
                     self.is_superuser = False
                 
@@ -1385,113 +1384,113 @@ class PublicRegisterView(generics.CreateAPIView):
 
             # Prepopulate required profile nested fields with empty lists to satisfy serializer
             profile_data = {
-                'professional_qualifications': [],
-                'employment_details': [],
-                'education_details': [],
-                'reference_checks': [],
-                'proof_of_address': [],
-                'insurance_verifications': [],
-                'driving_risk_assessments': [],
-                'legal_work_eligibilities': [],
-                'other_user_documents': [],
+                ProfileFields.PROFESSIONAL_QUALIFICATIONS: [],
+                ProfileFields.EMPLOYMENT_DETAILS: [],
+                ProfileFields.EDUCATION_DETAILS: [],
+                ProfileFields.REFERENCE_CHECKS: [],
+                ProfileFields.PROOF_OF_ADDRESS: [],
+                ProfileFields.INSURANCE_VERIFICATIONS: [],
+                ProfileFields.DRIVING_RISK_ASSESSMENTS: [],
+                ProfileFields.LEGAL_WORK_ELIGIBILITIES: [],
+                ProfileFields.OTHER_USER_DOCUMENTS: [],
                 # Add other profile fields if needed, e.g., from form
-                'work_phone': flattened_data.get('phoneNumber', ''),
-                'personal_phone': flattened_data.get('phoneNumber', ''),
-                'next_of_kin': flattened_data.get('nextOfKinName', ''),
-                'next_of_kin_phone_number': flattened_data.get('nextOfKinPhone', ''),
-                'relationship_to_next_of_kin': 'N/A',
-                'dob': None if not flattened_data.get('dob', '').strip() else flattened_data.get('dob'),
-                'gender': flattened_data.get('sex', ''),
+                ProfileFields.WORK_PHONE: flattened_data.get(RequestDataKeys.PHONE_NUMBER, ''),
+                ProfileFields.PERSONAL_PHONE: flattened_data.get(RequestDataKeys.PHONE_NUMBER, ''),
+                ProfileFields.NEXT_OF_KIN: flattened_data.get(RequestDataKeys.NEXT_OF_KIN_NAME, ''),
+                ProfileFields.NEXT_OF_KIN_PHONE_NUMBER: flattened_data.get(RequestDataKeys.NEXT_OF_KIN_PHONE, ''),
+                ProfileFields.RELATIONSHIP_TO_NEXT_OF_KIN: ProfileFields.RELATIONSHIP_TO_NEXT_OF_KIN_DEFAULT,
+                ProfileFields.DOB: None if not flattened_data.get(RequestDataKeys.DOB, '').strip() else flattened_data.get(RequestDataKeys.DOB),
+                ProfileFields.GENDER: flattened_data.get(RequestDataKeys.SEX, ''),
             }
-            flattened_data['profile'] = profile_data
+            flattened_data[ProfileFields.PROFILE] = profile_data
 
             # Use provided email if available; generate only if missing
-            if 'email' not in flattened_data:
+            if RequestDataKeys.EMAIL not in flattened_data:
                 # Generate temp email from phone or name
-                phone = flattened_data.get('phoneNumber', '')
-                name = f"{flattened_data.get('firstName', '')}.{flattened_data.get('surname', '')}".lower()
-                base_email = f"{name.replace(' ', '')}@{tenant_schema}.temp.com"
+                phone = flattened_data.get(RequestDataKeys.PHONE_NUMBER, '')
+                name = f"{flattened_data.get(RequestDataKeys.FIRST_NAME_DATA, '')}.{flattened_data.get(RequestDataKeys.SURNAME, '')}".lower()
+                base_email = f"{name.replace(' ', '')}@{tenant_schema}{DefaultValues.TEMP_EMAIL_DOMAIN}"
                 email = base_email
                 counter = 1
                 while CustomUser.objects.filter(email=email).exists():
-                    email = f"{name.replace(' ', '')}_{counter}@{tenant_schema}.temp.com"
+                    email = f"{name.replace(' ', '')}_{counter}@{tenant_schema}{DefaultValues.TEMP_EMAIL_DOMAIN}"
                     counter += 1
-                flattened_data['email'] = email
+                flattened_data[RequestDataKeys.EMAIL] = email
             else:
-                provided_email = flattened_data['email']
+                provided_email = flattened_data[RequestDataKeys.EMAIL]
                 if CustomUser.objects.filter(email=provided_email).exists():
                     return Response(
-                        {'error': 'The provided email address already exists. Please use a different email.'},
+                        {ResponseKeys.ERROR: ErrorMessages.THE_PROVIDED_EMAIL_ADDRESS_ALREADY_EXISTS},
                         status=status.HTTP_400_BAD_REQUEST
                     )
-                logger.info(f"Using provided email: {provided_email} for public registration")
+                logger.info(LogMessages.USING_PROVIDED_EMAIL.format(provided_email))
 
-            if 'password' not in flattened_data:
+            if RequestDataKeys.PASSWORD not in flattened_data:
                 # Generate temp password
-                temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
-                flattened_data['password'] = temp_password
-            if 'first_name' not in flattened_data:
-                flattened_data['first_name'] = flattened_data.get('firstName', '')
-            if 'last_name' not in flattened_data:
-                flattened_data['last_name'] = flattened_data.get('surname', '')
-            if 'username' not in flattened_data:
-                flattened_data['username'] = f"{flattened_data['first_name'][:3]}{flattened_data['last_name'][:3]}{random.randint(100,999)}".lower()
+                temp_password = ''.join(random.choices(RandomChoices.ASCII_LETTERS_DIGITS, k=DefaultValues.PASSWORD_LENGTH))
+                flattened_data[RequestDataKeys.PASSWORD] = temp_password
+            if RequestDataKeys.FIRST_NAME not in flattened_data:
+                flattened_data[RequestDataKeys.FIRST_NAME] = flattened_data.get(RequestDataKeys.FIRST_NAME_DATA, '')
+            if RequestDataKeys.LAST_NAME not in flattened_data:
+                flattened_data[RequestDataKeys.LAST_NAME] = flattened_data.get(RequestDataKeys.SURNAME, '')
+            if RequestDataKeys.USERNAME not in flattened_data:
+                flattened_data[RequestDataKeys.USERNAME] = f"{flattened_data[RequestDataKeys.FIRST_NAME][:3]}{flattened_data[RequestDataKeys.LAST_NAME][:3]}{random.randint(100,999)}".lower()
 
             # Use the modified request in serializer context
             serializer = self.get_serializer(data=flattened_data, context={'request': modified_request})
             serializer.is_valid(raise_exception=True)
-            
+
             # For public registration, default role to 'user' or 'investor' based on context
-            if 'role' not in serializer.validated_data:
-                serializer.validated_data['role'] = 'user'
-            
+            if FieldNames.ROLE not in serializer.validated_data:
+                serializer.validated_data[FieldNames.ROLE] = DefaultValues.DEFAULT_ROLE
+
             user_obj = serializer.save()
-            logger.info(f"Public user created: {user_obj.email} (ID: {user_obj.id}) for tenant {tenant.schema_name}")
+            logger.info(LogMessages.PUBLIC_USER_CREATED.format(user_obj.email, user_obj.id, tenant.schema_name))
 
             # Send notification event
             try:
-                event_id = f"evt-{str(uuid.uuid4())[:8]}"
-                user_agent = request.META.get("HTTP_USER_AGENT", "Unknown")
+                event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+                user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
                 company_name = tenant.name if hasattr(tenant, 'name') else "Unknown Company"
                 login_link = settings.WEB_PAGE_URL
 
                 event_payload = {
-                    "metadata": {
-                        "tenant_id": str(tenant.unique_id),
-                        "event_type": "user.account.created",
-                        "event_id": event_id,
-                        "created_at": timezone.now().isoformat(),
-                        "source": "auth-service",
+                    EventPayloadKeys.METADATA: {
+                        EventPayloadKeys.TENANT_ID: str(tenant.unique_id),
+                        EventPayloadKeys.EVENT_TYPE: EventTypes.USER_ACCOUNT_CREATED,
+                        EventPayloadKeys.EVENT_ID: event_id,
+                        EventPayloadKeys.CREATED_AT: timezone.now().isoformat(),
+                        EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
                     },
-                    "data": {
-                        "user_email": user_obj.email,
-                        "company_name": company_name,
-                        "temp_password": flattened_data['password'],
-                        "login_link": login_link,
-                        "timestamp": timezone.now().isoformat(),
-                        "user_agent": user_agent,
-                        "user_id": str(user_obj.id),
+                    EventPayloadKeys.DATA: {
+                        EventPayloadKeys.USER_EMAIL: user_obj.email,
+                        EventPayloadKeys.COMPANY_NAME: company_name,
+                        EventPayloadKeys.TEMP_PASSWORD: flattened_data[RequestDataKeys.PASSWORD],
+                        EventPayloadKeys.LOGIN_LINK: login_link,
+                        EventPayloadKeys.TIMESTAMP: timezone.now().isoformat(),
+                        EventPayloadKeys.USER_AGENT: user_agent,
+                        EventPayloadKeys.USER_ID: str(user_obj.id),
                     },
                 }
 
-                notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-                safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
-                logger.info(f"➡️ POST to {notifications_url} with payload: {safe_payload}")
+                notifications_url = settings.NOTIFICATIONS_SERVICE_URL + NotificationURLs.EVENTS
+                safe_payload = {**event_payload, EventPayloadKeys.DATA: {**event_payload[EventPayloadKeys.DATA], EventPayloadKeys.TEMP_PASSWORD: DefaultValues.REDACTED}}
+                logger.info(LogMessages.POST_TO_NOTIFICATIONS_URL.format(notifications_url, safe_payload))
 
                 response = requests.post(notifications_url, json=event_payload, timeout=5)
                 response.raise_for_status()
-                logger.info(f"✅ Public registration notification sent for {user_obj.email}. Status: {response.status_code}")
+                logger.info(LogMessages.PUBLIC_REGISTRATION_NOTIFICATION_SENT.format(user_obj.email, response.status_code))
 
             except Exception as e:
-                logger.warning(f"[❌ Notification Error] Failed to send public registration event for {user_obj.email}: {str(e)}")
+                logger.warning(LogMessages.FAILED_TO_SEND_PUBLIC_REGISTRATION_EVENT.format(user_obj.email, str(e)))
 
             return Response({
-                'status': 'success',
-                'message': 'Account created successfully!',
-                'user_id': user_obj.id,
-                'email': user_obj.email,
-                'temp_password': flattened_data['password'],
-                'login_link': settings.WEB_PAGE_URL
+                ResponseKeys.STATUS: ResponseStatuses.SUCCESS,
+                ResponseKeys.MESSAGE: DefaultValues.ACCOUNT_CREATED_SUCCESSFULLY,
+                ResponseKeys.USER_ID: user_obj.id,
+                ResponseKeys.EMAIL: user_obj.email,
+                ResponseKeys.TEMP_PASSWORD: flattened_data[RequestDataKeys.PASSWORD],
+                ResponseKeys.LOGIN_LINK: settings.WEB_PAGE_URL
             }, status=status.HTTP_201_CREATED)
             
 
@@ -1610,7 +1609,7 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
 
         with tenant_context(tenant):
             user_obj = serializer.save()
-            logger.info(f"User created: {user_obj.email} (ID: {user_obj.id}) for tenant {tenant.schema_name}")
+            logger.info(LogMessages.USER_CREATED.format(user_obj.email, user_obj.id, tenant.schema_name))
 
             # Invalidate user list cache on create
             from auth_service.utils.cache import delete_tenant_cache
@@ -1620,11 +1619,11 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
             logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
             try:
                 # Generate a unique event ID in the format 'evt-<uuid>'
-                event_id = f"evt-{str(uuid.uuid4())[:8]}"
+                event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                 # Get user agent from request
-                user_agent = self.request.META.get("HTTP_USER_AGENT", "Unknown")
+                user_agent = self.request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
                 # Define company name (assuming tenant name or a custom field)
-                company_name = tenant.name if hasattr(tenant, 'name') else "Unknown Company"
+                company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
                 # Define login link (customize as needed)
                 login_link = settings.WEB_PAGE_URL
 
@@ -1640,7 +1639,7 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
                         "event_type": "user.account.created",
                         "event_id": event_id,
                         "created_at": timezone.now().isoformat(),
-                        "source": "auth-service",
+                        EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
                     },
                     "data": {
                         "user_email": user_obj.email,
@@ -1950,11 +1949,11 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
                         logger.info(f"🎯 Sending user creation event for {user_obj.email} to notification service.")
                         try:
                             # Generate a unique event ID in the format 'evt-<uuid>'
-                            event_id = f"evt-{str(uuid.uuid4())[:8]}"
+                            event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                             # Get user agent from request
-                            user_agent = request.META.get("HTTP_USER_AGENT", "Unknown")
+                            user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
                             # Define company name (assuming tenant name or a custom field)
-                            company_name = tenant.name if hasattr(tenant, 'name') else "Unknown Company"
+                            company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
                             # Define login link (customize as needed)
                             login_link = "https://learn.prolianceltd.com/home/login"
 
@@ -1964,7 +1963,7 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
                                     "event_type": "user.account.created",
                                     "event_id": event_id,
                                     "created_at": timezone.now().isoformat(),
-                                    "source": "auth-service",
+                                    EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
                                 },
                                 "data": {
                                     "user_email": user_obj.email,
@@ -2051,6 +2050,7 @@ class LoginAttemptViewSet(viewsets.ReadOnlyModelViewSet):
                 queryset = queryset.filter(success=(success.lower() == "true"))
 
             return queryset.order_by("-timestamp")
+
 
 
 class BlockedIPViewSet(viewsets.ModelViewSet):
@@ -2580,9 +2580,6 @@ class EnhancedUserActivityViewSet(viewsets.ReadOnlyModelViewSet):
                 'activities': serializer.data
             })
 
-
-
-
 class UserPasswordRegenerateView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserPasswordRegenerateSerializer
@@ -2612,7 +2609,6 @@ class UserPasswordRegenerateView(generics.GenericAPIView):
                 },
                 status=status.HTTP_200_OK,
             )
-
 
 
 class GenericDetailView(APIView):
@@ -2724,7 +2720,6 @@ class GenericDetailView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
 # Specific views for each model
 class ProfessionalQualificationView(GenericDetailView):
     model = ProfessionalQualification
@@ -2802,11 +2797,11 @@ class AdminUserCreateView(APIView):
                 logger.info("🎯 Reached admin user creation success block. Sending user creation event to notification service.")
                 try:
                     # Generate a unique event ID in the format 'evt-<uuid>'
-                    event_id = f"evt-{str(uuid.uuid4())[:8]}"
+                    event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                     # Get user agent from request
-                    user_agent = request.META.get("HTTP_USER_AGENT", "Unknown")
+                    user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
                     # Define company name (assuming tenant name or a custom field)
-                    company_name = user.tenant.name if hasattr(user.tenant, 'name') else "Unknown Company"
+                    company_name = user.tenant.name if hasattr(user.tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
                     # Define login link (customize as needed)
                    
 
@@ -3167,9 +3162,6 @@ class UserSessionViewSet(viewsets.ViewSet):
             # You need to implement UserSessionSerializer
             data = UserSessionSerializer(sessions, many=True).data
             return Response({"sessions": data, "total_time": total}, status=200)
-
-
-
 
 
 class ClientViewSet(viewsets.ModelViewSet):
@@ -3565,6 +3557,8 @@ class DocumentListCreateView(APIView):
             logger.error(f"Error creating document: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
 class DocumentDetailView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
@@ -3613,6 +3607,8 @@ class DocumentDetailView(APIView):
         except Exception as e:
             logger.error(f"Error deleting document for tenant {tenant_uuid}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 class DocumentVersionListView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]

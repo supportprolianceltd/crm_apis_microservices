@@ -89,6 +89,9 @@ model ExternalRequest {
   @@map("external_requests")
 }
 
+
+
+
 model Visit {
    id String @id // Remove @default(cuid()), we'll generate custom IDs
    tenantId String

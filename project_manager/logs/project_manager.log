@@ -32485,3 +32485,700 @@ ImportError: cannot import name 'user_tasks' from 'tasks.views' (/app/tasks/view
 2025-11-15 10:40:51,695 [WARNING] project_manager: ✗ No jwt_payload found on request
 2025-11-15 10:40:51,697 [ERROR] project_manager: ✗ Tenant schema missing
 2025-11-15 10:40:51,700 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks/my_tasks
+2025-11-24 08:41:07,501 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 08:41:07,505 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 08:41:07,507 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 08:41:07,509 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 08:41:07,512 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 08:41:07,514 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 08:41:07,515 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 08:41:07,517 [INFO] project_manager: User: AnonymousUser
+2025-11-24 08:41:07,518 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 08:41:07,520 [INFO] project_manager: User is_authenticated: False
+2025-11-24 08:41:07,521 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 08:41:07,523 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 08:41:07,531 [WARNING] django.request: Forbidden: /api/project-manager/api/knowledge/categories
+2025-11-24 08:46:00,287 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 08:46:00,289 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 08:46:00,291 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 08:46:00,294 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 08:46:00,295 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 08:46:00,297 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 08:46:01,443 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-24 08:46:01,445 [INFO] project_manager: User: amahummed7808
+2025-11-24 08:46:01,447 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 08:46:01,449 [INFO] project_manager: User is_authenticated: True
+2025-11-24 08:46:01,451 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-24 08:46:01,453 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-24 08:46:01,455 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-24 08:46:01,457 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-24 08:46:01,932 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 08:46:01,934 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories/
+2025-11-24 08:46:01,936 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 08:46:01,939 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 08:46:01,941 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 08:46:01,943 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories/
+2025-11-24 08:46:02,007 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-24 08:46:02,010 [INFO] project_manager: User: amahummed7808
+2025-11-24 08:46:02,012 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 08:46:02,013 [INFO] project_manager: User is_authenticated: True
+2025-11-24 08:46:02,015 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-24 08:46:02,017 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-24 08:46:02,019 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-24 08:46:02,022 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-24 09:41:47,447 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:41:47,449 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 09:41:47,450 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:41:47,451 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:41:47,452 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:41:47,453 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 09:41:47,824 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-24 09:41:47,826 [INFO] project_manager: User: amahummed7808
+2025-11-24 09:41:47,827 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:41:47,828 [INFO] project_manager: User is_authenticated: True
+2025-11-24 09:41:47,830 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-24 09:41:47,831 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-24 09:41:47,833 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-24 09:41:47,834 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-24 09:41:48,204 [WARNING] django.request: Not Found: /api/project-manager/api/knowledge/categories
+2025-11-24 09:49:30,087 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:49:30,089 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 09:49:30,090 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:49:30,092 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:49:30,093 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:49:30,094 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/knowledge/categories
+2025-11-24 09:49:30,246 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-24 09:49:30,248 [INFO] project_manager: User: amahummed7808
+2025-11-24 09:49:30,250 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:49:30,251 [INFO] project_manager: User is_authenticated: True
+2025-11-24 09:49:30,252 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-24 09:49:30,254 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-24 09:49:30,255 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-24 09:49:30,256 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-24 09:49:30,481 [WARNING] django.request: Not Found: /api/project-manager/api/knowledge/categories
+2025-11-24 09:54:12,937 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:54:12,939 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles
+2025-11-24 09:54:12,940 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:54:12,941 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:54:12,942 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:54:12,943 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles
+2025-11-24 09:54:13,021 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-24 09:54:13,023 [INFO] project_manager: User: amahummed7808
+2025-11-24 09:54:13,024 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:54:13,025 [INFO] project_manager: User is_authenticated: True
+2025-11-24 09:54:13,026 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-24 09:54:13,028 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-24 09:54:13,029 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-24 09:54:13,030 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-24 09:54:13,247 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:54:13,248 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/
+2025-11-24 09:54:13,250 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:54:13,251 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:54:13,252 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:54:13,253 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/
+2025-11-24 09:54:13,390 [INFO] project_manager: ✓✓✓ JWT User created: amahummed7808 (pk=support@appbrew.com) ✓✓✓
+2025-11-24 09:54:13,392 [INFO] project_manager: User: amahummed7808
+2025-11-24 09:54:13,393 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:54:13,395 [INFO] project_manager: User is_authenticated: True
+2025-11-24 09:54:13,396 [INFO] project_manager: ✓ Found tenant_schema in JWT: appbrew
+2025-11-24 09:54:13,398 [INFO] project_manager: ✓ Schema set to: appbrew
+2025-11-24 09:54:13,399 [INFO] project_manager: Calling view with user: amahummed7808
+2025-11-24 09:54:13,401 [INFO] project_manager: ========== TENANT MIDDLEWARE END ==========
+2025-11-24 09:55:58,421 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:55:58,473 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 09:55:58,503 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:55:58,509 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:55:58,527 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:55:58,560 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 09:55:58,966 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 09:55:58,969 [INFO] project_manager: User: AnonymousUser
+2025-11-24 09:55:59,003 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:55:59,006 [INFO] project_manager: User is_authenticated: False
+2025-11-24 09:55:59,008 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 09:55:59,012 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 09:55:59,033 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/featured
+2025-11-24 09:55:59,093 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:55:59,103 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 09:55:59,120 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:55:59,142 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:55:59,151 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:55:59,154 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 09:55:59,234 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 09:55:59,240 [INFO] project_manager: User: AnonymousUser
+2025-11-24 09:55:59,243 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:55:59,245 [INFO] project_manager: User is_authenticated: False
+2025-11-24 09:55:59,251 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 09:55:59,254 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 09:55:59,258 [WARNING] django.request: Forbidden: /api/project-manager/api/tags
+2025-11-24 09:55:59,312 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:55:59,318 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/published
+2025-11-24 09:55:59,321 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:55:59,324 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:55:59,328 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:55:59,330 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/published
+2025-11-24 09:55:59,431 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 09:55:59,436 [INFO] project_manager: User: AnonymousUser
+2025-11-24 09:55:59,438 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:55:59,441 [INFO] project_manager: User is_authenticated: False
+2025-11-24 09:55:59,445 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 09:55:59,453 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 09:55:59,456 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/published
+2025-11-24 09:55:59,494 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:55:59,497 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 09:55:59,500 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:55:59,505 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:55:59,516 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:55:59,521 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 09:55:59,654 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 09:55:59,662 [INFO] project_manager: User: AnonymousUser
+2025-11-24 09:55:59,667 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:55:59,670 [INFO] project_manager: User is_authenticated: False
+2025-11-24 09:55:59,673 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 09:55:59,718 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 09:55:59,746 [WARNING] django.request: Forbidden: /api/project-manager/api/categories
+2025-11-24 09:55:59,935 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:55:59,941 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 09:55:59,946 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:55:59,974 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:55:59,978 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:56:00,010 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 09:56:00,075 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 09:56:00,079 [INFO] project_manager: User: AnonymousUser
+2025-11-24 09:56:00,085 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:56:00,087 [INFO] project_manager: User is_authenticated: False
+2025-11-24 09:56:00,089 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 09:56:00,092 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 09:56:00,095 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/featured
+2025-11-24 09:56:00,144 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:56:00,152 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 09:56:00,269 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:56:00,272 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:56:00,276 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:56:00,278 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 09:56:00,335 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 09:56:00,339 [INFO] project_manager: User: AnonymousUser
+2025-11-24 09:56:00,346 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:56:00,391 [INFO] project_manager: User is_authenticated: False
+2025-11-24 09:56:00,405 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 09:56:00,407 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 09:56:00,410 [WARNING] django.request: Forbidden: /api/project-manager/api/categories
+2025-11-24 09:56:00,466 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:56:00,471 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/published
+2025-11-24 09:56:00,474 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:56:00,477 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:56:00,479 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:56:00,485 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/published
+2025-11-24 09:56:00,523 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 09:56:00,525 [INFO] project_manager: User: AnonymousUser
+2025-11-24 09:56:00,529 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:56:00,536 [INFO] project_manager: User is_authenticated: False
+2025-11-24 09:56:00,538 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 09:56:00,540 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 09:56:00,543 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/published
+2025-11-24 09:56:00,595 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 09:56:00,607 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 09:56:00,621 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 09:56:00,626 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 09:56:00,629 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 09:56:00,637 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 09:56:00,672 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 09:56:00,674 [INFO] project_manager: User: AnonymousUser
+2025-11-24 09:56:00,677 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 09:56:00,679 [INFO] project_manager: User is_authenticated: False
+2025-11-24 09:56:00,687 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 09:56:00,689 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 09:56:00,692 [WARNING] django.request: Forbidden: /api/project-manager/api/tags
+2025-11-24 10:29:37,614 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:37,628 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/articles/featured/
+2025-11-24 10:29:37,631 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:37,634 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:37,637 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:37,638 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/articles/featured/
+2025-11-24 10:29:37,646 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:37,648 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:37,650 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:37,652 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:37,654 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:37,656 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:37,668 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/featured/
+2025-11-24 10:29:37,725 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:37,728 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/articles/my_articles/
+2025-11-24 10:29:37,730 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:37,733 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:37,735 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:37,738 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/articles/my_articles/
+2025-11-24 10:29:37,743 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:37,745 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:37,747 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:37,750 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:37,755 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:37,758 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:37,761 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/my_articles/
+2025-11-24 10:29:37,812 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:37,814 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/tags/
+2025-11-24 10:29:37,816 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:37,830 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:37,832 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:37,835 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/tags/
+2025-11-24 10:29:37,838 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:37,840 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:37,844 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:37,846 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:37,848 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:37,851 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:37,854 [WARNING] django.request: Forbidden: /api/project-manager/api/tags/
+2025-11-24 10:29:37,907 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:37,910 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/categories/
+2025-11-24 10:29:37,912 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:37,914 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:37,916 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:37,919 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/categories/
+2025-11-24 10:29:37,921 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:37,923 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:37,927 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:37,931 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:37,934 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:37,936 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:37,938 [WARNING] django.request: Forbidden: /api/project-manager/api/categories/
+2025-11-24 10:29:37,981 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:37,983 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/tags/
+2025-11-24 10:29:37,985 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:37,987 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:37,990 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:37,993 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/tags/
+2025-11-24 10:29:37,996 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:37,998 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:38,000 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:38,002 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:38,005 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:38,007 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:38,011 [WARNING] django.request: Forbidden: /api/project-manager/api/tags/
+2025-11-24 10:29:38,055 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:38,060 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/categories/
+2025-11-24 10:29:38,063 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:38,065 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:38,067 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:38,071 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/categories/
+2025-11-24 10:29:38,118 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:38,121 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:38,125 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:38,127 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:38,129 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:38,133 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:38,136 [WARNING] django.request: Forbidden: /api/project-manager/api/categories/
+2025-11-24 10:29:38,181 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:38,183 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/categories/
+2025-11-24 10:29:38,185 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:38,188 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:38,192 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:38,195 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/categories/
+2025-11-24 10:29:38,198 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:38,201 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:38,203 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:38,206 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:38,209 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:38,212 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:38,215 [WARNING] django.request: Forbidden: /api/project-manager/api/categories/
+2025-11-24 10:29:38,262 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:38,264 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/tags/
+2025-11-24 10:29:38,267 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:38,269 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:38,271 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:38,275 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/tags/
+2025-11-24 10:29:38,278 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:38,280 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:38,282 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:38,283 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:38,285 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:38,288 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:38,293 [WARNING] django.request: Forbidden: /api/project-manager/api/tags/
+2025-11-24 10:29:38,338 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:38,342 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/articles/featured/
+2025-11-24 10:29:38,344 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:38,347 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:38,348 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:38,350 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/articles/featured/
+2025-11-24 10:29:38,353 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:38,355 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:38,360 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:38,362 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:38,364 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:38,367 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:38,370 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/featured/
+2025-11-24 10:29:38,415 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:38,417 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/articles/my_articles/
+2025-11-24 10:29:38,419 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:38,421 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:38,426 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:38,429 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/articles/my_articles/
+2025-11-24 10:29:38,432 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:38,434 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:38,436 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:38,438 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:38,441 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:38,445 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:38,448 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/my_articles/
+2025-11-24 10:29:38,490 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:38,494 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/categories/
+2025-11-24 10:29:38,497 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:38,499 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:38,500 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:38,503 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/categories/
+2025-11-24 10:29:38,505 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:38,508 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:38,510 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:38,513 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:38,515 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:38,517 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:38,519 [WARNING] django.request: Forbidden: /api/project-manager/api/categories/
+2025-11-24 10:29:38,552 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:38,554 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/tags/
+2025-11-24 10:29:38,556 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:38,560 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:38,562 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:38,564 [INFO] project_manager: Method: OPTIONS, Path: /api/project-manager/api/tags/
+2025-11-24 10:29:38,566 [WARNING] project_manager: ✗ No Bearer token - returning AnonymousUser
+2025-11-24 10:29:38,567 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:38,569 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:38,570 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:38,572 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:38,574 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:38,577 [WARNING] django.request: Forbidden: /api/project-manager/api/tags/
+2025-11-24 10:29:43,026 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:43,027 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 10:29:43,029 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:43,031 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:43,033 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:43,035 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 10:29:43,510 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:29:43,514 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:43,516 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:43,517 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:43,519 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:43,524 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:43,528 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/featured
+2025-11-24 10:29:43,588 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:43,612 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:29:43,622 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:43,631 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:43,633 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:43,639 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:29:43,717 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:29:43,722 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:43,733 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:43,735 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:43,738 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:43,743 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:43,748 [WARNING] django.request: Forbidden: /api/project-manager/api/categories
+2025-11-24 10:29:43,795 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:43,797 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:29:43,799 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:43,801 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:43,804 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:43,808 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:29:43,855 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:29:43,860 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:44,285 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:44,422 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:44,449 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:44,452 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:44,456 [WARNING] django.request: Forbidden: /api/project-manager/api/tags
+2025-11-24 10:29:44,523 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:44,571 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/my_articles
+2025-11-24 10:29:44,596 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:44,599 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:44,603 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:44,605 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/my_articles
+2025-11-24 10:29:44,648 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:29:44,651 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:44,654 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:44,657 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:44,660 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:44,662 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:44,665 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/my_articles
+2025-11-24 10:29:44,722 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:44,735 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:29:44,738 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:44,741 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:44,743 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:44,746 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:29:44,800 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:29:44,804 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:44,811 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:44,814 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:44,817 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:44,819 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:44,822 [WARNING] django.request: Forbidden: /api/project-manager/api/categories
+2025-11-24 10:29:44,873 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:29:44,876 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:29:44,879 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:29:44,883 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:29:44,886 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:29:44,888 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:29:44,941 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:29:44,945 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:29:44,948 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:29:44,951 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:29:44,954 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:29:44,959 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:29:44,963 [WARNING] django.request: Forbidden: /api/project-manager/api/tags
+2025-11-24 10:32:56,133 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:32:56,135 [INFO] project_manager: Method: POST, Path: /api/project-manager/api/articles/
+2025-11-24 10:32:56,136 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:32:56,138 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:32:56,139 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:32:56,140 [INFO] project_manager: Method: POST, Path: /api/project-manager/api/articles/
+2025-11-24 10:32:56,185 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:32:56,187 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:32:56,188 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:32:56,190 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:32:56,191 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:32:56,192 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:32:56,198 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/
+2025-11-24 10:37:39,909 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:37:39,910 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:37:39,912 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:37:39,914 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:37:39,916 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:37:39,917 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:37:39,979 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:37:39,982 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:37:39,984 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:37:39,987 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:37:39,989 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:37:39,991 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:37:39,999 [WARNING] django.request: Forbidden: /api/project-manager/api/tags
+2025-11-24 10:37:40,035 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:37:40,037 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:37:40,039 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:37:40,041 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:37:40,042 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:37:40,044 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:37:40,093 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:37:40,096 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:37:40,099 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:37:40,100 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:37:40,102 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:37:40,104 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:37:40,107 [WARNING] django.request: Forbidden: /api/project-manager/api/categories
+2025-11-24 10:37:40,154 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:37:40,156 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 10:37:40,158 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:37:40,161 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:37:40,163 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:37:40,165 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 10:37:40,204 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:37:40,209 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:37:40,213 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:37:40,215 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:37:40,217 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:37:40,218 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:37:40,220 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/featured
+2025-11-24 10:37:40,257 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:37:40,304 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/my_articles
+2025-11-24 10:37:40,322 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:37:40,324 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:37:40,327 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:37:40,329 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/my_articles
+2025-11-24 10:37:40,364 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:37:40,367 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:37:40,369 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:37:40,371 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:37:40,373 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:37:40,375 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:37:40,378 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/my_articles
+2025-11-24 10:37:40,419 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:37:40,424 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:37:40,426 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:37:40,428 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:37:40,431 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:37:40,433 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:37:40,455 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:37:40,457 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:37:40,459 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:37:40,460 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:37:40,462 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:37:40,464 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:37:40,466 [WARNING] django.request: Forbidden: /api/project-manager/api/tags
+2025-11-24 10:37:40,494 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:37:40,496 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:37:40,498 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:37:40,500 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:37:40,503 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:37:40,505 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:37:40,537 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:37:40,539 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:37:40,540 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:37:40,542 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:37:40,550 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:37:40,551 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:37:40,553 [WARNING] django.request: Forbidden: /api/project-manager/api/categories
+2025-11-24 10:38:47,870 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:38:47,877 [INFO] project_manager: Method: POST, Path: /api/project-manager/api/articles/
+2025-11-24 10:38:47,881 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:38:47,905 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:38:47,909 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:38:47,914 [INFO] project_manager: Method: POST, Path: /api/project-manager/api/articles/
+2025-11-24 10:38:48,047 [ERROR] project_manager: ✗ Could not fetch public key: 404
+2025-11-24 10:38:48,060 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:38:48,064 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:38:48,067 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:38:48,073 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:38:48,076 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:38:48,093 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/
+2025-11-24 10:39:23,982 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:23,984 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-24 10:39:23,986 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:23,987 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:23,989 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:23,990 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-24 10:39:24,186 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:24,187 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:24,188 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:24,189 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:24,190 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:24,191 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:24,193 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks
+2025-11-24 10:39:24,224 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:24,227 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-24 10:39:24,228 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:24,229 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:24,233 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:24,235 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-24 10:39:24,258 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:24,259 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:24,261 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:24,262 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:24,263 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:24,265 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:24,266 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks
+2025-11-24 10:39:24,293 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:24,294 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-24 10:39:24,295 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:24,296 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:24,297 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:24,299 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-24 10:39:24,350 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:24,353 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:24,355 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:24,356 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:24,358 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:24,360 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:24,362 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks
+2025-11-24 10:39:24,422 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:24,425 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-24 10:39:24,427 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:24,431 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:24,436 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:24,438 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tasks
+2025-11-24 10:39:24,461 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:24,463 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:24,465 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:24,466 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:24,467 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:24,468 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:24,470 [WARNING] django.request: Forbidden: /api/project-manager/api/tasks
+2025-11-24 10:39:28,234 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:28,236 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:39:28,237 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:28,238 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:28,240 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:28,241 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:39:28,267 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:28,269 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:28,270 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:28,271 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:28,273 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:28,274 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:28,276 [WARNING] django.request: Forbidden: /api/project-manager/api/tags
+2025-11-24 10:39:28,302 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:28,303 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:39:28,304 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:28,306 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:28,308 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:28,309 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:39:28,381 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:28,383 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:28,385 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:28,386 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:28,392 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:28,395 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:28,398 [WARNING] django.request: Forbidden: /api/project-manager/api/categories
+2025-11-24 10:39:28,427 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:28,429 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/published
+2025-11-24 10:39:28,431 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:28,433 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:28,434 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:28,435 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/published
+2025-11-24 10:39:28,462 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:28,464 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:28,466 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:28,468 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:28,469 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:28,471 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:28,473 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/published
+2025-11-24 10:39:28,503 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:28,505 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 10:39:28,506 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:28,508 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:28,510 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:28,512 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 10:39:28,544 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:28,546 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:28,548 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:28,550 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:28,552 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:28,554 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:28,556 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/featured
+2025-11-24 10:39:28,587 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:28,588 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:39:28,589 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:28,591 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:28,592 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:28,594 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/tags
+2025-11-24 10:39:28,620 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:28,622 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:28,623 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:28,624 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:28,625 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:28,626 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:28,628 [WARNING] django.request: Forbidden: /api/project-manager/api/tags
+2025-11-24 10:39:28,650 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:28,652 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:39:28,654 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:28,655 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:28,656 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:28,657 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/categories
+2025-11-24 10:39:28,686 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:28,688 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:28,689 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:28,691 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:28,692 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:28,694 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:28,696 [WARNING] django.request: Forbidden: /api/project-manager/api/categories
+2025-11-24 10:39:28,724 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:28,726 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/published
+2025-11-24 10:39:28,727 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:28,729 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:28,731 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:28,733 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/published
+2025-11-24 10:39:28,763 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:28,767 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:28,769 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:28,771 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:28,772 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:28,774 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:28,776 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/published
+2025-11-24 10:39:28,809 [INFO] project_manager: ========== JWT MIDDLEWARE START ==========
+2025-11-24 10:39:28,811 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 10:39:28,813 [INFO] project_manager: ✓ JWT user object attached as SimpleLazyObject
+2025-11-24 10:39:28,815 [INFO] project_manager: ========== JWT MIDDLEWARE END ==========
+2025-11-24 10:39:28,817 [INFO] project_manager: ========== TENANT MIDDLEWARE START ==========
+2025-11-24 10:39:28,819 [INFO] project_manager: Method: GET, Path: /api/project-manager/api/articles/featured
+2025-11-24 10:39:28,851 [ERROR] project_manager: ✗ Could not fetch public key: 401
+2025-11-24 10:39:28,857 [INFO] project_manager: User: AnonymousUser
+2025-11-24 10:39:28,858 [INFO] project_manager: User type: SimpleLazyObject
+2025-11-24 10:39:28,860 [INFO] project_manager: User is_authenticated: False
+2025-11-24 10:39:28,861 [WARNING] project_manager: ✗ No jwt_payload found on request
+2025-11-24 10:39:28,863 [ERROR] project_manager: ✗ Tenant schema missing
+2025-11-24 10:39:28,865 [WARNING] django.request: Forbidden: /api/project-manager/api/articles/featured

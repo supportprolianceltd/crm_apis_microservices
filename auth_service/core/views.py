@@ -29,6 +29,14 @@ from .serializers import (
     TenantSerializer, ModuleSerializer, TenantConfigSerializer, 
     BranchSerializer, PublicTenantSerializer, GlobalActivitySerializer
 )
+from .constants import (
+    ErrorMessages, LogMessages, EventTypes, ResponseKeys, ResponseStatuses,
+    ResponseMessages, EmailTemplates, DefaultTemplateKeys, JWTKeys, Headers,
+    Algorithms, QueryParams, RequestDataKeys, KafkaEventKeys, NotificationKeys,
+    StatusValues, SchemaNames, KafkaTopics, JWTDecodeOptions, DefaultReasons,
+    OrderingFields, FieldNames, SQLQueries, AttributeNames, ActionNames,
+    URLParams, LookupFields, ContextKeys, DetailsKeys, URLPaths
+)
 from django.db.models import Prefetch
 
 logger = logging.getLogger(__name__)
@@ -46,7 +54,7 @@ class CustomPagination(PageNumberPagination):
         request = self.request
         path = request.path
         query_params = request.query_params.copy()
-        query_params['page'] = self.page.next_page_number()
+        query_params[QueryParams.PAGE] = self.page.next_page_number()
         query_string = urlencode(query_params, doseq=True)
 
         parsed_gateway = urlparse(gateway_url)
@@ -63,7 +71,7 @@ class CustomPagination(PageNumberPagination):
         request = self.request
         path = request.path
         query_params = request.query_params.copy()
-        query_params['page'] = self.page.previous_page_number()
+        query_params[QueryParams.PAGE] = self.page.previous_page_number()
         query_string = urlencode(query_params, doseq=True)
 
         parsed_gateway = urlparse(gateway_url)
@@ -88,45 +96,45 @@ class BranchListCreateView(generics.ListCreateAPIView):
 
     def get_tenant(self, request):
         try:
-            if hasattr(request.user, 'tenant') and request.user.tenant:
-                logger.debug(f"Tenant from user: {request.user.tenant.schema_name}")
+            if hasattr(request.user, AttributeNames.TENANT) and getattr(request.user, AttributeNames.TENANT):
+                logger.debug(LogMessages.TENANT_FROM_USER.format(request.user.tenant.schema_name))
                 return request.user.tenant
-            auth_header = request.headers.get('Authorization', '')
-            if not auth_header.startswith('Bearer '):
-                logger.warning("No valid Bearer token provided")
-                raise ValueError("Invalid token format")
+            auth_header = request.headers.get(Headers.AUTHORIZATION, '')
+            if not auth_header.startswith(Headers.BEARER_PREFIX):
+                logger.warning(ErrorMessages.NO_VALID_BEARER_TOKEN)
+                raise ValueError(ErrorMessages.INVALID_TOKEN_FORMAT)
             token = auth_header.split(' ')[1]
-            decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-            tenant_id = decoded_token.get('tenant_id')
-            schema_name = decoded_token.get('tenant_schema')
+            decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=[Algorithms.HS256])
+            tenant_id = decoded_token.get(JWTKeys.TENANT_ID)
+            schema_name = decoded_token.get(JWTKeys.TENANT_SCHEMA)
             if tenant_id:
                 tenant = Tenant.objects.get(id=tenant_id)
-                logger.debug(f"Tenant extracted from token by ID: {tenant.schema_name}")
+                logger.debug(LogMessages.TENANT_EXTRACTED_BY_ID.format(tenant.schema_name))
                 return tenant
             elif schema_name:
                 tenant = Tenant.objects.get(schema_name=schema_name)
-                logger.debug(f"Tenant extracted from token by schema: {tenant.schema_name}")
+                logger.debug(LogMessages.TENANT_EXTRACTED_BY_SCHEMA.format(tenant.schema_name))
                 return tenant
             else:
-                logger.warning("No tenant_id or schema_name in token")
-                raise ValueError("Tenant not specified in token")
+                logger.warning(LogMessages.NO_TENANT_IN_TOKEN)
+                raise ValueError(ErrorMessages.TENANT_NOT_SPECIFIED_IN_TOKEN)
         except Tenant.DoesNotExist:
-            logger.error("Tenant not found")
-            raise serializers.ValidationError("Tenant not found")
+            logger.error(ErrorMessages.TENANT_NOT_FOUND)
+            raise serializers.ValidationError(ErrorMessages.TENANT_NOT_FOUND)
         except jwt.InvalidTokenError:
-            logger.error("Invalid JWT token")
-            raise serializers.ValidationError("Invalid token")
+            logger.error(ErrorMessages.INVALID_TOKEN)
+            raise serializers.ValidationError(ErrorMessages.INVALID_TOKEN)
         except Exception as e:
-            logger.error(f"Error extracting tenant: {str(e)}")
-            raise serializers.ValidationError(f"Error extracting tenant: {str(e)}")
+            logger.error(ErrorMessages.ERROR_EXTRACTING_TENANT.format(str(e)))
+            raise serializers.ValidationError(ErrorMessages.ERROR_EXTRACTING_TENANT.format(str(e)))
 
     def get_queryset(self):
         tenant = self.get_tenant(self.request)
         connection.set_schema(tenant.schema_name)
         with connection.cursor() as cursor:
-            cursor.execute("SHOW search_path;")
+            cursor.execute(SQLQueries.SHOW_SEARCH_PATH)
             search_path = cursor.fetchone()[0]
-            logger.debug(f"Database search_path: {search_path}")
+            logger.debug(LogMessages.DATABASE_SEARCH_PATH.format(search_path))
         with tenant_context(tenant):
             return Branch.objects.filter(tenant=tenant)
 
@@ -136,67 +144,67 @@ class BranchListCreateView(generics.ListCreateAPIView):
             with tenant_context(tenant):
                 with transaction.atomic():
                     branch = serializer.save()
-                    logger.info(f"Branch created: {branch.name} for tenant {tenant.schema_name}")
+                    logger.info(LogMessages.BRANCH_CREATED.format(branch.name, tenant.schema_name))
         except Exception as e:
-            logger.error(f"Error creating branch for tenant {tenant.schema_name}: {str(e)}")
-            raise serializers.ValidationError(f"Error creating branch: {str(e)}")
+            logger.error(LogMessages.ERROR_CREATING_BRANCH.format(tenant.schema_name, str(e)))
+            raise serializers.ValidationError(ErrorMessages.ERROR_CREATING_BRANCH.format(str(e)))
 
     def list(self, request, *args, **kwargs):
         try:
             queryset = self.get_queryset()
             serializer = self.get_serializer(queryset, many=True)
-            logger.info(f"Retrieved {queryset.count()} branches for tenant {request.user.tenant.schema_name}")
+            logger.info(LogMessages.BRANCHES_RETRIEVED.format(queryset.count(), getattr(request.user, AttributeNames.TENANT).schema_name))
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Error listing branches for tenant {request.user.tenant.schema_name}: {str(e)}")
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(LogMessages.ERROR_LISTING_BRANCHES.format(request.user.tenant.schema_name, str(e)))
+            return Response({ResponseKeys.DETAIL: str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class BranchDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BranchSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'id'
+    lookup_field = LookupFields.ID
 
     def get_tenant(self, request):
         try:
-            if hasattr(request.user, 'tenant') and request.user.tenant:
-                logger.debug(f"Tenant from user: {request.user.tenant.schema_name}")
+            if hasattr(request.user, AttributeNames.TENANT) and getattr(request.user, AttributeNames.TENANT):
+                logger.debug(LogMessages.TENANT_FROM_USER.format(request.user.tenant.schema_name))
                 return request.user.tenant
-            auth_header = request.headers.get('Authorization', '')
-            if not auth_header.startswith('Bearer '):
-                logger.warning("No valid Bearer token provided")
-                raise ValueError("Invalid token format")
+            auth_header = request.headers.get(Headers.AUTHORIZATION, '')
+            if not auth_header.startswith(Headers.BEARER_PREFIX):
+                logger.warning(ErrorMessages.NO_VALID_BEARER_TOKEN)
+                raise ValueError(ErrorMessages.INVALID_TOKEN_FORMAT)
             token = auth_header.split(' ')[1]
-            decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-            tenant_id = decoded_token.get('tenant_id')
-            schema_name = decoded_token.get('tenant_schema')
+            decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=[Algorithms.HS256])
+            tenant_id = decoded_token.get(JWTKeys.TENANT_ID)
+            schema_name = decoded_token.get(JWTKeys.TENANT_SCHEMA)
             if tenant_id:
                 tenant = Tenant.objects.get(id=tenant_id)
-                logger.debug(f"Tenant extracted from token by ID: {tenant.schema_name}")
+                logger.debug(LogMessages.TENANT_EXTRACTED_BY_ID.format(tenant.schema_name))
                 return tenant
             elif schema_name:
                 tenant = Tenant.objects.get(schema_name=schema_name)
-                logger.debug(f"Tenant extracted from token by schema: {tenant.schema_name}")
+                logger.debug(LogMessages.TENANT_EXTRACTED_BY_SCHEMA.format(tenant.schema_name))
                 return tenant
             else:
-                logger.warning("No tenant_id or schema_name in token")
-                raise ValueError("Tenant not specified in token")
+                logger.warning(LogMessages.NO_TENANT_IN_TOKEN)
+                raise ValueError(ErrorMessages.TENANT_NOT_SPECIFIED_IN_TOKEN)
         except Tenant.DoesNotExist:
-            logger.error("Tenant not found")
-            raise serializers.ValidationError("Tenant not found")
+            logger.error(ErrorMessages.TENANT_NOT_FOUND)
+            raise serializers.ValidationError(ErrorMessages.TENANT_NOT_FOUND)
         except jwt.InvalidTokenError:
-            logger.error("Invalid JWT token")
-            raise serializers.ValidationError("Invalid token")
+            logger.error(ErrorMessages.INVALID_TOKEN)
+            raise serializers.ValidationError(ErrorMessages.INVALID_TOKEN)
         except Exception as e:
-            logger.error(f"Error extracting tenant: {str(e)}")
-            raise serializers.ValidationError(f"Error extracting tenant: {str(e)}")
+            logger.error(ErrorMessages.ERROR_EXTRACTING_TENANT.format(str(e)))
+            raise serializers.ValidationError(ErrorMessages.ERROR_EXTRACTING_TENANT.format(str(e)))
 
     def get_queryset(self):
         tenant = self.get_tenant(self.request)
         connection.set_schema(tenant.schema_name)
         with connection.cursor() as cursor:
-            cursor.execute("SHOW search_path;")
+            cursor.execute(SQLQueries.SHOW_SEARCH_PATH)
             search_path = cursor.fetchone()[0]
-            logger.debug(f"Database search_path: {search_path}")
+            logger.debug(LogMessages.DATABASE_SEARCH_PATH.format(search_path))
         with tenant_context(tenant):
             return Branch.objects.filter(tenant=tenant)
 
@@ -206,10 +214,10 @@ class BranchDetailView(generics.RetrieveUpdateDestroyAPIView):
             with tenant_context(tenant):
                 with transaction.atomic():
                     branch = serializer.save()
-                    logger.info(f"Branch updated: {branch.name} for tenant {tenant.schema_name}")
+                    logger.info(LogMessages.BRANCH_UPDATED.format(branch.name, tenant.schema_name))
         except Exception as e:
-            logger.error(f"Error updating branch for tenant {tenant.schema_name}: {str(e)}")
-            raise serializers.ValidationError(f"Error updating branch: {str(e)}")
+            logger.error(LogMessages.ERROR_UPDATING_BRANCH.format(tenant.schema_name, str(e)))
+            raise serializers.ValidationError(ErrorMessages.ERROR_UPDATING_BRANCH.format(str(e)))
 
     def perform_destroy(self, instance):
         tenant = self.get_tenant(self.request)
@@ -217,107 +225,79 @@ class BranchDetailView(generics.RetrieveUpdateDestroyAPIView):
             with tenant_context(tenant):
                 with transaction.atomic():
                     instance.delete()
-                    logger.info(f"Branch deleted: {instance.name} for tenant {tenant.schema_name}")
+                    logger.info(LogMessages.BRANCH_DELETED.format(instance.name, tenant.schema_name))
         except Exception as e:
-            logger.error(f"Error deleting branch for tenant {tenant.schema_name}: {str(e)}")
-            raise serializers.ValidationError(f"Error deleting branch: {str(e)}")
+            logger.error(LogMessages.ERROR_DELETING_BRANCH.format(tenant.schema_name, str(e)))
+            raise serializers.ValidationError(ErrorMessages.ERROR_DELETING_BRANCH.format(str(e)))
 
 class ModuleListView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        tenant = request.user.tenant
+        tenant = getattr(request.user, AttributeNames.TENANT)
         with tenant_context(tenant):
             modules = Module.objects.filter(is_active=True)
-            serializer = ModuleSerializer(modules, many=True, context={'request': request})
-            logger.info(f"Retrieved {modules.count()} modules for tenant {tenant.schema_name}")
+            serializer = ModuleSerializer(modules, many=True, context={ContextKeys.REQUEST: request})
+            logger.info(LogMessages.MODULES_RETRIEVED.format(modules.count(), tenant.schema_name))
             return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        tenant = request.user.tenant
-        serializer = ModuleSerializer(data=request.data, context={'request': request})
+        tenant = getattr(request.user, AttributeNames.TENANT)
+        serializer = ModuleSerializer(data=request.data, context={ContextKeys.REQUEST: request})
         if serializer.is_valid():
             try:
                 with tenant_context(tenant):
                     with transaction.atomic():
                         module = serializer.save()
-                        logger.info(f"Module created: {module.name} for tenant {tenant.schema_name}")
+                        logger.info(LogMessages.MODULE_CREATED.format(module.name, tenant.schema_name))
                         return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception as e:
-                logger.error(f"Error creating module for tenant {tenant.schema_name}: {str(e)}")
+                logger.error(LogMessages.ERROR_CREATING_MODULE.format(tenant.schema_name, str(e)))
                 return Response({
-                    'status': 'error',
-                    'message': str(e)
+                    ResponseKeys.STATUS: ResponseStatuses.ERROR,
+                    ResponseKeys.MESSAGE: str(e)
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        logger.error(f"Validation error for tenant {tenant.schema_name}: {serializer.errors}")
+        logger.error(LogMessages.VALIDATION_ERROR.format(tenant.schema_name, serializer.errors))
         return Response({
-            'status': 'error',
-            'message': serializer.errors
+            ResponseKeys.STATUS: ResponseStatuses.ERROR,
+            ResponseKeys.MESSAGE: serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
 
 class TenantConfigView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        tenant = request.user.tenant
+        tenant = getattr(request.user, AttributeNames.TENANT)
         with tenant_context(tenant):
             try:
                 config = TenantConfig.objects.get(tenant=tenant)
                 serializer = TenantConfigSerializer(config)
-                logger.info(f"Fetched TenantConfig for tenant {tenant.schema_name}")
+                logger.info(LogMessages.TENANT_CONFIG_FETCHED.format(tenant.schema_name))
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except TenantConfig.DoesNotExist:
                 default_templates = {
-                    'interviewScheduling': {
-                        'content': (
-                            'Hello [Candidate Name],\n\n'
-                            'We\'re pleased to invite you to an interview for the [Position] role at [Company].\n'
-                            'Please let us know your availability so we can confirm a convenient time.\n\n'
-                            'Best regards,\n[Your Name]'
-                        ),
+                    DefaultTemplateKeys.INTERVIEW_SCHEDULING: {
+                        'content': EmailTemplates.INTERVIEW_SCHEDULING,
                         'is_auto_sent': False
                     },
-                    'interviewRescheduling': {
-                        'content': (
-                            'Hello [Candidate Name],\n\n'
-                            'Due to unforeseen circumstances, we need to reschedule your interview originally set for [Old Date/Time]. '
-                            'Kindly share a few alternative slots that work for you.\n\n'
-                            'Thanks for your understanding,\n[Your Name]'
-                        ),
+                    DefaultTemplateKeys.INTERVIEW_RESCHEDULING: {
+                        'content': EmailTemplates.INTERVIEW_RESCHEDULING,
                         'is_auto_sent': False
                     },
-                    'interviewRejection': {
-                        'content': (
-                            'Hello [Candidate Name],\n\n'
-                            'Thank you for taking the time to interview. After careful consideration, '
-                            'we have decided not to move forward.\n\n'
-                            'Best wishes,\n[Your Name]'
-                        ),
+                    DefaultTemplateKeys.INTERVIEW_REJECTION: {
+                        'content': EmailTemplates.INTERVIEW_REJECTION,
                         'is_auto_sent': False
                     },
-                    'interviewAcceptance': {
-                        'content': (
-                            'Hello [Candidate Name],\n\n'
-                            'Congratulations! We are moving you to the next stage. We\'ll follow up with next steps.\n\n'
-                            'Looking forward,\n[Your Name]'
-                        ),
+                    DefaultTemplateKeys.INTERVIEW_ACCEPTANCE: {
+                        'content': EmailTemplates.INTERVIEW_ACCEPTANCE,
                         'is_auto_sent': False
                     },
-                    'jobRejection': {
-                        'content': (
-                            'Hello [Candidate Name],\n\n'
-                            'Thank you for applying. Unfortunately, we\'ve chosen another candidate at this time.\n\n'
-                            'Kind regards,\n[Your Name]'
-                        ),
+                    DefaultTemplateKeys.JOB_REJECTION: {
+                        'content': EmailTemplates.JOB_REJECTION,
                         'is_auto_sent': False
                     },
-                    'jobAcceptance': {
-                        'content': (
-                            'Hello [Candidate Name],\n\n'
-                            'We\'re excited to offer you the [Position] role at [Company]! '
-                            'Please find the offer letter attached.\n\n'
-                            'Welcome aboard!\n[Your Name]'
-                        ),
+                    DefaultTemplateKeys.JOB_ACCEPTANCE: {
+                        'content': EmailTemplates.JOB_ACCEPTANCE,
                         'is_auto_sent': False
                     }
                 }
@@ -327,53 +307,53 @@ class TenantConfigView(APIView):
                             tenant=tenant,
                             email_templates=default_templates
                         )
-                        logger.info(f"Created TenantConfig for tenant {tenant.schema_name} with default email templates")
+                        logger.info(LogMessages.TENANT_CONFIG_CREATED_DEFAULT.format(tenant.schema_name))
                         serializer = TenantConfigSerializer(config)
                         return Response(serializer.data, status=status.HTTP_201_CREATED)
                 except Exception as e:
-                    logger.error(f"Error creating TenantConfig for tenant {tenant.schema_name}: {str(e)}")
+                    logger.error(LogMessages.ERROR_CREATING_TENANT_CONFIG.format(tenant.schema_name, str(e)))
                     return Response(
-                        {'status': 'error', 'message': 'Failed to create tenant configuration'},
+                        {ResponseKeys.STATUS: ResponseStatuses.ERROR, ResponseKeys.MESSAGE: ErrorMessages.FAILED_TO_CREATE_TENANT_CONFIG},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
 
     def patch(self, request):
-        tenant = request.user.tenant
+        tenant = getattr(request.user, AttributeNames.TENANT)
         with tenant_context(tenant):
             try:
                 config = TenantConfig.objects.get(tenant=tenant)
                 current_templates = config.email_templates or {}
-                incoming_templates = request.data.get('email_templates', {})
+                incoming_templates = request.data.get(RequestDataKeys.EMAIL_TEMPLATES, {})
                 updated_templates = { **current_templates, **incoming_templates }
                 updated_data = { **request.data, 'email_templates': updated_templates }
                 serializer = TenantConfigSerializer(config, data=updated_data, partial=True)
                 if serializer.is_valid():
                     serializer.save()
-                    logger.info(f"Tenant config updated for tenant {tenant.schema_name}")
+                    logger.info(LogMessages.TENANT_CONFIG_UPDATED.format(tenant.schema_name))
                     return Response(serializer.data, status=status.HTTP_200_OK)
-                logger.error(f"Validation error for tenant {tenant.schema_name}: {serializer.errors}")
-                return Response({'status': 'error', 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                logger.error(LogMessages.VALIDATION_ERROR.format(tenant.schema_name, serializer.errors))
+                return Response({ResponseKeys.STATUS: ResponseStatuses.ERROR, ResponseKeys.MESSAGE: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             except TenantConfig.DoesNotExist:
-                logger.error(f"Tenant config not found for tenant {tenant.schema_name}")
-                return Response({'status': 'error', 'message': 'Tenant config not found'}, status=status.HTTP_404_NOT_FOUND)
+                logger.error(LogMessages.TENANT_CONFIG_NOT_FOUND_LOG.format(tenant.schema_name))
+                return Response({ResponseKeys.STATUS: ResponseStatuses.ERROR, ResponseKeys.MESSAGE: ErrorMessages.TENANT_CONFIG_NOT_FOUND}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
-        tenant = request.user.tenant
+        tenant = getattr(request.user, AttributeNames.TENANT)
         with tenant_context(tenant):
             try:
                 if TenantConfig.objects.filter(tenant=tenant).exists():
-                    logger.warning(f"Tenant config already exists for tenant {tenant.schema_name}")
-                    return Response({'status': 'error', 'message': 'Tenant config already exists'}, status=status.HTTP_400_BAD_REQUEST)
+                    logger.warning(LogMessages.TENANT_CONFIG_ALREADY_EXISTS_LOG.format(tenant.schema_name))
+                    return Response({ResponseKeys.STATUS: ResponseStatuses.ERROR, ResponseKeys.MESSAGE: ErrorMessages.TENANT_CONFIG_ALREADY_EXISTS}, status=status.HTTP_400_BAD_REQUEST)
                 serializer = TenantConfigSerializer(data=request.data)
                 if serializer.is_valid():
                     serializer.save(tenant=tenant)
-                    logger.info(f"Tenant config created for tenant {tenant.schema_name}")
+                    logger.info(LogMessages.TENANT_CONFIG_CREATED_LOG.format(tenant.schema_name))
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
-                logger.error(f"Validation error for tenant {tenant.schema_name}: {serializer.errors}")
-                return Response({'status': 'error', 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                logger.error(LogMessages.VALIDATION_ERROR.format(tenant.schema_name, serializer.errors))
+                return Response({ResponseKeys.STATUS: ResponseStatuses.ERROR, ResponseKeys.MESSAGE: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
-                logger.error(f"Error creating tenant config for tenant {tenant.schema_name}: {str(e)}")
-                return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                logger.error(LogMessages.ERROR_CREATING_TENANT_CONFIG_GENERAL.format(tenant.schema_name, str(e)))
+                return Response({ResponseKeys.STATUS: ResponseStatuses.ERROR, ResponseKeys.MESSAGE: str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class TenantViewSet(viewsets.ModelViewSet):
     queryset = Tenant.objects.all()
@@ -383,82 +363,82 @@ class TenantViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == ActionNames.LIST:
             return [IsSuperUser()]
         return [IsAuthenticated()]
 
     def get_object(self):
-        unique_id = self.kwargs.get('pk')
+        unique_id = self.kwargs.get(URLParams.PK)
         try:
             return Tenant.objects.get(unique_id=unique_id)
         except Tenant.DoesNotExist:
-            raise serializers.ValidationError("Tenant not found with this unique ID.")
+            raise serializers.ValidationError(ErrorMessages.TENANT_NOT_FOUND_BY_UNIQUE_ID)
 
     def get_tenant(self, request):
         try:
-            if hasattr(request.user, 'tenant') and request.user.tenant:
-                logger.debug(f"Tenant from user: {request.user.tenant.schema_name}")
-                return request.user.tenant
-            auth_header = request.headers.get('Authorization', '')
-            if not auth_header.startswith('Bearer '):
-                logger.warning("No valid Bearer token provided")
-                raise ValueError("Invalid token format")
+            if hasattr(request.user, AttributeNames.TENANT) and getattr(request.user, AttributeNames.TENANT):
+                logger.debug(LogMessages.TENANT_FROM_USER.format(getattr(request.user, AttributeNames.TENANT).schema_name))
+                return getattr(request.user, AttributeNames.TENANT)
+            auth_header = request.headers.get(Headers.AUTHORIZATION, '')
+            if not auth_header.startswith(Headers.BEARER_PREFIX):
+                logger.warning(ErrorMessages.NO_VALID_BEARER_TOKEN)
+                raise ValueError(ErrorMessages.INVALID_TOKEN_FORMAT)
             token = auth_header.split(' ')[1]
-            decoded_token = jwt.decode(token, options={"verify_signature": False})
-            tenant_id = decoded_token.get('tenant_id')
-            schema_name = decoded_token.get('tenant_schema')
+            decoded_token = jwt.decode(token, options={JWTDecodeOptions.VERIFY_SIGNATURE: False})
+            tenant_id = decoded_token.get(JWTKeys.TENANT_ID)
+            schema_name = decoded_token.get(JWTKeys.TENANT_SCHEMA)
             if not tenant_id and not schema_name:
-                logger.warning("No tenant_id or schema_name in token")
-                raise ValueError("Tenant not specified in token")
-            
+                logger.warning(LogMessages.NO_TENANT_IN_TOKEN)
+                raise ValueError(ErrorMessages.TENANT_NOT_SPECIFIED_IN_TOKEN)
+
             if tenant_id:
                 tenant = Tenant.objects.get(id=tenant_id)
             else:
                 tenant = Tenant.objects.get(schema_name=schema_name)
-            
+
             keypair = RSAKeyPair.objects.filter(tenant=tenant, active=True).first()
             if not keypair:
-                logger.error(f"No active RSA keypair found for tenant {tenant.schema_name}")
-                raise serializers.ValidationError("No active keypair for tenant")
+                logger.error(ErrorMessages.NO_ACTIVE_KEYPAIR.format(tenant.schema_name))
+                raise serializers.ValidationError(ErrorMessages.NO_ACTIVE_KEYPAIR.format(""))
             public_key = serialization.load_pem_public_key(keypair.public_key_pem.encode())
-            jwt.decode(token, public_key, algorithms=["RS256"])
-            
-            logger.debug(f"Tenant extracted from token: {tenant.schema_name}")
+            jwt.decode(token, public_key, algorithms=[Algorithms.RS256])
+
+            logger.debug(LogMessages.TENANT_EXTRACTED_FROM_TOKEN.format(tenant.schema_name))
             return tenant
         except Tenant.DoesNotExist:
-            logger.error("Tenant not found")
-            raise serializers.ValidationError("Tenant not found")
+            logger.error(ErrorMessages.TENANT_NOT_FOUND)
+            raise serializers.ValidationError(ErrorMessages.TENANT_NOT_FOUND)
         except jwt.InvalidTokenError:
-            logger.error("Invalid JWT token")
-            raise serializers.ValidationError("Invalid token")
+            logger.error(ErrorMessages.INVALID_TOKEN)
+            raise serializers.ValidationError(ErrorMessages.INVALID_TOKEN)
         except Exception as e:
-            logger.error(f"Error extracting tenant: {str(e)}")
-            raise serializers.ValidationError(f"Error extracting tenant: {str(e)}")
+            logger.error(ErrorMessages.ERROR_EXTRACTING_TENANT.format(str(e)))
+            raise serializers.ValidationError(ErrorMessages.ERROR_EXTRACTING_TENANT.format(str(e)))
 
     def get_queryset(self):
-        if self.action == 'list':
-            logger.debug("Returning all tenants for list action")
+        if self.action == ActionNames.LIST:
+            logger.debug(LogMessages.RETURNING_ALL_TENANTS)
             return Tenant.objects.all()
         tenant = self.get_tenant(self.request)
-        logger.debug(f"Filtering queryset for tenant: {tenant.schema_name}")
+        logger.debug(LogMessages.FILTERING_QUERYSET_FOR_TENANT.format(tenant.schema_name))
         connection.set_schema(tenant.schema_name)
         with connection.cursor() as cursor:
-            cursor.execute("SHOW search_path;")
+            cursor.execute(SQLQueries.SHOW_SEARCH_PATH)
             search_path = cursor.fetchone()[0]
-            logger.debug(f"Database search_path: {search_path}")
+            logger.debug(LogMessages.DATABASE_SEARCH_PATH.format(search_path))
         return Tenant.objects.filter(id=tenant.id)
 
     def perform_create(self, serializer):
         original_schema = connection.schema_name
         try:
-            connection.set_schema('public')
+            connection.set_schema(SchemaNames.PUBLIC)
             with transaction.atomic():
                 new_tenant = serializer.save()
-                logger.info(f"Tenant created: {new_tenant.name} (schema: {new_tenant.schema_name})")
-                
+                logger.info(LogMessages.TENANT_CREATED.format(new_tenant.name, new_tenant.schema_name))
+
                 # ✅ FIX: Log global activity for tenant creation
                 GlobalActivity.log_platform_action(
-                    action='tenant_created',
+                    action=EventTypes.TENANT_CREATED,
                     affected_tenant=new_tenant,
                     performed_by_id=str(self.request.user.id) if self.request.user.is_authenticated else None,
                     details={
@@ -468,28 +448,28 @@ class TenantViewSet(viewsets.ModelViewSet):
                     },
                     request=self.request
                 )
-                
+
                 # Publish Kafka event with tenant details
                 tenant_data = TenantSerializer(new_tenant).data
                 publish_event(
-                    settings.KAFKA_TOPIC_TENANT_EVENTS,
+                    KafkaTopics.TENANT_EVENTS,
                     {
-                        'event_type': 'tenant_created',
-                        'tenant_id': str(new_tenant.unique_id),
-                        'data': tenant_data
+                        KafkaEventKeys.EVENT_TYPE: EventTypes.TENANT_CREATED,
+                        KafkaEventKeys.TENANT_ID: str(new_tenant.unique_id),
+                        KafkaEventKeys.DATA: tenant_data
                     }
                 )
-                
+
                 # Send notification to notification service
                 notification_data = {
-                    'externalId': str(new_tenant.unique_id),
-                    'id': str(new_tenant.unique_id),
-                    'name': new_tenant.name
+                    NotificationKeys.EXTERNAL_ID: str(new_tenant.unique_id),
+                    NotificationKeys.ID: str(new_tenant.unique_id),
+                    NotificationKeys.NAME: new_tenant.name
                 }
                 send_notification_event(notification_data)
         except Exception as e:
-            logger.error(f"Failed to create tenant: {str(e)}")
-            raise serializers.ValidationError(f"Failed to create tenant: {str(e)}")
+            logger.error(ErrorMessages.FAILED_TO_CREATE_TENANT.format(str(e)))
+            raise serializers.ValidationError(ErrorMessages.FAILED_TO_CREATE_TENANT.format(str(e)))
         finally:
             connection.set_schema(original_schema)
 
@@ -499,44 +479,44 @@ class TenantViewSet(viewsets.ModelViewSet):
             page = self.paginate_queryset(queryset)
             if page is not None:
                 serializer = self.get_serializer(page, many=True)
-                logger.info(f"Listing paginated tenants: {[t['id'] for t in serializer.data]}")
+                logger.info(LogMessages.LISTING_PAGINATED_TENANTS.format([t['id'] for t in serializer.data]))
                 return self.get_paginated_response(serializer.data)
             serializer = self.get_serializer(queryset, many=True)
-            logger.info(f"Listing all tenants: {[t['id'] for t in serializer.data]}")
+            logger.info(LogMessages.LISTING_ALL_TENANTS.format([t['id'] for t in serializer.data]))
             return Response(serializer.data)
         except Exception as e:
-            logger.error(f"Error listing tenants: {str(e)}")
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(ErrorMessages.ERROR_LISTING_TENANTS.format(str(e)))
+            return Response({ResponseKeys.DETAIL: str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, *args, **kwargs):
         tenant = self.get_tenant(request)
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        logger.info(f"Retrieving tenant: {instance.id} for tenant {tenant.schema_name}")
+        logger.info(LogMessages.RETRIEVING_TENANT.format(instance.id, tenant.schema_name))
         return Response(serializer.data)
 
     def perform_destroy(self, instance):
         tenant = self.get_tenant(self.request)
         if instance.id != tenant.id:
-            logger.error(f"Unauthorized delete attempt on tenant {instance.id} by tenant {tenant.id}")
-            raise serializers.ValidationError("Not authorized to delete this tenant")
-        
+            logger.error(LogMessages.UNAUTHORIZED_DELETE_ATTEMPT.format(instance.id, tenant.id))
+            raise serializers.ValidationError(ErrorMessages.NOT_AUTHORIZED_DELETE_TENANT)
+
         # ✅ FIX: Log global activity for tenant deletion
-        with schema_context('public'):
+        with schema_context(SchemaNames.PUBLIC):
             GlobalActivity.log_platform_action(
-                action='tenant_deleted',
+                action=EventTypes.TENANT_DELETED,
                 affected_tenant=instance,
                 performed_by_id=str(self.request.user.id) if self.request.user.is_authenticated else None,
                 details={
-                    'tenant_name': instance.name,
-                    'schema_name': instance.schema_name
+                    DetailsKeys.TENANT_NAME: instance.name,
+                    DetailsKeys.SCHEMA_NAME: instance.schema_name
                 },
                 request=self.request
             )
-        
+
         with tenant_context(tenant):
             instance.delete()
-        logger.info(f"Tenant deleted: {instance.name} for tenant {tenant.schema_name}")
+        logger.info(LogMessages.TENANT_DELETED.format(instance.name, tenant.schema_name))
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -548,34 +528,34 @@ class TenantViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         tenant = self.get_tenant(self.request)
         if instance.id != tenant.id and not self.request.user.is_superuser:
-            raise serializers.ValidationError("Not authorized to update this tenant")
-        
+            raise serializers.ValidationError(ErrorMessages.NOT_AUTHORIZED_UPDATE_TENANT)
+
         # ✅ FIX: Log global activity for tenant update
-        with schema_context('public'):
+        with schema_context(SchemaNames.PUBLIC):
             GlobalActivity.log_platform_action(
-                action='tenant_updated',
+                action=EventTypes.TENANT_UPDATED,
                 affected_tenant=instance,
                 performed_by_id=str(self.request.user.id) if self.request.user.is_authenticated else None,
                 details={
-                    'tenant_name': instance.name,
-                    'schema_name': instance.schema_name
+                    DetailsKeys.TENANT_NAME: instance.name,
+                    DetailsKeys.SCHEMA_NAME: instance.schema_name
                 },
                 request=self.request
             )
-        
+
         with tenant_context(tenant):
             serializer.save()
-        logger.info(f"Tenant updated: {instance.name} for tenant {tenant.schema_name}")
+        logger.info(LogMessages.TENANT_UPDATED.format(instance.name, tenant.schema_name))
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         tenant = self.get_tenant(request)
         serializer = self.get_serializer(
-            instance, 
-            data=request.data, 
-            partial=partial, 
-            context={'request': request}
+            instance,
+            data=request.data,
+            partial=partial,
+            context={ContextKeys.REQUEST: request}
         )
         serializer.is_valid(raise_exception=True)
         with tenant_context(tenant):
@@ -586,63 +566,63 @@ class TenantViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='suspend')
     def suspend(self, request, pk=None):
         instance = self.get_object()
-        if instance.status == 'suspended':
-            return Response({'detail': 'Tenant is already suspended.'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        reason = request.data.get('reason', 'Manual suspension')
+        if instance.status == StatusValues.SUSPENDED:
+            return Response({ResponseKeys.DETAIL: ResponseMessages.TENANT_ALREADY_SUSPENDED_DETAIL}, status=status.HTTP_400_BAD_REQUEST)
+
+        reason = request.data.get(RequestDataKeys.REASON, DefaultReasons.MANUAL_SUSPENSION)
         try:
-            with schema_context('public'):  # Log in shared schema
+            with schema_context(SchemaNames.PUBLIC):  # Log in shared schema
                 GlobalActivity.log_platform_action(
-                    action='tenant_suspended',
+                    action=EventTypes.TENANT_SUSPENDED,
                     affected_tenant=instance,
                     performed_by_id=str(request.user.id),
-                    details={'reason': reason},
+                    details={DetailsKeys.REASON: reason},
                     request=request
                 )
-            
+
             with tenant_context(instance):
-                instance.status = 'suspended'
-                instance.save(update_fields=['status'])
-            
-            logger.info(f"Tenant suspended: {instance.name} (ID: {pk}) by {request.user.email}")
+                instance.status = StatusValues.SUSPENDED
+                instance.save(update_fields=[FieldNames.STATUS])
+
+            logger.info(LogMessages.TENANT_SUSPENDED.format(instance.name, pk, request.user.email))
             return Response({
-                'detail': f'Tenant "{instance.name}" suspended successfully.',
-                'status': instance.status
+                ResponseKeys.DETAIL: ResponseMessages.TENANT_SUSPENDED_SUCCESS.format(instance.name),
+                ResponseKeys.STATUS: instance.status
             }, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Error suspending tenant {pk}: {str(e)}")
-            return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(ErrorMessages.ERROR_SUSPENDING_TENANT.format(pk, str(e)))
+            return Response({ResponseKeys.DETAIL: str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # NEW: Action to activate a tenant
-    @action(detail=True, methods=['post'], url_path='activate')
+    @action(detail=True, methods=['post'], url_path=URLPaths.ACTIVATE)
     def activate(self, request, pk=None):
         instance = self.get_object()
-        if instance.status == 'active':
-            return Response({'detail': 'Tenant is already active.'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        reason = request.data.get('reason', 'Manual activation')
+        if instance.status == StatusValues.ACTIVE:
+            return Response({ResponseKeys.DETAIL: ResponseMessages.TENANT_ALREADY_ACTIVE_DETAIL}, status=status.HTTP_400_BAD_REQUEST)
+
+        reason = request.data.get(RequestDataKeys.REASON, DefaultReasons.MANUAL_ACTIVATION)
         try:
-            with schema_context('public'):  # Log in shared schema
+            with schema_context(SchemaNames.PUBLIC):  # Log in shared schema
                 GlobalActivity.log_platform_action(
-                    action='tenant_activated',
+                    action=EventTypes.TENANT_ACTIVATED,
                     affected_tenant=instance,
                     performed_by_id=str(request.user.id),
-                    details={'reason': reason},
+                    details={DetailsKeys.REASON: reason},
                     request=request
                 )
-            
+
             with tenant_context(instance):
-                instance.status = 'active'
-                instance.save(update_fields=['status'])
-            
-            logger.info(f"Tenant activated: {instance.name} (ID: {pk}) by {request.user.email}")
+                instance.status = StatusValues.ACTIVE
+                instance.save(update_fields=[FieldNames.STATUS])
+
+            logger.info(LogMessages.TENANT_ACTIVATED.format(instance.name, pk, request.user.email))
             return Response({
-                'detail': f'Tenant "{instance.name}" activated successfully.',
-                'status': instance.status
+                ResponseKeys.DETAIL: ResponseMessages.TENANT_ACTIVATED_SUCCESS.format(instance.name),
+                ResponseKeys.STATUS: instance.status
             }, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Error activating tenant {pk}: {str(e)}")
-            return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(ErrorMessages.ERROR_ACTIVATING_TENANT.format(pk, str(e)))
+            return Response({ResponseKeys.DETAIL: str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class PublicTenantInfoView(APIView):
@@ -654,7 +634,7 @@ class PublicTenantInfoView(APIView):
             serializer = PublicTenantSerializer(tenant)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Tenant.DoesNotExist:
-            return Response({"detail": "Tenant not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({ResponseKeys.DETAIL: ErrorMessages.TENANT_NOT_FOUND_PUBLIC}, status=status.HTTP_404_NOT_FOUND)
 
 class GlobalActivityViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -669,9 +649,9 @@ class GlobalActivityViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         # Only superusers can access global logs
         if not self.request.user.is_superuser:
-            raise PermissionDenied("Only platform superusers can view global activity logs.")
+            raise PermissionDenied(ErrorMessages.ONLY_SUPERUSERS_VIEW_GLOBAL_LOGS)
         
-        queryset = GlobalActivity.objects.all().select_related('affected_tenant').order_by('-timestamp')
+        queryset = GlobalActivity.objects.all().select_related('affected_tenant').order_by(OrderingFields.TIMESTAMP_DESC)
         
         # Apply filters
         queryset = self._apply_filters(queryset)
@@ -679,27 +659,27 @@ class GlobalActivityViewSet(viewsets.ReadOnlyModelViewSet):
     
     def _apply_filters(self, queryset):
         params = self.request.query_params
-        
+
         # Filter by tenant
-        tenant_id = params.get('tenant_id')
+        tenant_id = params.get(QueryParams.TENANT_ID)
         if tenant_id:
             queryset = queryset.filter(affected_tenant__unique_id=tenant_id)
-        
+
         # Filter by action type
-        actions = params.getlist('action') or params.getlist('action[]')
+        actions = params.getlist(QueryParams.ACTION) or params.getlist(QueryParams.ACTION_ALT)
         if actions:
             queryset = queryset.filter(action__in=actions)
-        
+
         # Date range
-        date_from = params.get('date_from')
-        date_to = params.get('date_to')
+        date_from = params.get(QueryParams.DATE_FROM)
+        date_to = params.get(QueryParams.DATE_TO)
         if date_from:
             queryset = queryset.filter(timestamp__gte=date_from)
         if date_to:
             queryset = queryset.filter(timestamp__lte=date_to)
-        
+
         # Search
-        search = params.get('search')
+        search = params.get(QueryParams.SEARCH)
         if search:
             queryset = queryset.filter(
                 Q(action__icontains=search) |
@@ -707,13 +687,13 @@ class GlobalActivityViewSet(viewsets.ReadOnlyModelViewSet):
                 Q(global_user__icontains=search) |
                 Q(performed_by__icontains=search)
             )
-        
+
         return queryset
     
     @action(detail=False, methods=['get'], url_path='dashboard-stats')
     def dashboard_stats(self, request):
         """Global dashboard statistics"""
-        days = int(request.query_params.get('days', 30))
+        days = int(request.query_params.get(QueryParams.DAYS, 30))
         end_date = timezone.now()
         start_date = end_date - timedelta(days=days)
         
@@ -727,54 +707,54 @@ class GlobalActivityViewSet(viewsets.ReadOnlyModelViewSet):
         
         # Activities by tenant
         activities_by_tenant = activities.values(
-            'affected_tenant__unique_id',
-            'affected_tenant__name',
-            'affected_tenant__schema_name'
+            FieldNames.AFFECTED_TENANT_UNIQUE_ID,
+            FieldNames.AFFECTED_TENANT_NAME,
+            FieldNames.AFFECTED_TENANT_SCHEMA_NAME
         ).annotate(
             count=Count('id')
         ).order_by('-count')[:10]
         
         # Activities by type
-        activities_by_type = activities.values('action').annotate(
+        activities_by_type = activities.values(FieldNames.ACTION).annotate(
             count=Count('id')
         ).order_by('-count')
         
         # Most active admins
-        active_admins = activities.values('global_user').annotate(
+        active_admins = activities.values(FieldNames.GLOBAL_USER).annotate(
             activity_count=Count('id')
         ).order_by('-activity_count')[:10]
         
         return Response({
-            'period': {'start_date': start_date, 'end_date': end_date, 'days': days},
-            'summary': {
-                'total_activities': total_activities,
-                'affected_tenants_count': activities.values('affected_tenant').distinct().count(),
-                'active_admins_count': activities.values('global_user').distinct().count(),
+            ResponseKeys.PERIOD: {FieldNames.START_DATE: start_date, FieldNames.END_DATE: end_date, FieldNames.DAYS: days},
+            ResponseKeys.SUMMARY: {
+                FieldNames.TOTAL_ACTIVITIES: total_activities,
+                FieldNames.AFFECTED_TENANTS_COUNT: activities.values(FieldNames.AFFECTED_TENANT).distinct().count(),
+                FieldNames.ACTIVE_ADMINS_COUNT: activities.values(FieldNames.GLOBAL_USER).distinct().count(),
             },
-            'activities_by_tenant': list(activities_by_tenant),
-            'activities_by_type': list(activities_by_type),
-            'active_admins': list(active_admins),
+            ResponseKeys.ACTIVITIES_BY_TENANT: list(activities_by_tenant),
+            ResponseKeys.ACTIVITIES_BY_TYPE: list(activities_by_type),
+            ResponseKeys.ACTIVE_ADMINS: list(active_admins),
         })
     
     @action(detail=False, methods=['get'], url_path='tenant-activities')
     def tenant_activities(self, request):
         """Get all activities for a specific tenant"""
-        tenant_id = request.query_params.get('tenant_id')
+        tenant_id = request.query_params.get(QueryParams.TENANT_ID)
         if not tenant_id:
             return Response(
-                {"error": "tenant_id parameter is required"},
+                {ResponseKeys.ERROR: ErrorMessages.TENANT_ID_PARAMETER_REQUIRED},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
             tenant = Tenant.objects.get(unique_id=tenant_id)
         except Tenant.DoesNotExist:
             return Response(
-                {"error": "Tenant not found"},
+                {ResponseKeys.ERROR: ErrorMessages.TENANT_NOT_FOUND_GENERAL},
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        activities = GlobalActivity.objects.filter(affected_tenant=tenant).select_related('affected_tenant').order_by('-timestamp')
+        activities = GlobalActivity.objects.filter(affected_tenant=tenant).select_related('affected_tenant').order_by(OrderingFields.TIMESTAMP_DESC)
         
         page = self.paginate_queryset(activities)
         if page is not None:

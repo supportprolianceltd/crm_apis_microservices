@@ -209,6 +209,7 @@ TENANT_APPS = [
     "users",
     "reviews",
     "investments",
+    "events",
 ]
 
 INSTALLED_APPS = list(SHARED_APPS) + [
