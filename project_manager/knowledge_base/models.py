@@ -7,6 +7,7 @@ def gen_id():
 
 class Category(models.Model):
     id = models.CharField(primary_key=True, max_length=32, default=gen_id, editable=False)
+    tenant_id = models.CharField(max_length=255, blank=False, null=False)
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -16,10 +17,11 @@ class Category(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.tenant_id})"
 
 class Tag(models.Model):
     id = models.CharField(primary_key=True, max_length=32, default=gen_id, editable=False)
+    tenant_id = models.CharField(max_length=255, blank=False, null=False, default='default-tenant')
     name = models.CharField(max_length=50, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -27,7 +29,7 @@ class Tag(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.tenant_id})"
 
 class Article(models.Model):
     STATUS_CHOICES = [
@@ -37,6 +39,7 @@ class Article(models.Model):
     ]
 
     id = models.CharField(primary_key=True, max_length=32, default=gen_id, editable=False)
+    tenant_id = models.CharField(max_length=255, blank=False, null=False, default='default-tenant')
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, blank=True)
     content = models.TextField()
@@ -59,7 +62,7 @@ class Article(models.Model):
         ordering = ['-published_at', '-created_at']
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.tenant_id})"
 
     def save(self, *args, **kwargs):
         if not self.slug:

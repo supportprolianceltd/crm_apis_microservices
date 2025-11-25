@@ -18,8 +18,15 @@ from django.conf import settings
 def user_tasks(request, user_id):
     """Get tasks assigned to a specific user"""
     try:
+        # Get tenant_id from JWT
+        jwt_payload = getattr(request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+
         # Get tasks assigned to the specified user
-        tasks = Task.objects.filter(assigned_to_id=user_id).prefetch_related('comments', 'daily_reports')
+        tasks = Task.objects.filter(assigned_to_id=user_id, tenant_id=tenant_id).prefetch_related('comments', 'daily_reports')
 
         # Apply any query parameters (like status filtering)
         status_filter = request.query_params.get('status')
@@ -105,16 +112,21 @@ class TaskViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     
     def get_queryset(self):
-        queryset = Task.objects.all().prefetch_related('comments', 'daily_reports')
-        
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        queryset = Task.objects.filter(tenant_id=tenant_id).prefetch_related('comments', 'daily_reports')
+
         status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
-            
+
         assigned_to_filter = self.request.query_params.get('assigned_to')
         if assigned_to_filter:
             queryset = queryset.filter(assigned_to_id=assigned_to_filter)
-            
+
         return queryset
 
     def get_serializer_class(self):
@@ -240,9 +252,23 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         logger.info(f"✓ Assigned user details: {assigned_user}")
 
+        # Get tenant_id
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+
         # Create task with both assignor and assignee details
         task_data = {
             **serializer.validated_data,
+            'tenant_id': tenant_id,
             'assigned_by_id': current_user['id'],
             'assigned_by_first_name': current_user['first_name'],
             'assigned_by_last_name': current_user['last_name'],
@@ -251,7 +277,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             'assigned_to_last_name': assigned_user['last_name'],
             'assigned_to_email': assigned_user['email'],
         }
-        
+
         logger.info(f"Creating task with data: {task_data}")
         task = Task.objects.create(**task_data)
         logger.info(f"✓✓✓ Task created successfully! ID: {task.id} ✓✓✓")
@@ -355,9 +381,14 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         task = serializer.save()
         
+        # Get tenant_id
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+
         # Auto-create daily report for status changes
         if request.data.get('status') in ['completed', 'blocked']:
             DailyReport.objects.create(
+                tenant_id=tenant_id,
                 task=task,
                 updated_by_id=current_user['id'],
                 updated_by_first_name=current_user['first_name'],
@@ -383,7 +414,12 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer = CommentCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        # Get tenant_id
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+
         comment = Comment.objects.create(
+            tenant_id=tenant_id,
             task=task,
             user_id=current_user['id'],
             user_first_name=current_user['first_name'],
@@ -411,7 +447,12 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer = DailyReportCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        # Get tenant_id
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+
         report = DailyReport.objects.create(
+            tenant_id=tenant_id,
             task=task,
             updated_by_id=current_user['id'],
             updated_by_first_name=current_user['first_name'],
@@ -433,8 +474,15 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
     permission_classes = []  # Empty list means no permission checks
+
+    def get_queryset(self):
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        return Comment.objects.filter(tenant_id=tenant_id)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -442,8 +490,14 @@ class CommentViewSet(viewsets.ModelViewSet):
         return CommentSerializer
 
     def perform_create(self, serializer):
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
         user = self.request.user
         serializer.save(
+            tenant_id=tenant_id,
             user_id=str(user.pk),
             user_first_name=user.first_name,
             user_last_name=user.last_name,
@@ -452,8 +506,15 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class DailyReportViewSet(viewsets.ModelViewSet):
-    queryset = DailyReport.objects.all()
     permission_classes = []  # Empty list means no permission checks
+
+    def get_queryset(self):
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        return DailyReport.objects.filter(tenant_id=tenant_id)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -461,6 +522,11 @@ class DailyReportViewSet(viewsets.ModelViewSet):
         return DailyReportSerializer
 
     def perform_create(self, serializer):
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
         user = self.request.user
         task = serializer.validated_data['task']
         new_status = serializer.validated_data.get('status')
@@ -471,6 +537,7 @@ class DailyReportViewSet(viewsets.ModelViewSet):
             task.save()
 
         serializer.save(
+            tenant_id=tenant_id,
             updated_by_id=str(user.pk),
             updated_by_first_name=user.first_name,
             updated_by_last_name=user.last_name,

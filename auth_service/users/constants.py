@@ -1,9 +1,12 @@
 import string
+import logging
 from datetime import timedelta
 from django.conf import settings
 from django_tenants.utils import get_public_schema_name
 from rest_framework import status
 from core.models import Tenant
+
+logger = logging.getLogger(__name__)
 
 
 class ErrorMessages:
@@ -173,6 +176,7 @@ class LogMessages:
     NOTIFICATION_SENT_FOR_PASSWORD_RESET_CONFIRMATION = "Notification sent for password reset confirmation: {}, Status: {}"
     FAILED_TO_SEND_PASSWORD_RESET_CONFIRMATION_NOTIFICATION = "Failed to send password reset confirmation notification for {}: {}"
     ERROR_DURING_PASSWORD_RESET_CONFIRMATION = "Error during password reset confirmation in schema {}: {}"
+    FAILED_TO_SEND_PUBLIC_REGISTRATION_EVENT = "Failed to send public registration event for {}: {}"
     REACHED_USER_CREATION_SUCCESS_BLOCK = "🎯 Reached user creation success block. Sending user creation event to notification service."
     REACHED_ADMIN_USER_CREATION_SUCCESS_BLOCK = "🎯 Reached admin user creation success block. Sending user creation event to notification service."
     SENDING_USER_CREATION_EVENT = "🎯 Sending user creation event for {} to notification service."
@@ -211,6 +215,7 @@ class ResponseKeys:
     DATA = "data"
     USER_ID = "user_id"
     EMAIL = "email"
+    USERNAME = "username"
     NEW_PASSWORD = "new_password"
     USERNAME = "username"
     JOB_ROLE = "job_role"
@@ -455,8 +460,9 @@ class DefaultValues:
     JTI = "jti"
     IMPERSONATED_BY = "impersonated_by"
     EXCLUDED_SCHEMAS = {get_public_schema_name(), 'auth-service'}
-    DEFAULT_TENANT = Tenant.objects.first()
-    PUBLIC_TENANT = Tenant.objects.get(schema_name=get_public_schema_name())
+    # DEFAULT_TENANT and PUBLIC_TENANT removed to avoid database queries at import time
+    # DEFAULT_TENANT = Tenant.objects.first()
+    # PUBLIC_TENANT = Tenant.objects.get(schema_name=get_public_schema_name())
     HOURS_1 = timedelta(hours=1)
     MINUTES_15 = timedelta(minutes=15)
     MINUTES_30 = timedelta(minutes=30)
@@ -777,15 +783,21 @@ class ProfileFields:
     LEGAL_WORK_ELIGIBILITIES = 'legal_work_eligibilities'
     OTHER_USER_DOCUMENTS = 'other_user_documents'
     SKILL_DETAILS = 'skill_details'
+    INVESTMENT_DETAILS = 'investment_details'
     WORK_PHONE = 'work_phone'
     PERSONAL_PHONE = 'personal_phone'
     NEXT_OF_KIN = 'next_of_kin'
+    NEXT_OF_KIN_ADDRESS = 'next_of_kin_address'
     NEXT_OF_KIN_PHONE_NUMBER = 'next_of_kin_phone_number'
     RELATIONSHIP_TO_NEXT_OF_KIN = 'relationship_to_next_of_kin'
     DOB = 'dob'
     GENDER = 'gender'
+    BANK_NAME = 'bank_name'
+    ACCOUNT_NAME = 'account_name'
+    ACCOUNT_NUMBER = 'account_number'
+    STREET = 'street'
+    CITY = 'city'
     RELATIONSHIP_TO_NEXT_OF_KIN_DEFAULT = 'N/A'
-    GENDER = 'gender'
 
 
 class PrefetchFields:
@@ -1088,13 +1100,23 @@ class RequestDataKeys:
     USERNAME = 'username'
     PHONE_NUMBER = 'phoneNumber'
     NEXT_OF_KIN_NAME = 'nextOfKinName'
+    NEXT_OF_KIN_ADDRESS = 'nextOfKinAddress'
     NEXT_OF_KIN_PHONE = 'nextOfKinPhone'
+    NEXT_OF_KIN_SEX = 'nextOfKinSex'
     DOB = 'dob'
     SEX = 'sex'
     FIRST_NAME_DATA = 'firstName'
     SURNAME = 'surname'
     TENANT_ID = 'tenant_id'
     TENANT_SCHEMA = 'tenant_schema'
+    INVESTMENT_AMOUNT = 'investmentAmount'
+    ROI_FREQUENCY = 'roiFrequency'
+    POLICY_DATE = 'policyDate'
+    BANK_NAME = 'disbursementBank'
+    ACCOUNT_NAME = 'accountName'
+    ACCOUNT_NUMBER = 'accountNumber'
+    RESIDENTIAL_ADDRESS = 'residentialAddress'
+    HOME_ADDRESS = 'homeAddress'
     REASON = 'reason'
     TOKEN = 'token'
     NEW_PASSWORD = 'new_password'

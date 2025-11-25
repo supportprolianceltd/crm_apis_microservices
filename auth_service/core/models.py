@@ -21,6 +21,7 @@ class Tenant(TenantMixin):
     # NEW: Suspension status field
     STATUS_CHOICES = [
         ('active', 'Active'),
+        ('inactive', 'Inactive'),
         ('suspended', 'Suspended'),
         ('overdue', 'Overdue'),
     ]

@@ -109,7 +109,7 @@ if not Tenant.objects.filter(schema_name='netwiver').exists():
     tenant = Tenant.objects.create(
         name='netwiver',
         schema_name='netwiver',
-        status="suspended"
+        status="active"
     )
     tenant.auto_create_schema = False
     tenant.save()
@@ -143,12 +143,12 @@ if not Tenant.objects.filter(schema_name='appbrew').exists():
 from core.models import Tenant
 from users.models import CustomUser
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='rodrimine')
+tenant = Tenant.objects.get(schema_name='netwiver')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='support@rodrimine.com',
+        email='support@netwiver.com',
         password='qwerty',
-        role='admin',
+        role='root-admin',
         first_name='Ikenga',
         last_name='Odili',
         job_role='Admin Desk',
@@ -297,7 +297,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='appbrew')
+tenant = Tenant.objects.get(schema_name='netwiver')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(

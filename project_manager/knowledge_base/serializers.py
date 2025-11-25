@@ -5,13 +5,13 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
-        read_only_fields = ('created_at', 'updated_at')
+        read_only_fields = ('id', 'created_at', 'updated_at', 'tenant_id')
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = '__all__'
-        read_only_fields = ('created_at',)
+        read_only_fields = ('id', 'created_at', 'tenant_id')
 
 class ArticleSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
@@ -21,7 +21,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = '__all__'
-        read_only_fields = ('created_at', 'updated_at', 'view_count')
+        read_only_fields = ('created_at', 'updated_at', 'view_count', 'tenant_id')
 
     def get_tags_list(self, obj):
         return [tag.name for tag in obj.tags.all()]
@@ -44,6 +44,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tags_data = validated_data.pop('tags', [])
         current_user = self.context.get('current_user')
+        tenant_id = validated_data.get('tenant_id')
 
         if current_user:
             validated_data.update({
@@ -57,7 +58,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
 
         # Handle tags
         for tag_name in tags_data:
-            tag, created = Tag.objects.get_or_create(name=tag_name.lower())
+            tag, created = Tag.objects.get_or_create(name=tag_name.lower(), tenant_id=tenant_id)
             article.tags.add(tag)
 
         return article
@@ -73,8 +74,9 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             # Clear existing tags
             instance.tags.clear()
             # Add new tags
+            tenant_id = instance.tenant_id
             for tag_name in tags_data:
-                tag, created = Tag.objects.get_or_create(name=tag_name.lower())
+                tag, created = Tag.objects.get_or_create(name=tag_name.lower(), tenant_id=tenant_id)
                 instance.tags.add(tag)
 
         return instance

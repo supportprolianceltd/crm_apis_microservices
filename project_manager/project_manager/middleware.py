@@ -239,8 +239,8 @@ class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
 
 class CustomTenantSchemaMiddleware:
     """
-    Middleware to switch DB schema based on tenant_schema in JWT.
-    Must run AFTER MicroserviceRS256JWTMiddleware.
+    Simplified middleware that uses public schema for all requests.
+    This matches the pattern used by other microservices.
     """
     def __init__(self, get_response):
         self.get_response = get_response
@@ -248,95 +248,20 @@ class CustomTenantSchemaMiddleware:
     def __call__(self, request):
         logger.info(f"========== TENANT MIDDLEWARE START ==========")
         logger.info(f"Method: {request.method}, Path: {request.path}")
-        
+
         # Force evaluation of lazy user object to ensure JWT is processed
         user = request.user
         logger.info(f"User: {user}")
         logger.info(f"User type: {type(user).__name__}")
         logger.info(f"User is_authenticated: {user.is_authenticated}")
 
-        # Handle public endpoints
-        if any(request.path.startswith(path) for path in public_paths):
-            logger.info("Public endpoint - using public schema")
-            try:
-                connection.set_schema_to_public()
-                response = self.get_response(request)
-                connection.set_schema_to_public()
-                return response
-            except Exception as e:
-                logger.error(f"✗ Schema switch failed for public endpoint: {str(e)}")
-                return JsonResponse({'error': 'Database configuration error'}, status=500)
-
-        # Handle knowledge base endpoints (temporary for development)
-        if request.path.startswith('/api/knowledge-base/'):
-            logger.info("Knowledge base endpoint - using public schema")
-            try:
-                connection.set_schema_to_public()
-                response = self.get_response(request)
-                connection.set_schema_to_public()
-                return response
-            except Exception as e:
-                logger.error(f"✗ Schema switch failed for knowledge base endpoint: {str(e)}")
-                return JsonResponse({'error': 'Database configuration error'}, status=500)
-
-        # Handle auth-only endpoints (require JWT but not tenant schema)
-        if any(request.path.startswith(path) for path in auth_only_paths):
-            logger.info("Auth-only endpoint - using public schema")
-            try:
-                connection.set_schema_to_public()
-                response = self.get_response(request)
-                connection.set_schema_to_public()
-                return response
-            except Exception as e:
-                logger.error(f"✗ Schema switch failed for auth-only endpoint: {str(e)}")
-                return JsonResponse({'error': 'Database configuration error'}, status=500)
-
-        # Get tenant schema from JWT payload
-        jwt_payload = getattr(request, 'jwt_payload', None)
-        tenant_schema = None
-
-        if jwt_payload:
-            tenant_schema = jwt_payload.get('tenant_schema')
-            logger.info(f"✓ Found tenant_schema in JWT: {tenant_schema}")
-            if not tenant_schema:
-                # Try to get tenant_id and fetch schema from auth-service
-                tenant_id = jwt_payload.get('tenant_id')
-                if tenant_id:
-                    try:
-                        tenant_url = f"{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{tenant_id}/"
-                        resp = requests.get(
-                            tenant_url,
-                            headers={'Authorization': request.headers.get('Authorization', '')},
-                            timeout=5
-                        )
-                        if resp.status_code == 200:
-                            tenant_data = resp.json()
-                            tenant_schema = tenant_data.get('schema_name')
-                            logger.info(f"✓ Fetched tenant_schema from auth-service: {tenant_schema}")
-                        else:
-                            logger.error(f"✗ Failed to fetch tenant from auth-service: {resp.status_code}")
-                    except Exception as e:
-                        logger.error(f"✗ Failed to fetch tenant schema: {str(e)}")
-        else:
-            logger.warning("✗ No jwt_payload found on request")
-
-        if not tenant_schema:
-            logger.error("✗ Tenant schema missing")
-            return JsonResponse({'error': 'Tenant schema missing from token'}, status=403)
-
-        # Switch to tenant schema
+        # No schema switching needed - using default connection
+        logger.info("No schema switching - using default database connection")
         try:
-            connection.set_schema(tenant_schema)
-            logger.info(f"✓ Schema set to: {tenant_schema}")
-            logger.info(f"Calling view with user: {request.user}")
-            logger.info(f"========== TENANT MIDDLEWARE END ==========")
-            
             response = self.get_response(request)
-            connection.set_schema_to_public()
+            logger.info(f"========== TENANT MIDDLEWARE END ==========")
             return response
-            
         except Exception as e:
-            logger.error(f"✗ Schema switch failed: {str(e)}")
+            logger.error(f"✗ Request processing failed: {str(e)}")
             logger.exception("Full traceback:")
-            connection.set_schema_to_public()
-            return JsonResponse({'error': 'Invalid tenant schema'}, status=404)
+            return JsonResponse({'error': 'Request processing error'}, status=500)

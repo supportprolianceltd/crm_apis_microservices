@@ -86,6 +86,9 @@ from .models import (
     WithdrawalDetail,
 )
 
+# Investments App - Models
+from investments.models import InvestmentPolicy
+
 # Local App - Serializers
 from .serializers import (
     AdminUserCreateSerializer,SkillDetailSerializer,    BlockedIPSerializer,TransactionSerializer,
@@ -1312,7 +1315,6 @@ class UserViewSet(viewsets.ModelViewSet):
         status_code = status.HTTP_201_CREATED if results else status.HTTP_400_BAD_REQUEST
         return Response(response_data, status=status_code)
     
-
 class PublicRegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = UserCreateSerializer
@@ -1397,12 +1399,39 @@ class PublicRegisterView(generics.CreateAPIView):
                 ProfileFields.WORK_PHONE: flattened_data.get(RequestDataKeys.PHONE_NUMBER, ''),
                 ProfileFields.PERSONAL_PHONE: flattened_data.get(RequestDataKeys.PHONE_NUMBER, ''),
                 ProfileFields.NEXT_OF_KIN: flattened_data.get(RequestDataKeys.NEXT_OF_KIN_NAME, ''),
+                ProfileFields.NEXT_OF_KIN_ADDRESS: flattened_data.get(RequestDataKeys.NEXT_OF_KIN_ADDRESS, ''),
                 ProfileFields.NEXT_OF_KIN_PHONE_NUMBER: flattened_data.get(RequestDataKeys.NEXT_OF_KIN_PHONE, ''),
                 ProfileFields.RELATIONSHIP_TO_NEXT_OF_KIN: ProfileFields.RELATIONSHIP_TO_NEXT_OF_KIN_DEFAULT,
                 ProfileFields.DOB: None if not flattened_data.get(RequestDataKeys.DOB, '').strip() else flattened_data.get(RequestDataKeys.DOB),
                 ProfileFields.GENDER: flattened_data.get(RequestDataKeys.SEX, ''),
+                ProfileFields.BANK_NAME: flattened_data.get(RequestDataKeys.BANK_NAME, ''),
+                ProfileFields.ACCOUNT_NAME: flattened_data.get(RequestDataKeys.ACCOUNT_NAME, ''),
+                ProfileFields.ACCOUNT_NUMBER: flattened_data.get(RequestDataKeys.ACCOUNT_NUMBER, ''),
+                ProfileFields.STREET: flattened_data.get(RequestDataKeys.RESIDENTIAL_ADDRESS, ''),
+                ProfileFields.CITY: flattened_data.get(RequestDataKeys.HOME_ADDRESS, ''),
             }
-            flattened_data[ProfileFields.PROFILE] = profile_data
+
+            # Parse investment_details from flattened multipart data
+            investment_details = []
+            i = 0
+            while True:
+                roi_rate_key = f'profile[investment_details][{i}][roi_rate]'
+                if roi_rate_key not in flattened_data:
+                    break
+                investment_detail = {
+                    'roi_rate': flattened_data.get(roi_rate_key),
+                    'custom_roi_rate': flattened_data.get(f'profile[investment_details][{i}][custom_roi_rate]'),
+                    'investment_amount': flattened_data.get(f'profile[investment_details][{i}][investment_amount]'),
+                    'investment_start_date': flattened_data.get(f'profile[investment_details][{i}][investment_start_date]'),
+                    'remaining_balance': flattened_data.get(f'profile[investment_details][{i}][remaining_balance]'),
+                }
+                investment_details.append(investment_detail)
+                i += 1
+            logger.info(f"ProfileFields attributes: {dir(ProfileFields)}")
+            logger.info(f"Has INVESTMENT_DETAILS: {hasattr(ProfileFields, 'INVESTMENT_DETAILS')}")
+            if investment_details:
+                profile_data[ProfileFields.INVESTMENT_DETAILS] = investment_details
+            flattened_data[FieldNames.PROFILE] = profile_data
 
             # Use provided email if available; generate only if missing
             if RequestDataKeys.EMAIL not in flattened_data:
@@ -1447,6 +1476,19 @@ class PublicRegisterView(generics.CreateAPIView):
             user_obj = serializer.save()
             logger.info(LogMessages.PUBLIC_USER_CREATED.format(user_obj.email, user_obj.id, tenant.schema_name))
 
+            # Create investment policy
+            try:
+                policy = InvestmentPolicy.objects.create(
+                    user=user_obj,
+                    principal_amount=float(flattened_data.get(RequestDataKeys.INVESTMENT_AMOUNT, 0)),
+                    roi_rate=float(tenant.roi_percent or 40),
+                    roi_frequency=flattened_data.get(RequestDataKeys.ROI_FREQUENCY, 'Monthly'),
+                    min_withdrawal_months=int(tenant.min_withdrawal_months or 4),
+                )
+                logger.info(f"Investment policy created for user {user_obj.email}: {policy.id}")
+            except Exception as e:
+                logger.error(f"Failed to create investment policy for user {user_obj.email}: {str(e)}")
+
             # Send notification event
             try:
                 event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
@@ -1489,10 +1531,11 @@ class PublicRegisterView(generics.CreateAPIView):
                 ResponseKeys.MESSAGE: DefaultValues.ACCOUNT_CREATED_SUCCESSFULLY,
                 ResponseKeys.USER_ID: user_obj.id,
                 ResponseKeys.EMAIL: user_obj.email,
+                ResponseKeys.USERNAME: user_obj.username,
                 ResponseKeys.TEMP_PASSWORD: flattened_data[RequestDataKeys.PASSWORD],
                 ResponseKeys.LOGIN_LINK: settings.WEB_PAGE_URL
             }, status=status.HTTP_201_CREATED)
-            
+          
 
 class UsersViewSetNoPagination(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()

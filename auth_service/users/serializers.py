@@ -731,7 +731,7 @@ class InvestmentDetailSerializer(serializers.ModelSerializer):
         model = InvestmentDetail
         fields = [
             "id", "roi_rate", "custom_roi_rate", "investment_amount",
-            "investment_start_date", "remaining_balance",
+            "investment_start_date", "remaining_balance","monthly_interest_amount",
             "last_updated_by_id", "last_updated_by"
         ]
         read_only_fields = ["id", "last_updated_by", "last_updated_by_id", "remaining_balance"]
@@ -741,7 +741,7 @@ class InvestmentDetailSerializer(serializers.ModelSerializer):
     
     def get_monthly_interest_amount(self, obj):
         """Calculate monthly interest: (40% of principal) / 12"""
-        return (obj.principal_amount * Decimal('0.40')) / 12
+        return (obj.investment_amount * Decimal('0.40')) / 12
     
 
     def create(self, validated_data, **kwargs):

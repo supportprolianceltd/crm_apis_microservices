@@ -7,8 +7,8 @@ from knowledge_base.urls import urlpatterns as kb_patterns
 
 router = DefaultRouter()
 router.register(r'tasks', TaskViewSet, basename='task')
-router.register(r'comments', CommentViewSet)
-router.register(r'reports', DailyReportViewSet)
+router.register(r'comments', CommentViewSet, basename='comment')
+router.register(r'reports', DailyReportViewSet, basename='report')
 
 urlpatterns = [
     path('', include(router.urls)),

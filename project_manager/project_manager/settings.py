@@ -43,9 +43,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-DATABASE_ROUTERS = [
-    'django_tenants.routers.TenantSyncRouter',
-]
 
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 
@@ -60,10 +57,9 @@ GATEWAY_URL = env("GATEWAY_URL", default="https://server1.prolianceltd.com")
 
 # ======================== Middleware ========================
 MIDDLEWARE = [
-    'django_tenants.middleware.main.TenantMainMiddleware',  # Django-tenants middleware FIRST
-    'project_manager.middleware.DatabaseConnectionMiddleware',  # Second
-    'project_manager.middleware.MicroserviceRS256JWTMiddleware',  # JWT auth THIRD
-    'project_manager.middleware.CustomTenantSchemaMiddleware',   # Tenant switching FOURTH
+    'project_manager.middleware.DatabaseConnectionMiddleware',  # First
+    'project_manager.middleware.MicroserviceRS256JWTMiddleware',  # JWT auth SECOND
+    'project_manager.middleware.CustomTenantSchemaMiddleware',   # Tenant switching THIRD
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     # REMOVED: 'django.contrib.sessions.middleware.SessionMiddleware',  # Not needed for JWT
@@ -106,7 +102,7 @@ REST_FRAMEWORK = {
 # ======================== Database ========================
 DATABASES = {
     'default': {
-        'ENGINE': 'django_tenants.postgresql_backend',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('DB_NAME', default=''),
         'USER': env('DB_USER', default=''),
         'PASSWORD': env('DB_PASSWORD', default=''),
@@ -240,42 +236,23 @@ LOGGING = {
 # Use cookie-based message storage since we removed session middleware
 MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
 
-# ======================== Django Tenants Configuration ========================
-TENANT_MODEL = "core.Tenant"
-TENANT_DOMAIN_MODEL = "core.Domain"
-
-# Public schema will be used for shared data
-PUBLIC_SCHEMA_NAME = 'public'
-
-# URLs that don't require tenant routing
-PUBLIC_SCHEMA_URLCONF = None
-
-# Show public schema if no tenant found
-SHOW_PUBLIC_IF_NO_TENANT = True
-
-# Allow public schema access for certain URLs
-SHARED_APPS = [
-    'django_tenants',
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.contenttypes',
-    'django.contrib.auth',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'corsheaders',
+    'django.contrib.auth',
     'django.contrib.staticfiles',
     'rest_framework',
     'drf_spectacular',
     'drf_yasg',
     'django_filters',
-    'corsheaders',
-    'django_extensions',
-]
-
-TENANT_APPS = [
     'tasks',
     'knowledge_base',
+    'django_extensions',
+    # Note: django_tenants is not included - using postgresql_backend only
 ]
-
-INSTALLED_APPS = SHARED_APPS + TENANT_APPS
 
 # ======================== Defaults ========================
 LANGUAGE_CODE = 'en-us'

@@ -5,13 +5,13 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
-        read_only_fields = ('created_at',)
+        read_only_fields = ('id', 'created_at', 'tenant_id')
 
 class DailyReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = DailyReport
         fields = '__all__'
-        read_only_fields = ('created_at', 'date')
+        read_only_fields = ('id', 'created_at', 'date', 'tenant_id')
 
 class TaskSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
@@ -20,7 +20,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
-        read_only_fields = ('created_at', 'updated_at')
+        read_only_fields = ('id', 'created_at', 'updated_at', 'tenant_id')
 
 class TaskCreateSerializer(serializers.ModelSerializer):
     assigned_to_id = serializers.CharField(required=False, allow_blank=True)
@@ -75,9 +75,17 @@ class BulkTaskCreateSerializer(serializers.Serializer):
                     }
                     task_data['assigned_to_id'] = None
 
+            # Get tenant_id from request
+            jwt_payload = getattr(self.context.get('request'), 'jwt_payload', None)
+            tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+            # For development/testing, use default tenant if not provided
+            if not tenant_id:
+                tenant_id = 'default-tenant'
+
             # Create task data with assignor details
             full_task_data = {
                 **task_data,
+                'tenant_id': tenant_id,
                 'assigned_by_id': current_user['id'],
                 'assigned_by_first_name': current_user['first_name'],
                 'assigned_by_last_name': current_user['last_name'],

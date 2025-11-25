@@ -18,10 +18,17 @@ class CustomPagination(PageNumberPagination):
     max_page_size = 100
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = []  # Empty list means no permission checks
 
+    def get_queryset(self):
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        return Category.objects.filter(tenant_id=tenant_id)
+
     def get_current_user_info(self):
         """
         Extract user info from JWT payload that was already validated by middleware.
@@ -55,14 +62,25 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
-        # This method is now handled in create() method above
-        pass
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        serializer.save(tenant_id=tenant_id)
 
 class TagViewSet(viewsets.ModelViewSet):
-    queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = []  # Empty list means no permission checks
 
+    def get_queryset(self):
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        return Tag.objects.filter(tenant_id=tenant_id)
+
     def get_current_user_info(self):
         """
         Extract user info from JWT payload that was already validated by middleware.
@@ -96,15 +114,27 @@ class TagViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
-        # This method is now handled in create() method above
-        pass
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        serializer.save(tenant_id=tenant_id)
 
 class ArticleViewSet(viewsets.ModelViewSet):
     permission_classes = []  # Empty list means no permission checks
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        queryset = Article.objects.all().prefetch_related('category', 'tags')
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        queryset = Article.objects.filter(tenant_id=tenant_id).prefetch_related('category', 'tags')
 
         # Filter by status
         status_filter = self.request.query_params.get('status')
@@ -172,9 +202,12 @@ class ArticleViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+
         serializer = self.get_serializer(data=request.data, context={'current_user': current_user, 'request': request})
         serializer.is_valid(raise_exception=True)
-        article = serializer.save()
+        article = serializer.save(tenant_id=tenant_id)
 
         return Response(
             ArticleSerializer(article).data,

@@ -499,6 +499,8 @@ class VideoSession(models.Model):
             producer.flush()
             logger.info(f"Video session {self.id} created for tenant {self.tenant_id}")
 
+
+
 class Participant(models.Model):
     session = models.ForeignKey(
         VideoSession,

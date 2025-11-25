@@ -66,6 +66,7 @@ class Task(models.Model):
     PRIORITY_CHOICES = [('low','Low'),('medium','Medium'),('high','High')]
 
     id = models.CharField(primary_key=True, max_length=32, editable=False)
+    tenant_id = models.CharField(max_length=255, blank=False, null=False, default='default-tenant')
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     assigned_to_id = models.CharField(max_length=128, null=True, blank=True)
@@ -88,7 +89,11 @@ class Task(models.Model):
     def save(self, *args, **kwargs):
         if not self.id:
             # Generate custom ID on first save
-            tenant_schema = connection.get_schema() or 'public'
+            try:
+                tenant_schema = connection.get_schema() or 'public'
+            except AttributeError:
+                # connection.get_schema() not available (django-tenants not installed)
+                tenant_schema = 'public'
             self.id = generate_task_id(tenant_schema)
         super().save(*args, **kwargs)
 
@@ -100,6 +105,7 @@ class Task(models.Model):
 
 class DailyReport(models.Model):
     id = models.CharField(primary_key=True, max_length=32, default=gen_id, editable=False)
+    tenant_id = models.CharField(max_length=255, blank=False, null=False, default='default-tenant')
     # Keep UUID for reports since they don't need custom IDs
     task = models.ForeignKey(Task, related_name='daily_reports', on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
@@ -121,6 +127,7 @@ class DailyReport(models.Model):
 
 class Comment(models.Model):
     id = models.CharField(primary_key=True, max_length=32, default=gen_id, editable=False)
+    tenant_id = models.CharField(max_length=255, blank=False, null=False)
     task = models.ForeignKey(Task, related_name='comments', on_delete=models.CASCADE)
     user_id = models.CharField(max_length=128)
     user_first_name = models.CharField(max_length=150)
