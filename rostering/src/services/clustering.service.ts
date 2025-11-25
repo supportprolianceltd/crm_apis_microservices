@@ -1250,49 +1250,62 @@ public async generateOptimizedClusters(
   // I've omitted them for brevity but they should remain in your class
 
   /**
-   * Find the nearest cluster for a location or create a new one if none exists within threshold
-   */
-  async findOrCreateClusterForLocation(
-    tenantId: string,
-    latitude: number,
-    longitude: number,
-    maxDistanceMeters: number = 5000
-  ) {
-    try {
-      // Find nearest existing cluster using PostGIS
-      const nearestClusters = await this.prisma.$queryRaw<Array<{
-        id: string;
-        name: string;
-        distance: number;
-      }>>`
-        SELECT 
-          id, 
-          name,
-          ST_Distance(
-            "regionCenter"::geography, 
-            ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography
-          ) AS distance
-        FROM clusters 
-        WHERE "tenantId" = ${tenantId}
-        ORDER BY "regionCenter" <-> ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)
-        LIMIT 1
-      `;
+    * Find the nearest cluster for a location or create a new one if none exists within threshold
+    */
+   async findOrCreateClusterForLocation(
+     tenantId: string,
+     latitude: number,
+     longitude: number,
+     maxDistanceMeters: number = 5000
+   ) {
+     console.log('=== findOrCreateClusterForLocation ===');
+     console.log('Inputs:', { tenantId, latitude, longitude, maxDistanceMeters });
 
-      // If nearest cluster is within threshold, use it
-      if (nearestClusters.length > 0 && nearestClusters[0].distance <= maxDistanceMeters) {
-        return await this.prisma.cluster.findUnique({
-          where: { id: nearestClusters[0].id }
-        });
-      }
+     try {
+       console.log('Querying for nearest cluster using PostGIS...');
+       // Find nearest existing cluster using PostGIS
+       const nearestClusters = await this.prisma.$queryRaw<Array<{
+         id: string;
+         name: string;
+         distance: number;
+       }>>`
+         SELECT
+           id,
+           name,
+           ST_Distance(
+             "regionCenter"::geography,
+             ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography
+           ) AS distance
+         FROM clusters
+         WHERE "tenantId" = ${tenantId}
+         ORDER BY "regionCenter" <-> ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)
+         LIMIT 1
+       `;
+       console.log('PostGIS query result:', nearestClusters);
 
-      // Otherwise, create new cluster
-      return await this.createNewCluster(tenantId, latitude, longitude);
-    } catch (error) {
-      console.error('Error finding/creating cluster:', error);
-      // Fallback: create new cluster
-      return await this.createNewCluster(tenantId, latitude, longitude);
-    }
-  }
+       // If nearest cluster is within threshold, use it
+       if (nearestClusters.length > 0 && nearestClusters[0].distance <= maxDistanceMeters) {
+         console.log(`Found nearby cluster ${nearestClusters[0].name} at distance ${nearestClusters[0].distance}m`);
+         const cluster = await this.prisma.cluster.findUnique({
+           where: { id: nearestClusters[0].id }
+         });
+         console.log('Retrieved cluster details:', cluster ? cluster.name : 'Not found');
+         return cluster;
+       }
+
+       console.log('No nearby cluster found, creating new cluster...');
+       // Otherwise, create new cluster
+       return await this.createNewCluster(tenantId, latitude, longitude);
+     } catch (error) {
+       console.error('=== findOrCreateClusterForLocation ERROR ===');
+       console.error('PostGIS query failed, falling back to creating new cluster');
+       console.error('Error details:', error);
+       console.error('Error message:', (error as Error)?.message);
+       console.error('Error stack:', (error as Error)?.stack);
+       // Fallback: create new cluster
+       return await this.createNewCluster(tenantId, latitude, longitude);
+     }
+   }
 
   /**
    * Create a new cluster at the specified location
@@ -1473,48 +1486,65 @@ public async generateOptimizedClusters(
 
 
   /**
-   * Assign a carer to a cluster based on their location
-   */
-  async assignCarerToCluster(tenantId: string, carerId: string, latitude: number, longitude: number) {
-    try {
+    * Assign a carer to a cluster based on their location
+    */
+   async assignCarerToCluster(tenantId: string, carerId: string, latitude: number, longitude: number) {
+     console.log('=== CLUSTERING SERVICE: assignCarerToCluster ===');
+     console.log('Inputs:', { tenantId, carerId, latitude, longitude });
 
+     try {
+       console.log('Finding or creating cluster for location...');
+       const cluster = await this.findOrCreateClusterForLocation(
+         tenantId,
+         latitude,
+         longitude
+       );
+       console.log('Cluster result:', cluster ? `Found/created cluster ${cluster.name} (${cluster.id})` : 'No cluster found/created');
 
-      const cluster = await this.findOrCreateClusterForLocation(
-        tenantId,
-        latitude,
-        longitude
-      );
+       if (cluster) {
+         console.log('Upserting cluster assignment...');
+         await this.prisma.clusterAssignment.upsert({
+         where: {
+           carerId_tenantId: {
+             carerId: carerId,
+             tenantId: tenantId
+           }
+         },
+         update: {
+           clusterId: cluster.id,
+           updatedAt: new Date()
+         },
+         create: {
+           carerId: carerId,
+           clusterId: cluster.id,
+           tenantId: tenantId,
+           assignedAt: new Date()
+         }
+         });
+         console.log('Cluster assignment upsert successful');
 
-      if (cluster) {
-        await this.prisma.clusterAssignment.upsert({
-        where: {
-          carerId_tenantId: {
-            carerId: carerId,
-            tenantId: tenantId
-          }
-        },
-        update: { 
-          clusterId: cluster.id,
-          updatedAt: new Date()
-        },
-        create: {
-          carerId: carerId,
-          clusterId: cluster.id,
-          tenantId: tenantId,
-          assignedAt: new Date()
-        }
-        });
+         // Update cluster stats
+         console.log('Updating cluster stats...');
+         await this.updateClusterStats(cluster.id);
+         console.log('Cluster stats updated');
+       } else {
+         console.log('WARNING: No cluster found/created, skipping assignment');
+       }
 
-        // Update cluster stats
-        await this.updateClusterStats(cluster.id);
+       console.log('=== CLUSTERING SERVICE: assignCarerToCluster COMPLETED ===');
+       return cluster;
+     } catch (error) {
+       console.error('=== CLUSTERING SERVICE: assignCarerToCluster ERROR ===');
+      console.error('Error details:', error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      } else {
+        console.error('Non-Error thrown (no message/stack available)');
       }
-
-      return cluster;
-    } catch (error) {
-      console.error('Error assigning carer to cluster:', error);
-      throw error;
-    }
-  }
+       throw error;
+     }
+   }
 
   /**
    * Get cluster overview for analytics
@@ -1550,12 +1580,12 @@ public async generateOptimizedClusters(
    */
   async removeCarerFromCluster(tenantId: string, carerId: string) {
     const assignment = await this.prisma.clusterAssignment.findUnique({
-      where: { carerId_tenantId: { carerId, tenantId } }
+      where: { carerId_tenantId: { carerId: carerId, tenantId: tenantId.toString() } }
     });
 
     if (assignment) {
       await this.prisma.clusterAssignment.delete({
-        where: { carerId_tenantId: { carerId, tenantId } }
+        where: { carerId_tenantId: { carerId: carerId, tenantId: tenantId.toString() } }
       });
       await this.updateClusterStats(assignment.clusterId);
     }
@@ -1566,7 +1596,7 @@ public async generateOptimizedClusters(
    */
   async getCarerClusterAssignment(tenantId: string, carerId: string) {
     return await this.prisma.clusterAssignment.findUnique({
-      where: { carerId_tenantId: { carerId, tenantId } },
+      where: { carerId_tenantId: { carerId: carerId, tenantId: tenantId.toString() } },
       include: { cluster: true }
     });
   }
@@ -1594,7 +1624,7 @@ public async generateOptimizedClusters(
         where: {
           carerId_tenantId: {
             carerId: carerId,
-            tenantId: tenantId
+            tenantId: tenantId.toString()
           }
         }
       });
@@ -1604,7 +1634,7 @@ public async generateOptimizedClusters(
         where: {
           carerId_tenantId: {
             carerId: carerId,
-            tenantId: tenantId
+            tenantId: tenantId.toString()
           }
         },
         update: { 

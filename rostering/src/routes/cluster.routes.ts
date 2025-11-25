@@ -45,6 +45,9 @@ export function createClusterRoutes(prisma: PrismaClient) {
   // List clients linked to a cluster
   router.get('/:clusterId/clients', clusterController.listClusterClients.bind(clusterController));
 
+  // Batch assign clients to a cluster
+  router.post('/:clusterId/assign-clients', clusterController.assignClientsToCluster.bind(clusterController));
+
   router.post('/:clusterId/assign-carer/:carerId', clusterController.assignCarerToSpecificCluster.bind(clusterController));
   
   router.get('/carers/:carerId/assignment', clusterController.getCarerClusterAssignment.bind(clusterController));
