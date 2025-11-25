@@ -48,17 +48,42 @@ export class ClientService {
             },
             body: JSON.stringify({ ids })
           });
-          if (!postResp.ok) return [];
-          return await postResp.json();
+          if (!postResp.ok) {
+            console.error('ClientService.getClientsByIds POST fallback returned non-ok', postResp.status);
+            return [];
+          }
+          const postParsed = await postResp.json();
+          return this.normalizeClientsResponse(postParsed);
         } catch (e) {
           console.error('ClientService.getClientsByIds fallback POST failed', e);
           return [];
         }
       }
-      return await resp.json();
+
+      const parsed = await resp.json();
+      return this.normalizeClientsResponse(parsed);
     } catch (err) {
       console.error('ClientService.getClientsByIds error', err);
       return [];
     }
+  }
+
+  private normalizeClientsResponse(parsed: any): any[] {
+    if (!parsed) return [];
+    if (Array.isArray(parsed)) return parsed;
+    // Common wrapper shapes
+    if (Array.isArray(parsed.clients)) return parsed.clients;
+    if (Array.isArray(parsed.data)) return parsed.data;
+    if (Array.isArray(parsed.results)) return parsed.results;
+    // If object has an items array
+    if (Array.isArray(parsed.items)) return parsed.items;
+    // If single object keyed by id, try to extract values
+    if (typeof parsed === 'object') {
+      const vals = Object.values(parsed).filter(v => Array.isArray(v));
+      if (vals.length > 0) return vals[0] as any[];
+    }
+    // Unknown shape
+    console.error('ClientService.normalizeClientsResponse: unexpected response shape', parsed);
+    return [];
   }
 }

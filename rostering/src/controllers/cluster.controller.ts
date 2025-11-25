@@ -405,50 +405,68 @@ export class ClusterController {
   }
 
   /**
-   * Assign a carer to a cluster based on location
-   */
-  public async assignCarerToCluster(req: Request, res: Response) {
-    try {
-      const tenantId = req.user?.tenantId;
-      if (!tenantId) {
-        return res.status(403).json({ error: 'tenantId missing from auth context' });
-      }
+    * Assign a carer to a cluster based on location
+    */
+   public async assignCarerToCluster(req: Request, res: Response) {
+     console.log('=== ASSIGN CARER TO CLUSTER START ===');
+     try {
+       const tenantId = req.user?.tenantId;
+       console.log('Tenant ID from auth:', tenantId);
 
-      const { carerId } = req.params;
-      const { latitude, longitude } = req.body;
+       if (!tenantId) {
+         console.log('ERROR: tenantId missing from auth context');
+         return res.status(403).json({ error: 'tenantId missing from auth context' });
+       }
 
-      if (!carerId) {
-        return res.status(400).json({ error: 'carerId required in path' });
-      }
+       const { carerId } = req.params;
+       const { latitude, longitude } = req.body;
+       console.log('Request params:', { carerId, latitude, longitude });
 
-      if (!latitude || !longitude) {
-        return res.status(400).json({ error: 'latitude and longitude required in body' });
-      }
+       if (!carerId) {
+         console.log('ERROR: carerId required in path');
+         return res.status(400).json({ error: 'carerId required in path' });
+       }
 
-      // Use auth-backed CarerService to validate carer exists
-      const authHeader = req.headers.authorization as string | undefined;
-      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
-      const carerService = new CarerService();
-      const carer = await carerService.getCarerById(token, carerId);
+       if (!latitude || !longitude) {
+         console.log('ERROR: latitude and longitude required in body');
+         return res.status(400).json({ error: 'latitude and longitude required in body' });
+       }
 
-      if (!carer) {
-        return res.status(404).json({ error: 'Carer not found in auth service' });
-      }
+       // Use auth-backed CarerService to validate carer exists
+       const authHeader = req.headers.authorization as string | undefined;
+       const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+       console.log('Auth token present:', !!token);
 
-      // No tenant check needed - endpoint already filters by tenant
-      const cluster = await this.clusteringService.assignCarerToCluster(tenantId.toString(), carerId, latitude, longitude);
+       const carerService = new CarerService();
+       console.log('Calling carerService.getCarerById...');
+       const carer = await carerService.getCarerById(token, carerId);
+       console.log('Carer lookup result:', carer ? `Found carer ${carer.first_name} ${carer.last_name}` : 'Carer not found');
 
-      return res.json({
-        carerId,
-        clusterId: cluster?.id,
-        clusterName: cluster?.name,
-        message: 'Carer assigned to cluster successfully'
-      });
-    } catch (error: any) {
-      console.error('assignCarerToCluster error', error);
-      return res.status(500).json({ error: 'Failed to assign carer to cluster', details: error?.message });
-    }
-  }
+       if (!carer) {
+         console.log('ERROR: Carer not found in auth service');
+         return res.status(404).json({ error: 'Carer not found in auth service' });
+       }
+
+       // No tenant check needed - endpoint already filters by tenant
+       console.log('Calling clusteringService.assignCarerToCluster...');
+       const cluster = await this.clusteringService.assignCarerToCluster(tenantId.toString(), carerId, latitude, longitude);
+       console.log('Cluster assignment result:', cluster ? `Assigned to cluster ${cluster.name}` : 'No cluster returned');
+
+       console.log('=== ASSIGN CARER TO CLUSTER SUCCESS ===');
+       return res.json({
+         carerId,
+         clusterId: cluster?.id,
+         clusterName: cluster?.name,
+         message: 'Carer assigned to cluster successfully'
+       });
+     } catch (error: any) {
+       console.error('=== ASSIGN CARER TO CLUSTER ERROR ===');
+       console.error('Error details:', error);
+       console.error('Error message:', error?.message);
+       console.error('Error stack:', error?.stack);
+       return res.status(500).json({ error: 'Failed to assign carer to cluster', details: error?.message });
+     }
+   }
 
   /**
    * Assign carer to specific cluster (manual assignment)
@@ -814,6 +832,103 @@ export class ClusterController {
     } catch (error: any) {
       console.error('listClusterClients error', error);
       return res.status(500).json({ error: 'Failed to list cluster clients', details: error?.message });
+    }
+  }
+
+  /**
+   * Batch assign multiple clients to a cluster
+   * POST /clusters/:clusterId/assign-clients
+   * Body: { clientIds: string[] }
+   */
+  public async assignClientsToCluster(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId;
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const { clusterId } = req.params as { clusterId?: string };
+      if (!clusterId) return res.status(400).json({ error: 'clusterId required in path' });
+
+      const { clientIds } = req.body as { clientIds?: string[] };
+      if (!Array.isArray(clientIds) || clientIds.length === 0) return res.status(400).json({ error: 'clientIds array required in body' });
+
+      // Verify cluster belongs to tenant
+      const cluster = await (this.prisma as any).cluster.findFirst({ where: { id: clusterId, tenantId: tenantId.toString() } });
+      if (!cluster) return res.status(404).json({ error: 'Cluster not found' });
+
+      // Validate clients exist via auth service (strict: only create for validated IDs)
+      const authHeader = req.headers.authorization as string | undefined;
+      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+      const { ClientService } = await import('../services/client.service');
+      const clientService = new ClientService();
+
+      let returnedIds: string[] = [];
+      try {
+        const clients = await clientService.getClientsByIds(token, clientIds) as any[];
+        if (!Array.isArray(clients)) {
+          console.error('Auth service returned non-array response for getClientsByIds');
+          return res.status(502).json({ error: 'Auth service returned unexpected response' });
+        }
+        returnedIds = clients.map(c => String(c.id)).filter(Boolean);
+      } catch (err) {
+        console.error('Failed to validate clients with auth service', err);
+        return res.status(502).json({ error: 'Failed to validate clients with auth service' });
+      }
+
+      const invalidIds = clientIds.filter(id => !returnedIds.includes(id));
+      const validClientIds = returnedIds;
+
+      if (validClientIds.length === 0) {
+        // Nothing to create
+        return res.status(400).json({ clusterId, requested: clientIds.length, validated: 0, created: 0, alreadyLinked: 0, invalidIds, message: 'No valid client IDs found' });
+      }
+
+      // Find existing links to avoid duplicates (only check among validated ids)
+      const existing = await (this.prisma as any).clusterClient.findMany({
+        where: { tenantId: tenantId.toString(), clusterId, clientId: { in: validClientIds } },
+        select: { clientId: true }
+      });
+      const existingIds = new Set(existing.map((e: any) => e.clientId));
+
+      const toCreate = validClientIds.filter(id => !existingIds.has(id)).map(id => ({ tenantId: tenantId.toString(), clusterId, clientId: id }));
+
+      const createdIds: string[] = [];
+      const alreadyLinkedIds: string[] = validClientIds.filter(id => existingIds.has(id));
+
+      if (toCreate.length > 0) {
+        try {
+          const result = await (this.prisma as any).clusterClient.createMany({ data: toCreate, skipDuplicates: true });
+          // createMany doesn't return ids; assume those not in existingIds were created
+          createdIds.push(...toCreate.map(t => t.clientId));
+        } catch (e) {
+          // Fallback: create individually and collect created ids
+          for (const row of toCreate) {
+            try {
+              const c = await (this.prisma as any).clusterClient.create({ data: row });
+              createdIds.push(c.clientId);
+            } catch (innerErr) {
+              console.error('clusterClient.create error (ignored)', innerErr);
+            }
+          }
+        }
+      }
+
+      // Update cluster statistics asynchronously
+      this.clusteringService.updateClusterStats(clusterId).catch((err) => console.error('updateClusterStats after assign clients failed', err));
+
+      return res.json({
+        clusterId,
+        requested: clientIds.length,
+        validated: validClientIds.length,
+        created: createdIds.length,
+        createdIds,
+        alreadyLinked: alreadyLinkedIds.length,
+        alreadyLinkedIds,
+        invalidIds,
+        message: `Batch assign completed: created ${createdIds.length}, already linked ${alreadyLinkedIds.length}`
+      });
+    } catch (error: any) {
+      console.error('assignClientsToCluster error', error);
+      return res.status(500).json({ error: 'Failed to assign clients to cluster', details: error?.message });
     }
   }
 
