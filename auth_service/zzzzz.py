@@ -64,12 +64,12 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='tonna.ezugwu@prolianceltd.com',
+        email='support@prolianceltd.com',
         password='qwerty',
-        role='admin',
-        first_name='Tonna',
-        last_name='Ezugwu',
-        job_role='Project Manager',
+        role='root-admin',
+        first_name='Root',
+        last_name='Admin',
+        job_role='Project Coordinator',
         tenant=tenant
     )
 
@@ -138,6 +138,17 @@ if not Tenant.objects.filter(schema_name='appbrew').exists():
     tenant.save()
     Domain.objects.create(tenant=tenant, domain='appbrew.com', is_primary=True)
     
+from core.models import Tenant, Domain
+if not Tenant.objects.filter(schema_name='rodrimine').exists():
+    tenant = Tenant.objects.create(
+        name='rodrimine',
+        schema_name='rodrimine',
+        status="active"
+    )
+    tenant.auto_create_schema = False
+    tenant.save()
+    Domain.objects.create(tenant=tenant, domain='rodrimine.com', is_primary=True)
+    
 
 # python manage.py shell
 from core.models import Tenant
@@ -199,6 +210,20 @@ with tenant_context(tenant):
         first_name='Marian',
         last_name='Goodness',
         job_role='Stfware Tester',
+        tenant=tenant
+    )
+from core.models import Tenant
+from users.models import CustomUser
+from django_tenants.utils import tenant_context
+tenant = Tenant.objects.get(schema_name='rodrimine')
+with tenant_context(tenant):
+    CustomUser.objects.create_superuser(
+        email='support@rodrimine.com',
+        password='qwerty',
+        role='root-admin',
+        first_name='Gideon',
+        last_name='Gideon',
+        job_role='CEO',
         tenant=tenant
     )
 
@@ -297,7 +322,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='netwiver')
+tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(

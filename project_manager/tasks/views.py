@@ -20,7 +20,7 @@ def user_tasks(request, user_id):
     try:
         # Get tenant_id from JWT
         jwt_payload = getattr(request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
@@ -113,7 +113,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
@@ -139,55 +139,19 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_current_user_info(self):
         """
         Extract user info from JWT payload that was already validated by middleware.
-        This avoids re-validation and auth service calls.
         """
-        logger.info(f"========== GET_CURRENT_USER_INFO START ==========")
-
-        # Use the JWT payload that was already validated by middleware
         jwt_payload = getattr(self.request, 'jwt_payload', None)
         if jwt_payload:
             user_info = {
-                'id': jwt_payload.get('sub'),  # User identifier from JWT
+                'id': jwt_payload.get('sub'),
                 'first_name': jwt_payload.get('first_name', ''),
                 'last_name': jwt_payload.get('last_name', ''),
                 'email': jwt_payload.get('email', ''),
                 'username': jwt_payload.get('username', ''),
                 'role': jwt_payload.get('role', ''),
             }
-
-            logger.info(f"✓✓✓ Successfully extracted user from validated JWT payload: {user_info} ✓✓✓")
-            logger.info(f"========== GET_CURRENT_USER_INFO END ==========")
             return user_info
-
-        # Fallback: try to decode token directly (for debugging)
-        logger.warning("⚠ JWT payload not found, trying direct token extraction...")
-        token = self.request.headers.get('Authorization', '').split('Bearer ')[-1]
-        if not token:
-            logger.error("✗ No token found in Authorization header")
-            return None
-
-        try:
-            import jwt
-            # Try unverified decode to at least get the payload
-            payload = jwt.decode(token, options={"verify_signature": False})
-
-            user_info = {
-                'id': payload.get('sub'),
-                'first_name': payload.get('first_name', ''),
-                'last_name': payload.get('last_name', ''),
-                'email': payload.get('email', ''),
-                'username': payload.get('username', ''),
-                'role': payload.get('role', ''),
-            }
-
-            logger.info(f"✓ Extracted user from unverified token (fallback): {user_info}")
-            logger.info(f"========== GET_CURRENT_USER_INFO END ==========")
-            return user_info
-
-        except Exception as e:
-            logger.error(f"✗ Error extracting user from token: {str(e)}")
-            logger.info(f"========== GET_CURRENT_USER_INFO END ==========")
-            return None
+        return None
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
@@ -254,13 +218,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         # Get tenant_id
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
-        # For development/testing, use default tenant if not provided
-        if not tenant_id:
-            tenant_id = 'default-tenant'
-        # For development/testing, use default tenant if not provided
-        if not tenant_id:
-            tenant_id = 'default-tenant'
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
@@ -383,7 +341,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         
         # Get tenant_id
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
 
         # Auto-create daily report for status changes
         if request.data.get('status') in ['completed', 'blocked']:
@@ -416,7 +374,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         # Get tenant_id
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
 
         comment = Comment.objects.create(
             tenant_id=tenant_id,
@@ -449,7 +407,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         # Get tenant_id
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
 
         report = DailyReport.objects.create(
             tenant_id=tenant_id,
@@ -478,7 +436,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
@@ -491,7 +449,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
@@ -510,7 +468,7 @@ class DailyReportViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
@@ -523,7 +481,7 @@ class DailyReportViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'

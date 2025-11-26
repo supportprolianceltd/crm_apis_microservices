@@ -8,7 +8,6 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.http import JsonResponse
 from django.db import connection, close_old_connections
 from django.contrib.auth.models import AnonymousUser
-from django.utils.functional import SimpleLazyObject
 
 logger = logging.getLogger('project_manager')
 
@@ -128,113 +127,90 @@ class DatabaseConnectionMiddleware:
         return response
 
 
-def get_jwt_user(request):
-    """
-    Helper function to get user from JWT token.
-    This is called lazily to prevent issues with other middleware.
-    """
-    # Check if already processed
-    if hasattr(request, '_jwt_user_cache'):
-        return request._jwt_user_cache
-    
-    # Allow public endpoints without JWT
-    if any(request.path.startswith(public) for public in public_paths):
-        logger.info("✓ Public endpoint - returning AnonymousUser")
-        request._jwt_user_cache = AnonymousUser()
-        return request._jwt_user_cache
-
-    # Get Authorization header
-    auth = request.headers.get('Authorization', '')
-    
-    if not auth.startswith('Bearer '):
-        logger.warning("✗ No Bearer token - returning AnonymousUser")
-        request._jwt_user_cache = AnonymousUser()
-        return request._jwt_user_cache
-
-    token = auth.split(' ')[1]
-
-    try:
-        # Get JWT header
-        unverified_header = jwt.get_unverified_header(token)
-        kid = unverified_header.get("kid")
-        alg = unverified_header.get("alg")
-
-        if not kid:
-            logger.error("✗ No 'kid' in token header")
-            request._jwt_user_cache = AnonymousUser()
-            return request._jwt_user_cache
-
-        # Decode without verification to get tenant info
-        unverified_payload = jwt.decode(token, options={"verify_signature": False})
-        tenant_id = unverified_payload.get("tenant_id")
-
-        # Fetch public key from auth service
-        public_key_url = f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/?tenant_id={tenant_id}"
-
-        try:
-            resp = requests.get(
-                public_key_url,
-                headers={'Authorization': auth},
-                timeout=5
-            )
-
-            if resp.status_code != 200:
-                logger.warning(f"✗ Could not fetch public key: {resp.status_code} - falling back to AnonymousUser")
-                request._jwt_user_cache = AnonymousUser()
-                return request._jwt_user_cache
-
-            public_key = resp.json().get("public_key")
-            if not public_key:
-                logger.warning("✗ Public key not found in response - falling back to AnonymousUser")
-                request._jwt_user_cache = AnonymousUser()
-                return request._jwt_user_cache
-        except requests.RequestException as e:
-            logger.warning(f"✗ Public key request failed: {str(e)} - falling back to AnonymousUser")
-            request._jwt_user_cache = AnonymousUser()
-            return request._jwt_user_cache
-
-        # Decode and verify JWT
-        payload = jwt.decode(token, public_key, algorithms=[alg])
-        
-        # Store payload and create user
-        request.jwt_payload = payload
-        user = SimpleUser(payload)
-        request._jwt_user_cache = user
-        
-        logger.info(f"✓✓✓ JWT User created: {user} (pk={user.pk}) ✓✓✓")
-        return user
-
-    except jwt.ExpiredSignatureError:
-        logger.error("✗ Token expired")
-        request._jwt_user_cache = AnonymousUser()
-        return request._jwt_user_cache
-    except jwt.InvalidTokenError as e:
-        logger.error(f"✗ Invalid token: {str(e)}")
-        request._jwt_user_cache = AnonymousUser()
-        return request._jwt_user_cache
-    except Exception as e:
-        logger.error(f"✗ Unexpected JWT error: {str(e)}")
-        logger.exception("Full traceback:")
-        request._jwt_user_cache = AnonymousUser()
-        return request._jwt_user_cache
 
 
 class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
     """
-    JWT Middleware that sets request.user from JWT token using SimpleLazyObject.
-    This ensures the user is only loaded when accessed and persists throughout the request.
+    JWT Middleware that validates JWT token and sets request.user and request.jwt_payload.
+    Returns 401 errors on validation failure like other microservices.
     """
-    
+
     def process_request(self, request):
         logger.info(f"========== JWT MIDDLEWARE START ==========")
         logger.info(f"Method: {request.method}, Path: {request.path}")
-        
-        # Use SimpleLazyObject to defer user loading until actually needed
-        # This prevents other middleware from resetting request.user
-        request.user = SimpleLazyObject(lambda: get_jwt_user(request))
-        
-        logger.info(f"✓ JWT user object attached as SimpleLazyObject")
-        logger.info(f"========== JWT MIDDLEWARE END ==========")
+
+        # Allow public endpoints without JWT
+        if any(request.path.startswith(public) for public in public_paths):
+            logger.info("✓ Public endpoint - no JWT required")
+            request.user = AnonymousUser()
+            logger.info(f"========== JWT MIDDLEWARE END ==========")
+            return
+
+        # Get Authorization header
+        auth = request.headers.get('Authorization', '')
+
+        if not auth.startswith('Bearer '):
+            logger.warning("✗ No Bearer token provided")
+            return JsonResponse({'error': 'Authorization header missing or invalid'}, status=401)
+
+        token = auth.split(' ')[1]
+
+        try:
+            # Get JWT header
+            unverified_header = jwt.get_unverified_header(token)
+            kid = unverified_header.get("kid")
+            alg = unverified_header.get("alg")
+
+            if not kid:
+                logger.error("✗ No 'kid' in token header")
+                return JsonResponse({'error': 'Invalid token: missing kid'}, status=401)
+
+            # Decode without verification to get tenant info
+            unverified_payload = jwt.decode(token, options={"verify_signature": False})
+            tenant_id = unverified_payload.get("tenant_id")
+
+            # Fetch public key from auth service
+            public_key_url = f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/?tenant_id={tenant_id}"
+
+            try:
+                resp = requests.get(
+                    public_key_url,
+                    headers={'Authorization': auth},
+                    timeout=5
+                )
+
+                if resp.status_code != 200:
+                    logger.warning(f"✗ Could not fetch public key: {resp.status_code}")
+                    return JsonResponse({'error': f'Could not validate token: {resp.status_code}'}, status=401)
+
+                public_key = resp.json().get("public_key")
+                if not public_key:
+                    logger.warning("✗ Public key not found in response")
+                    return JsonResponse({'error': 'Could not validate token: public key not found'}, status=401)
+            except requests.RequestException as e:
+                logger.warning(f"✗ Public key request failed: {str(e)}")
+                return JsonResponse({'error': 'Could not validate token: service unavailable'}, status=401)
+
+            # Decode and verify JWT
+            payload = jwt.decode(token, public_key, algorithms=[alg])
+
+            # Store payload and create user
+            request.jwt_payload = payload
+            user = SimpleUser(payload)
+            request.user = user
+
+            logger.info(f"✓✓✓ JWT validated successfully: {user} ✓✓✓")
+            logger.info(f"========== JWT MIDDLEWARE END ==========")
+
+        except jwt.ExpiredSignatureError:
+            logger.error("✗ Token expired")
+            return JsonResponse({'error': 'Token has expired'}, status=401)
+        except jwt.InvalidTokenError as e:
+            logger.error(f"✗ Invalid token: {str(e)}")
+            return JsonResponse({'error': f'Invalid token: {str(e)}'}, status=401)
+        except Exception as e:
+            logger.error(f"✗ Unexpected JWT error: {str(e)}")
+            return JsonResponse({'error': f'Authentication error: {str(e)}'}, status=401)
 
 
 class CustomTenantSchemaMiddleware:
@@ -249,7 +225,7 @@ class CustomTenantSchemaMiddleware:
         logger.info(f"========== TENANT MIDDLEWARE START ==========")
         logger.info(f"Method: {request.method}, Path: {request.path}")
 
-        # Force evaluation of lazy user object to ensure JWT is processed
+        # Check if user is authenticated (JWT middleware succeeded)
         user = request.user
         logger.info(f"User: {user}")
         logger.info(f"User type: {type(user).__name__}")

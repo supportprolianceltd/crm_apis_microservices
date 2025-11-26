@@ -8,14 +8,65 @@ from .serializers import (
     CategorySerializer, TagSerializer, ArticleSerializer,
     ArticleCreateSerializer, ArticleListSerializer
 )
+from rest_framework.pagination import PageNumberPagination
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+from django.conf import settings
 import logging
 
 logger = logging.getLogger('knowledge_base')
 
 class CustomPagination(PageNumberPagination):
-    page_size = 20
-    page_size_query_param = 'page_size'
-    max_page_size = 100
+    page_size = 20  # Adjust as needed
+
+    def get_next_link(self):
+        """Override to use gateway base URL."""
+        if not self.page.has_next():
+            return None
+        gateway_url = getattr(settings, 'GATEWAY_URL', None)
+        if not gateway_url:
+            return super().get_next_link()  # Fallback to default
+
+        request = self.request
+        # Build base path from current request (e.g., /api/user/users/)
+        path = request.path
+        # Get query params, update 'page', preserve others
+        query_params = request.query_params.copy()
+        query_params['page'] = self.page.next_page_number()
+        query_string = urlencode(query_params, doseq=True)
+
+        # Reconstruct full URL with gateway scheme/host
+        parsed_gateway = urlparse(gateway_url)
+        full_url = f"{parsed_gateway.scheme}://{parsed_gateway.netloc}{path}?{query_string}"
+        return full_url
+
+    def get_previous_link(self):
+        """Override to use gateway base URL."""
+        if not self.page.has_previous():
+            return None
+        gateway_url = getattr(settings, 'GATEWAY_URL', None)
+        if not gateway_url:
+            return super().get_previous_link()  # Fallback to default
+
+        request = self.request
+        path = request.path
+        query_params = request.query_params.copy()
+        query_params['page'] = self.page.previous_page_number()
+        query_string = urlencode(query_params, doseq=True)
+
+        parsed_gateway = urlparse(gateway_url)
+        full_url = f"{parsed_gateway.scheme}://{parsed_gateway.netloc}{path}?{query_string}"
+        return full_url
+
+    def get_paginated_response(self, data):
+        """Ensure the full response uses overridden links."""
+        response = super().get_paginated_response(data)
+        gateway_url = getattr(settings, 'GATEWAY_URL', None)
+        if gateway_url:
+            response['next'] = self.get_next_link()
+            response['previous'] = self.get_previous_link()
+        return response
+
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
@@ -23,7 +74,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
@@ -42,28 +93,54 @@ class CategoryViewSet(viewsets.ModelViewSet):
                 'email': jwt_payload.get('email', ''),
                 'username': jwt_payload.get('username', ''),
                 'role': jwt_payload.get('role', ''),
-                'tenant': jwt_payload.get('tenant', ''),
             }
             return user_info
         return None
 
     def create(self, request, *args, **kwargs):
+        logger.info(f"")
+        logger.info(f"={'='*60}")
+        logger.info(f"========== CREATE CATEGORY REQUEST START ==========")
+        logger.info(f"={'='*60}")
+        logger.info(f"Method: {request.method}")
+        logger.info(f"Path: {request.path}")
+        logger.info(f"Request data: {request.data}")
+
         current_user = self.get_current_user_info()
         if not current_user:
+            logger.error(f"")
+            logger.error(f"{'='*60}")
+            logger.error("✗✗✗ AUTHENTICATION FAILED ✗✗✗")
+            logger.error(f"{'='*60}")
             return Response(
                 {'detail': 'Authentication required'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
+        logger.info(f"✓ Current user authenticated: {current_user}")
+
+        # Get tenant_id from JWT
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        logger.info(f"Tenant ID extracted: {tenant_id}")
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        logger.info(f"✓ Request data validated")
+
+        serializer.save(tenant_id=tenant_id)
+        logger.info(f"✓✓✓ Category created successfully! ✓✓✓")
+        logger.info(f"={'='*60}")
+        logger.info(f"========== CREATE CATEGORY REQUEST END ==========")
+        logger.info(f"={'='*60}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
@@ -75,7 +152,7 @@ class TagViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
@@ -94,28 +171,54 @@ class TagViewSet(viewsets.ModelViewSet):
                 'email': jwt_payload.get('email', ''),
                 'username': jwt_payload.get('username', ''),
                 'role': jwt_payload.get('role', ''),
-                'tenant': jwt_payload.get('tenant', ''),
             }
             return user_info
         return None
 
     def create(self, request, *args, **kwargs):
+        logger.info(f"")
+        logger.info(f"={'='*60}")
+        logger.info(f"========== CREATE TAG REQUEST START ==========")
+        logger.info(f"={'='*60}")
+        logger.info(f"Method: {request.method}")
+        logger.info(f"Path: {request.path}")
+        logger.info(f"Request data: {request.data}")
+
         current_user = self.get_current_user_info()
         if not current_user:
+            logger.error(f"")
+            logger.error(f"{'='*60}")
+            logger.error("✗✗✗ AUTHENTICATION FAILED ✗✗✗")
+            logger.error(f"{'='*60}")
             return Response(
                 {'detail': 'Authentication required'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
+        logger.info(f"✓ Current user authenticated: {current_user}")
+
+        # Get tenant_id from JWT
+        jwt_payload = getattr(self.request, 'jwt_payload', None)
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        if not tenant_id:
+            tenant_id = 'default-tenant'
+        logger.info(f"Tenant ID extracted: {tenant_id}")
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        logger.info(f"✓ Request data validated")
+
+        serializer.save(tenant_id=tenant_id)
+        logger.info(f"✓✓✓ Tag created successfully! ✓✓✓")
+        logger.info(f"={'='*60}")
+        logger.info(f"========== CREATE TAG REQUEST END ==========")
+        logger.info(f"={'='*60}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
@@ -127,14 +230,13 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
         # For development/testing, use default tenant if not provided
         if not tenant_id:
             tenant_id = 'default-tenant'
-        # For development/testing, use default tenant if not provided
-        if not tenant_id:
-            tenant_id = 'default-tenant'
+        logger.info(f"ArticleViewSet.get_queryset: tenant_id={tenant_id}, jwt_payload={jwt_payload}")
         queryset = Article.objects.filter(tenant_id=tenant_id).prefetch_related('category', 'tags')
+        logger.info(f"ArticleViewSet.get_queryset: found {queryset.count()} articles")
 
         # Filter by status
         status_filter = self.request.query_params.get('status')
@@ -195,19 +297,42 @@ class ArticleViewSet(viewsets.ModelViewSet):
         return None
 
     def create(self, request, *args, **kwargs):
+        logger.info(f"")
+        logger.info(f"={'='*60}")
+        logger.info(f"========== CREATE ARTICLE REQUEST START ==========")
+        logger.info(f"={'='*60}")
+        logger.info(f"Method: {request.method}")
+        logger.info(f"Path: {request.path}")
+        logger.info(f"Request data: {request.data}")
+
         current_user = self.get_current_user_info()
         if not current_user:
+            logger.error(f"")
+            logger.error(f"{'='*60}")
+            logger.error("✗✗✗ AUTHENTICATION FAILED ✗✗✗")
+            logger.error(f"{'='*60}")
             return Response(
                 {'detail': 'Authentication required'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
+        logger.info(f"✓ Current user authenticated: {current_user}")
+
         jwt_payload = getattr(self.request, 'jwt_payload', None)
-        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') if jwt_payload else None
+        tenant_id = jwt_payload.get('tenant_unique_id') or jwt_payload.get('tenant') or jwt_payload.get('tenant_id') if jwt_payload else None
+        # For development/testing, use default tenant if not provided
+        if not tenant_id:
+            tenant_id = 'default-tenant'
 
         serializer = self.get_serializer(data=request.data, context={'current_user': current_user, 'request': request})
         serializer.is_valid(raise_exception=True)
+        logger.info(f"✓ Request data validated")
+
         article = serializer.save(tenant_id=tenant_id)
+        logger.info(f"✓✓✓ Article created successfully! ID: {article.id} ✓✓✓")
+        logger.info(f"={'='*60}")
+        logger.info(f"========== CREATE ARTICLE REQUEST END ==========")
+        logger.info(f"={'='*60}")
 
         return Response(
             ArticleSerializer(article).data,

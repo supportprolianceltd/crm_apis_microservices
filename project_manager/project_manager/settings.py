@@ -229,6 +229,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'knowledge_base': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
 

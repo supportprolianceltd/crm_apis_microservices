@@ -187,7 +187,7 @@ class InvestmentPolicyViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         tenant = self.request.user.tenant
         user = self.request.user
-        
+
         # Admins see all policies, investors see only their own
         if user.role in ['root-admin', 'co-admin', 'admin', 'staff']:
             return InvestmentPolicy.objects.filter(tenant=tenant).select_related('user', 'profile')
