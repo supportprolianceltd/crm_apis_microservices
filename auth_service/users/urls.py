@@ -11,7 +11,7 @@ from .views import (
     WithdrawalDetailView, ReferenceCheckView, ProofOfAddressView, InsuranceVerificationView,
     DocumentAcknowledgmentsListView, DocumentAcknowledgeView, DrivingRiskAssessmentView, PublicRegisterView,
     LegalWorkEligibilityView, OtherUserDocumentsView, SkillDetailView, UserDocumentAccessView, UsersViewSetNoPagination,
-    AllTenantsUsersListView, AllTenantNamesUsersListView # Ensure this import is added
+    AllTenantsUsersListView, AllTenantNamesUsersListView, UserProfileDataView # Ensure this import is added
 )
 
 router = DefaultRouter()
@@ -103,4 +103,5 @@ urlpatterns = [
     path('user-activities/security/overview/', EnhancedUserActivityViewSet.as_view({'get': 'security_events'}), name='security-overview'),
 
     path('transactions/', TransactionView.as_view(), name='transaction-create'),
+    path('profile-data/', UserProfileDataView.as_view(), name='user-profile-data'),
 ]

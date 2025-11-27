@@ -27,27 +27,7 @@ from .models import (DocumentAcknowledgment, DocumentPermission, Document,
 import os
 logger = logging.getLogger(__name__)
 
-# def get_user_data_from_jwt(request):
-#     """Extract user data from JWT payload."""
-#     auth_header = request.headers.get("Authorization", "")
-#     if not auth_header.startswith("Bearer "):
-#         raise serializers.ValidationError("No valid Bearer token provided.")
-#     token = auth_header.split(" ")[1]
-#     try:
-#         payload = jwt.decode(token, options={"verify_signature": False})
-#         user_data = payload.get("user", {})
-#         return {
-#             'email': user_data.get('email', ''),
-#             'first_name': user_data.get('first_name', ''),
-#             'last_name': user_data.get('last_name', ''),
-#             'job_role': user_data.get('job_role', ''),
-#             'id': user_data.get('id', None)
-#         }
-#     except Exception as e:
-#         logger.error(f"Failed to decode JWT for user data: {str(e)}")
-#         raise serializers.ValidationError("Invalid JWT token for user data.")
 
-   
 def get_user_data_from_jwt(request):
     """Extract user data from the authenticated request user."""
     if not request.user or not request.user.is_authenticated:

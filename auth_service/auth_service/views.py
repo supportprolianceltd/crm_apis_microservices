@@ -567,6 +567,8 @@ class CustomTokenSerializer(serializers.Serializer):
             "tenant_id": user.tenant.id,
             "tenant_organizational_id": str(user.tenant.organizational_id),
             "tenant_name": str(user.tenant.name),
+            "tenant_secondary_color": str(user.tenant.secondary_color),
+            "tenant_primary_color": str(user.tenant.primary_color),
             "tenant_unique_id": str(user.tenant.unique_id),
             "tenant_schema": user.tenant.schema_name,
             "tenant_domain": tenant_domain,
@@ -607,6 +609,8 @@ class CustomTokenSerializer(serializers.Serializer):
             "tenant_organizational_id": str(user.tenant.organizational_id),
             "tenant_name": str(user.tenant.name),
             "tenant_unique_id": str(user.tenant.unique_id),
+            "tenant_secondary_color": str(user.tenant.secondary_color),
+            "tenant_primary_color": str(user.tenant.primary_color),
             "tenant_schema": user.tenant.schema_name,
             "tenant_domain": tenant_domain,
             "user": {

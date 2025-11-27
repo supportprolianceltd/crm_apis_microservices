@@ -109,6 +109,10 @@ class LedgerEntry(models.Model):
         ]
         ordering = ['-entry_date']
 
+    @property
+    def entry_type_display(self):
+        return self.get_entry_type_display()
+
 class ROIAccrual(models.Model):
     """Track ROI calculations and accruals"""
     tenant = models.ForeignKey('core.Tenant', on_delete=models.CASCADE)
