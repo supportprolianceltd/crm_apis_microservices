@@ -40,7 +40,7 @@ if IS_PRODUCTION:
     FRONTEND_URLS = [
         "https://e3os.co.uk",
         "https://crm-frontend-react.vercel.app",
-        "https://loan-management-theta.vercel.app",
+        "https://loan-management-rho.vercel.app",
         "https://task-manager-two-plum.vercel.app",
         "https://technicalglobaladministrator.e3os.co.uk",
         "https://dev.e3os.co.uk",
@@ -51,7 +51,7 @@ elif IS_STAGING:
     FRONTEND_URLS = [
         "https://e3os.co.uk",
         "https://crm-frontend-react.vercel.app",
-       "https://loan-management-theta.vercel.app",
+       "https://loan-management-rho.vercel.app",
        "https://task-manager-two-plum.vercel.app",
         "https://technicalglobaladministrator.e3os.co.uk",
         "https://dev.e3os.co.uk",

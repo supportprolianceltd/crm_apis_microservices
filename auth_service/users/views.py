@@ -899,6 +899,14 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserImpersonateSerializer
         return CustomUserSerializer  # Full for retrieve
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = self.perform_create(serializer)
+        serializer = self.get_serializer(user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def perform_create(self, serializer):
         tenant = self.request.user.tenant
         user = self.request.user
@@ -966,6 +974,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}: {str(e)}")
             except Exception as e:
                 logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
+
+            return user_obj
 
     def update(self, request, *args, **kwargs):
         tenant = request.user.tenant
@@ -1317,6 +1327,8 @@ class UserViewSet(viewsets.ModelViewSet):
         }
         status_code = status.HTTP_201_CREATED if results else status.HTTP_400_BAD_REQUEST
         return Response(response_data, status=status_code)
+
+
     
 class PublicRegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
