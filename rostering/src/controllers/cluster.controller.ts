@@ -1069,71 +1069,96 @@ export class ClusterController {
 
   /**
    * Update a cluster's metadata (name, description, postcode, radius, location)
-   */
-  public async updateCluster(req: Request, res: Response) {
-    try {
-      const tenantId = req.user?.tenantId;
-      if (!tenantId) {
-        return res.status(403).json({ error: 'tenantId missing from auth context' });
-      }
+   /**
+    * Update a cluster's metadata (name, description, postcode, radius, location)
+    */
+   public async updateCluster(req: Request, res: Response) {
+     try {
+       const tenantId = req.user?.tenantId;
+       if (!tenantId) {
+         return res.status(403).json({ error: 'tenantId missing from auth context' });
+       }
 
-      const { clusterId } = req.params as { clusterId?: string };
-      if (!clusterId) {
-        return res.status(400).json({ error: 'clusterId required in path' });
-      }
+       const { clusterId } = req.params as { clusterId?: string };
+       if (!clusterId) {
+         return res.status(400).json({ error: 'clusterId required in path' });
+       }
 
-      const { name, description, postcode, latitude, longitude, radiusMeters } = req.body;
+       const { name, description, postcode, location, latitude, longitude, radiusMeters } = req.body;
 
-      // Verify cluster belongs to tenant
-      const existing = await (this.prisma as any).cluster.findFirst({ where: { id: clusterId, tenantId: tenantId.toString() } });
-      if (!existing) {
-        return res.status(404).json({ error: 'Cluster not found' });
-      }
+       // Verify cluster belongs to tenant
+       const existing = await (this.prisma as any).cluster.findFirst({ where: { id: clusterId, tenantId: tenantId.toString() } });
+       if (!existing) {
+         return res.status(404).json({ error: 'Cluster not found' });
+       }
 
-      const updateData: any = {};
-      if (name !== undefined) updateData.name = name;
-      if (description !== undefined) updateData.description = description || null;
+       const updateData: any = {};
+       if (name !== undefined) updateData.name = name;
+       if (description !== undefined) updateData.description = description || null;
 
-      if (postcode !== undefined && postcode !== null) {
-        if (typeof postcode !== 'string') {
-          return res.status(400).json({ error: 'postcode must be a string' });
-        }
-        updateData.postcode = postcode.trim().replace(/\s+/g, '').toUpperCase();
-      }
+       if (postcode !== undefined && postcode !== null) {
+         if (typeof postcode !== 'string') {
+           return res.status(400).json({ error: 'postcode must be a string' });
+         }
+         updateData.postcode = postcode.trim().replace(/\s+/g, '').toUpperCase();
+       }
 
-      if (radiusMeters !== undefined) {
-        const parsed = Number(radiusMeters);
-        if (Number.isNaN(parsed)) {
-          return res.status(400).json({ error: 'radiusMeters must be a number' });
-        }
-        updateData.radiusMeters = parsed;
-      }
+       if (radiusMeters !== undefined) {
+         const parsed = Number(radiusMeters);
+         if (Number.isNaN(parsed)) {
+           return res.status(400).json({ error: 'radiusMeters must be a number' });
+         }
+         updateData.radiusMeters = parsed;
+       }
 
-      if (latitude !== undefined) updateData.latitude = typeof latitude === 'number' ? latitude : (latitude === null ? null : Number(latitude));
-      if (longitude !== undefined) updateData.longitude = typeof longitude === 'number' ? longitude : (longitude === null ? null : Number(longitude));
+       // Accept a string `location` field (legacy human-readable location)
+       if (location !== undefined) {
+         if (location === null) {
+           updateData.location = null;
+         } else if (typeof location !== 'string') {
+           return res.status(400).json({ error: 'location must be a string or null' });
+         } else {
+           updateData.location = location;
+         }
+       }
 
-      const updated = await (this.prisma as any).cluster.update({ where: { id: clusterId }, data: updateData });
+       if (latitude !== undefined) updateData.latitude = typeof latitude === 'number' ? latitude : (latitude === null ? null : Number(latitude));
+       if (longitude !== undefined) updateData.longitude = typeof longitude === 'number' ? longitude : (longitude === null ? null : Number(longitude));
 
-      // If lat/lng provided, update PostGIS regionCenter via raw SQL
-      if ((latitude !== undefined && latitude !== null) && (longitude !== undefined && longitude !== null)) {
-        try {
-          await this.prisma.$executeRaw`
-            UPDATE clusters
-            SET "regionCenter" = ST_SetSRID(ST_MakePoint(${Number(longitude)}, ${Number(latitude)}), 4326)::geography
-            WHERE id = ${clusterId}
-          `;
-        } catch (err) {
-          console.error('Failed to update regionCenter for cluster', err);
-        }
-      }
+       const updated = await (this.prisma as any).cluster.update({ where: { id: clusterId }, data: updateData });
 
-      const cluster = await (this.prisma as any).cluster.findUnique({ where: { id: clusterId } });
-      return res.json(cluster);
-    } catch (error: any) {
-      console.error('updateCluster error', error);
-      return res.status(500).json({ error: 'Failed to update cluster', details: error?.message });
-    }
-  }
+       // If lat/lng provided, update PostGIS regionCenter via raw SQL only.
+       // Do NOT overwrite the string `location` column here - the API accepts `location` as a string in the body.
+       if ((latitude !== undefined && latitude !== null) && (longitude !== undefined && longitude !== null)) {
+         try {
+           await this.prisma.$executeRaw`
+             UPDATE clusters
+             SET "regionCenter" = ST_SetSRID(ST_MakePoint(${Number(longitude)}, ${Number(latitude)}), 4326)::geography
+             WHERE id = ${clusterId}
+           `;
+         } catch (err) {
+           console.error('Failed to update regionCenter for cluster', err);
+         }
+       } else if (latitude === null && longitude === null) {
+         // If coordinates explicitly set to null, clear geography regionCenter (do not touch string `location`)
+         try {
+           await this.prisma.$executeRaw`
+             UPDATE clusters
+             SET "regionCenter" = NULL
+             WHERE id = ${clusterId}
+           `;
+         } catch (err) {
+           console.error('Failed to clear regionCenter for cluster', err);
+         }
+       }
+
+       const cluster = await (this.prisma as any).cluster.findUnique({ where: { id: clusterId } });
+       return res.json(cluster);
+     } catch (error: any) {
+       console.error('updateCluster error', error);
+       return res.status(500).json({ error: 'Failed to update cluster', details: error?.message });
+     }
+   }
 
   /**
    * Delete a cluster. Prevent deletion if cluster has active requests.

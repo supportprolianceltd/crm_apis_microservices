@@ -23281,3 +23281,24 @@
 2025-11-26 08:28:27,655 [INFO] gateway: [gateway_0bbe088e] Forwarding to: http://project-manager:8005/api/project-manager/api/tasks (Service: project-manager)
 2025-11-26 08:28:27,657 [INFO] gateway: [gateway_0bbe088e] Forwarding request to: http://project-manager:8005/api/project-manager/api/tasks with timeout: 300s
 2025-11-26 08:28:27,847 [INFO] gateway: [gateway_0bbe088e] Gateway forwarded: GET /api/project-manager/api/tasks/ -> 200 (Service: project-manager)
+2025-11-27 12:21:45,454 [INFO] gateway: [gateway_24e063a3] Gateway received request: GET /api/rostering/clusters
+2025-11-27 12:21:45,466 [INFO] gateway: [gateway_24e063a3] Forwarding to: http://rostering:3005/api/rostering/clusters (Service: rostering)
+2025-11-27 12:21:45,470 [INFO] gateway: [gateway_24e063a3] Forwarding request to: http://rostering:3005/api/rostering/clusters with timeout: 120s
+2025-11-27 12:21:46,871 [INFO] gateway: [gateway_24e063a3] Gateway forwarded: GET /api/rostering/clusters -> 401 (Service: rostering)
+2025-11-27 12:21:46,896 [WARNING] django.request: Unauthorized: /api/rostering/clusters
+2025-11-27 12:51:42,943 [INFO] gateway: [gateway_048583f2] Gateway received request: POST /api/token/
+2025-11-27 12:51:42,969 [INFO] gateway: [gateway_048583f2] Forwarding to: http://auth-service:8001/api/token/ (Service: token)
+2025-11-27 12:51:42,985 [INFO] gateway: [gateway_048583f2] Forwarding request to: http://auth-service:8001/api/token/ with timeout: 300s
+2025-11-27 12:51:59,356 [INFO] gateway: [gateway_048583f2] Gateway forwarded: POST /api/token/ -> 200 (Service: token)
+2025-11-27 12:52:40,317 [INFO] gateway: [gateway_c7f880fc] Gateway received request: GET /api/rostering/clusters
+2025-11-27 12:52:40,333 [INFO] gateway: [gateway_c7f880fc] Forwarding to: http://rostering:3005/api/rostering/clusters (Service: rostering)
+2025-11-27 12:52:40,345 [INFO] gateway: [gateway_c7f880fc] Forwarding request to: http://rostering:3005/api/rostering/clusters with timeout: 120s
+2025-11-27 12:52:43,560 [INFO] gateway: [gateway_c7f880fc] Gateway forwarded: GET /api/rostering/clusters -> 200 (Service: rostering)
+2025-11-27 12:53:12,857 [INFO] gateway: [gateway_72394a90] Gateway received request: PUT /api/rostering/clusters/cmi8uav7d0000sg01p5s0qvsa
+2025-11-27 12:53:12,858 [INFO] gateway: [gateway_72394a90] Forwarding to: http://rostering:3005/api/rostering/clusters/cmi8uav7d0000sg01p5s0qvsa/ (Service: rostering)
+2025-11-27 12:53:12,861 [INFO] gateway: [gateway_72394a90] Forwarding request to: http://rostering:3005/api/rostering/clusters/cmi8uav7d0000sg01p5s0qvsa/ with timeout: 120s
+2025-11-27 12:53:13,113 [INFO] gateway: [gateway_72394a90] Gateway forwarded: PUT /api/rostering/clusters/cmi8uav7d0000sg01p5s0qvsa -> 200 (Service: rostering)
+2025-11-27 12:53:22,663 [INFO] gateway: [gateway_a1a4d78a] Gateway received request: PUT /api/rostering/clusters/cmi8uav7d0000sg01p5s0qvsa
+2025-11-27 12:53:22,664 [INFO] gateway: [gateway_a1a4d78a] Forwarding to: http://rostering:3005/api/rostering/clusters/cmi8uav7d0000sg01p5s0qvsa/ (Service: rostering)
+2025-11-27 12:53:22,665 [INFO] gateway: [gateway_a1a4d78a] Forwarding request to: http://rostering:3005/api/rostering/clusters/cmi8uav7d0000sg01p5s0qvsa/ with timeout: 120s
+2025-11-27 12:53:22,804 [INFO] gateway: [gateway_a1a4d78a] Gateway forwarded: PUT /api/rostering/clusters/cmi8uav7d0000sg01p5s0qvsa -> 200 (Service: rostering)
