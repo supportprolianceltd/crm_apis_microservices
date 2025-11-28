@@ -73,19 +73,21 @@ class EventViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
 
     def get_queryset(self):
+        tenant = self.request.user.tenant
         user = self.request.user
-        tenant = user.tenant
-        # Return events where user is creator or participant, or public events, filtered by tenant
-        return Event.objects.filter(
-            Q(tenant=tenant) & (
-                Q(creator=user) |
-                Q(participants=user) |
-                Q(visibility='public')
-            )
-        ).distinct()
 
-    def perform_create(self, serializer):
-        serializer.save(creator=self.request.user, tenant=self.request.user.tenant)
+        # Admins see all events, regular users see only their own events or public events
+        if user.role in ['root-admin', 'co-admin', 'admin', 'staff']:
+            return Event.objects.filter(tenant=tenant).select_related('creator')
+        else:
+            return Event.objects.filter(
+                Q(tenant=tenant) & (
+                    Q(creator=user) |
+                    Q(participants=user) |
+                    Q(visibility='public')
+                )
+            ).distinct().select_related('creator')
+
 
     @action(detail=False, methods=['get'], url_path='my_events')
     def my_events(self, request):
@@ -271,7 +273,8 @@ class EventViewSet(viewsets.ModelViewSet):
             )
 
         from users.models import CustomUser
-        users_to_add = CustomUser.objects.filter(id__in=user_ids)
+        tenant = request.user.tenant
+        users_to_add = CustomUser.objects.filter(id__in=user_ids, tenant=tenant)
         event.participants.add(*users_to_add)
 
         serializer = self.get_serializer(event)
@@ -295,7 +298,8 @@ class EventViewSet(viewsets.ModelViewSet):
             )
 
         from users.models import CustomUser
-        users_to_remove = CustomUser.objects.filter(id__in=user_ids)
+        tenant = request.user.tenant
+        users_to_remove = CustomUser.objects.filter(id__in=user_ids, tenant=tenant)
         event.participants.remove(*users_to_remove)
 
         serializer = self.get_serializer(event)

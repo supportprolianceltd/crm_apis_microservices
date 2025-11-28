@@ -54,6 +54,7 @@
   "location": "Conference Room A",
   "meeting_link": "https://zoom.us/j/123456789",
   "visibility": "specific_users",
+  "include_all_tenant_users": false,
   "participants": [2, 3, 4]
 }
 ```
@@ -69,6 +70,7 @@
   "location": "Conference Room A",
   "creator": 1,
   "visibility": "specific_users",
+  "include_all_tenant_users": false,
   "participants": [2, 3, 4],
   "participants_details": [
     {
@@ -106,6 +108,60 @@
 }
 ```
 
+### Create Company-Wide Event
+**Purpose:** Create an event that automatically includes all users in the tenant as participants.
+
+**Request Body:**
+```json
+{
+  "title": "Company All-Hands Meeting",
+  "description": "Monthly company-wide meeting for all employees",
+  "start_datetime": "2024-12-15T14:00:00Z",
+  "end_datetime": "2024-12-15T16:00:00Z",
+  "location": "Main Auditorium",
+  "meeting_link": "https://zoom.us/j/company-meeting",
+  "visibility": "public",
+  "include_all_tenant_users": true
+}
+```
+
+**Response:**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440001",
+  "title": "Company All-Hands Meeting",
+  "description": "Monthly company-wide meeting for all employees",
+  "start_datetime": "2024-12-15T14:00:00Z",
+  "end_datetime": "2024-12-15T16:00:00Z",
+  "location": "Main Auditorium",
+  "meeting_link": "https://zoom.us/j/company-meeting",
+  "creator": 1,
+  "visibility": "public",
+  "include_all_tenant_users": true,
+  "participants": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],  // All tenant users automatically included
+  "participants_details": [
+    {
+      "id": 1,
+      "email": "admin@example.com",
+      "first_name": "Admin",
+      "last_name": "User",
+      "role": "admin"
+    },
+    // ... all other tenant users
+  ],
+  "creator_details": {
+    "id": 1,
+    "email": "admin@example.com",
+    "first_name": "Admin",
+    "last_name": "User",
+    "role": "admin"
+  },
+  "created_at": "2024-11-20T12:00:00Z",
+  "updated_at": "2024-11-20T12:00:00Z",
+  "last_updated_by_id": "1"
+}
+```
+
 ---
 
 ### Get Events
@@ -134,6 +190,7 @@
       "end_datetime": "2024-12-01T11:00:00Z",
       "location": "Conference Room A",
       "creator": 1,
+      "tenant": 1,
       "visibility": "specific_users",
       "participants": [2, 3, 4],
       "participants_details": [
@@ -200,6 +257,7 @@
   "location": "Conference Room A",
   "meeting_link": "https://zoom.us/j/123456789",
   "creator": 1,
+  "tenant": 1,
   "visibility": "specific_users",
   "participants": [2, 3, 4],
   "participants_details": [
@@ -231,6 +289,11 @@
     "first_name": "John",
     "last_name": "Doe",
     "role": "admin"
+  },
+  "tenant_details": {
+    "id": 1,
+    "name": "Proliance Care",
+    "schema_name": "proliance"
   },
   "created_at": "2024-11-20T12:00:00Z",
   "updated_at": "2024-11-20T12:00:00Z",
@@ -302,6 +365,11 @@
     "first_name": "John",
     "last_name": "Doe",
     "role": "admin"
+  },
+  "tenant_details": {
+    "id": 1,
+    "name": "Proliance Care",
+    "schema_name": "proliance"
   },
   "created_at": "2024-11-20T12:00:00Z",
   "updated_at": "2024-11-20T12:30:00Z",
@@ -562,6 +630,12 @@
 - **Public:** All users in the tenant can see the event
 - **Specific Users:** Only creator and selected participants can see the event
 
+### Include All Tenant Users
+- **Field:** `include_all_tenant_users` (boolean)
+- **Purpose:** When set to `true`, automatically adds all users in the tenant as participants
+- **Validation:** Cannot specify manual participants when this field is `true`
+- **Use Case:** Company-wide events where everyone should be invited
+
 ### Access Control
 - **Create:** Any authenticated user can create events
 - **Read:** Based on visibility settings and user permissions
@@ -687,6 +761,7 @@
 - `creator`: ForeignKey to CustomUser (event creator)
 - `tenant`: ForeignKey to Tenant (multi-tenancy support)
 - `visibility`: Choice field (private, public, specific_users)
+- `include_all_tenant_users`: Boolean field - if true, automatically includes all tenant users as participants
 - `participants`: ManyToMany to CustomUser (event participants)
 - `created_at`: Auto timestamp
 - `updated_at`: Auto timestamp
@@ -986,6 +1061,8 @@
 - **Self-Addition:** Users cannot add themselves as participants
 - **Duplicate Prevention:** Same user cannot be added multiple times
 - **Tenant Boundary:** Only users from same tenant can be participants
+- **Include All Tenant Users:** When `include_all_tenant_users` is `true`, all tenant users are automatically added as participants
+- **Validation:** Cannot specify manual participants when `include_all_tenant_users` is `true`
 
 ### Multi-tenancy Features
 - **Complete Isolation:** Events are fully scoped to tenant schema
@@ -1131,6 +1208,7 @@ CREATE TABLE events_event (
     creator_id INTEGER NOT NULL REFERENCES users_customuser(id),
     tenant_id INTEGER NOT NULL REFERENCES core_tenant(id),
     visibility VARCHAR(20) NOT NULL,
+    include_all_tenant_users BOOLEAN DEFAULT FALSE,  -- Automatically include all tenant users as participants
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     last_updated_by_id VARCHAR(100)
@@ -1251,3 +1329,5 @@ EVENT_REMINDER_HOURS = 24
 *Mobile Responsive: ✅ 100% Complete*
 
 *Last Updated: November 2025*
+
+*Include All Tenant Users Feature: ✅ Added - Automatically includes all tenant users as participants when enabled*

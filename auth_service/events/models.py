@@ -24,6 +24,7 @@ class Event(models.Model):
     creator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='created_events')
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     visibility = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default='private')
+    include_all_tenant_users = models.BooleanField(default=False, help_text="If true, all tenant users are automatically added as participants")
     participants = models.ManyToManyField(CustomUser, related_name='events', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
