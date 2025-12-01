@@ -189,12 +189,12 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='tegaokorare91@gmail.com',
+        email='kayroog1@gmail.com',
         password='qwerty',
         role='staff',
-        first_name='Tega',
-        last_name='Okorare',
-        job_role=' Backend Developer',
+        first_name='Wisdom',
+        last_name='Suo',
+        job_role='Frontend Developer',
         tenant=tenant
     )
     

@@ -3584,13 +3584,16 @@ class GroupViewSet(viewsets.ModelViewSet):
 class DocumentListCreateView(APIView):
     def get(self, request):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            documents = Document.objects.filter(tenant_id=tenant_uuid)
-            serializer = DocumentSerializer(documents, many=True, context={"request": request})
-            logger.info(f"Retrieved {documents.count()} documents for tenant {tenant_uuid}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                documents = Document.objects.filter(tenant_id=tenant_id)
+                serializer = DocumentSerializer(documents, many=True, context={"request": request})
+                logger.info(f"Retrieved {documents.count()} documents for tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Error listing documents for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error listing documents for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
@@ -3599,7 +3602,7 @@ class DocumentListCreateView(APIView):
             logger.info(f"{request.data}")
             if serializer.is_valid():
                 document = serializer.save()
-                logger.info(f"Document created: {document.title} for tenant {serializer.validated_data['tenant_id']}")
+                logger.info(f"Document created: {document.title} for tenant {document.tenant_id}")
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             logger.error(f"Validation error: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -3614,48 +3617,57 @@ class DocumentDetailView(APIView):
 
     def get(self, request, id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=id, tenant_id=tenant_uuid)
-            serializer = DocumentSerializer(document, context={"request": request})
-            logger.info(f"Retrieved document {document.title} for tenant {tenant_uuid}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                document = Document.objects.get(id=id, tenant_id=tenant_id)
+                serializer = DocumentSerializer(document, context={"request": request})
+                logger.info(f"Retrieved document {document.title} for tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error retrieving document for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error retrieving document for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def patch(self, request, id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=id, tenant_id=tenant_uuid)
-            serializer = DocumentSerializer(document, data=request.data, partial=True, context={"request": request})
-            if serializer.is_valid():
-                serializer.save()
-                logger.info(f"Document updated: {document.title} for tenant {tenant_uuid}, version {document.version}")
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            logger.error(f"Validation error for tenant {tenant_uuid}: {serializer.errors}")
-            return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                document = Document.objects.get(id=id, tenant_id=tenant_id)
+                serializer = DocumentSerializer(document, data=request.data, partial=True, context={"request": request})
+                if serializer.is_valid():
+                    serializer.save()
+                    logger.info(f"Document updated: {document.title} for tenant {tenant_id}, version {document.version}")
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                logger.error(f"Validation error for tenant {tenant_unique_id}: {serializer.errors}")
+                return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error updating document for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error updating document for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=id, tenant_id=tenant_uuid)
-            document.delete()
-            logger.info(f"Document deleted: {document.title} for tenant {tenant_uuid}")
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                document = Document.objects.get(id=id, tenant_id=tenant_id)
+                document.delete()
+                logger.info(f"Document deleted: {document.title} for tenant {tenant_id}")
+                return Response(status=status.HTTP_204_NO_CONTENT)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error deleting document for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error deleting document for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -3665,17 +3677,20 @@ class DocumentVersionListView(APIView):
 
     def get(self, request, document_id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=document_id, tenant_id=tenant_uuid)
-            versions = DocumentVersion.objects.filter(document=document)
-            serializer = DocumentVersionSerializer(versions, many=True, context={"request": request})
-            logger.info(f"Retrieved {versions.count()} versions for document {document.title} in tenant {tenant_uuid}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                document = Document.objects.get(id=document_id, tenant_id=tenant_id)
+                versions = DocumentVersion.objects.filter(document=document)
+                serializer = DocumentVersionSerializer(versions, many=True, context={"request": request})
+                logger.info(f"Retrieved {versions.count()} versions for document {document.title} in tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error retrieving versions for document {document_id} in tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error retrieving versions for document {document_id} in tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class DocumentAcknowledgeView(APIView):
@@ -3683,32 +3698,35 @@ class DocumentAcknowledgeView(APIView):
 
     def post(self, request, document_id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
             current_user = get_user_data_from_jwt(request)
-            document = Document.objects.get(id=document_id, tenant_id=tenant_uuid)
-            if DocumentAcknowledgment.objects.filter(document=document, user_id=current_user['id'], tenant_id=tenant_uuid).exists():
-                return Response(
-                    {"detail": "You have already acknowledged this document"}, status=status.HTTP_400_BAD_REQUEST
+            with tenant_context(tenant):
+                document = Document.objects.get(id=document_id, tenant_id=tenant_id)
+                if DocumentAcknowledgment.objects.filter(document=document, user_id=current_user['id'], tenant_id=tenant_id).exists():
+                    return Response(
+                        {"detail": "You have already acknowledged this document"}, status=status.HTTP_400_BAD_REQUEST
+                    )
+                acknowledgment = DocumentAcknowledgment.objects.create(
+                    document=document,
+                    user_id=str(current_user['id']),
+                    email=current_user['email'],
+                    first_name=current_user['first_name'],
+                    last_name=current_user['last_name'],
+                    role=current_user['job_role'],
+                    tenant_id=tenant_id,
                 )
-            acknowledgment = DocumentAcknowledgment.objects.create(
-                document=document,
-                user_id=str(current_user['id']),
-                email=current_user['email'],
-                first_name=current_user['first_name'],
-                last_name=current_user['last_name'],
-                role=current_user['job_role'],
-                tenant_id=tenant_uuid,
-            )
-            serializer = DocumentAcknowledgmentSerializer(acknowledgment)
-            logger.info(
-                f"Document {document.title} acknowledged by {current_user['email']} in tenant {tenant_uuid}"
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                serializer = DocumentAcknowledgmentSerializer(acknowledgment)
+                logger.info(
+                    f"Document {document.title} acknowledged by {current_user['email']} in tenant {tenant_id}"
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error acknowledging document for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error acknowledging document for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class DocumentAcknowledgmentsListView(APIView):
@@ -3716,18 +3734,23 @@ class DocumentAcknowledgmentsListView(APIView):
 
     def get(self, request, document_id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=document_id, tenant_id=tenant_uuid)
-            acknowledgments = DocumentAcknowledgment.objects.filter(document=document, tenant_id=tenant_uuid).order_by('-acknowledged_at')
-            serializer = DocumentAcknowledgmentSerializer(acknowledgments, many=True, context={"request": request})
-            logger.info(f"Retrieved {acknowledgments.count()} acknowledgments for document {document.title} in tenant {tenant_uuid}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                document = Document.objects.get(id=document_id, tenant_id=tenant_id)
+                acknowledgments = DocumentAcknowledgment.objects.filter(document=document, tenant_id=tenant_id).order_by('-acknowledged_at')
+                serializer = DocumentAcknowledgmentSerializer(acknowledgments, many=True, context={"request": request})
+                logger.info(f"Retrieved {acknowledgments.count()} acknowledgments for document {document.title} in tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error retrieving acknowledgments for document {document_id} in tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error retrieving acknowledgments for document {document_id} in tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 class UserDocumentAccessView(APIView):
@@ -3738,19 +3761,22 @@ class UserDocumentAccessView(APIView):
         if not user_identifier:
             return Response({"detail": "Either 'user_id' or 'email' query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        tenant_uuid = get_tenant_id_from_jwt(request)
+        tenant_unique_id = get_tenant_id_from_jwt(request)
+        tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+        tenant_id = str(tenant.id)
         try:
-            if request.query_params.get('user_id'):
-                permissions = DocumentPermission.objects.filter(user_id=user_identifier, tenant_id=tenant_uuid).select_related('document')
-            else:
-                permissions = DocumentPermission.objects.filter(email=user_identifier, tenant_id=tenant_uuid).select_related('document')
-            serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})
-            if not permissions.exists():
-                return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
-            logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_uuid}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            with tenant_context(tenant):
+                if request.query_params.get('user_id'):
+                    permissions = DocumentPermission.objects.filter(user_id=user_identifier, tenant_id=tenant_id).select_related('document')
+                else:
+                    permissions = DocumentPermission.objects.filter(email=user_identifier, tenant_id=tenant_id).select_related('document')
+                serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})
+                if not permissions.exists():
+                    return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
+                logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Error retrieving user document access for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error retrieving user document access for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

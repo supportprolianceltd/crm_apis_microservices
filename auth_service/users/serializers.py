@@ -319,12 +319,13 @@ class EmploymentDetailSerializer(serializers.ModelSerializer):
         exclude = ["user_profile"]
         extra_kwargs = {
             "job_role": {"required": True},
-            "hierarchy": {"required": True},
-            "department": {"required": True},
+            "hierarchy": {"required": False, "allow_blank": True},
+            "department": {"required": False, "allow_blank": True},
+            "line_manager": {"required": False, "allow_blank": True},
             "work_email": {"required": True},
-            "employment_type": {"required": True},
+            "employment_type": {"required": False, "allow_blank": True},
             "employment_start_date": {"required": True},
-            "salary": {"required": True},
+            "salary": {"required": False, "allow_null": True},
             "working_days": {"required": True},
             "maximum_working_hours": {"required": True},
             "employment_end_date": {"required": False, "allow_null": True},
@@ -1277,8 +1278,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             return updated_instance
         
 
-
-
 class UserCreateSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=True)
     password = serializers.CharField(write_only=True, required=True, min_length=8)
@@ -1534,8 +1533,6 @@ class CustomUserListSerializer(serializers.ModelSerializer):
         except Exception as e:
             logger.error(f"Error calculating profile completion for user {obj.email}: {str(e)}")
             return 0
-
-
 
 
 class CustomUserSerializer(CustomUserListSerializer):
@@ -1942,92 +1939,6 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         return instance
 
 
-# class ClientDetailSerializer(serializers.ModelSerializer):
-#     profile = ClientProfileSerializer()
-
-#     class Meta:
-#         model = CustomUser
-#         fields = ["id", "email", "first_name", "last_name", "role", "job_role", "branch", "profile"]
-#         read_only_fields = ["id", "role"]
-
-#     def to_internal_value(self, data):
-#         """
-#         Custom parsing for multipart/form-data to handle nested 'profile' fields and files.
-#         Supports both simple nested (e.g., profile[photo]) and deeper nested (e.g., profile[preferred_carers][0]).
-#         """
-#         logger.info(f"Raw payload in ClientDetailSerializer: {dict(data) if hasattr(data, 'dict') else data}")
-#         mutable_data = {}
-#         profile_data = {}
-
-#         if hasattr(data, "getlist"):  # Multipart/form-data case
-#             # Initialize nested arrays (e.g., preferred_carers)
-#             nested_arrays = ["preferred_carers"]  # Add more if needed (e.g., for future many=True fields)
-#             for field in nested_arrays:
-#                 profile_data[field] = []
-
-#             for key in data:
-#                 if key.startswith("profile[") and key.endswith("]"):
-#                     # Handle profile-prefixed fields
-#                     if "][" in key:
-#                         # Deeper nested: e.g., profile[preferred_carers][0]
-#                         parts = key.split("[")
-#                         field_name = parts[1][:-1]  # e.g., "preferred_carers"
-#                         index_str = parts[2][:-1]   # e.g., "0"
-#                         if len(parts) > 3:
-#                             sub_field = parts[3][:-1]  # e.g., sub-sub-field
-#                             index = int(index_str)
-
-#                             # Ensure list is long enough
-#                             while len(profile_data.get(field_name, [])) <= index:
-#                                 profile_data[field_name].append({})
-
-#                             # Add value (file or text)
-#                             if key in self.context["request"].FILES:
-#                                 profile_data[field_name][index][sub_field] = self.context["request"].FILES[key]
-#                             else:
-#                                 profile_data[field_name][index][sub_field] = data.get(key)
-#                         else:
-#                             # Handle edge cases if needed
-#                             pass
-#                     else:
-#                         # Simple nested: e.g., profile[photo]
-#                         field_name = key[len("profile[") : -1]
-#                         if key in self.context["request"].FILES:
-#                             profile_data[field_name] = self.context["request"].FILES[key]
-#                         else:
-#                             profile_data[field_name] = data.get(key)
-#                 else:
-#                     # Top-level fields (e.g., email, first_name)
-#                     mutable_data[key] = data.get(key)
-#         else:
-#             # JSON case (no files)
-#             mutable_data = dict(data)
-#             profile_data = mutable_data.get("profile", {})
-
-#         logger.info(f"Parsed profile data: {profile_data}")
-#         mutable_data["profile"] = profile_data
-#         return super().to_internal_value(mutable_data)
-
-#     def to_representation(self, instance):
-#         data = super().to_representation(instance)
-#         if instance.client_profile:
-#             data["profile"] = ClientProfileSerializer(instance.client_profile).data
-#         else:
-#             data["profile"] = None
-#         return data
-
-#     def update(self, instance, validated_data):
-#         profile_data = validated_data.pop("profile", {})
-#         instance = super().update(instance, validated_data)
-
-#         if instance.client_profile:
-#             profile_serializer = ClientProfileSerializer(instance.client_profile, data=profile_data, partial=True, context=self.context)
-#             profile_serializer.is_valid(raise_exception=True)
-#             profile_serializer.save()
-#         return instance
-
-
-
 class ClientDetailSerializer(serializers.ModelSerializer):
     profile = ClientProfileSerializer()
 
@@ -2283,6 +2194,23 @@ class DocumentSerializer(serializers.ModelSerializer):
             if isinstance(value, list) and len(value) == 1:
                 mutable_data[key] = value[0]
 
+        # Parse permissions_write from multipart
+        permissions_write_data = []
+        i = 0
+        while True:
+            user_id_key = f'permissions_write[{i}][user_id]'
+            if user_id_key not in data:
+                break
+            perm = {
+                'user_id': data.get(user_id_key),
+                'email': data.get(f'permissions_write[{i}][email]'),
+                'permission_level': data.get(f'permissions_write[{i}][permission_level]'),
+            }
+            permissions_write_data.append(perm)
+            i += 1
+        if permissions_write_data:
+            mutable_data['permissions_write'] = permissions_write_data
+
         ret = super().to_internal_value(mutable_data)
         return ret
 
@@ -2394,16 +2322,22 @@ class DocumentSerializer(serializers.ModelSerializer):
     @extend_schema_field(str)
     def get_tenant_domain(self, obj):
         try:
-            tenant = Domain.objects.filter(tenant_id=obj.tenant_id, is_primary=True).first()
-            return tenant.domain if tenant else None
+            if isinstance(obj.tenant_id, int):
+                # tenant_id is already the integer ID
+                domain = Domain.objects.filter(tenant_id=obj.tenant_id, is_primary=True).first()
+            else:
+                # tenant_id is a UUID string, resolve to tenant integer ID
+                tenant = Tenant.objects.get(unique_id=obj.tenant_id)
+                domain = Domain.objects.filter(tenant_id=tenant.id, is_primary=True).first()
+            return domain.domain if domain else None
         except Exception as e:
             logger.error(f"Error fetching tenant domain for {obj.tenant_id}: {str(e)}")
             return None
 
     def validate_file(self, value):
         if value:
-            if not value.name.lower().endswith((".pdf", ".png", ".jpg", ".jpeg")):
-                raise serializers.ValidationError("Only PDF or image files are allowed.")
+            if not value.name.lower().endswith((".pdf", ".png", ".jpg", ".jpeg", ".doc", ".docx")):
+                raise serializers.ValidationError("Only PDF, image, or Word document files are allowed.")
             if value.size > 10 * 1024 * 1024:  # 10MB limit
                 raise serializers.ValidationError("File size cannot exceed 10MB.")
         return value
@@ -2423,12 +2357,12 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         tenant_id = get_tenant_id_from_jwt(self.context["request"])
-        data["tenant_id"] = tenant_id
+        # Note: tenant_id is read-only and set in create/update methods
         # Validate uploaded_by_id and updated_by_id if provided
         if "uploaded_by_id" in data:
             try:
                 # Try numeric ID first, fallback will be handled by exceptions
-                user = CustomUser.objects.get(id=data["uploaded_by_id"])
+                user = CustomUser.objects.get(id=int(data["uploaded_by_id"]))
                 user_tenant_uuid = str(Tenant.objects.get(id=user.tenant_id).unique_id)
                 if user_tenant_uuid != str(tenant_id):
                     raise serializers.ValidationError({"uploaded_by_id": "User does not belong to this tenant."})
@@ -2437,7 +2371,7 @@ class DocumentSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"uploaded_by_id": "Invalid user ID."})
         if "updated_by_id" in data:
             try:
-                user = CustomUser.objects.get(id=data["updated_by_id"])
+                user = CustomUser.objects.get(id=int(data["updated_by_id"]))
                 user_tenant_uuid = str(Tenant.objects.get(id=user.tenant_id).unique_id)
                 if user_tenant_uuid != str(tenant_id):
                     raise serializers.ValidationError({"updated_by_id": "User does not belong to this tenant."})
@@ -2452,8 +2386,9 @@ class DocumentSerializer(serializers.ModelSerializer):
                 user = None
                 if 'user_id' in perm_data and perm_data['user_id']:
                     try:
-                        user = CustomUser.objects.get(id=perm_data['user_id'])
-                    except CustomUser.DoesNotExist:
+                        user_id = int(perm_data['user_id'])
+                        user = CustomUser.objects.get(id=user_id)
+                    except (CustomUser.DoesNotExist, ValueError):
                         raise serializers.ValidationError({"permissions_write": f"Invalid user ID: {perm_data['user_id']}"})
                 elif 'email' in perm_data and perm_data['email']:
                     try:
@@ -2474,8 +2409,9 @@ class DocumentSerializer(serializers.ModelSerializer):
                 user = None
                 if 'user_id' in perm_data and perm_data['user_id']:
                     try:
-                        user = CustomUser.objects.get(id=perm_data['user_id'])
-                    except CustomUser.DoesNotExist:
+                        user_id = int(perm_data['user_id'])
+                        user = CustomUser.objects.get(id=user_id)
+                    except (CustomUser.DoesNotExist, ValueError):
                         raise serializers.ValidationError({"permissions_write": f"Invalid user ID: {perm_data['user_id']}"})
                 elif 'email' in perm_data and perm_data['email']:
                     try:
@@ -2511,7 +2447,9 @@ class DocumentSerializer(serializers.ModelSerializer):
         permission_action = validated_data.pop("permission_action", "add")
         file = validated_data.pop("file", None)
         current_user = get_user_data_from_jwt(self.context["request"])
-        validated_data["tenant_id"] = str(get_tenant_id_from_jwt(self.context["request"]))
+        tenant_unique_id = get_tenant_id_from_jwt(self.context["request"])
+        tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+        validated_data["tenant_id"] = str(tenant.id)
         validated_data["uploaded_by_id"] = str(current_user["id"])
         validated_data["updated_by_id"] = str(current_user["id"])
         validated_data["last_updated_by_id"] = str(current_user["id"])
@@ -2531,7 +2469,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             logger.info(f"Document file uploaded: {url}")
 
         document = super().create(validated_data)
-        tenant_id = validated_data["tenant_id"]
+        tenant_id = str(tenant.unique_id)
         if file:
             DocumentVersion.objects.create(
                 document=document,
@@ -2711,7 +2649,11 @@ class DocumentSerializer(serializers.ModelSerializer):
         current_user = get_user_data_from_jwt(self.context["request"])
         validated_data["updated_by_id"] = str(current_user["id"])
         instance.last_updated_by_id = str(current_user["id"])
-        tenant_id = instance.tenant_id
+        # Get the tenant from the instance's tenant_id (id string)
+        tenant = Tenant.objects.get(id=int(instance.tenant_id))
+        tenant_id = str(tenant.id)
+        # Update instance tenant_id to id string for consistency
+        instance.tenant_id = str(tenant.id)
 
         with transaction.atomic():
             # Store the old file info BEFORE updating
@@ -2938,36 +2880,7 @@ class UserProfileMinimalSerializer(serializers.ModelSerializer):
     #     return get_last_updated_by(self, obj)
 
 
-# class CustomUserMinimalSerializer(serializers.ModelSerializer):
-#     profile = UserProfileMinimalSerializer(read_only=True)
-#     # last_updated_by = serializers.SerializerMethodField()
 
-#     class Meta:
-#         model = CustomUser
-#         fields = [
-#             "id",
-#             "email",
-#             "username",
-#             "first_name",
-#             "last_name",
-#             "role",
-#             "job_role",
-#             "tenant",
-#             "branch",
-#             "status",
-#             "is_locked",
-#             "has_accepted_terms",
-#             "profile",
-#             # "last_updated_by_id",
-#             # "last_updated_by",
-#         ]
-#         # read_only_fields = ["last_updated_by", "last_updated_by_id"]
-
-#     # def get_last_updated_by(self, obj):
-#     #     return get_last_updated_by(self, obj)
-
-
-# users/serializers.py
 
 class CustomUserMinimalSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
