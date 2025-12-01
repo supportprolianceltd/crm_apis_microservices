@@ -13,10 +13,18 @@ export function createTaskRoutes(controller: TaskController) {
   // Assign a carer to an existing visit (visit-level assignment)
   // Place visit routes before the generic '/:taskId' route so '/visits' is not captured as a taskId.
   router.post('/visits/:visitId/assign', (req, res) => controller.assignCarerToVisit(req, res));
+  // Batch assign multiple carers to a visit
+  router.post('/visits/:visitId/assign-batch', (req, res) => controller.assignCarersToVisit(req, res));
+
+  // Get visit logs (client_visit_logs)
+  router.get('/visits/:visitId/logs', (req, res) => controller.getVisitLogs(req, res));
 
   // Clock in / clock out on a visit
   router.post('/visits/:visitId/clockin', (req, res) => controller.clockInVisit(req, res));
   router.post('/visits/:visitId/clockout', (req, res) => controller.clockOutVisit(req, res));
+
+  // Update a visit (partial updates) - use PATCH
+  router.patch('/visits/:visitId', (req, res) => controller.updateVisit(req, res));
 
   // List all visits for the tenant (supports pagination and optional carerId filter)
   // Get a single visit by id

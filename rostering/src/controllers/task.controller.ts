@@ -19,6 +19,71 @@ export class TaskController {
     }
   }
 
+  // Patch a visit (partial update) - supports updating careType with required switch reason/comment
+  public async updateVisit(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId ?? (req.body && req.body.tenantId) ?? (req.query && req.query.tenantId);
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const visitId = req.params.visitId;
+      if (!visitId) return res.status(400).json({ error: 'visitId required in path' });
+
+      const payload = req.body || {};
+
+      const existing = await (this.prisma as any).carerVisit.findUnique({ where: { id: visitId } });
+      if (!existing) return res.status(404).json({ error: 'Visit not found' });
+      if (existing.tenantId !== tenantId.toString()) return res.status(403).json({ error: 'Access denied to this visit' });
+
+      const updateData: any = {};
+
+      // Only allow updating careType, startDate, endDate for now
+      if (payload.startDate !== undefined) updateData.startDate = this.toDateOrNull(payload.startDate);
+      if (payload.endDate !== undefined) updateData.endDate = this.toDateOrNull(payload.endDate);
+
+      // Handle careType change with validation for switchReason/switchComment
+      if (payload.careType !== undefined) {
+        const newCareType = payload.careType as string | null;
+        const oldCareType = existing.careType as string | null;
+        if (newCareType !== oldCareType) {
+          // require switchReason and switchComment
+          const switchReason = payload.switchReason as string | undefined;
+          const switchComment = payload.switchComment as string | undefined;
+          if (!switchReason || typeof switchReason !== 'string') {
+            return res.status(400).json({ error: 'switchReason is required when changing careType' });
+          }
+          if (!switchComment || typeof switchComment !== 'string') {
+            return res.status(400).json({ error: 'switchComment is required when changing careType' });
+          }
+          updateData.careType = newCareType;
+          updateData.switchReason = switchReason;
+          updateData.switchComment = switchComment;
+        }
+      }
+
+      if (Object.keys(updateData).length === 0) return res.status(400).json({ error: 'No updatable fields provided' });
+
+      const updated = await (this.prisma as any).carerVisit.update({ where: { id: visitId }, data: updateData });
+
+      // If careType was changed, write a ClientVisitLog entry
+      if (payload.careType !== undefined && updated.careType !== existing.careType) {
+        try {
+          const performer = (req.user as any)?.id ?? (req.user as any)?.carerId ?? req.body?.performedById ?? 'system';
+          await (this.prisma as any).clientVisitLog.create({ data: {
+            tenantId: tenantId.toString(), visitId, action: 'CARETYPE_CHANGED', performedById: performer,
+            details: JSON.stringify({ from: existing.careType, to: updated.careType, switchReason: updated.switchReason, switchComment: updated.switchComment })
+          }});
+        } catch (e) {
+          console.error('Failed to write client visit log (caretype change)', e);
+        }
+      }
+
+      return res.json(updated);
+    } catch (error: any) {
+      console.error('updateVisit error', error);
+      return res.status(500).json({ error: 'Failed to update visit', details: error?.message });
+    }
+  }
+
   // Valid table names that tasks can be related to
   private validRelatedTables = [
     "RiskAssessment",
@@ -550,6 +615,7 @@ export class TaskController {
             tasks: {
               include: { carePlan: { select: { id: true, clientId: true, title: true } } },
             },
+            assignees: true,
           },
           orderBy: { startDate: 'asc' },
           skip,
@@ -722,6 +788,7 @@ export class TaskController {
               carePlan: { select: { id: true, clientId: true, title: true } },
             },
           },
+          assignees: true,
         },
         orderBy: { createdAt: "desc" },
       });
@@ -832,6 +899,7 @@ export class TaskController {
         where: { id: visitId },
         include: {
           tasks: { include: { carePlan: { select: { id: true, clientId: true, title: true } } } },
+          assignees: true,
         },
       });
 
@@ -1061,7 +1129,30 @@ export class TaskController {
           include: { carePlan: { select: { id: true, clientId: true, title: true } } },
         });
 
+        // If task was marked completed during this update, write a visit log for the related visit
+        try {
+          if (payload.status === 'COMPLETED' && existingTask.status !== 'COMPLETED' && attached.carerVisitId) {
+            const performer = (req.user as any)?.id ?? (req.user as any)?.carerId ?? req.body?.performedById ?? 'system';
+            await (this.prisma as any).clientVisitLog.create({ data: {
+              tenantId: tenantId.toString(), visitId: attached.carerVisitId, action: 'TASK_COMPLETED', performedById: performer, details: JSON.stringify({ taskId: attached.id })
+            }});
+          }
+        } catch (e) {
+          console.error('Failed to write client visit log (task completed)', e);
+        }
+
         return res.json(attached);
+      }
+
+      try {
+        if (payload.status === 'COMPLETED' && existingTask.status !== 'COMPLETED' && updated.carerVisitId) {
+          const performer = (req.user as any)?.id ?? (req.user as any)?.carerId ?? req.body?.performedById ?? 'system';
+          await (this.prisma as any).clientVisitLog.create({ data: {
+            tenantId: tenantId.toString(), visitId: updated.carerVisitId, action: 'TASK_COMPLETED', performedById: performer, details: JSON.stringify({ taskId: updated.id })
+          }});
+        }
+      } catch (e) {
+        console.error('Failed to write client visit log (task completed)', e);
       }
 
       return res.json(updated);
@@ -1389,6 +1480,112 @@ export class TaskController {
     }
   }
 
+  // Assign multiple carers to an existing CarerVisit in one request
+  // Body: { carerIds: string[], propagate?: boolean }
+  public async assignCarersToVisit(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId ?? (req.body && req.body.tenantId);
+      if (!tenantId)
+        return res
+          .status(403)
+          .json({ error: "tenantId missing from auth context" });
+
+      const visitId = req.params.visitId;
+      if (!visitId)
+        return res.status(400).json({ error: "visitId required in path" });
+
+      const { carerIds, propagate } = req.body || {};
+      if (!Array.isArray(carerIds) || carerIds.some((c: any) => typeof c !== 'string')) {
+        return res.status(400).json({ error: 'carerIds must be an array of strings' });
+      }
+
+      const uniqueCarerIds = Array.from(new Set(carerIds));
+      if (uniqueCarerIds.length === 0) return res.status(400).json({ error: 'carerIds cannot be empty' });
+
+      const shouldPropagate = propagate === undefined ? true : !!propagate;
+
+      // Fetch the visit and verify ownership
+      const existingVisit = await this.prisma.carerVisit.findUnique({ where: { id: visitId }, select: { id: true, tenantId: true, carerId: true, careType: true, carePlanId: true } });
+      if (!existingVisit) return res.status(404).json({ error: 'Visit not found' });
+      if (existingVisit.tenantId !== tenantId.toString()) return res.status(403).json({ error: 'Access denied to this visit' });
+
+      try {
+        const result = await this.prisma.$transaction(async (prismaTx) => {
+          const visit = await prismaTx.carerVisit.findUnique({ where: { id: visitId } });
+          if (!visit) throw new Error('Visit not found in transaction');
+
+          // Determine effective careType
+          let effectiveCareType: string | null = null;
+          if (visit.careType) effectiveCareType = visit.careType;
+          else if (visit.carePlanId) {
+            try {
+              const cp = await prismaTx.carePlan.findUnique({ where: { id: visit.carePlanId }, include: { careRequirements: true } });
+              if (cp && cp.careRequirements && cp.careRequirements.careType) effectiveCareType = cp.careRequirements.careType;
+            } catch (e) {
+              // ignore
+            }
+          }
+
+          const cap = this.careTypeCapacity(effectiveCareType);
+
+          // Find already assigned carers among requested list
+          const alreadyAssignedRecords = await prismaTx.carerVisitAssignee.findMany({ where: { carerVisitId: visitId, carerId: { in: uniqueCarerIds } }, select: { carerId: true } });
+          const alreadyLinkedIds = alreadyAssignedRecords.map((r: any) => r.carerId);
+
+          const newIds = uniqueCarerIds.filter((id) => !alreadyLinkedIds.includes(id));
+
+          // If cap is numeric, ensure adding these doesn't exceed capacity
+          if (typeof cap === 'number') {
+            const existingCount = await prismaTx.carerVisitAssignee.count({ where: { tenantId: tenantId.toString(), carerVisitId: visitId } });
+            if (existingCount + newIds.length > cap) {
+              throw new Error(`Visit assignment limit reached for careType=${effectiveCareType}. Available slots=${Math.max(0, cap - existingCount)}`);
+            }
+          }
+
+          // Create new assignees
+          const createData = newIds.map((cid) => ({ tenantId: tenantId.toString(), carerVisitId: visitId, carerId: cid }));
+          if (createData.length > 0) {
+            try {
+              await prismaTx.carerVisitAssignee.createMany({ data: createData, skipDuplicates: true });
+            } catch (e) {
+              // fallback to individual creates if createMany not supported
+              for (const d of createData) {
+                try { await prismaTx.carerVisitAssignee.create({ data: d }); } catch (err) { /* ignore duplicates */ }
+              }
+            }
+          }
+
+          // Update denormalized carerId on visit if previously null and now has exactly one assignee
+          const totalAfter = await prismaTx.carerVisitAssignee.count({ where: { tenantId: tenantId.toString(), carerVisitId: visitId } });
+          let updatedVisit: any = visit;
+          if (!visit.carerId && totalAfter === 1) {
+            // choose the single assignee as carerId
+            const single = (await prismaTx.carerVisitAssignee.findFirst({ where: { carerVisitId: visitId } })) as any;
+            if (single) {
+              updatedVisit = await prismaTx.carerVisit.update({ where: { id: visitId }, data: { carerId: single.carerId, assignedAt: new Date() } });
+            }
+          }
+
+          let tasksUpdated = 0;
+          if (shouldPropagate) {
+            const upd = await prismaTx.task.updateMany({ where: { carerVisitId: visitId }, data: { carerId: updatedVisit.carerId || undefined } });
+            tasksUpdated = upd.count || 0;
+          }
+
+          return { createdIds: newIds, alreadyLinkedIds, totalAfter, updatedVisit, tasksUpdated };
+        });
+
+        return res.json(result);
+      } catch (err: any) {
+        console.error('assignCarersToVisit transaction error', err);
+        return res.status(400).json({ error: err?.message || 'Failed to assign carers to visit' });
+      }
+    } catch (error: any) {
+      console.error('assignCarersToVisit error', error);
+      return res.status(500).json({ error: 'Failed to assign carers to visit', details: error?.message });
+    }
+  }
+
   // Clock in to a visit: set status to STARTED and record clockInAt timestamp
   public async clockInVisit(req: Request, res: Response) {
     try {
@@ -1398,21 +1595,57 @@ export class TaskController {
       const visitId = req.params.visitId;
       if (!visitId) return res.status(400).json({ error: 'visitId required in path' });
 
-      const existing = await (this.prisma as any).carerVisit.findUnique({ where: { id: visitId } });
+      const existing = await (this.prisma as any).carerVisit.findUnique({ where: { id: visitId }, include: { assignees: true } });
       if (!existing) return res.status(404).json({ error: 'Visit not found' });
       if (existing.tenantId !== tenantId.toString()) return res.status(403).json({ error: 'Access denied to this visit' });
 
-      // If caller is a carer (auth provides carerId) and visit has a carer assigned, ensure they match
-  const callerCarerId = (req.user as any)?.carerId as string | undefined;
-      if (callerCarerId && existing.carerId && existing.carerId !== callerCarerId) {
-        return res.status(403).json({ error: 'You are not assigned to this visit' });
+      // Enforce that only a carer who is listed as an assignee may clock in,
+      // unless an admin requests an override via body.adminOverride=true.
+      const callerCarerId = (req.user as any)?.carerId as string | undefined;
+      const callerIsAdmin = !!((req.user as any)?.isAdmin || (req.user as any)?.admin || ((req.user as any)?.roles && Array.isArray((req.user as any).roles) && (req.user as any).roles.includes('admin')));
+      const adminOverrideRequested = !!req.body?.adminOverride;
+
+      const assigneeIds = Array.isArray(existing.assignees) ? existing.assignees.map((a: any) => a.carerId) : [];
+
+      if (adminOverrideRequested && callerIsAdmin) {
+        // admin override allowed
+      } else {
+        if (!callerCarerId) return res.status(403).json({ error: 'Caller must be a carer to clock in' });
+        if (assigneeIds.length > 0) {
+          if (!assigneeIds.includes(callerCarerId)) {
+            return res.status(403).json({ error: 'You are not assigned to this visit' });
+          }
+        } else {
+          // Fallback to denormalized carerId if no assignees relation present
+          if (existing.carerId) {
+            if (existing.carerId !== callerCarerId) {
+              return res.status(403).json({ error: 'You are not assigned to this visit' });
+            }
+          } else {
+            return res.status(403).json({ error: 'No assignees on this visit' });
+          }
+        }
       }
 
       const updated = await (this.prisma as any).carerVisit.update({
         where: { id: visitId },
         data: { status: 'IN_PROGRESS', clockInAt: new Date() },
-        include: { tasks: { include: { carePlan: { select: { id: true, clientId: true, title: true } } } } },
+        include: { tasks: { include: { carePlan: { select: { id: true, clientId: true, title: true } } } }, assignees: true },
       });
+
+      try {
+        const performer = (req.user as any)?.id ?? (req.user as any)?.carerId ?? req.body?.performedById ?? 'system';
+        const logDetails: any = { clockInAt: updated.clockInAt };
+        if (adminOverrideRequested && callerIsAdmin) {
+          logDetails.adminOverride = true;
+          logDetails.adminId = (req.user as any)?.id ?? (req.user as any)?.email ?? 'admin';
+        }
+        await (this.prisma as any).clientVisitLog.create({ data: {
+          tenantId: tenantId.toString(), visitId, action: 'CLOCK_IN', performedById: performer, details: JSON.stringify(logDetails)
+        }});
+      } catch (e) {
+        console.error('Failed to write client visit log (clock in)', e);
+      }
 
       return res.json(updated);
     } catch (error: any) {
@@ -1432,26 +1665,99 @@ export class TaskController {
 
       const note = req.body?.note ?? req.body?.clockOutNote ?? null;
 
-      const existing = await (this.prisma as any).carerVisit.findUnique({ where: { id: visitId } });
+      const existing = await (this.prisma as any).carerVisit.findUnique({ where: { id: visitId }, include: { assignees: true } });
       if (!existing) return res.status(404).json({ error: 'Visit not found' });
       if (existing.tenantId !== tenantId.toString()) return res.status(403).json({ error: 'Access denied to this visit' });
 
-      // If caller is a carer (auth provides carerId) and visit has a carer assigned, ensure they match
-  const callerCarerId = (req.user as any)?.carerId as string | undefined;
-      if (callerCarerId && existing.carerId && existing.carerId !== callerCarerId) {
-        return res.status(403).json({ error: 'You are not assigned to this visit' });
+      // Enforce that only a carer who is listed as an assignee may clock out,
+      // unless an admin requests an override via body.adminOverride=true.
+      const callerCarerId = (req.user as any)?.carerId as string | undefined;
+      const callerIsAdmin = !!((req.user as any)?.isAdmin || (req.user as any)?.admin || ((req.user as any)?.roles && Array.isArray((req.user as any).roles) && (req.user as any).roles.includes('admin')));
+      const adminOverrideRequested = !!req.body?.adminOverride;
+
+      const assigneeIds = Array.isArray(existing.assignees) ? existing.assignees.map((a: any) => a.carerId) : [];
+
+      if (adminOverrideRequested && callerIsAdmin) {
+        // admin override allowed
+      } else {
+        if (!callerCarerId) return res.status(403).json({ error: 'Caller must be a carer to clock out' });
+        if (assigneeIds.length > 0) {
+          if (!assigneeIds.includes(callerCarerId)) {
+            return res.status(403).json({ error: 'You are not assigned to this visit' });
+          }
+        } else {
+          // Fallback to denormalized carerId if no assignees relation present
+          if (existing.carerId) {
+            if (existing.carerId !== callerCarerId) {
+              return res.status(403).json({ error: 'You are not assigned to this visit' });
+            }
+          } else {
+            return res.status(403).json({ error: 'No assignees on this visit' });
+          }
+        }
       }
 
       const updated = await (this.prisma as any).carerVisit.update({
         where: { id: visitId },
         data: { status: 'COMPLETED', clockOutAt: new Date(), clockOutNote: note ?? undefined },
-        include: { tasks: { include: { carePlan: { select: { id: true, clientId: true, title: true } } } } },
+        include: { tasks: { include: { carePlan: { select: { id: true, clientId: true, title: true } } } }, assignees: true },
       });
+
+      try {
+        const performer = (req.user as any)?.id ?? (req.user as any)?.carerId ?? req.body?.performedById ?? 'system';
+        const logDetails: any = { clockOutAt: updated.clockOutAt, note };
+        if (adminOverrideRequested && callerIsAdmin) {
+          logDetails.adminOverride = true;
+          logDetails.adminId = (req.user as any)?.id ?? (req.user as any)?.email ?? 'admin';
+        }
+        await (this.prisma as any).clientVisitLog.create({ data: {
+          tenantId: tenantId.toString(), visitId, action: 'CLOCK_OUT', performedById: performer, details: JSON.stringify(logDetails)
+        }});
+        await (this.prisma as any).clientVisitLog.create({ data: {
+          tenantId: tenantId.toString(), visitId, action: 'VISIT_COMPLETED', performedById: performer, details: JSON.stringify({ completedAt: updated.clockOutAt, adminOverride: logDetails.adminOverride ?? false })
+        }});
+      } catch (e) {
+        console.error('Failed to write client visit log (clock out)', e);
+      }
 
       return res.json(updated);
     } catch (error: any) {
       console.error('clockOutVisit error', error);
       return res.status(500).json({ error: 'Failed to clock out of visit', details: error?.message });
+    }
+  }
+
+  // Get logs for a specific visit (client_visit_logs)
+  public async getVisitLogs(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId ?? (req.query && req.query.tenantId) ?? (req.body && req.body.tenantId);
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const visitId = req.params.visitId;
+      if (!visitId) return res.status(400).json({ error: 'visitId required in path' });
+
+      // Optional filters
+      const action = req.query.action as string | undefined;
+      const since = req.query.since as string | undefined;
+      const limit = Math.min(Math.max(parseInt((req.query.limit as string) || '100', 10), 1), 1000);
+
+      const where: any = { tenantId: tenantId.toString(), visitId };
+      if (action) where.action = action;
+      if (since) {
+        const d = new Date(since);
+        if (!isNaN(d.getTime())) where.createdAt = { gte: d };
+      }
+
+      const logs = await (this.prisma as any).clientVisitLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+      });
+
+      return res.json(logs);
+    } catch (error: any) {
+      console.error('getVisitLogs error', error);
+      return res.status(500).json({ error: 'Failed to fetch visit logs', details: error?.message });
     }
   }
 
@@ -1526,6 +1832,7 @@ export class TaskController {
                 carePlan: { select: { id: true, clientId: true, title: true } },
               },
             },
+            assignees: true,
           },
           orderBy: { createdAt: "desc" },
           skip,
