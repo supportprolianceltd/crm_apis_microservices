@@ -40,7 +40,7 @@ if IS_PRODUCTION:
     FRONTEND_URLS = [
         "https://e3os.co.uk",
         "https://crm-frontend-react.vercel.app",
-        "https://loan-management-theta.vercel.app",
+        "https://loan-management-rho.vercel.app",
         "https://task-manager-two-plum.vercel.app",
         "https://technicalglobaladministrator.e3os.co.uk",
         "https://dev.e3os.co.uk",
@@ -51,7 +51,7 @@ elif IS_STAGING:
     FRONTEND_URLS = [
         "https://e3os.co.uk",
         "https://crm-frontend-react.vercel.app",
-       "https://loan-management-theta.vercel.app",
+       "https://loan-management-rho.vercel.app",
        "https://task-manager-two-plum.vercel.app",
         "https://technicalglobaladministrator.e3os.co.uk",
         "https://dev.e3os.co.uk",
@@ -60,6 +60,7 @@ elif IS_STAGING:
     DEFAULT_FRONTEND_URL = "https://crm-frontend-react.vercel.app"
 else:  # development
     FRONTEND_URLS = [
+        "https://dev.e3os.co.uk",
         "http://localhost:5173",
         "http://localhost:4000",
         "http://127.0.0.1:5173",
@@ -129,6 +130,7 @@ if IS_DEVELOPMENT:
         "http://localhost:3000",
         "http://localhost:4000",
         "http://127.0.0.1:3000",
+        "https://dev.e3os.co.uk",
     ])
 
 # Cookie settings - FIXED for development
@@ -453,6 +455,8 @@ CELERY_BEAT_SCHEDULE = {
 
 # #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 # # ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
+
+# corgi spaceship banana notebook
 
 # PASSWORD: Kd8k{tq|5?mQeB Health Care, Professional Services
 # #USERNAME: aekene-onwon8027

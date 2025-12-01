@@ -992,9 +992,10 @@ class EmploymentDetail(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='employment_details')
     job_role = models.CharField(max_length=255)
     hierarchy = models.CharField(max_length=100)
-    department = models.CharField(max_length=100)
+    line_manager = models.CharField(max_length=255, blank=True, null=True)
+    department = models.CharField(max_length=100, blank=True, null=True)
     work_email = models.EmailField()
-    employment_type = models.CharField(max_length=50, choices=[('Full Time', 'Full Time'), ('Part Time', 'Part Time'), ('Contract', 'Contract')])
+    employment_type = models.CharField(max_length=50, choices=[('Full Time', 'Full Time'), ('Part Time', 'Part Time'), ('Contract', 'Contract')], blank=True, null=True)
 
     employment_start_date = models.DateTimeField(default=now)
     employment_end_date = models.DateTimeField(null=True, blank=True)
@@ -1002,7 +1003,7 @@ class EmploymentDetail(models.Model):
 
     line_manager = models.CharField(max_length=255, null=True, blank=True)
     currency = models.CharField(max_length=100, null=True, blank=True)
-    salary = models.DecimalField(max_digits=20, decimal_places=2)
+    salary = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     working_days = models.CharField(max_length=100, null=True, blank=True)
     maximum_working_hours = models.PositiveIntegerField(null=True, blank=True)
     last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)

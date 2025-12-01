@@ -10,7 +10,7 @@ import urllib.parse
 from django_tenants.utils import get_public_schema_name
 from collections import defaultdict
 from datetime import datetime, timedelta
-from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+from urllib.parse import  urlencode, urlparse
 from django.db.models import Count, Q, F, ExpressionWrapper, FloatField
 from django.db.models.functions import TruncDate, TruncHour
 from django.utils import timezone
@@ -87,7 +87,10 @@ from .models import (
 )
 
 # Investments App - Models
-from investments.models import InvestmentPolicy
+from investments.models import (
+    InvestmentPolicy, LedgerEntry, WithdrawalRequest,
+    TaxRecord, TaxCertificate
+)
 
 # Local App - Serializers
 from .serializers import (
@@ -896,6 +899,14 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserImpersonateSerializer
         return CustomUserSerializer  # Full for retrieve
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = self.perform_create(serializer)
+        serializer = self.get_serializer(user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def perform_create(self, serializer):
         tenant = self.request.user.tenant
         user = self.request.user
@@ -963,6 +974,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}: {str(e)}")
             except Exception as e:
                 logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
+
+            return user_obj
 
     def update(self, request, *args, **kwargs):
         tenant = request.user.tenant
@@ -1314,6 +1327,8 @@ class UserViewSet(viewsets.ModelViewSet):
         }
         status_code = status.HTTP_201_CREATED if results else status.HTTP_400_BAD_REQUEST
         return Response(response_data, status=status_code)
+
+
     
 class PublicRegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -1366,14 +1381,6 @@ class PublicRegisterView(generics.CreateAPIView):
                 
                 def is_anonymous(self):
                     return False
-
-            # Create a modified request object
-            # modified_request = type('Request', (), {
-            #     'user': SimpleUser(),
-            #     'data': request.data,
-            #     'FILES': request.FILES,
-            #     'META': request.META
-            # })()
 
             modified_request = type('Request', (), {
                 'user': SimpleUser(),
@@ -3577,13 +3584,16 @@ class GroupViewSet(viewsets.ModelViewSet):
 class DocumentListCreateView(APIView):
     def get(self, request):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            documents = Document.objects.filter(tenant_id=tenant_uuid)
-            serializer = DocumentSerializer(documents, many=True, context={"request": request})
-            logger.info(f"Retrieved {documents.count()} documents for tenant {tenant_uuid}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                documents = Document.objects.filter(tenant_id=tenant_id)
+                serializer = DocumentSerializer(documents, many=True, context={"request": request})
+                logger.info(f"Retrieved {documents.count()} documents for tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Error listing documents for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error listing documents for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
@@ -3592,7 +3602,7 @@ class DocumentListCreateView(APIView):
             logger.info(f"{request.data}")
             if serializer.is_valid():
                 document = serializer.save()
-                logger.info(f"Document created: {document.title} for tenant {serializer.validated_data['tenant_id']}")
+                logger.info(f"Document created: {document.title} for tenant {document.tenant_id}")
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             logger.error(f"Validation error: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -3607,48 +3617,57 @@ class DocumentDetailView(APIView):
 
     def get(self, request, id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=id, tenant_id=tenant_uuid)
-            serializer = DocumentSerializer(document, context={"request": request})
-            logger.info(f"Retrieved document {document.title} for tenant {tenant_uuid}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                document = Document.objects.get(id=id, tenant_id=tenant_id)
+                serializer = DocumentSerializer(document, context={"request": request})
+                logger.info(f"Retrieved document {document.title} for tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error retrieving document for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error retrieving document for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def patch(self, request, id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=id, tenant_id=tenant_uuid)
-            serializer = DocumentSerializer(document, data=request.data, partial=True, context={"request": request})
-            if serializer.is_valid():
-                serializer.save()
-                logger.info(f"Document updated: {document.title} for tenant {tenant_uuid}, version {document.version}")
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            logger.error(f"Validation error for tenant {tenant_uuid}: {serializer.errors}")
-            return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                document = Document.objects.get(id=id, tenant_id=tenant_id)
+                serializer = DocumentSerializer(document, data=request.data, partial=True, context={"request": request})
+                if serializer.is_valid():
+                    serializer.save()
+                    logger.info(f"Document updated: {document.title} for tenant {tenant_id}, version {document.version}")
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                logger.error(f"Validation error for tenant {tenant_unique_id}: {serializer.errors}")
+                return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error updating document for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error updating document for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=id, tenant_id=tenant_uuid)
-            document.delete()
-            logger.info(f"Document deleted: {document.title} for tenant {tenant_uuid}")
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                document = Document.objects.get(id=id, tenant_id=tenant_id)
+                document.delete()
+                logger.info(f"Document deleted: {document.title} for tenant {tenant_id}")
+                return Response(status=status.HTTP_204_NO_CONTENT)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error deleting document for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error deleting document for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -3658,17 +3677,20 @@ class DocumentVersionListView(APIView):
 
     def get(self, request, document_id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=document_id, tenant_id=tenant_uuid)
-            versions = DocumentVersion.objects.filter(document=document)
-            serializer = DocumentVersionSerializer(versions, many=True, context={"request": request})
-            logger.info(f"Retrieved {versions.count()} versions for document {document.title} in tenant {tenant_uuid}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                document = Document.objects.get(id=document_id, tenant_id=tenant_id)
+                versions = DocumentVersion.objects.filter(document=document)
+                serializer = DocumentVersionSerializer(versions, many=True, context={"request": request})
+                logger.info(f"Retrieved {versions.count()} versions for document {document.title} in tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error retrieving versions for document {document_id} in tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error retrieving versions for document {document_id} in tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class DocumentAcknowledgeView(APIView):
@@ -3676,32 +3698,35 @@ class DocumentAcknowledgeView(APIView):
 
     def post(self, request, document_id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
             current_user = get_user_data_from_jwt(request)
-            document = Document.objects.get(id=document_id, tenant_id=tenant_uuid)
-            if DocumentAcknowledgment.objects.filter(document=document, user_id=current_user['id'], tenant_id=tenant_uuid).exists():
-                return Response(
-                    {"detail": "You have already acknowledged this document"}, status=status.HTTP_400_BAD_REQUEST
+            with tenant_context(tenant):
+                document = Document.objects.get(id=document_id, tenant_id=tenant_id)
+                if DocumentAcknowledgment.objects.filter(document=document, user_id=current_user['id'], tenant_id=tenant_id).exists():
+                    return Response(
+                        {"detail": "You have already acknowledged this document"}, status=status.HTTP_400_BAD_REQUEST
+                    )
+                acknowledgment = DocumentAcknowledgment.objects.create(
+                    document=document,
+                    user_id=str(current_user['id']),
+                    email=current_user['email'],
+                    first_name=current_user['first_name'],
+                    last_name=current_user['last_name'],
+                    role=current_user['job_role'],
+                    tenant_id=tenant_id,
                 )
-            acknowledgment = DocumentAcknowledgment.objects.create(
-                document=document,
-                user_id=str(current_user['id']),
-                email=current_user['email'],
-                first_name=current_user['first_name'],
-                last_name=current_user['last_name'],
-                role=current_user['job_role'],
-                tenant_id=tenant_uuid,
-            )
-            serializer = DocumentAcknowledgmentSerializer(acknowledgment)
-            logger.info(
-                f"Document {document.title} acknowledged by {current_user['email']} in tenant {tenant_uuid}"
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                serializer = DocumentAcknowledgmentSerializer(acknowledgment)
+                logger.info(
+                    f"Document {document.title} acknowledged by {current_user['email']} in tenant {tenant_id}"
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error acknowledging document for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error acknowledging document for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class DocumentAcknowledgmentsListView(APIView):
@@ -3709,18 +3734,23 @@ class DocumentAcknowledgmentsListView(APIView):
 
     def get(self, request, document_id):
         try:
-            tenant_uuid = get_tenant_id_from_jwt(request)
-            document = Document.objects.get(id=document_id, tenant_id=tenant_uuid)
-            acknowledgments = DocumentAcknowledgment.objects.filter(document=document, tenant_id=tenant_uuid).order_by('-acknowledged_at')
-            serializer = DocumentAcknowledgmentSerializer(acknowledgments, many=True, context={"request": request})
-            logger.info(f"Retrieved {acknowledgments.count()} acknowledgments for document {document.title} in tenant {tenant_uuid}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            tenant_unique_id = get_tenant_id_from_jwt(request)
+            tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+            tenant_id = str(tenant.id)
+            with tenant_context(tenant):
+                document = Document.objects.get(id=document_id, tenant_id=tenant_id)
+                acknowledgments = DocumentAcknowledgment.objects.filter(document=document, tenant_id=tenant_id).order_by('-acknowledged_at')
+                serializer = DocumentAcknowledgmentSerializer(acknowledgments, many=True, context={"request": request})
+                logger.info(f"Retrieved {acknowledgments.count()} acknowledgments for document {document.title} in tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
         except Document.DoesNotExist:
-            logger.error(f"Document not found for tenant {tenant_uuid}")
+            logger.error(f"Document not found for tenant {tenant_unique_id}")
             return Response({"detail": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error retrieving acknowledgments for document {document_id} in tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error retrieving acknowledgments for document {document_id} in tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 class UserDocumentAccessView(APIView):
@@ -3731,19 +3761,22 @@ class UserDocumentAccessView(APIView):
         if not user_identifier:
             return Response({"detail": "Either 'user_id' or 'email' query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        tenant_uuid = get_tenant_id_from_jwt(request)
+        tenant_unique_id = get_tenant_id_from_jwt(request)
+        tenant = Tenant.objects.get(unique_id=tenant_unique_id)
+        tenant_id = str(tenant.id)
         try:
-            if request.query_params.get('user_id'):
-                permissions = DocumentPermission.objects.filter(user_id=user_identifier, tenant_id=tenant_uuid).select_related('document')
-            else:
-                permissions = DocumentPermission.objects.filter(email=user_identifier, tenant_id=tenant_uuid).select_related('document')
-            serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})
-            if not permissions.exists():
-                return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
-            logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_uuid}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            with tenant_context(tenant):
+                if request.query_params.get('user_id'):
+                    permissions = DocumentPermission.objects.filter(user_id=user_identifier, tenant_id=tenant_id).select_related('document')
+                else:
+                    permissions = DocumentPermission.objects.filter(email=user_identifier, tenant_id=tenant_id).select_related('document')
+                serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})
+                if not permissions.exists():
+                    return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
+                logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Error retrieving user document access for tenant {tenant_uuid}: {str(e)}")
+            logger.error(f"Error retrieving user document access for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -3755,3 +3788,351 @@ class TransactionView(APIView):
             result = serializer.create(serializer.validated_data)
             return Response(result, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileUpdateSerializer(serializers.Serializer):
+    fullName = serializers.CharField(max_length=255, required=False)
+    residentialAddress = serializers.CharField(max_length=500, required=False)
+    homeAddress = serializers.CharField(max_length=500, required=False)
+    phoneNumber = serializers.CharField(max_length=20, required=False)
+    gender = serializers.ChoiceField(choices=['Male', 'Female', 'Other'], required=False)
+    nextOfKinName = serializers.CharField(max_length=255, required=False)
+    nextOfKinAddress = serializers.CharField(max_length=500, required=False)
+    nextOfKinPhone = serializers.CharField(max_length=20, required=False)
+    nextOfKinGender = serializers.ChoiceField(choices=['Male', 'Female', 'Other'], required=False)
+    referredBy = serializers.CharField(max_length=255, required=False)
+    disbursementBank = serializers.CharField(max_length=255, required=False)
+    accountName = serializers.CharField(max_length=255, required=False)
+    accountNumber = serializers.CharField(max_length=50, required=False)
+
+    def validate_phoneNumber(self, value):
+        import re
+        if value and not re.match(r'^\+?[\d\s\-\(\)]+$', value):
+            raise serializers.ValidationError("Invalid phone number format.")
+        return value
+
+    def validate_nextOfKinPhone(self, value):
+        import re
+        if value and not re.match(r'^\+?[\d\s\-\(\)]+$', value):
+            raise serializers.ValidationError("Invalid phone number format.")
+        return value
+
+    def validate_accountNumber(self, value):
+        if value and not value.isdigit():
+            raise serializers.ValidationError("Account number must contain only digits.")
+        return value
+
+
+class UserProfileDataView(APIView):
+    """
+    API endpoint for logged-in users to retrieve all their profile data and related information.
+    Returns comprehensive user data including profile, investment policies, withdrawals, etc.
+    Supports PATCH for updating user profile data.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """
+        Get comprehensive user data for the authenticated user.
+        """
+        user = request.user
+        tenant = user.tenant
+
+        try:
+            with tenant_context(tenant):
+                # Get user profile
+                try:
+                    user_profile = UserProfile.objects.select_related().get(user=user)
+                    profile_data = {
+                        'id': user_profile.id,
+                        'full_name': f"{user.first_name} {user.last_name}",
+                        'residential_address': f"{user_profile.street or ''}, {user_profile.city or ''}, {user_profile.state or ''}, {user_profile.country or ''}, {user_profile.zip_code or ''}",
+                        'home_address': f"{user_profile.street or ''}, {user_profile.city or ''}, {user_profile.state or ''}, {user_profile.country or ''}, {user_profile.zip_code or ''}",
+                        'phone_number': user_profile.work_phone or user_profile.personal_phone,
+                        'gender': user_profile.gender,
+                        'date_of_birth': user_profile.dob,
+                        'next_of_kin_name': user_profile.next_of_kin,
+                        'next_of_kin_address': user_profile.next_of_kin_address,
+                        'next_of_kin_phone': user_profile.next_of_kin_phone_number,
+                        'next_of_kin_gender': None,  # Not available in current model
+                        'referred_by': user_profile.assessor_name,  # Using assessor_name as referred_by
+                        'bank_name': user_profile.bank_name,
+                        'account_name': user_profile.account_name,
+                        'account_number': user_profile.account_number,
+                        'account_type': user_profile.account_type,
+                        'country_of_bank_account': user_profile.country_of_bank_account,
+                        'passport_url': user_profile.profile_image_url,  # Using profile image as passport
+                        'has_accepted_terms': user.has_accepted_terms,
+                        'is_locked': user.is_locked,
+                        'status': user.status,
+                        'is_active': user.is_active,
+                        'last_login': user.last_login,
+                        'date_joined': user.date_joined,
+                    }
+                except UserProfile.DoesNotExist:
+                    profile_data = {
+                        'message': 'Profile not found. Please complete your profile.',
+                        'has_profile': False
+                    }
+
+                # Get investment policies
+                investment_policies = InvestmentPolicy.objects.filter(user=user).select_related()
+                policies_data = []
+                for policy in investment_policies:
+                    # Calculate total balance as current_balance + roi_balance
+                    total_balance = policy.current_balance + policy.roi_balance
+                    policies_data.append({
+                        'id': policy.id,
+                        'policy_number': policy.policy_number,
+                        'unique_policy_id': policy.unique_policy_id,
+                        'principal_amount': str(policy.principal_amount),
+                        'current_balance': str(policy.current_balance),
+                        'roi_balance': str(policy.roi_balance),
+                        'total_balance': str(total_balance),
+                        'roi_rate': str(policy.roi_rate),
+                        'roi_frequency': policy.roi_frequency,
+                        'status': policy.status,
+                        'start_date': policy.start_date,
+                        'maturity_date': policy.maturity_date,
+                        'next_roi_date': policy.next_roi_date,
+                        'min_withdrawal_months': policy.min_withdrawal_months,
+                        'allow_partial_withdrawals': policy.allow_partial_withdrawals,
+                        'auto_rollover': policy.auto_rollover,
+                        'rollover_option': policy.rollover_option,
+                    })
+
+                # Get withdrawal requests
+                withdrawals = WithdrawalRequest.objects.filter(policy__user=user).select_related('policy')
+                withdrawals_data = []
+                for withdrawal in withdrawals:
+                    withdrawals_data.append({
+                        'id': withdrawal.id,
+                        'policy_number': withdrawal.policy.policy_number,
+                        'withdrawal_type': withdrawal.withdrawal_type,
+                        'amount_requested': str(withdrawal.amount_requested),
+                        'amount_processed': str(withdrawal.actual_amount) if withdrawal.actual_amount else None,
+                        'status': withdrawal.status,
+                        'request_date': withdrawal.request_date,
+                        'processed_date': withdrawal.processed_date,
+                        'disbursement_bank': withdrawal.disbursement_bank,
+                        'account_name': withdrawal.account_name,
+                        'account_number': withdrawal.account_number,
+                        'approved_by': withdrawal.approved_by.email if withdrawal.approved_by else None,
+                        'approved_date': withdrawal.approved_date,
+                    })
+
+                # Get recent ledger entries (last 50)
+                ledger_entries = LedgerEntry.objects.filter(
+                    policy__user=user
+                ).select_related('policy').order_by('-entry_date')[:50]
+
+                ledger_data = []
+                for entry in ledger_entries:
+                    try:
+                        entry_type_display = entry.get_entry_type_display()
+                    except AttributeError as e:
+                        entry_type_display = entry.entry_type
+                        logger.warning(f"Entry {entry.id} missing get_entry_type_display method: {e}, using entry_type: {entry_type_display}")
+                    ledger_data.append({
+                        'id': entry.id,
+                        'entry_date': entry.entry_date,
+                        'unique_reference': entry.unique_reference,
+                        'policy_number': entry.policy.policy_number,
+                        'description': entry.description,
+                        'entry_type': entry.entry_type,
+                        'entry_type_display': entry_type_display,
+                        'inflow': str(entry.inflow),
+                        'outflow': str(entry.outflow),
+                        'principal_balance': str(entry.principal_balance),
+                        'roi_balance': str(entry.roi_balance),
+                        'total_balance': str(entry.total_balance),
+                    })
+                                        
+                    # ledger_data.append({
+                    #     'id': entry.id,
+                    #     'entry_date': entry.entry_date,
+                    #     'unique_reference': entry.unique_reference,
+                    #     'policy_number': entry.policy.policy_number,
+                    #     'description': entry.description,
+                    #     'entry_type': entry.entry_type,
+                    #     'entry_type_display': entry.get_entry_type_display(),
+                    #     'inflow': str(entry.inflow),
+                    #     'outflow': str(entry.outflow),
+                    #     'principal_balance': str(entry.principal_balance),
+                    #     'roi_balance': str(entry.roi_balance),
+                    #     'total_balance': str(entry.total_balance),
+                    # })
+
+                # Get tax records
+                tax_records = TaxRecord.objects.filter(user=user).order_by('-calculation_date')[:20]
+                tax_data = []
+                for tax in tax_records:
+                    tax_data.append({
+                        'id': tax.id,
+                        'tax_type': tax.tax_type,
+                        'gross_amount': str(tax.gross_amount),
+                        'tax_rate': str(tax.tax_rate),
+                        'tax_amount': str(tax.tax_amount),
+                        'net_amount': str(tax.net_amount),
+                        'calculation_date': tax.calculation_date,
+                        'tax_year': tax.tax_year,
+                        'is_paid': tax.is_paid,
+                        'payment_date': tax.payment_date,
+                        'firs_reference': tax.firs_reference,
+                    })
+
+                # Get tax certificates
+                tax_certificates = TaxCertificate.objects.filter(user=user).order_by('-issue_date')[:10]
+                certificates_data = []
+                for cert in tax_certificates:
+                    certificates_data.append({
+                        'id': cert.id,
+                        'certificate_number': cert.certificate_number,
+                        'certificate_type': cert.certificate_type,
+                        'tax_year': cert.tax_year,
+                        'total_gross_income': str(cert.total_gross_income),
+                        'total_tax_deducted': str(cert.total_tax_deducted),
+                        'total_tax_paid': str(cert.total_tax_paid),
+                        'net_income_after_tax': str(cert.net_income_after_tax),
+                        'issue_date': cert.issue_date,
+                        'valid_until': cert.valid_until,
+                        'verification_code': cert.verification_code,
+                    })
+
+                # Get recent user activities (last 20)
+                user_activities = UserActivity.objects.filter(user=user).order_by('-timestamp')[:20]
+                activities_data = []
+                for activity in user_activities:
+                    activities_data.append({
+                        'id': activity.id,
+                        'action': activity.action,
+                        'details': activity.details,
+                        'timestamp': activity.timestamp,
+                        'ip_address': activity.ip_address,
+                        'user_agent': activity.user_agent,
+                        'success': activity.success,
+                    })
+
+                # Compile comprehensive response
+                response_data = {
+                    'user': {
+                        'id': user.id,
+                        'email': user.email,
+                        'username': user.username,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'role': user.role,
+                        'job_role': user.job_role,
+                        'branch': {
+                            'id': user.branch.id,
+                            'name': user.branch.name,
+                        } if user.branch else None,
+                        'tenant': {
+                            'id': tenant.id,
+                            'name': tenant.name,
+                            'schema_name': tenant.schema_name,
+                        },
+                    },
+                    'profile': profile_data,
+                    'investment_policies': policies_data,
+                    'withdrawals': withdrawals_data,
+                    'ledger_entries': ledger_data,
+                    'tax_records': tax_data,
+                    'tax_certificates': certificates_data,
+                    'recent_activities': activities_data,
+                    'summary': {
+                        'total_policies': len(policies_data),
+                        'active_policies': len([p for p in policies_data if p['status'] == 'active']),
+                        'total_investment': sum(float(p['principal_amount']) for p in policies_data),
+                        'total_roi_balance': sum(float(p['roi_balance']) for p in policies_data),
+                        'total_balance': sum(float(p['total_balance']) for p in policies_data),
+                        'pending_withdrawals': len([w for w in withdrawals_data if w['status'] == 'pending']),
+                        'total_tax_paid': sum(float(t['tax_amount']) for t in tax_data if t['is_paid']),
+                    }
+                }
+
+                logger.info(f"Retrieved comprehensive data for user {user.email} in tenant {tenant.schema_name}")
+                return Response(response_data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Error retrieving user data for {user.email}: {str(e)}")
+            return Response(
+                {"error": "Failed to retrieve user data", "detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def patch(self, request):
+        """
+        Update user profile data.
+        """
+        user = request.user
+        tenant = user.tenant
+        logger.info(f"PATCH request for user {user.email} with data: {request.data}")
+
+        with tenant_context(tenant):
+            try:
+                user_profile = UserProfile.objects.get(user=user)
+            except UserProfile.DoesNotExist:
+                return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            data = request.data
+            update_data = {}
+
+            if 'fullName' in data:
+                parts = data['fullName'].split(' ', 1)
+                if len(parts) >= 2:
+                    user.first_name = parts[0]
+                    user.last_name = parts[1]
+                    user.save()
+
+            if 'residentialAddress' in data:
+                parts = data['residentialAddress'].split(', ')
+                if len(parts) >= 5:
+                    update_data['street'] = parts[0]
+                    update_data['city'] = parts[1]
+                    update_data['state'] = parts[2]
+                    update_data['country'] = parts[3]
+                    update_data['zip_code'] = parts[4]
+
+            if 'homeAddress' in data:
+                parts = data['homeAddress'].split(', ')
+                if len(parts) >= 5:
+                    update_data['street'] = parts[0]
+                    update_data['city'] = parts[1]
+                    update_data['state'] = parts[2]
+                    update_data['country'] = parts[3]
+                    update_data['zip_code'] = parts[4]
+
+            if 'phoneNumber' in data:
+                update_data['work_phone'] = data['phoneNumber']
+
+            if 'gender' in data:
+                update_data['gender'] = data['gender']
+
+            if 'nextOfKinName' in data:
+                update_data['next_of_kin'] = data['nextOfKinName']
+
+            if 'nextOfKinAddress' in data:
+                update_data['next_of_kin_address'] = data['nextOfKinAddress']
+
+            if 'nextOfKinPhone' in data:
+                update_data['next_of_kin_phone_number'] = data['nextOfKinPhone']
+
+            if 'referredBy' in data:
+                update_data['assessor_name'] = data['referredBy']
+
+            if 'disbursementBank' in data:
+                update_data['bank_name'] = data['disbursementBank']
+
+            if 'accountName' in data:
+                update_data['account_name'] = data['accountName']
+
+            if 'accountNumber' in data:
+                update_data['account_number'] = data['accountNumber']
+
+            for key, value in update_data.items():
+                setattr(user_profile, key, value)
+
+            user_profile.save()
+
+            return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)

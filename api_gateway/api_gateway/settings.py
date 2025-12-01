@@ -209,7 +209,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://localhost:3001",
     "https://crm-frontend-react.vercel.app",
-    "https://loan-management-theta.vercel.app",
+    "https://loan-management-rho.vercel.app",
     "https://task-manager-two-plum.vercel.app",
     "https://e3os.co.uk",
     "https://dev.e3os.co.uk",

@@ -369,7 +369,7 @@
 ### Add Top-up to Policy
 **Purpose:** Add additional funds to an existing investment policy.
 **Method:** POST
-**URL:** `http://localhost:9090/api/investments/withdrawals/{id}/add_topup/`
+**URL:** `http://localhost:9090/api/investments/policies/{policy_id}/add_topup/`
 
 **Request Body:**
 ```json

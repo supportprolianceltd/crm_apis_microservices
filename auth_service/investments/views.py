@@ -230,6 +230,51 @@ class InvestmentPolicyViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(policies, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['post'])
+    def add_topup(self, request, pk=None):
+        """Add top-up to an investment policy"""
+        policy = self.get_object()
+        amount = Decimal(request.data.get('amount', 0))
+        top_up_date = timezone.now()
+
+        if amount <= 0:
+            return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            # Update policy balance
+            policy.current_balance += amount
+            policy.principal_amount += amount
+            policy.save()
+
+            # Apply date-based ROI rules
+            if top_up_date.day >= 13:
+                # ROI starts next month
+                description = f"Top-up (ROI from next month) - {amount}"
+            else:
+                # ROI includes current month
+                description = f"Top-up (ROI from current month) - {amount}"
+
+            # Create ledger entry
+            LedgerEntry.objects.create(
+                tenant=policy.tenant,
+                policy=policy,
+                entry_date=top_up_date,
+                unique_reference=f"TOPUP-{policy.policy_number}-{top_up_date.strftime('%Y%m%d%H%M%S')}",
+                description=description,
+                entry_type='top_up',
+                inflow=amount,
+                outflow=0,
+                principal_balance=policy.current_balance,
+                roi_balance=policy.roi_balance,
+                total_balance=policy.current_balance + policy.roi_balance,
+                created_by=request.user
+            )
+
+        return Response({
+            'message': 'Top-up added successfully',
+            'new_balance': policy.current_balance
+        })
+
     @action(detail=False, methods=['get'])
     def by_investor(self, request):
         """Get all investment policies for a specific investor by ID or email"""
@@ -308,63 +353,17 @@ class WithdrawalRequestViewSet(viewsets.ModelViewSet):
         """Approve withdrawal request (admin only)"""
         if request.user.role not in ['admin', 'staff']:
             return Response(
-                {'error': 'Only admins can approve withdrawals'}, 
+                {'error': 'Only admins can approve withdrawals'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         withdrawal = self.get_object()
         withdrawal.status = 'approved'
         withdrawal.approved_by = request.user
         withdrawal.approved_date = timezone.now()
         withdrawal.save()
-        
+
         return Response({'message': 'Withdrawal approved'})
-    
-  
-    @action(detail=True, methods=['post'])
-    def add_topup(self, request, pk=None):
-        policy = self.get_object()
-        amount = Decimal(request.data.get('amount', 0))
-        top_up_date = timezone.now()
-        
-        if amount <= 0:
-            return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        with transaction.atomic():
-            # Update policy balance
-            policy.current_balance += amount
-            policy.principal_amount += amount
-            policy.save()
-            
-            # Apply date-based ROI rules
-            if top_up_date.day >= 13:
-                # ROI starts next month
-                description = f"Top-up (ROI from next month) - {amount}"
-            else:
-                # ROI includes current month
-                description = f"Top-up (ROI from current month) - {amount}"
-            
-            # Create ledger entry
-            LedgerEntry.objects.create(
-                tenant=policy.tenant,
-                policy=policy,
-                entry_date=top_up_date,
-                unique_reference=f"TOPUP-{policy.policy_number}-{top_up_date.strftime('%Y%m%d%H%M%S')}",
-                description=description,
-                entry_type='top_up',
-                inflow=amount,
-                outflow=0,
-                principal_balance=policy.current_balance,
-                roi_balance=policy.roi_balance,
-                total_balance=policy.current_balance + policy.roi_balance,
-                created_by=request.user
-            )
-        
-        return Response({
-            'message': 'Top-up added successfully',
-            'new_balance': policy.current_balance
-        })
-        
     
     @action(detail=True, methods=['post'])
     def process(self, request, pk=None):

@@ -25,18 +25,27 @@ def get_user_data_from_jwt(request):
 class EventSerializer(serializers.ModelSerializer):
     participants_details = serializers.SerializerMethodField(read_only=True)
     creator_details = serializers.SerializerMethodField(read_only=True)
+    tenant_details = serializers.SerializerMethodField(read_only=True)
     last_updated_by = serializers.SerializerMethodField(read_only=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Filter participants by tenant
-        if self.context.get('request') and self.context['request'].user:
-            tenant = self.context['request'].user.tenant
-            self.fields['participants'] = serializers.PrimaryKeyRelatedField(
-                many=True,
-                queryset=CustomUser.objects.filter(tenant=tenant),
-                required=False
-            )
+        if self.context.get('request'):
+            request = self.context['request']
+            tenant = getattr(request, 'tenant', getattr(request.user, 'tenant', None) if request.user else None)
+            if tenant:
+                self.fields['participants'] = serializers.PrimaryKeyRelatedField(
+                    many=True,
+                    queryset=CustomUser.objects.filter(tenant=tenant),
+                    required=False
+                )
+            else:
+                self.fields['participants'] = serializers.PrimaryKeyRelatedField(
+                    many=True,
+                    queryset=CustomUser.objects.none(),
+                    required=False
+                )
         else:
             self.fields['participants'] = serializers.PrimaryKeyRelatedField(
                 many=True,
@@ -48,11 +57,11 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = [
             'id', 'title', 'description', 'start_datetime', 'end_datetime',
-            'location', 'meeting_link', 'creator', 'visibility', 'participants',
-            'participants_details', 'creator_details', 'created_at',
+            'location', 'meeting_link', 'creator', 'tenant', 'visibility', 'include_all_tenant_users', 'participants',
+            'participants_details', 'creator_details', 'tenant_details', 'created_at',
             'updated_at', 'last_updated_by_id', 'last_updated_by'
         ]
-        read_only_fields = ['id', 'creator', 'created_at', 'updated_at', 'last_updated_by', 'last_updated_by_id']
+        read_only_fields = ['id', 'creator', 'tenant', 'created_at', 'updated_at', 'last_updated_by', 'last_updated_by_id']
 
     def get_participants_details(self, obj):
         return [
@@ -75,6 +84,13 @@ class EventSerializer(serializers.ModelSerializer):
             'role': obj.creator.role
         }
 
+    def get_tenant_details(self, obj):
+        return {
+            'id': obj.tenant.id,
+            'name': obj.tenant.name,
+            'schema_name': obj.tenant.schema_name
+        }
+
     def get_last_updated_by(self, obj):
         if obj.last_updated_by_id:
             try:
@@ -90,9 +106,16 @@ class EventSerializer(serializers.ModelSerializer):
         return None
 
     def validate(self, data):
+        """Ensure data belongs to current tenant"""
+        request = self.context.get('request')
+        if request and hasattr(request, 'user') and hasattr(request.user, 'tenant'):
+            # ✅ Ensure created objects belong to current tenant
+            data['tenant'] = request.user.tenant
+
         start_datetime = data.get('start_datetime')
         end_datetime = data.get('end_datetime')
         visibility = data.get('visibility')
+        include_all_tenant_users = data.get('include_all_tenant_users', False)
         participants = data.get('participants', [])
 
         if start_datetime and end_datetime and start_datetime >= end_datetime:
@@ -101,10 +124,26 @@ class EventSerializer(serializers.ModelSerializer):
         if visibility == 'specific_users' and not participants:
             raise serializers.ValidationError("Participants are required when visibility is 'specific_users'.")
 
+        if include_all_tenant_users and participants:
+            raise serializers.ValidationError("Participants should not be specified when include_all_tenant_users is true.")
+
         return data
 
     def create(self, validated_data):
-        user_data = get_user_data_from_jwt(self.context['request'])
+        """Auto-assign tenant, creator, and last_updated_by on creation"""
+        request = self.context.get('request')
+
+        # Auto-assign tenant
+        if request and hasattr(request, 'user') and hasattr(request.user, 'tenant'):
+            validated_data['tenant'] = request.user.tenant
+
+        # Auto-assign creator
+        if 'creator' not in validated_data:
+            if request and hasattr(request, 'user'):
+                validated_data['creator'] = request.user
+
+        # Set last_updated_by
+        user_data = get_user_data_from_jwt(request)
         user_id = user_data.get('id')
         if user_id:
             validated_data['last_updated_by_id'] = str(user_id)
@@ -112,9 +151,13 @@ class EventSerializer(serializers.ModelSerializer):
             logger.warning("No user_id found in JWT payload for creation")
             raise serializers.ValidationError({"last_updated_by_id": "User ID required for creation."})
 
-        validated_data['creator'] = self.context['request'].user
-        validated_data['tenant'] = self.context['request'].user.tenant
-        return super().create(validated_data)
+        instance = super().create(validated_data)
+
+        if instance.include_all_tenant_users:
+            tenant_users = CustomUser.objects.filter(tenant=instance.tenant)
+            instance.participants.set(tenant_users)
+
+        return instance
 
     def update(self, instance, validated_data):
         user_data = get_user_data_from_jwt(self.context['request'])
@@ -124,4 +167,10 @@ class EventSerializer(serializers.ModelSerializer):
         else:
             logger.warning("No user_id found in JWT payload for update")
 
-        return super().update(instance, validated_data)
+        instance = super().update(instance, validated_data)
+
+        if instance.include_all_tenant_users:
+            tenant_users = CustomUser.objects.filter(tenant=instance.tenant)
+            instance.participants.set(tenant_users)
+
+        return instance

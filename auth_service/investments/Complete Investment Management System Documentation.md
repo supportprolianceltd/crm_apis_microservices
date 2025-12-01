@@ -37,7 +37,7 @@ def should_accrue_roi(investment_date):
 - ✅ Top-ups increase principal for ROI calculation
 - ✅ Ledger tracks all top-ups separately
 
-**Endpoint**: `POST /api/investments/withdrawals/{id}/add_topup/`
+**Endpoint**: `POST /api/investments/policies/{policy_id}/add_topup/`
 
 ```json
 {
@@ -557,7 +557,7 @@ Downloads complete ledger as CSV with all filters applied.
 6. If deposit on 15th → ROI accrues next month
 
 ### **Scenario 2: Top-up Investment**
-1. Investor adds funds → POST `/api/investments/withdrawals/{id}/add_topup/`
+1. Investor adds funds → POST `/api/investments/policies/{policy_id}/add_topup/`
 2. Principal balance increases
 3. Same date rules apply (1st-12th vs 13th+)
 4. Ledger entry created
@@ -738,13 +738,13 @@ def send_roi_due_notifications():
 - `POST /api/investments/policies/{id}/change_roi_frequency/` - Change ROI frequency
 - `GET /api/investments/policies/search/?q=term` - Search policies
 - `GET /api/investments/policies/by_investor/?investor_id={id}` - Get by investor
+- `POST /api/investments/policies/{policy_id}/add_topup/` - Add top-up to policy
 
 ### **Withdrawals**
 - `GET /api/investments/withdrawals/` - List withdrawals
 - `POST /api/investments/withdrawals/` - Create withdrawal request
 - `POST /api/investments/withdrawals/{id}/approve/` - Approve withdrawal
 - `POST /api/investments/withdrawals/{id}/process/` - Process withdrawal
-- `POST /api/investments/withdrawals/{id}/add_topup/` - Add top-up
 
 ### **Ledger & Statements**
 - `GET /api/investments/ledger/` - List ledger entries
