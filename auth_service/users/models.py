@@ -662,6 +662,14 @@ class UserProfile(models.Model):
     consent_given = models.BooleanField(default=False)
     bank_details_submitted_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
+    # OTP Preferences
+    preferred_otp_method = models.CharField(
+        max_length=10,
+        choices=[('email', 'Email'), ('phone', 'Phone')],
+        default='email',
+        help_text="User's preferred method for receiving OTP codes"
+    )
+
     # Permissions
     access_duration = models.DateField(default=today, blank=True)
     system_access_rostering = models.BooleanField(default=False)

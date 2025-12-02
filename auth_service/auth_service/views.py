@@ -76,7 +76,7 @@ def set_auth_cookies(response, access_token, refresh_token, remember_me=False):
         httponly=True,
         secure=secure,
         samesite=samesite,
-        max_age=180 * 60,  # 3 hours
+        max_age=72 * 60 * 60,  # 72 hours
         domain=cookie_domain,
         path='/'
     )
@@ -398,6 +398,11 @@ class CustomTokenSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=True)
     password = serializers.CharField(required=True)
     remember_me = serializers.BooleanField(required=False, default=False)
+    otp_method = serializers.ChoiceField(
+        choices=[('email', 'Email'), ('phone', 'Phone')],
+        required=False,
+        help_text="Optional: Override your preferred OTP method. If not specified, your profile preference will be used."
+    )
 
     def validate(self, attrs):
         logger.info(f"🔐🔐🔐 CUSTOM SERIALIZER VALIDATE CALLED")
@@ -455,24 +460,120 @@ class CustomTokenSerializer(serializers.Serializer):
                              ip_address, user_agent, False)
             raise serializers.ValidationError("This IP address is blocked")
 
-        # Check if 2FA is enabled
-        if user.two_factor_enabled:
-            # Cache login data for 2FA verification
-            cache_key = f"login_pending_{user.id}"
-            cache.set(cache_key, {
-                'remember_me': remember_me,
-                'method': "username" if "username" in attrs else "email",
-                'ip_address': ip_address,
-                'user_agent': user_agent
-            }, timeout=300)  # 5 minutes
+        # Determine OTP method - check user preference first, then allow override
+        otp_method = attrs.get('otp_method')
 
-            # Don't complete login yet, require 2FA
-            return {
-                "requires_2fa": True,
-                "user_id": user.id,
-                "email": user.email,
-                "message": "Two-factor authentication required"
+        if not otp_method:
+            # Check user's preferred OTP method from profile
+            try:
+                user_profile = user.profile
+                otp_method = getattr(user_profile, 'preferred_otp_method', 'email')
+                if not otp_method:
+                    otp_method = 'email'  # Default fallback
+            except Exception:
+                otp_method = 'email'  # Default if no profile
+
+        # Validate phone number if phone method is selected
+        if otp_method == 'phone':
+            # Check if user has a work phone number
+            try:
+                user_profile = user.profile
+                if not user_profile.work_phone:
+                    raise serializers.ValidationError("No phone number found. Please add a work phone number to your profile or use email verification.")
+            except Exception:
+                raise serializers.ValidationError("No phone number found. Please add a work phone number to your profile or use email verification.")
+
+        # Cache login data for OTP verification
+        cache_key = f"login_pending_{user.id}"
+        cache.set(cache_key, {
+            'remember_me': remember_me,
+            'method': "username" if "username" in attrs else "email",
+            'otp_method': otp_method,
+            'ip_address': ip_address,
+            'user_agent': user_agent
+        }, timeout=300)  # 5 minutes
+
+        # Send OTP to email or phone based on method
+        otp_code = f"{random.randint(100000, 999999)}"
+        logger.info(f"🔐 OTP generated for user {user.email} via {otp_method}: {otp_code}")
+        cache.set(f"otp_{user.id}", {'code': otp_code, 'remember_me': remember_me, 'otp_method': otp_method}, timeout=300)
+
+        # Send OTP via email or SMS based on method
+        if otp_method == 'email':
+            # Send OTP via email (using notifications service)
+            event_payload = {
+                "data": {
+                    "user_email": user.email,
+                    "2fa_code": otp_code,
+                    "2fa_method": "email",
+                    "ip_address": ip_address,
+                    "user_agent": user_agent,
+                    "login_method": "username" if "username" in attrs else "email",
+                    "remember_me": remember_me,
+                    "expires_in_seconds": 300,
+                },
+                "metadata": {
+                    "event_id": f"evt-{uuid.uuid4()}",
+                    "event_type": "auth.2fa.code.requested",
+                    "created_at": timezone.now().isoformat() + "Z",
+                    "source": "auth-service",
+                    "tenant_id": str(user.tenant.unique_id),
+                },
             }
+            try:
+                notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
+                response = requests.post(notifications_url, json=event_payload, timeout=5)
+                response.raise_for_status()
+                logger.info(f"✅ OTP email notification sent. Status: {response.status_code}")
+            except Exception as e:
+                logger.warning(f"[❌ OTP Email Notification Error] Failed to send OTP email: {str(e)}")
+        else:  # otp_method == 'phone'
+            # Send OTP via SMS (requires SMS service integration)
+            user_profile = user.profile
+            phone_number = user_profile.work_phone
+
+            # TODO: Integrate with SMS service (e.g., Twilio)
+            # For now, log the OTP and phone number for testing
+            logger.info(f"📱 OTP SMS would be sent to {phone_number}: {otp_code}")
+
+            # Example SMS integration (uncomment and configure when SMS service is available):
+            # sms_payload = {
+            #     "data": {
+            #         "phone_number": phone_number,
+            #         "2fa_code": otp_code,
+            #         "2fa_method": "sms",
+            #         "ip_address": ip_address,
+            #         "user_agent": user_agent,
+            #         "login_method": "username" if "username" in attrs else "email",
+            #         "remember_me": remember_me,
+            #         "expires_in_seconds": 300,
+            #     },
+            #     "metadata": {
+            #         "event_id": f"evt-{uuid.uuid4()}",
+            #         "event_type": "auth.2fa.code.requested",
+            #         "created_at": timezone.now().isoformat() + "Z",
+            #         "source": "auth-service",
+            #         "tenant_id": str(user.tenant.unique_id),
+            #     },
+            # }
+            # try:
+            #     sms_service_url = settings.SMS_SERVICE_URL + "/send-otp/"
+            #     response = requests.post(sms_service_url, json=sms_payload, timeout=5)
+            #     response.raise_for_status()
+            #     logger.info(f"✅ OTP SMS sent. Status: {response.status_code}")
+            # except Exception as e:
+            #     logger.warning(f"[❌ OTP SMS Error] Failed to send OTP SMS: {str(e)}")
+
+        # Don't complete login yet, require OTP verification
+        destination = user.email if otp_method == 'email' else user.profile.work_phone
+        method_text = "email" if otp_method == 'email' else "phone"
+        return {
+            "requires_otp": True,
+            "user_id": user.id,
+            "email": user.email,
+            "otp_method": otp_method,
+            "message": f"OTP sent to your {method_text}. Please verify to complete login."
+        }
 
         # Success: Reset attempts & log
         if hasattr(user, 'reset_login_attempts'):
@@ -576,7 +677,7 @@ class CustomTokenSerializer(serializers.Serializer):
             "user_type": "global" if isinstance(user, GlobalUser) else "ordinary",
             "email": user.email,
             "type": "access",
-            "exp": (timezone.now() + timedelta(minutes=180)).timestamp(),
+            "exp": (timezone.now() + timedelta(hours=72)).timestamp(),
         }
         access_token = issue_rsa_jwt(access_payload, user.tenant)
 
@@ -746,13 +847,14 @@ class CustomTokenObtainPairView(APIView):
             # Get validated data
             validated_data = serializer.validated_data
 
-            # Check if 2FA is required
-            if validated_data.get("requires_2fa"):
+            # Check if OTP is required
+            if validated_data.get("requires_otp"):
                 return Response({
-                    "requires_2fa": True,
+                    "requires_otp": True,
                     "user_id": validated_data["user_id"],
                     "email": validated_data["email"],
-                    "message": "Two-factor authentication required. Please verify your code."
+                    "otp_method": validated_data.get("otp_method", "email"),
+                    "message": validated_data["message"]
                 }, status=status.HTTP_200_OK)
 
             # Normal login flow
@@ -1039,7 +1141,7 @@ class CustomTokenRefreshView(APIView):
                     "user": CustomUserMinimalSerializer(user).data,
                     "email": user.email,
                     "type": "access",
-                    "exp": (timezone.now() + timedelta(minutes=180)).timestamp(),
+                    "exp": (timezone.now() + timedelta(hours=72)).timestamp(),
                 }
                 access_token = issue_rsa_jwt(access_payload, user.tenant)
 
@@ -1163,7 +1265,7 @@ class SilentTokenRenewView(APIView):
                     "user": CustomUserMinimalSerializer(user).data,
                     "email": user.email,
                     "type": "access",
-                    "exp": (timezone.now() + timedelta(minutes=180)).timestamp(),
+                    "exp": (timezone.now() + timedelta(hours=72)).timestamp(),
                 }
                 access_token = issue_rsa_jwt(access_payload, user.tenant)
 
@@ -1207,12 +1309,13 @@ class SilentTokenRenewView(APIView):
             logger.debug(f"Silent renew failed: {str(e)}")
             return Response(status=status.HTTP_204_NO_CONTENT)  # Silently fail without error to avoid breaking UI
 
-class Verify2FAView(APIView):
+class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request):
-        identifier = request.data.get("email")  # Use email for 2FA verification (consistent)
-        code = request.data.get("2fa_code")
+        identifier = request.data.get("email")  # Use email for OTP verification
+        code = request.data.get("otp_code")
         ip_address = request.META.get("REMOTE_ADDR")
         user_agent = request.META.get("HTTP_USER_AGENT", "")
         tenant = getattr(request, "tenant", None)
@@ -1229,9 +1332,9 @@ class Verify2FAView(APIView):
             )
             return Response({"detail": "Tenant not found."}, status=400)
         with tenant_context(tenant):
-            # Updated: Resolve user by email (for 2FA); if username provided, skip or log
+            # Resolve user by email
             if '@' not in identifier:
-                return Response({"detail": "Email required for 2FA verification."}, status=400)
+                return Response({"detail": "Email required for OTP verification."}, status=400)
             user = get_user_model().objects.filter(email__iexact=identifier, tenant=tenant).first()
             if not user:
                 UserActivity.objects.create(
@@ -1245,19 +1348,19 @@ class Verify2FAView(APIView):
                     success=False,
                 )
                 return Response({"detail": "Invalid user."}, status=400)
-            cached_data = cache.get(f"2fa_{user.id}")
+            cached_data = cache.get(f"otp_{user.id}")
             if not cached_data or cached_data.get('code') != code:
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
                     action="login",
                     performed_by=None,
-                    details={"reason": "Invalid or expired 2FA code"},
+                    details={"reason": "Invalid or expired OTP code"},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({"detail": "Invalid or expired 2FA code."}, status=400)
+                return Response({"detail": "Invalid or expired OTP code."}, status=400)
 
             remember_me = cached_data.get('remember_me', False)
             user.reset_login_attempts()
@@ -1266,16 +1369,16 @@ class Verify2FAView(APIView):
                 tenant=tenant,
                 action="login",
                 performed_by=None,
-                details={"reason": "2FA verified"},
+                details={"reason": "OTP verified"},
                 ip_address=ip_address,
                 user_agent=user_agent,
                 success=True,
             )
-            
+
             # Issue tokens (reuse logic from serializer)
             primary_domain = tenant.domains.filter(is_primary=True).first()
             tenant_domain = primary_domain.domain if primary_domain else None
-            
+
             access_payload = {
                 "jti": str(uuid.uuid4()),
                 "sub": user.email,
@@ -1321,13 +1424,13 @@ class Verify2FAView(APIView):
                 "has_accepted_terms": user.has_accepted_terms,
                 "remember_me": remember_me,
             }
-            
+
             # Create response and set cookies using helper function
             response = Response(data, status=200)
             response = set_auth_cookies(response, access_token, refresh_token, remember_me=remember_me)
-            
-            cache.delete(f"2fa_{user.id}")
-            logger.info("✅ 2FA verification successful with cookies set")
+
+            cache.delete(f"otp_{user.id}")
+            logger.info("✅ OTP verification successful with cookies set")
             return response
 
 

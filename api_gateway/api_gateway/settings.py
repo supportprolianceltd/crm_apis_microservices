@@ -247,7 +247,7 @@ PROJECT_MANAGER_URL = env.str("PROJECT_MANAGER_URL", default="http://project-man
 
 # ======================== ROUTE CONFIGURATION ========================
 AUTH_ROUTES = [
-    "token", "token/refresh", "token/validate", "login", "logout",
+    "token", "token/refresh", "token/validate", "login", "logout","verify-otp",
     "debug-cookies", "test-cookies", "simple-cookie-test",
     "verify-2fa", "docs", "doc", "user", "tenant", "public-key", "jitsi", "reviews", "investments", "events",
 ]

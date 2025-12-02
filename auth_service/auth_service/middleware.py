@@ -400,10 +400,10 @@ class CustomTenantMiddleware(TenantMainMiddleware):
             host = f"Invalid host: {e}"
         logger.info(f"Processing request: {request.method} {request.path}, Host: {host}")
 
-        # Updated public paths (ADDED /api/logout/)
+        # Updated public paths (ADDED /api/logout/ and /api/verify-otp/)
         public_paths = [
             '/api/docs/', '/api/schema/', '/api/token/refresh/',
-            '/api/token/', '/api/login/', '/api/logout/',  # Exact for token/login, added logout
+            '/api/token/', '/api/login/', '/api/logout/', '/api/verify-otp/',  # Exact for token/login, added logout and verify-otp
             '/api/social/callback/', '/api/admin/create/',
             '/api/applications-engine/applications/parse-resume/application/autofil/',
             '/api/talent-engine/requisitions/by-link/',
@@ -489,8 +489,9 @@ class CustomTenantMiddleware(TenantMainMiddleware):
                 return JsonResponse({'error': 'Invalid request format'}, status=400)
 
         # FIXED: Handle login/token endpoints with EXACT path matching (excludes /refresh/)
-        if (request.path in ['/api/token/', '/api/login/', '/api/verify-2fa/'] or 
-            request.path.startswith('/api/login/') or 
+        if (request.path in ['/api/token/', '/api/login/', '/api/verify-otp/', '/api/verify-2fa/'] or
+            request.path.startswith('/api/login/') or
+            request.path.startswith('/api/verify-otp/') or
             request.path.startswith('/api/verify-2fa/')) and request.method == 'POST':
             try:
                 body = request.body.decode('utf-8') if request.body else '{}'
