@@ -105,6 +105,28 @@ export class TaskController {
     this.prisma = prisma;
   }
 
+  // Mark overdue tasks as MISSED when dueDate has passed.
+  private async markOverdueTasks(tenantId: string) {
+    if (!tenantId) return;
+    try {
+      const now = new Date();
+      // Update tasks that were pending/in-progress and whose dueDate is in the past
+      const result = await (this.prisma as any).task.updateMany({
+        where: {
+          tenantId: tenantId.toString(),
+          dueDate: { lt: now },
+          status: { in: ['PENDING', 'IN_PROGRESS'] },
+        },
+        data: { status: 'MISSED' },
+      });
+      if (result && result.count && result.count > 0) {
+        console.debug(`Marked ${result.count} overdue tasks as MISSED for tenant ${tenantId}`);
+      }
+    } catch (e) {
+      console.error('Failed to mark overdue tasks', e);
+    }
+  }
+
   // Convert a time representation to minutes since midnight (0-1439).
   // Accepts "HH:MM" or "HH:MM:SS" strings, or Date objects (where only the time component is used).
   private timeStringToMinutes(hhmm: string | Date): number | null {
@@ -289,6 +311,9 @@ export class TaskController {
           .status(403)
           .json({ error: "tenantId missing from auth context" });
 
+      // Ensure overdue tasks are marked as MISSED before returning tasks for a client
+      await this.markOverdueTasks(tenantId.toString());
+
       const payload = req.body || {};
       const errors = this.validateCreatePayload(payload);
       if (errors.length) return res.status(400).json({ errors });
@@ -436,6 +461,12 @@ export class TaskController {
           .status(403)
           .json({ error: "tenantId missing from auth context" });
 
+      // Ensure overdue tasks are marked as MISSED before returning filtered tasks
+      await this.markOverdueTasks(tenantId.toString());
+
+      // Ensure overdue tasks are marked as MISSED before returning a task
+      await this.markOverdueTasks(tenantId.toString());
+
       const carePlanId = req.params.carePlanId;
       if (!carePlanId)
         return res.status(400).json({ error: "carePlanId required in path" });
@@ -483,6 +514,9 @@ export class TaskController {
         return res
           .status(403)
           .json({ error: "tenantId missing from auth context" });
+
+      // Ensure overdue tasks are marked as MISSED before returning tasks for a carer
+      await this.markOverdueTasks(tenantId.toString());
 
       const clientId = req.params.clientId;
       if (!clientId)
@@ -771,6 +805,9 @@ export class TaskController {
       if (!tenantId)
         return res.status(403).json({ error: "tenantId missing from auth context" });
 
+      // Ensure overdue tasks are marked as MISSED before returning carer visits/tasks
+      await this.markOverdueTasks(tenantId.toString());
+
       const carerId = req.params.carerId;
       if (!carerId) return res.status(400).json({ error: "carerId required in path" });
 
@@ -955,6 +992,9 @@ export class TaskController {
         return res
           .status(403)
           .json({ error: "tenantId missing from auth context" });
+
+      // Ensure overdue tasks are marked as MISSED before returning lists
+      await this.markOverdueTasks(tenantId.toString());
 
       const page = parseInt((req.query.page as string) || "1", 10);
       const pageSize = parseInt((req.query.pageSize as string) || "50", 10);

@@ -1954,6 +1954,7 @@ enum GenderPreference {
 enum TaskStatus {
   PENDING
   IN_PROGRESS
+  MISSED
   COMPLETED
   CANCELLED
   ON_HOLD
