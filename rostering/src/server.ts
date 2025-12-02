@@ -73,6 +73,7 @@ import { ClusterMetricsController } from './controllers/cluster-metrics.controll
 // Import workers and middleware
 import { EmailWorker } from './workers/email.worker';
 import { authenticate } from './middleware/auth.middleware';
+import { startOverdueTaskScheduler } from './services/overdue-tasks.scheduler';
 
 // Load environment variables
 dotenv.config();
@@ -948,6 +949,13 @@ class RosteringServer {
       logger.info('Starting background workers...');
       this.emailWorker!.start();
       logger.info('✅ Email worker started');
+
+      // Start overdue task scheduler (marks overdue tasks as MISSED)
+      try {
+        startOverdueTaskScheduler(this.prisma!);
+      } catch (e) {
+        logger.error('Failed to start OverdueTaskScheduler', e);
+      }
 
       // Start cleanup jobs
       this.startCleanupJobs();

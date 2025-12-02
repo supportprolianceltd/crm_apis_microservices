@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { format } from 'date-fns';
 
 export class TaskController {
   private prisma: PrismaClient;
@@ -64,18 +65,8 @@ export class TaskController {
 
       const updated = await (this.prisma as any).carerVisit.update({ where: { id: visitId }, data: updateData });
 
-      // If careType was changed, write a ClientVisitLog entry
-      if (payload.careType !== undefined && updated.careType !== existing.careType) {
-        try {
-          const performer = (req.user as any)?.id ?? (req.user as any)?.carerId ?? req.body?.performedById ?? 'system';
-          await (this.prisma as any).clientVisitLog.create({ data: {
-            tenantId: tenantId.toString(), visitId, action: 'CARETYPE_CHANGED', performedById: performer,
-            details: JSON.stringify({ from: existing.careType, to: updated.careType, switchReason: updated.switchReason, switchComment: updated.switchComment })
-          }});
-        } catch (e) {
-          console.error('Failed to write client visit log (caretype change)', e);
-        }
-      }
+      // NOTE: visit-level actions (care type changes) are no longer written to client_visit_logs.
+      // Only task-level actions (TASK_COMPLETED) are recorded in that table per product decision.
 
       return res.json(updated);
     } catch (error: any) {
@@ -105,22 +96,55 @@ export class TaskController {
     this.prisma = prisma;
   }
 
-  // Mark overdue tasks as MISSED when dueDate has passed.
+  // Mark overdue tasks as MISSED when dueDate has passed and write client_visit_logs entries
   private async markOverdueTasks(tenantId: string) {
     if (!tenantId) return;
     try {
       const now = new Date();
-      // Update tasks that were pending/in-progress and whose dueDate is in the past
-      const result = await (this.prisma as any).task.updateMany({
+
+      // Find candidate tasks
+      const candidates: any[] = await (this.prisma as any).task.findMany({
         where: {
           tenantId: tenantId.toString(),
           dueDate: { lt: now },
           status: { in: ['PENDING', 'IN_PROGRESS'] },
         },
-        data: { status: 'MISSED' },
+        select: { id: true, tenantId: true, carerVisitId: true, status: true },
       });
-      if (result && result.count && result.count > 0) {
-        console.debug(`Marked ${result.count} overdue tasks as MISSED for tenant ${tenantId}`);
+
+      if (!candidates || candidates.length === 0) return;
+
+      const nowIso = now.toISOString();
+      const logs = candidates
+        .filter((t: any) => t.carerVisitId)
+        .map((t: any) => ({
+          tenantId: t.tenantId,
+          visitId: t.carerVisitId,
+          action: 'TASK_MISSED',
+          taskId: t.id,
+          performedById: 'system',
+          details: JSON.stringify({ taskId: t.id, previousStatus: t.status, markedAt: nowIso }),
+        }));
+
+      try {
+        const taskIds = candidates.map((t: any) => t.id);
+        await (this.prisma as any).$transaction(async (tx: any) => {
+          if (logs.length > 0) {
+            try {
+              await tx.clientVisitLog.createMany({ data: logs, skipDuplicates: true });
+            } catch (e) {
+              for (const l of logs) {
+                try { await tx.clientVisitLog.create({ data: l }); } catch (err) { /* ignore */ }
+              }
+            }
+          }
+
+          await tx.task.updateMany({ where: { id: { in: taskIds } }, data: { status: 'MISSED' } });
+        });
+
+        console.debug(`Marked ${candidates.length} overdue tasks as MISSED for tenant ${tenantId} and wrote ${logs.length} client_visit_logs`);
+      } catch (e) {
+        console.error('Failed to mark overdue tasks (transaction)', e);
       }
     } catch (e) {
       console.error('Failed to mark overdue tasks', e);
@@ -1673,19 +1697,8 @@ export class TaskController {
         include: { tasks: { include: { carePlan: { select: { id: true, clientId: true, title: true } } } }, assignees: true },
       });
 
-      try {
-        const performer = (req.user as any)?.id ?? (req.user as any)?.carerId ?? req.body?.performedById ?? 'system';
-        const logDetails: any = { clockInAt: updated.clockInAt };
-        if (adminOverrideRequested && callerIsAdmin) {
-          logDetails.adminOverride = true;
-          logDetails.adminId = (req.user as any)?.id ?? (req.user as any)?.email ?? 'admin';
-        }
-        await (this.prisma as any).clientVisitLog.create({ data: {
-          tenantId: tenantId.toString(), visitId, action: 'CLOCK_IN', performedById: performer, details: JSON.stringify(logDetails)
-        }});
-      } catch (e) {
-        console.error('Failed to write client visit log (clock in)', e);
-      }
+      // Visit-level clock-in logs are intentionally not written to `client_visit_logs`.
+      // Per product decision, only task-level events (e.g. TASK_COMPLETED) are stored there.
 
       return res.json(updated);
     } catch (error: any) {
@@ -1743,22 +1756,8 @@ export class TaskController {
         include: { tasks: { include: { carePlan: { select: { id: true, clientId: true, title: true } } } }, assignees: true },
       });
 
-      try {
-        const performer = (req.user as any)?.id ?? (req.user as any)?.carerId ?? req.body?.performedById ?? 'system';
-        const logDetails: any = { clockOutAt: updated.clockOutAt, note };
-        if (adminOverrideRequested && callerIsAdmin) {
-          logDetails.adminOverride = true;
-          logDetails.adminId = (req.user as any)?.id ?? (req.user as any)?.email ?? 'admin';
-        }
-        await (this.prisma as any).clientVisitLog.create({ data: {
-          tenantId: tenantId.toString(), visitId, action: 'CLOCK_OUT', performedById: performer, details: JSON.stringify(logDetails)
-        }});
-        await (this.prisma as any).clientVisitLog.create({ data: {
-          tenantId: tenantId.toString(), visitId, action: 'VISIT_COMPLETED', performedById: performer, details: JSON.stringify({ completedAt: updated.clockOutAt, adminOverride: logDetails.adminOverride ?? false })
-        }});
-      } catch (e) {
-        console.error('Failed to write client visit log (clock out)', e);
-      }
+      // Visit-level clock-out/completion logs are intentionally not written to `client_visit_logs`.
+      // Only task-level events (e.g. TASK_COMPLETED) are stored there per product decision.
 
       return res.json(updated);
     } catch (error: any) {
@@ -1782,19 +1781,79 @@ export class TaskController {
       const limit = Math.min(Math.max(parseInt((req.query.limit as string) || '100', 10), 1), 1000);
 
       const where: any = { tenantId: tenantId.toString(), visitId };
-      if (action) where.action = action;
+      // Only allow task-level actions in the visit logs. Accept TASK_COMPLETED and TASK_MISSED.
+      if (action) {
+        if (action !== 'TASK_COMPLETED' && action !== 'TASK_MISSED') {
+          return res.json([]);
+        }
+        where.action = action;
+      } else {
+        // default to task actions only (both completed and missed)
+        where.action = { in: ['TASK_COMPLETED', 'TASK_MISSED'] };
+      }
       if (since) {
         const d = new Date(since);
         if (!isNaN(d.getTime())) where.createdAt = { gte: d };
       }
 
-      const logs = await (this.prisma as any).clientVisitLog.findMany({
-        where,
+      // If caller requests raw logs, return the client_visit_logs rows
+      const raw = (req.query.raw as string | undefined) === 'true';
+      if (raw) {
+        const logs = await (this.prisma as any).clientVisitLog.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          take: limit,
+        });
+        return res.json(logs);
+      }
+
+      // Otherwise return a simplified visit-log view derived from tasks attached to the visit
+      // Only include tasks with status COMPLETED or MISSED in the visit-log simplified view
+      const tasks: any[] = await (this.prisma as any).task.findMany({
+        where: { tenantId: tenantId.toString(), carerVisitId: visitId, status: { in: ['COMPLETED', 'MISSED'] } },
+        select: { id: true, title: true, status: true, dueDate: true, completedAt: true, additionalNotes: true, updatedAt: true, createdAt: true },
         orderBy: { createdAt: 'desc' },
-        take: limit,
       });
 
-      return res.json(logs);
+      const mapStatus = (s: string | null | undefined) => {
+        if (!s) return 'Unknown';
+        switch (s) {
+          case 'PENDING': return 'Pending';
+          case 'IN_PROGRESS': return 'In Progress';
+          case 'COMPLETED': return 'Completed';
+          case 'MISSED': return 'Missed';
+          case 'CANCELLED': return 'Cancelled';
+          case 'ON_HOLD': return 'On Hold';
+          default: return s;
+        }
+      };
+
+      const formatDateTime = (d: Date | null | undefined) => {
+        if (!d) return null;
+        try {
+          // e.g. "12 January 2025 at 4:03am"
+          return format(d, "d LLLL yyyy 'at' h:mma").replace('AM', 'am').replace('PM', 'pm');
+        } catch (e) {
+          return d.toISOString();
+        }
+      };
+
+      const simplified = tasks.map(t => {
+        const date = t.completedAt ?? t.dueDate ?? t.updatedAt ?? t.createdAt;
+        return {
+          task: t.title,
+          status: mapStatus(t.status),
+          dateTime: formatDateTime(date),
+          comment: t.additionalNotes ?? null,
+          taskId: t.id,
+        };
+      }).sort((a, b) => {
+        const ad = a.dateTime ? new Date(a.dateTime) : new Date(0);
+        const bd = b.dateTime ? new Date(b.dateTime) : new Date(0);
+        return bd.getTime() - ad.getTime();
+      });
+
+      return res.json(simplified);
     } catch (error: any) {
       console.error('getVisitLogs error', error);
       return res.status(500).json({ error: 'Failed to fetch visit logs', details: error?.message });
