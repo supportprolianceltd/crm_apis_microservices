@@ -4,6 +4,8 @@ import { ClusteringService } from '../services/clustering.service';
 import { CarerService } from '../services/carer.service';
 import { ConstraintsService } from '../services/constraints.service';
 import { TravelService } from '../services/travel.service';
+import { EnhancedTravelService } from '../services/enhanced-travel.service';
+import { TravelCalculationRequest } from '../types/travel-matrix.types';
 
 
 
@@ -11,13 +13,15 @@ export class ClusterController {
   private clusteringService: ClusteringService;
   private constraintsService: ConstraintsService;
   private travelService: TravelService;
+  private enhancedTravelService: EnhancedTravelService;
 
   constructor(private prisma: PrismaClient) {
     this.constraintsService = new ConstraintsService(prisma);
     this.travelService = new TravelService(prisma);
+    this.enhancedTravelService = new EnhancedTravelService(prisma);
     this.clusteringService = new ClusteringService(
-      prisma, 
-      this.constraintsService, 
+      prisma,
+      this.constraintsService,
       this.travelService
     );
   }
@@ -1549,4 +1553,637 @@ public async getBatchClientClusterSuggestions(req: Request, res: Response) {
     });
   }
 }
+
+/**
+ * Auto-assign client to cluster based on postcode similarity and distance
+ * POST /clusters/auto-assign-client
+ */
+public async autoAssignClientToCluster(req: Request, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      return res.status(403).json({ error: 'tenantId missing from auth context' });
+    }
+
+    const {
+      name,
+      postcode,
+      address,
+      town,
+      city,
+      latitude,
+      longitude,
+      clientId // optional, if client already exists
+    } = req.body;
+
+    if (!postcode) {
+      return res.status(400).json({ error: 'postcode is required' });
+    }
+
+    if (!address) {
+      return res.status(400).json({ error: 'address is required' });
+    }
+
+    // Normalize postcode for comparison
+    const normalizedPostcode = postcode.trim().replace(/\s+/g, '').toUpperCase();
+
+    // Step 1: Check if postcode matches any existing cluster postcode
+    const matchingCluster = await (this.prisma as any).cluster.findFirst({
+      where: {
+        tenantId: tenantId.toString(),
+        postcode: {
+          equals: normalizedPostcode,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (matchingCluster) {
+      // Assign to existing cluster
+      if (clientId) {
+        // Client exists, assign directly
+        await this.assignClientToClusterInternal(tenantId.toString(), matchingCluster.id, clientId);
+      } else {
+        // Create client and assign
+        const newClient = await this.createClientFromDetails(tenantId.toString(), req.body);
+        await this.assignClientToClusterInternal(tenantId.toString(), matchingCluster.id, newClient.id);
+      }
+
+      return res.json({
+        success: true,
+        action: 'assigned_to_existing_cluster',
+        clusterId: matchingCluster.id,
+        clusterName: matchingCluster.name,
+        reason: 'postcode_match',
+        message: `Client assigned to cluster "${matchingCluster.name}" due to matching postcode`
+      });
+    }
+
+    // Step 2: Check if postcode matches any existing client or carer assigned to a cluster
+    const existingAssignments = await (this.prisma as any).clusterClient.findMany({
+      where: {
+        tenantId: tenantId.toString()
+      },
+      include: {
+        cluster: true
+      }
+    });
+
+    // Get clients with matching postcode
+    const clientsWithMatchingPostcode = await (this.prisma as any).externalRequest.findMany({
+      where: {
+        tenantId: tenantId.toString(),
+        postcode: {
+          equals: normalizedPostcode,
+          mode: 'insensitive'
+        }
+      },
+      include: {
+        cluster: true
+      }
+    });
+
+    // Check carers with matching postcode
+    const carersWithMatchingPostcode = await (this.prisma as any).carer.findMany({
+      where: {
+        tenantId: tenantId.toString(),
+        postcode: {
+          equals: normalizedPostcode,
+          mode: 'insensitive'
+        }
+      },
+      include: {
+        cluster: true
+      }
+    });
+
+    // Find clusters from matching clients/carers
+    const relatedClusters = new Set<string>();
+    clientsWithMatchingPostcode.forEach((client: any) => {
+      if (client.clusterId) relatedClusters.add(client.clusterId);
+    });
+    carersWithMatchingPostcode.forEach((carer: any) => {
+      if (carer.clusterId) relatedClusters.add(carer.clusterId);
+    });
+
+    if (relatedClusters.size > 0) {
+      const targetClusterId = Array.from(relatedClusters)[0]; // Take first match
+      const targetCluster = await (this.prisma as any).cluster.findUnique({
+        where: { id: targetClusterId }
+      });
+
+      if (targetCluster) {
+        if (clientId) {
+          await this.assignClientToClusterInternal(tenantId.toString(), targetClusterId, clientId);
+        } else {
+          const newClient = await this.createClientFromDetails(tenantId.toString(), req.body);
+          await this.assignClientToClusterInternal(tenantId.toString(), targetClusterId, newClient.id);
+        }
+
+        return res.json({
+          success: true,
+          action: 'assigned_to_existing_cluster',
+          clusterId: targetClusterId,
+          clusterName: targetCluster.name,
+          reason: 'related_postcode_match',
+          message: `Client assigned to cluster "${targetCluster.name}" due to related postcode match`
+        });
+      }
+    }
+
+    // Step 3: Calculate distance to existing clusters using Google Maps API
+    const clusters = await (this.prisma as any).cluster.findMany({
+      where: {
+        tenantId: tenantId.toString()
+      },
+      select: {
+        id: true,
+        name: true,
+        latitude: true,
+        longitude: true,
+        postcode: true
+      }
+    });
+
+    if (clusters.length > 0) {
+      // Prepare client location data (Google Maps will geocode if needed)
+      const clientLocation = {
+        address: address,
+        postcode: postcode
+        // No coordinates needed - Google Maps will geocode from address/postcode
+      };
+
+      // Calculate distances to all clusters using Google Maps API
+      const distances: Array<{ cluster: any; distanceKm: number; durationMinutes: number }> = [];
+
+      for (const cluster of clusters) {
+        try {
+          // Prepare destination location for cluster
+          const clusterLocation: any = {};
+
+          if (cluster.latitude && cluster.longitude) {
+            // Use coordinates if available (more precise)
+            clusterLocation.latitude = cluster.latitude;
+            clusterLocation.longitude = cluster.longitude;
+            clusterLocation.address = cluster.name;
+          } else if (cluster.postcode) {
+            // Fall back to postcode
+            clusterLocation.postcode = cluster.postcode;
+            clusterLocation.address = cluster.name;
+          } else {
+            // Skip clusters without location data
+            continue;
+          }
+
+          const travelRequest: TravelCalculationRequest = {
+            from: clientLocation,
+            to: clusterLocation,
+            mode: 'driving'
+          };
+
+          const travelResult = await this.enhancedTravelService.calculateTravel(travelRequest);
+          const distanceKm = travelResult.distance.kilometers;
+
+          distances.push({
+            cluster,
+            distanceKm,
+            durationMinutes: travelResult.duration.minutes
+          });
+        } catch (error) {
+          console.error(`Failed to calculate distance to cluster ${cluster.id}:`, error);
+          // Skip this cluster if distance calculation fails
+          continue;
+        }
+      }
+
+      // Sort by distance
+      distances.sort((a, b) => a.distanceKm - b.distanceKm);
+
+      // Check if closest cluster is within 1km
+      if (distances.length > 0) {
+        const closest = distances[0];
+        if (closest.distanceKm <= 1.0) { // 1km threshold
+          if (clientId) {
+            await this.assignClientToClusterInternal(tenantId.toString(), closest.cluster.id, clientId);
+          } else {
+            const newClient = await this.createClientFromDetails(tenantId.toString(), req.body);
+            await this.assignClientToClusterInternal(tenantId.toString(), closest.cluster.id, newClient.id);
+          }
+
+          return res.json({
+            success: true,
+            action: 'assigned_to_existing_cluster',
+            clusterId: closest.cluster.id,
+            clusterName: closest.cluster.name,
+            reason: 'distance_match',
+            distanceKm: closest.distanceKm.toFixed(2),
+            durationMinutes: closest.durationMinutes,
+            message: `Client assigned to cluster "${closest.cluster.name}" due to proximity (${closest.distanceKm.toFixed(2)}km, ${closest.durationMinutes}min drive)`
+          });
+        }
+      }
+    }
+
+    // Step 4: Create new cluster
+    const clusterName = address; // Use address as cluster name
+    const newCluster = await (this.prisma as any).cluster.create({
+      data: {
+        tenantId: tenantId.toString(),
+        name: clusterName,
+        description: `Auto-created cluster for ${name || 'client'} at ${address}`,
+        postcode: normalizedPostcode,
+        latitude: latitude || null,
+        longitude: longitude || null,
+        radiusMeters: 5000,
+        activeRequestCount: 0,
+        totalRequestCount: 0,
+        activeCarerCount: 0,
+        totalCarerCount: 0,
+        lastActivityAt: new Date()
+      }
+    });
+
+    // Note: PostGIS regionCenter will be set when coordinates become available
+    // through Google Maps geocoding during distance calculations
+
+    // Create and assign client
+    let finalClient;
+    if (clientId) {
+      finalClient = { id: clientId };
+      await this.assignClientToClusterInternal(tenantId.toString(), newCluster.id, clientId);
+    } else {
+      finalClient = await this.createClientFromDetails(tenantId.toString(), req.body);
+      await this.assignClientToClusterInternal(tenantId.toString(), newCluster.id, finalClient.id);
+    }
+
+    return res.json({
+      success: true,
+      action: 'new_cluster_created',
+      clusterId: newCluster.id,
+      clusterName: newCluster.name,
+      clientId: finalClient.id,
+      reason: 'no_match_found',
+      message: `New cluster "${newCluster.name}" created and client assigned`
+    });
+
+  } catch (error: any) {
+    console.error('autoAssignClientToCluster error', error);
+    return res.status(500).json({
+      error: 'Failed to auto-assign client to cluster',
+      details: error?.message
+    });
+  }
+}
+
+/**
+ * Helper method to assign client to cluster
+ */
+private async assignClientToClusterInternal(tenantId: string, clusterId: string, clientId: string) {
+  // Check if already assigned
+  const existing = await (this.prisma as any).clusterClient.findFirst({
+    where: {
+      tenantId,
+      clusterId,
+      clientId
+    }
+  });
+
+  if (!existing) {
+    await (this.prisma as any).clusterClient.create({
+      data: {
+        tenantId,
+        clusterId,
+        clientId
+      }
+    });
+
+    // Update cluster stats
+    await this.clusteringService.updateClusterStats(clusterId);
+  }
+}
+
+/**
+ * Auto-assign carer to cluster based on postcode similarity and distance
+ * POST /clusters/auto-assign-carer
+ */
+public async autoAssignCarerToCluster(req: Request, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      return res.status(403).json({ error: 'tenantId missing from auth context' });
+    }
+
+    const {
+      carerId,
+      postcode,
+      address,
+      town,
+      city,
+      latitude,
+      longitude
+    } = req.body;
+
+    if (!carerId) {
+      return res.status(400).json({ error: 'carerId is required' });
+    }
+
+    if (!postcode) {
+      return res.status(400).json({ error: 'postcode is required' });
+    }
+
+    if (!address) {
+      return res.status(400).json({ error: 'address is required' });
+    }
+
+    // Validate carer exists in auth service
+    const authHeader = req.headers.authorization as string | undefined;
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+    const carerService = new CarerService();
+    const carer = await carerService.getCarerById(token, carerId);
+
+    if (!carer) {
+      return res.status(404).json({ error: 'Carer not found in auth service' });
+    }
+
+    // Normalize postcode for comparison
+    const normalizedPostcode = postcode.trim().replace(/\s+/g, '').toUpperCase();
+
+    // Step 1: Check if postcode matches any existing cluster postcode
+    const matchingCluster = await (this.prisma as any).cluster.findFirst({
+      where: {
+        tenantId: tenantId.toString(),
+        postcode: {
+          equals: normalizedPostcode,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (matchingCluster) {
+      // Assign to existing cluster
+      await this.assignCarerToClusterInternal(tenantId.toString(), matchingCluster.id, carerId);
+
+      return res.json({
+        success: true,
+        action: 'assigned_to_existing_cluster',
+        clusterId: matchingCluster.id,
+        clusterName: matchingCluster.name,
+        carerId,
+        reason: 'postcode_match',
+        message: `Carer assigned to cluster "${matchingCluster.name}" due to matching postcode`
+      });
+    }
+
+    // Step 2: Check if postcode matches any existing client or carer assigned to a cluster
+    const clientsWithMatchingPostcode = await (this.prisma as any).externalRequest.findMany({
+      where: {
+        tenantId: tenantId.toString(),
+        postcode: {
+          equals: normalizedPostcode,
+          mode: 'insensitive'
+        }
+      },
+      include: {
+        cluster: true
+      }
+    });
+
+    const carersWithMatchingPostcode = await (this.prisma as any).carer.findMany({
+      where: {
+        tenantId: tenantId.toString(),
+        postcode: {
+          equals: normalizedPostcode,
+          mode: 'insensitive'
+        }
+      },
+      include: {
+        cluster: true
+      }
+    });
+
+    // Find clusters from matching clients/carers
+    const relatedClusters = new Set<string>();
+    clientsWithMatchingPostcode.forEach((client: any) => {
+      if (client.clusterId) relatedClusters.add(client.clusterId);
+    });
+    carersWithMatchingPostcode.forEach((carer: any) => {
+      if (carer.clusterId) relatedClusters.add(carer.clusterId);
+    });
+
+    if (relatedClusters.size > 0) {
+      const targetClusterId = Array.from(relatedClusters)[0]; // Take first match
+      const targetCluster = await (this.prisma as any).cluster.findUnique({
+        where: { id: targetClusterId }
+      });
+
+      if (targetCluster) {
+        await this.assignCarerToClusterInternal(tenantId.toString(), targetClusterId, carerId);
+
+        return res.json({
+          success: true,
+          action: 'assigned_to_existing_cluster',
+          clusterId: targetClusterId,
+          clusterName: targetCluster.name,
+          carerId,
+          reason: 'related_postcode_match',
+          message: `Carer assigned to cluster "${targetCluster.name}" due to related postcode match`
+        });
+      }
+    }
+
+    // Step 3: Calculate distance to existing clusters using Google Maps API
+    const clusters = await (this.prisma as any).cluster.findMany({
+      where: {
+        tenantId: tenantId.toString()
+      },
+      select: {
+        id: true,
+        name: true,
+        latitude: true,
+        longitude: true,
+        postcode: true
+      }
+    });
+
+    if (clusters.length > 0) {
+      // Prepare carer location data (Google Maps will geocode if needed)
+      const carerLocation = {
+        address: address,
+        postcode: postcode
+        // No coordinates needed - Google Maps will geocode from address/postcode
+      };
+
+      // Calculate distances to all clusters using Google Maps API
+      const distances: Array<{ cluster: any; distanceKm: number; durationMinutes: number }> = [];
+
+      for (const cluster of clusters) {
+        try {
+          // Prepare destination location for cluster
+          const clusterLocation: any = {};
+
+          if (cluster.latitude && cluster.longitude) {
+            // Use coordinates if available (more precise)
+            clusterLocation.latitude = cluster.latitude;
+            clusterLocation.longitude = cluster.longitude;
+            clusterLocation.address = cluster.name;
+          } else if (cluster.postcode) {
+            // Fall back to postcode
+            clusterLocation.postcode = cluster.postcode;
+            clusterLocation.address = cluster.name;
+          } else {
+            // Skip clusters without location data
+            continue;
+          }
+
+          const travelRequest: TravelCalculationRequest = {
+            from: carerLocation,
+            to: clusterLocation,
+            mode: 'driving'
+          };
+
+          const travelResult = await this.enhancedTravelService.calculateTravel(travelRequest);
+          const distanceKm = travelResult.distance.kilometers;
+
+          distances.push({
+            cluster,
+            distanceKm,
+            durationMinutes: travelResult.duration.minutes
+          });
+        } catch (error) {
+          console.error(`Failed to calculate distance to cluster ${cluster.id}:`, error);
+          // Skip this cluster if distance calculation fails
+          continue;
+        }
+      }
+
+      // Sort by distance
+      distances.sort((a, b) => a.distanceKm - b.distanceKm);
+
+      // Check if closest cluster is within 1km
+      if (distances.length > 0) {
+        const closest = distances[0];
+        if (closest.distanceKm <= 1.0) { // 1km threshold
+          await this.assignCarerToClusterInternal(tenantId.toString(), closest.cluster.id, carerId);
+
+          return res.json({
+            success: true,
+            action: 'assigned_to_existing_cluster',
+            clusterId: closest.cluster.id,
+            clusterName: closest.cluster.name,
+            carerId,
+            reason: 'distance_match',
+            distanceKm: closest.distanceKm.toFixed(2),
+            durationMinutes: closest.durationMinutes,
+            message: `Carer assigned to cluster "${closest.cluster.name}" due to proximity (${closest.distanceKm.toFixed(2)}km, ${closest.durationMinutes}min drive)`
+          });
+        }
+      }
+    }
+
+    // Step 4: Create new cluster
+    const clusterName = address; // Use address as cluster name
+    const newCluster = await (this.prisma as any).cluster.create({
+      data: {
+        tenantId: tenantId.toString(),
+        name: clusterName,
+        description: `Auto-created cluster for carer ${carer.first_name} ${carer.last_name} at ${address}`,
+        postcode: normalizedPostcode,
+        latitude: latitude || null,
+        longitude: longitude || null,
+        radiusMeters: 5000,
+        activeRequestCount: 0,
+        totalRequestCount: 0,
+        activeCarerCount: 0,
+        totalCarerCount: 0,
+        lastActivityAt: new Date()
+      }
+    });
+
+    // Note: PostGIS regionCenter will be set when coordinates become available
+    // through Google Maps geocoding during distance calculations
+
+    // Assign carer to new cluster
+    await this.assignCarerToClusterInternal(tenantId.toString(), newCluster.id, carerId);
+
+    return res.json({
+      success: true,
+      action: 'new_cluster_created',
+      clusterId: newCluster.id,
+      clusterName: newCluster.name,
+      carerId,
+      reason: 'no_match_found',
+      message: `New cluster "${newCluster.name}" created and carer assigned`
+    });
+
+  } catch (error: any) {
+    console.error('autoAssignCarerToCluster error', error);
+    return res.status(500).json({
+      error: 'Failed to auto-assign carer to cluster',
+      details: error?.message
+    });
+  }
+}
+
+/**
+ * Helper method to assign carer to cluster
+ */
+private async assignCarerToClusterInternal(tenantId: string, clusterId: string, carerId: string) {
+  // Check if already assigned
+  const existing = await (this.prisma as any).clusterAssignment.findFirst({
+    where: {
+      tenantId,
+      clusterId,
+      carerId
+    }
+  });
+
+  if (!existing) {
+    await (this.prisma as any).clusterAssignment.create({
+      data: {
+        tenantId,
+        clusterId,
+        carerId
+      }
+    });
+
+    // Update cluster stats
+    await this.clusteringService.updateClusterStats(clusterId);
+  }
+}
+
+/**
+ * Helper method to create client from details
+ */
+private async createClientFromDetails(tenantId: string, clientData: any) {
+  const {
+    name,
+    postcode,
+    address,
+    town,
+    city,
+    latitude,
+    longitude
+  } = clientData;
+
+  // Create as ExternalRequest (client request)
+  const client = await (this.prisma as any).externalRequest.create({
+    data: {
+      tenantId,
+      subject: `Client: ${name}`,
+      content: `Auto-created client from cluster assignment`,
+      requestorEmail: `client_${Date.now()}@auto.generated`, // Placeholder
+      requestorName: name,
+      address,
+      postcode,
+      town,
+      latitude,
+      longitude,
+      status: 'APPROVED',
+      sendToRostering: true
+    }
+  });
+
+  return client;
+}
+
 }
