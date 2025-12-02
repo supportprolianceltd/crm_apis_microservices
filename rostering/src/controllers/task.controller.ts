@@ -1663,33 +1663,12 @@ export class TaskController {
       if (!existing) return res.status(404).json({ error: 'Visit not found' });
       if (existing.tenantId !== tenantId.toString()) return res.status(403).json({ error: 'Access denied to this visit' });
 
-      // Enforce that only a carer who is listed as an assignee may clock in,
-      // unless an admin requests an override via body.adminOverride=true.
-      const callerCarerId = (req.user as any)?.carerId as string | undefined;
-      const callerIsAdmin = !!((req.user as any)?.isAdmin || (req.user as any)?.admin || ((req.user as any)?.roles && Array.isArray((req.user as any).roles) && (req.user as any).roles.includes('admin')));
-      const adminOverrideRequested = !!req.body?.adminOverride;
-
+      // No auth checks: allow any authenticated user to clock in. Record who attempted.
+      const userObj = (req.user as any) || {};
+      const callerRole = userObj.role as string | undefined;
+      const callerUserId = userObj.id ? String(userObj.id) : null;
       const assigneeIds = Array.isArray(existing.assignees) ? existing.assignees.map((a: any) => a.carerId) : [];
-
-      if (adminOverrideRequested && callerIsAdmin) {
-        // admin override allowed
-      } else {
-        if (!callerCarerId) return res.status(403).json({ error: 'Caller must be a carer to clock in' });
-        if (assigneeIds.length > 0) {
-          if (!assigneeIds.includes(callerCarerId)) {
-            return res.status(403).json({ error: 'You are not assigned to this visit' });
-          }
-        } else {
-          // Fallback to denormalized carerId if no assignees relation present
-          if (existing.carerId) {
-            if (existing.carerId !== callerCarerId) {
-              return res.status(403).json({ error: 'You are not assigned to this visit' });
-            }
-          } else {
-            return res.status(403).json({ error: 'No assignees on this visit' });
-          }
-        }
-      }
+      console.log('[clockInVisit] attempt', { userId: callerUserId, role: callerRole, visitId, assigneesCount: assigneeIds.length });
 
       const updated = await (this.prisma as any).carerVisit.update({
         where: { id: visitId },
@@ -1697,8 +1676,45 @@ export class TaskController {
         include: { tasks: { include: { carePlan: { select: { id: true, clientId: true, title: true } } } }, assignees: true },
       });
 
-      // Visit-level clock-in logs are intentionally not written to `client_visit_logs`.
-      // Per product decision, only task-level events (e.g. TASK_COMPLETED) are stored there.
+      // Update/create attendance row: determine early/late entry relative to scheduled start
+      try {
+        const actingCarerId = (req.user as any)?.id ? String((req.user as any).id) : null;
+        const staffId = actingCarerId ? String(actingCarerId) : 'unknown';
+
+        const clockInAt = updated.clockInAt ? new Date(updated.clockInAt) : new Date();
+        const scheduledStart = existing.startDate ? new Date(existing.startDate) : null;
+
+        let entryStatus: any = null;
+        if (scheduledStart) {
+          // before or on scheduled start => early entry, otherwise late entry
+          entryStatus = (clockInAt.getTime() <= scheduledStart.getTime()) ? 'EARLY_ENTRY' : 'LATE_ENTRY';
+        }
+
+        // Find attendance record for same day (UTC day of clockIn)
+        const dayStart = new Date(Date.UTC(clockInAt.getUTCFullYear(), clockInAt.getUTCMonth(), clockInAt.getUTCDate(), 0, 0, 0, 0));
+        const dayEnd = new Date(dayStart);
+        dayEnd.setUTCDate(dayStart.getUTCDate() + 1);
+
+        const existingAttendance = await (this.prisma as any).attendance.findFirst({
+          where: {
+            tenantId: tenantId.toString(),
+            staffId,
+            OR: [
+              { carerVisitId: visitId },
+              { clockInAt: { gte: dayStart, lt: dayEnd } },
+              { clockOutAt: { gte: dayStart, lt: dayEnd } },
+            ],
+          },
+        });
+
+        if (existingAttendance) {
+          await (this.prisma as any).attendance.update({ where: { id: existingAttendance.id }, data: { clockInAt: clockInAt, entryStatus, carerVisitId: visitId } });
+        } else {
+          await (this.prisma as any).attendance.create({ data: { tenantId: tenantId.toString(), staffId, carerVisitId: visitId, clockInAt: clockInAt, entryStatus } });
+        }
+      } catch (e) {
+        console.error('Failed to write attendance on clockIn', e);
+      }
 
       return res.json(updated);
     } catch (error: any) {
@@ -1722,33 +1738,12 @@ export class TaskController {
       if (!existing) return res.status(404).json({ error: 'Visit not found' });
       if (existing.tenantId !== tenantId.toString()) return res.status(403).json({ error: 'Access denied to this visit' });
 
-      // Enforce that only a carer who is listed as an assignee may clock out,
-      // unless an admin requests an override via body.adminOverride=true.
-      const callerCarerId = (req.user as any)?.carerId as string | undefined;
-      const callerIsAdmin = !!((req.user as any)?.isAdmin || (req.user as any)?.admin || ((req.user as any)?.roles && Array.isArray((req.user as any).roles) && (req.user as any).roles.includes('admin')));
-      const adminOverrideRequested = !!req.body?.adminOverride;
-
+      // No auth checks: allow any authenticated user to clock out. Record who attempted.
+      const userObj = (req.user as any) || {};
+      const callerRole = userObj.role as string | undefined;
+      const callerUserId = userObj.id ? String(userObj.id) : null;
       const assigneeIds = Array.isArray(existing.assignees) ? existing.assignees.map((a: any) => a.carerId) : [];
-
-      if (adminOverrideRequested && callerIsAdmin) {
-        // admin override allowed
-      } else {
-        if (!callerCarerId) return res.status(403).json({ error: 'Caller must be a carer to clock out' });
-        if (assigneeIds.length > 0) {
-          if (!assigneeIds.includes(callerCarerId)) {
-            return res.status(403).json({ error: 'You are not assigned to this visit' });
-          }
-        } else {
-          // Fallback to denormalized carerId if no assignees relation present
-          if (existing.carerId) {
-            if (existing.carerId !== callerCarerId) {
-              return res.status(403).json({ error: 'You are not assigned to this visit' });
-            }
-          } else {
-            return res.status(403).json({ error: 'No assignees on this visit' });
-          }
-        }
-      }
+      console.log('[clockOutVisit] attempt', { userId: callerUserId, role: callerRole, visitId, assigneesCount: assigneeIds.length });
 
       const updated = await (this.prisma as any).carerVisit.update({
         where: { id: visitId },
@@ -1756,8 +1751,45 @@ export class TaskController {
         include: { tasks: { include: { carePlan: { select: { id: true, clientId: true, title: true } } } }, assignees: true },
       });
 
-      // Visit-level clock-out/completion logs are intentionally not written to `client_visit_logs`.
-      // Only task-level events (e.g. TASK_COMPLETED) are stored there per product decision.
+      // Update/create attendance row: determine early/late exit relative to scheduled end
+      try {
+        const actingCarerId = (req.user as any)?.id ? String((req.user as any).id) : null;
+        const staffId = actingCarerId ? String(actingCarerId) : 'unknown';
+
+        const clockOutAt = updated.clockOutAt ? new Date(updated.clockOutAt) : new Date();
+        const scheduledEnd = existing.endDate ? new Date(existing.endDate) : null;
+
+        let exitStatus: any = null;
+        if (scheduledEnd) {
+          // on/after scheduled end => late exit, otherwise early exit
+          exitStatus = (clockOutAt.getTime() >= scheduledEnd.getTime()) ? 'LATE_EXIT' : 'EARLY_EXIT';
+        }
+
+        // Find attendance record for same day (UTC day of clockOut)
+        const dayStart = new Date(Date.UTC(clockOutAt.getUTCFullYear(), clockOutAt.getUTCMonth(), clockOutAt.getUTCDate(), 0, 0, 0, 0));
+        const dayEnd = new Date(dayStart);
+        dayEnd.setUTCDate(dayStart.getUTCDate() + 1);
+
+        const existingAttendance = await (this.prisma as any).attendance.findFirst({
+          where: {
+            tenantId: tenantId.toString(),
+            staffId,
+            OR: [
+              { carerVisitId: visitId },
+              { clockInAt: { gte: dayStart, lt: dayEnd } },
+              { clockOutAt: { gte: dayStart, lt: dayEnd } },
+            ],
+          },
+        });
+
+        if (existingAttendance) {
+          await (this.prisma as any).attendance.update({ where: { id: existingAttendance.id }, data: { clockOutAt: clockOutAt, exitStatus, carerVisitId: visitId } });
+        } else {
+          await (this.prisma as any).attendance.create({ data: { tenantId: tenantId.toString(), staffId, carerVisitId: visitId, clockOutAt: clockOutAt, exitStatus } });
+        }
+      } catch (e) {
+        console.error('Failed to write attendance on clockOut', e);
+      }
 
       return res.json(updated);
     } catch (error: any) {
