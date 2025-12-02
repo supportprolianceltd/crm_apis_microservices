@@ -903,7 +903,9 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = self.perform_create(serializer)
-        serializer = self.get_serializer(user)
+        # Reload the user instance with the profile loaded
+        user = CustomUser.objects.select_related('client_profile').get(id=user.id)
+        serializer = ClientDetailSerializer(user, context=self.get_serializer_context())
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 

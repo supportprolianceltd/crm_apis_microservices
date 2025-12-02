@@ -72,6 +72,7 @@ import { ClusterMetricsController } from './controllers/cluster-metrics.controll
 
 // Import workers and middleware
 import { EmailWorker } from './workers/email.worker';
+import { AutoAssignWorker } from './workers/auto-assign.worker';
 import { authenticate } from './middleware/auth.middleware';
 import { startOverdueTaskScheduler } from './services/overdue-tasks.scheduler';
 
@@ -107,6 +108,7 @@ class RosteringServer {
 
   // Workers
   private emailWorker?: EmailWorker;
+  private autoAssignWorker?: any; // AutoAssignWorker
 
   // Controllers
   private requestController?: RequestController;
@@ -244,6 +246,9 @@ class RosteringServer {
         this.tenantEmailConfigService,
         this.notificationService
       );
+
+      console.log('🔧 [DEBUG] Initializing auto-assign worker...');
+      this.autoAssignWorker = new AutoAssignWorker(this.prisma);
 
       // Initialize controllers
       console.log('🔧 [DEBUG] Initializing controllers...');
@@ -950,6 +955,9 @@ class RosteringServer {
       this.emailWorker!.start();
       logger.info('✅ Email worker started');
 
+      this.autoAssignWorker!.start();
+      logger.info('✅ Auto-assign worker started');
+
       // Start overdue task scheduler (marks overdue tasks as MISSED)
       try {
         startOverdueTaskScheduler(this.prisma!);
@@ -1064,6 +1072,11 @@ class RosteringServer {
       if (this.emailWorker) {
         this.emailWorker.stop();
         logger.info('✅ Email worker stopped');
+      }
+
+      if (this.autoAssignWorker) {
+        this.autoAssignWorker.stop();
+        logger.info('✅ Auto-assign worker stopped');
       }
 
       // Step 4: Close email connections

@@ -1857,11 +1857,12 @@ class ClientProfileSerializer(serializers.ModelSerializer):
 
 
 
-    def create(self, validated_data):
+    def create(self, validated_data, **kwargs):
+        user = kwargs.get('user')
         try:
             user_data = get_user_data_from_jwt(self.context['request'])
             user_id = user_data.get('id')
-            
+
             if user_id:
                 validated_data['last_updated_by_id'] = str(user_id)
             else:
@@ -1882,11 +1883,15 @@ class ClientProfileSerializer(serializers.ModelSerializer):
             else:
                 validated_data['last_updated_by_id'] = None
 
+        # Set the user for creation since it's required
+        if user:
+            validated_data['user'] = user
+
         # Rest of your existing code for photo upload and creation
         photo = validated_data.pop("photo", None)
         preferred_carers = validated_data.pop("preferred_carers", [])
         client_profile = super().create(validated_data)
-        
+
         if photo and hasattr(photo, "name"):
             logger.info(f"Uploading client photo: {photo.name}")
             try:
@@ -1901,7 +1906,7 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         else:
             logger.info("No photo provided for client profile, setting photo_url to None")
             client_profile.photo_url = None
-            
+
         client_profile.preferred_carers.set(preferred_carers)
         client_profile.save()
         return client_profile
@@ -2098,6 +2103,24 @@ class ClientCreateSerializer(serializers.ModelSerializer):
             profile_serializer.is_valid(raise_exception=True)
             profile_serializer.save(user=user)
             return user
+
+    
+    def to_representation(self, instance):
+        """
+        Include the profile data in the response when creating a client.
+        """
+        representation = super().to_representation(instance)
+        
+        # Add profile data to the response
+        try:
+            if hasattr(instance, 'client_profile') and instance.client_profile:
+                representation['profile'] = ClientProfileSerializer(instance.client_profile).data
+            else:
+                representation['profile'] = None
+        except ClientProfile.DoesNotExist:
+            representation['profile'] = None
+            
+        return representation
 
 
 class DocumentPermissionSerializer(serializers.ModelSerializer):

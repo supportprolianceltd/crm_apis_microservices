@@ -1584,6 +1584,73 @@ public async autoAssignClientToCluster(req: Request, res: Response) {
       return res.status(400).json({ error: 'address is required' });
     }
 
+    // Import job queue service dynamically
+    const { jobQueueService } = await import('../services/job-queue.service');
+
+    // Add job to queue
+    const job = await jobQueueService.addClientAutoAssignJob({
+      tenantId: tenantId.toString(),
+      userId: req.user?.id || 'system',
+      data: {
+        name,
+        postcode,
+        address,
+        town,
+        city,
+        latitude,
+        longitude,
+        clientId
+      }
+    });
+
+    // Return job ID immediately for status tracking
+    return res.json({
+      success: true,
+      message: 'Client auto-assignment job queued successfully',
+      jobId: job.id,
+      status: 'queued',
+      estimatedProcessingTime: '5-30 seconds'
+    });
+
+  } catch (error: any) {
+    console.error('autoAssignClientToCluster error', error);
+    return res.status(500).json({
+      error: 'Failed to queue client auto-assignment job',
+      details: error?.message
+    });
+  }
+}
+
+/**
+ * Auto-assign client to cluster - SYNCHRONOUS VERSION (for internal use)
+ * This method contains the actual assignment logic
+ */
+private async autoAssignClientToClusterSync(req: Request, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      return res.status(403).json({ error: 'tenantId missing from auth context' });
+    }
+
+    const {
+      name,
+      postcode,
+      address,
+      town,
+      city,
+      latitude,
+      longitude,
+      clientId // optional, if client already exists
+    } = req.body;
+
+    if (!postcode) {
+      return res.status(400).json({ error: 'postcode is required' });
+    }
+
+    if (!address) {
+      return res.status(400).json({ error: 'address is required' });
+    }
+
     // Normalize postcode for comparison
     const normalizedPostcode = postcode.trim().replace(/\s+/g, '').toUpperCase();
 
@@ -1867,6 +1934,75 @@ private async assignClientToClusterInternal(tenantId: string, clusterId: string,
  * POST /clusters/auto-assign-carer
  */
 public async autoAssignCarerToCluster(req: Request, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      return res.status(403).json({ error: 'tenantId missing from auth context' });
+    }
+
+    const {
+      carerId,
+      postcode,
+      address,
+      town,
+      city,
+      latitude,
+      longitude
+    } = req.body;
+
+    if (!carerId) {
+      return res.status(400).json({ error: 'carerId is required' });
+    }
+
+    if (!postcode) {
+      return res.status(400).json({ error: 'postcode is required' });
+    }
+
+    if (!address) {
+      return res.status(400).json({ error: 'address is required' });
+    }
+
+    // Import job queue service dynamically
+    const { jobQueueService } = await import('../services/job-queue.service');
+
+    // Add job to queue
+    const job = await jobQueueService.addCarerAutoAssignJob({
+      tenantId: tenantId.toString(),
+      userId: req.user?.id || 'system',
+      data: {
+        carerId,
+        postcode,
+        address,
+        town,
+        city,
+        latitude,
+        longitude
+      }
+    });
+
+    // Return job ID immediately for status tracking
+    return res.json({
+      success: true,
+      message: 'Carer auto-assignment job queued successfully',
+      jobId: job.id,
+      status: 'queued',
+      estimatedProcessingTime: '5-30 seconds'
+    });
+
+  } catch (error: any) {
+    console.error('autoAssignCarerToCluster error', error);
+    return res.status(500).json({
+      error: 'Failed to queue carer auto-assignment job',
+      details: error?.message
+    });
+  }
+}
+
+/**
+ * Auto-assign carer to cluster - SYNCHRONOUS VERSION (for internal use)
+ * This method contains the actual assignment logic
+ */
+private async autoAssignCarerToClusterSync(req: Request, res: Response) {
   try {
     const tenantId = req.user?.tenantId;
     if (!tenantId) {
@@ -2184,6 +2320,88 @@ private async createClientFromDetails(tenantId: string, clientData: any) {
   });
 
   return client;
+}
+
+/**
+ * Get job status by ID
+ * GET /clusters/jobs/:queueType/:jobId/status
+ */
+public async getJobStatus(req: Request, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      return res.status(403).json({ error: 'tenantId missing from auth context' });
+    }
+
+    const { queueType, jobId } = req.params;
+
+    if (!['client', 'carer'].includes(queueType)) {
+      return res.status(400).json({ error: 'queueType must be either "client" or "carer"' });
+    }
+
+    // Import job queue service dynamically
+    const { jobQueueService } = await import('../services/job-queue.service');
+
+    const status = await jobQueueService.getJobStatus(queueType as 'client' | 'carer', jobId);
+
+    return res.json({
+      success: true,
+      data: status
+    });
+
+  } catch (error: any) {
+    console.error('getJobStatus error', error);
+    return res.status(500).json({
+      error: 'Failed to get job status',
+      details: error?.message
+    });
+  }
+}
+
+/**
+ * Get jobs status for a queue
+ * GET /clusters/jobs/:queueType/status
+ */
+public async getJobsStatus(req: Request, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      return res.status(403).json({ error: 'tenantId missing from auth context' });
+    }
+
+    const { queueType } = req.params;
+    const { status, limit = 10 } = req.query;
+
+    if (!['client', 'carer'].includes(queueType)) {
+      return res.status(400).json({ error: 'queueType must be either "client" or "carer"' });
+    }
+
+    // Import job queue service dynamically
+    const { jobQueueService } = await import('../services/job-queue.service');
+
+    const jobs = await jobQueueService.getJobs(
+      queueType as 'client' | 'carer',
+      status as string,
+      Number(limit)
+    );
+
+    return res.json({
+      success: true,
+      data: jobs,
+      meta: {
+        queueType,
+        filter: status || 'all',
+        limit: Number(limit)
+      }
+    });
+
+  } catch (error: any) {
+    console.error('getJobsStatus error', error);
+    return res.status(500).json({
+      error: 'Failed to get jobs status',
+      details: error?.message
+    });
+  }
 }
 
 }

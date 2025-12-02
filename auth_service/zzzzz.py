@@ -64,14 +64,15 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='support@prolianceltd.com',
+        email='tonna.ezugwu@prolianceltd.com',
         password='qwerty',
-        role='root-admin',
-        first_name='Root',
-        last_name='Admin',
+        role='co-admin',
+        first_name='Tonna',
+        last_name='Ezugwu',
         job_role='Project Coordinator',
         tenant=tenant
     )
+
 
 from core.models import Tenant, Domain
 if not Tenant.objects.filter(schema_name='public').exists():

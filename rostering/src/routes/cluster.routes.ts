@@ -74,6 +74,10 @@ export function createClusterRoutes(prisma: PrismaClient) {
     // NEW: Auto-assign carer to cluster
     router.post('/auto-assign-carer', clusterController.autoAssignCarerToCluster.bind(clusterController));
 
+    // NEW: Job status checking
+    router.get('/jobs/:queueType/:jobId/status', clusterController.getJobStatus.bind(clusterController));
+    router.get('/jobs/:queueType/status', clusterController.getJobsStatus.bind(clusterController));
+
     return router;
 }
 

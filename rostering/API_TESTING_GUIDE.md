@@ -587,6 +587,163 @@ curl -X POST http://localhost:3005/api/rostering/clusters/auto-assign-carer \
 
 ---
 
+## Background Job Processing
+
+### Overview
+Both auto-assignment endpoints use **background job processing** with Redis-based queues to ensure:
+
+- **Non-blocking API responses**: Immediate response with job ID for status tracking
+- **Reliability**: Jobs continue processing even if the client disconnects or page refreshes
+- **Scalability**: Multiple jobs can be processed concurrently
+- **Fault tolerance**: Automatic retries for failed jobs (up to 3 attempts)
+
+### Job Queue Architecture
+
+```
+API Request → Job Queued → Background Worker → Database Update
+     ↓              ↓              ↓              ↓
+Immediate     Job ID       Google Maps      Cluster
+Response      Returned     API Calls        Assignment
+```
+
+### Job Status Tracking
+
+#### Get Specific Job Status
+**Endpoint**: `GET /api/rostering/clusters/jobs/{queueType}/{jobId}/status`
+
+**Parameters**:
+- `queueType`: `"client"` or `"carer"`
+- `jobId`: Job ID returned from the auto-assignment request
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "123",
+    "status": "completed",
+    "progress": 100,
+    "result": {
+      "action": "assigned_to_existing_cluster",
+      "clusterId": "cluster_456",
+      "clusterName": "Central London Hub",
+      "reason": "postcode_match"
+    },
+    "error": null,
+    "createdAt": "2025-12-02T10:00:00.000Z",
+    "processedAt": "2025-12-02T10:00:05.000Z",
+    "finishedAt": "2025-12-02T10:00:15.000Z",
+    "attemptsMade": 1,
+    "attemptsRemaining": 2
+  }
+}
+```
+
+#### Get All Jobs for Queue
+**Endpoint**: `GET /api/rostering/clusters/jobs/{queueType}/status`
+
+**Query Parameters**:
+- `status`: Filter by status (`active`, `waiting`, `completed`, `failed`)
+- `limit`: Maximum jobs to return (default: 10)
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "123",
+      "status": "completed",
+      "data": { "carerId": "carer_456", "postcode": "SW1A 1AA" },
+      "result": { "action": "assigned_to_existing_cluster" },
+      "createdAt": "2025-12-02T10:00:00.000Z",
+      "finishedAt": "2025-12-02T10:00:15.000Z"
+    }
+  ],
+  "meta": {
+    "queueType": "carer",
+    "filter": "completed",
+    "limit": 10
+  }
+}
+```
+
+### Job Status Values
+
+| Status | Description |
+|--------|-------------|
+| `waiting` | Job queued, waiting to be processed |
+| `active` | Job currently being processed |
+| `completed` | Job finished successfully |
+| `failed` | Job failed after all retry attempts |
+| `delayed` | Job delayed before processing |
+
+### Testing Background Jobs
+
+#### 1. Submit Auto-Assignment Job
+```bash
+# Submit client assignment job
+curl -X POST http://localhost:3005/api/rostering/clusters/auto-assign-client \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "name": "John Smith",
+    "postcode": "SW1A 1AA",
+    "address": "123 Buckingham Palace Road, London"
+  }'
+
+# Response includes jobId
+{
+  "success": true,
+  "jobId": "123",
+  "status": "queued",
+  "estimatedProcessingTime": "5-30 seconds"
+}
+```
+
+#### 2. Check Job Status
+```bash
+# Check specific job status
+curl -X GET http://localhost:3005/api/rostering/clusters/jobs/client/123/status \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Check all client jobs
+curl -X GET "http://localhost:3005/api/rostering/clusters/jobs/client/status?status=completed" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+#### 3. Monitor Job Progress
+```bash
+# Poll job status until completion
+while true; do
+  STATUS=$(curl -s http://localhost:3005/api/rostering/clusters/jobs/client/123/status \
+    -H "Authorization: Bearer YOUR_JWT_TOKEN" | jq -r '.data.status')
+  echo "Job status: $STATUS"
+  if [ "$STATUS" = "completed" ] || [ "$STATUS" = "failed" ]; then
+    break
+  fi
+  sleep 2
+done
+```
+
+### Background Worker Management
+
+The auto-assign worker runs continuously in the background and:
+
+- **Processes jobs automatically** as they are queued
+- **Retries failed jobs** up to 3 times with exponential backoff
+- **Logs all activity** for monitoring and debugging
+- **Handles graceful shutdown** during server restarts
+
+### Performance Benefits
+
+- **Immediate API Response**: No waiting for Google Maps API calls
+- **Concurrent Processing**: Multiple assignments can be processed simultaneously
+- **Fault Tolerance**: Jobs survive server restarts and network issues
+- **Resource Efficiency**: Heavy processing moved off main request threads
+
+---
+
 ## Conclusion
 
 The Auto-Assignment endpoints provide intelligent, automated cluster assignment for both clients and carers based on real-world driving distances and postcode relationships. The Google Maps integration ensures accurate distance calculations, while the hierarchical matching algorithm provides flexible assignment logic suitable for various care scheduling scenarios.
