@@ -29,6 +29,7 @@ import { createHealthRoutes } from './routes/health.routes';
 import { createEmailRoutes } from './routes/email.routes';
 import { createCarePlanRoutes } from './routes/careplan.routes';
 import { createTaskRoutes } from './routes/task.routes';
+import { createAttendanceRoutes } from './routes/attendance.routes';
 import { createClusterRoutes } from './routes/cluster.routes';
 import { createConstraintsRoutes } from './routes/constraints.routes';
 import { createRosterRoutes } from './routes/roster.routes';
@@ -117,6 +118,7 @@ class RosteringServer {
   private rosterController?: RosterController;
   private carePlanController?: CarePlanController;
   private taskController?: TaskController;
+  private attendanceController?: any;
   private publicationController?: PublicationController;
   private dataValidationController?: DataValidationController;
   private travelMatrixController?: TravelMatrixController;
@@ -446,6 +448,7 @@ class RosteringServer {
     this.app.use('/api/rostering/visits', authenticate, createVisitRoutes(this.visitController!));
     this.app.use('/api/rostering/careplans', authenticate, createCarePlanRoutes(this.carePlanController!));
     this.app.use('/api/rostering/tasks', authenticate, createTaskRoutes(this.taskController!));
+    this.app.use('/api/rostering/attendance', authenticate, createAttendanceRoutes(new (require('./controllers/attendance.controller').AttendanceController)(this.prisma!)));
 
     // Rostering & optimization routes
     this.app.use('/api/rostering/roster', authenticate, createRosterRoutes(this.prisma!));

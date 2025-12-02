@@ -975,6 +975,23 @@ model ClientVisitLog {
   @@map("client_visit_logs")
 }
 
+model Attendance {
+  id           String    @id @default(cuid())
+  tenantId     String
+  staffId      String
+  carerVisitId String?
+  clockInAt    DateTime?
+  clockOutAt   DateTime?
+
+  entryStatus EntryStatus?
+  exitStatus  ExitStatus?
+
+  @@index([tenantId])
+  @@index([staffId])
+  @@index([carerVisitId])
+  @@map("attendance")
+}
+
 enum VisitAction {
   CLOCK_IN
   CLOCK_OUT
@@ -986,6 +1003,18 @@ enum VisitAction {
   VISIT_DELETED
   ASSIGNEE_ADDED
   ASSIGNEE_REMOVED
+}
+
+enum EntryStatus {
+  EARLY_ENTRY
+  LATE_ENTRY
+  ON_TIME
+}
+
+enum ExitStatus {
+  EARLY_EXIT
+  LATE_EXIT
+  ON_TIME
 }
 
 model CarerVisitAssignee {
