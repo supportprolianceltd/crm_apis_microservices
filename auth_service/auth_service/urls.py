@@ -2,9 +2,9 @@ from django.urls import path, include
 from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from .views import (
-    CookieDebugView, CustomTokenObtainPairView, CustomTokenRefreshView, JWKSView, 
+    CookieDebugView, CustomTokenObtainPairView, CustomTokenRefreshView, JWKSView,
     JitsiTokenView, SimpleCookieTestView, TokenValidateView, TestCookieSetView,
-    LoginWith2FAView, Verify2FAView, LogoutView, PublicKeyView, EnvironmentInfoView, 
+    LoginWith2FAView, VerifyOTPView, LogoutView, PublicKeyView, EnvironmentInfoView,
     SilentTokenRenewView
 )
 from django.conf import settings
@@ -36,10 +36,10 @@ urlpatterns = [
     path('api/investments/', include('investments.urls')),
     path('api/events/', include('events.urls')),
 
-    # 2FA endpoints
+    # OTP endpoints
     path('api/login/', LoginWith2FAView.as_view(), name='login_with_2fa'),
     path('api/logout/', LogoutView.as_view(), name='token_logout'),
-    path('api/verify-2fa/', Verify2FAView.as_view(), name='verify_2fa'),
+    path('api/verify-otp/', VerifyOTPView.as_view(), name='verify_otp'),
     path('api/test-cookies/', TestCookieSetView.as_view(), name='test_cookies'),
 
     # Authentication endpoints

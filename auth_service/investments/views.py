@@ -28,6 +28,7 @@ from .models import InvestmentPolicy, LedgerEntry, WithdrawalRequest
 from .serializers import *
 from .services.roi_calculator import ROICalculator
 from .services.withdrawal_validator import WithdrawalValidator
+from .services.tax_calculator import NigerianTaxCalculator
 from django.conf import settings
 from django.contrib.auth import get_user_model
 # investments/views.py (add this to the existing views)

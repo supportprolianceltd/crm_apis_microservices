@@ -67,7 +67,13 @@ export function createClusterRoutes(prisma: PrismaClient) {
     // NEW: Client cluster suggestions
     router.get('/clients/:clientId/suggestions', clusterController.getClientClusterSuggestions.bind(clusterController));
     router.post('/clients/batch-suggestions', clusterController.getBatchClientClusterSuggestions.bind(clusterController));
- 
+
+    // NEW: Auto-assign client to cluster
+    router.post('/auto-assign-client', clusterController.autoAssignClientToCluster.bind(clusterController));
+
+    // NEW: Auto-assign carer to cluster
+    router.post('/auto-assign-carer', clusterController.autoAssignCarerToCluster.bind(clusterController));
+
     return router;
 }
 

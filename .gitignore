@@ -392,3 +392,8 @@ hr_service/..gitignore
 
 # docker compose build --no-cache
 # docker compose up -d
+complete_lms/
+auth_service/reviews/
+auth_service/investments/
+test_api/
+project_manager/
