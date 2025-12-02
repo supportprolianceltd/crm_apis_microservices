@@ -73,9 +73,9 @@ export class AttendanceController {
         }
 
         return {
-          sn: idx + 1,
           staffId: it.staffId,
           attendanceId: it.id,
+          carerVisitId: it.carerVisitId ?? null,
           clockInTime: clockInTime ? clockInTime.toISOString() : null,
           clockOutTime: clockOutTime ? clockOutTime.toISOString() : null,
           entryStatus: it.entryStatus ?? null,
