@@ -219,12 +219,12 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='rodrimine')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='support@rodrimine.com',
+        email='ekehanson@gmail.com',
         password='qwerty',
-        role='root-admin',
-        first_name='Gideon',
-        last_name='Gideon',
-        job_role='CEO',
+        role='co-admin',
+        first_name='Test',
+        last_name='Admin User',
+        job_role='Supporting CEO',
         tenant=tenant
     )
 
@@ -234,12 +234,12 @@ from users.models import CustomUser
 from django_tenants.utils import tenant_context
 
 # Get the tenant
-tenant = Tenant.objects.get(schema_name='proliance')
+tenant = Tenant.objects.get(schema_name='rodrimine')
 
 # Enter tenant context
 with tenant_context(tenant):
     try:
-        user = CustomUser.objects.get(email='ekenehanson@gmail.com')
+        user = CustomUser.objects.get(email='support@rodrimine.com')
         user.delete()
         print("User deleted successfully.")
     except CustomUser.DoesNotExist:
@@ -281,7 +281,7 @@ from core.models import Tenant, Domain
 from django_tenants.utils import schema_context
 
 # Change this to the tenant schema name you want to delete
-schema_to_delete = 'proliance'  # example
+schema_to_delete = 'rodrimine'  # example
 
 try:
     tenant = Tenant.objects.get(schema_name=schema_to_delete)

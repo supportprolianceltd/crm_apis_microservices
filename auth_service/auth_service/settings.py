@@ -459,6 +459,6 @@ CELERY_BEAT_SCHEDULE = {
 # corgi spaceship banana notebook
 
 # PASSWORD: Kd8k{tq|5?mQeB Health Care, Professional Services
-# #USERNAME: aekene-onwon8027
-# #PASSWORD: qwerty
 
+# Email: ekeabr815
+# Password: M'7Sf$DI}B?C

@@ -16,12 +16,13 @@ The system consists of:
 ## Authentication Flow
 
 ```
-1. User submits credentials + optional OTP method
+1. User submits credentials (email/username + password) + optional OTP method
 2. System validates credentials
 3. System determines OTP delivery method (profile preference or override)
 4. OTP sent to user via chosen channel
-5. User submits OTP for verification
-6. System issues JWT tokens upon successful verification
+5. User submits OTP for verification using same identifier (email/username) as login
+6. System validates OTP and verifies method consistency
+7. System issues JWT tokens upon successful verification
 ```
 
 ---
@@ -39,7 +40,7 @@ The system consists of:
 **Request Payload:**
 ```json
 {
-  "email": "user@company.com",
+  "email": "user@company.com",  // or "username": "johndoe"
   "password": "string",
   "remember_me": false,
   "otp_method": "email"  // Optional: "email" or "phone"
@@ -47,7 +48,8 @@ The system consists of:
 ```
 
 **Parameters:**
-- `email` (string, required): User's email address
+- `email` (string, required if username not provided): User's email address
+- `username` (string, required if email not provided): User's username
 - `password` (string, required): User's password
 - `remember_me` (boolean, optional): Extend token validity to 30 days
 - `otp_method` (string, optional): Override user's preferred OTP method
@@ -87,20 +89,21 @@ The system consists of:
 
 **Endpoint:** `POST /api/verify-otp/`
 
-**Purpose:** Verify the OTP code and complete the login process.
+**Purpose:** Verify the OTP code and complete the login process. The verification identifier (email or username) must match the method used during login.
 
 **Authentication:** None required
 
 **Request Payload:**
 ```json
 {
-  "email": "user@company.com",
+  "email": "user@company.com",  // or "username": "johndoe"
   "otp_code": "123456"
 }
 ```
 
 **Parameters:**
-- `email` (string, required): User's email address
+- `email` (string, required if username not provided): User's email address (must match login method)
+- `username` (string, required if email not provided): User's username (must match login method)
 - `otp_code` (string, required): 6-digit OTP code
 
 **Success Response:**
@@ -140,6 +143,16 @@ The system consists of:
 // User not found
 {
   "detail": "Invalid user."
+}
+
+// Method mismatch - logged in with email, verifying with username
+{
+  "detail": "Please use email for OTP verification as you logged in with email."
+}
+
+// Method mismatch - logged in with username, verifying with email
+{
+  "detail": "Please use username for OTP verification as you logged in with username."
 }
 ```
 
@@ -343,8 +356,9 @@ class UserProfile(models.Model):
 
 1. **Frontend Integration:**
    ```javascript
-   // Login flow
+   // Login flow - supports both email and username
    const login = async (credentials) => {
+     // credentials can contain either {email, password} or {username, password}
      const response = await fetch('/api/token/', {
        method: 'POST',
        headers: { 'Content-Type': 'application/json' },
@@ -352,10 +366,27 @@ class UserProfile(models.Model):
      });
 
      if (response.data.requires_otp) {
-       // Show OTP input form
-       const otpResponse = await verifyOTP(email, otpCode);
+       // Show OTP input form - use same identifier as login
+       const identifier = credentials.email || credentials.username;
+       const otpResponse = await verifyOTP(identifier, otpCode);
        // Handle success
      }
+   };
+
+   // OTP verification - identifier must match login method
+   const verifyOTP = async (identifier, otpCode) => {
+     const payload = { otp_code: otpCode };
+     if (identifier.includes('@')) {
+       payload.email = identifier;
+     } else {
+       payload.username = identifier;
+     }
+
+     return await fetch('/api/verify-otp/', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(payload)
+     });
    };
    ```
 
@@ -371,8 +402,10 @@ class UserProfile(models.Model):
 
 ### For Users
 
-1. **OTP Method Selection:**
-   - Choose preferred method in profile settings
+1. **Login Options:**
+   - Login with either email or username + password
+   - OTP verification must use the same identifier (email or username) as login
+   - Choose preferred OTP method in profile settings
    - Keep contact information updated
    - Use email as fallback for SMS issues
 
@@ -443,6 +476,10 @@ python manage.py migrate
    - Verify code expiration (5 minutes)
    - Check for typos in code entry
    - Ensure single-use (codes are cleared after use)
+
+4. **Method Mismatch Error**
+   - Ensure OTP verification uses the same identifier (email/username) as login
+   - If logged in with email, verify with email; if with username, verify with username
 
 ### Debug Commands
 ```bash

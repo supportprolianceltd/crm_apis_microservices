@@ -1314,7 +1314,7 @@ class VerifyOTPView(APIView):
     authentication_classes = []
 
     def post(self, request):
-        identifier = request.data.get("email")  # Use email for OTP verification
+        identifier = request.data.get("email") or request.data.get("username")  # Accept email or username
         code = request.data.get("otp_code")
         ip_address = request.META.get("REMOTE_ADDR")
         user_agent = request.META.get("HTTP_USER_AGENT", "")
@@ -1331,28 +1331,48 @@ class VerifyOTPView(APIView):
                 success=False,
             )
             return Response({"detail": "Tenant not found."}, status=400)
-        with tenant_context(tenant):
-            # Resolve user by email
-            if '@' not in identifier:
-                return Response({"detail": "Email required for OTP verification."}, status=400)
+
+        # More robust identifier validation
+        if not identifier or not isinstance(identifier, str) or not identifier.strip():
+            return Response({"detail": "Email or username is required for OTP verification."}, status=400)
+
+        identifier = identifier.strip()  # Remove whitespace
+
+        # Resolve user based on identifier type
+        user = None
+        if '@' in identifier:
+            # Email verification
             user = get_user_model().objects.filter(email__iexact=identifier, tenant=tenant).first()
-            if not user:
-                UserActivity.objects.create(
-                    user=None,
-                    tenant=tenant,
-                    action="login",
-                    performed_by=None,
-                    details={"reason": "Invalid user"},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
-                )
-                return Response({"detail": "Invalid user."}, status=400)
+        else:
+            # Username verification
+            try:
+                index_entry = UsernameIndex.objects.get(username=identifier)
+                target_tenant = index_entry.tenant
+                with tenant_context(target_tenant):
+                    user = CustomUser.objects.get(id=index_entry.user_id)
+            except (UsernameIndex.DoesNotExist, CustomUser.DoesNotExist):
+                user = None
+
+        if not user:
+            UserActivity.objects.create(
+                user=None,
+                tenant=tenant,
+                action="login",
+                performed_by=None,
+                details={"reason": "Invalid user"},
+                ip_address=ip_address,
+                user_agent=user_agent,
+                success=False,
+            )
+            return Response({"detail": "Invalid user."}, status=400)
+
+        # Verify OTP with user's tenant context
+        with tenant_context(user.tenant):
             cached_data = cache.get(f"otp_{user.id}")
-            if not cached_data or cached_data.get('code') != code:
+            if not cached_data or not isinstance(cached_data, dict) or cached_data.get('code') != code:
                 UserActivity.objects.create(
                     user=user,
-                    tenant=tenant,
+                    tenant=user.tenant,
                     action="login",
                     performed_by=None,
                     details={"reason": "Invalid or expired OTP code"},
@@ -1361,6 +1381,33 @@ class VerifyOTPView(APIView):
                     success=False,
                 )
                 return Response({"detail": "Invalid or expired OTP code."}, status=400)
+
+            # Check that verification method matches login method
+            login_method = cached_data.get('method')
+            if login_method == 'email' and '@' not in identifier:
+                UserActivity.objects.create(
+                    user=user,
+                    tenant=user.tenant,
+                    action="login",
+                    performed_by=None,
+                    details={"reason": "Method mismatch: logged in with email, verifying with username"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False,
+                )
+                return Response({"detail": "Please use email for OTP verification as you logged in with email."}, status=400)
+            elif login_method == 'username' and '@' in identifier:
+                UserActivity.objects.create(
+                    user=user,
+                    tenant=user.tenant,
+                    action="login",
+                    performed_by=None,
+                    details={"reason": "Method mismatch: logged in with username, verifying with email"},
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=False,
+                )
+                return Response({"detail": "Please use username for OTP verification as you logged in with username."}, status=400)
 
             remember_me = cached_data.get('remember_me', False)
             user.reset_login_attempts()
