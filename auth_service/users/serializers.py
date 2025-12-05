@@ -88,6 +88,8 @@ def validate_file_extension(value):
             raise serializers.ValidationError('Only PDF, PNG, JPG, and JPEG files are allowed.')
         if value.size > 2 * 1024 * 1024:  # 2MB limit
             raise serializers.ValidationError('File size cannot exceed 2MB.')
+        if value.size == 0:
+            raise serializers.ValidationError('File cannot be empty.')
     return value
 
 class ProfessionalQualificationSerializer(serializers.ModelSerializer):
@@ -1145,6 +1147,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
         for field, url_field in image_fields:
             file = validated_data.pop(field, None)
             if file and hasattr(file, "name"):
+                # Check if file can be read
+                try:
+                    file.seek(0)
+                    content = file.read(1)
+                    file.seek(0)
+                except Exception as read_e:
+                    logger.error(f"File {field} cannot be read: {str(read_e)}")
+                    raise serializers.ValidationError(f"File {field} is corrupted or cannot be read.")
+
                 logger.info(f"Uploading {field}: {file.name}")
                 try:
                     url = upload_file_dynamic(
@@ -1154,7 +1165,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
                     logger.info(f"{field} uploaded: {url}")
                 except Exception as e:
                     logger.error(f"Failed to upload {field}: {str(e)}")
-                    raise serializers.ValidationError(f"Failed to upload {field}: {str(e)}")
+                    if "Expecting value" in str(e):
+                        raise serializers.ValidationError(f"Failed to upload {field}. Server error occurred.")
+                    else:
+                        raise serializers.ValidationError(f"Failed to upload {field}. Please ensure the file is valid and try again.")
             else:
                 logger.info(f"No file provided for {field}, setting {url_field} to None")
                 validated_data[url_field] = None
@@ -1219,6 +1233,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
             for field, url_field in image_fields:
                 file = validated_data.pop(field, None)
                 if file and hasattr(file, "name"):
+                    # Check if file can be read
+                    try:
+                        file.seek(0)
+                        content = file.read(1)
+                        file.seek(0)
+                    except Exception as read_e:
+                        logger.error(f"File {field} cannot be read: {str(read_e)}")
+                        raise serializers.ValidationError(f"File {field} is corrupted or cannot be read.")
+
                     logger.info(f"Uploading {field}: {file.name}")
                     try:
                         url = upload_file_dynamic(
@@ -1228,7 +1251,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
                         logger.info(f"{field} uploaded: {url}")
                     except Exception as e:
                         logger.error(f"Failed to update {field}: {str(e)}")
-                        raise serializers.ValidationError(f"Failed to upload {field}: {str(e)}")
+                        if "Expecting value" in str(e):
+                            raise serializers.ValidationError(f"Failed to upload {field}. Server error occurred.")
+                        else:
+                            raise serializers.ValidationError(f"Failed to upload {field}. Please ensure the file is valid and try again.")
                 else:
                     logger.info(f"No file provided for {field}, keeping existing {url_field}")
                     validated_data[url_field] = getattr(instance, url_field, None)
@@ -2258,8 +2284,9 @@ class DocumentSerializer(serializers.ModelSerializer):
         mutable_data.pop('id', None)
 
         # Flatten single-item lists (file, title, etc. come as lists in multipart)
+        # But exclude permissions_write which should remain as a list
         for key, value in mutable_data.items():
-            if isinstance(value, list) and len(value) == 1:
+            if key != 'permissions_write' and isinstance(value, list) and len(value) == 1:
                 mutable_data[key] = value[0]
 
         # Parse permissions_write from multipart
