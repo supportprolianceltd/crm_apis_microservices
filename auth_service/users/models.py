@@ -544,8 +544,8 @@ class UserProfile(models.Model):
     # Personal Information
     next_of_kin = models.CharField(max_length=255, blank=True)
     next_of_kin_address = models.CharField(max_length=255, blank=True)
-    next_of_kin_phone_number = models.CharField(max_length=15, blank=True)
-    next_of_kin_alternate_phone = models.CharField(max_length=15, blank=True)
+    next_of_kin_phone_number = models.CharField(max_length=25, blank=True)
+    next_of_kin_alternate_phone = models.CharField(max_length=25, blank=True)
     relationship_to_next_of_kin = models.CharField(max_length=100, blank=True)
     next_of_kin_email = models.EmailField(blank=True)
     next_of_kin_town = models.CharField(max_length=255, blank=True)
@@ -924,7 +924,7 @@ class EducationDetail(models.Model):
         validators=[validate_image_or_pdf]
     )
     certificate_url = models.CharField(max_length=1024, blank=True, null=True)
-    skills = models.TextField(blank=True)
+    skills = models.TextField(blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
@@ -1494,6 +1494,8 @@ class BlacklistedToken(models.Model):
     expires_at = models.DateTimeField()
 
 
+
+
 class Document(models.Model):
     id = models.AutoField(primary_key=True)
     tenant_id = models.CharField(max_length=255, blank=True, null=True)
@@ -1571,6 +1573,7 @@ class DocumentAcknowledgment(models.Model):
             models.Index(fields=['document', 'tenant_id']),
             models.Index(fields=['user_id', 'tenant_id']),
         ]
+
 
 
 class Group(models.Model):

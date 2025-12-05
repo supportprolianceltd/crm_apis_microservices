@@ -52,6 +52,10 @@ urlpatterns = [
     path('employment-details/', EmploymentDetailView.as_view(), name='employment-detail-create'),
     path('employment-details/<int:obj_id>/', EmploymentDetailView.as_view(), name='employment-detail-update'),
 
+    # Education Detail endpoints
+    path('education-details/', EducationDetailView.as_view(), name='education-detail-create'),
+    path('education-details/<int:obj_id>/', EducationDetailView.as_view(), name='education-detail-update'),
+
     # Investment Detail endpoints
     path('investment-details/', InvestmentDetailView.as_view(), name='investment-detail-create'),
     path('investment-details/<int:obj_id>/', InvestmentDetailView.as_view(), name='investment-detail-update'),
@@ -85,8 +89,8 @@ urlpatterns = [
     path('other-user-documents/<int:obj_id>/', OtherUserDocumentsView.as_view(), name='other-user-documents-update'),
 
     # Skill Detail endpoints
-    path('skill-details/', SkillDetailView.as_view(), name='skill-detail-create'),
-    path('skill-details/<int:obj_id>/', SkillDetailView.as_view(), name='skill-detail-update'),
+    path('skills/', SkillDetailView.as_view({'get': 'list', 'post': 'create'}), name='skill-list'),
+    path('skills/<int:pk>/', SkillDetailView.as_view({'get': 'retrieve', 'patch': 'partial_update', 'put': 'update', 'delete': 'destroy'}), name='skill-detail'),
 
     path('documents/', DocumentListCreateView.as_view(), name='document-list-create'),
     path('documents/<int:id>/', DocumentDetailView.as_view(), name='document-detail'),

@@ -2828,10 +2828,16 @@ class OtherUserDocumentsView(GenericDetailView):
     serializer_class = OtherUserDocumentsSerializer
     model_name = "Other User Document"
 
-class SkillDetailView(GenericDetailView):
-    model = SkillDetail
+class SkillDetailView(viewsets.ModelViewSet):
     serializer_class = SkillDetailSerializer
     model_name = "Skill Detail"
+
+    def get_queryset(self):
+        user_profile = self.request.user.profile
+        return SkillDetail.objects.filter(user_profile=user_profile)
+
+    def perform_create(self, serializer):
+        serializer.save(user_profile=self.request.user.profile)
 
 
 class AdminUserCreateView(APIView):

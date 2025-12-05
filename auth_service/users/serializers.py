@@ -154,6 +154,8 @@ class ProfessionalQualificationSerializer(serializers.ModelSerializer):
 class EducationDetailSerializer(serializers.ModelSerializer):
     #certificate = serializers.FileField(required=False, allow_null=True)
     certificate = serializers.FileField(required=False, allow_null=True, validators=[validate_file_extension])
+    start_year = serializers.IntegerField(required=False, allow_null=True)
+    end_year = serializers.IntegerField(required=False, allow_null=True)
     last_updated_by = serializers.SerializerMethodField()
 
     class Meta:
@@ -168,7 +170,7 @@ class EducationDetailSerializer(serializers.ModelSerializer):
             "end_year": {"required": False},
             "start_year_new": {"required": False},
             "end_year_new": {"required": False},
-            "skills": {"required": True},
+            "skills": {"required": False, "allow_null": True},
             "certificate": {"required": False, "allow_null": True},
         }
 
@@ -222,6 +224,8 @@ class EducationDetailSerializer(serializers.ModelSerializer):
         logger.info(f"Validating EducationDetailSerializer data: {data}")
         start_year = data.get("start_year")
         end_year = data.get("end_year")
+
+        # Validate year ranges
 
         # Validate year ranges
         if start_year is not None:
@@ -851,7 +855,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     investment_details = InvestmentDetailSerializer(many=True, required=False, allow_null=True)
     withdrawal_details = WithdrawalDetailSerializer(many=True, required=False, allow_null=True)
     education_details = EducationDetailSerializer(many=True, required=False, allow_null=True)
-    skill_details = SkillDetailSerializer(many=True, required=False, allow_null=True)
+    skills = SkillDetailSerializer(many=True, required=False, allow_null=True)
     reference_checks = ReferenceCheckSerializer(many=True, required=False, allow_null=True)
     proof_of_address = ProofOfAddressSerializer(many=True, required=False, allow_null=True)
     insurance_verifications = InsuranceVerificationSerializer(many=True, required=False, allow_null=True)
@@ -869,6 +873,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
     Right_to_rent_file = serializers.FileField(required=False, allow_null=True, validators=[validate_file_extension])
     dbs_certificate = serializers.FileField(required=False, allow_null=True, validators=[validate_file_extension])
     dbs_update_file = serializers.FileField(required=False, allow_null=True, validators=[validate_file_extension])
+
+    # Availability field as JSONField
+    availability = serializers.JSONField(required=False, allow_null=True)
 
 
     class Meta:
@@ -967,7 +974,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "professional_qualifications",
             "employment_details",
             "education_details",
-            "skill_details",
+            "skills",
             "investment_details",
             "withdrawal_details",
             "reference_checks",
@@ -1082,7 +1089,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "professional_qualifications",
             "employment_details",
             "education_details",
-            "skill_details",
+            "skills",
             "investment_details",
             "withdrawal_details",
             "reference_checks",
@@ -1114,7 +1121,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             ("professional_qualifications", ProfessionalQualificationSerializer, "professional_qualifications"),
             ("employment_details", EmploymentDetailSerializer, "employment_details"),
             ("education_details", EducationDetailSerializer, "education_details"),
-            ("skill_details", SkillDetailSerializer, "skill_details"),
+            ("skills", SkillDetailSerializer, "skill_details"),
             ("investment_details", InvestmentDetailSerializer, "investment_details"),
             ("withdrawal_details", WithdrawalDetailSerializer, "withdrawal_details"),
             ("reference_checks", ReferenceCheckSerializer, "reference_checks"),
@@ -1188,7 +1195,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 ("professional_qualifications", ProfessionalQualificationSerializer, "professional_qualifications"),
                 ("employment_details", EmploymentDetailSerializer, "employment_details"),
                 ("education_details", EducationDetailSerializer, "education_details"),
-                ("skill_details", SkillDetailSerializer, "skill_details"),
+                ("skills", SkillDetailSerializer, "skill_details"),
                 ("investment_details", InvestmentDetailSerializer, "investment_details"),
                 ("withdrawal_details", WithdrawalDetailSerializer, "withdrawal_details"),
                 ("reference_checks", ReferenceCheckSerializer, "reference_checks"),
@@ -1251,14 +1258,29 @@ class UserProfileSerializer(serializers.ModelSerializer):
                                         logger.error(f"Validation failed for {field} item {item_id}: {item_serializer.errors}")
                                         raise serializers.ValidationError({field: item_serializer.errors})
                                 else:
-                                    # Create new item
-                                    item_serializer = serializer_class(data=item_data, context=self.context)
-                                    if item_serializer.is_valid():
-                                        item_serializer.save(user_profile=updated_instance)
-                                        logger.info(f"Created new {field} item for profile {updated_instance.id}")
+                                    # Try to find existing skill by name (for skills field)
+                                    existing_item = None
+                                    if field == "skills":
+                                        existing_item = getattr(updated_instance, related_name).filter(skill_name=item_data.get("skill_name")).first()
+                                    if existing_item:
+                                        # Update existing
+                                        item_serializer = serializer_class(existing_item, data=item_data, partial=True, context=self.context)
+                                        if item_serializer.is_valid():
+                                            item_serializer.save()
+                                            logger.info(f"Updated existing {field} item {existing_item.id} for profile {updated_instance.id}")
+                                            sent_ids.add(existing_item.id)
+                                        else:
+                                            logger.error(f"Validation failed for updating {field} item: {item_serializer.errors}")
+                                            raise serializers.ValidationError({field: item_serializer.errors})
                                     else:
-                                        logger.error(f"Validation failed for new {field} item: {item_serializer.errors}")
-                                        raise serializers.ValidationError({field: item_serializer.errors})
+                                        # Create new item
+                                        item_serializer = serializer_class(data=item_data, context=self.context)
+                                        if item_serializer.is_valid():
+                                            item_serializer.save(user_profile=updated_instance)
+                                            logger.info(f"Created new {field} item for profile {updated_instance.id}")
+                                        else:
+                                            logger.error(f"Validation failed for new {field} item: {item_serializer.errors}")
+                                            raise serializers.ValidationError({field: item_serializer.errors})
                         else:
                             logger.error(f"Validation failed for {field}: {serializer.errors}")
                             raise serializers.ValidationError({field: serializer.errors})
@@ -1329,7 +1351,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 "professional_qualifications",
                 "employment_details",
                 "education_details",
-                "skill_details",
+                "skills",
                 "investment_details",
                 "withdrawal_details",
                 "reference_checks",
@@ -1343,18 +1365,41 @@ class UserCreateSerializer(serializers.ModelSerializer):
             for field in nested_fields:
                 profile_data[field] = []
 
+            # Special handling for availability
+            availability_data = {}
+            for key in data:
+                if key.startswith("profile[availability]"):
+                    parts = key.split("[")
+                    if len(parts) >= 4:
+                        day = parts[2][:-1]  # monday, tuesday, etc.
+                        if len(parts) == 4:  # profile[availability][day][available]
+                            sub_field = parts[3][:-1]  # available
+                            value = data.get(key)
+                            if day not in availability_data:
+                                availability_data[day] = {}
+                            availability_data[day][sub_field] = value
+                        elif len(parts) == 5:  # profile[availability][day][slot][field]
+                            slot_index = int(parts[3][:-1])  # 0, 1, etc.
+                            sub_field = parts[4][:-1]  # start, end, available
+                            value = data.get(key)
+                            if day not in availability_data:
+                                availability_data[day] = []
+                            while len(availability_data[day]) <= slot_index:
+                                availability_data[day].append({})
+                            availability_data[day][slot_index][sub_field] = value
+            if availability_data:
+                profile_data['availability'] = availability_data
+
             for key in data:
                 # Handle both prefixed (profile[nested][0][field]) and non-prefixed (nested[0][field]) formats
-                if key.startswith("profile[") and key.endswith("]"):
+                if key.startswith("profile[") and key.endswith("]") and not key.startswith("profile[availability]"):
                     # Handle profile-prefixed fields
                     if "][" in key:
                         parts = key.split("[")
                         field_name = parts[1][:-1]  # e.g., professional_qualifications
 
-                        # CRITICAL FIX: Map "skills" to "skill_details" 
-                        if field_name == "skills":
-                            field_name = "skill_details"
-   
+                        # Field name is already "skills"
+
                         index = int(parts[2][:-1])  # e.g., 0
                         sub_field = parts[3][:-1]  # e.g., image_file
 
