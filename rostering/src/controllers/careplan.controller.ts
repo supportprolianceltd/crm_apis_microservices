@@ -143,6 +143,7 @@ export class CarePlanController {
             visitsToCreate.push({
               tenantId: tenantId.toString(),
               carePlanId: carePlan.id,
+              clientId: carePlan.clientId,
               startDate: visitStart,
               endDate: visitEnd,
               generatedFromCarePlan: true,
@@ -743,6 +744,84 @@ export class CarePlanController {
     } catch (error: any) {
       console.error('deleteCarePlan error', error);
       return res.status(500).json({ error: 'Failed to delete care plan', details: getUserFriendlyError(error) });
+    }
+  }
+
+  // Get all carers assigned to a client based on their CarerVisits
+  public async getCarersForClient(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId ?? (req.query && req.query.tenantId);
+      if (!tenantId) return res.status(403).json({ error: 'tenantId missing from auth context' });
+
+      const { clientId } = req.params;
+      if (!clientId) return res.status(400).json({ error: 'clientId parameter is required' });
+
+      // Get all carer visits for this client
+      const carerVisits = await (this.prisma as any).carerVisit.findMany({
+        where: {
+          tenantId: tenantId.toString(),
+          clientId: clientId
+        },
+        include: {
+          assignees: true // Get CarerVisitAssignee records
+        }
+      });
+
+      // Extract unique carer IDs from all visits
+      const carerIds = new Set<string>();
+      carerVisits.forEach((visit: any) => {
+        // Add carerId if visit has direct carer assignment
+        if (visit.carerId) {
+          carerIds.add(visit.carerId);
+        }
+        // Add carer IDs from assignees
+        visit.assignees?.forEach((assignee: any) => {
+          if (assignee.carerId) {
+            carerIds.add(assignee.carerId);
+          }
+        });
+      });
+
+      // Get carer details for all unique carer IDs
+      const carers = await (this.prisma as any).carer.findMany({
+        where: {
+          tenantId: tenantId.toString(),
+          id: { in: Array.from(carerIds) }
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          skills: true,
+          isActive: true,
+          createdAt: true
+        }
+      });
+
+      // Return carers with visit count for this client
+      const result = carers.map((carer: any) => {
+        const visitCount = carerVisits.filter((visit: any) => 
+          visit.carerId === carer.id || 
+          visit.assignees?.some((assignee: any) => assignee.carerId === carer.id)
+        ).length;
+
+        return {
+          ...carer,
+          visitCount
+        };
+      });
+
+      return res.json({
+        clientId,
+        carers: result,
+        totalCarers: result.length,
+        totalVisits: carerVisits.length
+      });
+    } catch (error: any) {
+      console.error('getCarersForClient error', error);
+      return res.status(500).json({ error: 'Failed to fetch carers for client', details: getUserFriendlyError(error) });
     }
   }
 }

@@ -90,6 +90,7 @@ model ExternalRequest {
 model Visit {
   id                String           @id // Remove @default(cuid()), we'll generate custom IDs
   tenantId          String
+  clientId          String?          // Add clientId for direct client-visit linking
   externalRequestId String?          @map("external_request_id") // Add ? to make it optional
   externalRequest   ExternalRequest? @relation(fields: [externalRequestId], references: [id], onDelete: Cascade) // Also make relation optional
 
@@ -155,6 +156,7 @@ model Visit {
   incidents        Incident[]
 
   @@index([tenantId])
+  @@index([clientId])
   @@index([externalRequestId])
   @@index([status])
   @@index([scheduledStartTime])
@@ -916,6 +918,7 @@ model Task {
 model CarerVisit {
   id                    String               @id @default(cuid())
   tenantId              String
+  clientId              String?              // Add clientId for direct client-visit linking
   careType              careType?
   // Reason for switching careType (required at API validation time when careType is changed)
   switchReason          String?
@@ -946,6 +949,7 @@ model CarerVisit {
   updatedAt DateTime @updatedAt
 
   @@index([tenantId])
+  @@index([clientId])
   @@index([carePlanId])
   @@index([carerId])
   @@index([generatedFromCarePlan])
