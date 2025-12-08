@@ -22,7 +22,7 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='tonna.ezugwu@prolianceltd.com',
+        email='support@prolianceltd.com',
         password='qwerty',
         role='admin',
         first_name='Tonna',
@@ -190,12 +190,12 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='tegaokorare91@gmail.com',
+        email='support@prolianceltd.com',
         password='qwerty',
-        role='staff',
+        role='admin',
         first_name='Tega',
         last_name='Okorare',
-        job_role='Backend Developer',
+        job_role='Admin',
         tenant=tenant
     )
     

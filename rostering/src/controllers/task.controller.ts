@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { format } from 'date-fns';
+import { TravelService } from '../services/travel.service';
 
 export class TaskController {
   private prisma: PrismaClient;
+  private travelService: TravelService;
 
   // Map careType enum to assignment capacity (null means unlimited)
   private careTypeCapacity(ct?: string | null): number | null {
@@ -94,6 +96,7 @@ export class TaskController {
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
+    this.travelService = new TravelService(prisma);
   }
 
   // Mark overdue tasks as MISSED when dueDate has passed and write client_visit_logs entries
@@ -682,7 +685,9 @@ export class TaskController {
         (this.prisma as any).carerVisit.count({ where }),
       ]);
 
-      return res.json({ items, total, page, pageSize });
+      const authToken = req.headers.authorization || '';
+      const enrichedItems = await this.enrichVisitsWithDistance(items, authToken);
+      return res.json({ items: enrichedItems, total, page, pageSize });
     } catch (error: any) {
       console.error('getVisitsByClient error', error);
       return res.status(500).json({ error: 'Failed to fetch visits for client', details: error?.message });
@@ -818,6 +823,73 @@ export class TaskController {
     }
   }
 
+  // Helper method to enrich visits with distance information for all assignees
+  private async enrichVisitsWithDistance(visits: any[], authToken: string): Promise<any[]> {
+    const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8001';
+
+    return await Promise.all(visits.map(async (visit: any) => {
+      // Fetch client postcode
+      let clientPostcode: string | null = null;
+      if (visit.clientId) {
+        try {
+          const clientResponse = await fetch(`${authServiceUrl}/api/user/clients/${visit.clientId}/`, {
+            headers: { 'Authorization': authToken }
+          });
+          if (clientResponse.ok) {
+            const clientData: any = await clientResponse.json();
+            clientPostcode = clientData.profile?.postcode || clientData.profile?.zip_code || null;
+          }
+        } catch (e) {
+          console.error(`Failed to fetch client ${visit.clientId}:`, e);
+        }
+      }
+
+      // Enrich each assignee with distance
+      if (visit.assignees && Array.isArray(visit.assignees)) {
+        visit.assignees = await Promise.all(visit.assignees.map(async (assignee: any) => {
+          if (!clientPostcode) {
+            return { ...assignee, distance: "client has no zip code" };
+          }
+
+          // Fetch carer postcode
+          let carerPostcode: string | null = null;
+          try {
+            const carerResponse = await fetch(`${authServiceUrl}/api/user/users/${assignee.carerId}/`, {
+              headers: { 'Authorization': authToken }
+            });
+            if (carerResponse.ok) {
+              const carerData: any = await carerResponse.json();
+              carerPostcode = carerData.profile?.zip_code || carerData.profile?.postcode || null;
+            }
+          } catch (e) {
+            console.error(`Failed to fetch carer ${assignee.carerId}:`, e);
+          }
+
+          if (!carerPostcode) {
+            return { ...assignee, distance: "can't find zip code" };
+          }
+
+          // Calculate distance
+          try {
+            const travelResult = await this.travelService.getTravelTime(carerPostcode, clientPostcode, 'driving');
+            return {
+              ...assignee,
+              distanceMeters: travelResult.distanceMeters,
+              distance: `${(travelResult.distanceMeters / 1609.34).toFixed(1)} mi`,
+              durationSeconds: travelResult.durationSeconds,
+              duration: `${Math.round(travelResult.durationSeconds / 60)} mins`
+            };
+          } catch (e: any) {
+            console.error(`Failed to calculate distance for assignee ${assignee.carerId}:`, e.message);
+            return { ...assignee, distance: e.message };
+          }
+        }));
+      }
+
+      return visit;
+    }));
+  }
+
   // Get carer visits (carerVisit records) and optionally filter by date, day of week or range
   // Query params:
   // - date=YYYY-MM-DD (returns visits which have tasks that overlap that date)
@@ -854,9 +926,11 @@ export class TaskController {
         orderBy: { createdAt: "desc" },
       });
 
-      // If no temporal filter provided, return all visits
+      // If no temporal filter provided, enrich and return all visits
       if (!dateParam && !dayParam && !startParam && !endParam) {
-        return res.json(visits);
+        const authToken = req.headers.authorization || '';
+        const enrichedVisits = await this.enrichVisitsWithDistance(visits, authToken);
+        return res.json(enrichedVisits);
       }
 
       // Helpers to build range
@@ -939,7 +1013,9 @@ export class TaskController {
         })
         .filter((v: any) => v.tasks && v.tasks.length > 0);
 
-      return res.json(filtered);
+      const authToken = req.headers.authorization || '';
+      const enrichedFiltered = await this.enrichVisitsWithDistance(filtered, authToken);
+      return res.json(enrichedFiltered);
     } catch (error: any) {
       console.error("getCarerVisits error", error);
       return res.status(500).json({ error: "Failed to fetch carer visits", details: error?.message });
@@ -966,6 +1042,68 @@ export class TaskController {
 
       if (!visit) return res.status(404).json({ error: "Visit not found" });
       if (visit.tenantId !== tenantId.toString()) return res.status(403).json({ error: "Access denied to this visit" });
+
+      // Enrich assignees with distance information
+      const authToken = req.headers.authorization || '';
+      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8001';
+
+      // Fetch client postcode
+      let clientPostcode: string | null = null;
+      if (visit.clientId) {
+        try {
+          const clientResponse = await fetch(`${authServiceUrl}/api/user/clients/${visit.clientId}/`, {
+            headers: { 'Authorization': authToken }
+          });
+          if (clientResponse.ok) {
+            const clientData: any = await clientResponse.json();
+            clientPostcode = clientData.profile?.postcode || clientData.profile?.zip_code || null;
+          }
+        } catch (e) {
+          console.error(`Failed to fetch client ${visit.clientId}:`, e);
+        }
+      }
+
+      // Enrich each assignee with distance
+      if (visit.assignees && Array.isArray(visit.assignees)) {
+        visit.assignees = await Promise.all(visit.assignees.map(async (assignee: any) => {
+          if (!clientPostcode) {
+            return { ...assignee, distance: "client has no zip code" };
+          }
+
+          // Fetch carer postcode
+          let carerPostcode: string | null = null;
+          try {
+            const carerResponse = await fetch(`${authServiceUrl}/api/user/users/${assignee.carerId}/`, {
+              headers: { 'Authorization': authToken }
+            });
+            if (carerResponse.ok) {
+              const carerData: any = await carerResponse.json();
+              carerPostcode = carerData.profile?.zip_code || carerData.profile?.postcode || null;
+            }
+          } catch (e) {
+            console.error(`Failed to fetch carer ${assignee.carerId}:`, e);
+          }
+
+          if (!carerPostcode) {
+            return { ...assignee, distance: "can't find zip code" };
+          }
+
+          // Calculate distance
+          try {
+            const travelResult = await this.travelService.getTravelTime(carerPostcode, clientPostcode, 'driving');
+            return {
+              ...assignee,
+              distanceMeters: travelResult.distanceMeters,
+              distance: `${(travelResult.distanceMeters / 1609.34).toFixed(1)} mi`,
+              durationSeconds: travelResult.durationSeconds,
+              duration: `${Math.round(travelResult.durationSeconds / 60)} mins`
+            };
+          } catch (e: any) {
+            console.error(`Failed to calculate distance for assignee ${assignee.carerId}:`, e.message);
+            return { ...assignee, distance: e.message };
+          }
+        }));
+      }
 
       return res.json(visit);
     } catch (error: any) {
@@ -1972,7 +2110,9 @@ export class TaskController {
         (this.prisma as any).carerVisit.count({ where }),
       ]);
 
-      return res.json({ items, total, page, pageSize });
+      const authToken = req.headers.authorization || '';
+      const enrichedItems = await this.enrichVisitsWithDistance(items, authToken);
+      return res.json({ items: enrichedItems, total, page, pageSize });
     } catch (error: any) {
       console.error("listTenantVisits error", error);
       return res

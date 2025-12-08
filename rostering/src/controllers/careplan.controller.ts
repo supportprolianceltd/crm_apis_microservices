@@ -6,6 +6,7 @@ const ALLOWED_CARE_TYPES = ['SINGLE_HANDED_CALL', 'DOUBLE_HANDED_CALL', 'SPECIAL
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { validateCreatePayload } from '../validation/careplan.validation';
+import { TravelService } from '../services/travel.service';
 
 function getUserFriendlyError(error: any): string {
   if (error?.code === 'P2002') {
@@ -42,9 +43,11 @@ function getUserFriendlyError(error: any): string {
 
 export class CarePlanController {
   private prisma: PrismaClient;
+  private travelService: TravelService;
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
+    this.travelService = new TravelService(prisma);
   }
 
   // Normalize day strings to Prisma DayOfWeek enum values (MONDAY..SUNDAY)
@@ -747,7 +750,7 @@ export class CarePlanController {
     }
   }
 
-  // Get all carers assigned to a client based on their CarerVisits
+  // Get all carers assigned to a client based on their CarerVisits with distance calculation
   public async getCarersForClient(req: Request, res: Response) {
     try {
       const tenantId = req.user?.tenantId ?? (req.query && req.query.tenantId);
@@ -756,41 +759,162 @@ export class CarePlanController {
       const { clientId } = req.params;
       if (!clientId) return res.status(400).json({ error: 'clientId parameter is required' });
 
-      // Get all carer visits for this client
+      const authToken = req.headers.authorization || '';
+      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8001';
+
+      // 1. Get all carer visits for this client
       const carerVisits = await (this.prisma as any).carerVisit.findMany({
         where: {
           tenantId: tenantId.toString(),
           clientId: clientId
         },
         include: {
-          assignees: true // Get CarerVisitAssignee records
+          assignees: true
         }
       });
 
-      // Extract unique carer IDs from all visits
+      // 2. Extract unique carer IDs from all visits
       const carerIds = new Set<string>();
       carerVisits.forEach((visit: any) => {
-        // Add carerId if visit has direct carer assignment
-        if (visit.carerId) {
-          carerIds.add(visit.carerId);
-        }
-        // Add carer IDs from assignees
+        if (visit.carerId) carerIds.add(visit.carerId);
         visit.assignees?.forEach((assignee: any) => {
-          if (assignee.carerId) {
-            carerIds.add(assignee.carerId);
-          }
+          if (assignee.carerId) carerIds.add(assignee.carerId);
         });
       });
 
+      if (carerIds.size === 0) {
+        return res.json({
+          clientId,
+          carers: [],
+          totalCarers: 0,
+          totalVisits: carerVisits.length
+        });
+      }
+
+      // 3. Fetch client details to get postcode
+      let clientPostcode: string | null = null;
+      try {
+        const clientResponse = await fetch(`${authServiceUrl}/api/user/clients/${clientId}/`, {
+          headers: { 'Authorization': authToken }
+        });
+        if (clientResponse.ok) {
+          const clientData: any = await clientResponse.json();
+          clientPostcode = clientData.profile?.postcode || clientData.profile?.zip_code || null;
+        } else {
+          const errorText = await clientResponse.text();
+          console.warn(`Failed to fetch client ${clientId}: ${clientResponse.status}`, errorText);
+        }
+      } catch (e: any) {
+        console.error('Error fetching client details:', e.message);
+      }
+
+      // 4. Fetch carer details (including postcodes) from auth service
+      const carerIdsArray = Array.from(carerIds);
+      const carerDetailsPromises = carerIdsArray.map(async (carerId) => {
+        try {
+          const response = await fetch(`${authServiceUrl}/api/user/users/${carerId}/`, {
+            headers: { 'Authorization': authToken }
+          });
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.warn(`Failed to fetch carer ${carerId}: ${response.status}`, errorText);
+            return null;
+          }
+          const data: any = await response.json();
+          return {
+            id: data.id,
+            email: data.email,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            role: data.role,
+            postcode: data.profile?.zip_code || data.profile?.postcode || null,
+            phone: data.profile?.work_phone || data.profile?.personal_phone || null,
+            availability: data.profile?.availability || null,
+          };
+        } catch (e: any) {
+          console.error(`Failed to fetch carer ${carerId}:`, e.message);
+          return null;
+        }
+      });
+
+      const carerDetails = (await Promise.all(carerDetailsPromises)).filter(c => c !== null);
+
+      // 5. Calculate distances using TravelService
+      let carersWithDistance: any[] = [];
+      
+      if (!clientPostcode) {
+        carersWithDistance = carerDetails.map(carer => ({
+          ...carer,
+          distance: null,
+          distanceMeters: null,
+          duration: null,
+          durationSeconds: null,
+          error: 'Client postcode not available'
+        }));
+      } else {
+        carersWithDistance = await Promise.all(carerDetails.map(async (carer: any) => {
+          if (!carer.postcode) {
+            return {
+              ...carer,
+              distance: null,
+              distanceMeters: null,
+              duration: null,
+              durationSeconds: null,
+              error: 'Carer postcode not available'
+            };
+          }
+
+          try {
+            const travelResult = await this.travelService.getTravelTime(
+              carer.postcode,
+              clientPostcode,
+              'driving'
+            );
+
+            return {
+              ...carer,
+              distanceMeters: travelResult.distanceMeters,
+              distance: `${(travelResult.distanceMeters / 1609.34).toFixed(1)} mi`,
+              durationSeconds: travelResult.durationSeconds,
+              duration: `${Math.round(travelResult.durationSeconds / 60)} mins`,
+              error: null
+            };
+          } catch (e: any) {
+            console.error(`Failed to calculate distance for carer ${carer.id}:`, e.message);
+            return {
+              ...carer,
+              distance: null,
+              distanceMeters: null,
+              duration: null,
+              durationSeconds: null,
+              error: e.message
+            };
+          }
+        }));
+
+        // 6. Sort by distance (closest first, null distances at the end)
+        carersWithDistance.sort((a, b) => {
+          if (a.distanceMeters != null && b.distanceMeters != null) return a.distanceMeters - b.distanceMeters;
+          if (a.distanceMeters != null) return -1;
+          if (b.distanceMeters != null) return 1;
+          return 0;
+        });
+      }
+
       return res.json({
         clientId,
-        carerIds: Array.from(carerIds),
-        totalCarers: carerIds.size,
+        clientPostcode,
+        carers: carersWithDistance,
+        totalCarers: carersWithDistance.length,
         totalVisits: carerVisits.length
       });
+
     } catch (error: any) {
       console.error('getCarersForClient error', error);
-      return res.status(500).json({ error: 'Failed to fetch carers for client', details: getUserFriendlyError(error) });
+      return res.status(500).json({
+        error: 'Failed to fetch carers for client',
+        details: getUserFriendlyError(error)
+      });
     }
   }
 }
