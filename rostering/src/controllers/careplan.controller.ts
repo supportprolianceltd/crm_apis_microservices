@@ -782,41 +782,10 @@ export class CarePlanController {
         });
       });
 
-      // Get carer details for all unique carer IDs
-      const carers = await (this.prisma as any).carer.findMany({
-        where: {
-          tenantId: tenantId.toString(),
-          id: { in: Array.from(carerIds) }
-        },
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-          phone: true,
-          skills: true,
-          isActive: true,
-          createdAt: true
-        }
-      });
-
-      // Return carers with visit count for this client
-      const result = carers.map((carer: any) => {
-        const visitCount = carerVisits.filter((visit: any) => 
-          visit.carerId === carer.id || 
-          visit.assignees?.some((assignee: any) => assignee.carerId === carer.id)
-        ).length;
-
-        return {
-          ...carer,
-          visitCount
-        };
-      });
-
       return res.json({
         clientId,
-        carers: result,
-        totalCarers: result.length,
+        carerIds: Array.from(carerIds),
+        totalCarers: carerIds.size,
         totalVisits: carerVisits.length
       });
     } catch (error: any) {

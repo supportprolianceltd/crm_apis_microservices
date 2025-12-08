@@ -165,6 +165,8 @@ model Visit {
   @@map("visits")
 }
 
+
+// To be removed
 model Carer {
   id        String                                 @id @default(cuid())
   tenantId  String
