@@ -567,13 +567,22 @@ class CustomTokenSerializer(serializers.Serializer):
         # Don't complete login yet, require OTP verification
         destination = user.email if otp_method == 'email' else user.profile.work_phone
         method_text = "email" if otp_method == 'email' else "phone"
-        return {
+
+        # For development: include OTP in response if DEBUG is True
+        response_data = {
             "requires_otp": True,
             "user_id": user.id,
             "email": user.email,
             "otp_method": otp_method,
             "message": f"OTP sent to your {method_text}. Please verify to complete login."
         }
+
+        # Add OTP code for development debugging
+        if settings.DEBUG:
+            response_data["debug_otp_code"] = otp_code
+            logger.warning(f"🔧 DEVELOPMENT MODE: OTP code for {user.email}: {otp_code}")
+
+        return response_data
 
         # Success: Reset attempts & log
         if hasattr(user, 'reset_login_attempts'):
