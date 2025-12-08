@@ -14,16 +14,6 @@ logger = logging.getLogger('talent_engine')
 
 from django.contrib.auth.models import AnonymousUser
 
-# public_paths = ['/api/docs/', '/api/schema/', '/api/health/',  
-#                 '/api/talent-engine/requisitions/by-link/',
-#                 '/api/talent-engine/requisitions/unique_link/',
-#                 '/api/talent-engine/requisitions/public/published/',
-#                 '/api/talent-engine/requisitions/public/close/',
-#                 '/api/talent-engine/requisitions/upcoming/public/jobs',
-#                 '/api/talent-engine/requisitions/public/update-applications/'
-#                 ]
-
-
 public_paths = [
     '/api/docs/',
     '/api/schema/',
@@ -114,7 +104,7 @@ class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
 
             unverified_payload = jwt.decode(token, options={"verify_signature": False})
             tenant_id = unverified_payload.get("tenant_id")
-            tenant_schema = unverified_payload.get("tenant_schema")
+            tenant_schema = unverified_payload.get("tenant_schema") or unverified_payload.get("tenant_id")
             logger.info(f"Unverified JWT: kid={kid}, tenant_id={tenant_id}, tenant_schema={tenant_schema}")
 
             resp = requests.get(
@@ -131,6 +121,9 @@ class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
                 raise AuthenticationFailed("Public key not found.")
 
             payload = jwt.decode(token, public_key, algorithms=["RS256"])
+            # Ensure 'id' is set from 'sub' if missing
+            if 'id' not in payload and 'sub' in payload:
+                payload['id'] = payload['sub']
             request.jwt_payload = payload
             request.user = SimpleUser(payload)  # Set custom user
             logger.info(f"Set request.user: {request.user}, is_authenticated={request.user.is_authenticated}")
