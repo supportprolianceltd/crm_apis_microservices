@@ -828,8 +828,9 @@ export class TaskController {
     const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8001';
 
     return await Promise.all(visits.map(async (visit: any) => {
-      // Fetch client postcode
+      // Fetch client details (postcode and name)
       let clientPostcode: string | null = null;
+      let clientName: string | null = null;
       if (visit.clientId) {
         try {
           const clientResponse = await fetch(`${authServiceUrl}/api/user/clients/${visit.clientId}/`, {
@@ -838,6 +839,7 @@ export class TaskController {
           if (clientResponse.ok) {
             const clientData: any = await clientResponse.json();
             clientPostcode = clientData.profile?.postcode || clientData.profile?.zip_code || null;
+            clientName = `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim() || null;
           }
         } catch (e) {
           console.error(`Failed to fetch client ${visit.clientId}:`, e);
@@ -886,7 +888,10 @@ export class TaskController {
         }));
       }
 
-      return visit;
+      return {
+        ...visit,
+        client_name: clientName
+      };
     }));
   }
 
@@ -1047,8 +1052,9 @@ export class TaskController {
       const authToken = req.headers.authorization || '';
       const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8001';
 
-      // Fetch client postcode
+      // Fetch client details (postcode and name)
       let clientPostcode: string | null = null;
+      let clientName: string | null = null;
       if (visit.clientId) {
         try {
           const clientResponse = await fetch(`${authServiceUrl}/api/user/clients/${visit.clientId}/`, {
@@ -1057,6 +1063,7 @@ export class TaskController {
           if (clientResponse.ok) {
             const clientData: any = await clientResponse.json();
             clientPostcode = clientData.profile?.postcode || clientData.profile?.zip_code || null;
+            clientName = `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim() || null;
           }
         } catch (e) {
           console.error(`Failed to fetch client ${visit.clientId}:`, e);
@@ -1105,7 +1112,10 @@ export class TaskController {
         }));
       }
 
-      return res.json(visit);
+      return res.json({
+        ...visit,
+        client_name: clientName
+      });
     } catch (error: any) {
       console.error("getVisitById error", error);
       return res.status(500).json({ error: "Failed to fetch visit", details: error?.message });
