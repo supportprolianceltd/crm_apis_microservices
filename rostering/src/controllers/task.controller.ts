@@ -2103,7 +2103,7 @@ export class TaskController {
             },
             assignees: true,
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: [{ createdAt: "desc" }, {id: "desc"}],
           skip,
           take: pageSize,
         }),
