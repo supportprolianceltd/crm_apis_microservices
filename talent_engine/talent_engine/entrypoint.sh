@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+echo "Starting Django..."
 # Entrypoint script to make migrations and run migrations for talent_engine
 python manage.py makemigrations
 python manage.py migrate
