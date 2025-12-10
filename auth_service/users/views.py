@@ -4199,3 +4199,49 @@ class BulkUserDetailsView(APIView):
                 "users": serializer.data,
                 "count": len(serializer.data)
             }, status=status.HTTP_200_OK)
+
+
+class BulkClientDetailsView(APIView):
+    """
+    API endpoint to retrieve details of multiple clients by their IDs.
+    Accepts a list of client IDs and returns their details.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """
+        Retrieve details of multiple clients by IDs.
+        Expects: {"client_ids": [1, 2, 3, 4, 5, 9]}
+        """
+        client_ids = request.data.get('client_ids', [])
+        if not isinstance(client_ids, list):
+            return Response({"error": "client_ids must be a list"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not client_ids:
+            return Response({"error": "client_ids list cannot be empty"}, status=status.HTTP_400_BAD_REQUEST)
+
+        tenant = request.user.tenant
+        with tenant_context(tenant):
+            # Filter clients by IDs, tenant, and role='client'
+            clients = CustomUser.objects.filter(
+                id__in=client_ids,
+                tenant=tenant,
+                role="client"
+            ).prefetch_related("client_profile")
+
+            # Check permissions: similar to ClientViewSet
+            user = request.user
+            if user.is_superuser or user.role == "admin":
+                pass  # Can see all clients
+            elif user.role == "team_manager":
+                pass  # Can see all clients in tenant
+            elif user.role == "recruiter" and user.branch:
+                clients = clients.filter(branch=user.branch)
+            else:
+                clients = clients.filter(id=user.id)  # Self only if client
+
+            serializer = ClientDetailSerializer(clients, many=True, context={"request": request})
+            return Response({
+                "clients": serializer.data,
+                "count": len(serializer.data)
+            }, status=status.HTTP_200_OK)
