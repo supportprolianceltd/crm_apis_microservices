@@ -3955,7 +3955,7 @@ class UserProfileDataView(APIView):
                         'roi_balance': str(entry.roi_balance),
                         'total_balance': str(entry.total_balance),
                     })
-                                        
+                                         
                     # ledger_data.append({
                     #     'id': entry.id,
                     #     'entry_date': entry.entry_date,
@@ -4144,3 +4144,58 @@ class UserProfileDataView(APIView):
             user_profile.save()
 
             return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
+
+
+class BulkUserDetailsView(APIView):
+    """
+    API endpoint to retrieve details of multiple users by their IDs.
+    Accepts a list of user IDs and returns their details.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """
+        Retrieve details of multiple users by IDs.
+        Expects: {"user_ids": [1, 2, 3, 4, 5, 9]}
+        """
+        user_ids = request.data.get('user_ids', [])
+        if not isinstance(user_ids, list):
+            return Response({"error": "user_ids must be a list"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user_ids:
+            return Response({"error": "user_ids list cannot be empty"}, status=status.HTTP_400_BAD_REQUEST)
+
+        tenant = request.user.tenant
+        with tenant_context(tenant):
+            # Filter users by IDs and tenant, excluding clients if needed (based on existing logic)
+            users = CustomUser.objects.filter(
+                id__in=user_ids,
+                tenant=tenant
+            ).exclude(role='client').prefetch_related(
+                "profile__professional_qualifications",
+                "profile__employment_details",
+                "profile__education_details",
+                "profile__reference_checks",
+                "profile__proof_of_address",
+                "profile__insurance_verifications",
+                "profile__driving_risk_assessments",
+                "profile__legal_work_eligibilities",
+                "profile__other_user_documents",
+                "profile__skill_details",
+            )
+
+            # Check permissions: similar to UserViewSet
+            user = request.user
+            if not (user.is_superuser or user.role == "admin"):
+                if user.role == "team_manager":
+                    pass  # All non-client users in tenant
+                elif user.role == "recruiter" and user.branch:
+                    users = users.filter(branch=user.branch)
+                else:
+                    users = users.filter(id=user.id)  # Self only
+
+            serializer = CustomUserSerializer(users, many=True, context={"request": request})
+            return Response({
+                "users": serializer.data,
+                "count": len(serializer.data)
+            }, status=status.HTTP_200_OK)

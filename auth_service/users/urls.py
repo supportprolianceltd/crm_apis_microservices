@@ -11,7 +11,7 @@ from .views import (
     WithdrawalDetailView, ReferenceCheckView, ProofOfAddressView, InsuranceVerificationView,
     DocumentAcknowledgmentsListView, DocumentAcknowledgeView, DrivingRiskAssessmentView, PublicRegisterView,
     LegalWorkEligibilityView, OtherUserDocumentsView, SkillDetailView, UserDocumentAccessView, UsersViewSetNoPagination,
-    AllTenantsUsersListView, AllTenantNamesUsersListView, UserProfileDataView # Ensure this import is added
+    AllTenantsUsersListView, AllTenantNamesUsersListView, UserProfileDataView, BulkUserDetailsView # Ensure this import is added
 )
 
 router = DefaultRouter()
@@ -108,4 +108,5 @@ urlpatterns = [
 
     path('transactions/', TransactionView.as_view(), name='transaction-create'),
     path('profile-data/', UserProfileDataView.as_view(), name='user-profile-data'),
+    path('bulk-user-details/', BulkUserDetailsView.as_view(), name='bulk-user-details'),
 ]
