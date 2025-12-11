@@ -201,7 +201,17 @@ export class ClusterController {
               email: carer.email,
               phone: carer.profile?.personal_phone || carer.profile?.work_phone || null,
               skills: carer.profile?.professional_qualifications || [],
-              // Add other fields you need from auth service
+              jobRole: carer.job_role,
+              status: carer.status,
+              address: carer.profile?.street ? `${carer.profile.street}, ${carer.profile.city}, ${carer.profile.state}` : null,
+              postcode: carer.profile?.zip_code || null,
+              employeeId: carer.profile?.employee_id || null,
+              dob: carer.profile?.dob || null,
+              street: carer.profile?.street || null,
+              city: carer.profile?.city || null,
+              state: carer.profile?.state || null,
+              country: carer.profile?.country || null,
+              zip_code: carer.profile?.zip_code || null
             } : null
           };
         })
@@ -352,7 +362,17 @@ export class ClusterController {
               email: carer.email,
               phone: carer.profile?.personal_phone || carer.profile?.work_phone || null,
               skills: carer.profile?.professional_qualifications || [],
-              // Add other fields from auth service
+              jobRole: carer.job_role,
+              status: carer.status,
+              address: carer.profile?.street ? `${carer.profile.street}, ${carer.profile.city}, ${carer.profile.state}` : null,
+              postcode: carer.profile?.zip_code || null,
+              employeeId: carer.profile?.employee_id || null,
+              dob: carer.profile?.dob || null,
+              street: carer.profile?.street || null,
+              city: carer.profile?.city || null,
+              state: carer.profile?.state || null,
+              country: carer.profile?.country || null,
+              zip_code: carer.profile?.zip_code || null
             } : null
           };
         })
@@ -362,7 +382,41 @@ export class ClusterController {
         clusterId,
         clusterName: cluster.name,
         includeNearby,
-        carerAssignments: carersWithDetails
+        carers: carersWithDetails.map((assignment: any) => {
+          if (assignment.carerDetails) {
+            // Full details available
+            return {
+              ...assignment.carerDetails,
+              assignmentId: assignment.assignmentId,
+              assignedAt: assignment.assignedAt,
+              isInCluster: assignment.isInCluster
+            };
+          } else {
+            // Fallback when auth service is not available
+            return {
+              id: assignment.carerId,
+              firstName: 'Carer',
+              lastName: `(ID: ${assignment.carerId})`,
+              email: `carer_${assignment.carerId}@unknown.local`,
+              phone: null,
+              skills: [],
+              jobRole: 'carer',
+              status: 'unknown',
+              address: null,
+              postcode: null,
+              employeeId: null,
+              dob: null,
+              street: null,
+              city: null,
+              state: null,
+              country: null,
+              zip_code: null,
+              assignmentId: assignment.assignmentId,
+              assignedAt: assignment.assignedAt,
+              isInCluster: assignment.isInCluster
+            };
+          }
+        })
       });
     } catch (error: any) {
       console.error('getClusterCarers error', error);
@@ -778,13 +832,32 @@ export class ClusterController {
       const client = await clientService.getClientById(token, clientId);
       if (!client) return res.status(404).json({ error: 'Client not found in auth service' });
 
-      // Idempotent create: skip if already linked
-      const existingLink = await (this.prisma as any).clusterClient.findFirst({
-        where: { tenantId: tenantId.toString(), clusterId: clusterId, clientId }
+      // Check if client is already assigned to any cluster
+      const existingLinks = await (this.prisma as any).clusterClient.findMany({
+        where: { tenantId: tenantId.toString(), clientId }
       });
 
-      if (existingLink) {
-        return res.json({ success: true, message: 'Client already assigned to cluster', data: existingLink });
+      if (existingLinks.length > 0) {
+        const existingInTarget = existingLinks.find((link: any) => link.clusterId === clusterId);
+        if (existingInTarget) {
+          // Already assigned to this cluster, remove from any others
+          const others = existingLinks.filter((link: any) => link.clusterId !== clusterId);
+          for (const other of others) {
+            await (this.prisma as any).clusterClient.delete({
+              where: { id: other.id }
+            });
+            await this.clusteringService.updateClusterStats(other.clusterId);
+          }
+          return res.json({ success: true, message: 'Client already assigned to this cluster (removed from others)', data: existingInTarget });
+        } else {
+          // Remove from all existing clusters and assign to new
+          for (const link of existingLinks) {
+            await (this.prisma as any).clusterClient.delete({
+              where: { id: (link as any).id }
+            });
+            await this.clusteringService.updateClusterStats((link as any).clusterId);
+          }
+        }
       }
 
       const created = await (this.prisma as any).clusterClient.create({ data: { tenantId: tenantId.toString(), clusterId, clientId } });
@@ -825,10 +898,37 @@ export class ClusterController {
         const { ClientService } = await import('../services/client.service');
         const clientService = new ClientService();
         try {
-          clients = await clientService.getClientsByIds(token, clientIds) as any[];
+          // Keep as strings for the auth service (it handles string IDs)
+          const allClients = await clientService.getClientsByIds(token, clientIds) as any[];
+          // Filter to only include clients that are actually assigned to this cluster
+          const filteredClients = allClients.filter((client: any) => clientIds.includes(client.id.toString()));
+
+          // Transform to only include rostering-relevant information
+          clients = filteredClients.map((client: any) => ({
+            id: client.id,
+            firstName: client.first_name,
+            lastName: client.last_name,
+            email: client.email,
+            phone: client.profile?.personal_phone || client.profile?.work_phone || null,
+            address: client.profile?.street ? `${client.profile.street}, ${client.profile.city}, ${client.profile.state}` : null,
+            postcode: client.profile?.zip_code || null,
+            specialRequirements: client.profile?.special_requirements || null,
+            emergencyContact: client.profile?.emergency_contact || null
+          }));
         } catch (err) {
           console.error('Failed to fetch clients from auth service', err);
-          clients = clientIds.map((id: string) => ({ id }));
+          // Fallback when auth service is not available
+          clients = clientIds.map((id: string) => ({
+            id: parseInt(id, 10),
+            firstName: 'Client',
+            lastName: `(ID: ${id})`,
+            email: `client_${id}@unknown.local`,
+            phone: null,
+            address: null,
+            postcode: null,
+            specialRequirements: null,
+            emergencyContact: null
+          }));
         }
       }
 
@@ -886,17 +986,57 @@ export class ClusterController {
         return res.status(400).json({ clusterId, requested: clientIds.length, validated: 0, created: 0, alreadyLinked: 0, invalidIds, message: 'No valid client IDs found' });
       }
 
-      // Find existing links to avoid duplicates (only check among validated ids)
+      // Find all existing assignments for these clients
       const existing = await (this.prisma as any).clusterClient.findMany({
-        where: { tenantId: tenantId.toString(), clusterId, clientId: { in: validClientIds } },
-        select: { clientId: true }
+        where: { tenantId: tenantId.toString(), clientId: { in: validClientIds } },
+        select: { id: true, clientId: true, clusterId: true }
       });
-      const existingIds = new Set(existing.map((e: any) => e.clientId));
 
-      const toCreate = validClientIds.filter(id => !existingIds.has(id)).map(id => ({ tenantId: tenantId.toString(), clusterId, clientId: id }));
+      const existingByClient = new Map<string, any[]>();
+      for (const link of existing) {
+        const clientId = (link as any).clientId;
+        if (!existingByClient.has(clientId)) {
+          existingByClient.set(clientId, []);
+        }
+        existingByClient.get(clientId)!.push(link);
+      }
+
+      const toCreate: any[] = [];
+      const movedClients: any[] = [];
+      const alreadyInCluster: any[] = [];
+
+      for (const clientId of validClientIds) {
+        const existingLinks = existingByClient.get(clientId) || [];
+        if (existingLinks.length > 0) {
+          const inTarget = existingLinks.filter((link: any) => link.clusterId === clusterId);
+          if (inTarget.length > 0) {
+            // Already in target cluster, remove from others
+            const others = existingLinks.filter((link: any) => link.clusterId !== clusterId);
+            for (const other of others) {
+              await (this.prisma as any).clusterClient.delete({
+                where: { id: other.id }
+              });
+              await this.clusteringService.updateClusterStats(other.clusterId);
+            }
+            alreadyInCluster.push({ clientId, clusterId });
+          } else {
+            // Remove from all existing and assign to new
+            for (const link of existingLinks) {
+              await (this.prisma as any).clusterClient.delete({
+                where: { id: (link as any).id }
+              });
+              await this.clusteringService.updateClusterStats((link as any).clusterId);
+            }
+            movedClients.push({ clientId, fromClusters: existingLinks.map((l: any) => l.clusterId) });
+            toCreate.push({ tenantId: tenantId.toString(), clusterId, clientId });
+          }
+        } else {
+          toCreate.push({ tenantId: tenantId.toString(), clusterId, clientId });
+        }
+      }
 
       const createdIds: string[] = [];
-      const alreadyLinkedIds: string[] = validClientIds.filter(id => existingIds.has(id));
+      const movedIds: string[] = movedClients.map(m => m.clientId);
 
       if (toCreate.length > 0) {
         try {
@@ -923,12 +1063,14 @@ export class ClusterController {
         clusterId,
         requested: clientIds.length,
         validated: validClientIds.length,
-        created: createdIds.length,
-        createdIds,
-        alreadyLinked: alreadyLinkedIds.length,
-        alreadyLinkedIds,
+        created: toCreate.length,
+        createdIds: toCreate.map(c => c.clientId),
+        moved: movedIds.length,
+        movedClients,
+        alreadyInCluster: alreadyInCluster.length,
+        alreadyInClusterClients: alreadyInCluster,
         invalidIds,
-        message: `Batch assign completed: created ${createdIds.length}, already linked ${alreadyLinkedIds.length}`
+        message: `Batch assign completed: created ${toCreate.length}, moved ${movedIds.length}, already in cluster ${alreadyInCluster.length}`
       });
     } catch (error: any) {
       console.error('assignClientsToCluster error', error);
@@ -1555,71 +1697,72 @@ public async getBatchClientClusterSuggestions(req: Request, res: Response) {
 }
 
 /**
- * Auto-assign client to cluster based on postcode similarity and distance
- * POST /clusters/auto-assign-client
- */
-public async autoAssignClientToCluster(req: Request, res: Response) {
-  try {
-    const tenantId = req.user?.tenantId;
-    if (!tenantId) {
-      return res.status(403).json({ error: 'tenantId missing from auth context' });
-    }
+  * Auto-assign client to cluster based on postcode similarity and distance
+  * POST /clusters/auto-assign-client
+  */
+ public async autoAssignClientToCluster(req: Request, res: Response) {
+   try {
+     const tenantId = req.user?.tenantId;
+     if (!tenantId) {
+       return res.status(403).json({ error: 'tenantId missing from auth context' });
+     }
 
-    const {
-      name,
-      postcode,
-      address,
-      town,
-      city,
-      latitude,
-      longitude,
-      clientId // optional, if client already exists
-    } = req.body;
+     const {
+       name,
+       postcode,
+       address,
+       town,
+       city,
+       latitude,
+       longitude,
+       clientId // optional, if client already exists
+     } = req.body;
+ 
+ 
+     if (!postcode) {
+       return res.status(400).json({ error: 'postcode is required' });
+     }
+ 
+     if (!address) {
+       return res.status(400).json({ error: 'address is required' });
+     }
 
-    if (!postcode) {
-      return res.status(400).json({ error: 'postcode is required' });
-    }
+     // Import job queue service dynamically
+     const { jobQueueService } = await import('../services/job-queue.service');
 
-    if (!address) {
-      return res.status(400).json({ error: 'address is required' });
-    }
+     // Add job to queue
+     const job = await jobQueueService.addClientAutoAssignJob({
+       tenantId: tenantId.toString(),
+       userId: req.user?.id || 'system',
+       data: {
+         name,
+         postcode,
+         address,
+         town,
+         city,
+         latitude,
+         longitude,
+         clientId: clientId ? clientId.toString() : undefined
+       }
+     });
 
-    // Import job queue service dynamically
-    const { jobQueueService } = await import('../services/job-queue.service');
+     // Return job ID immediately for status tracking
+     return res.json({
+       success: true,
+       message: 'Client auto-assignment job queued successfully',
+       jobId: job.id,
+       status: 'queued',
+       estimatedProcessingTime: '5-30 seconds'
+     });
 
-    // Add job to queue
-    const job = await jobQueueService.addClientAutoAssignJob({
-      tenantId: tenantId.toString(),
-      userId: req.user?.id || 'system',
-      data: {
-        name,
-        postcode,
-        address,
-        town,
-        city,
-        latitude,
-        longitude,
-        clientId
-      }
-    });
-
-    // Return job ID immediately for status tracking
-    return res.json({
-      success: true,
-      message: 'Client auto-assignment job queued successfully',
-      jobId: job.id,
-      status: 'queued',
-      estimatedProcessingTime: '5-30 seconds'
-    });
-
-  } catch (error: any) {
-    console.error('autoAssignClientToCluster error', error);
-    return res.status(500).json({
-      error: 'Failed to queue client auto-assignment job',
-      details: error?.message
-    });
-  }
-}
+   } catch (error: any) {
+     console.error('autoAssignClientToCluster error', error);
+     return res.status(500).json({
+       error: 'Failed to queue client auto-assignment job',
+       details: error?.message
+     });
+   }
+ }
 
 /**
  * Auto-assign client to cluster - SYNCHRONOUS VERSION (for internal use)
@@ -1669,7 +1812,7 @@ private async autoAssignClientToClusterSync(req: Request, res: Response) {
       // Assign to existing cluster
       if (clientId) {
         // Client exists, assign directly
-        await this.assignClientToClusterInternal(tenantId.toString(), matchingCluster.id, clientId);
+        await this.assignClientToClusterInternal(tenantId.toString(), matchingCluster.id, String(clientId));
       } else {
         // Create client and assign
         const newClient = await this.createClientFromDetails(tenantId.toString(), req.body);
@@ -1741,7 +1884,7 @@ private async autoAssignClientToClusterSync(req: Request, res: Response) {
 
       if (targetCluster) {
         if (clientId) {
-          await this.assignClientToClusterInternal(tenantId.toString(), targetClusterId, clientId);
+          await this.assignClientToClusterInternal(tenantId.toString(), targetClusterId, String(clientId));
         } else {
           const newClient = await this.createClientFromDetails(tenantId.toString(), req.body);
           await this.assignClientToClusterInternal(tenantId.toString(), targetClusterId, newClient.id);
@@ -1831,7 +1974,7 @@ private async autoAssignClientToClusterSync(req: Request, res: Response) {
         const closest = distances[0];
         if (closest.distanceKm <= 1.0) { // 1km threshold
           if (clientId) {
-            await this.assignClientToClusterInternal(tenantId.toString(), closest.cluster.id, clientId);
+            await this.assignClientToClusterInternal(tenantId.toString(), closest.cluster.id, String(clientId));
           } else {
             const newClient = await this.createClientFromDetails(tenantId.toString(), req.body);
             await this.assignClientToClusterInternal(tenantId.toString(), closest.cluster.id, newClient.id);
@@ -1876,8 +2019,8 @@ private async autoAssignClientToClusterSync(req: Request, res: Response) {
     // Create and assign client
     let finalClient;
     if (clientId) {
-      finalClient = { id: clientId };
-      await this.assignClientToClusterInternal(tenantId.toString(), newCluster.id, clientId);
+      finalClient = { id: String(clientId) };
+      await this.assignClientToClusterInternal(tenantId.toString(), newCluster.id, String(clientId));
     } else {
       finalClient = await this.createClientFromDetails(tenantId.toString(), req.body);
       await this.assignClientToClusterInternal(tenantId.toString(), newCluster.id, finalClient.id);
@@ -1903,31 +2046,51 @@ private async autoAssignClientToClusterSync(req: Request, res: Response) {
 }
 
 /**
- * Helper method to assign client to cluster
- */
-private async assignClientToClusterInternal(tenantId: string, clusterId: string, clientId: string) {
-  // Check if already assigned
-  const existing = await (this.prisma as any).clusterClient.findFirst({
-    where: {
-      tenantId,
-      clusterId,
-      clientId
-    }
-  });
+  * Helper method to assign client to cluster
+  */
+ private async assignClientToClusterInternal(tenantId: string, clusterId: string, clientId: string) {
+   // Check if already assigned to any cluster
+   const existingLinks = await (this.prisma as any).clusterClient.findMany({
+     where: {
+       tenantId,
+       clientId
+     }
+   });
 
-  if (!existing) {
-    await (this.prisma as any).clusterClient.create({
-      data: {
-        tenantId,
-        clusterId,
-        clientId
-      }
-    });
+   if (existingLinks.length > 0) {
+     const inTarget = existingLinks.filter((link: any) => link.clusterId === clusterId);
+     if (inTarget.length > 0) {
+       // Already in target, remove from others
+       const others = existingLinks.filter((link: any) => link.clusterId !== clusterId);
+       for (const other of others) {
+         await (this.prisma as any).clusterClient.delete({
+           where: { id: other.id }
+         });
+         await this.clusteringService.updateClusterStats(other.clusterId);
+       }
+       return;
+     } else {
+       // Remove from all existing clusters
+       for (const link of existingLinks) {
+         await (this.prisma as any).clusterClient.delete({
+           where: { id: (link as any).id }
+         });
+         await this.clusteringService.updateClusterStats((link as any).clusterId);
+       }
+     }
+   }
 
-    // Update cluster stats
-    await this.clusteringService.updateClusterStats(clusterId);
-  }
-}
+   await (this.prisma as any).clusterClient.create({
+     data: {
+       tenantId,
+       clusterId,
+       clientId
+     }
+   });
+
+   // Update cluster stats
+   await this.clusteringService.updateClusterStats(clusterId);
+ }
 
 /**
  * Auto-assign carer to cluster based on postcode similarity and distance
@@ -1970,7 +2133,7 @@ public async autoAssignCarerToCluster(req: Request, res: Response) {
       tenantId: tenantId.toString(),
       userId: req.user?.id || 'system',
       data: {
-        carerId,
+        carerId: carerId ? carerId.toString() : undefined,
         postcode,
         address,
         town,
@@ -2057,7 +2220,7 @@ private async autoAssignCarerToClusterSync(req: Request, res: Response) {
 
     if (matchingCluster) {
       // Assign to existing cluster
-      await this.assignCarerToClusterInternal(tenantId.toString(), matchingCluster.id, carerId);
+      await this.assignCarerToClusterInternal(tenantId.toString(), matchingCluster.id, String(carerId));
 
       return res.json({
         success: true,
@@ -2113,7 +2276,7 @@ private async autoAssignCarerToClusterSync(req: Request, res: Response) {
       });
 
       if (targetCluster) {
-        await this.assignCarerToClusterInternal(tenantId.toString(), targetClusterId, carerId);
+        await this.assignCarerToClusterInternal(tenantId.toString(), targetClusterId, String(carerId));
 
         return res.json({
           success: true,
@@ -2199,7 +2362,7 @@ private async autoAssignCarerToClusterSync(req: Request, res: Response) {
       if (distances.length > 0) {
         const closest = distances[0];
         if (closest.distanceKm <= 1.0) { // 1km threshold
-          await this.assignCarerToClusterInternal(tenantId.toString(), closest.cluster.id, carerId);
+          await this.assignCarerToClusterInternal(tenantId.toString(), closest.cluster.id, String(carerId));
 
           return res.json({
             success: true,
@@ -2239,7 +2402,7 @@ private async autoAssignCarerToClusterSync(req: Request, res: Response) {
     // through Google Maps geocoding during distance calculations
 
     // Assign carer to new cluster
-    await this.assignCarerToClusterInternal(tenantId.toString(), newCluster.id, carerId);
+    await this.assignCarerToClusterInternal(tenantId.toString(), newCluster.id, String(carerId));
 
     return res.json({
       success: true,

@@ -7,7 +7,7 @@ export class ClientService {
 
   async getClientById(token: string | undefined, id: string) {
     try {
-      const url = `${this.baseUrl.replace(/\/$/, '')}/api/user/clients/${encodeURIComponent(id)}`;
+      const url = `${this.baseUrl.replace(/\/$/, '')}/api/user/users/${encodeURIComponent(id)}`;
       const resp = await fetch(url, {
         method: 'GET',
         headers: {
@@ -25,43 +25,14 @@ export class ClientService {
 
   async getClientsByIds(token: string | undefined, ids: string[]) {
     if (!ids || ids.length === 0) return [];
-    try {
-      // Prefer GET with comma-separated ids when supported
-      const query = ids.map(encodeURIComponent).join(',');
-      const url = `${this.baseUrl.replace(/\/$/, '')}/api/user/clients?ids=${query}`;
-      const resp = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        }
-      });
-      if (!resp.ok) {
-        // Fallback: try POST bulk lookup if available
-        try {
-          const postUrl = `${this.baseUrl.replace(/\/$/, '')}/api/user/clients/bulk`;
-          const postResp = await fetch(postUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token ? { Authorization: `Bearer ${token}` } : {})
-            },
-            body: JSON.stringify({ ids })
-          });
-          if (!postResp.ok) {
-            console.error('ClientService.getClientsByIds POST fallback returned non-ok', postResp.status);
-            return [];
-          }
-          const postParsed = await postResp.json();
-          return this.normalizeClientsResponse(postParsed);
-        } catch (e) {
-          console.error('ClientService.getClientsByIds fallback POST failed', e);
-          return [];
-        }
-      }
 
-      const parsed = await resp.json();
-      return this.normalizeClientsResponse(parsed);
+    try {
+      // Make individual requests for each client ID since users endpoint doesn't support bulk lookup
+      const clientPromises = ids.map(id => this.getClientById(token, id));
+      const clients = await Promise.all(clientPromises);
+
+      // Filter out null results (clients not found)
+      return clients.filter(client => client !== null);
     } catch (err) {
       console.error('ClientService.getClientsByIds error', err);
       return [];

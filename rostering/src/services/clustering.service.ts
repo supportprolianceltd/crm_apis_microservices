@@ -1370,7 +1370,7 @@ public async generateOptimizedClusters(
           COUNT(CASE WHEN er.status IN ('PENDING', 'PROCESSING', 'MATCHED') THEN 1 END) as active_requests,
           COUNT(er.id) as total_requests
         FROM clusters cl
-        LEFT JOIN cluster_assignments ca ON ca."clusterId" = cl.id
+        LEFT JOIN cluster_assignment ca ON ca."clusterId" = cl.id
         LEFT JOIN external_requests er ON er."clusterId" = cl.id
         WHERE cl.id = ${clusterId}
         GROUP BY cl.id
@@ -1456,8 +1456,8 @@ public async generateOptimizedClusters(
       if (includeNearby && assignments.length < 3) {
         try {
           const nearbyAssignments = await this.prisma.$queryRaw<any[]>`
-            SELECT ca.* 
-            FROM cluster_assignments ca
+            SELECT ca.*
+            FROM cluster_assignment ca
             JOIN clusters c ON c.id = ca."clusterId"
             WHERE ca."clusterId" != ${clusterId}
               AND ca."tenantId" = ${cluster.tenantId}
