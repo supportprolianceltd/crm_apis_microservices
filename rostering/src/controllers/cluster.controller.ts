@@ -909,12 +909,28 @@ export class ClusterController {
             firstName: client.first_name,
             lastName: client.last_name,
             email: client.email,
-            phone: client.profile?.personal_phone || client.profile?.work_phone || null,
-            address: client.profile?.street ? `${client.profile.street}, ${client.profile.city}, ${client.profile.state}` : null,
-            postcode: client.profile?.zip_code || null,
+            phone: client.profile?.contact_number || client.profile?.personal_phone || client.profile?.work_phone || null,
+            address: client.profile?.address_line || null,
+            postcode: client.profile?.postcode || null,
             specialRequirements: client.profile?.special_requirements || null,
             emergencyContact: client.profile?.emergency_contact || null
           }));
+
+          // If no clients were found from auth service, use fallback
+          if (clients.length === 0) {
+            console.warn('No clients found in auth service, using fallback data', { clientIds });
+            clients = clientIds.map((id: string) => ({
+              id: parseInt(id, 10),
+              firstName: 'Client',
+              lastName: `(ID: ${id})`,
+              email: `client_${id}@unknown.local`,
+              phone: null,
+              address: null,
+              postcode: null,
+              specialRequirements: null,
+              emergencyContact: null
+            }));
+          }
         } catch (err) {
           console.error('Failed to fetch clients from auth service', err);
           // Fallback when auth service is not available
@@ -2464,9 +2480,13 @@ private async createClientFromDetails(tenantId: string, clientData: any) {
     longitude
   } = clientData;
 
+  // Generate a unique ID for the external request
+  const clientId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
   // Create as ExternalRequest (client request)
   const client = await (this.prisma as any).externalRequest.create({
     data: {
+      id: clientId,
       tenantId,
       subject: `Client: ${name}`,
       content: `Auto-created client from cluster assignment`,

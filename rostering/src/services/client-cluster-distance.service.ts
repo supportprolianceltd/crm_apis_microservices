@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { logger, logServiceError } from '../utils/logger';
+import { GeocodingService } from './geocoding.service';
 
 export interface ClusterSuggestion {
   clusterId: string;
@@ -29,7 +30,11 @@ export interface ClientClusterSuggestionResult {
 }
 
 export class ClientClusterDistanceService {
-  constructor(private prisma: PrismaClient) {}
+  private geocodingService: GeocodingService;
+
+  constructor(private prisma: PrismaClient) {
+    this.geocodingService = new GeocodingService(prisma);
+  }
 
   /**
    * Calculate distance between two coordinates using Haversine formula
@@ -390,15 +395,88 @@ export class ClientClusterDistanceService {
   }
 
   /**
-   * Geocode postcode to coordinates
+   * Geocode postcode to coordinates using multiple formats and country detection
    */
   private async geocodePostcode(postcode: string): Promise<{ latitude: number; longitude: number }> {
-    // This would integrate with your geocoding service
-    // For now, return placeholder coordinates
-    return {
-      latitude: 51.5074, // London coordinates as placeholder
-      longitude: -0.1278
-    };
+    try {
+      // Detect country based on postcode format
+      let country: string | undefined;
+      const cleanPostcode = postcode.trim().toUpperCase();
+
+      // UK postcode pattern: e.g., SW1A 1AA, M1 1AE, etc.
+      if (/^[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}$/.test(cleanPostcode)) {
+        country = 'UK';
+      }
+      // Nigerian postcode pattern: 6 digits
+      else if (/^\d{6}$/.test(cleanPostcode)) {
+        country = 'Nigeria';
+      }
+      // US ZIP code: 5 digits or 5+4
+      else if (/^\d{5}(-\d{4})?$/.test(cleanPostcode)) {
+        country = 'USA';
+      }
+      // Canadian postal code: e.g., K1A 0A6
+      else if (/^[A-Z]\d[A-Z]\s*\d[A-Z]\d$/.test(cleanPostcode)) {
+        country = 'Canada';
+      }
+      // Ghana postcode: similar to Nigeria
+      else if (/^\d{5,6}$/.test(cleanPostcode)) {
+        country = 'Ghana';
+      }
+      // Default to no country if not recognized
+
+      // Try geocoding with detected country
+      if (country) {
+        const result = await this.geocodingService.geocodeAddress(postcode, postcode, country);
+        if (result) {
+          return {
+            latitude: result.latitude,
+            longitude: result.longitude
+          };
+        }
+      }
+
+      // If that fails or no country detected, try without country restriction
+      const resultNoCountry = await this.geocodingService.geocodeAddress(postcode, postcode);
+      if (resultNoCountry) {
+        return {
+          latitude: resultNoCountry.latitude,
+          longitude: resultNoCountry.longitude
+        };
+      }
+
+      // Fallback to country-specific coordinates if geocoding fails
+      logger.warn(`Geocoding failed for postcode: ${postcode}, using fallback coordinates for country: ${country}`);
+      if (country === 'UK') {
+        return {
+          latitude: 51.5074, // London coordinates
+          longitude: -0.1278
+        };
+      } else if (country === 'USA') {
+        return {
+          latitude: 40.7128, // New York coordinates
+          longitude: -74.0060
+        };
+      } else if (country === 'Canada') {
+        return {
+          latitude: 45.4215, // Toronto coordinates
+          longitude: -75.6972
+        };
+      } else {
+        // Default to Abuja for Nigeria, Ghana, or unknown
+        return {
+          latitude: 9.0765,
+          longitude: 7.3986
+        };
+      }
+    } catch (error) {
+      logServiceError('ClientClusterDistance', 'geocodePostcode', error, { postcode });
+      // Fallback coordinates
+      return {
+        latitude: 9.0765,
+        longitude: 7.3986
+      };
+    }
   }
 
   /**

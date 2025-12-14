@@ -7,7 +7,7 @@ export class ClientService {
 
   async getClientById(token: string | undefined, id: string) {
     try {
-      const url = `${this.baseUrl.replace(/\/$/, '')}/api/user/users/${encodeURIComponent(id)}`;
+      const url = `${this.baseUrl.replace(/\/$/, '')}/api/user/clients/${encodeURIComponent(id)}`;
       const resp = await fetch(url, {
         method: 'GET',
         headers: {

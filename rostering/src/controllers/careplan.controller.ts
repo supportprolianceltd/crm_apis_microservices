@@ -7,6 +7,7 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { validateCreatePayload } from '../validation/careplan.validation';
 import { TravelService } from '../services/travel.service';
+import { GeocodingService } from '../services/geocoding.service';
 
 function getUserFriendlyError(error: any): string {
   if (error?.code === 'P2002') {
@@ -44,10 +45,12 @@ function getUserFriendlyError(error: any): string {
 export class CarePlanController {
   private prisma: PrismaClient;
   private travelService: TravelService;
+  private geocodingService: GeocodingService;
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
     this.travelService = new TravelService(prisma);
+    this.geocodingService = new GeocodingService(prisma);
   }
 
   // Normalize day strings to Prisma DayOfWeek enum values (MONDAY..SUNDAY)
@@ -71,6 +74,72 @@ export class CarePlanController {
     if (!val) return null;
     const d = new Date(val);
     return isNaN(d.getTime()) ? null : d;
+  }
+
+  private detectCountryFromPostcode(postcode: string): string | undefined {
+    const cleanPostcode = postcode.trim().toUpperCase();
+
+    // UK postcode pattern: e.g., SW1A 1AA, M1 1AE, etc.
+    if (/^[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}$/.test(cleanPostcode)) {
+      return 'UK';
+    }
+    // Nigerian postcode pattern: 6 digits
+    else if (/^\d{6}$/.test(cleanPostcode)) {
+      return 'Nigeria';
+    }
+    // US ZIP code: 5 digits or 5+4
+    else if (/^\d{5}(-\d{4})?$/.test(cleanPostcode)) {
+      return 'USA';
+    }
+    // Canadian postal code: e.g., K1A 0A6
+    else if (/^[A-Z]\d[A-Z]\s*\d[A-Z]\d$/.test(cleanPostcode)) {
+      return 'Canada';
+    }
+    // Ghana postcode: similar to Nigeria
+    else if (/^\d{5,6}$/.test(cleanPostcode)) {
+      return 'Ghana';
+    }
+    return undefined;
+  }
+
+  private extractPostcodeFromAddress(address: string): string | null {
+    // UK postcode pattern
+    const ukMatch = address.match(/([A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2})/i);
+    if (ukMatch) return ukMatch[1].toUpperCase();
+
+    // US ZIP
+    const usMatch = address.match(/(\d{5}(-\d{4})?)/);
+    if (usMatch) return usMatch[1];
+
+    // Nigerian/Ghana
+    const ngMatch = address.match(/(\d{5,6})/);
+    if (ngMatch) return ngMatch[1];
+
+    // Canadian
+    const caMatch = address.match(/([A-Z]\d[A-Z]\s*\d[A-Z]\d)/i);
+    if (caMatch) return caMatch[1].toUpperCase();
+
+    return null;
+  }
+
+  private detectCountryFromAddress(address: string): string | undefined {
+    const lowerAddress = address.toLowerCase();
+    if (lowerAddress.includes('uk') || lowerAddress.includes('london') || lowerAddress.includes('manchester') || lowerAddress.includes('birmingham')) {
+      return 'UK';
+    }
+    if (lowerAddress.includes('nigeria') || lowerAddress.includes('lagos') || lowerAddress.includes('abuja') || lowerAddress.includes('port harcourt')) {
+      return 'Nigeria';
+    }
+    if (lowerAddress.includes('usa') || lowerAddress.includes('united states') || lowerAddress.includes('new york') || lowerAddress.includes('california')) {
+      return 'USA';
+    }
+    if (lowerAddress.includes('canada') || lowerAddress.includes('toronto') || lowerAddress.includes('vancouver')) {
+      return 'Canada';
+    }
+    if (lowerAddress.includes('ghana') || lowerAddress.includes('accra')) {
+      return 'Ghana';
+    }
+    return undefined;
   }
 
   // Generate CarerVisit rows for a care plan using its careRequirements.schedules slots
@@ -791,15 +860,66 @@ export class CarePlanController {
         });
       }
 
-      // 3. Fetch client details to get postcode
+      // 3. Fetch client details from auth service
+      let clientAddress: string | null = null;
       let clientPostcode: string | null = null;
+      let clientLatitude: number | null = null;
+      let clientLongitude: number | null = null;
       try {
         const clientResponse = await fetch(`${authServiceUrl}/api/user/clients/${clientId}/`, {
           headers: { 'Authorization': authToken }
         });
         if (clientResponse.ok) {
           const clientData: any = await clientResponse.json();
-          clientPostcode = clientData.profile?.postcode || clientData.profile?.zip_code || null;
+          clientAddress = clientData.profile?.address_line || null;
+          clientPostcode = clientData.profile?.postcode || null;
+          // Geocode client address and postcode to get coordinates
+          let geocodeAddress: string = '';
+          let geocodePostcode: string = '';
+
+          if (clientAddress) {
+            // Check if address already contains a postcode
+            const addressPostcode = this.extractPostcodeFromAddress(clientAddress);
+            if (addressPostcode) {
+              geocodeAddress = clientAddress;
+              geocodePostcode = addressPostcode;
+            } else if (clientPostcode) {
+              geocodeAddress = `${clientAddress}, ${clientPostcode}`;
+              geocodePostcode = clientPostcode;
+            } else {
+              geocodeAddress = clientAddress;
+              geocodePostcode = '';
+            }
+          } else if (clientPostcode) {
+            geocodeAddress = clientPostcode;
+            geocodePostcode = clientPostcode;
+          }
+
+          if (geocodeAddress) {
+            try {
+              // Detect country from address first, then from postcode
+              let country = geocodePostcode ? this.detectCountryFromPostcode(geocodePostcode) : undefined;
+              if (!country && clientAddress) {
+                country = this.detectCountryFromAddress(clientAddress);
+              }
+              const clientCoords = await this.geocodingService.geocodeAddress(geocodeAddress, geocodePostcode || undefined, country);
+              if (clientCoords) {
+                clientLatitude = clientCoords.latitude;
+                clientLongitude = clientCoords.longitude;
+              } else {
+                // If geocoding fails, try postcode fallback
+                if (geocodePostcode) {
+                  const fallbackCoords = await this.geocodingService.geocodeAddress(geocodePostcode, geocodePostcode, country);
+                  if (fallbackCoords) {
+                    clientLatitude = fallbackCoords.latitude;
+                    clientLongitude = fallbackCoords.longitude;
+                  }
+                }
+              }
+            } catch (geoError) {
+              console.warn(`Failed to geocode client address "${geocodeAddress}":`, geoError);
+            }
+          }
         } else {
           const errorText = await clientResponse.text();
           console.warn(`Failed to fetch client ${clientId}: ${clientResponse.status}`, errorText);
@@ -808,7 +928,7 @@ export class CarePlanController {
         console.error('Error fetching client details:', e.message);
       }
 
-      // 4. Fetch carer details (including postcodes) from auth service
+      // 4. Fetch carer details from auth service
       const carerIdsArray = Array.from(carerIds);
       const carerDetailsPromises = carerIdsArray.map(async (carerId) => {
         try {
@@ -826,8 +946,8 @@ export class CarePlanController {
             email: data.email,
             firstName: data.first_name,
             lastName: data.last_name,
-            role: data.role,
-            postcode: data.profile?.zip_code || data.profile?.postcode || null,
+            address: data.profile?.street || null,
+            postcode: data.profile?.zip_code || null,
             phone: data.profile?.work_phone || data.profile?.personal_phone || null,
             availability: data.profile?.availability || null,
           };
@@ -839,11 +959,76 @@ export class CarePlanController {
 
       const carerDetails = (await Promise.all(carerDetailsPromises)).filter(c => c !== null);
 
+      // Geocode carer addresses and postcodes to get coordinates
+      const carersWithCoords = await Promise.all(carerDetails.map(async (carer: any) => {
+        let latitude: number | null = null;
+        let longitude: number | null = null;
+        let geocodeAddress: string = '';
+        let geocodePostcode: string = '';
+
+        if (carer.address) {
+          // Check if address already contains a postcode
+          const addressPostcode = this.extractPostcodeFromAddress(carer.address);
+          if (addressPostcode) {
+            geocodeAddress = carer.address;
+            geocodePostcode = addressPostcode;
+          } else if (carer.postcode) {
+            geocodeAddress = `${carer.address}, ${carer.postcode}`;
+            geocodePostcode = carer.postcode;
+          } else {
+            geocodeAddress = carer.address;
+            geocodePostcode = '';
+          }
+        } else if (carer.postcode) {
+          geocodeAddress = carer.postcode;
+          geocodePostcode = carer.postcode;
+        }
+
+        if (geocodeAddress) {
+          try {
+            // Detect country from address first, then from postcode
+            let country = geocodePostcode ? this.detectCountryFromPostcode(geocodePostcode) : undefined;
+            if (!country && carer.address) {
+              country = this.detectCountryFromAddress(carer.address);
+            }
+            const coords = await this.geocodingService.geocodeAddress(geocodeAddress, geocodePostcode || undefined, country);
+            if (coords) {
+              latitude = coords.latitude;
+              longitude = coords.longitude;
+            } else {
+              // If geocoding fails, try postcode fallback
+              if (geocodePostcode) {
+                const fallbackCoords = await this.geocodingService.geocodeAddress(geocodePostcode, geocodePostcode, country);
+                if (fallbackCoords) {
+                  latitude = fallbackCoords.latitude;
+                  longitude = fallbackCoords.longitude;
+                }
+              }
+            }
+          } catch (geoError) {
+            console.warn(`Failed to geocode carer address "${geocodeAddress}" for carer ${carer.id}:`, geoError);
+          }
+        }
+
+        return {
+          id: carer.id,
+          email: carer.email,
+          firstName: carer.firstName,
+          lastName: carer.lastName,
+          role: 'carer',
+          postcode: carer.postcode,
+          phone: carer.phone,
+          availability: carer.availability,
+          latitude,
+          longitude
+        };
+      }));
+
       // 5. Calculate distances using TravelService
       let carersWithDistance: any[] = [];
-      
+
       if (!clientPostcode) {
-        carersWithDistance = carerDetails.map(carer => ({
+        carersWithDistance = carersWithCoords.map(carer => ({
           ...carer,
           distance: null,
           distanceMeters: null,
@@ -852,7 +1037,7 @@ export class CarePlanController {
           error: 'Client postcode not available'
         }));
       } else {
-        carersWithDistance = await Promise.all(carerDetails.map(async (carer: any) => {
+        carersWithDistance = await Promise.all(carersWithCoords.map(async (carer: any) => {
           if (!carer.postcode) {
             return {
               ...carer,
@@ -904,6 +1089,8 @@ export class CarePlanController {
       return res.json({
         clientId,
         clientPostcode,
+        clientLatitude,
+        clientLongitude,
         carers: carersWithDistance,
         totalCarers: carersWithDistance.length,
         totalVisits: carerVisits.length

@@ -1364,13 +1364,13 @@ public async generateOptimizedClusters(
         active_requests: number;
         total_requests: number;
       }>>`
-        SELECT 
+        SELECT
           COUNT(ca.id) as active_carers,
           COUNT(ca.id) as total_carers,
           COUNT(CASE WHEN er.status IN ('PENDING', 'PROCESSING', 'MATCHED') THEN 1 END) as active_requests,
           COUNT(er.id) as total_requests
         FROM clusters cl
-        LEFT JOIN cluster_assignment ca ON ca."clusterId" = cl.id
+        LEFT JOIN "ClusterAssignment" ca ON ca."clusterId" = cl.id
         LEFT JOIN external_requests er ON er."clusterId" = cl.id
         WHERE cl.id = ${clusterId}
         GROUP BY cl.id
