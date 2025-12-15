@@ -31,7 +31,6 @@ from users.serializers import (
     CustomUserMinimalSerializer,
     CustomUserSerializer,
 )
-
 # 2FA imports
 import pyotp
 import qrcode
@@ -46,6 +45,7 @@ from auth_service.utils.jwt_rsa import (
 )
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from rest_framework.pagination import PageNumberPagination
+from auth_service.utils.kafka_producer import publish_event
 
 logger = logging.getLogger(__name__)
 
@@ -500,33 +500,58 @@ class CustomTokenSerializer(serializers.Serializer):
 
         # Send OTP via email or SMS based on method
         if otp_method == 'email':
-            # Send OTP via email (using notifications service)
-            event_payload = {
-                "data": {
-                    "user_email": user.email,
-                    "2fa_code": otp_code,
-                    "2fa_method": "email",
-                    "ip_address": ip_address,
-                    "user_agent": user_agent,
-                    "login_method": "username" if "username" in attrs else "email",
-                    "remember_me": remember_me,
-                    "expires_in_seconds": 300,
-                },
-                "metadata": {
-                    "event_id": f"evt-{uuid.uuid4()}",
+            # Check cache to prevent duplicate OTP sends (atomic)
+            cache_key = f"otp_sent_{user.id}"
+            if not cache.add(cache_key, True, timeout=300):
+                logger.warning(f"OTP already sent recently for user {user.email}, skipping")
+            else:
+                # Get the domain/URL the user is logging in from
+                request = self.context.get("request")
+                login_domain = None
+                if request:
+                    # Try to get from Origin header first, then Host
+                    origin = request.META.get('HTTP_ORIGIN')
+                    if origin:
+                        login_domain = urlparse(origin).netloc
+                    else:
+                        host = request.META.get('HTTP_HOST')
+                        if host:
+                            login_domain = host.split(':')[0]  # Remove port if present
+
+                # Send OTP via email (using Kafka events)
+                from auth_service.utils.kafka_producer import publish_event
+                event_payload = {
                     "event_type": "auth.2fa.code.requested",
-                    "created_at": timezone.now().isoformat() + "Z",
-                    "source": "auth-service",
                     "tenant_id": str(user.tenant.unique_id),
-                },
-            }
-            try:
-                notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-                response = requests.post(notifications_url, json=event_payload, timeout=5)
-                response.raise_for_status()
-                logger.info(f"✅ OTP email notification sent. Status: {response.status_code}")
-            except Exception as e:
-                logger.warning(f"[❌ OTP Email Notification Error] Failed to send OTP email: {str(e)}")
+                    "timestamp": timezone.now().isoformat() + "Z",
+                    "payload": {
+                        "user_email": user.email,
+                        "user_first_name": getattr(user, 'first_name', ''),
+                        "user_last_name": getattr(user, 'last_name', ''),
+                        "2fa_code": otp_code,
+                        "2fa_method": "email",
+                        "ip_address": ip_address,
+                        "user_agent": user_agent,
+                        "login_method": "username" if "username" in attrs else "email",
+                        "remember_me": remember_me,
+                        "expires_in_seconds": 300,
+                        "login_domain": login_domain,
+                        "tenant_name": user.tenant.name,
+                        "tenant_logo": user.tenant.logo,
+                        "tenant_primary_color": user.tenant.primary_color,
+                        "tenant_secondary_color": user.tenant.secondary_color,
+                    },
+                    "metadata": {
+                        "event_id": f"evt-{uuid.uuid4()}",
+                        "created_at": timezone.now().isoformat() + "Z",
+                        "source": "auth-service",
+                    },
+                }
+                try:
+                    publish_event("auth-events", event_payload)
+                    logger.info(f"✅ OTP email event sent to Kafka")
+                except Exception as e:
+                    logger.warning(f"[❌ OTP Email Event Error] Failed to send OTP event: {str(e)}")
         else:  # otp_method == 'phone'
             # Send OTP via SMS (requires SMS service integration)
             user_profile = user.profile
@@ -536,40 +561,12 @@ class CustomTokenSerializer(serializers.Serializer):
             # For now, log the OTP and phone number for testing
             logger.info(f"📱 OTP SMS would be sent to {phone_number}: {otp_code}")
 
-            # Example SMS integration (uncomment and configure when SMS service is available):
-            # sms_payload = {
-            #     "data": {
-            #         "phone_number": phone_number,
-            #         "2fa_code": otp_code,
-            #         "2fa_method": "sms",
-            #         "ip_address": ip_address,
-            #         "user_agent": user_agent,
-            #         "login_method": "username" if "username" in attrs else "email",
-            #         "remember_me": remember_me,
-            #         "expires_in_seconds": 300,
-            #     },
-            #     "metadata": {
-            #         "event_id": f"evt-{uuid.uuid4()}",
-            #         "event_type": "auth.2fa.code.requested",
-            #         "created_at": timezone.now().isoformat() + "Z",
-            #         "source": "auth-service",
-            #         "tenant_id": str(user.tenant.unique_id),
-            #     },
-            # }
-            # try:
-            #     sms_service_url = settings.SMS_SERVICE_URL + "/send-otp/"
-            #     response = requests.post(sms_service_url, json=sms_payload, timeout=5)
-            #     response.raise_for_status()
-            #     logger.info(f"✅ OTP SMS sent. Status: {response.status_code}")
-            # except Exception as e:
-            #     logger.warning(f"[❌ OTP SMS Error] Failed to send OTP SMS: {str(e)}")
+
 
         # Don't complete login yet, require OTP verification
         destination = user.email if otp_method == 'email' else user.profile.work_phone
         method_text = "email" if otp_method == 'email' else "phone"
-
-        # For development: include OTP in response if DEBUG is True
-        response_data = {
+        return {
             "requires_otp": True,
             "user_id": user.id,
             "email": user.email,
@@ -577,22 +574,7 @@ class CustomTokenSerializer(serializers.Serializer):
             "message": f"OTP sent to your {method_text}. Please verify to complete login."
         }
 
-        # Add OTP code for development debugging
-        if settings.DEBUG:
-            response_data["debug_otp_code"] = otp_code
-            logger.warning(f"🔧 DEVELOPMENT MODE: OTP code for {user.email}: {otp_code}")
 
-        return response_data
-
-        # Success: Reset attempts & log
-        if hasattr(user, 'reset_login_attempts'):
-            user.reset_login_attempts()
-
-        method = "username" if "username" in attrs else "email"
-        self._log_activity(user, user.tenant, "login", {"method": method}, ip_address, user_agent, True)
-
-        # Generate tokens
-        return self._generate_tokens(user, remember_me, method, ip_address, user_agent)
 
     def _authenticate_by_email(self, email, password, tenant):
         """Authenticate by email: Try tenant first, fallback to global"""
@@ -674,7 +656,7 @@ class CustomTokenSerializer(serializers.Serializer):
             "username": username,
             "role": role,
             "status": status,
-            "tenant_id": user.tenant.id,
+            "tenant_id": str(user.tenant.unique_id),
             "tenant_organizational_id": str(user.tenant.organizational_id),
             "tenant_name": str(user.tenant.name),
             "tenant_secondary_color": str(user.tenant.secondary_color),
@@ -697,7 +679,7 @@ class CustomTokenSerializer(serializers.Serializer):
             "jti": refresh_jti,
             "sub": user.email,
             "username": username,
-            "tenant_id": user.tenant.id,
+            "tenant_id": str(user.tenant.unique_id),
             "tenant_organizational_id": str(user.tenant.organizational_id),
             "tenant_name": str(user.tenant.name),
             "tenant_unique_id": str(user.tenant.unique_id),
@@ -715,7 +697,7 @@ class CustomTokenSerializer(serializers.Serializer):
         return {
             "access": access_token,
             "refresh": refresh_token,
-            "tenant_id": user.tenant.id,
+            "tenant_id": str(user.tenant.unique_id),
             "tenant_organizational_id": str(user.tenant.organizational_id),
             "tenant_name": str(user.tenant.name),
             "tenant_unique_id": str(user.tenant.unique_id),
@@ -737,17 +719,14 @@ class CustomTokenSerializer(serializers.Serializer):
         }
 
     def _send_login_notification(self, user, method, ip_address, user_agent, remember_me):
-        """Send login notification event"""
+        """Send login notification event via Kafka"""
         try:
+            from auth_service.utils.kafka_producer import publish_event
             event_payload = {
-                "metadata": {
-                    "tenant_id": str(user.tenant.unique_id),
-                    "event_type": "user.login.succeeded",
-                    "event_id": str(uuid.uuid4()),
-                    "created_at": timezone.now().isoformat(),
-                    "source": "auth-service",
-                },
-                "data": {
+                "event_type": "user.login.succeeded",
+                "tenant_id": str(user.tenant.unique_id),
+                "timestamp": timezone.now().isoformat() + "Z",
+                "payload": {
                     "user_email": user.email,
                     "login_method": method,
                     "ip_address": ip_address,
@@ -756,16 +735,24 @@ class CustomTokenSerializer(serializers.Serializer):
                     "user_agent": user_agent,
                     "remember_me": remember_me,
                     "user_type": "global" if isinstance(user, GlobalUser) else "tenant",
+                    # Include tenant branding for in-app notifications
+                    "tenant_name": user.tenant.name,
+                    "tenant_logo": user.tenant.logo,
+                    "tenant_primary_color": user.tenant.primary_color,
+                    "tenant_secondary_color": user.tenant.secondary_color,
+                },
+                "metadata": {
+                    "event_id": str(uuid.uuid4()),
+                    "created_at": timezone.now().isoformat() + "Z",
+                    "source": "auth-service",
                 },
             }
 
-            notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-            response = requests.post(notifications_url, json=event_payload, timeout=5)
-            response.raise_for_status()
-            logger.info(f"✅ Notification sent. Status: {response.status_code}")
+            publish_event("auth-events", event_payload)
+            logger.info("✅ Login success event sent to Kafka")
 
         except Exception as e:
-            logger.warning(f"[❌ Notification Error] Failed to send login event: {str(e)}")
+            logger.warning(f"[❌ Login Event Error] Failed to send login event: {str(e)}")
 
     def _log_activity(self, user, tenant, action, details, ip_address, user_agent, success):
         """Helper to safely log UserActivity for both user types"""
@@ -985,9 +972,15 @@ class LoginWith2FAView(APIView):
             remember_me = request.data.get('remember_me', False)
             code = f"{random.randint(100000, 999999)}"
             cache.set(f"2fa_{user.id}", {'code': code, 'remember_me': remember_me}, timeout=300)
+
             event_payload = {
-                "data": {
+                "event_type": "auth.2fa.code.requested",
+                "tenant_id": str(getattr(tenant, "unique_id", getattr(tenant, "id", "unknown"))),
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "payload": {
                     "user_email": user.email,
+                    "user_first_name": getattr(user, 'first_name', ''),
+                    "user_last_name": getattr(user, 'last_name', ''),
                     "2fa_code": code,
                     "2fa_method": "email",
                     "ip_address": ip_address,
@@ -995,13 +988,16 @@ class LoginWith2FAView(APIView):
                     "login_method": method,
                     "remember_me": remember_me,
                     "expires_in_seconds": 300,
+                    "login_domain": request.get_host() if hasattr(request, 'get_host') else None,
+                    "tenant_name": getattr(tenant, 'name', ''),
+                    "tenant_logo": getattr(tenant, 'logo', None),
+                    "tenant_primary_color": getattr(tenant, 'primary_color', ''),
+                    "tenant_secondary_color": getattr(tenant, 'secondary_color', ''),
                 },
                 "metadata": {
                     "event_id": f"evt-{uuid.uuid4()}",
-                    "event_type": "auth.2fa.code.requested",
                     "created_at": datetime.utcnow().isoformat() + "Z",
                     "source": "auth-service",
-                    "tenant_id": str(getattr(tenant, "id", "unknown")),
                 },
             }
             try:
@@ -1486,10 +1482,39 @@ class VerifyOTPView(APIView):
             response = set_auth_cookies(response, access_token, refresh_token, remember_me=remember_me)
 
             cache.delete(f"otp_{user.id}")
+            
+            # Publish login success event to Kafka for notification processing
+            try:
+                login_event = {
+                    'event_type': 'user.login.succeeded',
+                     "tenant_id": str(user.tenant.unique_id),
+                    'timestamp': timezone.now().isoformat(),
+                    'payload': {
+                        'user_id': str(user.id),
+                        'email': user.email,
+                        'username': user.username,
+                        'login_time': timezone.now().isoformat(),
+                        'ip_address': ip_address,
+                        'user_agent': user_agent,
+                        'login_method': login_method,
+                        # Include tenant branding for in-app notifications
+                        'tenant_name': user.tenant.name,
+                        'tenant_logo': user.tenant.logo,
+                        'tenant_primary_color': user.tenant.primary_color,
+                        'tenant_secondary_color': user.tenant.secondary_color,
+                    }
+                }
+                success = publish_event('auth-events', login_event)
+                if success:
+                    logger.info(f"✅ Published user.login.succeeded event to Kafka for user {user.email}")
+                else:
+                    logger.warning(f"⚠️ Failed to publish user.login.succeeded event to Kafka for user {user.email}")
+            except Exception as e:
+                logger.error(f"❌ Error publishing login event to Kafka: {str(e)}")
+                # Don't fail login if Kafka fails - continue with response
+            
             logger.info("✅ OTP verification successful with cookies set")
             return response
-
-
 
 class LogoutView(APIView):
     permission_classes = [AllowAny]
@@ -1627,7 +1652,6 @@ class LogoutView(APIView):
                 success=False,
             )
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class PublicKeyView(APIView):
     permission_classes = [AllowAny]

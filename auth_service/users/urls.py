@@ -108,6 +108,6 @@ urlpatterns = [
 
     path('transactions/', TransactionView.as_view(), name='transaction-create'),
     path('profile-data/', UserProfileDataView.as_view(), name='user-profile-data'),
-    path('bulk-user-details/', BulkUserDetailsView.as_view(), name='bulk-user-details'),
-    path('bulk-client-details/', BulkClientDetailsView.as_view(), name='bulk-client-details'),
+     path('bulk-user-details/', BulkUserDetailsView.as_view(), name='bulk-user-details'),
+     path('bulk-client-details/', BulkClientDetailsView.as_view(), name='bulk-client-details'),
 ]

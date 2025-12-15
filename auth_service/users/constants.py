@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class ErrorMessages:
+    PASSWORD_RESET_SUCCESSFULLY = "Password reset successfully"
     INVALID_TOKEN_FORMAT = "Invalid token format"
     NO_VALID_BEARER_TOKEN = "No valid Bearer token provided"
     TENANT_NOT_FOUND = "Tenant not found"
@@ -208,6 +209,7 @@ class LogMessages:
 
 
 class ResponseKeys:
+    IDENTIFIER_USED = "email"
     STATUS = "status"
     MESSAGE = "message"
     DETAIL = "detail"

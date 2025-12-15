@@ -62,7 +62,7 @@ INSTALLED_APPS = [
 # ======================== MIDDLEWARE ========================
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # must be first
-    'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.common.CommonMiddleware',  # Disabled to prevent APPEND_SLASH redirects
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -97,6 +97,9 @@ TEMPLATES = [
 # ======================== WSGI ========================
 WSGI_APPLICATION = 'api_gateway.wsgi.application'
 
+# ======================== ASGI ========================
+ASGI_APPLICATION = 'api_gateway.asgi.application'
+
 
 # ======================== DATABASE ========================
 DATABASES = {
@@ -121,6 +124,10 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
+
+# ======================== APPEND_SLASH ========================
+# Disable APPEND_SLASH for API gateway to avoid redirecting POST requests
+APPEND_SLASH = False
 
 
 # ======================== STATIC FILES ========================
@@ -240,6 +247,7 @@ TALENT_ENGINE_URL = env.str("TALENT_ENGINE_URL", default="http://talent-engine:8
 MESSAGING_URL = env.str("MESSAGING_URL", default="http://messaging:3000")
 LMS_APP_URL = env.str("LMS_APP_URL", default="http://lms-app:8004")
 NOTIFICATIONS_SERVICE_URL = env.str("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
+NOTIFICATIONS_APP_URL = env.str("NOTIFICATIONS_APP_URL", default="http://notifications:3002")
 HR_SERVICE_URL = env.str("HR_SERVICE_URL", default="http://hr:8004")
 ROSTERING_SERVICE_URL = env.str("ROSTERING_SERVICE_URL", default="http://rostering:3005")
 PROJECT_MANAGER_URL = env.str("PROJECT_MANAGER_URL", default="http://project-manager:8005")
@@ -258,7 +266,8 @@ MICROSERVICE_URLS = {
     "talent-engine": TALENT_ENGINE_URL,
     "messaging": MESSAGING_URL,
     "lms": LMS_APP_URL,
-    "notifications": NOTIFICATIONS_SERVICE_URL,
+    "app": NOTIFICATIONS_SERVICE_URL,
+    "notifications": NOTIFICATIONS_APP_URL,
     "hr": HR_SERVICE_URL,
     "rostering": ROSTERING_SERVICE_URL,
     "project-manager": PROJECT_MANAGER_URL,

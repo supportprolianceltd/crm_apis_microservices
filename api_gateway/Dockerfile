@@ -19,5 +19,5 @@ COPY gunicorn.conf.py .
 # Expose the port
 EXPOSE 9090
 
-# Command to run the application with gunicorn config
-CMD ["gunicorn", "--config", "gunicorn.conf.py", "api_gateway.wsgi:application"]
+# Command to run the ASGI application with Daphne
+CMD ["daphne", "-b", "0.0.0.0", "-p", "9090", "api_gateway.asgi:application"]

@@ -1599,7 +1599,7 @@ class GroupMembership(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='group_memberships')
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     joined_at = models.DateTimeField(auto_now_add=True)
-    
+
 
     class Meta:
         unique_together = ('group', 'user')
@@ -1610,5 +1610,45 @@ class GroupMembership(models.Model):
 
     def __str__(self):
         return f"{self.user.email} in {self.group.name}"
+
+
+class InAppNotification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('profile_update', 'Profile Update'),
+        ('account_created', 'Account Created'),
+        ('password_changed', 'Password Changed'),
+        ('account_locked', 'Account Locked'),
+        ('account_unlocked', 'Account Unlocked'),
+        ('account_suspended', 'Account Suspended'),
+        ('account_activated', 'Account Activated'),
+        ('system_message', 'System Message'),
+    ]
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='in_app_notifications')
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
+    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    data = models.JSONField(default=dict, blank=True)  # Additional data like updated fields, etc.
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'tenant', 'is_read', 'created_at']),
+            models.Index(fields=['tenant', 'created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.notification_type} for {self.user.email}"
+
+    def mark_as_read(self):
+        """Mark the notification as read"""
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
 
 

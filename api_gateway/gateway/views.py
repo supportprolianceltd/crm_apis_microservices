@@ -174,16 +174,20 @@ def api_gateway_view(request, path):
         # ======================== MICROSERVICE ROUTING ========================
         prefix = segments[0]
         sub_path = '/'.join(segments[1:]) if len(segments) > 1 else ''
-        
+
         # Special handling for notifications service
         if prefix == "notifications":
             base_url = settings.MICROSERVICE_URLS.get("notifications")
             if not base_url:
                 logger.error(f"[{request_id}] Notifications service URL not configured")
                 return JsonResponse({"error": "Notifications service not available"}, status=500)
-                
-            forward_url = f"{base_url}/{sub_path}" if sub_path else base_url
+
+            forward_url = f"{base_url}/api/notifications/{sub_path}" if sub_path else f"{base_url}/api/notifications/"
             service_name = "notifications"
+
+            # Ensure POST/PUT/PATCH requests have trailing slashes for notifications
+            if request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+                forward_url = forward_url.rstrip('/') + '/'
         else:
             # Get base URL for the microservice - FIXED ROUTING LOGIC
             base_url = settings.MICROSERVICE_URLS.get(prefix)
@@ -237,7 +241,7 @@ def api_gateway_view(request, path):
         # Set proper Host header
         if base_url:
             try:
-                host_without_scheme = base_url.split('//')[-1].split('/')[0]
+                host_without_scheme = base_url.split('//')[-1].split('/')[0].split(':')[0]  # Remove port
                 headers['Host'] = host_without_scheme
             except Exception as e:
                 logger.warning(f"[{request_id}] Failed to parse host from base URL: {str(e)}")
@@ -245,13 +249,15 @@ def api_gateway_view(request, path):
         # ADD CRITICAL GATEWAY HEADERS
         headers['X-Gateway-Request-ID'] = request_id
         headers['X-Gateway-Service'] = service_name
-        headers['X-Forwarded-For'] = request.META.get('REMOTE_ADDR', '')
-        headers['X-Forwarded-Host'] = request.get_host()
-        headers['X-Forwarded-Proto'] = 'https' if request.is_secure() else 'http'
+        # Skip X-Forwarded headers for notification service to avoid issues
+        if service_name != 'notifications':
+            headers['X-Forwarded-For'] = request.META.get('REMOTE_ADDR', '')
+            headers['X-Forwarded-Host'] = request.get_host()
+            headers['X-Forwarded-Proto'] = 'https' if request.is_secure() else 'http'
 
         # ======================== REQUEST BODY HANDLING ========================
         method = request.method.upper()
-        
+
         # Read request body
         try:
             body = request.body
@@ -265,7 +271,7 @@ def api_gateway_view(request, path):
             try:
                 body_str = force_str(body[:10000])  # Peek first 10KB
                 file_fields = re.findall(
-                    r'Content-Disposition: form-data; name="([^"]+)"(?:; filename="([^"]+)")?', 
+                    r'Content-Disposition: form-data; name="([^"]+)"(?:; filename="([^"]+)")?',
                     body_str
                 )
                 if file_fields:
@@ -273,6 +279,15 @@ def api_gateway_view(request, path):
                     logger.info(f"[{request_id}] Multipart request with {len(file_info)} files: {file_info}")
             except Exception as e:
                 logger.warning(f"[{request_id}] Could not parse multipart body: {str(e)}")
+
+        # Handle JSON requests properly for ASGI services
+        json_data = None
+        if content_type.startswith("application/json") and body:
+            try:
+                json_data = json.loads(body.decode('utf-8'))
+                logger.info(f"[{request_id}] Parsed JSON data: {json_data}")
+            except Exception as e:
+                logger.warning(f"[{request_id}] Failed to parse JSON body: {str(e)}")
 
         # ======================== TIMEOUT CONFIGURATION ========================
         timeout_config = 300  # Increased default timeout to 5 minutes
@@ -305,8 +320,11 @@ def api_gateway_view(request, path):
             }
 
             # Add body for methods that require it
-            if method in ['POST', 'PUT', 'PATCH', 'DELETE'] and body:
-                request_kwargs['data'] = body
+            if method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+                if json_data is not None:
+                    request_kwargs['json'] = json_data
+                elif body:
+                    request_kwargs['data'] = body
 
             # Use global session for connection pooling
             response = session.request(**request_kwargs)
@@ -406,503 +424,6 @@ def api_gateway_view(request, path):
             "suggestion": "An unexpected error occurred in the gateway. Please contact support."
         }, status=500)
 
-
-
-
-# @csrf_exempt
-# @ratelimit(key='ip', rate='100/m', method='POST', block=True)
-# @ratelimit(key='ip', rate='200/m', method='GET', block=True)
-# def api_gateway_view(request, path):
-#     """
-#     Main API Gateway view that routes requests to appropriate microservices
-#     """
-#     try:
-#         # Generate request ID for gateway headers
-#         request_id = f"gateway_{uuid.uuid4().hex[:8]}"
-#         logger.info(f"[{request_id}] Gateway received request: {request.method} /api/{path}")
-        
-#         # ======================== REQUEST PARSING ========================
-#         segments = path.strip('/').split('/')
-#         if not segments:
-#             return JsonResponse({"error": "Invalid path"}, status=400)
-
-#         # ======================== MICROSERVICE ROUTING ========================
-#         prefix = segments[0]
-#         sub_path = '/'.join(segments[1:]) if len(segments) > 1 else ''
-        
-#         # Special handling for notifications service
-#         if prefix == "notifications":
-#             base_url = settings.MICROSERVICE_URLS.get("notifications")
-#             if not base_url:
-#                 logger.error(f"[{request_id}] Notifications service URL not configured")
-#                 return JsonResponse({"error": "Notifications service not available"}, status=500)
-                
-#             forward_url = f"{base_url}/{sub_path}" if sub_path else base_url
-#             service_name = "notifications"
-#         else:
-#             # Get base URL for the microservice - FIXED ROUTING LOGIC
-#             base_url = settings.MICROSERVICE_URLS.get(prefix)
-            
-#             # If not found, check if it's an auth route
-#             if not base_url and prefix in getattr(settings, 'AUTH_ROUTES', []):
-#                 base_url = settings.MICROSERVICE_URLS.get("auth_service")
-#                 service_name = "auth_service"
-#             elif not base_url:
-#                 logger.error(f"[{request_id}] No route found for prefix: {prefix}")
-#                 return JsonResponse({"error": f"No route found for /api/{prefix}/"}, status=404)
-#             else:
-#                 service_name = prefix
-
-#             if not base_url:
-#                 logger.error(f"[{request_id}] Base URL not found for service: {service_name}")
-#                 return JsonResponse({"error": f"Service {service_name} not configured"}, status=500)
-
-#             # Construct forward URL with proper trailing slash handling - ROSTERING-SPECIFIC
-#             if prefix == 'rostering':
-#                 if sub_path:
-#                     forward_url = f"{base_url}/api/rostering/{sub_path}"
-#                 else:
-#                     forward_url = f"{base_url}/api/rostering/"
-#             else:
-#                 if sub_path:
-#                     forward_url = f"{base_url}/api/{prefix}/{sub_path}"
-#                 else:
-#                     forward_url = f"{base_url}/api/{prefix}/"
-
-#             # FIXED: Do NOT force trailing slash for POST/etc. - let the service handle it
-#             # (Rostering expects exact match without extra trailing slash on the endpoint)
-
-#         logger.info(f"[{request_id}] Forwarding to: {forward_url} (Service: {service_name})")
-
-#         # ======================== AUTHENTICATION HANDLING ========================
-#         is_public = any(public_path in path for public_path in getattr(settings, 'PUBLIC_PATHS', []))
-        
-#         # Prepare headers for forwarding
-#         excluded_headers = {
-#             'host', 'content-length', 'content-encoding', 
-#             'transfer-encoding', 'connection', 'x-forwarded-for',
-#             'x-real-ip', 'x-forwarded-proto'
-#         }
-        
-#         headers = {}
-#         for key, value in request.headers.items():
-#             key_lower = key.lower()
-#             if key_lower not in excluded_headers:
-#                 # Remove authorization for public paths
-#                 if is_public and key_lower == 'authorization':
-#                     continue
-#                 headers[key] = value
-
-#         # Set proper Host header
-#         if base_url:
-#             try:
-#                 host_without_scheme = base_url.split('//')[-1].split('/')[0]
-#                 headers['Host'] = host_without_scheme
-#             except Exception as e:
-#                 logger.warning(f"[{request_id}] Failed to parse host from base URL: {str(e)}")
-
-#         # ADD CRITICAL GATEWAY HEADERS
-#         headers['X-Gateway-Request-ID'] = request_id
-#         headers['X-Gateway-Service'] = service_name
-#         headers['X-Forwarded-For'] = request.META.get('REMOTE_ADDR', '')
-#         headers['X-Forwarded-Host'] = request.get_host()
-#         headers['X-Forwarded-Proto'] = 'https' if request.is_secure() else 'http'
-
-#         # ======================== REQUEST BODY HANDLING ========================
-#         method = request.method.upper()
-        
-#         # Read request body
-#         try:
-#             body = request.body
-#         except Exception as e:
-#             logger.warning(f"[{request_id}] Error reading request body: {str(e)}")
-#             body = None
-
-#         # Debug logging for multipart requests
-#         content_type = request.META.get("CONTENT_TYPE", "")
-#         if content_type.startswith("multipart/form-data") and body:
-#             try:
-#                 body_str = force_str(body[:10000])  # Peek first 10KB
-#                 file_fields = re.findall(
-#                     r'Content-Disposition: form-data; name="([^"]+)"(?:; filename="([^"]+)")?', 
-#                     body_str
-#                 )
-#                 if file_fields:
-#                     file_info = [(f[0], f[1]) for f in file_fields if f[1]]
-#                     logger.info(f"[{request_id}] Multipart request with {len(file_info)} files: {file_info}")
-#             except Exception as e:
-#                 logger.warning(f"[{request_id}] Could not parse multipart body: {str(e)}")
-
-#         # ======================== TIMEOUT CONFIGURATION ========================
-#         timeout_config = 300  # Increased default timeout to 5 minutes
-        
-#         # Adjust timeout based on endpoint type
-#         if 'screen-resumes' in path or 'screen_resumes' in path:
-#             timeout_config = 600  # 10 minutes for resume screening
-#         elif 'parse-resume' in path or 'upload' in path or 'file' in path:
-#             timeout_config = 300   # 5 minutes for file processing
-#         elif service_name == 'notifications':
-#             timeout_config = 30   # Shorter for notifications
-#         elif service_name == 'auth_service':
-#             timeout_config = 60   # 1 minute for auth
-#         # New: Rostering-specific timeout (e.g., for polling/email tasks)
-#         elif service_name == 'rostering':
-#             timeout_config = 120  # 2 minutes for rostering operations
-
-#         # ======================== REQUEST FORWARDING ========================
-#         logger.info(f"[{request_id}] Forwarding request to: {forward_url} with timeout: {timeout_config}s")
-        
-#         try:
-#             request_kwargs = {
-#                 'method': method,
-#                 'url': forward_url,
-#                 'headers': headers,
-#                 'params': request.GET,
-#                 'timeout': timeout_config,
-#                 'verify': False,  # Disable SSL verification for internal services
-#                 'stream': True,   # Stream large responses
-#             }
-
-#             # Add body for methods that require it
-#             if method in ['POST', 'PUT', 'PATCH', 'DELETE'] and body:
-#                 request_kwargs['data'] = body
-
-#             # Use global session for connection pooling
-#             response = session.request(**request_kwargs)
-
-#         except requests.exceptions.Timeout as e:
-#             logger.error(f"[{request_id}] Gateway timeout on /api/{path} after {timeout_config}s")
-#             return JsonResponse({
-#                 "error": "Request timeout", 
-#                 "details": f"Service took longer than {timeout_config} seconds to respond",
-#                 "service": service_name,
-#                 "request_id": request_id,
-#                 "suggestion": "Please try again later or contact support if the problem persists"
-#             }, status=504)
-            
-#         except requests.exceptions.ConnectionError as e:
-#             logger.error(f"[{request_id}] Connection error to {service_name} service: {str(e)}")
-#             return JsonResponse({
-#                 "error": "Service unavailable",
-#                 "details": f"Cannot connect to {service_name} service",
-#                 "service": service_name,
-#                 "request_id": request_id,
-#                 "suggestion": "Service may be restarting. Please try again in a few moments."
-#             }, status=502)
-            
-#         except requests.exceptions.RequestException as e:
-#             logger.error(f"[{request_id}] Request error to {service_name} service: {str(e)}")
-#             return JsonResponse({
-#                 "error": "Request failed",
-#                 "details": str(e),
-#                 "service": service_name,
-#                 "request_id": request_id
-#             }, status=502)
-
-#         # ======================== RESPONSE HANDLING ========================
-#         logger.info(
-#             f"[{request_id}] Gateway forwarded: {method} /api/{path} -> {response.status_code} "
-#             f"(Service: {service_name})"
-#         )
-
-#         # Stream the response content to avoid memory issues
-#         response_content = b''
-#         for chunk in response.iter_content(chunk_size=8192):
-#             response_content += chunk
-
-#         # Prepare response headers
-#         excluded_response_headers = {
-#             'content-encoding', 'transfer-encoding', 'connection',
-#             'keep-alive', 'proxy-authenticate', 'proxy-authorization'
-#         }
-        
-#         response_headers = {}
-#         for key, value in response.headers.items():
-#             key_lower = key.lower()
-#             if key_lower not in excluded_response_headers:
-#                 response_headers[key] = value
-
-#         # Add gateway headers to response
-#         response_headers['X-Gateway-Request-ID'] = request_id
-#         response_headers['X-Gateway-Service'] = service_name
-
-#         # Create Django response
-#         django_response = HttpResponse(
-#             content=response_content,
-#             status=response.status_code,
-#             content_type=response.headers.get('Content-Type', 'application/json')
-#         )
-        
-#         # Set headers
-#         for key, value in response_headers.items():
-#             django_response[key] = value
-
-#         return django_response
-
-#     except Exception as e:
-#         logger.exception(f"Unexpected gateway error on /api/{path}: {str(e)}")
-#         return JsonResponse({
-#             "error": "Internal gateway error",
-#             "details": str(e),
-#             "suggestion": "An unexpected error occurred in the gateway. Please contact support."
-#         }, status=500)
-
-
-
-# @csrf_exempt
-# @ratelimit(key='ip', rate='100/m', method='POST', block=True)
-# @ratelimit(key='ip', rate='200/m', method='GET', block=True)
-# def api_gateway_view(request, path):
-#     """
-#     Main API Gateway view that routes requests to appropriate microservices
-#     """
-#     try:
-#         # Generate request ID for gateway headers
-#         request_id = f"gateway_{uuid.uuid4().hex[:8]}"
-#         logger.info(f"[{request_id}] Gateway received request: {request.method} /api/{path}")
-        
-#         # ======================== REQUEST PARSING ========================
-#         segments = path.strip('/').split('/')
-#         if not segments:
-#             return JsonResponse({"error": "Invalid path"}, status=400)
-
-#         # ======================== MICROSERVICE ROUTING ========================
-#         prefix = segments[0]
-#         sub_path = '/'.join(segments[1:]) if len(segments) > 1 else ''
-        
-#         # Special handling for notifications service
-#         if prefix == "notifications":
-#             base_url = settings.MICROSERVICE_URLS.get("notifications")
-#             if not base_url:
-#                 logger.error(f"[{request_id}] Notifications service URL not configured")
-#                 return JsonResponse({"error": "Notifications service not available"}, status=500)
-                
-#             forward_url = f"{base_url}/{sub_path}" if sub_path else base_url
-#             service_name = "notifications"
-#         else:
-#             # Get base URL for the microservice - FIXED ROUTING LOGIC
-#             base_url = settings.MICROSERVICE_URLS.get(prefix)
-            
-#             # If not found, check if it's an auth route
-#             if not base_url and prefix in getattr(settings, 'AUTH_ROUTES', []):
-#                 base_url = settings.MICROSERVICE_URLS.get("auth_service")
-#                 service_name = "auth_service"
-#             elif not base_url:
-#                 logger.error(f"[{request_id}] No route found for prefix: {prefix}")
-#                 return JsonResponse({"error": f"No route found for /api/{prefix}/"}, status=404)
-#             else:
-#                 service_name = prefix
-
-#             if not base_url:
-#                 logger.error(f"[{request_id}] Base URL not found for service: {service_name}")
-#                 return JsonResponse({"error": f"Service {service_name} not configured"}, status=500)
-
-#             # Construct forward URL with proper trailing slash handling - ROSTERING-SPECIFIC
-#             if prefix == 'rostering':
-#                 if sub_path:
-#                     forward_url = f"{base_url}/api/rostering/{sub_path}"
-#                 else:
-#                     forward_url = f"{base_url}/api/rostering/"
-#             else:
-#                 if sub_path:
-#                     forward_url = f"{base_url}/api/{prefix}/{sub_path}"
-#                 else:
-#                     forward_url = f"{base_url}/api/{prefix}/"
-
-#             # FIXED: Do NOT force trailing slash for POST/etc. - let the service handle it
-#             # (Rostering expects exact match without extra trailing slash on the endpoint)
-
-#         logger.info(f"[{request_id}] Forwarding to: {forward_url} (Service: {service_name})")
-
-#         # ======================== AUTHENTICATION HANDLING ========================
-#         is_public = any(public_path in path for public_path in getattr(settings, 'PUBLIC_PATHS', []))
-        
-#         # Prepare headers for forwarding
-#         excluded_headers = {
-#             'host', 'content-length', 'content-encoding', 
-#             'transfer-encoding', 'connection', 'x-forwarded-for',
-#             'x-real-ip', 'x-forwarded-proto'
-#         }
-        
-#         headers = {}
-#         for key, value in request.headers.items():
-#             key_lower = key.lower()
-#             if key_lower not in excluded_headers:
-#                 # Remove authorization for public paths
-#                 if is_public and key_lower == 'authorization':
-#                     continue
-#                 headers[key] = value
-
-#         # Set proper Host header
-#         if base_url:
-#             try:
-#                 host_without_scheme = base_url.split('//')[-1].split('/')[0]
-#                 headers['Host'] = host_without_scheme
-#             except Exception as e:
-#                 logger.warning(f"[{request_id}] Failed to parse host from base URL: {str(e)}")
-
-#         # ADD CRITICAL GATEWAY HEADERS
-#         headers['X-Gateway-Request-ID'] = request_id
-#         headers['X-Gateway-Service'] = service_name
-#         headers['X-Forwarded-For'] = request.META.get('REMOTE_ADDR', '')
-#         headers['X-Forwarded-Host'] = request.get_host()
-#         headers['X-Forwarded-Proto'] = 'https' if request.is_secure() else 'http'
-
-#         # ======================== REQUEST BODY HANDLING ========================
-#         method = request.method.upper()
-        
-#         # Read request body
-#         try:
-#             body = request.body
-#         except Exception as e:
-#             logger.warning(f"[{request_id}] Error reading request body: {str(e)}")
-#             body = None
-
-#         # Debug logging for multipart requests
-#         content_type = request.META.get("CONTENT_TYPE", "")
-#         if content_type.startswith("multipart/form-data") and body:
-#             try:
-#                 body_str = force_str(body[:10000])  # Peek first 10KB
-#                 file_fields = re.findall(
-#                     r'Content-Disposition: form-data; name="([^"]+)"(?:; filename="([^"]+)")?', 
-#                     body_str
-#                 )
-#                 if file_fields:
-#                     file_info = [(f[0], f[1]) for f in file_fields if f[1]]
-#                     logger.info(f"[{request_id}] Multipart request with {len(file_info)} files: {file_info}")
-#             except Exception as e:
-#                 logger.warning(f"[{request_id}] Could not parse multipart body: {str(e)}")
-
-#         # ======================== TIMEOUT CONFIGURATION ========================
-#         timeout_config = 300  # Increased default timeout to 5 minutes
-        
-#         # Adjust timeout based on endpoint type
-#         if 'screen-resumes' in path or 'screen_resumes' in path:
-#             timeout_config = 600  # 10 minutes for resume screening
-#         elif 'parse-resume' in path or 'upload' in path or 'file' in path:
-#             timeout_config = 300   # 5 minutes for file processing
-#         elif service_name == 'notifications':
-#             timeout_config = 30   # Shorter for notifications
-#         elif service_name == 'auth_service':
-#             timeout_config = 60   # 1 minute for auth
-#         # New: Rostering-specific timeout (e.g., for polling/email tasks)
-#         elif service_name == 'rostering':
-#             timeout_config = 120  # 2 minutes for rostering operations
-
-#         # ======================== REQUEST FORWARDING ========================
-#         logger.info(f"[{request_id}] Forwarding request to: {forward_url} with timeout: {timeout_config}s")
-        
-#         try:
-#             request_kwargs = {
-#                 'method': method,
-#                 'url': forward_url,
-#                 'headers': headers,
-#                 'params': request.GET,
-#                 'timeout': timeout_config,
-#                 'verify': False,  # Disable SSL verification for internal services
-#                 'stream': True,   # Stream large responses
-#             }
-
-#             # Add body for methods that require it
-#             if method in ['POST', 'PUT', 'PATCH', 'DELETE'] and body:
-#                 request_kwargs['data'] = body
-
-#             # Use global session for connection pooling
-#             response = session.request(**request_kwargs)
-
-#         except requests.exceptions.Timeout as e:
-#             logger.error(f"[{request_id}] Gateway timeout on /api/{path} after {timeout_config}s")
-#             return JsonResponse({
-#                 "error": "Request timeout", 
-#                 "details": f"Service took longer than {timeout_config} seconds to respond",
-#                 "service": service_name,
-#                 "request_id": request_id,
-#                 "suggestion": "Please try again later or contact support if the problem persists"
-#             }, status=504)
-            
-#         except requests.exceptions.ConnectionError as e:
-#             logger.error(f"[{request_id}] Connection error to {service_name} service: {str(e)}")
-#             return JsonResponse({
-#                 "error": "Service unavailable",
-#                 "details": f"Cannot connect to {service_name} service",
-#                 "service": service_name,
-#                 "request_id": request_id,
-#                 "suggestion": "Service may be restarting. Please try again in a few moments."
-#             }, status=502)
-            
-#         except requests.exceptions.RequestException as e:
-#             logger.error(f"[{request_id}] Request error to {service_name} service: {str(e)}")
-#             return JsonResponse({
-#                 "error": "Request failed",
-#                 "details": str(e),
-#                 "service": service_name,
-#                 "request_id": request_id
-#             }, status=502)
-
-#         # ======================== RESPONSE HANDLING ========================
-#         logger.info(
-#             f"[{request_id}] Gateway forwarded: {method} /api/{path} -> {response.status_code} "
-#             f"(Service: {service_name})"
-#         )
-
-#         # FIXED: Handle decompression for compressed responses
-#         content_encoding = response.headers.get('content-encoding', '').lower()
-#         response_content = b''
-#         for chunk in response.iter_content(chunk_size=8192):
-#             response_content += chunk
-
-#         if content_encoding == 'gzip':
-#             try:
-#                 buffer = io.BytesIO(response_content)
-#                 with gzip.GzipFile(fileobj=buffer) as gz:
-#                     response_content = gz.read()
-#                 logger.info(f"[{request_id}] Decompressed gzip response")
-#             except Exception as decomp_err:
-#                 logger.warning(f"[{request_id}] Failed to decompress gzip: {str(decomp_err)}")
-#         elif content_encoding == 'deflate':
-#             # Simple deflate (without zlib header)
-#             try:
-#                 response_content = gzip.decompress(response_content)
-#                 logger.info(f"[{request_id}] Decompressed deflate response")
-#             except Exception as decomp_err:
-#                 logger.warning(f"[{request_id}] Failed to decompress deflate: {str(decomp_err)}")
-
-#         # Prepare response headers
-#         excluded_response_headers = {
-#             'content-encoding', 'transfer-encoding', 'connection',
-#             'keep-alive', 'proxy-authenticate', 'proxy-authorization'
-#         }
-        
-#         response_headers = {}
-#         for key, value in response.headers.items():
-#             key_lower = key.lower()
-#             if key_lower not in excluded_response_headers:
-#                 response_headers[key] = value
-
-#         # Add gateway headers to response
-#         response_headers['X-Gateway-Request-ID'] = request_id
-#         response_headers['X-Gateway-Service'] = service_name
-
-#         # Create Django response
-#         django_response = HttpResponse(
-#             content=response_content,
-#             status=response.status_code,
-#             content_type=response.headers.get('Content-Type', 'application/json')
-#         )
-        
-#         # Set headers
-#         for key, value in response_headers.items():
-#             django_response[key] = value
-
-#         return django_response
-
-#     except Exception as e:
-#         logger.exception(f"Unexpected gateway error on /api/{path}: {str(e)}")
-#         return JsonResponse({
-#             "error": "Internal gateway error",
-#             "details": str(e),
-#             "suggestion": "An unexpected error occurred in the gateway. Please contact support."
-#         }, status=500)
 
 
 @csrf_exempt
@@ -1444,48 +965,19 @@ def websocket_gateway_view(request, path):
     try:
         # Generate request ID for gateway headers
         request_id = f"gateway_ws_{uuid.uuid4().hex[:8]}"
-        logger.info(f"[{request_id}] WebSocket Gateway received connection request: /ws/{path}")
 
-        # Parse WebSocket path
-        segments = path.strip('/').split('/')
-        if not segments:
-            return JsonResponse({"error": "Invalid WebSocket path"}, status=400)
+        # Check if this is a WebSocket upgrade request
+        connection = request.META.get('HTTP_CONNECTION', '').lower()
+        upgrade = request.META.get('HTTP_UPGRADE', '').lower()
 
-        # Route WebSocket connections based on service
-        prefix = segments[0]
-
-        # For messaging service WebSocket connections
-        if prefix == "messaging":
-            messaging_url = settings.MICROSERVICE_URLS.get("messaging")
-            if not messaging_url:
-                logger.error(f"[{request_id}] Messaging service URL not configured")
-                return JsonResponse({"error": "Messaging service not available"}, status=500)
-
-            # Convert HTTP URL to WebSocket URL
-            ws_url = messaging_url.replace('http://', 'ws://').replace('https://', 'wss://')
-
-            # Construct WebSocket URL with remaining path
-            sub_path = '/'.join(segments[1:]) if len(segments) > 1 else ''
-            if sub_path:
-                target_ws_url = f"{ws_url}/{sub_path}"
-            else:
-                target_ws_url = f"{ws_url}/"
-
-            logger.info(f"[{request_id}] Routing WebSocket to: {target_ws_url}")
-
-            # Return WebSocket routing information
-            # In a real implementation, this would upgrade the connection
-            # For now, return the routing info that frontend can use
-            return JsonResponse({
-                "websocket_url": target_ws_url,
-                "service": "messaging",
-                "request_id": request_id,
-                "status": "routed"
-            })
-
+        if connection == 'upgrade' and upgrade == 'websocket':
+            # This is a WebSocket upgrade request - proxy the connection
+            logger.info(f"[{request_id}] WebSocket upgrade request: /ws/{path}")
+            return proxy_websocket_connection(request, path, request_id)
         else:
-            logger.error(f"[{request_id}] No WebSocket route found for prefix: {prefix}")
-            return JsonResponse({"error": f"No WebSocket route found for /{prefix}/"}, status=404)
+            # This is an HTTP request for routing information
+            logger.info(f"[{request_id}] WebSocket routing request: /ws/{path}")
+            return get_websocket_routing_info(request, path, request_id)
 
     except Exception as e:
         logger.exception(f"Unexpected WebSocket gateway error on /ws/{path}: {str(e)}")
@@ -1493,4 +985,136 @@ def websocket_gateway_view(request, path):
             "error": "Internal WebSocket gateway error",
             "details": str(e),
             "suggestion": "An unexpected error occurred in the WebSocket gateway."
+        }, status=500)
+
+
+def get_websocket_routing_info(request, path, request_id):
+    """
+    Return WebSocket routing information for HTTP requests
+    """
+    # Parse WebSocket path
+    segments = path.strip('/').split('/')
+    if not segments:
+        return JsonResponse({"error": "Invalid WebSocket path"}, status=400)
+
+    # Route WebSocket connections based on service
+    prefix = segments[0]
+
+    # For messaging service WebSocket connections
+    if prefix == "messaging":
+        messaging_url = settings.MICROSERVICE_URLS.get("messaging")
+        if not messaging_url:
+            logger.error(f"[{request_id}] Messaging service URL not configured")
+            return JsonResponse({"error": "Messaging service not available"}, status=500)
+
+        # Convert HTTP URL to WebSocket URL
+        ws_url = messaging_url.replace('http://', 'ws://').replace('https://', 'wss://')
+
+        # Construct WebSocket URL with remaining path
+        sub_path = '/'.join(segments[1:]) if len(segments) > 1 else ''
+        if sub_path:
+            target_ws_url = f"{ws_url}/{sub_path}"
+        else:
+            target_ws_url = f"{ws_url}/"
+
+        logger.info(f"[{request_id}] Routing WebSocket to: {target_ws_url}")
+
+        return JsonResponse({
+            "websocket_url": target_ws_url,
+            "service": "messaging",
+            "request_id": request_id,
+            "status": "routed"
+        })
+
+    # For notifications service WebSocket connections
+    elif prefix == "notifications":
+        # Return a WebSocket URL that routes through the gateway itself
+        # The client will connect to the gateway, and we'll proxy the connection
+        gateway_host = request.get_host()
+        protocol = 'wss' if request.is_secure() else 'ws'
+
+        # Construct WebSocket URL that routes back through gateway
+        # Extract hostname without port to avoid conflicts
+        hostname = gateway_host.split(':')[0] if ':' in gateway_host else gateway_host
+        sub_path = '/'.join(segments[1:]) if len(segments) > 1 else ''
+        if sub_path:
+            client_ws_url = f"{protocol}://{hostname}:9090/ws/notifications/{sub_path}"
+        else:
+            client_ws_url = f"{protocol}://{hostname}:9090/ws/notifications/"
+
+        logger.info(f"[{request_id}] Providing gateway WebSocket URL: {client_ws_url}")
+
+        return JsonResponse({
+            "websocket_url": client_ws_url,
+            "service": "notifications",
+            "request_id": request_id,
+            "status": "routed",
+            "note": "Connect to this URL - gateway will proxy the WebSocket connection"
+        })
+
+    else:
+        logger.error(f"[{request_id}] No WebSocket route found for prefix: {prefix}")
+        return JsonResponse({"error": f"No WebSocket route found for /{prefix}/"}, status=404)
+
+
+async def proxy_websocket_connection(request, path, request_id):
+    """
+    Proxy WebSocket connection to the appropriate microservice using asyncio
+    """
+    try:
+        # Parse WebSocket path
+        segments = path.strip('/').split('/')
+        if not segments:
+            return JsonResponse({"error": "Invalid WebSocket path"}, status=400)
+
+        prefix = segments[0]
+
+        # Get target service URL
+        if prefix == "notifications":
+            target_service_url = settings.MICROSERVICE_URLS.get("notifications")
+            if not target_service_url:
+                logger.error(f"[{request_id}] Notifications service URL not configured")
+                return JsonResponse({"error": "Notifications service not available"}, status=500)
+        elif prefix == "messaging":
+            target_service_url = settings.MICROSERVICE_URLS.get("messaging")
+            if not target_service_url:
+                logger.error(f"[{request_id}] Messaging service URL not configured")
+                return JsonResponse({"error": "Messaging service not available"}, status=500)
+        else:
+            logger.error(f"[{request_id}] No WebSocket proxy route found for prefix: {prefix}")
+            return JsonResponse({"error": f"No WebSocket proxy route found for /{prefix}/"}, status=404)
+
+        # Convert HTTP URL to WebSocket URL for target service
+        target_ws_url = target_service_url.replace('http://', 'ws://').replace('https://', 'wss://')
+
+        # Construct target WebSocket URL
+        sub_path = '/'.join(segments[1:]) if len(segments) > 1 else ''
+        if sub_path:
+            full_target_ws_url = f"{target_ws_url}/ws/{prefix}/{sub_path}"
+        else:
+            full_target_ws_url = f"{target_ws_url}/ws/{prefix}/"
+
+        # Extract query parameters (including token)
+        query_string = request.META.get('QUERY_STRING', '')
+        if query_string:
+            full_target_ws_url += f"?{query_string}"
+
+        logger.info(f"[{request_id}] Proxying WebSocket connection to: {full_target_ws_url}")
+
+        # For Django views, we can't directly handle WebSocket connections
+        # Return an error indicating this needs to be handled at the ASGI level
+        return JsonResponse({
+            "error": "WebSocket proxying requires ASGI application",
+            "details": "Django views cannot handle WebSocket connections. This needs to be implemented at the ASGI level using Django Channels or similar.",
+            "target_url": full_target_ws_url,
+            "request_id": request_id,
+            "suggestion": "Implement WebSocket proxying in the ASGI application using channels"
+        }, status=501)
+
+    except Exception as e:
+        logger.exception(f"WebSocket proxy setup error on /ws/{path}: {str(e)}")
+        return JsonResponse({
+            "error": "WebSocket proxy setup error",
+            "details": str(e),
+            "request_id": request_id
         }, status=500)

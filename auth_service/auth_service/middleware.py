@@ -412,39 +412,122 @@ class CustomTenantMiddleware(TenantMainMiddleware):
         ]
 
         # Handle password reset request by email domain (similar to login)
+        # In CustomTenantMiddleware.process_request()
+        # Handle password reset request by email OR username domain
         if request.path.startswith('/api/user/password/reset/') and request.method == 'POST':
             try:
                 body = request.body.decode('utf-8') if request.body else '{}'
                 logger.debug(f"Password reset request body: {body}")
                 data = json.loads(body)
+                
+                # Get both email and username
                 email = data.get('email')
-                if not email:
-                    logger.error("No email provided in password reset request")
-                    return JsonResponse({'error': 'Email is required'}, status=400)
+                username = data.get('username')
+                
+                if not email and not username:
+                    logger.error("No email or username provided in password reset request")
+                    return JsonResponse({'error': 'Email or username is required'}, status=400)
 
-                email_domain = email.split('@')[1]
-                logger.debug(f"Password reset email domain: {email_domain}")
-                domain = Domain.objects.filter(domain=email_domain).first()
-                if not domain:
-                    logger.error(f"No domain found for email domain: {email_domain}")
-                    return JsonResponse({'error': f'No tenant found for email domain: {email_domain}'}, status=404)
+                # Handle email-based password reset
+                if email:
+                    email_domain = email.split('@')[1]
+                    logger.debug(f"Password reset email domain: {email_domain}")
+                    domain = Domain.objects.filter(domain=email_domain).first()
+                    if not domain:
+                        logger.error(f"No domain found for email domain: {email_domain}")
+                        return JsonResponse({'error': f'No tenant found for email domain: {email_domain}'}, status=404)
 
-                request.tenant = domain.tenant
-                connection.set_schema(domain.tenant.schema_name)
-                logger.info(f"Set tenant schema for password reset: {domain.tenant.schema_name}")
+                    request.tenant = domain.tenant
+                    connection.set_schema(domain.tenant.schema_name)
+                    logger.info(f"Set tenant schema for password reset (email): {domain.tenant.schema_name}")
 
-                # NEW: Tenant suspension check
-                if request.tenant.status == 'suspended':
-                    logger.warning(f"Access denied to suspended tenant for password reset: {request.tenant.schema_name}")
-                    return JsonResponse({
-                        'detail': 'Tenant account is currently suspended.',
-                        'status': 'suspended',
-                        'message': 'Your organization\'s account has been temporarily suspended due to administrative reasons. All access is restricted until reactivation.',
-                        'support': 'Please contact your organization administrator or support team at support@yourcompany.com for assistance with reactivation.',
-                        'timestamp': timezone.now().isoformat()
-                    }, status=503)
+                    # NEW: Tenant suspension check
+                    if request.tenant.status == 'suspended':
+                        logger.warning(f"Access denied to suspended tenant for password reset: {request.tenant.schema_name}")
+                        return JsonResponse({
+                            'detail': 'Tenant account is currently suspended.',
+                            'status': 'suspended',
+                            'message': 'Your organization\'s account has been temporarily suspended due to administrative reasons. All access is restricted until reactivation.',
+                            'support': 'Please contact your organization administrator or support team at support@yourcompany.com for assistance with reactivation.',
+                            'timestamp': timezone.now().isoformat()
+                        }, status=503)
 
-                return
+                    return
+
+                # Handle username-based password reset (NEW)
+                elif username:
+                    logger.info(f"🔐 Username password reset attempt: {username}")
+                    
+                    try:
+                        # Look up tenant from global UsernameIndex
+                        index_entry = UsernameIndex.objects.get(username=username)
+                        target_tenant = index_entry.tenant
+                        logger.info(f"✅ Resolved username '{username}' to tenant: {target_tenant.schema_name}")
+                        
+                        request.tenant = target_tenant
+                        connection.set_schema(target_tenant.schema_name)
+                        logger.info(f"Set tenant schema for password reset (username): {target_tenant.schema_name}")
+                        
+                        with connection.cursor() as cursor:
+                            cursor.execute("SHOW search_path;")
+                            logger.debug(f"Current search_path: {cursor.fetchone()[0]}")
+
+                        # NEW: Tenant suspension check
+                        if request.tenant.status == 'suspended':
+                            logger.warning(f"Access denied to suspended tenant for username password reset: {request.tenant.schema_name}")
+                            return JsonResponse({
+                                'detail': 'Tenant account is currently suspended.',
+                                'status': 'suspended',
+                                'message': 'Your organization\'s account has been temporarily suspended due to administrative reasons. All access is restricted until reactivation.',
+                                'support': 'Please contact your organization administrator or support team at support@yourcompany.com for assistance with reactivation.',
+                                'timestamp': timezone.now().isoformat()
+                            }, status=503)
+                        
+                        return
+                        
+                    except UsernameIndex.DoesNotExist:
+                        logger.error(f"❌ No UsernameIndex found for username: {username}")
+                        
+                        # Fallback to hostname-based resolution if username not found
+                        hostname = host.split(':')[0]  # Strip port
+                        if hostname == '0.0.0.0':
+                            hostname = 'localhost'
+                        
+                        domain_key = get_cache_key('public', 'domain', hostname)
+                        domain = get_from_cache(domain_key)
+                        if domain is None:
+                            domain = Domain.objects.filter(domain=hostname).first()
+                            if domain:
+                                set_to_cache(domain_key, domain, timeout=600)  # 10 min cache
+                            else:
+                                logger.error(f"No domain found for hostname: {hostname}")
+                                return JsonResponse({'error': f'No tenant found for hostname: {hostname}'}, status=404)
+                        
+                        request.tenant = domain.tenant
+                        connection.set_schema(domain.tenant.schema_name)
+                        logger.info(f"Set tenant schema for username fallback (hostname {hostname}): {domain.tenant.schema_name}")
+                        with connection.cursor() as cursor:
+                            cursor.execute("SHOW search_path;")
+                            logger.debug(f"Current search_path: {cursor.fetchone()[0]}")
+
+                        # NEW: Tenant suspension check
+                        if request.tenant.status == 'suspended':
+                            logger.warning(f"Access denied to suspended tenant for username fallback: {request.tenant.schema_name}")
+                            return JsonResponse({
+                                'detail': 'Tenant account is currently suspended.',
+                                'status': 'suspended',
+                                'message': 'Your organization\'s account has been temporarily suspended due to administrative reasons. All access is restricted until reactivation.',
+                                'support': 'Please contact your organization administrator or support team at support@yourcompany.com for assistance with reactivation.',
+                                'timestamp': timezone.now().isoformat()
+                            }, status=503)
+                        
+                        return
+                            
+                else:
+                    # This shouldn't happen due to the check above, but just in case
+                    logger.error("No email or username provided in password reset request")
+                    return JsonResponse({'error': 'Email or username is required'}, status=400)
+                    
             except (ValueError, IndexError) as e:
                 logger.error(f"Invalid email format in password reset: {str(e)}")
                 return JsonResponse({'error': 'Invalid email format'}, status=400)
@@ -452,25 +535,77 @@ class CustomTenantMiddleware(TenantMainMiddleware):
                 logger.error(f"Error processing password reset request: {str(e)}")
                 return JsonResponse({'error': 'Invalid request format'}, status=400)
 
+
         # Handle password reset confirmation by token
+        # In CustomTenantMiddleware.process_request()
+        # Add this AFTER the password reset request section but BEFORE the password reset confirmation section:
+
+        # Handle password reset confirmation with email/username AND token
         if request.path.startswith('/api/user/password/reset/confirm/') and request.method == 'POST':
             try:
                 body = request.body.decode('utf-8') if request.body else '{}'
+                logger.debug(f"Password reset confirm request body: {body}")
                 data = json.loads(body)
+                
                 token = data.get('token')
+                email = data.get('email')
+                username = data.get('username')
+                
                 if not token:
                     logger.error("No token provided in password reset confirm request")
                     return JsonResponse({'error': 'Token is required'}, status=400)
-
-                # Look up reset token to determine tenant
+                
+                tenant = None
+                
+                # Priority 1: Look up token to determine tenant
                 reset_token = PasswordResetToken.objects.select_related('tenant').filter(token=token).first()
-                if not reset_token:
-                    logger.error(f"Invalid or missing reset token: {token}")
-                    return JsonResponse({'error': 'Invalid or missing token'}, status=400)
-
-                request.tenant = reset_token.tenant
-                connection.set_schema(reset_token.tenant.schema_name)
-                logger.info(f"Set tenant schema for reset token: {reset_token.tenant.schema_name}")
+                if reset_token:
+                    tenant = reset_token.tenant
+                    logger.info(f"✅ Found tenant from reset token: {tenant.schema_name}")
+                
+                # Priority 2: If email provided, use email domain
+                elif email and not tenant:
+                    try:
+                        email_domain = email.split('@')[1]
+                        domain = Domain.objects.filter(domain=email_domain).first()
+                        if domain:
+                            tenant = domain.tenant
+                            logger.info(f"✅ Found tenant from email domain: {tenant.schema_name}")
+                    except (ValueError, IndexError):
+                        pass
+                
+                # Priority 3: If username provided, use UsernameIndex
+                elif username and not tenant:
+                    try:
+                        index_entry = UsernameIndex.objects.get(username=username)
+                        tenant = index_entry.tenant
+                        logger.info(f"✅ Found tenant from username index: {tenant.schema_name}")
+                    except UsernameIndex.DoesNotExist:
+                        pass
+                
+                # Priority 4: Fallback to request hostname
+                if not tenant:
+                    hostname = host.split(':')[0]  # Strip port
+                    if hostname == '0.0.0.0':
+                        hostname = 'localhost'
+                    
+                    domain_key = get_cache_key('public', 'domain', hostname)
+                    domain = get_from_cache(domain_key)
+                    if domain is None:
+                        domain = Domain.objects.filter(domain=hostname).first()
+                        if domain:
+                            set_to_cache(domain_key, domain, timeout=600)
+                        else:
+                            logger.error(f"No domain found for hostname: {hostname}")
+                            return JsonResponse({'error': f'No tenant found for hostname: {hostname}'}, status=404)
+                    
+                    tenant = domain.tenant
+                    logger.info(f"✅ Fallback to hostname tenant: {tenant.schema_name}")
+                
+                # Set tenant and schema
+                request.tenant = tenant
+                connection.set_schema(tenant.schema_name)
+                logger.info(f"Set tenant schema for password reset confirm: {tenant.schema_name}")
 
                 # NEW: Tenant suspension check
                 if request.tenant.status == 'suspended':
@@ -485,9 +620,11 @@ class CustomTenantMiddleware(TenantMainMiddleware):
 
                 return
             except (ValueError, KeyError, json.JSONDecodeError) as e:
-                logger.error(f"Error processing reset token request: {str(e)}")
+                logger.error(f"Error processing password reset confirm request: {str(e)}")
                 return JsonResponse({'error': 'Invalid request format'}, status=400)
-
+            
+            
+            
         # FIXED: Handle login/token endpoints with EXACT path matching (excludes /refresh/)
         if (request.path in ['/api/token/', '/api/login/', '/api/verify-otp/', '/api/verify-2fa/'] or
             request.path.startswith('/api/login/') or

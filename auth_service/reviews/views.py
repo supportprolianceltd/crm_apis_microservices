@@ -13,7 +13,6 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 import csv
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
-import requests
 import uuid
 import logging
 from django.shortcuts import get_object_or_404
@@ -156,25 +155,19 @@ class CustomPagination(PageNumberPagination):
 
 
 def send_review_notification(event_type, review, user=None, extra_data=None):
-    """Send event to notifications service."""
+    """Send event to notifications service via Kafka."""
     try:
         logger.info(f"📨 Sending {event_type} notification for review {review.id}")
-        
+
         tenant_id = str(review.tenant.unique_id)
         event_id = f"evt-{uuid.uuid4().hex[:8]}"
         now = timezone.now().isoformat()
 
-        payload = {
-            "metadata": {
-                "event_id": event_id,
-                "event_type": event_type,
-                "event_version": "1.0",
-                "created_at": now,
-                "source": "reviews-service",
-                "tenant_id": tenant_id,
-                "timestamp": now,
-            },
-            "data": {
+        event_payload = {
+            "event_type": event_type,
+            "tenant_id": tenant_id,
+            "timestamp": now,
+            "payload": {
                 "review_id": str(review.id),
                 "reviewer_email": review.reviewer_email,
                 "rating": review.rating,
@@ -182,16 +175,22 @@ def send_review_notification(event_type, review, user=None, extra_data=None):
                 "submitted_at": review.submitted_at.isoformat() if review.submitted_at else now,
                 **(extra_data or {}),
             },
+            "metadata": {
+                "event_id": event_id,
+                "created_at": now,
+                "source": "reviews-service",
+            },
         }
 
         if user:
-            payload["data"]["performed_by"] = user.email
+            event_payload["payload"]["performed_by"] = user.email
 
-        url = f"{settings.NOTIFICATIONS_SERVICE_URL}/events/"
-        logger.debug(f"Notification payload: {payload}")
-        response = requests.post(url, json=payload, timeout=5)
-        response.raise_for_status()
-        logger.info(f"✅ Successfully sent {event_type} for review {review.id}: {response.status_code}")
+        from auth_service.utils.kafka_producer import publish_event
+        success = publish_event("auth-events", event_payload)
+        if success:
+            logger.info(f"✅ Successfully sent {event_type} for review {review.id}")
+        else:
+            logger.error(f"❌ Failed to send {event_type} for review {review.id}")
     except Exception as e:
         logger.error(f"❌ Failed to send {event_type} for review {review.id}: {str(e)}")
 

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import transaction, connection
 from django_tenants.utils import tenant_context, schema_context
 from cryptography.hazmat.primitives import serialization
-from core.utils.kafka_producer import publish_event
+from auth_service.utils.kafka_producer import publish_event
 from core.utils.notifications import send_notification_event
 from django.db.models import Count
 from django.utils import timezone

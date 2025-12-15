@@ -280,6 +280,19 @@ class EventViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(event)
         return Response(serializer.data)
 
+    def destroy(self, request, *args, **kwargs):
+        """Delete an event - only the creator can delete."""
+        event = self.get_object()
+        logger.info(f"User {request.user.id} ({request.user.email}) attempting to delete event {event.id} created by {event.creator.id} ({event.creator.email})")
+        if event.creator != request.user:
+            logger.warning(f"Unauthorized delete attempt: User {request.user.id} tried to delete event {event.id} created by {event.creator.id}")
+            return Response(
+                {"detail": "Only the event creator can delete this event."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        logger.info(f"Authorized delete: User {request.user.id} deleting their event {event.id}")
+        return super().destroy(request, *args, **kwargs)
+
     @action(detail=True, methods=['post'], url_path='remove-participants')
     def remove_participants(self, request, pk=None):
         """Remove participants from an event."""

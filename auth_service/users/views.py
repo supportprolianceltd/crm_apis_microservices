@@ -51,7 +51,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # Core App - Models
-from core.models import Branch, Domain, Tenant, TenantConfig
+from core.models import Branch, Domain, Tenant, UsernameIndex
 
 # Users App - Models
 from users.models import CustomUser  # Imported specifically from users app
@@ -471,6 +471,46 @@ class UserPasswordRegenerateView(APIView):
         user.set_password(password)
         user.save()
 
+        # ✅ SEND NOTIFICATION EVENT FOR PASSWORD REGENERATION
+        logger.info("🎯 Sending password regeneration event to notification service.")
+        try:
+            from auth_service.utils.kafka_producer import publish_event
+
+            event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+            user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+            company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
+
+            event_payload = {
+                "event_type": "user.password.changed",
+                "tenant_id": str(tenant.unique_id),
+                "timestamp": timezone.now().isoformat(),
+                "payload": {
+                    "user_email": user.email,
+                    "user_name": f"{user.first_name} {user.last_name}",
+                    "changed_by": request.user.email,  # Admin who regenerated
+                    "change_time": timezone.now().isoformat(),
+                    "ip_address": request.META.get("REMOTE_ADDR"),
+                    "user_agent": user_agent,
+                    "tenant_name": company_name,
+                    "user_id": str(user.id),
+                    "change_method": "admin_regenerate",
+                },
+                "metadata": {
+                    "event_id": event_id,
+                    "created_at": timezone.now().isoformat(),
+                    "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                },
+            }
+
+            success = publish_event("auth-events", event_payload)
+            if success:
+                logger.info(f"✅ Password regeneration notification sent for {user.email}")
+            else:
+                logger.warning(f"[❌ Notification Error] Failed to send password regeneration event for {user.email}")
+
+        except Exception as e:
+            logger.error(f"[❌ Notification Exception] Unexpected error for {user.email}: {str(e)}")
+
         return Response({ResponseKeys.USER_ID: user.id, ResponseKeys.EMAIL: user.email, ResponseKeys.NEW_PASSWORD: password}, status=DefaultValues.INDEX_200_OK)
 
 
@@ -487,34 +527,118 @@ class PasswordResetRequestView(generics.GenericAPIView):
             logger.error(LogMessages.SERIALIZER_VALIDATION_FAILED.format(serializer.errors))
             return Response({ResponseKeys.ERROR: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        email = serializer.validated_data["email"]
+        email = serializer.validated_data.get("email")
+        username = serializer.validated_data.get("username")
         ip_address = request.META.get("REMOTE_ADDR")
         user_agent = request.META.get("HTTP_USER_AGENT", "")
-        logger.info(LogMessages.PROCESSING_PASSWORD_RESET_FOR_EMAIL.format(email))
+        identifier = email or username
+        logger.info(LogMessages.PROCESSING_PASSWORD_RESET_FOR_EMAIL.format(identifier))
 
-        # Extract tenant using email domain
+        # Get the domain/URL where the reset request is coming from
+        reset_domain = None
+        if request:
+            origin = request.META.get('HTTP_ORIGIN')
+            if origin:
+                reset_domain = urlparse(origin).netloc
+            else:
+                host = request.META.get('HTTP_HOST')
+                if host:
+                    reset_domain = host.split(':')[0]
+
+        # Extract tenant using email domain or UsernameIndex for username
         try:
-            email_domain = email.split('@')[1]
-            logger.debug(LogMessages.EMAIL_DOMAIN.format(email_domain))
-            domain = Domain.objects.filter(domain=email_domain).first()
-            if not domain:
-                logger.error(LogMessages.NO_DOMAIN_FOUND_FOR_EMAIL_DOMAIN.format(email_domain))
+            tenant = None
+            user = None
+            
+            if email:
+                # Email-based tenant resolution
+                email_domain = email.split('@')[1]
+                logger.debug(LogMessages.EMAIL_DOMAIN.format(email_domain))
+                domain = Domain.objects.filter(domain=email_domain).first()
+                if not domain:
+                    logger.error(LogMessages.NO_DOMAIN_FOUND_FOR_EMAIL_DOMAIN.format(email_domain))
+                    UserActivity.objects.create(
+                        user=None,
+                        tenant=Tenant.objects.first(),
+                        action="password_reset_request",
+                        performed_by=None,
+                        details={"reason": ErrorMessages.NO_TENANT_FOUND_FOR_EMAIL_DOMAIN.format(email_domain)},
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        success=False,
+                    )
+                    return Response({ResponseKeys.ERROR: ErrorMessages.NO_TENANT_FOUND_FOR_EMAIL_DOMAIN.format(email_domain)}, status=status.HTTP_404_NOT_FOUND)
+
+                tenant = domain.tenant
+                logger.info(LogMessages.FOUND_TENANT_FOR_EMAIL_DOMAIN.format(tenant.schema_name, email_domain))
+                
+                # Look up user in tenant schema
+                with tenant_context(tenant):
+                    user = CustomUser.objects.filter(email=email, tenant=tenant).first()
+                    
+            elif username:
+                # Username-based tenant resolution (similar to login flow)
+                logger.info(f"🔐 Username-based password reset attempt: {username}")
+                
+                try:
+                    # Look up tenant from global UsernameIndex
+                    index_entry = UsernameIndex.objects.get(username=username)
+                    tenant = index_entry.tenant
+                    logger.info(f"✅ Resolved username '{username}' to tenant: {tenant.schema_name}")
+                    
+                    # Look up user in tenant schema
+                    with tenant_context(tenant):
+                        user = CustomUser.objects.filter(id=index_entry.user_id).first()
+                        
+                except UsernameIndex.DoesNotExist:
+                    logger.error(f"❌ No UsernameIndex found for username: {username}")
+                    
+                    # Fallback: Try using request tenant (if available)
+                    tenant = getattr(request, 'tenant', None)
+                    if tenant:
+                        logger.info(f"🔄 Using request tenant for username fallback: {tenant.schema_name}")
+                        with tenant_context(tenant):
+                            user = CustomUser.objects.filter(username=username, tenant=tenant).first()
+                    else:
+                        logger.error("No tenant found for username-based password reset")
+                        UserActivity.objects.create(
+                            user=None,
+                            tenant=Tenant.objects.first(),
+                            action="password_reset_request",
+                            performed_by=None,
+                            details={"reason": "Username not found in global index and no tenant specified"},
+                            ip_address=ip_address,
+                            user_agent=user_agent,
+                            success=False,
+                        )
+                        return Response({
+                            ResponseKeys.ERROR: "Username not found. Please use email or contact support."
+                        }, status=status.HTTP_404_NOT_FOUND)
+                    
+            else:
+                return Response({
+                    ResponseKeys.ERROR: "Either email or username must be provided"
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if user was found
+            if not user:
+                logger.warning(LogMessages.USER_WITH_EMAIL_NOT_FOUND.format(identifier, tenant.schema_name if tenant else "unknown"))
                 UserActivity.objects.create(
                     user=None,
-                    tenant=Tenant.objects.first(),
+                    tenant=tenant or Tenant.objects.first(),
                     action="password_reset_request",
                     performed_by=None,
-                    details={"reason": ErrorMessages.NO_TENANT_FOUND_FOR_EMAIL_DOMAIN.format(email_domain)},
+                    details={"reason": ErrorMessages.NO_USER_FOUND_WITH_EMAIL},
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({ResponseKeys.ERROR: ErrorMessages.NO_TENANT_FOUND_FOR_EMAIL_DOMAIN.format(email_domain)}, status=status.HTTP_404_NOT_FOUND)
+                return Response({
+                    ResponseKeys.ERROR: ErrorMessages.NO_USER_FOUND_WITH_EMAIL
+                }, status=status.HTTP_404_NOT_FOUND)
 
-            tenant = domain.tenant
-            logger.info(LogMessages.FOUND_TENANT_FOR_EMAIL_DOMAIN.format(tenant.schema_name, email_domain))
         except (ValueError, IndexError) as e:
-            logger.error(ErrorMessages.INVALID_EMAIL_FORMAT.format(email, str(e)))
+            logger.error(ErrorMessages.INVALID_EMAIL_FORMAT.format(identifier, str(e)))
             UserActivity.objects.create(
                 user=None,
                 tenant=Tenant.objects.first(),
@@ -525,29 +649,15 @@ class PasswordResetRequestView(generics.GenericAPIView):
                 user_agent=user_agent,
                 success=False,
             )
-            return Response({ResponseKeys.ERROR: ErrorMessages.INVALID_EMAIL_FORMAT.format("", "")}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                ResponseKeys.ERROR: ErrorMessages.INVALID_EMAIL_FORMAT.format("", "")
+            }, status=status.HTTP_400_BAD_REQUEST)
 
-        # Perform DB operations in the tenant schema
+        # Now we have both tenant and user, proceed with reset
         with tenant_context(tenant):
-            try:
-                user = CustomUser.objects.get(email=email, tenant=tenant)
-            except CustomUser.DoesNotExist:
-                logger.warning(LogMessages.USER_WITH_EMAIL_NOT_FOUND.format(email, tenant.schema_name))
-                UserActivity.objects.create(
-                    user=None,
-                    tenant=tenant,
-                    action="password_reset_request",
-                    performed_by=None,
-                    details={"reason": ErrorMessages.NO_USER_FOUND_WITH_EMAIL},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
-                )
-                return Response({ResponseKeys.ERROR: ErrorMessages.NO_USER_FOUND_WITH_EMAIL}, status=status.HTTP_404_NOT_FOUND)
-
             # Check if user is locked or suspended
             if user.is_locked or user.status == "suspended" or not user.is_active:
-                logger.warning(LogMessages.USER_LOCKED_OR_SUSPENDED.format(email, tenant.schema_name))
+                logger.warning(LogMessages.USER_LOCKED_OR_SUSPENDED.format(user.email, tenant.schema_name))
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
@@ -558,7 +668,9 @@ class PasswordResetRequestView(generics.GenericAPIView):
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({ResponseKeys.ERROR: ErrorMessages.ACCOUNT_LOCKED_OR_SUSPENDED}, status=status.HTTP_403_FORBIDDEN)
+                return Response({
+                    ResponseKeys.ERROR: ErrorMessages.ACCOUNT_LOCKED_OR_SUSPENDED
+                }, status=status.HTTP_403_FORBIDDEN)
 
             # Check if IP is blocked
             if BlockedIP.objects.filter(ip_address=ip_address, tenant=tenant, is_active=True).exists():
@@ -573,7 +685,9 @@ class PasswordResetRequestView(generics.GenericAPIView):
                     user_agent=user_agent,
                     success=False,
                 )
-                return Response({ResponseKeys.ERROR: ErrorMessages.THIS_IP_ADDRESS_IS_BLOCKED}, status=status.HTTP_403_FORBIDDEN)
+                return Response({
+                    ResponseKeys.ERROR: ErrorMessages.THIS_IP_ADDRESS_IS_BLOCKED
+                }, status=status.HTTP_403_FORBIDDEN)
 
             # Create password reset token
             token = str(uuid.uuid4())
@@ -584,58 +698,59 @@ class PasswordResetRequestView(generics.GenericAPIView):
                 token=token,
                 expires_at=expires_at
             )
-            logger.info(LogMessages.PASSWORD_RESET_TOKEN_CREATED.format(email, tenant.schema_name))
+            logger.info(LogMessages.PASSWORD_RESET_TOKEN_CREATED.format(user.email, tenant.schema_name))
 
             # Send notification to external service
-            event_payload = {
-                "metadata": {
-                    "event_id": str(uuid.uuid4()),
-                    "event_type": "user.password.reset.requested",
-                    "event_version": "1.0",
-                    "created_at": timezone.now().isoformat(),
-                    "source": "auth-service",
-                    "tenant_id": str(tenant.unique_id),
-                },
-                "data": {
-                    "user_email": user.email,
-                    "user_name": f"{user.first_name} {user.last_name}",
-                    "reset_link": token,
-                    "ip_address": ip_address,
-                    "user_agent": user_agent,
-                    "user_id": user.id,
-                    "expires_at": expires_at.isoformat(),
-                },
-            }
             try:
-                url = urllib.parse.urljoin(settings.NOTIFICATIONS_SERVICE_URL.rstrip('/') + '/', 'events/')
+                from auth_service.utils.kafka_producer import publish_event
 
-                response = requests.post(
-                    url,
-                    json=event_payload,
-                    timeout=5
-                )
-                response.raise_for_status()
-                logger.info(LogMessages.NOTIFICATION_SENT_FOR_PASSWORD_RESET.format(user.email, response.status_code))
-            except requests.exceptions.RequestException as e:
+                event_payload = {
+                    "event_type": "user.password.reset.requested",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
+                        "email": user.email,
+                        "username": user.username,
+                        "user_name": f"{user.first_name} {user.last_name}",
+                        "reset_token": token,
+                        "reset_link": token,
+                        "ip_address": ip_address,
+                        "user_agent": user_agent,
+                        "user_id": str(user.id),
+                        "expires_at": expires_at.isoformat(),
+                        "reset_domain": reset_domain,
+                        "tenant_name": tenant.name,
+                        "tenant_logo": tenant.logo,
+                        "tenant_primary_color": tenant.primary_color,
+                        "tenant_secondary_color": tenant.secondary_color,
+                        "tenant_unique_id": str(tenant.unique_id),
+                        "tenant_schema": tenant.schema_name,
+                        "identifier_type": "email" if email else "username",
+                        "identifier_used": identifier,
+                    },
+                    "metadata": {
+                        "event_id": str(uuid.uuid4()),
+                        "created_at": timezone.now().isoformat(),
+                        "source": "auth-service",
+                    },
+                }
+
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(LogMessages.NOTIFICATION_SENT_FOR_PASSWORD_RESET.format(user.email, "Kafka"))
+                else:
+                    logger.error(LogMessages.FAILED_TO_SEND_PASSWORD_RESET_NOTIFICATION.format(user.email, "Kafka send failed"))
+            except Exception as e:
                 logger.error(LogMessages.FAILED_TO_SEND_PASSWORD_RESET_NOTIFICATION.format(user.email, str(e)))
-
-            # # Log activity
-            # UserActivity.objects.create(
-            #     user=user,
-            #     tenant=tenant,
-            #     action="password_reset_request",
-            #     performed_by=None,
-            #     details={"token": token},
-            #     ip_address=ip_address,
-            #     user_agent=user_agent,
-            #     success=True,
-            # )
 
         return Response(
             {
                 ResponseKeys.DETAIL: LogMessages.PASSWORD_RESET_TOKEN_GENERATED_SUCCESSFULLY,
                 ResponseKeys.TENANT_SCHEMA: tenant.schema_name,
-                ResponseKeys.EMAIL: email
+                ResponseKeys.EMAIL: user.email,  # Always return the actual email
+                ResponseKeys.USERNAME: user.username if hasattr(user, 'username') else None,
+                ResponseKeys.IDENTIFIER_USED: "email" if email else "username",
+                ResponseKeys.MESSAGE: f"Password reset link has been sent. Check your email associated with {identifier}.",
             },
             status=status.HTTP_200_OK
         )
@@ -646,151 +761,230 @@ class PasswordResetConfirmView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        logger.info(LogMessages.PROCESSING_PASSWORD_RESET_CONFIRMATION.format(request.data))
+        logger.info(
+            LogMessages.PROCESSING_PASSWORD_RESET_CONFIRMATION.format(request.data)
+        )
 
-        serializer = self.get_serializer(data=request.data, context={"request": request})
+        serializer = self.get_serializer(
+            data=request.data,
+            context={"request": request}
+        )
+
         if not serializer.is_valid():
-            logger.error(LogMessages.VALIDATION_FAILED_FOR_PASSWORD_RESET_CONFIRMATION.format(serializer.errors))
+            logger.error(
+                LogMessages.VALIDATION_FAILED_FOR_PASSWORD_RESET_CONFIRMATION.format(
+                    serializer.errors
+                )
+            )
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         token = serializer.validated_data["token"]
         new_password = serializer.validated_data["new_password"]
+        email = serializer.validated_data.get("email")
+        username = serializer.validated_data.get("username")
+
         ip_address = request.META.get("REMOTE_ADDR")
         user_agent = request.META.get("HTTP_USER_AGENT", "")
 
-        # The middleware has already set the tenant based on the token
         tenant = request.tenant
-        logger.info(LogMessages.PROCESSING_PASSWORD_RESET_CONFIRMATION_IN_TENANT.format(tenant.schema_name))
+        identifier = email or username or "token-only"
+
+        logger.info(
+            LogMessages.PROCESSING_PASSWORD_RESET_CONFIRMATION_IN_TENANT.format(
+                tenant.schema_name, identifier
+            )
+        )
 
         try:
-            # Token already used?
-            reset_token = PasswordResetToken.objects.select_related('user').filter(token=token).first()
-            if not reset_token:
-                logger.warning(LogMessages.INVALID_TOKEN.format(token, tenant.schema_name))
-                UserActivity.objects.create(
-                    user=None,
-                    tenant=tenant,
-                    action="password_reset_confirm",
-                    performed_by=None,
-                    details={"reason": ErrorMessages.INVALID_TOKEN},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
+            with tenant_context(tenant):
+
+                reset_token = (
+                    PasswordResetToken.objects
+                    .select_related("user")
+                    .filter(token=token, tenant=tenant)
+                    .first()
                 )
-                return Response({ResponseKeys.DETAIL: ErrorMessages.INVALID_OR_EXPIRED_TOKEN}, status=status.HTTP_400_BAD_REQUEST)
 
-            if reset_token.used:
-                logger.warning(LogMessages.TOKEN_ALREADY_USED.format(token, tenant.schema_name))
-                UserActivity.objects.create(
-                    user=reset_token.user,
-                    tenant=tenant,
-                    action="password_reset_confirm",
-                    performed_by=None,
-                    details={"reason": ErrorMessages.THIS_TOKEN_HAS_ALREADY_BEEN_USED},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
-                )
-                return Response({ResponseKeys.DETAIL: ErrorMessages.THIS_TOKEN_HAS_ALREADY_BEEN_USED}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Token expired?
-            if reset_token.expires_at < timezone.now():
-                logger.warning(LogMessages.TOKEN_EXPIRED.format(token, tenant.schema_name))
-                UserActivity.objects.create(
-                    user=reset_token.user,
-                    tenant=tenant,
-                    action="password_reset_confirm",
-                    performed_by=None,
-                    details={"reason": ErrorMessages.THIS_TOKEN_HAS_EXPIRED},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
-                )
-                return Response({ResponseKeys.DETAIL: ErrorMessages.THIS_TOKEN_HAS_EXPIRED}, status=status.HTTP_400_BAD_REQUEST)
-
-            user = reset_token.user
-
-            # Additional user checks
-            if user.is_locked or user.status == "suspended" or not user.is_active:
-                logger.warning(LogMessages.USER_LOCKED_OR_SUSPENDED.format(user.email, tenant.schema_name))
-                UserActivity.objects.create(
-                    user=user,
-                    tenant=tenant,
-                    action="password_reset_confirm",
-                    performed_by=None,
-                    details={"reason": ErrorMessages.ACCOUNT_IS_LOCKED_OR_SUSPENDED},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
-                )
-                return Response({ResponseKeys.DETAIL: ErrorMessages.ACCOUNT_IS_LOCKED_OR_SUSPENDED}, status=status.HTTP_403_FORBIDDEN)
-
-            with transaction.atomic():
-                user.set_password(new_password)
-                user.last_password_reset = timezone.now()
-                user.save()
-
-                reset_token.used = True
-                reset_token.save()
-
-                logger.info(LogMessages.PASSWORD_RESET_SUCCESSFUL.format(user.email, tenant.schema_name))
-
-                # Send notification to external service
-                event_payload = {
-                    "metadata": {
-                        "tenant_id": str(tenant.unique_id),
-                        "event_type": "auth.password_reset.confirmed",
-                        "event_id": str(uuid.uuid4()),
-                        "created_at": timezone.now().isoformat(),
-                        "source": "auth-service",
-                    },
-                    "data": {
-                        "user_email": user.email,
-                        "ip_address": ip_address,
-                        "user_agent": user_agent,
-                        "timestamp": timezone.now().isoformat(),
-                    },
-                }
-                try:
-                    response = requests.post(
-                        settings.NOTIFICATIONS_EVENT_URL,
-                        json=event_payload,
-                        timeout=5
+                if not reset_token:
+                    logger.warning(
+                        LogMessages.INVALID_TOKEN.format(token, tenant.schema_name)
                     )
-                    response.raise_for_status()
-                    logger.info(LogMessages.NOTIFICATION_SENT_FOR_PASSWORD_RESET_CONFIRMATION.format(user.email, response.status_code))
-                except requests.exceptions.RequestException as e:
-                    logger.error(LogMessages.FAILED_TO_SEND_PASSWORD_RESET_CONFIRMATION_NOTIFICATION.format(user.email, str(e)))
+                    UserActivity.objects.create(
+                        user=None,
+                        tenant=tenant,
+                        action="password_reset_confirm",
+                        performed_by=None,
+                        details={"reason": ErrorMessages.INVALID_TOKEN},
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        success=False,
+                    )
+                    return Response(
+                        {"detail": ErrorMessages.INVALID_OR_EXPIRED_TOKEN},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
-                # Log successful activity
+                user = reset_token.user
+
+                # 🔐 Email / Username verification
+                if email and user.email.lower() != email.lower():
+                    return Response(
+                        {"detail": "Email does not match reset token"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                if username and user.username.lower() != username.lower():
+                    return Response(
+                        {"detail": "Username does not match reset token"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                # 🚫 Token already used
+                if reset_token.used:
+                    return Response(
+                        {"detail": ErrorMessages.THIS_TOKEN_HAS_ALREADY_BEEN_USED},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                # ⏰ EXPIRY CHECK (FIXED)
+                expires_at = reset_token.expires_at
+
+                # Convert date → datetime (SAFE WITH CURRENT IMPORTS)
+                if not hasattr(expires_at, "hour"):
+                    expires_at = datetime.combine(
+                        expires_at,
+                        datetime.max.time()
+                    )
+
+                # Ensure timezone awareness
+                if timezone.is_naive(expires_at):
+                    expires_at = timezone.make_aware(expires_at)
+
+                if expires_at < timezone.now():
+                    logger.warning(
+                        LogMessages.TOKEN_EXPIRED.format(token, tenant.schema_name)
+                    )
+                    UserActivity.objects.create(
+                        user=user,
+                        tenant=tenant,
+                        action="password_reset_confirm",
+                        performed_by=None,
+                        details={"reason": ErrorMessages.THIS_TOKEN_HAS_EXPIRED},
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        success=False,
+                    )
+                    return Response(
+                        {"detail": ErrorMessages.THIS_TOKEN_HAS_EXPIRED},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                # 🚫 User state checks
+                if user.is_locked or user.status == "suspended" or not user.is_active:
+                    return Response(
+                        {"detail": ErrorMessages.ACCOUNT_IS_LOCKED_OR_SUSPENDED},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+
+                # 🔄 PASSWORD RESET
+                with transaction.atomic():
+                    user.set_password(new_password)
+                    user.last_password_reset = timezone.now()
+                    user.save(update_fields=["password", "last_password_reset"])
+
+                    reset_token.used = True
+                    reset_token.save(update_fields=["used"])
+
+                # 📣 Emit Kafka Event
+                try:
+                    from auth_service.utils.kafka_producer import publish_event
+
+                    event_payload = {
+                        "event_type": "user.password.changed",
+                        "tenant_id": str(tenant.unique_id),
+                        "timestamp": timezone.now().isoformat(),
+                        "payload": {
+                            "email": user.email,
+                            "username": user.username,
+                            "user_name": f"{user.first_name} {user.last_name}",
+                            "user_id": str(user.id),
+                            "ip_address": ip_address,
+                            "user_agent": user_agent,
+                            "change_type": "reset_via_token",
+                            "identifier_used": identifier,
+                            "tenant_name": tenant.name,
+                            "tenant_logo": tenant.logo,
+                            "tenant_primary_color": tenant.primary_color,
+                            "tenant_secondary_color": tenant.secondary_color,
+                            "tenant_unique_id": str(tenant.unique_id),
+                            "tenant_schema": tenant.schema_name,
+                            "identifier_type": "email" if email else "username" if username else "token_only",
+                        },
+                        "metadata": {
+                            "event_id": str(uuid.uuid4()),
+                            "created_at": timezone.now().isoformat(),
+                            "source": "auth-service",
+                        },
+                    }
+
+                    publish_event("auth-events", event_payload)
+
+                except Exception as e:
+                    logger.error(f"Kafka publish failed: {str(e)}")
+
+                # 🧾 Audit log
                 UserActivity.objects.create(
                     user=user,
                     tenant=tenant,
                     action="password_reset_confirm",
                     performed_by=None,
-                    details={},
+                    details={
+                        "identifier_used": identifier,
+                        "verification_method": "token",
+                    },
                     ip_address=ip_address,
                     user_agent=user_agent,
                     success=True,
                 )
 
-            return Response({ResponseKeys.DETAIL: ErrorMessages.PASSWORD_RESET_SUCCESSFULLY}, status=status.HTTP_200_OK)
+                logger.info(
+                    LogMessages.PASSWORD_RESET_SUCCESSFUL.format(
+                        user.email, tenant.schema_name
+                    )
+                )
+
+                return Response(
+                    {
+                        "detail": ErrorMessages.PASSWORD_RESET_SUCCESSFULLY,
+                        "email": user.email,
+                        "username": user.username,
+                        "identifier_used": identifier,
+                    },
+                    status=status.HTTP_200_OK,
+                )
 
         except Exception as e:
-            logger.exception(LogMessages.ERROR_DURING_PASSWORD_RESET_CONFIRMATION.format(tenant.schema_name, str(e)))
+            logger.exception(
+                LogMessages.ERROR_DURING_PASSWORD_RESET_CONFIRMATION.format(
+                    tenant.schema_name, str(e)
+                )
+            )
             UserActivity.objects.create(
                 user=None,
                 tenant=tenant,
                 action="password_reset_confirm",
                 performed_by=None,
-                details={"reason": f"Internal error: {str(e)}"},
+                details={"reason": str(e)},
                 ip_address=ip_address,
                 user_agent=user_agent,
                 success=False,
             )
-            return Response({ResponseKeys.DETAIL: ErrorMessages.PASSWORD_RESET_FAILED}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"detail": ErrorMessages.PASSWORD_RESET_FAILED},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
-
+       
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     permission_classes = [IsAuthenticated]
@@ -912,8 +1106,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         tenant = self.request.user.tenant
         user = self.request.user
-        if self.request.user.role != "admin" and not self.request.user.is_superuser:
-            raise ValidationError("Only admins or superusers can create users.")
+        # if self.request.user.role != "admin" and not self.request.user.is_superuser:
+        #     raise ValidationError("Only admins or superusers can create users.")
 
         # Restrict setting role to 'admin' unless superuser
         if serializer.validated_data.get('role') == 'admin' and not self.request.user.is_superuser:
@@ -930,6 +1124,8 @@ class UserViewSet(viewsets.ModelViewSet):
             # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
             logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
             try:
+                from auth_service.utils.kafka_producer import publish_event
+
                 # Generate a unique event ID in the format 'evt-<uuid>'
                 event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                 # Get user agent from request
@@ -939,21 +1135,13 @@ class UserViewSet(viewsets.ModelViewSet):
                 # Define login link (customize as needed)
                 login_link = settings.WEB_PAGE_URL
 
-                # print("login_link")
-                # print(login_link)
-                # print("login_link")
-
                 logger.info(f"🎯 {login_link}")
 
                 event_payload = {
-                    "metadata": {
-                        "tenant_id": str(tenant.unique_id),
-                        "event_type": "user.account.created",
-                        "event_id": event_id,
-                        "created_at": timezone.now().isoformat(),
-                        EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
-                    },
-                    "data": {
+                    "event_type": "user.account.created",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
                         "user_email": user_obj.email,
                         "company_name": company_name,
                         "temp_password": serializer.validated_data.get("password", ""),
@@ -962,18 +1150,22 @@ class UserViewSet(viewsets.ModelViewSet):
                         "user_agent": user_agent,
                         "user_id": str(user_obj.id),
                     },
+                    "metadata": {
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                    },
                 }
 
-                notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-                safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
-                logger.info(f"➡️ POST to {notifications_url} with payload: {safe_payload}")
+                safe_payload = {**event_payload, "payload": {**event_payload["payload"], "temp_password": "[REDACTED]"}}
+                logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
 
-                response = requests.post(notifications_url, json=event_payload, timeout=5)
-                response.raise_for_status()  # Raise if status != 200
-                logger.info(f"✅ Notification sent for {user_obj.email}. Status: {response.status_code}, Response: {response.text}")
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(f"✅ Notification sent for {user_obj.email}")
+                else:
+                    logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}")
 
-            except requests.exceptions.RequestException as e:
-                logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}: {str(e)}")
             except Exception as e:
                 logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
 
@@ -1212,11 +1404,11 @@ class UserViewSet(viewsets.ModelViewSet):
         user = self.request.user
 
         # Check permissions
-        if not (user.is_superuser or user.role == "admin"):
-            logger.warning(
-                f"User {user.email} attempted bulk create without permission in tenant {tenant.schema_name}"
-            )
-            raise PermissionDenied("Only admins or superusers can create users.")
+        # if not (user.is_superuser or user.role == "admin"):
+        #     logger.warning(
+        #         f"User {user.email} attempted bulk create without permission in tenant {tenant.schema_name}"
+        #     )
+        #     raise PermissionDenied("Only admins or superusers can create users.")
 
         # Expect a list of user data
         data = request.data
@@ -1262,6 +1454,8 @@ class UserViewSet(viewsets.ModelViewSet):
                         # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
                         logger.info(f"🎯 Sending user creation event for {user_obj.email} to notification service.")
                         try:
+                            from core.utils.kafka_producer import publish_event
+
                             # Generate a unique event ID in the format 'evt-<uuid>'
                             event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                             # Get user agent from request
@@ -1272,14 +1466,10 @@ class UserViewSet(viewsets.ModelViewSet):
                             login_link = "https://learn.prolianceltd.com/home/login"
 
                             event_payload = {
-                                "metadata": {
-                                    "tenant_id": str(tenant.unique_id),
-                                    "event_type": "user.account.created",
-                                    "event_id": event_id,
-                                    "created_at": timezone.now().isoformat(),
-                                    EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
-                                },
-                                "data": {
+                                "event_type": "user.account.created",
+                                "tenant_id": str(tenant.unique_id),
+                                "timestamp": timezone.now().isoformat(),
+                                "payload": {
                                     "user_email": user_obj.email,
                                     "company_name": company_name,
                                     "temp_password": serializer.validated_data.get("password", ""),
@@ -1288,18 +1478,22 @@ class UserViewSet(viewsets.ModelViewSet):
                                     "user_agent": user_agent,
                                     "user_id": str(user_obj.id),
                                 },
+                                "metadata": {
+                                    "event_id": event_id,
+                                    "created_at": timezone.now().isoformat(),
+                                    "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                                },
                             }
 
-                            notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-                            safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
-                            logger.info(f"➡️ POST to {notifications_url} with payload: {safe_payload}")
+                            safe_payload = {**event_payload, "payload": {**event_payload["payload"], "temp_password": "[REDACTED]"}}
+                            logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
 
-                            response = requests.post(notifications_url, json=event_payload, timeout=5)
-                            response.raise_for_status()  # Raise if status != 200
-                            logger.info(f"✅ Notification sent for {user_obj.email}. Status: {response.status_code}, Response: {response.text}")
+                            success = publish_event("auth-events", event_payload)
+                            if success:
+                                logger.info(f"✅ Notification sent for {user_obj.email}")
+                            else:
+                                logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}")
 
-                        except requests.exceptions.RequestException as e:
-                            logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}: {str(e)}")
                         except Exception as e:
                             logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
 
@@ -1498,42 +1692,46 @@ class PublicRegisterView(generics.CreateAPIView):
             except Exception as e:
                 logger.error(f"Failed to create investment policy for user {user_obj.email}: {str(e)}")
 
-            # Send notification event
+            # Send notification event via Kafka
             try:
+                from auth_service.utils.kafka_producer import publish_event
+
                 event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                 user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
                 company_name = tenant.name if hasattr(tenant, 'name') else "Unknown Company"
                 login_link = settings.WEB_PAGE_URL
 
                 event_payload = {
-                    EventPayloadKeys.METADATA: {
-                        EventPayloadKeys.TENANT_ID: str(tenant.unique_id),
-                        EventPayloadKeys.EVENT_TYPE: EventTypes.USER_ACCOUNT_CREATED,
-                        EventPayloadKeys.EVENT_ID: event_id,
-                        EventPayloadKeys.CREATED_AT: timezone.now().isoformat(),
-                        EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
+                    "event_type": "user.account.created",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
+                        "user_email": user_obj.email,
+                        "company_name": company_name,
+                        "temp_password": flattened_data[RequestDataKeys.PASSWORD],
+                        "login_link": login_link,
+                        "timestamp": timezone.now().isoformat(),
+                        "user_agent": user_agent,
+                        "user_id": str(user_obj.id),
                     },
-                    EventPayloadKeys.DATA: {
-                        EventPayloadKeys.USER_EMAIL: user_obj.email,
-                        EventPayloadKeys.COMPANY_NAME: company_name,
-                        EventPayloadKeys.TEMP_PASSWORD: flattened_data[RequestDataKeys.PASSWORD],
-                        EventPayloadKeys.LOGIN_LINK: login_link,
-                        EventPayloadKeys.TIMESTAMP: timezone.now().isoformat(),
-                        EventPayloadKeys.USER_AGENT: user_agent,
-                        EventPayloadKeys.USER_ID: str(user_obj.id),
+                    "metadata": {
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
                     },
                 }
 
-                notifications_url = settings.NOTIFICATIONS_SERVICE_URL + NotificationURLs.EVENTS
-                safe_payload = {**event_payload, EventPayloadKeys.DATA: {**event_payload[EventPayloadKeys.DATA], EventPayloadKeys.TEMP_PASSWORD: DefaultValues.REDACTED}}
-                logger.info(LogMessages.POST_TO_NOTIFICATIONS_URL.format(notifications_url, safe_payload))
+                safe_payload = {**event_payload, "payload": {**event_payload["payload"], "temp_password": "[REDACTED]"}}
+                logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
 
-                response = requests.post(notifications_url, json=event_payload, timeout=5)
-                response.raise_for_status()
-                logger.info(LogMessages.PUBLIC_REGISTRATION_NOTIFICATION_SENT.format(user_obj.email, response.status_code))
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(f"✅ Public registration notification sent for {user_obj.email}")
+                else:
+                    logger.warning(f"[❌ Notification Error] Failed to send public registration event for {user_obj.email}")
 
             except Exception as e:
-                logger.warning(LogMessages.FAILED_TO_SEND_PUBLIC_REGISTRATION_EVENT.format(user_obj.email, str(e)))
+                logger.warning(f"Failed to send public registration event for {user_obj.email}: {str(e)}")
 
             return Response({
                 ResponseKeys.STATUS: ResponseStatuses.SUCCESS,
@@ -1670,6 +1868,8 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
             # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
             logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
             try:
+                from auth_service.utils.kafka_producer import publish_event
+
                 # Generate a unique event ID in the format 'evt-<uuid>'
                 event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                 # Get user agent from request
@@ -1679,41 +1879,43 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
                 # Define login link (customize as needed)
                 login_link = settings.WEB_PAGE_URL
 
-                # print("login_link")
-                # print(login_link)
-                # print("login_link")
-
                 logger.info(f"🎯 {login_link}")
 
                 event_payload = {
-                    "metadata": {
-                        "tenant_id": str(tenant.unique_id),
-                        "event_type": "user.account.created",
-                        "event_id": event_id,
-                        "created_at": timezone.now().isoformat(),
-                        EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
-                    },
-                    "data": {
+                    "event_type": "user.registration.completed",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
                         "user_email": user_obj.email,
+                        "username": user_obj.username,
+                        "first_name": user_obj.first_name,
+                        "last_name": user_obj.last_name,
                         "company_name": company_name,
                         "temp_password": serializer.validated_data.get("password", ""),
                         "login_link": login_link,
                         "timestamp": timezone.now().isoformat(),
                         "user_agent": user_agent,
                         "user_id": str(user_obj.id),
+                        "registration_date": timezone.now().isoformat(),
+                        "verification_required": False,
+                        "send_credentials": True,
+                    },
+                    "metadata": {
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
                     },
                 }
 
-                notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-                safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
-                logger.info(f"➡️ POST to {notifications_url} with payload: {safe_payload}")
+                safe_payload = {**event_payload, "payload": {**event_payload["payload"], "temp_password": "[REDACTED]"}}
+                logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
 
-                response = requests.post(notifications_url, json=event_payload, timeout=5)
-                response.raise_for_status()  # Raise if status != 200
-                logger.info(f"✅ Notification sent for {user_obj.email}. Status: {response.status_code}, Response: {response.text}")
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(f"✅ Notification sent for {user_obj.email}")
+                else:
+                    logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}")
 
-            except requests.exceptions.RequestException as e:
-                logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}: {str(e)}")
             except Exception as e:
                 logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
 
@@ -1746,6 +1948,58 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
             from auth_service.utils.cache import delete_tenant_cache
             delete_tenant_cache(tenant.schema_name, 'users_list')
             logger.info(f"User {instance.email} updated by {user.email} in tenant {tenant.schema_name}")
+
+            # ✅ SEND NOTIFICATION EVENT FOR USER PROFILE UPDATE
+            logger.info("🎯 Sending user profile update event to notification service.")
+            try:
+                from auth_service.utils.kafka_producer import publish_event
+
+                # Generate a unique event ID in the format 'evt-<uuid>'
+                event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+                # Get user agent from request
+                user_agent = self.request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+                # Define company name (assuming tenant name or a custom field)
+                company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
+
+                # Determine which fields were updated
+                updated_fields = []
+                if hasattr(serializer, 'validated_data'):
+                    updated_fields = list(serializer.validated_data.keys())
+
+                event_payload = {
+                    "event_type": "user.profile.updated",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
+                        "user_email": instance.email,
+                        "user_name": f"{instance.first_name} {instance.last_name}",
+                        "updated_by": user.email,
+                        "updated_fields": updated_fields,
+                        "update_time": timezone.now().isoformat(),
+                        "ip_address": request.META.get("REMOTE_ADDR"),
+                        "user_agent": user_agent,
+                        "tenant_name": company_name,
+                        "user_id": str(instance.id),
+                    },
+                    "metadata": {
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                    },
+                }
+
+                safe_payload = {**event_payload, "payload": {**event_payload["payload"]}}
+                logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
+
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(f"✅ Profile update notification sent for {instance.email}")
+                else:
+                    logger.warning(f"[❌ Notification Error] Failed to send profile update event for {instance.email}")
+
+            except Exception as e:
+                logger.error(f"[❌ Notification Exception] Unexpected error for {instance.email}: {str(e)}")
+
             return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
@@ -1786,6 +2040,48 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
             user_key = get_cache_key(tenant.schema_name, 'customuser', instance.email)
             delete_cache_key(user_key)
             logger.info(f"User {instance.email} locked by {request.user.email} in tenant {tenant.schema_name}")
+
+            # ✅ SEND NOTIFICATION EVENT FOR ACCOUNT LOCK
+            logger.info("🎯 Sending account lock event to notification service.")
+            try:
+                from auth_service.utils.kafka_producer import publish_event
+
+                event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+                user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+                company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
+
+                event_payload = {
+                    "event_type": "user.account.locked",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
+                        "user_email": instance.email,
+                        "user_name": f"{instance.first_name} {instance.last_name}",
+                        "action": "locked",
+                        "reason": request.data.get("reason", "Manual lock"),
+                        "performed_by": request.user.email,
+                        "action_time": timezone.now().isoformat(),
+                        "ip_address": request.META.get("REMOTE_ADDR"),
+                        "user_agent": user_agent,
+                        "tenant_name": company_name,
+                        "user_id": str(instance.id),
+                    },
+                    "metadata": {
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                    },
+                }
+
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(f"✅ Account lock notification sent for {instance.email}")
+                else:
+                    logger.warning(f"[❌ Notification Error] Failed to send account lock event for {instance.email}")
+
+            except Exception as e:
+                logger.error(f"[❌ Notification Exception] Unexpected error for {instance.email}: {str(e)}")
+
             return Response(
                 {"status": "success", "message": f"User {instance.email} account locked successfully."}, status=200
             )
@@ -1814,6 +2110,48 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
             user_key = get_cache_key(tenant.schema_name, 'customuser', instance.email)
             delete_cache_key(user_key)
             logger.info(f"User {instance.email} unlocked by {request.user.email} in tenant {tenant.schema_name}")
+
+            # ✅ SEND NOTIFICATION EVENT FOR ACCOUNT UNLOCK
+            logger.info("🎯 Sending account unlock event to notification service.")
+            try:
+                from auth_service.utils.kafka_producer import publish_event
+
+                event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+                user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+                company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
+
+                event_payload = {
+                    "event_type": "user.account.unlocked",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
+                        "user_email": instance.email,
+                        "user_name": f"{instance.first_name} {instance.last_name}",
+                        "action": "unlocked",
+                        "reason": "Account unlocked",
+                        "performed_by": request.user.email,
+                        "action_time": timezone.now().isoformat(),
+                        "ip_address": request.META.get("REMOTE_ADDR"),
+                        "user_agent": user_agent,
+                        "tenant_name": company_name,
+                        "user_id": str(instance.id),
+                    },
+                    "metadata": {
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                    },
+                }
+
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(f"✅ Account unlock notification sent for {instance.email}")
+                else:
+                    logger.warning(f"[❌ Notification Error] Failed to send account unlock event for {instance.email}")
+
+            except Exception as e:
+                logger.error(f"[❌ Notification Exception] Unexpected error for {instance.email}: {str(e)}")
+
             return Response(
                 {"status": "success", "message": f"User {instance.email} account unlocked successfully."}, status=200
             )
@@ -1842,6 +2180,48 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
             user_key = get_cache_key(tenant.schema_name, 'customuser', instance.email)
             delete_cache_key(user_key)
             logger.info(f"User {instance.email} suspended by {request.user.email} in tenant {tenant.schema_name}")
+
+            # ✅ SEND NOTIFICATION EVENT FOR ACCOUNT SUSPEND
+            logger.info("🎯 Sending account suspend event to notification service.")
+            try:
+                from auth_service.utils.kafka_producer import publish_event
+
+                event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+                user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+                company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
+
+                event_payload = {
+                    "event_type": "user.account.suspended",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
+                        "user_email": instance.email,
+                        "user_name": f"{instance.first_name} {instance.last_name}",
+                        "action": "suspended",
+                        "reason": "Account suspended",
+                        "performed_by": request.user.email,
+                        "action_time": timezone.now().isoformat(),
+                        "ip_address": request.META.get("REMOTE_ADDR"),
+                        "user_agent": user_agent,
+                        "tenant_name": company_name,
+                        "user_id": str(instance.id),
+                    },
+                    "metadata": {
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                    },
+                }
+
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(f"✅ Account suspend notification sent for {instance.email}")
+                else:
+                    logger.warning(f"[❌ Notification Error] Failed to send account suspend event for {instance.email}")
+
+            except Exception as e:
+                logger.error(f"[❌ Notification Exception] Unexpected error for {instance.email}: {str(e)}")
+
             return Response(
                 {"status": "success", "message": f"User {instance.email} account suspended successfully."}, status=200
             )
@@ -1870,6 +2250,48 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
             user_key = get_cache_key(tenant.schema_name, 'customuser', instance.email)
             delete_cache_key(user_key)
             logger.info(f"User {instance.email} activated by {request.user.email} in tenant {tenant.schema_name}")
+
+            # ✅ SEND NOTIFICATION EVENT FOR ACCOUNT ACTIVATE
+            logger.info("🎯 Sending account activate event to notification service.")
+            try:
+                from auth_service.utils.kafka_producer import publish_event
+
+                event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+                user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+                company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
+
+                event_payload = {
+                    "event_type": "user.account.activated",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
+                        "user_email": instance.email,
+                        "user_name": f"{instance.first_name} {instance.last_name}",
+                        "action": "activated",
+                        "reason": "Account activated",
+                        "performed_by": request.user.email,
+                        "action_time": timezone.now().isoformat(),
+                        "ip_address": request.META.get("REMOTE_ADDR"),
+                        "user_agent": user_agent,
+                        "tenant_name": company_name,
+                        "user_id": str(instance.id),
+                    },
+                    "metadata": {
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                    },
+                }
+
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(f"✅ Account activate notification sent for {instance.email}")
+                else:
+                    logger.warning(f"[❌ Notification Error] Failed to send account activate event for {instance.email}")
+
+            except Exception as e:
+                logger.error(f"[❌ Notification Exception] Unexpected error for {instance.email}: {str(e)}")
+
             return Response(
                 {"status": "success", "message": f"User {instance.email} account activated successfully."}, status=200
             )
@@ -2000,6 +2422,8 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
                         # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
                         logger.info(f"🎯 Sending user creation event for {user_obj.email} to notification service.")
                         try:
+                            from auth_service.utils.kafka_producer import publish_event
+
                             # Generate a unique event ID in the format 'evt-<uuid>'
                             event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                             # Get user agent from request
@@ -2010,34 +2434,40 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
                             login_link = "https://learn.prolianceltd.com/home/login"
 
                             event_payload = {
-                                "metadata": {
-                                    "tenant_id": str(tenant.unique_id),
-                                    "event_type": "user.account.created",
-                                    "event_id": event_id,
-                                    "created_at": timezone.now().isoformat(),
-                                    EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
-                                },
-                                "data": {
+                                "event_type": "user.registration.completed",
+                                "tenant_id": str(tenant.unique_id),
+                                "timestamp": timezone.now().isoformat(),
+                                "payload": {
                                     "user_email": user_obj.email,
+                                    "username": user_obj.username,
+                                    "first_name": user_obj.first_name,
+                                    "last_name": user_obj.last_name,
                                     "company_name": company_name,
                                     "temp_password": serializer.validated_data.get("password", ""),
                                     "login_link": login_link,
                                     "timestamp": timezone.now().isoformat(),
                                     "user_agent": user_agent,
                                     "user_id": str(user_obj.id),
+                                    "registration_date": timezone.now().isoformat(),
+                                    "verification_required": False,
+                                    "send_credentials": True,
+                                },
+                                "metadata": {
+                                    "event_id": event_id,
+                                    "created_at": timezone.now().isoformat(),
+                                    "source": DefaultValues.SOURCE_AUTH_SERVICE,
                                 },
                             }
 
-                            notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-                            safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
-                            logger.info(f"➡️ POST to {notifications_url} with payload: {safe_payload}")
+                            safe_payload = {**event_payload, "payload": {**event_payload["payload"], "temp_password": "[REDACTED]"}}
+                            logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
 
-                            response = requests.post(notifications_url, json=event_payload, timeout=5)
-                            response.raise_for_status()  # Raise if status != 200
-                            logger.info(f"✅ Notification sent for {user_obj.email}. Status: {response.status_code}, Response: {response.text}")
+                            success = publish_event("auth-events", event_payload)
+                            if success:
+                                logger.info(f"✅ Notification sent for {user_obj.email}")
+                            else:
+                                logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}")
 
-                        except requests.exceptions.RequestException as e:
-                            logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}: {str(e)}")
                         except Exception as e:
                             logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
 
@@ -2854,6 +3284,8 @@ class AdminUserCreateView(APIView):
                 # ✅ SEND NOTIFICATION EVENT AFTER ADMIN USER CREATION
                 logger.info("🎯 Reached admin user creation success block. Sending user creation event to notification service.")
                 try:
+                    from auth_service.utils.kafka_producer import publish_event
+
                     # Generate a unique event ID in the format 'evt-<uuid>'
                     event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                     # Get user agent from request
@@ -2861,44 +3293,45 @@ class AdminUserCreateView(APIView):
                     # Define company name (assuming tenant name or a custom field)
                     company_name = user.tenant.name if hasattr(user.tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
                     # Define login link (customize as needed)
-                   
+
 
                     login_link = settings.WEB_PAGE_URL
-                    # print("login_link")
-                    # print(login_link)
-                    # print("login_link")
-
                     logger.info(f"🎯 {login_link}")
                     event_payload = {
-                        "metadata": {
-                            "tenant_id": str(user.tenant.unique_id),
-                            "event_type": "user.account.created",
-                            "event_id": event_id,
-                            "created_at": timezone.now().isoformat(),
-                            "source": "auth-service",
-                        },
-                        "data": {
+                        "event_type": "user.registration.completed",
+                        "tenant_id": str(user.tenant.unique_id),
+                        "timestamp": timezone.now().isoformat(),
+                        "payload": {
                             "user_email": user.email,
+                            "username": user.username,
+                            "first_name": user.first_name,
+                            "last_name": user.last_name,
                             "company_name": company_name,
                             "temp_password": serializer.validated_data.get("password", ""),
                             "login_link": login_link,
                             "timestamp": timezone.now().isoformat(),
-                            "login_link": login_link,
                             "user_agent": user_agent,
                             "user_id": str(user.id),
+                            "registration_date": timezone.now().isoformat(),
+                            "verification_required": False,
+                            "send_credentials": True,
+                        },
+                        "metadata": {
+                            "event_id": event_id,
+                            "created_at": timezone.now().isoformat(),
+                            "source": DefaultValues.SOURCE_AUTH_SERVICE,
                         },
                     }
 
-                    notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-                    safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
-                    logger.info(f"➡️ POST to {notifications_url} with payload: {safe_payload}")
+                    safe_payload = {**event_payload, "payload": {**event_payload["payload"], "temp_password": "[REDACTED]"}}
+                    logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
 
-                    response = requests.post(notifications_url, json=event_payload, timeout=5)
-                    response.raise_for_status()  # Raise if status != 200
-                    logger.info(f"✅ Notification sent for {user.email}. Status: {response.status_code}, Response: {response.text}")
+                    success = publish_event("auth-events", event_payload)
+                    if success:
+                        logger.info(f"✅ Notification sent for {user.email}")
+                    else:
+                        logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user.email}")
 
-                except requests.exceptions.RequestException as e:
-                    logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user.email}: {str(e)}")
                 except Exception as e:
                     logger.error(f"[❌ Notification Exception] Unexpected error for {user.email}: {str(e)}")
 
@@ -3441,8 +3874,6 @@ def generate_rsa_keypair(key_size=2048):
 
 
 
-
-
 class RSAKeyPairCreateView(APIView):
     permission_classes = [IsAdminUser]
 
@@ -3510,8 +3941,6 @@ class RSAKeyPairCreateView(APIView):
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
-
 
 
 
@@ -3729,6 +4158,47 @@ class DocumentAcknowledgeView(APIView):
                 logger.info(
                     f"Document {document.title} acknowledged by {current_user['email']} in tenant {tenant_id}"
                 )
+
+                # ✅ SEND NOTIFICATION EVENT FOR DOCUMENT ACKNOWLEDGMENT
+                logger.info("🎯 Sending document acknowledgment event to notification service.")
+                try:
+                    from auth_service.utils.kafka_producer import publish_event
+
+                    event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+                    user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+                    company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
+
+                    event_payload = {
+                        "event_type": "document.acknowledged",
+                        "tenant_id": str(tenant.unique_id),
+                        "timestamp": timezone.now().isoformat(),
+                        "payload": {
+                            "user_email": current_user['email'],
+                            "user_name": f"{current_user['first_name']} {current_user['last_name']}",
+                            "user_id": str(current_user['id']),
+                            "document_title": document.title,
+                            "document_id": str(document.id),
+                            "acknowledged_at": acknowledgment.acknowledged_at.isoformat(),
+                            "ip_address": request.META.get("REMOTE_ADDR"),
+                            "user_agent": user_agent,
+                            "tenant_name": company_name,
+                        },
+                        "metadata": {
+                            "event_id": event_id,
+                            "created_at": timezone.now().isoformat(),
+                            "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                        },
+                    }
+
+                    success = publish_event("auth-events", event_payload)
+                    if success:
+                        logger.info(f"✅ Document acknowledgment notification sent for {current_user['email']}")
+                    else:
+                        logger.warning(f"[❌ Notification Error] Failed to send document acknowledgment event for {current_user['email']}")
+
+                except Exception as e:
+                    logger.error(f"[❌ Notification Exception] Unexpected error for {current_user['email']}: {str(e)}")
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Document.DoesNotExist:
             logger.error(f"Document not found for tenant {tenant_unique_id}")
@@ -3757,8 +4227,6 @@ class DocumentAcknowledgmentsListView(APIView):
         except Exception as e:
             logger.error(f"Error retrieving acknowledgments for document {document_id} in tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 
 class UserDocumentAccessView(APIView):
@@ -3955,7 +4423,7 @@ class UserProfileDataView(APIView):
                         'roi_balance': str(entry.roi_balance),
                         'total_balance': str(entry.total_balance),
                     })
-                                         
+                                        
                     # ledger_data.append({
                     #     'id': entry.id,
                     #     'entry_date': entry.entry_date,
@@ -4143,8 +4611,53 @@ class UserProfileDataView(APIView):
 
             user_profile.save()
 
-            return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
+            # ✅ SEND NOTIFICATION EVENT FOR PROFILE UPDATE
+            logger.info("🎯 Sending profile update event to notification service.")
+            try:
+                from auth_service.utils.kafka_producer import publish_event
 
+                event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+                user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+                company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
+
+                event_payload = {
+                    "event_type": "user.profile.updated",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
+                        "user_email": user.email,
+                        "user_name": f"{user.first_name} {user.last_name}",
+                        "updated_by": user.email,  # Self-updated
+                        "updated_fields": list(update_data.keys()),
+                        "update_time": timezone.now().isoformat(),
+                        "ip_address": request.META.get("REMOTE_ADDR"),
+                        "user_agent": user_agent,
+                        "tenant_name": company_name,
+                        "user_id": str(user.id),
+                    },
+                    "metadata": {
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                    },
+                }
+
+                safe_payload = {**event_payload, "payload": {**event_payload["payload"]}}
+                logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
+
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(f"✅ Profile update notification sent for {user.email}")
+                else:
+                    logger.warning(f"[❌ Notification Error] Failed to send profile update event for {user.email}")
+
+            except Exception as e:
+                logger.error(f"[❌ Notification Exception] Unexpected error for {user.email}: {str(e)}")
+
+            return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
+        
+        
+        
 
 class BulkUserDetailsView(APIView):
     """
@@ -4199,6 +4712,8 @@ class BulkUserDetailsView(APIView):
                 "users": serializer.data,
                 "count": len(serializer.data)
             }, status=status.HTTP_200_OK)
+            
+            
 
 
 class BulkClientDetailsView(APIView):

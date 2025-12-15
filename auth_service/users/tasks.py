@@ -52,26 +52,22 @@ def log_activity_async(action, user_id, tenant_id, details, ip=None, user_agent=
 # ---------------------------------------------------------------------------
 def send_expiry_notification(user, document_info, days_value, event_type, source="application-system"):
     """
-    Send a document expiry or expired notification to the Notification microservice.
+    Send a document expiry or expired notification to the Notification microservice via Kafka.
     event_type can be:
       - user.document.expiry.warning
       - user.document.expired
     """
     try:
+        from auth_service.utils.kafka_producer import publish_event
+
         now = timezone.now()
         tenant_id = str(user.tenant.id) if hasattr(user, "tenant") else "unknown-tenant"
 
         event_payload = {
-            "metadata": {
-                "event_id": str(uuid.uuid4()),
-                "event_type": event_type,
-                "event_version": "1.0",
-                "created_at": now.isoformat(),
-                "source": source,
-                "tenant_id": tenant_id,
-                "timestamp": now.isoformat(),
-            },
-            "data": {
+            "event_type": event_type,
+            "tenant_id": tenant_id,
+            "timestamp": now.isoformat() + "Z",
+            "payload": {
                 "full_name": f"{user.first_name} {user.last_name}".strip() or user.email,
                 "user_email": user.email,
                 "document_type": document_info.get("type", "Unknown Document"),
@@ -91,18 +87,19 @@ def send_expiry_notification(user, document_info, days_value, event_type, source
                 ),
                 "timezone": str(now.tzinfo) or "Africa/Lagos",
             },
+            "metadata": {
+                "event_id": str(uuid.uuid4()),
+                "created_at": now.isoformat() + "Z",
+                "source": source,
+            },
         }
 
-        notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-        logger.info(f"➡️ Sending {event_type} for {user.email} to {notifications_url}")
-        response = requests.post(notifications_url, json=event_payload, timeout=5)
-        response.raise_for_status()
-        logger.info(f"✅ Notification sent for {event_type} ({response.status_code})")
+        logger.info(f"➡️ Sending {event_type} for {user.email} to Kafka topic 'auth-events'")
+        publish_event("auth-events", event_payload)
+        logger.info(f"✅ Notification event sent for {event_type}")
 
-    except requests.exceptions.RequestException as e:
-        logger.warning(f"[❌ Notification Error] Failed to send event for {user.email}: {str(e)}")
     except Exception as e:
-        logger.error(f"[❌ Notification Exception] Unexpected error for {user.email}: {str(e)}")
+        logger.error(f"[❌ Notification Exception] Failed to send event for {user.email}: {str(e)}")
 
 
 # ---------------------------------------------------------------------------

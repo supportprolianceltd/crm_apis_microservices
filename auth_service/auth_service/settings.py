@@ -424,6 +424,9 @@ CACHE_ENABLED = env.bool("CACHE_ENABLED", default=True)
 KAFKA_BOOTSTRAP_SERVERS = env.list("KAFKA_BOOTSTRAP_SERVERS", default=["kafka:9092"])
 KAFKA_TOPIC_USER_EVENTS = "user-events"
 KAFKA_TOPIC_TENANT_EVENTS = "tenant-created"
+KAFKA_TOPIC_AUTH_EVENTS = "auth-events"
+KAFKA_TOPIC_APP_EVENTS = "app-events"
+KAFKA_TOPIC_SECURITY_EVENTS = "security-events"
 
 CACHE_ENABLED = env.bool("CACHE_ENABLED", default=True)
 TENANT_CACHE_PREFIX = "tenant:{}:"
@@ -440,7 +443,7 @@ SUPABASE_URL = env("SUPABASE_URL", default="")
 SUPABASE_KEY = env("SUPABASE_KEY", default="")
 SUPABASE_BUCKET = env("SUPABASE_BUCKET", default="")
 STORAGE_TYPE = env("STORAGE_TYPE", default="supabase")
-
+CACHE_ENABLED = False  # In settings.py or .env
 # Add to settings.py
 CELERY_BEAT_SCHEDULE = {
     'accrue-monthly-roi': {
@@ -448,8 +451,12 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(0, 0, day_of_month='1'),  # 1st of every month
     },
     'send-roi-notifications': {
-        'task': 'investments.tasks.send_roi_due_notifications', 
+        'task': 'investments.tasks.send_roi_due_notifications',
         'schedule': crontab(0, 0, day_of_month='25'),  # 25th of every month
+    },
+    'check-expiring-documents': {
+        'task': 'users.tasks.check_expiring_documents',
+        'schedule': crontab(hour=2, minute=0),  # Run daily at 2 AM
     },
 }
 
@@ -463,3 +470,5 @@ CELERY_BEAT_SCHEDULE = {
 
 # Email: ekeabr815
 # Password: &7*XW[E)cJb+
+#  Email: newstaff@prolianceltd.com
+# Pword: Wn6xaKsikVXP

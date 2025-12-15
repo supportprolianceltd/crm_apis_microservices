@@ -11,6 +11,8 @@ from django.utils import timezone
 from django_tenants.utils import tenant_context
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+import uuid
+
 from decimal import Decimal
 # Local imports
 from core.models import Branch, Domain, Tenant, GlobalActivity
@@ -91,6 +93,7 @@ def validate_file_extension(value):
         if value.size == 0:
             raise serializers.ValidationError('File cannot be empty.')
     return value
+
 
 class ProfessionalQualificationSerializer(serializers.ModelSerializer):
     #image_file = serializers.FileField(required=False, allow_null=True)
@@ -1572,7 +1575,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return f"{prefix}-{count:06d}"
 
 
-
 class CustomUserListSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
     tenant = serializers.SlugRelatedField(read_only=True, slug_field="name")
@@ -1836,39 +1838,74 @@ class UserBranchUpdateSerializer(serializers.ModelSerializer):
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
+    email = serializers.EmailField(required=False)
+    username = serializers.CharField(required=False)
 
-    def validate_email(self, value):
-        tenant = self.context["request"].tenant
-        with tenant_context(tenant):
-            if not CustomUser.objects.filter(email=value, tenant=tenant).exists():
-                raise serializers.ValidationError(f"No user found with email '{value}' for this tenant.")
-        return value
+    def validate(self, data):
+        email = data.get('email')
+        username = data.get('username')
 
+        if not email and not username:
+            raise serializers.ValidationError("Either 'email' or 'username' must be provided.")
 
+        if email and username:
+            raise serializers.ValidationError("Provide only one of 'email' or 'username', not both.")
+
+        # NOTE: We can't validate existence here because we don't know the tenant yet
+        # The tenant resolution happens in the view
+        return data
+    
 class PasswordResetConfirmSerializer(serializers.Serializer):
-    token = serializers.CharField(required=True)
-    new_password = serializers.CharField(write_only=True, min_length=8, required=True)
+    token = serializers.CharField(required=True, write_only=True)
+    email = serializers.EmailField(required=False, allow_blank=True)
+    username = serializers.CharField(required=False, allow_blank=True)
+    new_password = serializers.CharField(
+        write_only=True, 
+        min_length=8, 
+        required=True,
+        style={'input_type': 'password'}
+    )
+    confirm_password = serializers.CharField(
+        write_only=True, 
+        required=True,
+        style={'input_type': 'password'}
+    )
+
+    def validate(self, data):
+        # Check if email or username is provided (optional but recommended)
+        email = data.get('email')
+        username = data.get('username')
+        
+        if not email and not username:
+            # Allow token-only for backward compatibility
+            logger.warning("Password reset confirmation without email/username (token-only)")
+        
+        # Check if passwords match
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        
+        # Password complexity requirements
+        password = data['new_password']
+        if len(password) < 8:
+            raise serializers.ValidationError({"new_password": "Password must be at least 8 characters long."})
+        if not any(c.isupper() for c in password):
+            raise serializers.ValidationError({"new_password": "Password must contain at least one uppercase letter."})
+        if not any(c.isdigit() for c in password):
+            raise serializers.ValidationError({"new_password": "Password must contain at least one number."})
+            
+        return data
 
     def validate_token(self, value):
-        tenant = self.context["request"].tenant
-        with tenant_context(tenant):
-            try:
-                reset_token = PasswordResetToken.objects.get(token=value, tenant=tenant)
-                if reset_token.expires_at < timezone.now():
-                    raise serializers.ValidationError("This token has expired.")
-                if reset_token.used:
-                    raise serializers.ValidationError("This token has already been used.")
-            except PasswordResetToken.DoesNotExist:
-                raise serializers.ValidationError("Invalid token.")
-        return value
-
-    def validate_new_password(self, value):
-        if not any(c.isupper() for c in value) or not any(c.isdigit() for c in value):
-            raise serializers.ValidationError("Password must contain at least one uppercase letter and one number.")
-        return value
-
-
+        # Validate token format and optionally check if it exists
+        # Note: Full validation happens in the view with tenant context
+        try:
+            uuid.UUID(value)
+            return value
+        except ValueError:
+            raise serializers.ValidationError("Invalid token format.")
+        
+        
+    
 class UserSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSession
@@ -2815,20 +2852,21 @@ class DocumentSerializer(serializers.ModelSerializer):
                 if permission_action == 'add':
                     added_count = 0
                     for perm in resolved_permissions:
-                        if not existing_permissions.filter(user_id=perm['resolved_user_id']).exists():
-                            new_perm = DocumentPermission(
-                                document=instance,
-                                user_id=perm['resolved_user_id'],
-                                email=perm['email'],
-                                first_name=perm['first_name'],
-                                last_name=perm['last_name'],
-                                role=perm['role'],
-                                permission_level=perm['permission_level'],
-                                tenant_id=tenant_id
-                            )
-                            new_perm.save()
+                        obj, created = DocumentPermission.objects.update_or_create(
+                            document=instance,
+                            user_id=str(perm['resolved_user_id']),
+                            tenant_id=str(tenant_id),
+                            defaults={
+                                'email': perm['email'],
+                                'first_name': perm['first_name'],
+                                'last_name': perm['last_name'],
+                                'role': perm['role'],
+                                'permission_level': perm['permission_level'],
+                            }
+                        )
+                        if created:
                             added_count += 1
-                    logger.info(f"Added {added_count} new permissions for document {instance.title}")
+                    logger.info(f"Added or updated {added_count} permissions for document {instance.title}")
                 elif permission_action == 'remove':
                     removed_count = 0
                     for perm in resolved_permissions:
@@ -2837,21 +2875,22 @@ class DocumentSerializer(serializers.ModelSerializer):
                     logger.info(f"Removed {removed_count} permissions for document {instance.title}")
                 elif permission_action == 'replace':
                     existing_permissions.delete()
-                    permission_objs = [
-                        DocumentPermission(
+                    replaced_count = 0
+                    for perm in resolved_permissions:
+                        obj, created = DocumentPermission.objects.update_or_create(
                             document=instance,
-                            user_id=perm['resolved_user_id'],
-                            email=perm['email'],
-                            first_name=perm['first_name'],
-                            last_name=perm['last_name'],
-                            role=perm['role'],
-                            permission_level=perm['permission_level'],
-                            tenant_id=tenant_id
+                            user_id=str(perm['resolved_user_id']),
+                            tenant_id=str(tenant_id),
+                            defaults={
+                                'email': perm['email'],
+                                'first_name': perm['first_name'],
+                                'last_name': perm['last_name'],
+                                'role': perm['role'],
+                                'permission_level': perm['permission_level'],
+                            }
                         )
-                        for perm in resolved_permissions
-                    ]
-                    DocumentPermission.objects.bulk_create(permission_objs)
-                    logger.info(f"Replaced with {len(resolved_permissions)} permissions for document {instance.title}")
+                        replaced_count += 1
+                    logger.info(f"Replaced with {replaced_count} permissions for document {instance.title}")
                 elif permission_action == 'update_level':
                     updated_count = 0
                     for perm in resolved_permissions:
