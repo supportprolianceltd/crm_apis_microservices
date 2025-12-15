@@ -808,8 +808,8 @@ class UserViewSet(viewsets.ModelViewSet):
                     pass  # All non-client users in tenant
                 elif user.role == "recruiter" and user.branch:
                     base_qs = base_qs.filter(branch=user.branch)
-                else:
-                    base_qs = base_qs.filter(id=user.id)  # Self only
+                # else:
+                #     base_qs = base_qs.filter(id=user.id)  # Self only
             return base_qs
 
     def get_queryset(self):
@@ -1563,8 +1563,8 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
                     pass  # All non-client users in tenant
                 elif user.role == "recruiter" and user.branch:
                     base_qs = base_qs.filter(branch=user.branch)
-                else:
-                    base_qs = base_qs.filter(id=user.id)  # Self only
+                # else:
+                #     base_qs = base_qs.filter(id=user.id)  # Self only
             return base_qs
 
     def get_queryset(self):
