@@ -1621,12 +1621,51 @@ export class TaskController {
       // Fetch the visit and verify ownership
       const existingVisit = await this.prisma.carerVisit.findUnique({
         where: { id: visitId },
-        select: { id: true, tenantId: true },
+        select: { id: true, tenantId: true, startDate: true, endDate: true },
       });
 
       if (!existingVisit) return res.status(404).json({ error: "Visit not found" });
       if (existingVisit.tenantId !== tenantId.toString())
         return res.status(403).json({ error: "Access denied to this visit" });
+
+      // Check for time conflicts with existing visits for this carer
+      if (existingVisit.startDate && existingVisit.endDate) {
+        const conflictingVisits = await this.prisma.carerVisit.findMany({
+          where: {
+            tenantId: tenantId.toString(),
+            carerId: carerId,
+            id: { not: visitId }, // Exclude the current visit
+            OR: [
+              // New visit starts during existing visit
+              {
+                startDate: { lte: existingVisit.startDate },
+                endDate: { gt: existingVisit.startDate }
+              },
+              // New visit ends during existing visit
+              {
+                startDate: { lt: existingVisit.endDate },
+                endDate: { gte: existingVisit.endDate }
+              },
+              // New visit completely encompasses existing visit
+              {
+                startDate: { gte: existingVisit.startDate },
+                endDate: { lte: existingVisit.endDate }
+              }
+            ]
+          },
+          select: { id: true, startDate: true, endDate: true }
+        });
+
+        if (conflictingVisits.length > 0) {
+          const conflictDetails = conflictingVisits.map(v => 
+            `Visit ${v.id}: ${v.startDate?.toISOString()} - ${v.endDate?.toISOString()}`
+          ).join('; ');
+          return res.status(409).json({ 
+            error: "Carer has conflicting visits scheduled", 
+            conflicts: conflictDetails 
+          });
+        }
+      }
 
       // Transaction: create assignee while enforcing capacity, optionally propagate to tasks
       try {
@@ -1717,9 +1756,53 @@ export class TaskController {
       const shouldPropagate = propagate === undefined ? true : !!propagate;
 
       // Fetch the visit and verify ownership
-      const existingVisit = await this.prisma.carerVisit.findUnique({ where: { id: visitId }, select: { id: true, tenantId: true, carerId: true, careType: true, carePlanId: true } });
+      const existingVisit = await this.prisma.carerVisit.findUnique({ 
+        where: { id: visitId }, 
+        select: { id: true, tenantId: true, carerId: true, careType: true, carePlanId: true, startDate: true, endDate: true } 
+      });
       if (!existingVisit) return res.status(404).json({ error: 'Visit not found' });
       if (existingVisit.tenantId !== tenantId.toString()) return res.status(403).json({ error: 'Access denied to this visit' });
+
+      // Check for time conflicts with existing visits for each carer
+      if (existingVisit.startDate && existingVisit.endDate) {
+        for (const carerId of uniqueCarerIds) {
+          const conflictingVisits = await this.prisma.carerVisit.findMany({
+            where: {
+              tenantId: tenantId.toString(),
+              carerId: carerId,
+              id: { not: visitId }, // Exclude the current visit
+              OR: [
+                // New visit starts during existing visit
+                {
+                  startDate: { lte: existingVisit.startDate },
+                  endDate: { gt: existingVisit.startDate }
+                },
+                // New visit ends during existing visit
+                {
+                  startDate: { lt: existingVisit.endDate },
+                  endDate: { gte: existingVisit.endDate }
+                },
+                // New visit completely encompasses existing visit
+                {
+                  startDate: { gte: existingVisit.startDate },
+                  endDate: { lte: existingVisit.endDate }
+                }
+              ]
+            },
+            select: { id: true, startDate: true, endDate: true }
+          });
+
+          if (conflictingVisits.length > 0) {
+            const conflictDetails = conflictingVisits.map(v => 
+              `Visit ${v.id}: ${v.startDate?.toISOString()} - ${v.endDate?.toISOString()}`
+            ).join('; ');
+            return res.status(409).json({ 
+              error: `Carer ${carerId} has conflicting visits scheduled`, 
+              conflicts: conflictDetails 
+            });
+          }
+        }
+      }
 
       try {
         const result = await this.prisma.$transaction(async (prismaTx) => {

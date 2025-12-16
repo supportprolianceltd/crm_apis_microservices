@@ -29,6 +29,7 @@ import { createHealthRoutes } from './routes/health.routes';
 import { createEmailRoutes } from './routes/email.routes';
 import { createCarePlanRoutes } from './routes/careplan.routes';
 import { createTaskRoutes } from './routes/task.routes';
+import { createLogsRoutes } from './routes/logs.routes';
 import { createAttendanceRoutes } from './routes/attendance.routes';
 import { createClusterRoutes } from './routes/cluster.routes';
 import { createConstraintsRoutes } from './routes/constraints.routes';
@@ -70,6 +71,7 @@ import { DataValidationController } from './controllers/data-validation.controll
 import { TravelMatrixController } from './controllers/travel-matrix.controller';
 import { EligibilityController } from './controllers/eligibility.controller';
 import { ClusterMetricsController } from './controllers/cluster-metrics.controller';
+import { LogsController } from './controllers/logs.controller';
 
 // Import workers and middleware
 import { EmailWorker } from './workers/email.worker';
@@ -124,6 +126,7 @@ class RosteringServer {
   private travelMatrixController?: TravelMatrixController;
   private eligibilityController?: EligibilityController;
   private clusterMetricsController?: ClusterMetricsController;
+  private logsController?: LogsController;
 
   constructor() {
     console.log('🔧 [DEBUG] Constructor called');
@@ -265,6 +268,7 @@ class RosteringServer {
       this.travelMatrixController = new TravelMatrixController(this.prisma);
       this.eligibilityController = new EligibilityController(this.prisma);
       this.clusterMetricsController = new ClusterMetricsController(this.prisma);
+      this.logsController = new LogsController(this.prisma);
 
       console.log('🔧 [DEBUG] All services initialized successfully');
       logger.info('All services initialized successfully');
@@ -448,6 +452,7 @@ class RosteringServer {
     this.app.use('/api/rostering/visits', authenticate, createVisitRoutes(this.visitController!));
     this.app.use('/api/rostering/careplans', authenticate, createCarePlanRoutes(this.carePlanController!));
     this.app.use('/api/rostering/tasks', authenticate, createTaskRoutes(this.taskController!));
+    this.app.use('/api/rostering/logs', authenticate, createLogsRoutes(this.logsController!));
     this.app.use('/api/rostering/attendance', authenticate, createAttendanceRoutes(new (require('./controllers/attendance.controller').AttendanceController)(this.prisma!)));
 
     // Rostering & optimization routes
