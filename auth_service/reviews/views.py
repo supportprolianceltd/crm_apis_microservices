@@ -173,6 +173,8 @@ def send_review_notification(event_type, review, user=None, extra_data=None):
                 "rating": review.rating,
                 "comment_preview": review.comment[:100] + "..." if len(review.comment) > 100 else review.comment,
                 "submitted_at": review.submitted_at.isoformat() if review.submitted_at else now,
+                # Always use custom email template in notification service
+                "html_template": "email/otp_email.html",
                 **(extra_data or {}),
             },
             "metadata": {

@@ -256,6 +256,7 @@ SIMPLE_JWT = {
 # EXTERNAL SERVICES
 # ============================================================================
 
+NOTIFICATIONS_APP_URL = env("NOTIFICATIONS_APP_URL", default="http://notifications:3002")
 NOTIFICATIONS_SERVICE_URL = env("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
 GLOBAL_ADMIN_PASSWORD = env("GLOBAL_ADMIN_PASSWORD", default="SuperAdmin2025!")
 GLOBAL_ADMIN_EMAIL = env("GLOBAL_ADMIN_EMAIL", default="admin@platform.local")

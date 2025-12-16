@@ -740,6 +740,8 @@ class CustomTokenSerializer(serializers.Serializer):
                     "tenant_logo": user.tenant.logo,
                     "tenant_primary_color": user.tenant.primary_color,
                     "tenant_secondary_color": user.tenant.secondary_color,
+                    # Always use custom email template in notification service
+                    "html_template": "email/otp_email.html",
                 },
                 "metadata": {
                     "event_id": str(uuid.uuid4()),

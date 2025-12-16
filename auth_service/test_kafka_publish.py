@@ -27,6 +27,7 @@ test_event = {
         'tenant_logo': '',
         'tenant_primary_color': '#123456',
         'tenant_secondary_color': '#abcdef',
+        'html_template': 'email/otp_email.html',  # Ensure custom template is used
     }
 }
 

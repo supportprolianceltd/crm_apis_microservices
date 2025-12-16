@@ -4237,22 +4237,31 @@ class UserDocumentAccessView(APIView):
         if not user_identifier:
             return Response({"detail": "Either 'user_id' or 'email' query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        tenant_unique_id = get_tenant_id_from_jwt(request)
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return Response({"detail": "No valid Bearer token provided."}, status=status.HTTP_401_UNAUTHORIZED)
+        token = auth_header.split(" ")[1]
+        try:
+            payload = jwt.decode(token, options={"verify_signature": False})
+            tenant_unique_id = payload.get("tenant_unique_id")
+        except Exception as e:
+            logger.error(f"Invalid JWT token: {str(e)}")
+            return Response({"detail": "Invalid JWT token."}, status=status.HTTP_401_UNAUTHORIZED)
         tenant = Tenant.objects.get(unique_id=tenant_unique_id)
-        tenant_id = str(tenant.id)
+        tenant_id_str = str(tenant.id)
         try:
             with tenant_context(tenant):
                 if request.query_params.get('user_id'):
-                    permissions = DocumentPermission.objects.filter(user_id=user_identifier, tenant_id=tenant_id).select_related('document')
+                    permissions = DocumentPermission.objects.filter(user_id=user_identifier, tenant_id=tenant_id_str).select_related('document')
                 else:
-                    permissions = DocumentPermission.objects.filter(email=user_identifier, tenant_id=tenant_id).select_related('document')
+                    permissions = DocumentPermission.objects.filter(email=user_identifier, tenant_id=tenant_id_str).select_related('document')
                 serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})
                 if not permissions.exists():
                     return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
-                logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_id}")
+                logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_id_str}")
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Error retrieving user document access for tenant {tenant_unique_id}: {str(e)}")
+            logger.error(f"Error retrieving user document access for tenant {tenant_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

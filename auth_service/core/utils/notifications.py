@@ -10,17 +10,24 @@ def send_notification_event(event_data):
     Send an event to the notification service via HTTP POST.
     """
     # Combine NOTIFICATIONS_SERVICE_URL with /tenants endpoint
-    notification_url = urljoin(settings.NOTIFICATIONS_SERVICE_URL, 'tenants/')
+    notification_url = urljoin(settings.NOTIFICATIONS_APP_URL, 'tenants/')
+    logger.debug(f"Preparing to send notification event to {notification_url}")
+    logger.debug(f"Event data: {event_data}")
     try:
         response = requests.post(
             notification_url,
             json=event_data,
             timeout=10  # Timeout after 10 seconds
         )
+        logger.debug(f"Notification service response status: {response.status_code}")
+        logger.debug(f"Notification service response body: {response.text}")
         response.raise_for_status()  # Raise an exception for 4xx/5xx status codes
         logger.info(f"Notification sent successfully to {notification_url}: {event_data}")
         return response.json()
     except requests.exceptions.RequestException as e:
         logger.error(f"Failed to send notification to {notification_url}: {str(e)}")
+        if hasattr(e, 'response') and e.response is not None:
+            logger.error(f"Error response status: {e.response.status_code}")
+            logger.error(f"Error response body: {e.response.text}")
         # Optionally raise or handle (e.g., queue for retry)
         return None

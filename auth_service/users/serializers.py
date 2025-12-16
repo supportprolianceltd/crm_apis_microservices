@@ -2579,7 +2579,16 @@ class DocumentSerializer(serializers.ModelSerializer):
         permission_action = validated_data.pop("permission_action", "add")
         file = validated_data.pop("file", None)
         current_user = get_user_data_from_jwt(self.context["request"])
-        tenant_unique_id = get_tenant_id_from_jwt(self.context["request"])
+        auth_header = self.context["request"].headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            raise serializers.ValidationError("No valid Bearer token provided.")
+        token = auth_header.split(" ")[1]
+        try:
+            payload = jwt.decode(token, options={"verify_signature": False})
+            tenant_unique_id = payload.get("tenant_unique_id")
+        except Exception as e:
+            logger.error(f"Invalid JWT token: {str(e)}")
+            raise serializers.ValidationError("Invalid JWT token.")
         tenant = Tenant.objects.get(unique_id=tenant_unique_id)
         validated_data["tenant_id"] = str(tenant.id)
         validated_data["uploaded_by_id"] = str(current_user["id"])
@@ -2908,11 +2917,10 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 class UserDocumentAccessSerializer(serializers.ModelSerializer):
     document = DocumentSerializer(read_only=True)
-    permission = DocumentPermissionSerializer(read_only=True)
 
     class Meta:
         model = DocumentPermission
-        fields = ['document', 'permission']
+        fields = ['document', 'user_id', 'email', 'first_name', 'last_name', 'role', 'permission_level', 'created_at']
 
 
 class GroupSerializer(serializers.ModelSerializer):
