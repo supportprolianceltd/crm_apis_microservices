@@ -4252,16 +4252,16 @@ class UserDocumentAccessView(APIView):
         try:
             with tenant_context(tenant):
                 if request.query_params.get('user_id'):
-                    permissions = DocumentPermission.objects.filter(user_id=user_identifier, tenant_id=tenant_id_str).select_related('document')
+                    permissions = DocumentPermission.objects.filter(user_id=user_identifier).select_related('document')
                 else:
-                    permissions = DocumentPermission.objects.filter(email=user_identifier, tenant_id=tenant_id_str).select_related('document')
+                    permissions = DocumentPermission.objects.filter(email=user_identifier).select_related('document')
                 serializer = UserDocumentAccessSerializer(permissions, many=True, context={"request": request})
                 if not permissions.exists():
                     return Response({"detail": "No access found for the specified user."}, status=status.HTTP_404_NOT_FOUND)
                 logger.info(f"Retrieved {len(permissions)} documents for user {user_identifier} in tenant {tenant_id_str}")
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Error retrieving user document access for tenant {tenant_id}: {str(e)}")
+            logger.error(f"Error retrieving user document access for tenant : {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

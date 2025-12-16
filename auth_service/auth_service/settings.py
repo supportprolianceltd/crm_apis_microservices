@@ -445,7 +445,6 @@ SUPABASE_KEY = env("SUPABASE_KEY", default="")
 SUPABASE_BUCKET = env("SUPABASE_BUCKET", default="")
 STORAGE_TYPE = env("STORAGE_TYPE", default="supabase")
 CACHE_ENABLED = False  # In settings.py or .env
-# Add to settings.py
 CELERY_BEAT_SCHEDULE = {
     'accrue-monthly-roi': {
         'task': 'investments.tasks.accrue_monthly_roi',
@@ -460,6 +459,9 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=2, minute=0),  # Run daily at 2 AM
     },
 }
+
+# Celery 6.0+ compatibility: retry broker connection on startup
+broker_connection_retry_on_startup = True
 
 # #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 # # ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158

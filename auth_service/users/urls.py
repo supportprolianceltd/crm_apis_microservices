@@ -97,7 +97,7 @@ urlpatterns = [
     path('documents/<int:document_id>/versions/', DocumentVersionListView.as_view(), name='document-versions'),
     path('documents/<int:document_id>/acknowledge/', DocumentAcknowledgeView.as_view(), name='document-acknowledge'),  # New
     path('documents/<int:document_id>/acknowledgments/', DocumentAcknowledgmentsListView.as_view(), name='document-acknowledgments'),  # New
-    path('documents/user-access/', UserDocumentAccessView.as_view(), name='user-document-access'),  # New
+    path('documents/user-access', UserDocumentAccessView.as_view(), name='user-document-access'),  # New
 
 
 

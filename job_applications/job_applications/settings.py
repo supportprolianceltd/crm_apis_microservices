@@ -283,6 +283,9 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
+# Celery 6.0+ compatibility: retry broker connection on startup
+broker_connection_retry_on_startup = True
+
 # CELERY_BEAT_SCHEDULE = {
 #     'auto-screen-all-applications-at-midnight': {
 #         'task': 'job_application.tasks.auto_screen_all_applications',

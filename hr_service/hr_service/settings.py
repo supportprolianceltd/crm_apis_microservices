@@ -112,6 +112,9 @@ KAFKA_TOPICS = {
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://hr_redis:6379/0")
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
+# Celery 6.0+ compatibility: retry broker connection on startup
+broker_connection_retry_on_startup = True
+
 # ======================== CORS ========================
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=['http://localhost:3000'])
 CORS_ALLOW_CREDENTIALS = True
