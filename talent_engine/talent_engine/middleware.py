@@ -9,8 +9,12 @@ from django.http import JsonResponse
 from django.db import connection
 import logging
 from django.db import close_old_connections, connection
+from threading import local
 
 logger = logging.getLogger('talent_engine')
+
+# Thread-local storage for caching service token
+_thread_locals = local()
 
 from django.contrib.auth.models import AnonymousUser
 
@@ -109,7 +113,6 @@ class MicroserviceRS256JWTMiddleware(MiddlewareMixin):
 
             resp = requests.get(
                 f"{settings.AUTH_SERVICE_URL}/api/public-key/{kid}/?tenant_id={tenant_id}",
-                headers={'Authorization': auth},  # Pass the same token
                 timeout=5
             )
             logger.info(f"Public key response: {resp.status_code} {resp.text}")

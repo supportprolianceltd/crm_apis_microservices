@@ -4,12 +4,12 @@ import requests
 AUTH_SERVICE_URL = "http://localhost:8000/api/tenant/"
 TOKEN_URL = "http://localhost:8000/api/token/"
 USERNAME = "support@prolianceltd.com"  # Replace with your service account username
-PASSWORD = "qwerty"    # Replace with your service account password
+PASSWORD = "Qwertyqwerty"    # Replace with your service account password
 
 
 def get_jwt_token():
     """Obtain JWT access token from auth service."""
-    response = requests.post(TOKEN_URL, json={"username": USERNAME, "password": PASSWORD})
+    response = requests.post(TOKEN_URL, json={"email": USERNAME, "password": PASSWORD})
     response.raise_for_status()
     return response.json()["access"]
 
