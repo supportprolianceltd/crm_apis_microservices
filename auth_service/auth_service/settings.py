@@ -394,31 +394,51 @@ SPECTACULAR_SETTINGS = {
 # ============================================================================
 # CACHING CONFIGURATION
 # ============================================================================
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": env("REDIS_URL", default="redis://redis:6379/0"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "CONNECTION_POOL_KWARGS": {"max_connections": 20},
-            "SOCKET_CONNECT_TIMEOUT": 5,
-            "SOCKET_TIMEOUT": 5,
-            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
-            "SOCKET_KEEPALIVE": True,
-            "SOCKET_KEEPALIVE_OPTIONS": {
-                "tcp_keepalive": True,
-                "tcp_keepalive_idle": 60,
-                "tcp_keepalive_intvl": 10,
-                "tcp_keepalive_probes": 3,
-            },
-        },
-        "KEY_PREFIX": "authservice:v1:",
-        "DEFAULT_TIMEOUT": 300,
-    }
-}
-
+ 
+# Use Redis when available and enabled via env; otherwise fall back to DummyCache.
+# This avoids silent failures when REDIS_URL is not provided or CACHE_ENABLED=false.
 CACHE_ENABLED = env.bool("CACHE_ENABLED", default=True)
+REDIS_URL = env("REDIS_URL", default=None)
+
+local_logger = logging.getLogger(__name__)
+
+if CACHE_ENABLED and REDIS_URL:
+    parsed_redis = urlparse(REDIS_URL)
+
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "CONNECTION_POOL_KWARGS": {"max_connections": 20},
+                "SOCKET_CONNECT_TIMEOUT": 5,
+                "SOCKET_TIMEOUT": 5,
+                "IGNORE_EXCEPTIONS": True,  # Never kill requests
+                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+                "SOCKET_KEEPALIVE": True,
+                "SOCKET_KEEPALIVE_OPTIONS": {
+                    "tcp_keepalive": True,
+                    "tcp_keepalive_idle": 60,
+                    "tcp_keepalive_intvl": 10,
+                    "tcp_keepalive_probes": 3,
+                },
+            },
+            "KEY_PREFIX": "authservice:v1:",
+            "DEFAULT_TIMEOUT": 300,
+        }
+    }
+
+    local_logger.info(
+        f"🧠 Redis cache ENABLED → {parsed_redis.hostname}:{parsed_redis.port}"
+    )
+
+else:
+    # Explicitly disable cache (no silent fallback)
+    CACHES = {
+        "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
+    }
+    local_logger.warning("⚠️ Redis cache DISABLED (CACHE_ENABLED=false or REDIS_URL missing)")
 
 # Kafka Configuration
 KAFKA_BOOTSTRAP_SERVERS = env.list("KAFKA_BOOTSTRAP_SERVERS", default=["kafka:9092"])
