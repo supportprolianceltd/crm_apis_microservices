@@ -6,14 +6,14 @@
 
 
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='appBrew')
+tenant = Tenant.objects.get(schema_name='rodrimine')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='support@appBrew.com',
+        email='gideon4937@gmail.com',
         password='qwerty',
-        role='admin',
-        first_name='Tonna',
-        last_name='Ezugwu',
+        role='root-admin',
+        first_name='Gideon',
+        last_name='Isreal',
         job_role='Project Manager',
         tenant=tenant
     )

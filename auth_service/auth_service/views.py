@@ -586,7 +586,7 @@ class CustomTokenSerializer(serializers.Serializer):
                     logger.warning(f"[❌ OTP Email Notification Error] Failed to send OTP email: {str(e)}")
                    
                 try:
-                    publish_event("auth-events", event_payload)
+                   # publish_event("auth-events", event_payload)
                     logger.info(f"✅ OTP email event sent to Kafka")
                 except Exception as e:
                     logger.warning(f"[❌ OTP Email Event Error] Failed to send OTP event: {str(e)}")
