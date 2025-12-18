@@ -1547,11 +1547,12 @@ class VerifyOTPView(APIView):
                         'tenant_secondary_color': user.tenant.secondary_color,
                     }
                 }
-                success = publish_event('auth-events', login_event)
-                if success:
-                    logger.info(f"✅ Published user.login.succeeded event to Kafka for user {user.email}")
-                else:
-                    logger.warning(f"⚠️ Failed to publish user.login.succeeded event to Kafka for user {user.email}")
+                #success = publish_event('auth-events', login_event)
+                # if success:
+                #     logger.info(f"✅ Published user.login.succeeded event to Kafka for user {user.email}")
+                # else:
+                #     logger.warning(f"⚠️ Failed to publish user.login.succeeded event to Kafka for user {user.email}")
+            
             except Exception as e:
                 logger.error(f"❌ Error publishing login event to Kafka: {str(e)}")
                 # Don't fail login if Kafka fails - continue with response
