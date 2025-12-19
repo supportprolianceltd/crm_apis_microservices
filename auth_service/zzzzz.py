@@ -155,15 +155,15 @@ if not Tenant.objects.filter(schema_name='rodrimine').exists():
 from core.models import Tenant
 from users.models import CustomUser
 from django_tenants.utils import tenant_context
-tenant = Tenant.objects.get(schema_name='netwiver')
+tenant = Tenant.objects.get(schema_name='proliance')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='support@netwiver.com',
-        password='qwerty',
+        email='support@prolianceltd.com',
+        password='magnn$$22Quts',
         role='root-admin',
-        first_name='Ikenga',
-        last_name='Odili',
-        job_role='Admin Desk',
+        first_name='Support',
+        last_name='Team',
+        job_role='admin',
         tenant=tenant
     )
 
