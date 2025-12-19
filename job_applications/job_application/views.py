@@ -2118,7 +2118,8 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         close_old_connections()
         
         jwt_payload = getattr(request, 'jwt_payload', {})
-        dashboardLink = request.data.get('dashboardLink')  # <-- Get from data, not request attribute
+        dashboardLink = request.data.get('dashboardLink') 
+        job_requisition_title = request.data.get('job_requisition_title')  
         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
 
         if not tenant_id:
@@ -2126,6 +2127,10 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             return Response({"error": "Tenant schema or ID missing from token"}, status=status.HTTP_401_UNAUTHORIZED)
 
         data = request.data.copy()
+        # print("data")
+        # print(data)
+        # logger.info(data)
+        # print("data")
         serializer = self.get_serializer(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         schedule = serializer.save()  # Calls create method in serializer
