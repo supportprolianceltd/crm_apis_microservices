@@ -104,12 +104,16 @@ def validate_rsa_jwt(token: str):
     except InvalidTokenError:
         raise
 
-def decode_rsa_jwt(token):
+def decode_rsa_jwt(token, tenant=None):
     unverified_header = jwt.get_unverified_header(token)
     kid = unverified_header.get("kid")
     if not kid:
         raise Exception("No kid in JWT header")
-    keypair = RSAKeyPair.objects.filter(kid=kid, active=True).first()
+    # If tenant is provided, filter by tenant to ensure correct key
+    if tenant:
+        keypair = RSAKeyPair.objects.filter(kid=kid, tenant=tenant, active=True).first()
+    else:
+        keypair = RSAKeyPair.objects.filter(kid=kid, active=True).first()
     if not keypair:
         raise Exception("No matching RSA keypair found")
     public_key = keypair.public_key_pem
@@ -117,8 +121,8 @@ def decode_rsa_jwt(token):
     return payload
 
 
-def blacklist_refresh_token(refresh_token):
-    payload = decode_rsa_jwt(refresh_token)
+def blacklist_refresh_token(refresh_token, tenant=None):
+    payload = decode_rsa_jwt(refresh_token, tenant)
     jti = payload.get("jti")
     exp = datetime.fromtimestamp(payload["exp"])
     BlacklistedToken.objects.create(jti=jti, expires_at=exp)

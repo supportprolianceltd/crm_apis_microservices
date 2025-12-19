@@ -1118,7 +1118,7 @@ class CustomTokenRefreshView(APIView):
             with tenant_context(tenant):
                 logger.info(f"Current schema: {connection.schema_name}")
                 # Validate and decode refresh token
-                payload = decode_rsa_jwt(refresh_token)
+                payload = decode_rsa_jwt(refresh_token, tenant)
                 if payload.get("type") != "refresh":
                     UserActivity.objects.create(
                         user=None,
@@ -1269,7 +1269,7 @@ class SilentTokenRenewView(APIView):
             tenant = Tenant.objects.get(id=tenant_id)
             with tenant_context(tenant):
                 # Validate refresh token (reuse decode_rsa_jwt)
-                payload = decode_rsa_jwt(refresh_token)
+                payload = decode_rsa_jwt(refresh_token, tenant)
                 if payload.get("type") != "refresh":
                     logger.debug("Silent renew: Invalid refresh token type")
                     return Response(status=status.HTTP_204_NO_CONTENT)
@@ -1607,7 +1607,7 @@ class LogoutView(APIView):
             tenant = Tenant.objects.get(id=tenant_id)
             with tenant_context(tenant):
                 # Validate and decode refresh token
-                payload = decode_rsa_jwt(refresh_token)
+                payload = decode_rsa_jwt(refresh_token, tenant)
                 if payload.get("type") != "refresh":
                     UserActivity.objects.create(
                         user=None,
