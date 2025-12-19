@@ -395,4 +395,21 @@ complete_lms/
 auth_service/reviews/
 auth_service/investments/
 test_api/
-project_manager/
+project_manager/# Log files and directories
+*.log
+logs/
+**/logs/
+*.log.*
+
+# Docker volumes and temp
+.docker/
+temp/
+tmp/
+
+# Environment files (keep secrets out)
+.env.local
+.env.production
+
+# OS/files
+.DS_Store
+Thumbs.db

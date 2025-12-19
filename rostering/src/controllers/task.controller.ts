@@ -458,7 +458,7 @@ export class TaskController {
 
         if (!matched) {
           // Per policy: tasks don't create visits. Fail fast and ask caller to ensure visits exist on care plan
-          return res.status(400).json({ error: 'No matching visit found for the provided task times; create visits via care plan schedules or admin.' });
+          return res.status(400).json({ error: 'No matching visit found for the provided task times; please select a time from the visit window.' });
         }
 
         const updated = await (this.prisma as any).task.update({
@@ -1254,12 +1254,45 @@ export class TaskController {
         return res.status(403).json({ error: "Access denied to this task" });
       }
 
+      // Load full task including related visit and its assignees so we can enforce
+      // that only carers assigned to the visit may change the task status.
+      const fullTask = await (this.prisma as any).task.findUnique({
+        where: { id: taskId },
+        include: { carerVisit: { include: { assignees: true } } },
+      });
+
       const updateData: any = {};
 
       if (payload.title !== undefined) updateData.title = payload.title;
       if (payload.description !== undefined)
         updateData.description = payload.description;
+
       if (payload.status !== undefined) {
+        // If the task is linked to a visit with assignees, only allow status
+        // changes by one of those assignees. If no visit attached, allow change.
+        if (fullTask && fullTask.carerVisitId) {
+          const assignees = Array.isArray(fullTask.carerVisit?.assignees)
+            ? fullTask.carerVisit.assignees.map((a: any) => String(a.carerId))
+            : [];
+
+          if (assignees.length > 0) {
+            const callerRaw = (req.user as any)?.id ?? (req.user as any)?.carerId ?? null;
+            const callerId = callerRaw !== undefined && callerRaw !== null ? String(callerRaw) : null;
+            if (!callerId || !assignees.includes(callerId)) {
+              return res.status(403).json({ error: 'Only assignees of the related visit may change task status' });
+            }
+          }
+        }
+
+        // If caller is attempting to start the task (mark IN_PROGRESS), ensure
+        // the related visit has already been clocked in.
+        if (payload.status === 'COMPLETED' && fullTask && fullTask.carerVisitId) {
+          const visitClockIn = fullTask.carerVisit?.clockInAt ?? null;
+          if (!visitClockIn) {
+            return res.status(400).json({ error: 'Cannot start task before the related visit has been clocked in' });
+          }
+        }
+
         updateData.status = payload.status;
         // Auto-set completedAt when status changes to COMPLETED
         if (
@@ -1276,6 +1309,7 @@ export class TaskController {
           updateData.completedAt = null;
         }
       }
+
       if (payload.riskFrequency !== undefined)
         updateData.riskFrequency = payload.riskFrequency;
       if (payload.startDate !== undefined)
@@ -1881,6 +1915,169 @@ export class TaskController {
     }
   }
 
+  // Replace a carer in an existing CarerVisit
+  // Body: { oldCarerId: string, newCarerId: string, propagate?: boolean }
+  public async replaceCarerInVisit(req: Request, res: Response) {
+    try {
+      const tenantId = req.user?.tenantId ?? (req.body && req.body.tenantId);
+      if (!tenantId)
+        return res
+          .status(403)
+          .json({ error: "tenantId missing from auth context" });
+
+      const visitId = req.params.visitId;
+      if (!visitId)
+        return res.status(400).json({ error: "visitId required in path" });
+
+      const { oldCarerId, newCarerId, propagate } = req.body || {};
+      if (!oldCarerId || typeof oldCarerId !== "string") {
+        return res
+          .status(400)
+          .json({ error: "oldCarerId is required in body and must be a string" });
+      }
+      if (!newCarerId || typeof newCarerId !== "string") {
+        return res
+          .status(400)
+          .json({ error: "newCarerId is required in body and must be a string" });
+      }
+      if (oldCarerId === newCarerId) {
+        return res.status(400).json({ error: "oldCarerId and newCarerId cannot be the same" });
+      }
+
+      // Default propagate to true unless explicitly false
+      const shouldPropagate = propagate === undefined ? true : !!propagate;
+
+      // Fetch the visit and verify ownership
+      const existingVisit = await this.prisma.carerVisit.findUnique({
+        where: { id: visitId },
+        select: { id: true, tenantId: true, carerId: true, startDate: true, endDate: true, careType: true, carePlanId: true },
+      });
+
+      if (!existingVisit) return res.status(404).json({ error: "Visit not found" });
+      if (existingVisit.tenantId !== tenantId.toString())
+        return res.status(403).json({ error: "Access denied to this visit" });
+
+      // Check if oldCarerId is assigned to this visit
+      const oldAssignee = await this.prisma.carerVisitAssignee.findFirst({
+        where: { carerVisitId: visitId, carerId: oldCarerId }
+      });
+      if (!oldAssignee) {
+        return res.status(400).json({ error: "oldCarerId is not assigned to this visit" });
+      }
+
+      // Check if newCarerId is already assigned
+      const newAssignee = await this.prisma.carerVisitAssignee.findFirst({
+        where: { carerVisitId: visitId, carerId: newCarerId }
+      });
+      if (newAssignee) {
+        return res.status(400).json({ error: "newCarerId is already assigned to this visit" });
+      }
+
+      // Check for time conflicts with existing visits for the new carer
+      if (existingVisit.startDate && existingVisit.endDate) {
+        const conflictingVisits = await this.prisma.carerVisit.findMany({
+          where: {
+            tenantId: tenantId.toString(),
+            carerId: newCarerId,
+            id: { not: visitId }, // Exclude the current visit
+            OR: [
+              // New visit starts during existing visit
+              {
+                startDate: { lte: existingVisit.startDate },
+                endDate: { gt: existingVisit.startDate }
+              },
+              // New visit ends during existing visit
+              {
+                startDate: { lt: existingVisit.endDate },
+                endDate: { gte: existingVisit.endDate }
+              },
+              // New visit completely encompasses existing visit
+              {
+                startDate: { gte: existingVisit.startDate },
+                endDate: { lte: existingVisit.endDate }
+              }
+            ]
+          },
+          select: { id: true, startDate: true, endDate: true }
+        });
+
+        if (conflictingVisits.length > 0) {
+          const conflictDetails = conflictingVisits.map(v => 
+            `Visit ${v.id}: ${v.startDate?.toISOString()} - ${v.endDate?.toISOString()}`
+          ).join('; ');
+          return res.status(409).json({ 
+            error: "New carer has conflicting visits scheduled", 
+            conflicts: conflictDetails 
+          });
+        }
+      }
+
+      // Transaction: replace the carer
+      try {
+        const result = await this.prisma.$transaction(async (prismaTx) => {
+          const visit = await prismaTx.carerVisit.findUnique({ where: { id: visitId } });
+          if (!visit) throw new Error('Visit not found in transaction');
+
+          // Determine effective careType
+          let effectiveCareType: string | null = null;
+          if (visit.careType) effectiveCareType = visit.careType;
+          else if (visit.carePlanId) {
+            try {
+              const cp = await prismaTx.carePlan.findUnique({ where: { id: visit.carePlanId }, include: { careRequirements: true } });
+              if (cp && cp.careRequirements && cp.careRequirements.careType) effectiveCareType = cp.careRequirements.careType;
+            } catch (e) {
+              // ignore
+            }
+          }
+
+          const cap = this.careTypeCapacity(effectiveCareType);
+
+          // Since we're replacing, capacity should be fine as long as newCarerId isn't already assigned
+
+          // Delete old assignee
+          await prismaTx.carerVisitAssignee.deleteMany({
+            where: { carerVisitId: visitId, carerId: oldCarerId }
+          });
+
+          // Create new assignee
+          await prismaTx.carerVisitAssignee.create({
+            data: { tenantId: tenantId.toString(), carerVisitId: visitId, carerId: newCarerId }
+          });
+
+          // Update denormalized carerId on visit if it was the oldCarerId
+          let updatedVisit: any = visit;
+          if (visit.carerId === oldCarerId) {
+            updatedVisit = await prismaTx.carerVisit.update({
+              where: { id: visitId },
+              data: { carerId: newCarerId, assignedAt: new Date() }
+            });
+          }
+
+          let tasksUpdated = 0;
+          if (shouldPropagate) {
+            const upd = await prismaTx.task.updateMany({
+              where: { carerVisitId: visitId, carerId: oldCarerId },
+              data: { carerId: newCarerId }
+            });
+            tasksUpdated = upd.count || 0;
+          }
+
+          return { updatedVisit, tasksUpdated };
+        });
+
+        return res.json(result);
+      } catch (err: any) {
+        console.error('replaceCarerInVisit transaction error', err);
+        return res.status(400).json({ error: err?.message || 'Failed to replace carer in visit' });
+      }
+    } catch (error: any) {
+      console.error("replaceCarerInVisit error", error);
+      return res
+        .status(500)
+        .json({ error: "Failed to replace carer in visit", details: error?.message });
+    }
+  }
+
   // Clock in to a visit: set status to STARTED and record clockInAt timestamp
   public async clockInVisit(req: Request, res: Response) {
     try {
@@ -1899,7 +2096,29 @@ export class TaskController {
       const callerRole = userObj.role as string | undefined;
       const callerUserId = userObj.id ? String(userObj.id) : null;
       const assigneeIds = Array.isArray(existing.assignees) ? existing.assignees.map((a: any) => a.carerId) : [];
-      console.log('[clockInVisit] attempt', { userId: callerUserId, role: callerRole, visitId, assigneesCount: assigneeIds.length });
+
+      // Only allow callers who are assigned to this visit to clock in.
+      if (!callerUserId || assigneeIds.length === 0 || !assigneeIds.includes(callerUserId)) {
+        return res.status(403).json({ error: 'Only assignees of this visit may clock in' });
+      }
+
+      // Prevent clock-in before the visit's calendar day.
+      // Users may clock in anytime on the same day of the visit (including before the scheduled time),
+      // but not on earlier calendar days.
+      try {
+        const now = new Date();
+        const scheduledStart = existing.startDate ? new Date(existing.startDate) : null;
+        if (scheduledStart) {
+          const visitDayStart = new Date(scheduledStart);
+          visitDayStart.setHours(0, 0, 0, 0);
+          if (now.getTime() < visitDayStart.getTime()) {
+            return res.status(400).json({ error: 'Cannot clock in before the day of the visit' });
+          }
+        }
+      } catch (e) {
+        // If anything goes wrong with the check, log and continue to avoid blocking legitimate clock-ins.
+        console.warn('visit day check failed', e);
+      }
 
       const updated = await (this.prisma as any).carerVisit.update({
         where: { id: visitId },

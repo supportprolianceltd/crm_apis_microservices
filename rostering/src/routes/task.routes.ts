@@ -15,6 +15,8 @@ export function createTaskRoutes(controller: TaskController) {
   router.post('/visits/:visitId/assign', (req, res) => controller.assignCarerToVisit(req, res));
   // Batch assign multiple carers to a visit
   router.post('/visits/:visitId/assign-batch', (req, res) => controller.assignCarersToVisit(req, res));
+  // Replace a carer in a visit
+  router.post('/visits/:visitId/replace-carer', (req, res) => controller.replaceCarerInVisit(req, res));
 
   // Get visit logs (client_visit_logs)
   router.get('/visits/:visitId/logs', (req, res) => controller.getVisitLogs(req, res));

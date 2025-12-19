@@ -10,11 +10,20 @@ declare global {
     interface Request {
       user?: {
         id: string;
+        username?: string;
         email: string;
         tenantId: string;
         permissions?: string[];
         firstName?: string;
         lastName?: string;
+        role?: string;
+        jobRole?: string | null;
+        tenant?: string | null;
+        branch?: string | null;
+        status?: string | null;
+        profile?: any;
+        isLocked?: boolean;
+        raw?: any; // raw decoded token (for debugging)
       };
     }
   }
@@ -268,14 +277,37 @@ class AuthMiddleware {
       // Extract display name from available fields
       const displayName = this.getDisplayName(decoded);
 
-      // Attach user info to request including first and last name
+      // Attach comprehensive user info to request. Prefer nested `decoded.user` fields
+      // when present (auth service embeds full user object), otherwise fall back
+      // to top-level claims. Normalize ID and tenant to strings.
+      const decodedAny = decoded as any;
+      const nestedUser = decodedAny.user || {};
+
+      const rawUserId = decodedAny.user_id ?? decodedAny.userId ?? nestedUser.id ?? decoded.sub ?? decoded.email;
+      const normalizedUserId = rawUserId !== undefined && rawUserId !== null ? String(rawUserId) : '';
+
+      const tenantIdRaw = decodedAny.tenant_id ?? nestedUser.tenant ?? decodedAny.tenant ?? '';
+      const normalizedTenantId = tenantIdRaw !== undefined && tenantIdRaw !== null ? String(tenantIdRaw) : '';
+
+      const firstName = decodedAny.first_name ?? nestedUser.first_name ?? nestedUser.firstName ?? displayName.firstName ?? '';
+      const lastName = decodedAny.last_name ?? nestedUser.last_name ?? nestedUser.lastName ?? displayName.lastName ?? '';
+
       req.user = {
-        id: decoded.sub, // Use 'sub' as user ID
-        email: decoded.email,
-        tenantId: decoded.tenant_id,
-        permissions: decoded.permissions || [],
-        firstName: displayName.firstName,
-        lastName: displayName.lastName
+        id: normalizedUserId,
+        username: nestedUser.username ?? decodedAny.username ?? undefined,
+        email: decodedAny.email ?? nestedUser.email ?? '',
+        tenantId: normalizedTenantId,
+        permissions: decodedAny.permissions || nestedUser.permissions || [],
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        role: decodedAny.role ?? nestedUser.role ?? undefined,
+        jobRole: nestedUser.job_role ?? nestedUser.jobRole ?? undefined,
+        tenant: nestedUser.tenant ?? undefined,
+        branch: nestedUser.branch ?? undefined,
+        status: nestedUser.status ?? decodedAny.status ?? undefined,
+        profile: nestedUser.profile ?? undefined,
+        isLocked: nestedUser.is_locked ?? undefined,
+        raw: decodedAny,
       };
 
       logger.debug(`Authenticated user: ${decoded.email} (tenant: ${decoded.tenant_id})`, {
