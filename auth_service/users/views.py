@@ -734,6 +734,41 @@ class PasswordResetRequestView(generics.GenericAPIView):
                         "source": "auth-service",
                     },
                 }
+                
+                # Send notification to external service
+                event_payload = {
+                    "metadata": {
+                        "event_id": str(uuid.uuid4()),
+                        "event_type": "user.password.reset.requested",
+                        "event_version": "1.0",
+                        "created_at": timezone.now().isoformat(),
+                        "source": "auth-service",
+                        "tenant_id": str(tenant.unique_id),
+                    },
+                    "data": {
+                        "user_email": user.email,
+                        "user_name": f"{user.first_name} {user.last_name}",
+                        "reset_link": token,
+                        "ip_address": ip_address,
+                        "user_agent": user_agent,
+                        "user_id":     str(user.id),
+                        "expires_at": expires_at.isoformat(),
+                    },
+                }
+                
+                try:
+                    url = urllib.parse.urljoin(settings.NOTIFICATIONS_SERVICE_URL.rstrip('/') + '/', 'events/')
+
+                    response = requests.post(
+                        url,
+                        json=event_payload,
+                        timeout=5
+                    )
+                    response.raise_for_status()
+                    logger.info(LogMessages.NOTIFICATION_SENT_FOR_PASSWORD_RESET.format(user.email, response.status_code))
+                except requests.exceptions.RequestException as e:
+                    logger.error(LogMessages.FAILED_TO_SEND_PASSWORD_RESET_NOTIFICATION.format(user.email, str(e)))
+                    
 
                 success = publish_event("auth-events", event_payload)
                 if success:

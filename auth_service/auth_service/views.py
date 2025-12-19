@@ -520,11 +520,45 @@ class CustomTokenSerializer(serializers.Serializer):
 
                 # Send OTP via email (using Kafka events)
                 from auth_service.utils.kafka_producer import publish_event
+                # event_payload = {
+                #     "event_type": "auth.2fa.code.requested",
+                #     "tenant_id": str(user.tenant.unique_id),
+                #     "timestamp": timezone.now().isoformat() + "Z",
+                #     "payload": {
+                #         "user_email": user.email,
+                #         "user_first_name": getattr(user, 'first_name', ''),
+                #         "user_last_name": getattr(user, 'last_name', ''),
+                #         "2fa_code": otp_code,
+                #         "2fa_method": "email",
+                #         "ip_address": ip_address,
+                #         "user_agent": user_agent,
+                #         "login_method": "username" if "username" in attrs else "email",
+                #         "remember_me": remember_me,
+                #         "expires_in_seconds": 300,
+                #         "login_domain": login_domain,
+                #         "tenant_name": user.tenant.name,
+                #         "tenant_logo": user.tenant.logo,
+                #         "tenant_primary_color": user.tenant.primary_color,
+                #         "tenant_secondary_color": user.tenant.secondary_color,
+                #     },
+                #     "metadata": {
+                #         "event_id": f"evt-{uuid.uuid4()}",
+                #         "created_at": timezone.now().isoformat() + "Z",
+                #         "source": "auth-service",
+                #         "tenant_id": str(user.tenant.unique_id),
+                #     },
+                # }
+                
+                
                 event_payload = {
-                    "event_type": "auth.2fa.code.requested",
-                    "tenant_id": str(user.tenant.unique_id),
-                    "timestamp": timezone.now().isoformat() + "Z",
-                    "payload": {
+                    "metadata": {
+                        "event_id": f"evt-{uuid.uuid4()}",
+                        "event_type": "auth.2fa.code.requested",
+                        "created_at": timezone.now().isoformat() + "Z",
+                        "source": "auth-service",
+                        "tenant_id": str(user.tenant.unique_id),
+                    },
+                    "data": {
                         "user_email": user.email,
                         "user_first_name": getattr(user, 'first_name', ''),
                         "user_last_name": getattr(user, 'last_name', ''),
@@ -540,15 +574,19 @@ class CustomTokenSerializer(serializers.Serializer):
                         "tenant_logo": user.tenant.logo,
                         "tenant_primary_color": user.tenant.primary_color,
                         "tenant_secondary_color": user.tenant.secondary_color,
-                    },
-                    "metadata": {
-                        "event_id": f"evt-{uuid.uuid4()}",
-                        "created_at": timezone.now().isoformat() + "Z",
-                        "source": "auth-service",
-                    },
+                    }
                 }
+                                
                 try:
-                    publish_event("auth-events", event_payload)
+                    notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
+                    response = requests.post(notifications_url, json=event_payload, timeout=5)
+                    response.raise_for_status()
+                    logger.info(f"✅ OTP email notification sent. Status: {response.status_code}")
+                except Exception as e:
+                    logger.warning(f"[❌ OTP Email Notification Error] Failed to send OTP email: {str(e)}")
+                   
+                try:
+                   # publish_event("auth-events", event_payload)
                     logger.info(f"✅ OTP email event sent to Kafka")
                 except Exception as e:
                     logger.warning(f"[❌ OTP Email Event Error] Failed to send OTP event: {str(e)}")
@@ -1494,6 +1532,9 @@ class VerifyOTPView(APIView):
                     'payload': {
                         'user_id': str(user.id),
                         'email': user.email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'email': user.email,
                         'username': user.username,
                         'login_time': timezone.now().isoformat(),
                         'ip_address': ip_address,
@@ -1506,11 +1547,12 @@ class VerifyOTPView(APIView):
                         'tenant_secondary_color': user.tenant.secondary_color,
                     }
                 }
-                success = publish_event('auth-events', login_event)
-                if success:
-                    logger.info(f"✅ Published user.login.succeeded event to Kafka for user {user.email}")
-                else:
-                    logger.warning(f"⚠️ Failed to publish user.login.succeeded event to Kafka for user {user.email}")
+                #success = publish_event('auth-events', login_event)
+                # if success:
+                #     logger.info(f"✅ Published user.login.succeeded event to Kafka for user {user.email}")
+                # else:
+                #     logger.warning(f"⚠️ Failed to publish user.login.succeeded event to Kafka for user {user.email}")
+            
             except Exception as e:
                 logger.error(f"❌ Error publishing login event to Kafka: {str(e)}")
                 # Don't fail login if Kafka fails - continue with response

@@ -13,6 +13,9 @@ import uuid
 import zipfile
 from urllib import request
 
+from rest_framework.pagination import PageNumberPagination
+from django.conf import settings
+from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
 # job_applications/views.py
 from django.db import connection
@@ -102,7 +105,6 @@ from .tasks import process_large_resume_batch, _append_status_history, send_noti
 
 logger = logging.getLogger(__name__)
 
-# Logger
 logger = logging.getLogger('job_applications')
 
 
@@ -140,12 +142,9 @@ def get_tenant_by_id(tenant_id, request):
         return resp.json()
     return None
 
-
 def chunk_list(lst, chunk_size):
     for i in range(0, len(lst), chunk_size):
         yield lst[i:i + chunk_size]
-
-
 
 
 class GlobalApplicationsByRequisitionView(APIView):
@@ -192,14 +191,6 @@ class HealthCheckView(View):
         }
         return JsonResponse(health_data)
 
-
-# class CustomPagination(PageNumberPagination):
-#     page_size = 20
-
-
-from rest_framework.pagination import PageNumberPagination
-from django.conf import settings
-from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
 class CustomPagination(PageNumberPagination):
     page_size = 50  # Adjust as needed
@@ -251,7 +242,6 @@ class CustomPagination(PageNumberPagination):
             response['next'] = self.get_next_link()
             response['previous'] = self.get_previous_link()
         return response
-
 
 
 class CircuitBreaker:
@@ -310,8 +300,6 @@ class CircuitBreaker:
         return (time.time() - self.last_failure_time) > self.recovery_timeout
 
 
-
-
 class ResumeParseView(APIView):
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [AllowAny]
@@ -368,9 +356,6 @@ class ResumeParseView(APIView):
         except Exception as e:
             logger.exception(f"Error parsing resume: {str(e)} | Request data: {request.data}, FILES: {request.FILES}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
 
 
 class ResumeScreeningView(APIView):
@@ -1227,7 +1212,6 @@ class ScreeningTaskStatusView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class JobApplicationCreatePublicView(generics.CreateAPIView):
     serializer_class = PublicJobApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -1412,7 +1396,6 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-
 class JobApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = JobApplicationSerializer
     pagination_class = CustomPagination
@@ -1447,24 +1430,7 @@ class JobApplicationListCreateView(generics.ListCreateAPIView):
         return queryset.order_by('-created_at')
 
 
-    # def get_queryset(self):
-    #     request = self.request
-    #     tenant_id = request.jwt_payload.get('tenant_unique_id')
 
-    #     if not tenant_id:
-    #         logger.warning("Tenant unique ID not found in token")
-    #         return JobApplication.objects.none()
-
-    #     branch_id = request.query_params.get('branch_id')
-    #     queryset = JobApplication.active_objects.filter(tenant_id=tenant_id)
-
-    #     if branch_id:
-    #         queryset = queryset.filter(branch_id=branch_id)
-
-    #     if hasattr(request.user, 'branch') and request.user.branch and not branch_id:
-    #         queryset = queryset.filter(branch=request.user.branch)
-
-    #     return queryset.order_by('-created_at')
 
     def check_permissions(self, request):
         logger.info(f"Permission check for {request.user} - authenticated: {getattr(request.user, 'is_authenticated', None)}")
@@ -1476,21 +1442,7 @@ class JobApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     lookup_field = 'id'
 
-    # def get_queryset(self):
-    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
-    #     tenant_id = jwt_payload.get('tenant_unique_id')
-    #     role = jwt_payload.get('role')
-    #     branch = jwt_payload.get('user', {}).get('branch')
-    #     queryset = JobApplication.active_objects.all()
-    #     if not tenant_id:
-    #         logger.error("No tenant_id in token")
-    #         return JobApplication.active_objects.none()
-    #     queryset = queryset.filter(tenant_id=tenant_id)
-    #     if role == 'recruiter' and branch:
-    #         queryset = queryset.filter(branch=branch)
-    #     elif branch:
-    #         queryset = queryset.filter(branch=branch)
-    #     return queryset.order_by('-created_at')
+
 
     def get_queryset(self):
         # Close any stale connections first
@@ -1547,46 +1499,19 @@ class JobApplicationBulkDeleteView(APIView):
     # permission_classes = [IsAuthenticated]
     serializer_class = SimpleMessageSerializer
 
-    # def post(self, request):
-    #     ids = request.data.get('ids', [])
-    #     if not ids:
-    #         return Response({"detail": "No IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
-    #     try:
-    #         jwt_payload = getattr(request, 'jwt_payload', {})
-    #         tenant_id = jwt_payload.get('tenant_id')
-    #         role = jwt_payload.get('role')
-    #         branch = jwt_payload.get('branch')
-    #         if not tenant_id:
-    #             return Response({"detail": "No tenant_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
-    #         queryset = JobApplication.active_objects.filter(tenant_id=tenant_id, id__in=ids)
-    #         if role == 'recruiter' and branch:
-    #             queryset = queryset.filter(branch=branch)
-    #         applications = list(queryset)
-    #         count = len(applications)
-    #         if count == 0:
-    #             return Response({"detail": "No applications found."}, status=status.HTTP_404_NOT_FOUND)
-    #         with transaction.atomic():
-    #             for application in applications:
-    #                 application.soft_delete()
-    #         return Response({"detail": f"Soft-deleted {count} application(s)."}, status=status.HTTP_200_OK)
-    #     except Exception as e:
-    #         logger.error(f"Bulk soft delete failed: {str(e)}")
-    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
     def post(self, request):
         # Close any stale connections first
         from django.db import close_old_connections
         close_old_connections()
-        
+
         ids = request.data.get('ids', [])
         if not ids:
             return Response({"detail": "No IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             jwt_payload = getattr(request, 'jwt_payload', {})
-            tenant_id = jwt_payload.get('tenant_id')
+            tenant_id = jwt_payload.get('tenant_unique_id')
             role = jwt_payload.get('role')
-            branch = jwt_payload.get('branch')
+            branch = jwt_payload.get('user', {}).get('branch')
             if not tenant_id:
                 return Response({"detail": "No tenant_id in token."}, status=status.HTTP_401_UNAUTHORIZED)
             queryset = JobApplication.active_objects.filter(tenant_id=tenant_id, id__in=ids)
@@ -1765,7 +1690,6 @@ class JobApplicationWithSchedulesView(APIView):
     #     return Response(response_data, status=status.HTTP_200_OK)
 
 
-
 class JobApplicationsByRequisitionView(generics.ListAPIView):
     serializer_class = JobApplicationSerializer
     pagination_class = CustomPagination
@@ -1809,108 +1733,6 @@ class JobApplicationsByRequisitionView(generics.ListAPIView):
             return JobApplication.active_objects.none()
 
 
-
-# class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
-#     serializer_class = SimpleMessageSerializer
-   
-
-#     def get(self, request):
-#         # Close any stale connections first
-#         from django.db import close_old_connections
-#         close_old_connections()
-        
-#         jwt_payload = getattr(request, 'jwt_payload', {})
-#         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
-#         #tenant_id = str(jwt_payload.get('tenant_id')) if jwt_payload.get('tenant_id') is not None else None
-#         role = jwt_payload.get('role')
-#         branch = jwt_payload.get('user', {}).get('branch')
-
-#         if not tenant_id:
-#             return Response({"detail": "tenant_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # ---------- Fetch paginated results ----------
-#         all_job_requisitions = []
-#         next_url = f"{settings.TALENT_ENGINE_URL}/api/talent-engine/requisitions/"
-#         headers = {'Authorization': request.META.get("HTTP_AUTHORIZATION", "")}
-#         params = {'tenant_id': tenant_id, 'publish_status': True}
-
-#         while next_url:
-#             try:
-#                 resp = requests.get(next_url, headers=headers, params=params if next_url.endswith('/requisitions/') else {})
-#                 data = resp.json()
-#             except requests.RequestException as e:
-#                 print(f"Request failed: {e}")
-#                 return Response({"detail": "Error fetching job requisitions."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-#             except ValueError:
-#                 print("Invalid JSON response from requisition service.")
-#                 return Response({"detail": "Invalid response format."}, status=500)
-
-#             if resp.status_code != 200:
-#                 print(f"Failed to fetch job requisitions: {resp.status_code} - {resp.text}")
-#                 return Response({"detail": "Failed to fetch job requisitions."}, status=resp.status_code)
-
-#             results = data.get('results', [])
-#             all_job_requisitions.extend(results)
-#             next_url = data.get('next')
-
-#         # ---------- Process requisitions ----------
-#         response_data = []
-
-#         for job_requisition in all_job_requisitions:
-#             if not isinstance(job_requisition, dict):
-#                 print(f"Invalid job requisition: {job_requisition}")
-#                 continue
-
-#             job_requisition_id = job_requisition.get('id')
-#             if not job_requisition_id:
-#                 print(f"Missing job requisition ID: {job_requisition}")
-#                 continue
-
-#             # Fetch shortlisted applications
-#             applications = JobApplication.active_objects.filter(
-#                 tenant_id=tenant_id,
-#                 job_requisition_id=job_requisition_id,
-#                 status='shortlisted'
-#             )
-#             if branch:
-#                 applications = applications.filter(branch=branch)
-
-#             application_serializer = JobApplicationSerializer(applications, many=True)
-
-#             # Add schedules to each application
-#             enhanced_applications = []
-#             for app_data in application_serializer.data:
-#                 application_id = app_data['id']
-#                 schedules = Schedule.active_objects.filter(
-#                     tenant_id=tenant_id,
-#                     job_application_id=application_id
-#                 )
-#                 if branch:
-#                     schedules = schedules.filter(branch=branch)
-
-#                 schedule_serializer = ScheduleSerializer(schedules, many=True)
-#                 app_data['scheduled'] = schedules.exists()
-#                 app_data['schedules'] = schedule_serializer.data
-#                 enhanced_applications.append(app_data)
-
-#             # Total applications
-#             total_applications = JobApplication.active_objects.filter(
-#                 tenant_id=tenant_id,
-#                 job_requisition_id=job_requisition_id
-#             )
-#             if branch:
-#                 total_applications = total_applications.filter(branch=branch)
-
-#             response_data.append({
-#                 'job_requisition': job_requisition,
-#                 'shortlisted_applications': enhanced_applications,
-#                 'shortlisted_count': applications.count(),
-#                 'total_applications': total_applications.count()
-#             })
-
-#         # Sort by created_at descending
-#         response_data.sort(key=lambda x: x['job_requisition'].get('created_at', ''), reverse=True)
-#         return Response(response_data, status=status.HTTP_200_OK)
 class PublishedJobRequisitionsWithShortlistedApplicationsView(APIView):
     serializer_class = SimpleMessageSerializer
    
@@ -2134,7 +1956,6 @@ class PublishedPublicJobRequisitionsWithShortlistedApplicationsView(APIView):
         return Response(response_data, status=status.HTTP_200_OK)
 
 
-
 class TimezoneChoicesView(APIView):
     serializer_class = SimpleMessageSerializer 
     # permission_classes = [IsAuthenticated]
@@ -2262,31 +2083,10 @@ class PermanentDeleteJobApplicationsView(APIView):
         return Response({"detail": f"Successfully permanently deleted {deleted_count} application(s)."}, status=status.HTTP_200_OK)
 
 
-
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
     pagination_class = CustomPagination
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-
-    # def get_queryset(self):
-    #     jwt_payload = getattr(self.request, 'jwt_payload', {})
-    #     tenant_id = jwt_payload.get('tenant_unique_id')
-    #     role = jwt_payload.get('role')
-    #     branch = jwt_payload.get('user', {}).get('branch')
-    #     queryset = Schedule.active_objects.all()
-    #     if not tenant_id:
-    #         logger.error("No tenant_id in token")
-    #         return Schedule.active_objects.none()
-    #     queryset = queryset.filter(tenant_id=tenant_id)
-    #     if role == 'recruiter' and branch:
-    #         queryset = queryset.filter(branch=branch)
-    #     elif branch:
-    #         queryset = queryset.filter(branch=branch)
-    #     status_param = self.request.query_params.get('status', None)
-    #     if status_param:
-    #         queryset = queryset.filter(status=status_param)
-    #     return queryset.order_by('-created_at')
-
 
     def get_queryset(self):
         # Close any stale connections first
@@ -2318,6 +2118,8 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         close_old_connections()
         
         jwt_payload = getattr(request, 'jwt_payload', {})
+        dashboardLink = request.data.get('dashboardLink') 
+        job_requisition_title = request.data.get('job_requisition_title')  
         tenant_id = self.request.jwt_payload.get('tenant_unique_id')
 
         if not tenant_id:
@@ -2325,6 +2127,10 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             return Response({"error": "Tenant schema or ID missing from token"}, status=status.HTTP_401_UNAUTHORIZED)
 
         data = request.data.copy()
+        # print("data")
+        # print(data)
+        # logger.info(data)
+        # print("data")
         serializer = self.get_serializer(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         schedule = serializer.save()  # Calls create method in serializer
@@ -2337,6 +2143,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             else:
                 notification_payload = {
                     "application_id": str(schedule.job_application_id),
+                    "dashboard_url": dashboardLink,
                     "full_name": job_app.full_name,
                     "email": job_app.email,
                     "job_requisition_id": str(job_app.job_requisition_id),
@@ -2361,51 +2168,6 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             logger.error(f"Failed to send schedule creation notification for schedule {schedule.id}: {str(e)}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    # def create(self, request, *args, **kwargs):
-    #     jwt_payload = getattr(request, 'jwt_payload', {})
-    #     tenant_id = self.request.jwt_payload.get('tenant_unique_id')
-
-    #     if not tenant_id:
-    #         logger.error("Tenant schema or ID missing from token")
-    #         return Response({"error": "Tenant schema or ID missing from token"}, status=status.HTTP_401_UNAUTHORIZED)
-
-    #     data = request.data.copy()
-    #     serializer = self.get_serializer(data=data, context={'request': request})
-    #     serializer.is_valid(raise_exception=True)
-    #     schedule = serializer.save()  # Calls create method in serializer
-
-    #     # Send notification after successful schedule creation
-    #     try:
-    #         job_app = JobApplication.objects.filter(id=schedule.job_application_id).first()
-    #         if not job_app:
-    #             logger.error(f"Job application {schedule.job_application_id} not found for schedule {schedule.id}")
-    #         else:
-    #             notification_payload = {
-    #                 "application_id": str(schedule.job_application_id),
-    #                 "full_name": job_app.full_name,
-    #                 "email": job_app.email,
-    #                 "job_requisition_id": str(job_app.job_requisition_id),
-    #                 "status": schedule.status,
-    #                 "interview_start_date_time": schedule.interview_start_date_time.isoformat(),
-    #                 "interview_end_date_time": schedule.interview_end_date_time.isoformat() if schedule.interview_end_date_time else None,
-    #                 "meeting_mode": schedule.meeting_mode,
-    #                 "meeting_link": schedule.meeting_link,
-    #                 "interview_address": schedule.interview_address,
-    #                 "message": schedule.message,
-    #                 "timezone": schedule.timezone,
-    #                 "schedule_id": str(schedule.id)
-    #             }
-    #             send_screening_notification(
-    #                 notification_payload,
-    #                 tenant_id=tenant_id,
-    #                 event_type="interview.scheduled"
-    #             )
-    #             logger.info(f"Schedule creation notification sent for schedule {schedule.id}, job application {schedule.job_application_id}")
-    #     except Exception as e:
-    #         logger.error(f"Failed to send schedule creation notification for schedule {schedule.id}: {str(e)}")
-
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -2518,7 +2280,6 @@ class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class ScheduleBulkDeleteView(APIView):
     serializer_class = SimpleMessageSerializer 
     # permission_classes = [IsAuthenticated]
@@ -2596,8 +2357,6 @@ class ScheduleBulkDeleteView(APIView):
         return Response({"detail": f"Successfully soft-deleted {schedules.count()} schedule(s)."}, status=status.HTTP_200_OK)
 
 
-
-
 class SoftDeletedSchedulesView(generics.ListAPIView):
     serializer_class = ScheduleSerializer
     # permission_classes = [IsAuthenticated]
@@ -2639,8 +2398,6 @@ class SoftDeletedSchedulesView(generics.ListAPIView):
         elif branch:
             queryset = queryset.filter(branch=branch)
         return queryset.order_by('-created_at')
-
-
 
 class RecoverSoftDeletedSchedulesView(APIView):
     serializer_class = SimpleMessageSerializer 
@@ -2854,7 +2611,6 @@ class ComplianceStatusUpdateView(APIView):
         }, status=status.HTTP_200_OK)
 
      
-
 class ApplicantComplianceUploadView(APIView):
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
