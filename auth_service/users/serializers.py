@@ -2303,15 +2303,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     permission_action = serializers.ChoiceField(choices=['add', 'remove', 'replace', 'update_level'], required=False, write_only=True)
     file = serializers.FileField(required=False, allow_null=True)
 
-    # def to_internal_value(self, data):
-    #     data = dict(data)
-    #     data.pop('id', None)
-    #     # Flatten single-value lists for multipart/form-data
-    #     for key, value in data.items():
-    #         if isinstance(value, list) and len(value) == 1:
-    #             data[key] = value[0]
-    #     ret = super().to_internal_value(data)
-    #     return ret
+
 
     def to_internal_value(self, data):
         # data is Immutable QueryDict in multipart → make it mutable

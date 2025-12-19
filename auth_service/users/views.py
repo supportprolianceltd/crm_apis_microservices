@@ -3701,18 +3701,18 @@ class ClientViewSet(viewsets.ModelViewSet):
         tenant = self.request.user.tenant
         user = self.request.user
         with tenant_context(tenant):
-            if user.is_superuser or user.role == "admin":
-                return CustomUser.objects.filter(tenant=tenant, role="client").prefetch_related("client_profile")
-            elif user.role == "team_manager":
-                return CustomUser.objects.filter(tenant=tenant, role="client").prefetch_related("client_profile")
-            elif user.role == "recruiter" and user.branch:
-                return CustomUser.objects.filter(tenant=tenant, role="client", branch=user.branch).prefetch_related(
-                    "client_profile"
-                )
-            else:
-                return CustomUser.objects.filter(tenant=tenant, id=user.id, role="client").prefetch_related(
-                    "client_profile"
-                )
+            #if user.is_superuser or user.role == "admin" or  user.role == "co-admin" or user.role == "root-admin":
+            return CustomUser.objects.filter(tenant=tenant, role="client").prefetch_related("client_profile")
+            # elif user.role == "team_manager":
+            #     return CustomUser.objects.filter(tenant=tenant, role="client").prefetch_related("client_profile")
+            # elif user.role == "recruiter" and user.branch:
+            #     return CustomUser.objects.filter(tenant=tenant, role="client", branch=user.branch).prefetch_related(
+            #         "client_profile"
+            #     )
+            # else:
+            #     return CustomUser.objects.filter(tenant=tenant, id=user.id, role="client").prefetch_related(
+            #         "client_profile"
+            #     )
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -3723,8 +3723,8 @@ class ClientViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         tenant = self.request.user.tenant
-        if not (self.request.user.is_superuser or self.request.user.role == "admin"):
-            raise PermissionDenied("Only admins or superusers can create clients.")
+        # if not (self.request.user.is_superuser or self.request.user.role == "admin"):
+        #     raise PermissionDenied("Only admins or superusers can create clients.")
         with tenant_context(tenant):
             serializer.save()
 
@@ -3733,8 +3733,8 @@ class ClientViewSet(viewsets.ModelViewSet):
         user = request.user
         with tenant_context(tenant):
             instance = self.get_object()
-            if not (user.is_superuser or user.role == "admin" or user.id == instance.id):
-                raise PermissionDenied("You do not have permission to update this client.")
+            # if not (user.is_superuser or user.role == "admin" or user.id == instance.id):
+            #     raise PermissionDenied("You do not have permission to update this client.")
             serializer = self.get_serializer(instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
@@ -3760,11 +3760,11 @@ class ClientViewSet(viewsets.ModelViewSet):
         user = self.request.user
 
         # Check permissions
-        if not (user.is_superuser or user.role == "admin"):
-            logger.warning(
-                f"User {user.email} attempted bulk create without permission in tenant {tenant.schema_name}"
-            )
-            raise PermissionDenied("Only admins or superusers can create clients.")
+        # if not (user.is_superuser or user.role == "admin"):
+        #     logger.warning(
+        #         f"User {user.email} attempted bulk create without permission in tenant {tenant.schema_name}"
+        #     )
+        #     raise PermissionDenied("Only admins or superusers can create clients.")
 
         # Expect a list of client data
         data = request.data
@@ -4085,7 +4085,7 @@ class DocumentListCreateView(APIView):
 
 
 class DocumentDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
         try:
