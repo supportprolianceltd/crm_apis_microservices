@@ -53,11 +53,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4'
+          cpus: '2'
           memory: 2G
         reservations:
-          cpus: '2'
-          memory: 1G
+          cpus: '1'
+          memory: 512MB
 
   # ... (rest of your existing services)
   rostering-db:
