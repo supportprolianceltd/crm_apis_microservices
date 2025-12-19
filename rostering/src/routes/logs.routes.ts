@@ -10,5 +10,7 @@ export function createLogsRoutes(controller: LogsController) {
   // Get all logs for the tenant
   router.get('/', (req, res) => controller.getAllLogs(req, res));
 
+  
+
   return router;
 }

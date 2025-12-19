@@ -458,7 +458,7 @@ export class TaskController {
 
         if (!matched) {
           // Per policy: tasks don't create visits. Fail fast and ask caller to ensure visits exist on care plan
-          return res.status(400).json({ error: 'No matching visit found for the provided task times; create visits via care plan schedules or admin.' });
+          return res.status(400).json({ error: 'No matching visit found for the provided task times; please select a time from the visit window.' });
         }
 
         const updated = await (this.prisma as any).task.update({
@@ -1254,12 +1254,45 @@ export class TaskController {
         return res.status(403).json({ error: "Access denied to this task" });
       }
 
+      // Load full task including related visit and its assignees so we can enforce
+      // that only carers assigned to the visit may change the task status.
+      const fullTask = await (this.prisma as any).task.findUnique({
+        where: { id: taskId },
+        include: { carerVisit: { include: { assignees: true } } },
+      });
+
       const updateData: any = {};
 
       if (payload.title !== undefined) updateData.title = payload.title;
       if (payload.description !== undefined)
         updateData.description = payload.description;
+
       if (payload.status !== undefined) {
+        // If the task is linked to a visit with assignees, only allow status
+        // changes by one of those assignees. If no visit attached, allow change.
+        if (fullTask && fullTask.carerVisitId) {
+          const assignees = Array.isArray(fullTask.carerVisit?.assignees)
+            ? fullTask.carerVisit.assignees.map((a: any) => String(a.carerId))
+            : [];
+
+          if (assignees.length > 0) {
+            const callerRaw = (req.user as any)?.id ?? (req.user as any)?.carerId ?? null;
+            const callerId = callerRaw !== undefined && callerRaw !== null ? String(callerRaw) : null;
+            if (!callerId || !assignees.includes(callerId)) {
+              return res.status(403).json({ error: 'Only assignees of the related visit may change task status' });
+            }
+          }
+        }
+
+        // If caller is attempting to start the task (mark IN_PROGRESS), ensure
+        // the related visit has already been clocked in.
+        if (payload.status === 'COMPLETED' && fullTask && fullTask.carerVisitId) {
+          const visitClockIn = fullTask.carerVisit?.clockInAt ?? null;
+          if (!visitClockIn) {
+            return res.status(400).json({ error: 'Cannot start task before the related visit has been clocked in' });
+          }
+        }
+
         updateData.status = payload.status;
         // Auto-set completedAt when status changes to COMPLETED
         if (
@@ -1276,6 +1309,7 @@ export class TaskController {
           updateData.completedAt = null;
         }
       }
+
       if (payload.riskFrequency !== undefined)
         updateData.riskFrequency = payload.riskFrequency;
       if (payload.startDate !== undefined)
@@ -1899,7 +1933,29 @@ export class TaskController {
       const callerRole = userObj.role as string | undefined;
       const callerUserId = userObj.id ? String(userObj.id) : null;
       const assigneeIds = Array.isArray(existing.assignees) ? existing.assignees.map((a: any) => a.carerId) : [];
-      console.log('[clockInVisit] attempt', { userId: callerUserId, role: callerRole, visitId, assigneesCount: assigneeIds.length });
+
+      // Only allow callers who are assigned to this visit to clock in.
+      if (!callerUserId || assigneeIds.length === 0 || !assigneeIds.includes(callerUserId)) {
+        return res.status(403).json({ error: 'Only assignees of this visit may clock in' });
+      }
+
+      // Prevent clock-in before the visit's calendar day.
+      // Users may clock in anytime on the same day of the visit (including before the scheduled time),
+      // but not on earlier calendar days.
+      try {
+        const now = new Date();
+        const scheduledStart = existing.startDate ? new Date(existing.startDate) : null;
+        if (scheduledStart) {
+          const visitDayStart = new Date(scheduledStart);
+          visitDayStart.setHours(0, 0, 0, 0);
+          if (now.getTime() < visitDayStart.getTime()) {
+            return res.status(400).json({ error: 'Cannot clock in before the day of the visit' });
+          }
+        }
+      } catch (e) {
+        // If anything goes wrong with the check, log and continue to avoid blocking legitimate clock-ins.
+        console.warn('visit day check failed', e);
+      }
 
       const updated = await (this.prisma as any).carerVisit.update({
         where: { id: visitId },
