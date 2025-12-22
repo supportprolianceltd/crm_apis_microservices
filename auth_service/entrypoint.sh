@@ -15,4 +15,12 @@ echo "Starting entrypoint script"
 # python manage.py migrate_schemas
 # echo "migrate_schemas completed"
 echo "Starting gunicorn"
-exec gunicorn --bind 0.0.0.0:8001 auth_service.wsgi:application
+# exec gunicorn --bind 0.0.0.0:8001 auth_service.wsgi:application
+exec gunicorn auth_service.wsgi:application \
+  --bind 0.0.0.0:8001 \
+  --workers 3 \
+  --threads 2 \
+  --timeout 120 \
+  --worker-class gthread \
+  --max-requests 1000 \
+  --max-requests-jitter 100

@@ -800,17 +800,17 @@ class CustomTokenSerializer(serializers.Serializer):
             if not tenant:
                 tenant = Tenant.objects.get(schema_name=get_public_schema_name())
 
-            with tenant_context(tenant):
-                UserActivity.objects.create(
-                    user=user,
-                    tenant=tenant,
-                    action=action,
-                    performed_by=None,
-                    details=details,
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=success,
-                )
+            # with tenant_context(tenant):
+            #     UserActivity.objects.create(
+            #         user=user,
+            #         tenant=tenant,
+            #         action=action,
+            #         performed_by=None,
+            #         details=details,
+            #         ip_address=ip_address,
+            #         user_agent=user_agent,
+            #         success=success,
+            #     )
         except Exception as e:
             logger.warning(f"⚠️ Failed to log activity '{action}': {str(e)}")
 
@@ -1435,7 +1435,7 @@ class VerifyOTPView(APIView):
                 "status": user.status,
                 "tenant_id": user.tenant.id,
                 "tenant_organizational_id": str(tenant.organizational_id),
-                "tenant_unique_id": str(tenant.unique_id),
+                "tenant_unique_id": str(user.tenant.unique_id),
                 "tenant_schema": user.tenant.schema_name,
                 "tenant_domain": tenant_domain,
                 "has_accepted_terms": user.has_accepted_terms,
@@ -1467,6 +1467,7 @@ class VerifyOTPView(APIView):
                 "refresh": refresh_token,
                 "tenant_id": user.tenant.id,
                 "tenant_schema": user.tenant.schema_name,
+                "tenant_unique_id": str(user.tenant.unique_id),
                 "tenant_domain": tenant_domain,
                 "user": CustomUserMinimalSerializer(user).data,
                 "has_accepted_terms": user.has_accepted_terms,
