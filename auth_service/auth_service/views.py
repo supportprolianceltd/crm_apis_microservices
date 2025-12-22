@@ -799,19 +799,20 @@ class CustomTokenSerializer(serializers.Serializer):
         try:
             if not tenant:
                 tenant = Tenant.objects.get(schema_name=get_public_schema_name())
-                
-            UserActivity.objects.create(
-                user=user,
-                tenant=tenant,
-                action=action,
-                performed_by=None,
-                details=details,
-                ip_address=ip_address,
-                user_agent=user_agent,
-                success=success,
-            )
+
+            with tenant_context(tenant):
+                UserActivity.objects.create(
+                    user=user,
+                    tenant=tenant,
+                    action=action,
+                    performed_by=None,
+                    details=details,
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                    success=success,
+                )
         except Exception as e:
-            logger.error(f"❌ Failed to log activity '{action}': {str(e)}")
+            logger.warning(f"⚠️ Failed to log activity '{action}': {str(e)}")
 
 
 class CustomTokenObtainPairView(APIView):
@@ -1062,116 +1063,75 @@ class CustomTokenRefreshView(APIView):
     authentication_classes = []  # Add this line to disable authentication
 
     def post(self, request):
+        logger.info("🔄 Starting token refresh process")
         # Try to get refresh token from cookies first, then fallback to body
         refresh_token = request.COOKIES.get('refresh_token') or request.data.get("refresh")
         ip_address = request.META.get("REMOTE_ADDR")
         user_agent = request.META.get("HTTP_USER_AGENT", "")
+        logger.info(f"🔄 Refresh token source: {'cookie' if request.COOKIES.get('refresh_token') else 'body'}")
 
-        if not refresh_token:
-            UserActivity.objects.create(
-                user=None,
-                tenant=Tenant.objects.first(),
-                action="refresh_token",
-                performed_by=None,
-                details={"reason": "No refresh token provided"},
-                ip_address=ip_address,
-                user_agent=user_agent,
-                success=False,
-            )
-            return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            logger.info("🔄 Decoding token unverified to extract tenant_id")
             # Decode token without verification to extract tenant_id
             unverified_payload = jwt.decode(refresh_token, options={"verify_signature": False})
             tenant_id = unverified_payload.get("tenant_id")
-            if not tenant_id:
-                UserActivity.objects.create(
-                    user=None,
-                    tenant=Tenant.objects.first(),
-                    action="refresh_token",
-                    performed_by=None,
-                    details={"reason": "Tenant ID missing in token payload"},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
-                )
-                return Response({"detail": "Tenant ID missing in token payload."}, status=status.HTTP_400_BAD_REQUEST)
-
+            logger.info(f"🔄 Extracted tenant_id: {tenant_id}")
+            
             # Fetch tenant and verify schema
+            logger.info(f"🔄 Fetching tenant with id: {tenant_id}")
             try:
                 tenant = Tenant.objects.get(id=tenant_id)
-                logger.info(f"Fetched tenant: id={tenant_id}, schema_name={tenant.schema_name}")
+                logger.info(f"✅ Fetched tenant: id={tenant_id}, schema_name={tenant.schema_name}")
             except Tenant.DoesNotExist:
-                UserActivity.objects.create(
-                    user=None,
-                    tenant=Tenant.objects.first(),
-                    action="refresh_token",
-                    performed_by=None,
-                    details={"reason": f"Tenant not found for tenant_id: {tenant_id}"},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=False,
-                )
+                logger.error(f"❌ Tenant not found for tenant_id: {tenant_id}")
+                  
                 return Response({"detail": f"Tenant not found for tenant_id: {tenant_id}."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Set tenant context and log current schema
+            logger.info(f"🔄 Setting tenant context for schema: {tenant.schema_name}")
             with tenant_context(tenant):
-                logger.info(f"Current schema: {connection.schema_name}")
+                logger.info(f"✅ Current schema: {connection.schema_name}")
                 # Validate and decode refresh token
+                logger.info("🔄 Validating and decoding refresh token with RSA")
                 payload = decode_rsa_jwt(refresh_token, tenant)
+                logger.info(f"✅ Token decoded successfully, type: {payload.get('type')}")
                 if payload.get("type") != "refresh":
-                    UserActivity.objects.create(
-                        user=None,
-                        tenant=tenant,
-                        action="refresh_token",
-                        performed_by=None,
-                        details={"reason": "Invalid token type"},
-                        ip_address=ip_address,
-                        user_agent=user_agent,
-                        success=False,
-                    )
+                    logger.error("❌ Invalid token type")
+                    
                     return Response({"detail": "Invalid token type."}, status=status.HTTP_400_BAD_REQUEST)
 
                 jti = payload.get("jti")
+                logger.info(f"🔄 Checking if token jti {jti} is blacklisted")
                 if BlacklistedToken.objects.filter(jti=jti).exists():
-                    UserActivity.objects.create(
-                        user=None,
-                        tenant=tenant,
-                        action="refresh_token",
-                        performed_by=None,
-                        details={"reason": "Token blacklisted"},
-                        ip_address=ip_address,
-                        user_agent=user_agent,
-                        success=False,
-                    )
+                    logger.error("❌ Token is blacklisted")
+                 
                     return Response({"detail": "Token blacklisted."}, status=status.HTTP_401_UNAUTHORIZED)
 
                 # Blacklist the used refresh token
+                logger.info("🔄 Blacklisting used refresh token")
                 exp = datetime.fromtimestamp(payload["exp"])
                 BlacklistedToken.objects.create(jti=jti, expires_at=exp)
 
                 # Retrieve user
+                logger.info(f"🔄 Retrieving user with email: {payload['sub']}")
                 user = get_user_model().objects.get(email=payload["sub"])
+                logger.info(f"✅ User retrieved: {user.email}")
 
                 # Log successful refresh activity
-                UserActivity.objects.create(
-                    user=user,
-                    tenant=tenant,
-                    action="refresh_token",
-                    performed_by=None,
-                    details={"reason": "Token refresh successful"},
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    success=True,
-                )
+              
 
                 # Fetch the primary domain
+                logger.info("🔄 Fetching primary domain")
                 primary_domain = tenant.domains.filter(is_primary=True).first()
                 tenant_domain = primary_domain.domain if primary_domain else None
+                logger.info(f"✅ Primary domain: {tenant_domain}")
 
                 remember_me = payload.get('remember_me', False)
+                logger.info(f"🔄 Remember me: {remember_me}")
 
                 # Issue new access token (matching CustomTokenSerializer)
+                logger.info("🔄 Issuing new access token")
                 access_payload = {
                     "jti": str(uuid.uuid4()),
                     "sub": user.email,
@@ -1189,8 +1149,10 @@ class CustomTokenRefreshView(APIView):
                     "exp": (timezone.now() + timedelta(hours=72)).timestamp(),
                 }
                 access_token = issue_rsa_jwt(access_payload, user.tenant)
+                logger.info("✅ New access token issued")
 
                 # Issue new refresh token
+                logger.info("🔄 Issuing new refresh token")
                 new_refresh_jti = str(uuid.uuid4())
                 refresh_days = 30 if remember_me else 7
                 refresh_payload = {
@@ -1205,6 +1167,7 @@ class CustomTokenRefreshView(APIView):
                     "exp": (timezone.now() + timedelta(days=refresh_days)).timestamp(),
                 }
                 new_refresh_token = issue_rsa_jwt(refresh_payload, user.tenant)
+                logger.info("✅ New refresh token issued")
 
                 data = {
                     "access": access_token,
@@ -1219,23 +1182,16 @@ class CustomTokenRefreshView(APIView):
                 }
 
                 # Create response and set new cookies using helper function
+                logger.info("🔄 Setting auth cookies")
                 response = Response(data, status=status.HTTP_200_OK)
                 response = set_auth_cookies(response, access_token, new_refresh_token, remember_me=remember_me)
-                
+
                 logger.info("✅ Token refresh successful with new cookies")
                 return response
 
         except Exception as e:
-            UserActivity.objects.create(
-                user=None,
-                tenant=Tenant.objects.first(),
-                action="refresh_token",
-                performed_by=None,
-                details={"reason": f"Token refresh failed: {str(e)}"},
-                ip_address=ip_address,
-                user_agent=user_agent,
-                success=False,
-            )
+            logger.error(f"❌ Unexpected error in token refresh: {str(e)}", exc_info=True)
+          
             return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
 class SilentTokenRenewView(APIView):
