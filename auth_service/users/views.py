@@ -4265,7 +4265,7 @@ class DocumentAcknowledgmentsListView(APIView):
 
 
 class UserDocumentAccessView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user_identifier = request.query_params.get('user_id') or request.query_params.get('email')

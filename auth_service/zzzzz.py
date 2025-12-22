@@ -1,10 +1,23 @@
 
-# python manage.py makemigrations users core 
-# python manage.py migrate_schemas --shared
-# python manage.py migrate_schemas
+# docker exec auth-service python manage.py makemigrations core reviews users events investments
+# docker exec auth-service python manage.py migrate_schemas --shared
+# docker exec auth-service python manage.py migrate_schemas
 
 
 
+from django_tenants.utils import tenant_context
+tenant = Tenant.objects.get(schema_name='appbrew')
+with tenant_context(tenant):
+    CustomUser.objects.create_superuser(
+        email='suuport@appbrew.com',
+        password='qwerty',
+        role='root-admin',
+        first_name='Gideon',
+        last_name='Isreal',
+        job_role='Project Manager',
+        tenant=tenant
+    )
+    
 from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='rodrimine')
 with tenant_context(tenant):
@@ -323,7 +336,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='proliance')
+tenant = Tenant.objects.get(schema_name='appbrew')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(

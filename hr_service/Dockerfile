@@ -25,8 +25,10 @@ COPY . .
 RUN curl -L https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh -o /app/wait-for-it.sh \
     && chmod +x /app/wait-for-it.sh
 
-# Make entrypoint executable
-RUN chmod +x /app/entrypoint.sh
+# Ensure entrypoint is available outside /app to avoid bind-mount masking
+# Copy the entrypoint into a global location and make it executable
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 8004
 
@@ -34,4 +36,4 @@ EXPOSE 8004
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8004/api/hr/health/ || exit 1
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
