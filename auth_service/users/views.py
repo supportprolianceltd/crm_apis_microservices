@@ -1832,7 +1832,7 @@ class UsersViewSetNoPagination(viewsets.ModelViewSet):
             if self.action == "list":
                 # Light: select_related for basic profile, no deep nests
                 qs = base_qs.select_related("profile", "tenant", "branch")
-                serialized_qs = list(qs.values('id', 'email', 'first_name', 'last_name', 'role'))  # Minimal
+                serialized_qs = list(qs.values('id', 'email', 'first_name', 'last_name', 'role', 'status'))  # Minimal
                 set_to_cache(cache_key, {'ids': [item['id'] for item in serialized_qs]}, timeout=300)
                 return qs
             # Full prefetch for retrieve/update/detail
