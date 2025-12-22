@@ -1346,6 +1346,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "role",
+            "status",
             "job_role",
             "is_superuser",
             "last_password_reset",
@@ -1363,6 +1364,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "last_name": {"required": True},
             "username": {"required": False, "allow_null": True},
             "role": {"required": False, "allow_null": True},
+            "status": {"required": False, "allow_null": True},
             "job_role": {"required": False, "allow_null": True},
             "has_accepted_terms": {"required": False, "allow_null": True},
             "permission_levels": {"required": False, "allow_null": True},
@@ -2166,12 +2168,13 @@ class ClientCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ["id", "email", "password", "first_name", "last_name", "role", "job_role", "profile", "branch"]
+        fields = ["id", "email", "password", "first_name", "last_name", "role", "job_role", "profile", "branch", "status"]
         read_only_fields = ["id"]
         extra_kwargs = {
             "email": {"required": True},
             "first_name": {"required": True},
             "last_name": {"required": True},
+            "status": {"required": False},
             "role": {"default": "client"},
         }
 

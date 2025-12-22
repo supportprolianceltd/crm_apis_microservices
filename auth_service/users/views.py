@@ -1220,7 +1220,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 serializer.is_valid(raise_exception=True)
 
                 # Restrict setting role to 'admin' unless superuser
-                if serializer.validated_data.get('role') == 'admin' and not request.user.is_superuser:
+                if serializer.validated_data.get('role') == 'root-admin' and not request.user.is_superuser:
                     raise ValidationError("Cannot set user role to 'admin'.")
 
                 logger.info(f"Validated data for user {instance.email}: {serializer.validated_data}")
