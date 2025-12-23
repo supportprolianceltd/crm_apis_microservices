@@ -106,10 +106,9 @@ Storage Costs: Retaining all versions increases storage usage. Consider cleanup 
 
 
 
-
 ## Comprehensive List of Microservice Implementations
 
-Here is the detailed report of implemented features in our E3OS microservices (API Gateway, Auth Service, Talent Engine/Requisition Service, and Job Applications Service, Notification Service, Rostering)  SAAS  Architecture that are ready for  deployment:
+Here is the detailed report of implemented features in our E3OS microservices (API Gateway, Auth Service, Talent Engine/Requisition Service, Job Applications Service, and Notification Service) SAAS Architecture that are ready for deployment:
 
 ### 1. API Gateway Service
 - **Routing Infrastructure**: Django-based API gateway providing unified interface for client requests to backend services
@@ -121,14 +120,13 @@ Here is the detailed report of implemented features in our E3OS microservices (A
 - **Multi-Tenant Architecture**: Complete schema-based tenant isolation with PostgreSQL
 - **JWT Authentication**: Secure token-based authentication with RSA key pairs for signing/validation
 - **User Management System**:
-  - Custom user model with roles (root-admin, co-admin, staff etc.), only root-admin can manage permissins, but he can designate a co-admin to manage permissions too.
+  - Custom user model with roles (root-admin, co-admin, staff etc.), only root-admin can manage permissions, but he can designate a co-admin to manage permissions too.
   - Comprehensive user profiles with personal info, employment details, qualifications
   - Document management for onboarding.
-  - Client profiles with automatice assignment to cluster for the rostering Microservice.
+  - Client profiles with automatic assignment to cluster for the rostering Microservice.
 - **Security Features**:
   - Two-factor authentication support
-  - Account locking/deactivation  for suspicious activity
-  - Session management and audit trails
+  - Account locking/deactivation for suspicious activity
   - RSA key management for JWT
 - **Event Management**:
   - Calendar integration with event scheduling.
@@ -144,13 +142,11 @@ Here is the detailed report of implemented features in our E3OS microservices (A
   - Approval workflows for job postings
   - Multi-organization support with data isolation
 - **Leave Management System**:
-  - Leave types configuration (paid/unpaid, max days)
   - Leave request processing with approval workflows
 - **Equipment Management**:
   - Equipment request, and approval
- - **Service Management**:
+- **Service Management**:
   - Service request, and approval
-
 
 ### 4. Job Applications Service
 - **Application Processing**:
@@ -160,7 +156,6 @@ Here is the detailed report of implemented features in our E3OS microservices (A
 - **Intelligent Screening**:
   - AI-powered resume evaluation with scoring
   - Automated candidate ranking
-  - Screening questions and tagging system
   - Status history tracking
 - **Interview Scheduling**:
   - Virtual and physical meeting scheduling
@@ -173,6 +168,21 @@ Here is the detailed report of implemented features in our E3OS microservices (A
 - **Kafka Integration**: Asynchronous processing for screening and notifications
 - **RESTful API**: Complete endpoints for application management
 
+### 5. Notification Service
+- **Multi-Tenant Notification System**: Isolated notification handling per tenant with customizable branding
+- **Multi-Channel Support**: Email notifications with extensible architecture for SMS and push notifications
+- **Template Management**: Dynamic Handlebars-based templates for personalized notifications
+- **Queue-Based Processing**: Redis-backed BullMQ job queues for reliable asynchronous processing
+- **Event-Driven API**: RESTful endpoints for receiving and processing notification events
+- **Tenant Configuration**:
+  - Custom branding per tenant (logos, colors, contact info)
+  - Multiple email provider support (SMTP configurations)
+  - Tenant-specific settings and preferences
+- **Comprehensive Audit Trail**: Full logging of notification attempts, delivery status, and failures
+- **Email Processing**: SMTP-based email delivery with provider response tracking
+- **Template System**: Localized templates with dynamic content replacement
+- **Health Monitoring**: Service health checks and metrics endpoints
+
 ### Cross-Service Integrations
 - **Inter-Service Communication**: All services communicate via REST APIs and Kafka events
 - **Shared Authentication**: JWT tokens validated across services
@@ -182,15 +192,15 @@ Here is the detailed report of implemented features in our E3OS microservices (A
 
 ### Technical Infrastructure
 - **Containerization**: All services dockerized with Docker Compose
-- **Database**: PostgreSQL with schema-based multi-tenancy
-- **Message Queue**: Kafka for event-driven processing
+- **Database**: PostgreSQL with schema-based multi-tenancy (Django services) and Prisma ORM (NestJS)
+- **Message Queue**: Kafka for event-driven processing, Redis/BullMQ for job queues
 - **Caching**: Redis integration for performance optimization
 - **API Documentation**: Swagger/OpenAPI for all services
 - **Logging**: Comprehensive logging with rotation
-- **Background Processing**: Celery for asynchronous tasks
+- **Background Processing**: Celery for asynchronous tasks, BullMQ for notification queues
 
 ### Deployment Readiness
-All services include:
+All services above are ready for deployment and they include:
 - Production-ready Docker configurations
 - Environment-based settings
 - Database migrations

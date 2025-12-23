@@ -1,6 +1,3 @@
-echo "⏳ Waiting for database..."
-
-echo "⏳ Waiting for database..."
 #!/usr/bin/env bash
 set -e
 
