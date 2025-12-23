@@ -463,8 +463,8 @@ CELERY_BEAT_SCHEDULE = {
 # Celery 6.0+ compatibility: retry broker connection on startup
 broker_connection_retry_on_startup = True
 
-# #  ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
-# # ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
+# ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
+# ssh -i "$env:USERPROFILE\.ssh\my_vps_key" -p 2222 root@162.254.32.158
 
 
 # corgi spaceship banana notebook
