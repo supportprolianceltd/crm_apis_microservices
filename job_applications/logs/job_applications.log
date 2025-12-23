@@ -1,338 +1,406 @@
-2025-12-23 03:45:44,572 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
-2025-12-23 03:45:44,575 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
-2025-12-23 03:45:44,580 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:45:44,702 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
-2025-12-23 03:45:44,712 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:45:44,795 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
-2025-12-23 03:45:44,799 [INFO] job_applications: Set schema to: appbrew
-2025-12-23 03:45:44,845 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
-2025-12-23 03:45:44,846 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
-2025-12-23 03:45:44,849 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:45:44,897 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
-2025-12-23 03:45:44,901 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:45:44,957 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
-2025-12-23 03:45:44,960 [INFO] job_applications: Set schema to: appbrew
-2025-12-23 03:45:44,963 [INFO] job_applications: Permission check for AnonymousUser - authenticated: False
-2025-12-23 03:52:13,200 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-12-23 03:52:13,200 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-12-23 03:52:13,204 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-12-23 03:52:13,207 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-12-23 03:52:13,209 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-12-23 03:52:13,210 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-12-23 03:52:13,781 [INFO] job_applications.settings: Logging configuration applied successfully
-2025-12-23 03:52:13,783 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-12-23 03:52:13,785 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
-2025-12-23 03:52:33,401 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
-2025-12-23 03:52:33,409 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
-2025-12-23 03:52:33,430 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:52:33,609 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
-2025-12-23 03:52:33,628 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:52:33,839 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
-2025-12-23 03:52:33,843 [INFO] job_applications: Set schema to: appbrew
-2025-12-23 03:52:56,237 [DEBUG] celery.utils.functional: 
+2025-12-23 06:47:01,601 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:47:01,605 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:47:01,614 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:01,688 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:47:01,700 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:01,759 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:47:01,761 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:47:02,075 [INFO] job_applications: Schedule created: 820fa862-7eec-43c4-804a-187d50ec9038 for job_application_id: 9c24504b-95b9-4395-9241-9483fe7fce0a by user: 1
+2025-12-23 06:47:02,085 [INFO] job_applications: ➡️ POST to http://app:3001/events/ with payload: {'metadata': {'tenant_id': '952803e6-f251-4cf9-9815-5be15f88afd9', 'event_type': 'interview.scheduled', 'event_id': '7438fe10-c717-4da2-9234-aa8861bfabb1', 'created_at': '2025-12-23T06:47:02.084201+00:00', 'source': 'job-applications'}, 'data': {'email': 'ekenehanson@gmail.com', 'full_name': 'Ekene-onwon Hanson Abraham', 'application_id': '9c24504b-95b9-4395-9241-9483fe7fce0a', 'job_requisition_id': 'APP-0001', 'job_requisition_title': 'jsdbchsdv. ksvkasva .', 'status': 'scheduled', 'score': None, 'has_employment_gaps': False, 'employment_gaps': [], 'timestamp': '2025-12-23T06:47:02.084340+00:00', 'user_agent': 'unknown'}}
+2025-12-23 06:47:02,092 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): app:3001
+2025-12-23 06:47:02,156 [DEBUG] urllib3.connectionpool: http://app:3001 "POST /events/ HTTP/1.1" 201 83
+2025-12-23 06:47:02,158 [INFO] job_applications: ✅ Notification sent for interview.scheduled to ekenehanson@gmail.com. Status: 201, Response: {"success":true,"message":"Event received and processing started","jobIds":["100"]}
+2025-12-23 06:47:02,160 [INFO] job_applications: Schedule {'application_id': '9c24504b-95b9-4395-9241-9483fe7fce0a', 'dashboard_url': 'https://dev.e3os.co.ukapplication-dashboard/APP-JA-0001/ekenehanson%40gmail.com/952803e6-f251-4cf9-9815-5be15f88afd9-APP-frontend-react-developer-cb5fc2d1', 'full_name': 'Ekene-onwon Hanson Abraham', 'email': 'ekenehanson@gmail.com', 'job_requisition_id': 'APP-0001', 'job_requisition_title': 'jsdbchsdv. ksvkasva .', 'status': 'scheduled', 'interview_start_date_time': '2025-12-24T23:30:11+00:00', 'interview_end_date_time': '2025-12-25T00:30:11+00:00', 'meeting_mode': 'Physical', 'meeting_link': '', 'interview_address': '16 Alpha Crescent, Lekki Phase 1, Lagos, Nigeri', 'message': "Hello Ekene-onwon Hanson Abraham,\n\nWe're pleased to invite you to an interview for the Frontend React Developer role at appbrew.\nPlease let us know your availability so we can confirm a convenient time.\n\nBest regards,\nHiring Team\n\nPlease check your application dashboard for further details: https://dev.e3os.co.uk/application-dashboard/APP-JA-0001/ekenehanson%40gmail.com/952803e6-f251-4cf9-9815-5be15f88afd9-APP-frontend-react-developer-cb5fc2d1", 'timezone': 'UTC', 'schedule_id': '820fa862-7eec-43c4-804a-187d50ec9038'} creation notification sent for schedule 820fa862-7eec-43c4-804a-187d50ec9038, job application 9c24504b-95b9-4395-9241-9483fe7fce0a
+2025-12-23 06:47:02,761 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:47:02,766 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:47:02,774 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:02,872 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:47:02,885 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:03,049 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:47:03,055 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:47:03,155 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:47:03,166 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:47:03,170 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:03,262 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:47:03,271 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:03,359 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:47:03,362 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:47:03,424 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:47:03,426 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:47:03,430 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:03,484 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:47:03,488 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:03,543 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:47:03,545 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:47:03,585 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:47:03,588 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:47:03,591 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:03,705 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:47:03,714 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:03,762 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:47:03,763 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:47:03,931 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:47:03,934 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:47:03,938 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:04,003 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:47:04,007 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:04,061 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:47:04,063 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:47:04,095 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:47:04,096 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:47:04,099 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:04,148 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:47:04,153 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:04,206 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:47:04,209 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:47:04,244 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:47:04,245 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:47:04,248 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:04,294 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:47:04,298 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:04,337 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:47:04,342 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:47:04,375 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:47:04,379 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:47:04,384 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:04,447 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:47:04,450 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:47:04,508 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:47:04,510 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:53:31,519 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-12-23 06:53:31,520 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-12-23 06:53:31,521 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-12-23 06:53:31,522 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-12-23 06:53:31,524 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-12-23 06:53:31,524 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-12-23 06:53:32,147 [INFO] job_applications.settings: Logging configuration applied successfully
+2025-12-23 06:53:32,150 [DEBUG] environ.environ: get 'CELERY_BROKER_URL' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-12-23 06:53:32,162 [DEBUG] environ.environ: get 'CELERY_RESULT_BACKEND' casted as 'None' with default 'redis://job_app_redis:6379/0'
+2025-12-23 06:53:45,751 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:53:45,782 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:53:45,816 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:53:49,278 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:53:49,309 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:53:49,766 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:53:49,775 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:47,882 [DEBUG] celery.utils.functional: 
 def chain(*args, **kwargs):
     return 1
 
-2025-12-23 03:52:56,238 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:47,885 [DEBUG] celery.utils.functional: 
 def auto_screen_all_applications():
     return 1
 
-2025-12-23 03:52:56,252 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:47,887 [DEBUG] celery.utils.functional: 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-12-23 06:54:47,889 [DEBUG] celery.utils.functional: 
 def chain(*args, **kwargs):
     return 1
 
-2025-12-23 03:52:56,251 [DEBUG] celery.utils.functional: 
-def accumulate(self, *args, **kwargs):
-    return 1
-
-2025-12-23 03:52:56,268 [DEBUG] celery.utils.functional: 
-def daily_background_cv_vetting():
-    return 1
-
-2025-12-23 03:52:56,269 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:47,898 [DEBUG] celery.utils.functional: 
 def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
     return 1
 
-2025-12-23 03:52:56,287 [DEBUG] celery.utils.functional: 
-def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+2025-12-23 06:54:47,895 [DEBUG] celery.utils.functional: 
+def daily_background_cv_vetting():
     return 1
 
-2025-12-23 03:52:56,300 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:47,910 [DEBUG] celery.utils.functional: 
 def accumulate(self, *args, **kwargs):
     return 1
 
-2025-12-23 03:52:56,319 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:47,911 [DEBUG] celery.utils.functional: 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-12-23 06:54:47,914 [DEBUG] celery.utils.functional: 
+def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
+    return 1
+
+2025-12-23 06:54:47,916 [DEBUG] celery.utils.functional: 
 def auto_screen_all_applications():
     return 1
 
-2025-12-23 03:52:56,332 [DEBUG] celery.utils.functional: 
-def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
-    return 1
-
-2025-12-23 03:52:56,352 [DEBUG] celery.utils.functional: 
-def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
-    return 1
-
-2025-12-23 03:52:56,337 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:47,918 [DEBUG] celery.utils.functional: 
 def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
     return 1
 
-2025-12-23 03:52:56,367 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:47,930 [DEBUG] celery.utils.functional: 
 def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
     return 1
 
-2025-12-23 03:52:56,369 [DEBUG] celery.utils.functional: 
-def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
-    return 1
-
-2025-12-23 03:52:56,392 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:47,959 [DEBUG] celery.utils.functional: 
 def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
     return 1
 
-2025-12-23 03:52:56,403 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:47,969 [DEBUG] celery.utils.functional: 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-12-23 06:54:47,977 [DEBUG] celery.utils.functional: 
+def xmap(task, it):
+    return 1
+
+2025-12-23 06:54:47,997 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-12-23 06:54:48,006 [DEBUG] celery.utils.functional: 
+def aggregate_screening_results(self, chunk_results, job_requisition_id, tenant_id, num_candidates, document_type, authorization_header=0):
+    return 1
+
+2025-12-23 06:54:48,007 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
+    return 1
+
+2025-12-23 06:54:48,010 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-12-23 06:54:48,012 [DEBUG] celery.utils.functional: 
 def process_large_resume_batch(self, job_requisition_id, tenant_id, document_type, applications_data, num_candidates, role=0, branch=1, authorization_header=2):
     return 1
 
-2025-12-23 03:52:56,406 [DEBUG] celery.utils.functional: 
-def xmap(task, it):
-    return 1
-
-2025-12-23 03:52:56,408 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:48,020 [DEBUG] celery.utils.functional: 
 def process_vetting_batch(self, job_requisition_id, job_requirements, applications_data, num_candidates):
     return 1
 
-2025-12-23 03:52:56,419 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+2025-12-23 06:54:48,021 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
     return 1
 
-2025-12-23 03:52:56,421 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:48,027 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-12-23 06:54:48,034 [DEBUG] celery.utils.functional: 
 def xmap(task, it):
     return 1
 
-2025-12-23 03:52:56,423 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-12-23 03:52:56,436 [DEBUG] celery.utils.functional: 
-def xstarmap(task, it):
-    return 1
-
-2025-12-23 03:52:56,441 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-12-23 03:52:56,451 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-12-23 03:52:56,447 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
-    return 1
-
-2025-12-23 03:52:56,470 [DEBUG] celery.utils.functional: 
-def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
-    return 1
-
-2025-12-23 03:52:56,475 [DEBUG] celery.utils.functional: 
-def chunks(task, it, n):
-    return 1
-
-2025-12-23 03:52:56,479 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:48,038 [DEBUG] celery.utils.functional: 
 def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
     return 1
 
-2025-12-23 03:52:56,478 [DEBUG] celery.utils.functional: 
-def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+2025-12-23 06:54:48,039 [DEBUG] celery.utils.functional: 
+def xstarmap(task, it):
     return 1
 
-2025-12-23 03:52:56,493 [DEBUG] celery.utils.functional: 
-def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
-    return 1
-
-2025-12-23 03:52:56,497 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:48,042 [DEBUG] celery.utils.functional: 
 def daily_background_cv_vetting():
     return 1
 
-2025-12-23 03:52:56,504 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:48,048 [DEBUG] celery.utils.functional: 
+def backend_cleanup():
+    return 1
+
+2025-12-23 06:54:48,049 [DEBUG] celery.utils.functional: 
+def chunks(task, it, n):
+    return 1
+
+2025-12-23 06:54:48,058 [DEBUG] celery.utils.functional: 
+def send_notification_task(self, applicant_data, tenant_id, event_type, employment_gaps=0):
+    return 1
+
+2025-12-23 06:54:48,067 [DEBUG] celery.utils.functional: 
+def screen_resumes_task(job_requisition_id, document_type, num_candidates, applications_data, job_requisition):
+    return 1
+
+2025-12-23 06:54:48,075 [DEBUG] celery.utils.functional: 
+def process_resume_chunk(self, job_requisition_id, tenant_id, document_type, applications_chunk, chunk_index, total_chunks, role=0, branch=1, authorization_header=2, job_requirements=3):
+    return 1
+
+2025-12-23 06:54:48,081 [DEBUG] celery.utils.functional: 
 def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
     return 1
 
-2025-12-23 03:52:56,506 [DEBUG] celery.utils.functional: 
+2025-12-23 06:54:48,083 [DEBUG] celery.utils.functional: 
 def backend_cleanup():
     return 1
 
-2025-12-23 03:52:56,508 [DEBUG] celery.utils.functional: 
-def backend_cleanup():
-    return 1
-
-2025-12-23 03:53:11,391 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
-2025-12-23 03:53:11,398 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
-2025-12-23 03:53:11,404 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:53:11,536 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
-2025-12-23 03:53:11,556 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:53:11,709 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
-2025-12-23 03:53:11,717 [INFO] job_applications: Set schema to: appbrew
-2025-12-23 03:53:11,840 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
-2025-12-23 03:53:11,848 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
-2025-12-23 03:53:11,855 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:53:11,959 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
-2025-12-23 03:53:11,966 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:53:12,081 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
-2025-12-23 03:53:12,090 [INFO] job_applications: Set schema to: appbrew
-2025-12-23 03:53:12,092 [INFO] job_applications: Permission check for AnonymousUser - authenticated: False
-2025-12-23 03:53:12,292 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
-2025-12-23 03:53:12,297 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
-2025-12-23 03:53:12,302 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:53:12,368 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
-2025-12-23 03:53:12,376 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
-2025-12-23 03:53:12,446 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
-2025-12-23 03:53:12,450 [INFO] job_applications: Set schema to: appbrew
-2025-12-23 03:53:12,453 [INFO] job_applications: Permission check for AnonymousUser - authenticated: False
-2025-12-23 03:54:02,118 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
-2025-12-23 03:54:02,132 [INFO] job_applications: No Bearer token provided
-2025-12-23 03:54:02,175 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
-2025-12-23 03:54:02,369 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/by-link/952803e6-f251-4cf9-9815-5be15f88afd9-APP-frontend-react-developer-cb5fc2d1/ HTTP/1.1" 200 3107
-2025-12-23 03:54:02,385 [INFO] job_applications: Requisition fetch for link: 952803e6-f251-4cf9-9815-5be15f88afd9-APP-frontend-react-developer-cb5fc2d1, status: 200
-2025-12-23 03:54:05,826 [DEBUG] httpcore.connection: connect_tcp.started host='gkvgqvosnetifsonhxuo.supabase.co' port=443 local_address=None timeout=20 socket_options=None
-2025-12-23 03:54:07,049 [DEBUG] httpcore.connection: connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x76b80b8425d0>
-2025-12-23 03:54:07,061 [DEBUG] httpcore.connection: start_tls.started ssl_context=<ssl.SSLContext object at 0x76b7e37972f0> server_hostname='gkvgqvosnetifsonhxuo.supabase.co' timeout=20
-2025-12-23 03:54:07,228 [DEBUG] httpcore.connection: start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x76b80b840b10>
-2025-12-23 03:54:07,230 [DEBUG] httpcore.http2: send_connection_init.started request=<Request [b'POST']>
-2025-12-23 03:54:07,232 [DEBUG] httpcore.http2: send_connection_init.complete
-2025-12-23 03:54:07,234 [DEBUG] httpcore.http2: send_request_headers.started request=<Request [b'POST']> stream_id=1
-2025-12-23 03:54:07,235 [DEBUG] hpack.hpack: Adding (b':method', b'POST') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,239 [DEBUG] hpack.hpack: Encoding 3 with 7 bits
-2025-12-23 03:54:07,240 [DEBUG] hpack.hpack: Adding (b':authority', b'gkvgqvosnetifsonhxuo.supabase.co') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,242 [DEBUG] hpack.hpack: Encoding 1 with 6 bits
-2025-12-23 03:54:07,243 [DEBUG] hpack.hpack: Encoding 23 with 7 bits
-2025-12-23 03:54:07,245 [DEBUG] hpack.hpack: Adding (b':scheme', b'https') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,246 [DEBUG] hpack.hpack: Encoding 7 with 7 bits
-2025-12-23 03:54:07,248 [DEBUG] hpack.hpack: Adding (b':path', b'/storage/v1/object/luminacaremedia/application_documents/2025/12/23/19decb65-7053-47c5-9a75-091f9cbd15ea.pdf.gz') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,249 [DEBUG] hpack.hpack: Encoding 4 with 6 bits
-2025-12-23 03:54:07,251 [DEBUG] hpack.hpack: Encoding 78 with 7 bits
-2025-12-23 03:54:07,253 [DEBUG] hpack.hpack: Adding (b'accept', b'*/*') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,254 [DEBUG] hpack.hpack: Encoding 19 with 6 bits
-2025-12-23 03:54:07,255 [DEBUG] hpack.hpack: Encoding 3 with 7 bits
-2025-12-23 03:54:07,257 [DEBUG] hpack.hpack: Adding (b'accept-encoding', b'gzip, deflate') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,258 [DEBUG] hpack.hpack: Encoding 16 with 7 bits
-2025-12-23 03:54:07,260 [DEBUG] hpack.hpack: Adding (b'user-agent', b'supabase-py/storage3 v0.12.1') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,261 [DEBUG] hpack.hpack: Encoding 58 with 6 bits
-2025-12-23 03:54:07,262 [DEBUG] hpack.hpack: Encoding 20 with 7 bits
-2025-12-23 03:54:07,264 [DEBUG] hpack.hpack: Adding (b'x-client-info', b'supabase-py/2.18.1') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,265 [DEBUG] hpack.hpack: Encoding 10 with 7 bits
-2025-12-23 03:54:07,268 [DEBUG] hpack.hpack: Encoding 13 with 7 bits
-2025-12-23 03:54:07,270 [DEBUG] hpack.hpack: Adding (b'apikey', b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrdmdxdm9zbmV0aWZzb25oeHVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2NTU0OTcsImV4cCI6MjA2ODIzMTQ5N30.foh7w4Ko-wGwMc9GW7ZX2YswK8d4J51wel532mjPTfw') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,272 [DEBUG] hpack.hpack: Encoding 5 with 7 bits
-2025-12-23 03:54:07,273 [DEBUG] hpack.hpack: Encoding 166 with 7 bits
-2025-12-23 03:54:07,275 [DEBUG] hpack.hpack: Adding (b'authorization', b'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrdmdxdm9zbmV0aWZzb25oeHVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2NTU0OTcsImV4cCI6MjA2ODIzMTQ5N30.foh7w4Ko-wGwMc9GW7ZX2YswK8d4J51wel532mjPTfw') to the header table, sensitive:True, huffman:True
-2025-12-23 03:54:07,276 [DEBUG] hpack.hpack: Encoding 23 with 4 bits
-2025-12-23 03:54:07,278 [DEBUG] hpack.hpack: Encoding 171 with 7 bits
-2025-12-23 03:54:07,279 [DEBUG] hpack.hpack: Adding (b'cache-control', b'max-age=3600') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,281 [DEBUG] hpack.hpack: Encoding 24 with 6 bits
-2025-12-23 03:54:07,282 [DEBUG] hpack.hpack: Encoding 9 with 7 bits
-2025-12-23 03:54:07,284 [DEBUG] hpack.hpack: Adding (b'x-upsert', b'true') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,285 [DEBUG] hpack.hpack: Encoding 6 with 7 bits
-2025-12-23 03:54:07,287 [DEBUG] hpack.hpack: Encoding 3 with 7 bits
-2025-12-23 03:54:07,288 [DEBUG] hpack.hpack: Adding (b'content-length', b'199195') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,289 [DEBUG] hpack.hpack: Encoding 28 with 6 bits
-2025-12-23 03:54:07,291 [DEBUG] hpack.hpack: Encoding 5 with 7 bits
-2025-12-23 03:54:07,293 [DEBUG] hpack.hpack: Adding (b'content-type', b'multipart/form-data; boundary=a54ccd2e63e5c644f60bd4b3940d7b53') to the header table, sensitive:False, huffman:True
-2025-12-23 03:54:07,294 [DEBUG] hpack.hpack: Encoding 31 with 6 bits
-2025-12-23 03:54:07,296 [DEBUG] hpack.hpack: Encoding 45 with 7 bits
-2025-12-23 03:54:07,298 [DEBUG] hpack.hpack: Encoded header block to b"\x83A\x97\x9b\xafy\xbbw:**M*\x0fT\xfem:\xe8\xb6\xb1\xc64\x15r\x1f\x87D\xcea\t=\x83\x98\xacw\x0b\x07\x8f\xa1H\x96(\xb6\x93T2\x0e\xc2\xd2Y\x0c6\x07]t\x18\x83I\x8fTR\x1c\x96\xd2Z\x92\x86\x04\x016\xc0D\xc0\x99`/\xc8RF\xe3k:\x06\xd9Y\xa7H\xda\xcf\x8d\xd6\xd6\x03\xe1\x95\xf2G [(\xd7\xaeIW\x9b\xdfS\x83\xf9c\xe7\x90z\x94E\xb5\x8e1\xa0\xabW\xe9\x84$\xf6\x0eb\xb2\xa7p.\x11.\x1f@\x8a\xf2\xb1(1jJ\xc6\xaaS\xff\x8dE\xb5\x8e1\xa0\xabW\xe9\x81.\x17\x97\x0f@\x85\x1df\xea__\xff'/\xac\xb3\xc7\x88\x86\xd4l\xb98{\xc8\x1d&\xc8\x8c\x95ml\x97\xb29\x93\xad\x7f\x9coe}r\xfa\xcbY\x19\xd0mF\xcb\xeeO\xcb\xb3\xf3\xa7\x0f\xbf\xdd\xd9\x11\x92\xac\xb4~\x9b#\x99)\x92\xc9)\x93\xcc\x94\xbf\xee:x\x80|\xbf}\xc6&\xce\\|{\xe47\x83\x12\x97\xd1\xfb\xbb#\x99)\xc3lbh\xd9\xefe\xaf\x9f\xe6\xc3j\xe9\x81\x9d;\xf2\x0bN\xfe\x00\xd5\xbc\x88\xc9O\x16\x89{#\x9a:B-W\xf2{\xd1\xbfczY\x02\xf2\x9ew|5\x98\xebx\xc5\xe3A\x1f\xc5\xc9\xdf\xdf\xc1sG\x8c\xcfH\xd6V\xc3\xe0\xb46\xc8\xa9\xe9\xaf|\xbe?\x1f\x08\xff,\xbaQ\xd8[\x14/\xac\xb3\xc7\x88\x86\xd4l\xb98{\xc8\x1d&\xc8\x8c\x95ml\x97\xb29\x93\xad\x7f\x9coe}r\xfa\xcbY\x19\xd0mF\xcb\xeeO\xcb\xb3\xf3\xa7\x0f\xbf\xdd\xd9\x11\x92\xac\xb4~\x9b#\x99)\x92\xc9)\x93\xcc\x94\xbf\xee:x\x80|\xbf}\xc6&\xce\\|{\xe47\x83\x12\x97\xd1\xfb\xbb#\x99)\xc3lbh\xd9\xefe\xaf\x9f\xe6\xc3j\xe9\x81\x9d;\xf2\x0bN\xfe\x00\xd5\xbc\x88\xc9O\x16\x89{#\x9a:B-W\xf2{\xd1\xbfczY\x02\xf2\x9ew|5\x98\xebx\xc5\xe3A\x1f\xc5\xc9\xdf\xdf\xc1sG\x8c\xcfH\xd6V\xc3\xe0\xb46\xc8\xa9\xe9\xaf|\xbe?X\x89\xa4~V\x1c\xc5\x81\x97\x00\x0f@\x86\xf2\xb5\xb5\xa0\xb6'\x83M\x96\x97\\\x85\x0b\xef\x85\xf6\xff_\xad\xa6\xda\x12j\xc7bX\x94\xf6R\xb4\x83H\xfe\xd4\x8c\xf6\xd5 \xec\xf5\x00\xdbh\x84\x90Eq\x92\xb6G\x1ajW\x01\x1c\x8dF\xcb\xed\x02Gcm\x9f"
-2025-12-23 03:54:07,301 [DEBUG] httpcore.http2: send_request_headers.complete
-2025-12-23 03:54:07,303 [DEBUG] httpcore.http2: send_request_body.started request=<Request [b'POST']> stream_id=1
-2025-12-23 03:54:07,504 [DEBUG] httpcore.http2: receive_remote_settings.started
-2025-12-23 03:54:07,506 [DEBUG] httpcore.http2: receive_remote_settings.complete return_value=<RemoteSettingsChanged changed_settings:{ChangedSetting(setting=3, original_value=None, new_value=100), ChangedSetting(setting=4, original_value=65535, new_value=65536), ChangedSetting(setting=5, original_value=16384, new_value=16777215)}>
-2025-12-23 03:54:07,905 [DEBUG] httpcore.http2: send_request_body.complete
-2025-12-23 03:54:07,909 [DEBUG] httpcore.http2: receive_response_headers.started request=<Request [b'POST']> stream_id=1
-2025-12-23 03:54:08,443 [DEBUG] hpack.hpack: Decoding b'?\xe1\x1f\x88a\x96\xdfi~\x94\x13*_)\x14\x10\x04\xda\x80f\xe3m\\\x03\xcab\xd1\xbf_\x96\x1du\xd0b\r&=LtA\xea\xfbP\x93\x8e\xc4\x150Z\x99V{Z\x83\x9b\xd9\xab@\x85$\xabX?_\x8f~14Q\xba\xd8\x9f\x95\xd7\x9e$kg\xc7\xb7@\x8a$\xab\x10d\x9c\xab!#M\xa8\x86\xbf\xcfL:2^T\x01*x\xa0\xa4~V\x1c\xc5\x81\x90\xb6\xcb\x80\x00>\xd45D\xa2\xd9\x0b\xba\xd8\xef\x9e\x91\x9a\xa4}\xa9]\x85\xa0\xe3\x93@\x8bDkL4\x97\xc0\xfd-I\xe4/\x84\x90\xd6\x14\x89@\x8dDkL4\x97\xc0\xfd-\xdc\xb6 \xc7\xab\x011@\x8aDkWa\xfa\x14\x89Z\xc2\xcb\x8f\x9b\xafy\xbbw:**M*\x0fT\xfem?@\x8aDkX^\xd6\x95\tX\xd2\x7f\x9a\x00_\x8d\xa7\xdbub<7Vu\xe0>\xb4ad\x8b\x16IJRH9Y~Ow\xffV\x8a"K\x14t\xc0\x10m\xc9_\xe6\x8e\x1f\xb8zp\xc36\x03\t|\x1d@\xd7O2\xa7\xcdd\xe5k&\xce\xf3\xbe\xbbJ/Y\xdeX.\xb8\xe3N\x08\r<\xb0W\x02\xe1\\+a\xbf\x8c\x1f\xb5\xf5\x896R\x82s\xf4\xf6\xa8\xf3\xe9\x87v\x8e\x9a\xac\xd31\xe5\x8f%\xe4M\xf8\xbe\xa7\xcc\xbd\x99\xbfqp\xb3\xafbE\xa5\xce^c\x93\'\xef\xa4\x92\xc1\xf3\xa3U^"\xb3\x84\x9d\xe6\xe7\x8b\xf2i\xaa\xcf\x98\x0f\xdd5s\xc8\x0b\xee{\xe3\xb4Ma\x89\xd7d\xf7\xbe\x1e\x1fjV4\xcf\x03\x1fj\x17\xcdf\xb0\xa8\x83}\xa5\xfaPL\xad|\xa4XM\xa8\x06\xae\t\xab\x80yLZ7\xfd\xa9!\xe9\x19\xaa\x81t[X\xe3\x1a\n\xb9\x0f\xf6\xa64\xa6\xbdUQ\xeb\xedM\xc5%\xb6\x17\xedM\xc3\xa4\xbb\x8c\x92\xc1\xa4\xf5\x17{\x8b\x84\x84-i[\x05D<\x86\xaaov\x87%\x07\xb6Ih\x1d\x85@\x85\x1d\tY\x1d\xc9\x90\x9d\x98?\x9b\x8d4\xcf\xf3\xf6\xa5#\x81\xe7\x1a\x00?'
-2025-12-23 03:54:08,445 [DEBUG] hpack.hpack: Decoded 4096, consumed 3 bytes
-2025-12-23 03:54:08,446 [DEBUG] hpack.table: Resizing header table to 4096 from 4096
-2025-12-23 03:54:08,449 [DEBUG] hpack.hpack: Decoded 8, consumed 1 bytes
-2025-12-23 03:54:08,453 [DEBUG] hpack.hpack: Decoded (b':status', b'200'), consumed 1
-2025-12-23 03:54:08,456 [DEBUG] hpack.hpack: Decoded 33, consumed 1 bytes
-2025-12-23 03:54:08,458 [DEBUG] hpack.hpack: Decoded 22, consumed 1 bytes
-2025-12-23 03:54:08,463 [DEBUG] hpack.hpack: Decoded (b'date', b'Tue, 23 Dec 2025 03:54:08 GMT'), total consumed 24 bytes, indexed True
-2025-12-23 03:54:08,465 [DEBUG] hpack.hpack: Decoded 31, consumed 1 bytes
-2025-12-23 03:54:08,469 [DEBUG] hpack.hpack: Decoded 22, consumed 1 bytes
-2025-12-23 03:54:08,471 [DEBUG] hpack.hpack: Decoded (b'content-type', b'application/json; charset=utf-8'), total consumed 24 bytes, indexed True
-2025-12-23 03:54:08,476 [DEBUG] hpack.hpack: Decoded 26, consumed 1 bytes
-2025-12-23 03:54:08,478 [DEBUG] hpack.hpack: Decoded 3, consumed 1 bytes
-2025-12-23 03:54:08,481 [DEBUG] hpack.hpack: Decoded (b'content-encoding', b'gzip'), total consumed 5 bytes, indexed True
-2025-12-23 03:54:08,483 [DEBUG] hpack.hpack: Decoded 5, consumed 1 bytes
-2025-12-23 03:54:08,484 [DEBUG] hpack.hpack: Decoded 15, consumed 1 bytes
-2025-12-23 03:54:08,487 [DEBUG] hpack.hpack: Decoded (b'cf-ray', b'9b24ea7529f788cb-LHR'), total consumed 23 bytes, indexed True
-2025-12-23 03:54:08,490 [DEBUG] hpack.hpack: Decoded 10, consumed 1 bytes
-2025-12-23 03:54:08,494 [DEBUG] hpack.hpack: Decoded 6, consumed 1 bytes
-2025-12-23 03:54:08,500 [DEBUG] hpack.hpack: Decoded (b'cf-cache-status', b'DYNAMIC'), total consumed 19 bytes, indexed True
-2025-12-23 03:54:08,502 [DEBUG] hpack.hpack: Decoded 20, consumed 1 bytes
-2025-12-23 03:54:08,504 [DEBUG] hpack.hpack: Decoded 1, consumed 1 bytes
-2025-12-23 03:54:08,511 [DEBUG] hpack.hpack: Decoded (b'access-control-allow-origin', <memory at 0x76b7e38225c0>), total consumed 3 bytes, indexed True
-2025-12-23 03:54:08,515 [DEBUG] hpack.hpack: Decoded 56, consumed 1 bytes
-2025-12-23 03:54:08,518 [DEBUG] hpack.hpack: Decoded 32, consumed 1 bytes
-2025-12-23 03:54:08,526 [DEBUG] hpack.hpack: Decoded (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), total consumed 34 bytes, indexed True
-2025-12-23 03:54:08,529 [DEBUG] hpack.hpack: Decoded 11, consumed 1 bytes
-2025-12-23 03:54:08,532 [DEBUG] hpack.hpack: Decoded 4, consumed 1 bytes
-2025-12-23 03:54:08,534 [DEBUG] hpack.hpack: Decoded (b'sb-gateway-mode', b'direct'), total consumed 18 bytes, indexed True
-2025-12-23 03:54:08,538 [DEBUG] hpack.hpack: Decoded 13, consumed 1 bytes
-2025-12-23 03:54:08,541 [DEBUG] hpack.hpack: Decoded 1, consumed 1 bytes
-2025-12-23 03:54:08,544 [DEBUG] hpack.hpack: Decoded (b'sb-gateway-version', <memory at 0x76b7e3822680>), total consumed 17 bytes, indexed True
-2025-12-23 03:54:08,546 [DEBUG] hpack.hpack: Decoded 10, consumed 1 bytes
-2025-12-23 03:54:08,548 [DEBUG] hpack.hpack: Decoded 15, consumed 1 bytes
-2025-12-23 03:54:08,554 [DEBUG] hpack.hpack: Decoded (b'sb-project-ref', b'gkvgqvosnetifsonhxuo'), total consumed 28 bytes, indexed True
-2025-12-23 03:54:08,556 [DEBUG] hpack.hpack: Decoded 10, consumed 1 bytes
-2025-12-23 03:54:08,560 [DEBUG] hpack.hpack: Decoded 26, consumed 1 bytes
-2025-12-23 03:54:08,562 [DEBUG] hpack.hpack: Decoded (b'sb-request-id', b'019b4957-c8a7-7809-b13c-edfeecdaf39d'), total consumed 39 bytes, indexed True
-2025-12-23 03:54:08,563 [DEBUG] hpack.hpack: Decoded 55, consumed 1 bytes
-2025-12-23 03:54:08,566 [DEBUG] hpack.hpack: Decoded 213, consumed 2 bytes
-2025-12-23 03:54:08,570 [DEBUG] hpack.hpack: Decoded (b'set-cookie', b'__cf_bm=10RIpXMUZFjUFgEi2.Ek04jxftxpcWu3iL87yqf2yL8-1766462048-1.0.1.1-FDH0Zpk_trmscYy8ObLNASMjOrNgofbICsgX.O9i.rKZGUrkqc_N6WxbdIZytcraYlOnw_rUdvgYGXggnLK09Biphd0D6zVR24F_77dzTAU; path=/; expires=Tue, 23-Dec-25 04:24:08 GMT; domain=.supabase.co; HttpOnly; Secure; SameSite=None'), total consumed 216 bytes, indexed True
-2025-12-23 03:54:08,571 [DEBUG] hpack.hpack: Decoded 59, consumed 1 bytes
-2025-12-23 03:54:08,574 [DEBUG] hpack.hpack: Decoded 11, consumed 1 bytes
-2025-12-23 03:54:08,576 [DEBUG] hpack.hpack: Decoded (b'vary', b'Accept-Encoding'), total consumed 13 bytes, indexed True
-2025-12-23 03:54:08,578 [DEBUG] hpack.hpack: Decoded 54, consumed 1 bytes
-2025-12-23 03:54:08,584 [DEBUG] hpack.hpack: Decoded 7, consumed 1 bytes
-2025-12-23 03:54:08,586 [DEBUG] hpack.hpack: Decoded (b'server', b'cloudflare'), total consumed 9 bytes, indexed True
-2025-12-23 03:54:08,588 [DEBUG] hpack.hpack: Decoded 5, consumed 1 bytes
-2025-12-23 03:54:08,590 [DEBUG] hpack.hpack: Decoded 16, consumed 1 bytes
-2025-12-23 03:54:08,599 [DEBUG] hpack.hpack: Decoded (b'alt-svc', b'h3=":443"; ma=86400'), total consumed 24 bytes, indexed True
-2025-12-23 03:54:08,601 [DEBUG] httpcore.http2: receive_response_headers.complete return_value=(200, [(b'date', b'Tue, 23 Dec 2025 03:54:08 GMT'), (b'content-type', b'application/json; charset=utf-8'), (b'content-encoding', b'gzip'), (b'cf-ray', b'9b24ea7529f788cb-LHR'), (b'cf-cache-status', b'DYNAMIC'), (b'access-control-allow-origin', b'*'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'sb-gateway-mode', b'direct'), (b'sb-gateway-version', b'1'), (b'sb-project-ref', b'gkvgqvosnetifsonhxuo'), (b'sb-request-id', b'019b4957-c8a7-7809-b13c-edfeecdaf39d'), (b'set-cookie', b'__cf_bm=10RIpXMUZFjUFgEi2.Ek04jxftxpcWu3iL87yqf2yL8-1766462048-1.0.1.1-FDH0Zpk_trmscYy8ObLNASMjOrNgofbICsgX.O9i.rKZGUrkqc_N6WxbdIZytcraYlOnw_rUdvgYGXggnLK09Biphd0D6zVR24F_77dzTAU; path=/; expires=Tue, 23-Dec-25 04:24:08 GMT; domain=.supabase.co; HttpOnly; Secure; SameSite=None'), (b'vary', b'Accept-Encoding'), (b'server', b'cloudflare'), (b'alt-svc', b'h3=":443"; ma=86400')])
-2025-12-23 03:54:08,605 [INFO] httpx: HTTP Request: POST https://gkvgqvosnetifsonhxuo.supabase.co/storage/v1/object/luminacaremedia/application_documents/2025/12/23/19decb65-7053-47c5-9a75-091f9cbd15ea.pdf.gz "HTTP/2 200 OK"
-2025-12-23 03:54:08,608 [DEBUG] httpcore.http2: receive_response_body.started request=<Request [b'POST']> stream_id=1
-2025-12-23 03:54:08,611 [DEBUG] httpcore.http2: receive_response_body.complete
-2025-12-23 03:54:08,616 [DEBUG] httpcore.http2: response_closed.started stream_id=1
-2025-12-23 03:54:08,619 [DEBUG] httpcore.http2: response_closed.complete
-2025-12-23 03:54:08,622 [INFO] utils.storage: [DEBUG] Using bucket: luminacaremedia
-2025-12-23 03:54:08,624 [INFO] utils.storage: Successfully uploaded application_documents/2025/12/23/19decb65-7053-47c5-9a75-091f9cbd15ea.pdf.gz to Supabase
-2025-12-23 03:54:08,627 [DEBUG] utils.storage: Generated public URL for application_documents/2025/12/23/19decb65-7053-47c5-9a75-091f9cbd15ea.pdf.gz: https://gkvgqvosnetifsonhxuo.supabase.co/storage/v1/object/public/luminacaremedia/application_documents/2025/12/23/19decb65-7053-47c5-9a75-091f9cbd15ea.pdf.gz?
-2025-12-23 03:54:08,630 [INFO] job_applications: Uploaded file application_documents/2025/12/23/19decb65-7053-47c5-9a75-091f9cbd15ea.pdf.gz to https://gkvgqvosnetifsonhxuo.supabase.co/storage/v1/object/public/luminacaremedia/application_documents/2025/12/23/19decb65-7053-47c5-9a75-091f9cbd15ea.pdf.gz?
-2025-12-23 03:54:08,632 [INFO] job_applications: Full POST payload: {'unique_link': '952803e6-f251-4cf9-9815-5be15f88afd9-APP-frontend-react-developer-cb5fc2d1', 'job_requisition': 'APP-0001', 'job_requisition_title': 'Frontend React Developer', 'full_name': 'Ekene-onwon Abraham', 'email': 'ekenehffanson@gmail.com', 'phone': '08146955393', 'date_of_birth': '2007-12-04', 'qualification': 'Data Pipeline and Preprocessing: Work closely with data engineers to develop efficient data pipelines.', 'experience': '["4 years experience as a frontend developer using React","Vue","and Django REST."]', 'knowledge_skill': 'B.Sc in Computer Science from University of Lagos (2015)', 'cover_letter': '', 'resume_status': 'true', 'documents[0][document_type]': 'Curriculum Vitae (CV)', 'documents[0][file]': <InMemoryUploadedFile: Abraham E Hanson frontend Cert (1).pdf (application/pdf)>, 'job_requisition_id': 'APP-0001', 'tenant_id': '952803e6-f251-4cf9-9815-5be15f88afd9', 'documents': [{'document_type': 'curriculum vitae (cv)', 'file_url': 'https://gkvgqvosnetifsonhxuo.supabase.co/storage/v1/object/public/luminacaremedia/application_documents/2025/12/23/19decb65-7053-47c5-9a75-091f9cbd15ea.pdf.gz?', 'original_name': 'Abraham E Hanson frontend Cert (1).pdf', 'compression': 'gzip', 'uploaded_at': '2025-12-23T03:54:08.632846+00:00'}]}
-2025-12-23 03:54:08,994 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
-2025-12-23 03:54:09,092 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "POST /api/talent-engine/requisitions/public/update-applications/952803e6-f251-4cf9-9815-5be15f88afd9-APP-frontend-react-developer-cb5fc2d1/ HTTP/1.1" 200 1332
-2025-12-23 03:54:09,095 [INFO] job_applications: Successfully incremented num_of_applications for unique_link 952803e6-f251-4cf9-9815-5be15f88afd9-APP-frontend-react-developer-cb5fc2d1
-2025-12-23 03:54:09,098 [DEBUG] kafka.producer.kafka: <KafkaProducer client_id=kafka-python-producer-1 transactional_id=None>: Starting Kafka producer
-2025-12-23 03:54:09,103 [DEBUG] kafka.metrics.metrics: Added sensor with name connections-closed
-2025-12-23 03:54:09,106 [DEBUG] kafka.metrics.metrics: Added sensor with name connections-created
-2025-12-23 03:54:09,109 [DEBUG] kafka.metrics.metrics: Added sensor with name select-time
-2025-12-23 03:54:09,111 [DEBUG] kafka.metrics.metrics: Added sensor with name io-time
-2025-12-23 03:54:09,114 [DEBUG] kafka.client: Attempting to check version with node bootstrap-0
-2025-12-23 03:54:09,116 [DEBUG] kafka.client: Initiating connection to node bootstrap-0 at kafka:9092
-2025-12-23 03:54:09,121 [DEBUG] kafka.metrics.metrics: Added sensor with name bytes-sent-received
-2025-12-23 03:54:09,124 [DEBUG] kafka.metrics.metrics: Added sensor with name bytes-sent
-2025-12-23 03:54:09,129 [DEBUG] kafka.metrics.metrics: Added sensor with name bytes-received
-2025-12-23 03:54:09,136 [DEBUG] kafka.metrics.metrics: Added sensor with name request-latency
-2025-12-23 03:54:09,138 [DEBUG] kafka.metrics.metrics: Added sensor with name throttle-time
-2025-12-23 03:54:09,142 [DEBUG] kafka.metrics.metrics: Added sensor with name node-bootstrap-0.bytes-sent
-2025-12-23 03:54:09,145 [DEBUG] kafka.metrics.metrics: Added sensor with name node-bootstrap-0.bytes-received
-2025-12-23 03:54:09,148 [DEBUG] kafka.metrics.metrics: Added sensor with name node-bootstrap-0.latency
-2025-12-23 03:54:09,150 [DEBUG] kafka.metrics.metrics: Added sensor with name node-bootstrap-0.throttle
-2025-12-23 03:54:12,824 [WARNING] kafka.conn: DNS lookup failed for kafka:9092, exception was [Errno -2] Name or service not known. Is your advertised.listeners (called advertised.host.name before Kafka 9) correct and resolvable?
-2025-12-23 03:54:12,827 [ERROR] kafka.conn: <BrokerConnection client_id=kafka-python-producer-1, node_id=bootstrap-0 host=kafka:9092 <connecting> [unspecified None]>: DNS lookup failed for kafka:9092 (0)
-2025-12-23 03:54:12,830 [ERROR] kafka.conn: <BrokerConnection client_id=kafka-python-producer-1, node_id=bootstrap-0 host=kafka:9092 <connecting> [unspecified None]>: Closing connection. KafkaConnectionError: DNS failure
-2025-12-23 03:54:12,832 [DEBUG] kafka.conn: <BrokerConnection client_id=kafka-python-producer-1, node_id=bootstrap-0 host=kafka:9092 <connecting> [unspecified None]>: reconnect backoff 0.05134392678769802 after 1 failures
-2025-12-23 03:54:12,835 [ERROR] job_applications: Kafka publish error: NoBrokersAvailable
-2025-12-23 03:54:12,839 [INFO] job_applications: ➡️ POST to http://app:3001/events/ with payload: {'metadata': {'tenant_id': '952803e6-f251-4cf9-9815-5be15f88afd9', 'event_type': 'application.submitted', 'event_id': '4032544e-9284-4b4a-96db-43700d644d2b', 'created_at': '2025-12-23T03:54:12.839620+00:00', 'source': 'job-applications'}, 'data': {'email': 'ekenehffanson@gmail.com', 'full_name': 'Ekene-onwon Abraham', 'application_id': 'ea60939e-8c50-4cd4-b669-9041af9a4796', 'job_requisition_id': 'APP-0001', 'job_requisition_title': 'Frontend React Developer', 'status': 'new', 'score': None, 'has_employment_gaps': False, 'employment_gaps': [], 'timestamp': '2025-12-23T03:54:12.839655+00:00', 'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'}}
-2025-12-23 03:54:12,845 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): app:3001
-2025-12-23 03:54:12,963 [DEBUG] urllib3.connectionpool: http://app:3001 "POST /events/ HTTP/1.1" 201 82
-2025-12-23 03:54:12,968 [INFO] job_applications: ✅ Notification sent for application.submitted to ekenehffanson@gmail.com. Status: 201, Response: {"success":true,"message":"Event received and processing started","jobIds":["98"]}
-2025-12-23 03:54:12,972 [INFO] job_applications: Application submission notification queued for job application ea60939e-8c50-4cd4-b669-9041af9a4796
+2025-12-23 06:54:49,657 [INFO] job_applications: Schedule 820fa862-7eec-43c4-804a-187d50ec9038 soft-deleted for tenant 952803e6-f251-4cf9-9815-5be15f88afd9
+2025-12-23 06:54:50,037 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:50,056 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:50,074 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:50,499 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:50,510 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:50,670 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:50,681 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:50,857 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:50,860 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:50,871 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:51,002 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:51,017 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:51,137 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:51,141 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:46,016 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:46,035 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:46,043 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:54,328 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:54,339 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:54,429 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:54,432 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:54,602 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:54,613 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:54,619 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:54,753 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:54,768 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:54,917 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:54,929 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:55,117 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:55,124 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:55,129 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:55,213 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:55,228 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:55,305 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:55,310 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:55,587 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:55,591 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:55,595 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:55,699 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:55,705 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:55,778 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:55,784 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:55,871 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:55,876 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:55,881 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:55,997 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:56,006 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:56,124 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:56,128 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:56,417 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:56,423 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:56,430 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:56,680 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:56,696 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:56,831 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:56,838 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:56,918 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:56,922 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:56,928 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:57,005 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:57,011 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:57,072 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:57,074 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:57,140 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:57,143 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:57,147 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:57,214 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:57,222 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:57,294 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:57,297 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:57,340 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:57,342 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:57,345 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:57,398 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:57,403 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:57,463 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:57,465 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:57,632 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:57,643 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:57,652 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:57,725 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:54:57,730 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:54:57,799 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:54:57,802 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:54:59,823 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:54:59,826 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:54:59,836 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:00,123 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:00,136 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:00,415 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:00,418 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:00,552 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:00,557 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:00,563 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:00,644 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:00,656 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:00,871 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:00,890 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:00,906 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-12-23 06:55:01,391 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=952803e6-f251-4cf9-9815-5be15f88afd9&publish_status=True HTTP/1.1" 200 3159
+2025-12-23 06:55:01,863 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:01,875 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:01,882 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:02,000 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:02,012 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:02,111 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:02,116 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:02,201 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:02,204 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:02,208 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:02,298 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:02,305 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:02,437 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:02,440 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:02,453 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): talent-engine:8002
+2025-12-23 06:55:02,733 [DEBUG] urllib3.connectionpool: http://talent-engine:8002 "GET /api/talent-engine/requisitions/?tenant_id=952803e6-f251-4cf9-9815-5be15f88afd9&publish_status=True HTTP/1.1" 200 3159
+2025-12-23 06:55:23,438 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:23,444 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:23,485 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:23,694 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:23,707 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:23,849 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:23,863 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:24,099 [INFO] job_applications: Schedule created: 14453793-6735-4cfe-bec4-e21da5d56b8f for job_application_id: 9c24504b-95b9-4395-9241-9483fe7fce0a by user: 1
+2025-12-23 06:55:18,747 [INFO] job_applications: ➡️ POST to http://app:3001/events/ with payload: {'metadata': {'tenant_id': '952803e6-f251-4cf9-9815-5be15f88afd9', 'event_type': 'interview.scheduled', 'event_id': '14a5bbde-92e8-4feb-81aa-9f5ae1ba2bbf', 'created_at': '2025-12-23T06:55:18.747219+00:00', 'source': 'job-applications'}, 'data': {'email': 'ekenehanson@gmail.com', 'full_name': 'Ekene-onwon Hanson Abraham', 'application_id': '9c24504b-95b9-4395-9241-9483fe7fce0a', 'dashboard_url': 'https://dev.e3os.co.ukapplication-dashboard/APP-JA-0001/ekenehanson%40gmail.com/952803e6-f251-4cf9-9815-5be15f88afd9-APP-frontend-react-developer-cb5fc2d1', 'job_requisition_id': 'APP-0001', 'job_requisition_title': 'jsdbchsdv. ksvkasva .', 'status': 'scheduled', 'score': None, 'has_employment_gaps': False, 'employment_gaps': [], 'timestamp': '2025-12-23T06:55:18.747248+00:00', 'user_agent': 'unknown'}}
+2025-12-23 06:55:18,759 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): app:3001
+2025-12-23 06:55:27,043 [DEBUG] urllib3.connectionpool: http://app:3001 "POST /events/ HTTP/1.1" 201 83
+2025-12-23 06:55:27,061 [INFO] job_applications: ✅ Notification sent for interview.scheduled to ekenehanson@gmail.com. Status: 201, Response: {"success":true,"message":"Event received and processing started","jobIds":["101"]}
+2025-12-23 06:55:27,515 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:27,557 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:27,588 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:27,787 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:27,821 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:27,961 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:27,969 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:28,087 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:28,123 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:28,129 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:28,329 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:28,346 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:28,553 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:28,565 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:28,733 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:28,739 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:28,750 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:28,949 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:28,986 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:29,361 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:29,377 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:29,612 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:29,696 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:29,735 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:30,063 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:30,085 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:30,267 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:30,278 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:30,347 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:30,380 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:30,396 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:30,523 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:30,535 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:30,632 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:30,634 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:30,679 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:30,684 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:30,688 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:30,764 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:30,778 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:30,889 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:30,908 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:30,998 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:31,028 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:31,038 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:31,315 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:31,372 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:31,638 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:31,649 [INFO] job_applications: Set schema to: appbrew
+2025-12-23 06:55:31,856 [INFO] job_applications: Entering MicroserviceRS256JWTMiddleware
+2025-12-23 06:55:31,916 [INFO] job_applications: Fetching public key from: http://auth-service:8001/api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3
+2025-12-23 06:55:31,929 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:32,122 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/public-key/a15df0e9e8084bb3ab34b6185b599a8c/?tenant_id=3 HTTP/1.1" 200 477
+2025-12-23 06:55:32,134 [DEBUG] urllib3.connectionpool: Starting new HTTP connection (1): auth-service:8001
+2025-12-23 06:55:32,284 [DEBUG] urllib3.connectionpool: http://auth-service:8001 "GET /api/tenant/tenants/952803e6-f251-4cf9-9815-5be15f88afd9/ HTTP/1.1" 200 650
+2025-12-23 06:55:32,290 [INFO] job_applications: Set schema to: appbrew

@@ -2166,7 +2166,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
                     tenant_id=tenant_id,
                     event_type="interview.scheduled"
                 )
-                logger.info(f"Schedule {notification_payload} creation notification sent for schedule {schedule.id}, job application {schedule.job_application_id}")
+                #logger.info(f"Schedule {notification_payload} creation notification sent for schedule {schedule.id}, job application {schedule.job_application_id}")
         except Exception as e:
             logger.error(f"Failed to send schedule creation notification for schedule {schedule.id}: {str(e)}")
 

@@ -82,6 +82,7 @@ def send_screening_notification(applicant, tenant_id, event_type, source="job-ap
                 "email": applicant.get("email"),
                 "full_name": applicant.get("full_name"),
                 "application_id": applicant.get("application_id"),
+                "dashboard_url": applicant.get("dashboard_url"),
                 "job_requisition_id": applicant.get("job_requisition_id"),
                 "job_requisition_title": applicant.get("job_requisition_title"),
                 "status": applicant.get("status"),
