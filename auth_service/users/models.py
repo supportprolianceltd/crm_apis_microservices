@@ -134,6 +134,7 @@ class CustomUser(AbstractUser):
     is_locked = models.BooleanField(default=False)
     login_attempts = models.PositiveIntegerField(default=0)
     last_password_reset = models.DateTimeField(null=True, blank=True)
+    manage_permission = models.BooleanField(default=False)
 
     # Two-Factor Authentication fields
     two_factor_enabled = models.BooleanField(default=False)
@@ -151,6 +152,11 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    def clean(self):
+        if self.manage_permission and self.role != 'co-admin':
+            raise ValidationError("manage_permission can only be set to True for users with role 'co-admin'.")
+        super().clean()
 
     def lock_account(self, reason="Manual lock"):
         self.is_locked = True

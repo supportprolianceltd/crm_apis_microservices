@@ -1353,6 +1353,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "profile",
             "has_accepted_terms",
             "permission_levels",
+            "manage_permission",
             "branch",
             # "last_updated_by_id",
             # "last_updated_by",
@@ -1598,6 +1599,7 @@ class CustomUserListSerializer(serializers.ModelSerializer):
             "branch",
             "status",
             "permission_levels",
+            "manage_permission",
             "profile",
             "profile_completion_percentage",
         ]  # Light fields
@@ -2059,7 +2061,7 @@ class ClientDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ["id", "email", "first_name", "last_name", "role", "job_role", "branch", "profile"]
+        fields = ["id", "email", "first_name", "last_name", "role", "username", "job_role", "branch", "profile"]
         read_only_fields = ["id", "role"]
 
     def to_internal_value(self, data):
@@ -2168,8 +2170,8 @@ class ClientCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ["id", "email", "password", "first_name", "last_name", "role", "job_role", "profile", "branch", "status"]
-        read_only_fields = ["id"]
+        fields = ["id", "username", "email", "password", "first_name", "last_name", "role", "job_role", "profile", "branch", "status"]
+        read_only_fields = ["id", "username"]
         extra_kwargs = {
             "email": {"required": True},
             "first_name": {"required": True},

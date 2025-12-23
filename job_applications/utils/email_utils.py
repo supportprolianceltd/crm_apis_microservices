@@ -83,6 +83,7 @@ def send_screening_notification(applicant, tenant_id, event_type, source="job-ap
                 "full_name": applicant.get("full_name"),
                 "application_id": applicant.get("application_id"),
                 "job_requisition_id": applicant.get("job_requisition_id"),
+                "job_requisition_title": applicant.get("job_requisition_title"),
                 "status": applicant.get("status"),
                 "score": applicant.get("score", None),
                 "has_employment_gaps": bool(employment_gaps),

@@ -1156,11 +1156,9 @@ class UserViewSet(viewsets.ModelViewSet):
             from auth_service.utils.cache import delete_tenant_cache
             delete_tenant_cache(tenant.schema_name, 'users_list')
 
-            # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
+        # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
             logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
             try:
-                from auth_service.utils.kafka_producer import publish_event
-
                 # Generate a unique event ID in the format 'evt-<uuid>'
                 event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                 # Get user agent from request
@@ -1170,13 +1168,21 @@ class UserViewSet(viewsets.ModelViewSet):
                 # Define login link (customize as needed)
                 login_link = settings.WEB_PAGE_URL
 
+                # print("login_link")
+                # print(login_link)
+                # print("login_link")
+
                 logger.info(f"🎯 {login_link}")
 
                 event_payload = {
-                    "event_type": "user.account.created",
-                    "tenant_id": str(tenant.unique_id),
-                    "timestamp": timezone.now().isoformat(),
-                    "payload": {
+                    "metadata": {
+                        "tenant_id": str(tenant.unique_id),
+                        "event_type": "user.account.created",
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
+                    },
+                    "data": {
                         "user_email": user_obj.email,
                         "company_name": company_name,
                         "temp_password": serializer.validated_data.get("password", ""),
@@ -1185,22 +1191,18 @@ class UserViewSet(viewsets.ModelViewSet):
                         "user_agent": user_agent,
                         "user_id": str(user_obj.id),
                     },
-                    "metadata": {
-                        "event_id": event_id,
-                        "created_at": timezone.now().isoformat(),
-                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
-                    },
                 }
 
-                safe_payload = {**event_payload, "payload": {**event_payload["payload"], "temp_password": "[REDACTED]"}}
-                logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
+                notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
+                safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
+                logger.info(f"➡️ POST to {notifications_url} with payload: {safe_payload}")
 
-                success = publish_event("auth-events", event_payload)
-                if success:
-                    logger.info(f"✅ Notification sent for {user_obj.email}")
-                else:
-                    logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}")
+                response = requests.post(notifications_url, json=event_payload, timeout=5)
+                response.raise_for_status()  # Raise if status != 200
+                logger.info(f"✅ Notification sent for {user_obj.email}. Status: {response.status_code}, Response: {response.text}")
 
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}: {str(e)}")
             except Exception as e:
                 logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
 
@@ -1487,24 +1489,78 @@ class UserViewSet(viewsets.ModelViewSet):
                         delete_tenant_cache(tenant.schema_name, 'users_list')
 
                         # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
-                        logger.info(f"🎯 Sending user creation event for {user_obj.email} to notification service.")
-                        try:
-                            from core.utils.kafka_producer import publish_event
+                        # logger.info(f"🎯 Sending user creation event for {user_obj.email} to notification service.")
+                        # try:
+                        #     from core.utils.kafka_producer import publish_event
 
+                        #     # Generate a unique event ID in the format 'evt-<uuid>'
+                        #     event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+                        #     # Get user agent from request
+                        #     user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+                        #     # Define company name (assuming tenant name or a custom field)
+                        #     company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
+                        #     # Define login link (customize as needed)
+                        #     login_link = settings.WEB_PAGE_URL
+
+                        #     event_payload = {
+                        #         "event_type": "user.account.created",
+                        #         "tenant_id": str(tenant.unique_id),
+                        #         "timestamp": timezone.now().isoformat(),
+                        #         "payload": {
+                        #             "user_email": user_obj.email,
+                        #             "username": user_obj.username,
+                        #             "company_name": company_name,
+                        #             "temp_password": serializer.validated_data.get("password", ""),
+                        #             "login_link": login_link,
+                        #             "timestamp": timezone.now().isoformat(),
+                        #             "user_agent": user_agent,
+                        #             "user_id": str(user_obj.id),
+                        #         },
+                        #         "metadata": {
+                        #             "event_id": event_id,
+                        #             "created_at": timezone.now().isoformat(),
+                        #             "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                        #         },
+                        #     }
+
+                        #     safe_payload = {**event_payload, "payload": {**event_payload["payload"], "temp_password": "[REDACTED]"}}
+                        #     logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
+
+                        #     success = publish_event("auth-events", event_payload)
+                        #     if success:
+                        #         logger.info(f"✅ Notification sent for {user_obj.email}")
+                        #     else:
+                        #         logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}")
+
+                        # except Exception as e:
+                        #     logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
+                        # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
+                        logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
+                        try:
                             # Generate a unique event ID in the format 'evt-<uuid>'
                             event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
                             # Get user agent from request
-                            user_agent = request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+                            user_agent = self.request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
                             # Define company name (assuming tenant name or a custom field)
                             company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
                             # Define login link (customize as needed)
-                            login_link = "https://learn.prolianceltd.com/home/login"
+                            login_link = settings.WEB_PAGE_URL
+
+                            # print("login_link")
+                            # print(login_link)
+                            # print("login_link")
+
+                            logger.info(f"🎯 {login_link}")
 
                             event_payload = {
-                                "event_type": "user.account.created",
-                                "tenant_id": str(tenant.unique_id),
-                                "timestamp": timezone.now().isoformat(),
-                                "payload": {
+                                "metadata": {
+                                    "tenant_id": str(tenant.unique_id),
+                                    "event_type": "user.account.created",
+                                    "event_id": event_id,
+                                    "created_at": timezone.now().isoformat(),
+                                    EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
+                                },
+                                "data": {
                                     "user_email": user_obj.email,
                                     "company_name": company_name,
                                     "temp_password": serializer.validated_data.get("password", ""),
@@ -1513,24 +1569,22 @@ class UserViewSet(viewsets.ModelViewSet):
                                     "user_agent": user_agent,
                                     "user_id": str(user_obj.id),
                                 },
-                                "metadata": {
-                                    "event_id": event_id,
-                                    "created_at": timezone.now().isoformat(),
-                                    "source": DefaultValues.SOURCE_AUTH_SERVICE,
-                                },
                             }
 
-                            safe_payload = {**event_payload, "payload": {**event_payload["payload"], "temp_password": "[REDACTED]"}}
-                            logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
+                            notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
+                            safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
+                            logger.info(f"➡️ POST to {notifications_url} with payload: {safe_payload}")
 
-                            success = publish_event("auth-events", event_payload)
-                            if success:
-                                logger.info(f"✅ Notification sent for {user_obj.email}")
-                            else:
-                                logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}")
+                            response = requests.post(notifications_url, json=event_payload, timeout=5)
+                            response.raise_for_status()  # Raise if status != 200
+                            logger.info(f"✅ Notification sent for {user_obj.email}. Status: {response.status_code}, Response: {response.text}")
 
+                        except requests.exceptions.RequestException as e:
+                            logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}: {str(e)}")
                         except Exception as e:
                             logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
+
+
 
                         results.append(
                             {
@@ -3316,8 +3370,8 @@ class AdminUserCreateView(APIView):
                 refresh = RefreshToken.for_user(user)
                 logger.info(f"Admin user created: {user.email} for tenant {user.tenant.schema_name}")
 
-                # ✅ SEND NOTIFICATION EVENT AFTER ADMIN USER CREATION
-                logger.info("🎯 Reached admin user creation success block. Sending user creation event to notification service.")
+                # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
+                logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
                 try:
                     from auth_service.utils.kafka_producer import publish_event
 
@@ -3328,28 +3382,22 @@ class AdminUserCreateView(APIView):
                     # Define company name (assuming tenant name or a custom field)
                     company_name = user.tenant.name if hasattr(user.tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
                     # Define login link (customize as needed)
-
-
                     login_link = settings.WEB_PAGE_URL
+
                     logger.info(f"🎯 {login_link}")
+
                     event_payload = {
-                        "event_type": "user.registration.completed",
+                        "event_type": "user.account.created",
                         "tenant_id": str(user.tenant.unique_id),
                         "timestamp": timezone.now().isoformat(),
                         "payload": {
                             "user_email": user.email,
-                            "username": user.username,
-                            "first_name": user.first_name,
-                            "last_name": user.last_name,
                             "company_name": company_name,
                             "temp_password": serializer.validated_data.get("password", ""),
                             "login_link": login_link,
                             "timestamp": timezone.now().isoformat(),
                             "user_agent": user_agent,
                             "user_id": str(user.id),
-                            "registration_date": timezone.now().isoformat(),
-                            "verification_required": False,
-                            "send_credentials": True,
                         },
                         "metadata": {
                             "event_id": event_id,
@@ -3358,8 +3406,19 @@ class AdminUserCreateView(APIView):
                         },
                     }
 
-                    safe_payload = {**event_payload, "payload": {**event_payload["payload"], "temp_password": "[REDACTED]"}}
-                    logger.info(f"➡️ Kafka to auth-events with payload: {safe_payload}")
+                    # Send notification to external service
+                    try:
+                        url = urllib.parse.urljoin(settings.NOTIFICATIONS_SERVICE_URL.rstrip('/') + '/', 'events/')
+
+                        response = requests.post(
+                            url,
+                            json=event_payload,
+                            timeout=5
+                        )
+                        response.raise_for_status()
+                        logger.info(LogMessages.NOTIFICATION_SENT_FOR_PASSWORD_RESET.format(user.email, response.status_code))
+                    except requests.exceptions.RequestException as e:
+                        logger.error(LogMessages.FAILED_TO_SEND_PASSWORD_RESET_NOTIFICATION.format(user.email, str(e)))
 
                     success = publish_event("auth-events", event_payload)
                     if success:
@@ -3726,7 +3785,71 @@ class ClientViewSet(viewsets.ModelViewSet):
         # if not (self.request.user.is_superuser or self.request.user.role == "admin"):
         #     raise PermissionDenied("Only admins or superusers can create clients.")
         with tenant_context(tenant):
-            serializer.save()
+            user_obj = serializer.save()
+            logger.info(f"User created: {user_obj.email} (ID: {user_obj.id}) for tenant {tenant.schema_name}")
+
+            # Invalidate user list cache on create
+            from auth_service.utils.cache import delete_tenant_cache
+            delete_tenant_cache(tenant.schema_name, 'users_list')
+
+            # ✅ SEND NOTIFICATION EVENT AFTER USER CREATION
+            logger.info("🎯 Reached user creation success block. Sending user creation event to notification service.")
+            try:
+                from auth_service.utils.kafka_producer import publish_event
+
+                # Generate a unique event ID in the format 'evt-<uuid>'
+                event_id = f"{DefaultValues.EVT_PREFIX}{str(uuid.uuid4())[:DefaultValues.UUID_LENGTH]}"
+                # Get user agent from request
+                user_agent = self.request.META.get(RequestMetaKeys.HTTP_USER_AGENT, DefaultValues.UNKNOWN)
+                # Define company name (assuming tenant name or a custom field)
+                company_name = tenant.name if hasattr(tenant, 'name') else DefaultValues.UNKNOWN_COMPANY
+                # Define login link (customize as needed)
+                login_link = settings.WEB_PAGE_URL
+
+                logger.info(f"🎯 {login_link}")
+
+                event_payload = {
+                    "event_type": "user.account.created",
+                    "tenant_id": str(tenant.unique_id),
+                    "timestamp": timezone.now().isoformat(),
+                    "payload": {
+                        "user_email": user_obj.email,
+                        "company_name": company_name,
+                        "temp_password": serializer.validated_data.get("password", ""),
+                        "login_link": login_link,
+                        "timestamp": timezone.now().isoformat(),
+                        "user_agent": user_agent,
+                        "user_id": str(user_obj.id),
+                    },
+                    "metadata": {
+                        "event_id": event_id,
+                        "created_at": timezone.now().isoformat(),
+                        "source": DefaultValues.SOURCE_AUTH_SERVICE,
+                    },
+                }
+
+                # Send notification to external service
+                try:
+                    url = urllib.parse.urljoin(settings.NOTIFICATIONS_SERVICE_URL.rstrip('/') + '/', 'events/')
+
+                    response = requests.post(
+                        url,
+                        json=event_payload,
+                        timeout=5
+                    )
+                    response.raise_for_status()
+                    logger.info(LogMessages.NOTIFICATION_SENT_FOR_PASSWORD_RESET.format(user_obj.email, response.status_code))
+                except requests.exceptions.RequestException as e:
+                    logger.error(LogMessages.FAILED_TO_SEND_PASSWORD_RESET_NOTIFICATION.format(user_obj.email, str(e)))
+
+                success = publish_event("auth-events", event_payload)
+                if success:
+                    logger.info(f"✅ Notification sent for {user_obj.email}")
+                else:
+                    logger.warning(f"[❌ Notification Error] Failed to send user creation event for {user_obj.email}")
+
+            except Exception as e:
+                logger.error(f"[❌ Notification Exception] Unexpected error for {user_obj.email}: {str(e)}")
 
     def update(self, request, *args, **kwargs):
         tenant = request.user.tenant

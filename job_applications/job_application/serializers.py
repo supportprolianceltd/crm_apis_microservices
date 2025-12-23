@@ -138,7 +138,7 @@ class PublicJobApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplication
         fields = [
-            'id', 'tenant_id', 'job_requisition_id', 'full_name',
+            'id', 'tenant_id', 'job_requisition_id', 'job_requisition_title', 'full_name',
             'email', 'phone', 'date_of_birth', 'resume_url', 'cover_letter_url', 'source',
             'application_date', 'current_stage', 'status', 'qualification', 'experience',
             'knowledge_skill', 'cover_letter', 'documents', 'compliance_status',
@@ -296,7 +296,7 @@ class JobApplicationSerializer(serializers.ModelSerializer):
     documents = DocumentSerializer(many=True, required=False)
     compliance_status = ComplianceStatusSerializer(many=True, required=False)
     job_requisition_id = serializers.CharField()
-    job_requisition_title = serializers.CharField(read_only=True)  # New read-only field for title
+    #job_requisition_title = serializers.CharField(read_only=True)  # New read-only field for title
     branch_id = serializers.CharField(allow_null=True, required=False)
     tenant_id = serializers.CharField(read_only=True)
     resume_url = serializers.CharField(read_only=True)
@@ -308,7 +308,7 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         model = JobApplication
         fields = "__all__"
         read_only_fields = [
-            'id', 'tenant_id', 'job_requisition_title', 'resume_url', 'cover_letter_url', 'is_deleted', 'applied_at', 'created_at', 'updated_at', 'hired_by', 'status_history'
+            'id', 'tenant_id', 'resume_url', 'cover_letter_url', 'is_deleted', 'applied_at', 'created_at', 'updated_at', 'hired_by', 'status_history'
         ]
 
     def validate(self, data):

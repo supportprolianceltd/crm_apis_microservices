@@ -642,6 +642,7 @@ def screen_resumes_task(job_requisition_id, document_type, num_candidates, appli
             shortlisted_app = next((item for item in final_shortlisted if item['application_id'] == app_id_str), None)
             if shortlisted_app:
                 shortlisted_app['job_requisition_id'] = job_requisition['id']
+                shortlisted_app['job_requisition_title'] = app.job_requisition_title
                 shortlisted_app['status'] = 'shortlisted'
                 employment_gaps = shortlisted_app.get('employment_gaps', [])
                 event_type = "job.application.shortlisted.gaps" if employment_gaps else "job.application.shortlisted"
@@ -658,6 +659,7 @@ def screen_resumes_task(job_requisition_id, document_type, num_candidates, appli
                 "full_name": app.full_name,
                 "email": app.email,
                 "job_requisition_id": job_requisition['id'],
+                "job_requisition_title": app.job_requisition_title,
                 "status": "rejected",
                 "score": getattr(app, "screening_score", None)
             }
@@ -1063,6 +1065,7 @@ def _update_applications_and_queue_emails(shortlisted_candidates, job_requisitio
                             "full_name": shortlisted_app['full_name'],
                             "application_id": shortlisted_app['application_id'],
                             "job_requisition_id": job_requisition_id,
+                            "job_requisition_title": app.job_requisition_title,
                             "status": "shortlisted",
                             "score": shortlisted_app.get('score'),
                             "explanation": shortlisted_app.get('explanation')
@@ -1088,6 +1091,7 @@ def _update_applications_and_queue_emails(shortlisted_candidates, job_requisitio
                         "full_name": app.full_name,
                         "application_id": app_id_str,
                         "job_requisition_id": job_requisition_id,
+                        "job_requisition_title": app.job_requisition_title,
                         "status": "rejected",
                         "score": getattr(app, "screening_score", None)
                     }

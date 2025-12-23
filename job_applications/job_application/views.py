@@ -1127,6 +1127,7 @@ class ResumeScreeningView(APIView):
                             "full_name": shortlisted_app['full_name'],
                             "application_id": shortlisted_app['application_id'],
                             "job_requisition_id": job_requisition['id'],
+                            "job_requisition_title": app.job_requisition_title,
                             "status": "shortlisted",
                             "score": shortlisted_app.get('score')
                         }
@@ -1157,6 +1158,7 @@ class ResumeScreeningView(APIView):
                         "full_name": app.full_name,
                         "application_id": app_id_str,
                         "job_requisition_id": job_requisition['id'],
+                        "job_requisition_title": app.job_requisition_title,
                         "status": "rejected",
                         "score": getattr(app, "screening_score", None)
                     }
@@ -1263,6 +1265,7 @@ class JobApplicationCreatePublicView(generics.CreateAPIView):
         # Prepare payload, normalizing list-based fields
         payload = {key: normalize_field(value) for key, value in request.data.items()}
         payload['job_requisition_id'] = job_requisition['id']
+        payload['job_requisition_title'] = job_requisition.get('title', '')
         payload['tenant_id'] = tenant_id
 
         # Extract and compress documents from multipart form
