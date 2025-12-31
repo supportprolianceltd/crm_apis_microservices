@@ -4821,9 +4821,8 @@ class UserProfileDataView(APIView):
             except Exception as e:
                 logger.error(f"[❌ Notification Exception] Unexpected error for {user.email}: {str(e)}")
 
-            return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
-        
-        
+            # Return the complete updated user data
+            return self.get(request)     
         
 
 class BulkUserDetailsView(APIView):

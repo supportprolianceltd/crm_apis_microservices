@@ -136,9 +136,12 @@ class ROIAccrualView(APIView):
         
         due_summary = due_policies.aggregate(
             total_policies=Count('id'),
-            total_principal=Sum('current_balance'),
-            estimated_roi=Sum('current_balance') * 0.40 / 12  # 40% annual / 12 months
+            total_principal=Sum('current_balance')
         )
+
+        # Calculate estimated ROI in Python to avoid Django aggregation type issues
+        total_principal = due_summary['total_principal'] or 0
+        due_summary['estimated_roi'] = total_principal * Decimal('0.40') / 12
         
         # Recent ROI accruals
         recent_accruals = ROIAccrual.objects.filter(
@@ -168,7 +171,7 @@ class ROIAccrualView(APIView):
                         'investor_name': policy.user.get_full_name(),
                         'current_balance': policy.current_balance,
                         'next_roi_date': policy.next_roi_date,
-                        'estimated_roi': policy.current_balance * 0.40 / 12
+                        'estimated_roi': policy.current_balance * Decimal("0.40") / Decimal("12")
                     }
                     for policy in due_policies
                 ]

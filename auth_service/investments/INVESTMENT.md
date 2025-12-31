@@ -10,8 +10,8 @@
 **Request Body:**
 ```json
 {
-  "email": "support@appbrew.com",
-  "password": "qwerty"
+    "email": "support@prolianceltd.com",
+    "password": "[4=y:Yg)mzD6Xs"
 }
 ```
 

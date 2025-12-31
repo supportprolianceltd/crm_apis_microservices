@@ -405,7 +405,7 @@ class CustomTokenSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        logger.info(f"🔐🔐🔐 CUSTOM SERIALIZER VALIDATE CALLED")
+        # logger.info(f"🔐🔐🔐 CUSTOM SERIALIZER VALIDATE CALLED")
         
         remember_me = attrs.get('remember_me', False)
         ip_address = self.context["request"].META.get("REMOTE_ADDR")
@@ -426,10 +426,10 @@ class CustomTokenSerializer(serializers.Serializer):
         # Try authentication - this will handle both CustomUser and GlobalUser
         user = None
         if '@' in identifier:
-            logger.info("🔐 Using email authentication")
+            # logger.info("🔐 Using email authentication")
             user = self._authenticate_by_email(identifier, attrs.get("password"), tenant)
         else:
-            logger.info("🔐 Using username authentication")
+            # logger.info("🔐 Using username authentication")
             user = self._authenticate_by_username(identifier, attrs.get("password"))
 
         if not user:
@@ -496,6 +496,7 @@ class CustomTokenSerializer(serializers.Serializer):
         # Send OTP to email or phone based on method
         otp_code = f"{random.randint(100000, 999999)}"
         logger.info(f"🔐 OTP generated for user {user.email} via {otp_method}: {otp_code}")
+        print(f"🔐 OTP generated for user {user.email} via {otp_method}: {otp_code}")
         cache.set(f"otp_{user.id}", {'code': otp_code, 'remember_me': remember_me, 'otp_method': otp_method}, timeout=300)
 
         # Send OTP via email or SMS based on method

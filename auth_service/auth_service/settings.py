@@ -473,5 +473,5 @@ broker_connection_retry_on_startup = True
 
 # Email: ekeabr815
 # Password: &7*XW[E)cJb+
-#  Email: newstaff@prolianceltd.com
-# Pword: Wn6xaKsikVXP
+#  Email: support@prolianceltd.com
+# Pword: [4=y:Yg)mzD6Xs

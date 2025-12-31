@@ -32,7 +32,7 @@ class InvestmentPolicySerializer(serializers.ModelSerializer):
         return super().validate(data)
     
     def create(self, validated_data):
-        """Auto-assign tenant, user, and profile on creation if not provided"""
+        """Auto-assign tenant, user, and profile on creation if not provided. Set current_balance = principal_amount if not provided."""
         request = self.context.get('request')
 
         # Auto-assign tenant
@@ -49,6 +49,12 @@ class InvestmentPolicySerializer(serializers.ModelSerializer):
             assigned_user = validated_data.get('user')
             if assigned_user and hasattr(assigned_user, 'profile'):
                 validated_data['profile'] = assigned_user.profile
+
+        # Set current_balance = principal_amount if not provided
+        if 'current_balance' not in validated_data or validated_data.get('current_balance') in (None, ''):
+            principal = validated_data.get('principal_amount')
+            if principal is not None:
+                validated_data['current_balance'] = principal
 
         # Generate policy_number if not provided
         tenant = validated_data.get('tenant')
@@ -71,8 +77,8 @@ class InvestmentPolicySerializer(serializers.ModelSerializer):
         model = InvestmentPolicy
         fields = [
             'id', 'user', 'user_details', 'policy_number', 'unique_policy_id', 'principal_amount', 'roi_rate',
-            'roi_frequency', 'min_withdrawal_months', 'allow_partial_withdrawals',
-            'auto_rollover', 'rollover_option', 'status', 'maturity_date'
+            'roi_frequency', 'min_withdrawal_months', 'allow_partial_withdrawals','current_balance',
+                'next_roi_date', 'auto_rollover', 'rollover_option', 'status', 'maturity_date', 'start_date'
         ]
         read_only_fields = ['id', 'policy_number', 'unique_policy_id', 'status', 'user_details']
         extra_kwargs = {

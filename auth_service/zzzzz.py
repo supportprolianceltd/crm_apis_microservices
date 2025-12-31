@@ -9,7 +9,7 @@ from django_tenants.utils import tenant_context
 tenant = Tenant.objects.get(schema_name='appbrew')
 with tenant_context(tenant):
     CustomUser.objects.create_superuser(
-        email='suuport@appbrew.com',
+        email='support@appbrew.com',
         password='qwerty',
         role='root-admin',
         first_name='Gideon',
