@@ -77,8 +77,8 @@ class InvestmentPolicySerializer(serializers.ModelSerializer):
         model = InvestmentPolicy
         fields = [
             'id', 'user', 'user_details', 'policy_number', 'unique_policy_id', 'principal_amount', 'roi_rate',
-            'roi_frequency', 'min_withdrawal_months', 'allow_partial_withdrawals','current_balance',
-                'next_roi_date', 'auto_rollover', 'rollover_option', 'status', 'maturity_date', 'start_date'
+            'roi_frequency', 'min_withdrawal_months', 'allow_partial_withdrawals','current_balance', 'roi_balance',
+                'next_roi_date', 'auto_rollover', 'rollover_option', 'status', 'maturity_date', 'start_date', 'roi_due'
         ]
         read_only_fields = ['id', 'policy_number', 'unique_policy_id', 'status', 'user_details']
         extra_kwargs = {

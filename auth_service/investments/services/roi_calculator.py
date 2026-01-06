@@ -72,7 +72,57 @@ class ROICalculator:
             )
             
             return accrual
-    
+
+    @classmethod
+    def accrue_roi_for_policy(cls, policy, force=False):
+        """Accrue ROI for a specific policy (with optional force flag for testing)"""
+        if not force and not cls.should_accrue_roi(policy.start_date.date()):
+            return None
+
+        # Calculate ROI
+        roi_amount = cls.calculate_monthly_roi(policy.current_balance, policy.roi_rate)
+
+        with transaction.atomic():
+            # Update policy balances
+            policy.roi_balance += roi_amount
+            policy.total_balance += roi_amount
+            policy.last_roi_calculation = timezone.now()
+            policy.next_roi_date = timezone.now() + timedelta(days=30)
+            policy.save()
+
+            # Create ROI accrual record
+            accrual = ROIAccrual.objects.create(
+                tenant=policy.tenant,
+                policy=policy,
+                accrual_date=timezone.now(),
+                calculation_period=timezone.now().strftime('%Y-%m'),
+                principal_for_calculation=policy.current_balance,
+                roi_rate_applied=policy.roi_rate,
+                roi_amount=roi_amount
+            )
+
+            # Create ledger entry
+            LedgerEntry.objects.create(
+                tenant=policy.tenant,
+                policy=policy,
+                entry_date=timezone.now(),
+                unique_reference=f"ROI-{policy.policy_number}-{timezone.now().strftime('%Y%m%d%H%M%S')}",
+                description=f"Manual ROI Accrual - {timezone.now().strftime('%B %Y')}",
+                entry_type='roi_accrual',
+                inflow=roi_amount,
+                outflow=0,
+                principal_balance=policy.current_balance,
+                roi_balance=policy.roi_balance,
+                total_balance=policy.total_balance,
+                created_by=policy.last_updated_by
+            )
+
+            return {
+                'accrued_amount': roi_amount,
+                'new_roi_balance': policy.roi_balance,
+                'calculation_date': timezone.now().isoformat()
+            }
+
     @classmethod
     def process_monthly_roi_accruals(cls):
         """Batch process ROI accruals for all eligible policies"""

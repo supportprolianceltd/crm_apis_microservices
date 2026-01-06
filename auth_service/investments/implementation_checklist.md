@@ -161,13 +161,31 @@ This comprehensive investment management platform is **100% implemented** with a
 - **Demo Flow:** Dashboard shows accurate policy balances
 
 ### ✅ **20. Nigerian Tax System**
-**Additional Enhancement:** Complete FIRS-compliant tax management  
+**Additional Enhancement:** Complete FIRS-compliant tax management
 **Status:** ✅ **FULLY IMPLEMENTED**
 - **Tax Types:** WHT (10%), PIT (progressive), CGT (10%), VAT (7.5%), TET (2.5%)
 - **Automation:** 10% WHT on ROI withdrawals
 - **Records:** Complete audit trail with TaxRecord model
 - **Certificates:** FIRS-compliant tax certificates
 - **Demo Flow:** Tax calculations, reports, and certificate generation
+
+### ✅ **21. ROI Balance Display**
+**Enhancement:** Display accumulated ROI balance in frontend
+**Status:** ✅ **FULLY IMPLEMENTED**
+- **Serializer:** Added `roi_balance` to InvestmentPolicySerializer
+- **Table View:** ROI Balance column in InvestmentTable.jsx
+- **Detail View:** ROI Balance shown in overview and financial tabs
+- **Real-time:** Updates immediately after ROI accrual
+- **Demo Flow:** Shows ₦0.00 initially, populates after accrual
+
+### ✅ **22. Manual ROI Accrual per Policy**
+**Enhancement:** Individual policy ROI accrual for testing
+**Status:** ✅ **FULLY IMPLEMENTED**
+- **Endpoint:** `POST /api/investments/policies/{id}/accrue_roi/`
+- **Force Option:** Bypasses date rules for testing purposes
+- **Admin Only:** Restricted to administrators
+- **Ledger:** Creates proper accrual entries and updates balances
+- **Demo Flow:** Test ROI balance display by accruing specific policies
 
 ---
 
@@ -237,6 +255,8 @@ This comprehensive investment management platform is **100% implemented** with a
 | **User Registration** | ✅ Complete | 100% |
 | **Investment Policies** | ✅ Complete | 100% |
 | **ROI Calculation** | ✅ Complete | 100% |
+| **ROI Balance Display** | ✅ Complete | 100% |
+| **Manual ROI Accrual** | ✅ Complete | 100% |
 | **Withdrawal System** | ✅ Complete | 100% |
 | **Ledger & Statements** | ✅ Complete | 100% |
 | **Multi-tenancy** | ✅ Complete | 100% |

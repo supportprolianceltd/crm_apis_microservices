@@ -72,7 +72,7 @@ def create_initial_ledger_entry(sender, instance, created, **kwargs):
                 # Add new investment detail as related model instance
                 from decimal import Decimal
                 profile.investment_details.create(
-                    roi_rate=instance.roi_frequency,
+                    roi_rate=instance.roi_rate,
                     custom_roi_rate=None,
                     investment_amount=instance.principal_amount,
                     investment_start_date=instance.start_date,

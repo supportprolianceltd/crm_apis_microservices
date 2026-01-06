@@ -275,6 +275,30 @@
 
 ---
 
+### Manual ROI Accrual for Individual Policy (Admin Only)
+**Purpose:** Manually accrue ROI for a specific policy (useful for testing or corrections).
+**Method:** POST
+**URL:** `http://localhost:9090/api/investments/policies/{policy_id}/accrue_roi/`
+
+**Response:**
+```json
+{
+  "message": "ROI accrued successfully",
+  "policy_number": "PRO-000001",
+  "accrued_amount": "40000.00",
+  "new_roi_balance": "40000.00",
+  "calculation_date": "2026-01-06T08:46:00.000000Z"
+}
+```
+
+**Features:**
+- Forces ROI accrual regardless of date rules (for testing)
+- Updates `roi_balance` field immediately
+- Creates ledger entry and ROIAccrual record
+- Useful for demonstrating ROI balance functionality
+
+---
+
 ### Get Investment Policies by Investor (Admin Only)
 **Purpose:** Retrieve all investment policies for a specific investor using their ID or email address.
 **Method:** GET
@@ -862,6 +886,7 @@ Validates withdrawal requests against business rules:
 - `PUT /api/investments/policies/{id}/` - Update policy ✅ **Frontend Implemented**
 - `DELETE /api/investments/policies/{id}/` - Delete policy ✅ **Frontend Implemented**
 - `POST /api/investments/policies/{id}/change_roi_frequency/` - Change ROI frequency ✅ **Frontend Implemented**
+- `POST /api/investments/policies/{id}/accrue_roi/` - Manual ROI accrual for policy (Admin Only) ✅ **New - Backend Implemented**
 - `GET /api/investments/policies/search/?q=search_term` - Search policies ✅ **Frontend Implemented**
 - `GET /api/investments/policies/by_investor/?investor_id={id}&investor_email={email}` - Get policies by investor (Admin Only) ✅ **Frontend Implemented**
 
@@ -929,6 +954,14 @@ Validates withdrawal requests against business rules:
 - ✅ **Tax History**: Historical tax summaries and reporting
 - ✅ **Tax APIs**: Complete REST API integration (9 new endpoints)
 
+#### **ROI Balance Display & Management (✅ New - Fully Implemented)**
+- ✅ **ROI Balance Field**: Added `roi_balance` to InvestmentPolicySerializer
+- ✅ **Frontend Display**: ROI Balance column in InvestmentTable.jsx
+- ✅ **Detail View**: ROI Balance shown in PotentialInvestors overview and financial tabs
+- ✅ **Manual Accrual**: Individual policy ROI accrual endpoint for testing
+- ✅ **Real-time Updates**: ROI balance updates immediately after accrual
+- ✅ **Ledger Integration**: ROI accrual transactions properly recorded
+
 #### **User Interface Components**
 - ✅ **Admin Dashboard**: Comprehensive metrics and navigation
 - ✅ **Investment Table**: Responsive table with actions dropdown
@@ -958,6 +991,8 @@ Validates withdrawal requests against business rules:
 | **Nigerian Tax System** | ✅ **Complete** | **100%** |
 | **Tax APIs** | ✅ **Complete** | **100%** |
 | **Tax Frontend Integration** | ✅ **Complete** | **100%** |
+| **ROI Balance Display** | ✅ **Complete** | **100%** |
+| **Manual ROI Accrual** | ✅ **Complete** | **100%** |
 
 ### 🔧 **Technical Implementation**
 
@@ -1001,7 +1036,7 @@ Validates withdrawal requests against business rules:
 - `unique_policy_id`: Sequential 6-digit ID per tenant
 - `principal_amount`: Initial investment amount
 - `current_balance`: Current principal balance
-- `roi_balance`: Accumulated ROI
+- `roi_balance`: **Accumulated unpaid ROI** (now displayed in frontend)
 - `total_balance`: Current + ROI balance
 - `roi_rate`: Annual ROI percentage
 - `roi_frequency`: Monthly or on-demand

@@ -63,6 +63,12 @@ class InvestmentPolicy(models.Model):
             models.Index(fields=['status', 'next_roi_date']),
         ]
 
+    @property
+    def roi_due(self):
+        """Calculate the next ROI amount due"""
+        from .services.roi_calculator import ROICalculator
+        return ROICalculator.calculate_monthly_roi(self.current_balance, self.roi_rate)
+
     def __str__(self):
         return f"{self.policy_number} - {self.user.email}"
 

@@ -381,6 +381,28 @@ def accrue_monthly_roi_for_tenant(tenant_id=None):
 
 Admins can manually trigger ROI accrual outside scheduled time.
 
+### **Manual ROI Accrual per Policy** (Admin Only)
+**Endpoint**: `POST /api/investments/policies/{policy_id}/accrue_roi/`
+
+**Purpose**: Manually accrue ROI for a specific policy (useful for testing and corrections).
+
+**Response**:
+```json
+{
+  "message": "ROI accrued successfully",
+  "policy_number": "PRO-000001",
+  "accrued_amount": "40000.00",
+  "new_roi_balance": "40000.00",
+  "calculation_date": "2026-01-06T08:46:00.000000Z"
+}
+```
+
+**Features**:
+- Forces ROI accrual regardless of date rules (for testing)
+- Updates `roi_balance` field immediately
+- Creates ledger entry and ROIAccrual record
+- Useful for demonstrating ROI balance functionality
+
 ### **ROI Status Check**
 **Endpoint**: `GET /api/investments/roi/accrue/`
 
@@ -632,6 +654,7 @@ Sends reminders for upcoming ROI payments (3 days in advance).
 Core investment policy with:
 - Policy identification (policy_number, unique_policy_id)
 - Financial amounts (principal, current_balance, roi_balance, total_balance)
+- **ROI Balance**: Accumulated unpaid ROI (now displayed in frontend tables and detail views)
 - ROI configuration (roi_rate, roi_frequency)
 - Dates (start_date, maturity_date, next_roi_date)
 - Business rules (min_withdrawal_months, allow_partial_withdrawals)
@@ -686,6 +709,7 @@ Handles all ROI logic:
 - `calculate_monthly_roi()`: Monthly ROI formula
 - `should_accrue_roi()`: Date-based eligibility (1st-12th rule)
 - `accrue_monthly_roi_for_policy()`: Single policy accrual
+- `accrue_roi_for_policy()`: Manual accrual for specific policy (with force option)
 - `process_monthly_roi_accruals()`: Batch processing
 
 ### **WithdrawalValidator Service** (`investments/services/withdrawal_validator.py`)
@@ -736,6 +760,7 @@ def send_roi_due_notifications():
 - `PUT /api/investments/policies/{id}/` - Update policy
 - `DELETE /api/investments/policies/{id}/` - Delete policy
 - `POST /api/investments/policies/{id}/change_roi_frequency/` - Change ROI frequency
+- `POST /api/investments/policies/{id}/accrue_roi/` - Manual ROI accrual for policy (Admin Only)
 - `GET /api/investments/policies/search/?q=term` - Search policies
 - `GET /api/investments/policies/by_investor/?investor_id={id}` - Get by investor
 - `POST /api/investments/policies/{policy_id}/add_topup/` - Add top-up to policy
@@ -810,6 +835,9 @@ def send_roi_due_notifications():
 | 26 | Tax Report Modal (frontend) | ✅ | Interactive tax reports with backend integration |
 | 27 | Responsive Tax UI | ✅ | Mobile-friendly tax interfaces |
 | 28 | Frontend-Backend Tax Integration | ✅ | Real-time tax calculations and data |
+| 29 | ROI Balance Display | ✅ | Added roi_balance to serializer and frontend display |
+| 30 | Manual ROI Accrual per Policy | ✅ | Individual policy accrual endpoint for testing |
+| 31 | Force Accrual Option | ✅ | Bypass date rules for testing purposes |
 
 ---
 

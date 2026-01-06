@@ -15,7 +15,7 @@ import base64
 
 env = environ.Env(
     DEBUG=(bool, True),
-    DJANGO_SECRET_KEY=(str, "django-insecure-va=ok0r=3)*b@ekd_c^+zkz&d)@*sd3sm$t(1o-n$yj)zwfked"),
+    # DJANGO_SECRET_KEY=(str, "django-insecure-va=ok0r=3)*b@ekd_c^+zkz&d)@*sd3sm$t(1o-n$yj)zwfked"),
     DEPLOYMENT_ENV=(str, "development"),
 )
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,8 +25,7 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env("DEBUG")
 DEPLOYMENT_ENV = env("DEPLOYMENT_ENV")
 # Generate a key once (run in shell: from cryptography.fernet import Fernet; print(Fernet.generate_key().decode()))
-QR_ENCRYPTION_KEY = env("QR_ENCRYPTION_KEY", default="e9SQU1V0RmKKxz1w6nLKnBX9sFMEy7SXBnsuK900xDM=")  # Replace with real key
-
+QR_ENCRYPTION_KEY = env("QR_ENCRYPTION_KEY")
 # ============================================================================
 # ENVIRONMENT-AWARE CONFIGURATION
 # ============================================================================
@@ -68,7 +67,7 @@ else:  # development
         "http://localhost:4000",
         "http://localhost:3001",
         "http://127.0.0.1:3000",
-         "https://dev.e3os.co.uk",
+        "https://dev.e3os.co.uk",
     ]
     DEFAULT_FRONTEND_URL = "http://localhost:5173"
     REVIEWS_QR_BASE_URL = "http://localhost:5173"
@@ -258,8 +257,8 @@ SIMPLE_JWT = {
 
 NOTIFICATIONS_APP_URL = env("NOTIFICATIONS_APP_URL", default="http://notifications:3002")
 NOTIFICATIONS_SERVICE_URL = env("NOTIFICATIONS_SERVICE_URL", default="http://app:3001")
-GLOBAL_ADMIN_PASSWORD = env("GLOBAL_ADMIN_PASSWORD", default="SuperAdmin2025!")
-GLOBAL_ADMIN_EMAIL = env("GLOBAL_ADMIN_EMAIL", default="admin@platform.local")
+GLOBAL_ADMIN_PASSWORD = env("GLOBAL_ADMIN_PASSWORD")
+GLOBAL_ADMIN_EMAIL = env("GLOBAL_ADMIN_EMAIL")
 
 # ============================================================================
 # URL & TEMPLATE CONFIGURATION
@@ -433,12 +432,12 @@ CACHE_ENABLED = env.bool("CACHE_ENABLED", default=True)
 TENANT_CACHE_PREFIX = "tenant:{}:"
 
 # Environment info logging
-logger = logging.getLogger(__name__)
-logger.info(f"🚀 Starting auth-service in {DEPLOYMENT_ENV} mode")
-logger.info(f"🌍 Frontend URLs: {FRONTEND_URLS}")
-logger.info(f"🔧 Cookie settings - SameSite: {COOKIE_SAMESITE}, Secure: {COOKIE_SECURE}")
-logger.info(f"🔧 CORS Allowed Origins: {CORS_ALLOWED_ORIGINS}")
-logger.info(f"🔧 CSRF Trusted Origins: {CSRF_TRUSTED_ORIGINS}")
+# logger = logging.getLogger(__name__)
+# logger.info(f"🚀 Starting auth-service in {DEPLOYMENT_ENV} mode")
+# logger.info(f"🌍 Frontend URLs: {FRONTEND_URLS}")
+# logger.info(f"🔧 Cookie settings - SameSite: {COOKIE_SAMESITE}, Secure: {COOKIE_SECURE}")
+# logger.info(f"🔧 CORS Allowed Origins: {CORS_ALLOWED_ORIGINS}")
+# logger.info(f"🔧 CSRF Trusted Origins: {CSRF_TRUSTED_ORIGINS}")
 
 SUPABASE_URL = env("SUPABASE_URL", default="")
 SUPABASE_KEY = env("SUPABASE_KEY", default="")

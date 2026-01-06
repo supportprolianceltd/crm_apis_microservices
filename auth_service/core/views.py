@@ -496,8 +496,21 @@ class TenantViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_destroy(self, instance):
+        from users.signals import set_deleting_tenant
+        
         tenant = self.get_tenant(self.request)
-        if instance.id != tenant.id:
+        user = self.request.user
+        
+        # Check if user is authorized to delete the tenant
+        is_own_tenant = instance.id == tenant.id
+        is_proliance_admin = (
+            tenant.schema_name.lower() == 'proliance' and 
+            hasattr(user, 'role') and 
+            user.role in ['root-admin', 'co-admin']
+        )
+        
+        # Allow deletion if: (1) deleting own tenant, OR (2) Proliance admin
+        if not is_own_tenant and not is_proliance_admin:
             logger.error(LogMessages.UNAUTHORIZED_DELETE_ATTEMPT.format(instance.id, tenant.id))
             raise serializers.ValidationError(ErrorMessages.NOT_AUTHORIZED_DELETE_TENANT)
 
@@ -514,9 +527,24 @@ class TenantViewSet(viewsets.ModelViewSet):
                 request=self.request
             )
 
-        with tenant_context(tenant):
-            instance.delete()
-        logger.info(LogMessages.TENANT_DELETED.format(instance.name, tenant.schema_name))
+        # Disable activity logging during tenant deletion to avoid FK violations
+        try:
+            set_deleting_tenant(True)
+            
+            # Always delete from the target tenant's own schema
+            # Django-Tenants requires deletion to happen in the tenant's schema or public schema
+            # But since CustomUser and other models reference Tenant and exist in tenant schemas,
+            # we must use the target tenant's schema for proper CASCADE deletion
+            with tenant_context(instance):
+                instance.delete()
+            
+            if is_proliance_admin and not is_own_tenant:
+                logger.info(f"Proliance admin deleted tenant: {instance.name} ({instance.schema_name})")
+            else:
+                logger.info(LogMessages.TENANT_DELETED.format(instance.name, instance.schema_name))
+        finally:
+            # Always reset the flag
+            set_deleting_tenant(False)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

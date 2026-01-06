@@ -294,7 +294,7 @@ from core.models import Tenant, Domain
 from django_tenants.utils import schema_context
 
 # Change this to the tenant schema name you want to delete
-schema_to_delete = 'rodrimine'  # example
+schema_to_delete = 'netwiver'  # example
 
 try:
     tenant = Tenant.objects.get(schema_name=schema_to_delete)
@@ -336,7 +336,7 @@ def generate_rsa_keypair(key_size=2048):
     return private_pem, public_pem
 
 # Trigger for a specific tenant (e.g., 'auth-service')
-tenant = Tenant.objects.get(schema_name='appbrew')
+tenant = Tenant.objects.get(schema_name='netwiver')
 with tenant_context(tenant):
     priv, pub = generate_rsa_keypair()
     RSAKeyPair.objects.create(
@@ -368,6 +368,43 @@ public_tenant = Tenant.objects.get(schema_name=get_public_schema_name())
 with tenant_context(public_tenant):
     user = authenticate(email='admin@platform.local', password='SuperAdmin2025!')
     print(f"Authenticated: {user is not None} | User: {user.email if user else 'None'}")
+
+
+# ===== CREATE SUPERUSER WITH PROFILE DATA =====
+from core.models import Tenant
+from users.models import CustomUser, UserProfile
+from django_tenants.utils import tenant_context
+
+tenant = Tenant.objects.get(schema_name='netwiver')
+with tenant_context(tenant):
+    # Create the superuser
+    user = CustomUser.objects.create_superuser(
+        email='admin@netwiver.com',
+        password='qwerty',
+        role='root-admin',
+        first_name='Netwiver',
+        last_name='Admin',
+        job_role='System Administrator',
+        tenant=tenant
+    )
+    
+    # Create or update the profile with system access
+    profile, created = UserProfile.objects.get_or_create(user=user)
+    # profile.employee_id = 'NET-0001'
+    # profile.access_duration = '2026-01-06'
+    profile.system_access_rostering = True
+    profile.system_access_hr = True
+    profile.system_access_recruitment = True
+    profile.system_access_training = True
+    profile.system_access_finance = True
+    profile.system_access_compliance = True
+    profile.system_access_co_superadmin = True
+    profile.system_access_asset_management = True
+    profile.save()
+    
+    print(f"✅ Superuser {user.email} created with profile data")
+    print(f"   Employee ID: {profile.employee_id}")
+    print(f"   Access Duration: {profile.access_duration}")
 
 
 from core.models import Tenant, Domain

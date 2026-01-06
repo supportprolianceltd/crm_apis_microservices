@@ -139,11 +139,24 @@ class Tenant(TenantMixin):
         if not self.schema_name or self.schema_name.strip() == '':
             self.schema_name = self.name.lower().replace(' ', '_').replace('-', '_')
 
-        # Auto-generate organizational_id
+        # Auto-generate organizational_id (handle deleted tenants by finding max existing ID)
         if not self.organizational_id:
             with transaction.atomic():
-                last_id = Tenant.objects.count() + 1
-                self.organizational_id = f"TEN-{str(last_id).zfill(4)}"
+                # Find the highest existing organizational_id number
+                existing_ids = Tenant.objects.exclude(organizational_id__isnull=True).values_list('organizational_id', flat=True)
+                max_num = 0
+                for org_id in existing_ids:
+                    if org_id and org_id.startswith('TEN-'):
+                        try:
+                            num = int(org_id.split('-')[1])
+                            if num > max_num:
+                                max_num = num
+                        except (IndexError, ValueError):
+                            continue
+                
+                # Increment from the highest existing number
+                next_num = max_num + 1
+                self.organizational_id = f"TEN-{str(next_num).zfill(4)}"
 
         logger.info(
             f"Saving tenant {self.name} with schema: {self.schema_name}, Org ID: {self.organizational_id}"

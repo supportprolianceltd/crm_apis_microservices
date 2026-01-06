@@ -203,17 +203,52 @@ class InvestmentPolicyViewSet(viewsets.ModelViewSet):
         """Change ROI frequency between monthly and on-demand"""
         policy = self.get_object()
         new_frequency = request.data.get('roi_frequency')
-        
+
         if new_frequency not in ['monthly', 'on_demand']:
             return Response(
-                {'error': 'Invalid ROI frequency'}, 
+                {'error': 'Invalid ROI frequency'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         policy.roi_frequency = new_frequency
         policy.save()
-        
+
         return Response({'message': f'ROI frequency updated to {new_frequency}'})
+
+    @action(detail=True, methods=['post'])
+    def accrue_roi(self, request, pk=None):
+        """Manually accrue ROI for a specific policy (admin only)"""
+        if request.user.role not in ['root-admin', 'co-admin', 'admin', 'staff']:
+            return Response(
+                {'error': 'Only admins can manually accrue ROI'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        policy = self.get_object()
+
+        if policy.status != 'active':
+            return Response(
+                {'error': 'Can only accrue ROI for active policies'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            from .services.roi_calculator import ROICalculator
+            result = ROICalculator.accrue_roi_for_policy(policy, force=True)
+
+            return Response({
+                'message': 'ROI accrued successfully',
+                'policy_number': policy.policy_number,
+                'accrued_amount': str(result['accrued_amount']),
+                'new_roi_balance': str(result['new_roi_balance']),
+                'calculation_date': result['calculation_date']
+            })
+
+        except Exception as e:
+            return Response(
+                {'error': f'ROI accrual failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
     @action(detail=False, methods=['get'])
     def search(self, request):

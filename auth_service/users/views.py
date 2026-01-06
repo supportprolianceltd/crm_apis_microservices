@@ -232,7 +232,6 @@ def get_root_admin(tenant):
     return None
 
 
-@method_decorator(cache_page(60 * 5), name='dispatch')   # 5-minute cache
 class AllTenantsUsersListView(generics.ListAPIView):
     """
     PUBLIC endpoint – returns **all** users from **every** client tenant.
@@ -243,11 +242,6 @@ class AllTenantsUsersListView(generics.ListAPIView):
     serializer_class = CustomUserListSerializer
 
     def list(self, request, *args, **kwargs):
-        cache_key = CacheKeys.PUBLIC_ALL_TENANTS_USERS
-        data = cache.get(cache_key)
-        if data:
-            return Response(data)
-
         EXCLUDED_SCHEMAS = DefaultValues.EXCLUDED_SCHEMAS
 
         tenants_data = defaultdict(LambdaDefaults.DEFAULT_DICT)
@@ -326,11 +320,8 @@ class AllTenantsUsersListView(generics.ListAPIView):
             ResponseDataKeys.TOTAL_TENANTS: total_tenants,
         }
 
-        # cache the heavy result
-        cache.set(cache_key, response_data, timeout=DefaultValues.CACHE_TIMEOUT_5_MIN)
         return Response(response_data)
 
-@method_decorator(cache_page(60 * 5), name='dispatch')
 class AllTenantNamesUsersListView(generics.ListAPIView):
     """
     PUBLIC paginated endpoint – same payload as above but with DRF pagination.
@@ -341,11 +332,6 @@ class AllTenantNamesUsersListView(generics.ListAPIView):
     pagination_class = CustomPagination
 
     def list(self, request, *args, **kwargs):
-        cache_key = CacheKeys.PUBLIC_ALL_TENANTS_USERS_PAGINATED
-        data = cache.get(cache_key)
-        if data:
-            return Response(data)
-
         EXCLUDED_SCHEMAS = DefaultValues.EXCLUDED_SCHEMAS
 
         tenants_data = defaultdict(LambdaDefaults.DEFAULT_DICT)
@@ -425,7 +411,6 @@ class AllTenantNamesUsersListView(generics.ListAPIView):
         if page is not None:
             payload = self.get_paginated_response(payload).data
 
-        cache.set(cache_key, payload, timeout=60 * 5)
         return Response(payload)
 
 
