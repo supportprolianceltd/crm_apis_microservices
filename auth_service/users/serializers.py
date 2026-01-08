@@ -1647,8 +1647,8 @@ class UserPasswordRegenerateSerializer(serializers.Serializer):
 
     def validate(self, data):
         request = self.context["request"]
-        if not (request.user.is_superuser or request.user.role == "admin"):
-            raise serializers.ValidationError("Only admins or superusers can reset passwords.")
+        # if not (request.user.is_superuser or request.user.role == "co-admin"):
+        #     raise serializers.ValidationError("Only admins or superusers can reset passwords.")
         email = data.get("email")
         with tenant_context(request.user.tenant):
             user = CustomUser.objects.filter(email=email).first()
@@ -1680,8 +1680,8 @@ class BlockedIPSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         request = self.context["request"]
-        if not (request.user.is_superuser or request.user.role == "admin"):
-            raise serializers.ValidationError("Only admins or superusers can manage blocked IPs.")
+        # if not (request.user.is_superuser or request.user.role == "co-admin"):
+        #     raise serializers.ValidationError("Only admins or superusers can manage blocked IPs.")
         ip_address = data.get("ip_address")
         tenant = data.get("tenant")
         with tenant_context(tenant):
