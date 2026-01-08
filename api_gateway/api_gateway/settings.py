@@ -244,7 +244,6 @@ HR_SERVICE_URL = env.str("HR_SERVICE_URL", default="http://hr:8004")
 ROSTERING_SERVICE_URL = env.str("ROSTERING_SERVICE_URL", default="http://rostering:3005")
 PROJECT_MANAGER_URL = env.str("PROJECT_MANAGER_URL", default="http://project-manager:8005")
 
-
 # ======================== ROUTE CONFIGURATION ========================
 AUTH_ROUTES = [
     "token", "token/refresh", "token/validate", "login", "logout","verify-otp",
