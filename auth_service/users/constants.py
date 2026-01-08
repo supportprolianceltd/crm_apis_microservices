@@ -461,7 +461,7 @@ class DefaultValues:
     EXP = "exp"
     JTI = "jti"
     IMPERSONATED_BY = "impersonated_by"
-    EXCLUDED_SCHEMAS = {get_public_schema_name(), 'auth-service'}
+    EXCLUDED_SCHEMAS = {get_public_schema_name(), 'auth-service', 'rodrimine', }
     # DEFAULT_TENANT and PUBLIC_TENANT removed to avoid database queries at import time
     # DEFAULT_TENANT = Tenant.objects.first()
     # PUBLIC_TENANT = Tenant.objects.get(schema_name=get_public_schema_name())

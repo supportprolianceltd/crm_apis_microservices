@@ -79,9 +79,9 @@
 | **Documents** | `GET/POST /api/user/documents/` | ✅ Working |
 | Document Versions | `GET /api/user/documents/<id>/versions/` | ✅ Working |
 | **Tenant Management** | `GET/POST /api/tenant/tenants/` | ✅ Working |
-| Branches | `GET/POST /api/tenant/branches/` | ✅ Working |
+<!-- | Branches | `GET/POST /api/tenant/branches/` | not implemented | -->
 | **Security** | `GET /api/public-key/` | ✅ Working |
-| JWKS Endpoint | `GET /api/.well-known/jwks.json` | ✅ Working |
+<!-- | JWKS Endpoint | `GET /api/.well-known/jwks.json` |  Not implemented | -->
 | **2FA** | `POST /api/login/` | ✅ Working |
 | Verify OTP | `POST /api/verify-otp/` | ✅ Working |
 

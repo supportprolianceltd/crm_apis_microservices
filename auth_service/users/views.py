@@ -1153,30 +1153,52 @@ class UserViewSet(viewsets.ModelViewSet):
                 # Define login link (customize as needed)
                 login_link = settings.WEB_PAGE_URL
 
-                # print("login_link")
-                # print(login_link)
-                # print("login_link")
+                # Check if user email contains tenant domain
+                user_email_domain = user_obj.email.split('@')[-1] if '@' in user_obj.email else None
+                tenant_domains_info = get_tenant_domains(tenant)
+                tenant_domains = tenant_domains_info.get('all_domains', [])
 
-                logger.info(f"🎯 {login_link}")
-
-                event_payload = {
-                    "metadata": {
-                        "tenant_id": str(tenant.unique_id),
-                        "event_type": "user.account.created",
-                        "event_id": event_id,
-                        "created_at": timezone.now().isoformat(),
-                        EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
-                    },
-                    "data": {
-                        "user_email": user_obj.email,
-                        "company_name": company_name,
-                        "temp_password": serializer.validated_data.get("password", ""),
-                        "login_link": login_link,
-                        "timestamp": timezone.now().isoformat(),
-                        "user_agent": user_agent,
-                        "user_id": str(user_obj.id),
-                    },
-                }
+                # Determine which identifier to use
+                if user_email_domain and user_email_domain in tenant_domains:
+                    logger.info(f"🎯 {login_link}")
+                    event_payload = {
+                        "metadata": {
+                            "tenant_id": str(tenant.unique_id),
+                            "event_type": "user.account.created",
+                            "event_id": event_id,
+                            "created_at": timezone.now().isoformat(),
+                            EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
+                        },
+                        "data": {
+                            "user_email": user_obj.email,
+                            "company_name": company_name,
+                            "temp_password": serializer.validated_data.get("password", ""),
+                            "login_link": login_link,
+                            "timestamp": timezone.now().isoformat(),
+                            "user_agent": user_agent,
+                            "user_id": str(user_obj.id),
+                        },
+                    }
+                else:
+                    logger.info(f"🎯 {login_link}")
+                    event_payload = {
+                        "metadata": {
+                            "tenant_id": str(tenant.unique_id),
+                            "event_type": "user.account.created",
+                            "event_id": event_id,
+                            "created_at": timezone.now().isoformat(),
+                            EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
+                        },
+                        "data": {
+                            "username": user_obj.username,
+                            "company_name": company_name,
+                            "temp_password": serializer.validated_data.get("password", ""),
+                            "login_link": login_link,
+                            "timestamp": timezone.now().isoformat(),
+                            "user_agent": user_agent,
+                            "user_id": str(user_obj.id),
+                        },
+                    }
 
                 notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
                 safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}
@@ -1531,30 +1553,52 @@ class UserViewSet(viewsets.ModelViewSet):
                             # Define login link (customize as needed)
                             login_link = settings.WEB_PAGE_URL
 
-                            # print("login_link")
-                            # print(login_link)
-                            # print("login_link")
+                            # Check if user email contains tenant domain
+                            user_email_domain = user_obj.email.split('@')[-1] if '@' in user_obj.email else None
+                            tenant_domains_info = get_tenant_domains(tenant)
+                            tenant_domains = tenant_domains_info.get('all_domains', [])
 
-                            logger.info(f"🎯 {login_link}")
-
-                            event_payload = {
-                                "metadata": {
-                                    "tenant_id": str(tenant.unique_id),
-                                    "event_type": "user.account.created",
-                                    "event_id": event_id,
-                                    "created_at": timezone.now().isoformat(),
-                                    EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
-                                },
-                                "data": {
-                                    "user_email": user_obj.email,
-                                    "company_name": company_name,
-                                    "temp_password": serializer.validated_data.get("password", ""),
-                                    "login_link": login_link,
-                                    "timestamp": timezone.now().isoformat(),
-                                    "user_agent": user_agent,
-                                    "user_id": str(user_obj.id),
-                                },
-                            }
+                            # Determine which identifier to use
+                            if user_email_domain and user_email_domain in tenant_domains:
+                                logger.info(f"🎯 {login_link}")
+                                event_payload = {
+                                    "metadata": {
+                                        "tenant_id": str(tenant.unique_id),
+                                        "event_type": "user.account.created",
+                                        "event_id": event_id,
+                                        "created_at": timezone.now().isoformat(),
+                                        EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
+                                    },
+                                    "data": {
+                                        "user_email": user_obj.email,
+                                        "company_name": company_name,
+                                        "temp_password": serializer.validated_data.get("password", ""),
+                                        "login_link": login_link,
+                                        "timestamp": timezone.now().isoformat(),
+                                        "user_agent": user_agent,
+                                        "user_id": str(user_obj.id),
+                                    },
+                                }
+                            else:
+                                logger.info(f"🎯 {login_link}")
+                                event_payload = {
+                                    "metadata": {
+                                        "tenant_id": str(tenant.unique_id),
+                                        "event_type": "user.account.created",
+                                        "event_id": event_id,
+                                        "created_at": timezone.now().isoformat(),
+                                        EventPayloadKeys.SOURCE: DefaultValues.SOURCE_AUTH_SERVICE,
+                                    },
+                                    "data": {
+                                        "username": user_obj.username,
+                                        "company_name": company_name,
+                                        "temp_password": serializer.validated_data.get("password", ""),
+                                        "login_link": login_link,
+                                        "timestamp": timezone.now().isoformat(),
+                                        "user_agent": user_agent,
+                                        "user_id": str(user_obj.id),
+                                    },
+                                }
 
                             notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
                             safe_payload = {**event_payload, "data": {**event_payload["data"], "temp_password": "[REDACTED]"}}

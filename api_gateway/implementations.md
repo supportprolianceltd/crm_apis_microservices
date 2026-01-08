@@ -31,7 +31,7 @@
 | WebSocket Router | `ANY /ws/<path>` | ✅ Working (messaging routing info) |
 | API Proxy | `ANY /api/<path>` | ✅ Working |
 
-Routing map (settings-driven): `auth_service`, `applications-engine`, `talent-engine`, `messaging`, `lms`, `notifications`, `hr`, `rostering`, `project-manager`, plus auth shortcut routes.
+Routing map (settings-driven): `auth_service`, `applications-engine`, `talent-engine`,  `notifications`, `hr`, `rostering`, plus auth shortcut routes.
 
 ---
 
