@@ -1,122 +1,216 @@
-# version: '3.8'  # Obsolete
+# ============================================================================
+# LMS Service - Production Docker Compose Configuration
+# ============================================================================
+# Version: 3.9 (supports all modern features)
+# Features: Multi-stage builds, health checks, resource limits, logging
+# ============================================================================
+
+version: '3.9'
 
 services:
+  # ============================================================================
+  # PostgreSQL Database
+  # ============================================================================
   lms-db:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: lms_db
-    restart: always
+    restart: on-failure:5
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
     volumes:
       - lms_db_data:/var/lib/postgresql/data
     ports:
-      - "5435:5432"
+      - "${DB_PORT}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d multi_tenant_lms"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     networks:
       - auth_service_default
+    mem_limit: 1g
+    memswap_limit: 1g
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
+  # ============================================================================
+  # Redis Cache & Message Broker
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: lms_redis
+    restart: on-failure:5
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_secure_password}
+    volumes:
+      - lms_redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - auth_service_default
+    mem_limit: 512m
+    memswap_limit: 512m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================================================
+  # LMS Web Application (Gunicorn + Django)
+  # ============================================================================
   lms-app:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+    image: lms-service:latest
     container_name: lms_app
-    restart: on-failure
+    restart: on-failure:5
     env_file:
       - .env
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - REDIS_URL=redis://default:${REDIS_PASSWORD:-redis_secure_password}@${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB}
+      - CELERY_BROKER_URL=redis://default:${REDIS_PASSWORD:-redis_secure_password}@${REDIS_HOST}:${REDIS_PORT}/0
+      - CELERY_RESULT_BACKEND=redis://default:${REDIS_PASSWORD:-redis_secure_password}@${REDIS_HOST}:${REDIS_PORT}/1
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DEBUG=${DEBUG}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - FRONTEND_URL=${FRONTEND_URL}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
     ports:
       - "8004:8004"
-    command: gunicorn --bind 0.0.0.0:8004 complete_lms.wsgi:application
+    expose:
+      - "8004"
     depends_on:
       lms-db:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     networks:
       - auth_service_default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     mem_limit: 2g
+    memswap_limit: 2g
+    cpus: '2'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+        labels: "service=lms-app"
+    labels:
+      - "com.example.service=lms-app"
+      - "com.example.environment=production"
 
-  lms_consumer:
+  # ============================================================================
+  # Celery Worker (Async Task Processing)
+  # ============================================================================
+  lms-worker:
     build:
       context: .
       dockerfile: Dockerfile
+    image: lms-service:latest
+    container_name: lms_worker
+    restart: on-failure:5
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - REDIS_URL=redis://default:${REDIS_PASSWORD:-redis_secure_password}@${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB}
+      - CELERY_BROKER_URL=redis://default:${REDIS_PASSWORD:-redis_secure_password}@${REDIS_HOST}:${REDIS_PORT}/0
+      - CELERY_RESULT_BACKEND=redis://default:${REDIS_PASSWORD:-redis_secure_password}@${REDIS_HOST}:${REDIS_PORT}/1
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+    depends_on:
+      lms-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - auth_service_default
+    mem_limit: 1g
+    memswap_limit: 1g
+    cpus: '1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+        labels: "service=lms-worker"
+    labels:
+      - "com.example.service=lms-worker"
+      - "com.example.environment=production"
+
+  # ============================================================================
+  # Kafka Event Consumer
+  # ============================================================================
+  lms-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lms-service:latest
     container_name: lms_consumer
-    restart: on-failure
+    restart: on-failure:5
     env_file:
       - .env
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - REDIS_URL=redis://default:${REDIS_PASSWORD:-redis_secure_password}@${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB}
     entrypoint: ["/app/consumer-entrypoint.sh"]
     depends_on:
       lms-db:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     networks:
       - auth_service_default
     mem_limit: 1g
+    memswap_limit: 1g
+    cpus: '1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+        labels: "service=lms-consumer"
+    labels:
+      - "com.example.service=lms-consumer"
+      - "com.example.environment=production"
 
-  redis:
-    image: redis:6.2
-    container_name: lms_redis
-    restart: always
-    ports:
-      - "6382:6379"
-    networks:
-      - auth_service_default
-
-  # kafka:
-  #   image: confluentinc/cp-kafka:7.5.0
-  #   container_name: lms_kafka
-  #   environment:
-  #     KAFKA_BROKER_ID: 1
-  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-  #     KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
-  #     KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
-  #     KAFKA_SUPER_USERS: User:lms_consumer;User:auth-service
-  #   ports:
-  #     - "9093:9092"
-  #   healthcheck:
-  #     test: ["CMD", "/opt/kafka/bin/kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 5
-  #   networks:
-  #     - auth_service_default
-
-  # zookeeper:
-  #   image: confluentinc/cp-zookeeper:7.5.0
-  #   container_name: zookeeper
-  #   environment:
-  #     ZOOKEEPER_CLIENT_PORT: 2181
-  #     ZOOKEEPER_TICK_TIME: 2000
-  #   healthcheck:
-  #     test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181 | grep imok"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 5
-  #   networks:
-  #     - auth_service_default
-
+# ============================================================================
+# Volumes (Persistent Data Storage)
+# ============================================================================
 volumes:
   lms_db_data:
+    driver: local
+  lms_redis_data:
+    driver: local
 
+# ============================================================================
+# Networks
+# ============================================================================
 networks:
   auth_service_default:
     external: true
+

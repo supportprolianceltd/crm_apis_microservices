@@ -146,7 +146,7 @@ class ForumPostSerializer(serializers.ModelSerializer):
             validated_data['tenant_name'] = tenant_name
         return super().create(validated_data)
 
-    def update(self, validated_data):
+    def update(self, instance, validated_data):
         request = self.context.get('request')
         tenant_id = get_tenant_id_from_jwt(request)
         validated_data['tenant_id'] = tenant_id

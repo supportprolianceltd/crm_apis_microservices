@@ -42,8 +42,8 @@ INSTALLED_APPS = [
 
 # drf-spectacular
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Talent Engine API',
-    'DESCRIPTION': 'API documentation for Talent Engine microservice',
+    'TITLE': 'LMS API',
+    'DESCRIPTION': 'API documentation for LMS microservice',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'SWAGGER_UI_SETTINGS': {
@@ -73,7 +73,7 @@ django.http.request.split_domain_port = patched_split_domain_port
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
-    "localhost", "127.0.0.1", "talent-engine", "0.0.0.0", "*", "talent-engine:8001", "http://localhost:9090"
+    "localhost", "127.0.0.1", "lms-app", "0.0.0.0", "*", "lms-app:8004", "http://localhost:9090"
 ])
 
 # Database

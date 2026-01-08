@@ -6,7 +6,6 @@ from django.utils import timezone
 import uuid
 import os
 import logging
-import requests
 from django.conf import settings
 from activitylog.models import ActivityLog
 
@@ -37,21 +36,13 @@ def assignment_instructions_path(instance, filename):
 def assignment_submission_path(instance, filename):
     return f'courses/{instance.assignment.course.tenant_id}/{instance.assignment.course.slug}/assignments/submissions/{filename}'
 
-def get_tenant_name(tenant_id):
-    """Helper function to fetch tenant name from auth-service."""
-    try:
-        tenant_response = requests.get(
-            f"{settings.AUTH_SERVICE_URL}/api/tenant/tenants/{tenant_id}/",
-            headers={'Authorization': f'Bearer {settings.INTERNAL_AUTH_TOKEN}'}
-        )
-        if tenant_response.status_code == 200:
-            tenant_data = tenant_response.json()
-            return tenant_data.get('name')
-        logger.error(f"Failed to fetch tenant {tenant_id} from auth_service")
-        return None
-    except Exception as e:
-        logger.error(f"Error fetching tenant name for {tenant_id}: {str(e)}")
-        return None
+def get_tenant_name(tenant_id, tenant_name=None):
+    """
+    Simplified tenant name resolver.
+    Prefer passing tenant_name from request JWT payload (via serializer).
+    Returns passed tenant_name if available, otherwise None (no network call).
+    """
+    return tenant_name
 
 class Category(models.Model):
     id = models.AutoField(primary_key=True)
@@ -76,8 +67,6 @@ class Category(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -91,10 +80,9 @@ class Category(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] Category {self.id} {'created' if is_new else 'updated'}: {self.name}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='category_deleted',
             details=f"Category {self.name} deleted",
@@ -177,10 +165,8 @@ class Course(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         if not self.code:
-            tenant_name = self.tenant_name or get_tenant_name(self.tenant_id) or 'COURSE'
+            tenant_name = self.tenant_name or 'COURSE'
             self.code = f"{tenant_name}-{uuid.uuid4().hex[:8]}"
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         if isinstance(self.learning_outcomes, list):
             self.learning_outcomes = [str(item) for item in self.learning_outcomes]
         elif isinstance(self.learning_outcomes, str):
@@ -213,10 +199,9 @@ class Course(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] Course {self.id} {'created' if is_new else 'updated'}: {self.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='course_deleted',
             details=f"Course {self.title} deleted",
@@ -254,7 +239,7 @@ class Module(models.Model):
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=self.course.tenant_name or get_tenant_name(self.course.tenant_id),
+            tenant_name=self.course.tenant_name,
             user_id=None,
             activity_type='module_created' if is_new else 'module_updated',
             details=f"Module {self.title} for course {self.course.title} {'created' if is_new else 'updated'}",
@@ -263,10 +248,9 @@ class Module(models.Model):
         logger.info(f"[Tenant {self.course.tenant_id}] Module {self.id} {'created' if is_new else 'updated'}: {self.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.course.tenant_name or get_tenant_name(self.course.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.course.tenant_name,
             user_id=None,
             activity_type='module_deleted',
             details=f"Module {self.title} for course {self.course.title} deleted",
@@ -315,7 +299,7 @@ class Lesson(models.Model):
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
             tenant_id=self.module.course.tenant_id,
-            tenant_name=self.module.course.tenant_name or get_tenant_name(self.module.course.tenant_id),
+            tenant_name=self.module.course.tenant_name,
             user_id=None,
             activity_type='lesson_created' if is_new else 'lesson_updated',
             details=f"Lesson {self.title} for module {self.module.title} {'created' if is_new else 'updated'}",
@@ -324,10 +308,9 @@ class Lesson(models.Model):
         logger.info(f"[Tenant {self.module.course.tenant_id}] Lesson {self.id} {'created' if is_new else 'updated'}: {self.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.module.course.tenant_name or get_tenant_name(self.module.course.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.module.course.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.module.course.tenant_name,
             user_id=None,
             activity_type='lesson_deleted',
             details=f"Lesson {self.title} for module {self.module.title} deleted",
@@ -381,7 +364,7 @@ class Resource(models.Model):
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=self.course.tenant_name or get_tenant_name(self.course.tenant_id),
+            tenant_name=self.course.tenant_name,
             user_id=None,
             activity_type='resource_created' if is_new else 'resource_updated',
             details=f"Resource {self.title} for course {self.course.title} {'created' if is_new else 'updated'}",
@@ -390,10 +373,9 @@ class Resource(models.Model):
         logger.info(f"[Tenant {self.course.tenant_id}] Resource {self.id} {'created' if is_new else 'updated'}: {self.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.course.tenant_name or get_tenant_name(self.course.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.course.tenant_name,
             user_id=None,
             activity_type='resource_deleted',
             details=f"Resource {self.title} for course {self.course.title} deleted",
@@ -422,8 +404,6 @@ class Instructor(models.Model):
         return f"Instructor {self.user_id} (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -437,10 +417,9 @@ class Instructor(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] Instructor {self.id} {'created' if is_new else 'updated'}: {self.user_id}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.user_id,
             activity_type='instructor_deleted',
             details=f"Instructor profile for user {self.user_id} deleted",
@@ -478,7 +457,7 @@ class CourseInstructor(models.Model):
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=self.course.tenant_name or get_tenant_name(self.course.tenant_id),
+            tenant_name=self.course.tenant_name,
             user_id=self.instructor_id,
             activity_type='courseinstructor_created' if is_new else 'courseinstructor_updated',
             details=f"CourseInstructor for {self.course.title} and instructor {self.instructor_id} {'created' if is_new else 'updated'}",
@@ -487,10 +466,9 @@ class CourseInstructor(models.Model):
         logger.info(f"[Tenant {self.course.tenant_id}] CourseInstructor {self.id} {'created' if is_new else 'updated'}: {self.instructor_id}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.course.tenant_name or get_tenant_name(self.course.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.course.tenant_name,
             user_id=self.instructor_id,
             activity_type='courseinstructor_deleted',
             details=f"CourseInstructor for {self.course.title} and instructor {self.instructor_id} deleted",
@@ -535,7 +513,7 @@ class CertificateTemplate(models.Model):
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=self.course.tenant_name or get_tenant_name(self.course.tenant_id),
+            tenant_name=self.course.tenant_name,
             user_id=None,
             activity_type='certificatetemplate_created' if is_new else 'certificatetemplate_updated',
             details=f"CertificateTemplate for course {self.course.title} {'created' if is_new else 'updated'}",
@@ -544,10 +522,9 @@ class CertificateTemplate(models.Model):
         logger.info(f"[Tenant {self.course.tenant_id}] CertificateTemplate {self.id} {'created' if is_new else 'updated'}: {self.course.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.course.tenant_name or get_tenant_name(self.course.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.course.tenant_name,
             user_id=None,
             activity_type='certificatetemplate_deleted',
             details=f"CertificateTemplate for course {self.course.title} deleted",
@@ -598,7 +575,7 @@ class SCORMxAPISettings(models.Model):
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=self.course.tenant_name or get_tenant_name(self.course.tenant_id),
+            tenant_name=self.course.tenant_name,
             user_id=None,
             activity_type='scormsettings_created' if is_new else 'scormsettings_updated',
             details=f"SCORMxAPISettings for course {self.course.title} {'created' if is_new else 'updated'}",
@@ -607,10 +584,9 @@ class SCORMxAPISettings(models.Model):
         logger.info(f"[Tenant {self.course.tenant_id}] SCORMxAPISettings {self.id} {'created' if is_new else 'updated'}: {self.course.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.course.tenant_name or get_tenant_name(self.course.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.course.tenant_name,
             user_id=None,
             activity_type='scormsettings_deleted',
             details=f"SCORMxAPISettings for course {self.course.title} deleted",
@@ -643,8 +619,6 @@ class SCORMTracking(models.Model):
         return f"SCORM Tracking for user {self.user_id} - {self.course.title} (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -658,10 +632,9 @@ class SCORMTracking(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] SCORMTracking {self.id} {'created' if is_new else 'updated'}: {self.course.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.user_id,
             activity_type='scormtracking_deleted',
             details=f"SCORMTracking for course {self.course.title} deleted",
@@ -695,8 +668,6 @@ class LearningPath(models.Model):
         return f"{self.title} (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -710,10 +681,9 @@ class LearningPath(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] LearningPath {self.id} {'created' if is_new else 'updated'}: {self.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='learningpath_deleted',
             details=f"LearningPath {self.title} deleted",
@@ -744,8 +714,6 @@ class LessonProgress(models.Model):
         return f"User {self.user_id} - {self.lesson.title} - {'Completed' if self.is_completed else 'In Progress'} (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -759,10 +727,9 @@ class LessonProgress(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] LessonProgress {self.id} {'created' if is_new else 'updated'}: {self.lesson.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.user_id,
             activity_type='lessonprogress_deleted',
             details=f"LessonProgress for lesson {self.lesson.title} deleted",
@@ -794,8 +761,6 @@ class Enrollment(models.Model):
         return f"User {self.user_id} - {self.course.title} (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -809,10 +774,9 @@ class Enrollment(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] Enrollment {self.id} {'created' if is_new else 'updated'}: {self.course.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.user_id,
             activity_type='enrollment_deleted',
             details=f"Enrollment for course {self.course.title} deleted",
@@ -858,7 +822,7 @@ class Certificate(models.Model):
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
             tenant_id=self.enrollment.tenant_id,
-            tenant_name=self.enrollment.tenant_name or get_tenant_name(self.enrollment.tenant_id),
+            tenant_name=self.enrollment.tenant_name,
             user_id=self.enrollment.user_id,
             activity_type='certificate_created' if is_new else 'certificate_updated',
             details=f"Certificate {self.certificate_id} for course {self.enrollment.course.title} {'created' if is_new else 'updated'}",
@@ -867,10 +831,9 @@ class Certificate(models.Model):
         logger.info(f"[Tenant {self.enrollment.tenant_id}] Certificate {self.id} {'created' if is_new else 'updated'}: {self.certificate_id}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.enrollment.tenant_name or get_tenant_name(self.enrollment.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.enrollment.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.enrollment.tenant_name,
             user_id=self.enrollment.user_id,
             activity_type='certificate_deleted',
             details=f"Certificate {self.certificate_id} for course {self.enrollment.course.title} deleted",
@@ -904,8 +867,6 @@ class CourseRating(models.Model):
         return f"User {self.user_id} rated {self.course.title} {self.rating} stars (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -919,10 +880,9 @@ class CourseRating(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] CourseRating {self.id} {'created' if is_new else 'updated'}: {self.course.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.user_id,
             activity_type='courserating_deleted',
             details=f"CourseRating for course {self.course.title} deleted",
@@ -955,8 +915,6 @@ class Badge(models.Model):
         return f"{self.title} (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -970,10 +928,9 @@ class Badge(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] Badge {self.id} {'created' if is_new else 'updated'}: {self.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=None,
             activity_type='badge_deleted',
             details=f"Badge {self.title} deleted",
@@ -1010,8 +967,6 @@ class UserPoints(models.Model):
         return f"User {self.user_id} - {self.points} points (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -1025,10 +980,9 @@ class UserPoints(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] UserPoints {self.id} {'created' if is_new else 'updated'}: {self.activity_type}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.user_id,
             activity_type='userpoints_deleted',
             details=f"UserPoints for activity {self.activity_type} deleted",
@@ -1058,8 +1012,6 @@ class UserBadge(models.Model):
         return f"User {self.user_id} - {self.badge.title} (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -1073,10 +1025,9 @@ class UserBadge(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] UserBadge {self.id} {'created' if is_new else 'updated'}: {self.badge.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.user_id,
             activity_type='userbadge_deleted',
             details=f"UserBadge {self.badge.title} for course {self.course.title if self.course else 'N/A'} deleted",
@@ -1113,7 +1064,7 @@ class FAQ(models.Model):
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=self.course.tenant_name or get_tenant_name(self.course.tenant_id),
+            tenant_name=self.course.tenant_name,
             user_id=None,
             activity_type='faq_created' if is_new else 'faq_updated',
             details=f"FAQ for course {self.course.title} {'created' if is_new else 'updated'}",
@@ -1122,10 +1073,9 @@ class FAQ(models.Model):
         logger.info(f"[Tenant {self.course.tenant_id}] FAQ {self.id} {'created' if is_new else 'updated'}: {self.question[:50]}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.course.tenant_name or get_tenant_name(self.course.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.course.tenant_name,
             user_id=None,
             activity_type='faq_deleted',
             details=f"FAQ for course {self.course.title} deleted",
@@ -1160,7 +1110,7 @@ class Assignment(models.Model):
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=self.course.tenant_name or get_tenant_name(self.course.tenant_id),
+            tenant_name=self.course.tenant_name,
             user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='assignment_created' if is_new else 'assignment_updated',
             details=f"Assignment {self.title} for course {self.course.title} {'created' if is_new else 'updated'}",
@@ -1169,10 +1119,9 @@ class Assignment(models.Model):
         logger.info(f"[Tenant {self.course.tenant_id}] Assignment {self.id} {'created' if is_new else 'updated'}: {self.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.course.tenant_name or get_tenant_name(self.course.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.course.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.course.tenant_name,
             user_id=self.created_by.get('id') if self.created_by else None,
             activity_type='assignment_deleted',
             details=f"Assignment {self.title} for course {self.course.title} deleted",
@@ -1207,8 +1156,6 @@ class AssignmentSubmission(models.Model):
         return f"User {self.student_id} - {self.assignment.title} (Tenant: {self.tenant_id})"
 
     def save(self, *args, **kwargs):
-        if not self.tenant_name:
-            self.tenant_name = get_tenant_name(self.tenant_id)
         is_new = self._state.adding
         super().save(*args, **kwargs)
         ActivityLog.objects.create(
@@ -1222,10 +1169,9 @@ class AssignmentSubmission(models.Model):
         logger.info(f"[Tenant {self.tenant_id}] AssignmentSubmission {self.id} {'created' if is_new else 'updated'}: {self.assignment.title}")
 
     def delete(self, *args, **kwargs):
-        tenant_name = self.tenant_name or get_tenant_name(self.tenant_id)
         ActivityLog.objects.create(
             tenant_id=self.tenant_id,
-            tenant_name=tenant_name,
+            tenant_name=self.tenant_name,
             user_id=self.student_id,
             activity_type='assignmentsubmission_deleted',
             details=f"AssignmentSubmission for assignment {self.assignment.title} deleted",

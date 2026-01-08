@@ -11,6 +11,82 @@ import requests
 import openai
 from transformers import pipeline
 import uuid
+
+# ======================== JWT EXTRACTION UTILITIES ========================
+# Extract tenant and user data directly from RS256 JWT payload
+# (set by MicroserviceRS256JWTMiddleware) instead of making API calls
+
+def get_jwt_payload(request):
+    """Extract JWT payload from request (set by MicroserviceRS256JWTMiddleware)."""
+    return getattr(request, 'jwt_payload', {}) or {}
+
+
+def get_request_context(request):
+    """
+    Extract tenant and user context from JWT payload.
+    
+    Returns dict with:
+    - tenant_id: Tenant UUID from JWT
+    - tenant_schema: DB schema name from JWT
+    - tenant_name: Display name from JWT
+    - user: Dict with id, email, role
+    """
+    payload = get_jwt_payload(request)
+    return {
+        "tenant_id": payload.get("tenant_id") or payload.get("tenant_uuid"),
+        "tenant_schema": payload.get("tenant_schema"),
+        "tenant_name": payload.get("tenant_name"),
+        "user": {
+            "id": payload.get("id"),
+            "email": payload.get("email"),
+            "role": payload.get("role"),
+            "username": payload.get("username", ""),
+        },
+    }
+
+
+def get_user_data_from_jwt(request):
+    """
+    Extract user data from JWT payload.
+    
+    Returns dict with: id, email, role, username
+    """
+    payload = get_jwt_payload(request)
+    return {
+        "id": payload.get("id"),
+        "email": payload.get("email"),
+        "role": payload.get("role", ""),
+        "username": payload.get("username", ""),
+    }
+
+
+def get_tenant_data_from_jwt(request):
+    """
+    Extract tenant data from JWT payload.
+    
+    Returns dict with: tenant_id, tenant_schema, tenant_name
+    """
+    payload = get_jwt_payload(request)
+    return {
+        "tenant_id": payload.get("tenant_id") or payload.get("tenant_uuid"),
+        "tenant_schema": payload.get("tenant_schema"),
+        "tenant_name": payload.get("tenant_name"),
+    }
+
+
+def build_created_by(user_data):
+    """Build created_by JSON from user data dict."""
+    if not user_data or not user_data.get("id"):
+        return None
+    return {
+        "id": user_data.get("id"),
+        "email": user_data.get("email"),
+        "role": user_data.get("role", ""),
+        "username": user_data.get("username", ""),
+    }
+
+# ======================== END JWT UTILITIES ========================
+
 # Load the QA pipeline once at module level
 qa_pipeline = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
 

@@ -17,7 +17,6 @@ from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from django.http import StreamingHttpResponse
 
-
 from rest_framework import status, viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -48,7 +47,6 @@ from .serializers import (
 from mimetypes import guess_type
 logger = logging.getLogger(__name__)
 
-
 class StandardResultsPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
@@ -75,9 +73,6 @@ class TenantBaseView(viewsets.GenericViewSet):
         super().initial(request, *args, **kwargs)
         # Schema already set by middleware
         logger.debug("Schema set for request")
-
-# CertificateTemplateView (already updated in previous response, included
-# for completeness)
 
 
 class CertificateTemplateView(TenantAPIView):
@@ -1403,8 +1398,6 @@ class BadgeViewSet(TenantBaseView, viewsets.ModelViewSet):
             logger.info(
                 f"[{tenant.schema_name}] Badge deleted: {instance.title}")
             return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 
 
 class UserPointsViewSet(TenantBaseView, viewsets.ModelViewSet):

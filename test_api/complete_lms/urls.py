@@ -2,11 +2,14 @@ from django.urls import path, include
 from django.http import JsonResponse
 from django.conf import settings
 from django.conf.urls.static import static
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
 
 from django.http import HttpResponse
 
+def health_view(request):
+    return JsonResponse({'status': 'healthy'})
 def test_metrics(request):
     return HttpResponse("Test metrics endpoint")
 
@@ -31,6 +34,9 @@ def root_view(request):
 
 urlpatterns = [
     path('', root_view, name='root'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/health/', health_view, name='health'),
     path('api/lms/activitylog/', include('activitylog.urls')),
     path('api/lms/courses/', include('courses.urls')),
     path('api/lms/schedule/', include('schedule.urls')),
