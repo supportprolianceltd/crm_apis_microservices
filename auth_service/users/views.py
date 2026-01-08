@@ -1171,6 +1171,7 @@ class UserViewSet(viewsets.ModelViewSet):
                         },
                         "data": {
                             "user_email": user_obj.email,
+                            "login_email": user_obj.email,
                             "company_name": company_name,
                             "temp_password": serializer.validated_data.get("password", ""),
                             "login_link": login_link,
@@ -1191,6 +1192,7 @@ class UserViewSet(viewsets.ModelViewSet):
                         },
                         "data": {
                             "username": user_obj.username,
+                            "user_email": user_obj.email,
                             "company_name": company_name,
                             "temp_password": serializer.validated_data.get("password", ""),
                             "login_link": login_link,
@@ -1571,6 +1573,7 @@ class UserViewSet(viewsets.ModelViewSet):
                                     },
                                     "data": {
                                         "user_email": user_obj.email,
+                                        "login_email": user_obj.email,
                                         "company_name": company_name,
                                         "temp_password": serializer.validated_data.get("password", ""),
                                         "login_link": login_link,
@@ -1591,6 +1594,8 @@ class UserViewSet(viewsets.ModelViewSet):
                                     },
                                     "data": {
                                         "username": user_obj.username,
+                                        "user_email": user_obj.email,
+                                        "login_email": user_obj.email,
                                         "company_name": company_name,
                                         "temp_password": serializer.validated_data.get("password", ""),
                                         "login_link": login_link,
