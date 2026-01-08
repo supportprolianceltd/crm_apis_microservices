@@ -2632,8 +2632,8 @@ class LoginAttemptViewSet(viewsets.ReadOnlyModelViewSet):
         tenant = self.request.user.tenant
         user = self.request.user
         with tenant_context(tenant):
-            if not (user.is_superuser or user.role == "admin"):
-                raise PermissionDenied("Only admins or superusers can view login attempts.")
+            # if not (user.is_superuser or user.role == "admin"):
+            #     raise PermissionDenied("Only admins or superusers can view login attempts.")
 
             queryset = UserActivity.objects.filter(tenant=tenant, action="login")
 
