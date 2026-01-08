@@ -501,96 +501,91 @@ class CustomTokenSerializer(serializers.Serializer):
 
         # Send OTP via email or SMS based on method
         if otp_method == 'email':
-            # Check cache to prevent duplicate OTP sends (atomic)
-            cache_key = f"otp_sent_{user.id}"
-            if not cache.add(cache_key, True, timeout=300):
-                logger.warning(f"OTP already sent recently for user {user.email}, skipping")
-            else:
-                # Get the domain/URL the user is logging in from
-                request = self.context.get("request")
-                login_domain = None
-                if request:
-                    # Try to get from Origin header first, then Host
-                    origin = request.META.get('HTTP_ORIGIN')
-                    if origin:
-                        login_domain = urlparse(origin).netloc
-                    else:
-                        host = request.META.get('HTTP_HOST')
-                        if host:
-                            login_domain = host.split(':')[0]  # Remove port if present
+            # Get the domain/URL the user is logging in from
+            request = self.context.get("request")
+            login_domain = None
+            if request:
+                # Try to get from Origin header first, then Host
+                origin = request.META.get('HTTP_ORIGIN')
+                if origin:
+                    login_domain = urlparse(origin).netloc
+                else:
+                    host = request.META.get('HTTP_HOST')
+                    if host:
+                        login_domain = host.split(':')[0]  # Remove port if present
 
-                # Send OTP via email (using Kafka events)
-                from auth_service.utils.kafka_producer import publish_event
-                # event_payload = {
-                #     "event_type": "auth.2fa.code.requested",
-                #     "tenant_id": str(user.tenant.unique_id),
-                #     "timestamp": timezone.now().isoformat() + "Z",
-                #     "payload": {
-                #         "user_email": user.email,
-                #         "user_first_name": getattr(user, 'first_name', ''),
-                #         "user_last_name": getattr(user, 'last_name', ''),
-                #         "2fa_code": otp_code,
-                #         "2fa_method": "email",
-                #         "ip_address": ip_address,
-                #         "user_agent": user_agent,
-                #         "login_method": "username" if "username" in attrs else "email",
-                #         "remember_me": remember_me,
-                #         "expires_in_seconds": 300,
-                #         "login_domain": login_domain,
-                #         "tenant_name": user.tenant.name,
-                #         "tenant_logo": user.tenant.logo,
-                #         "tenant_primary_color": user.tenant.primary_color,
-                #         "tenant_secondary_color": user.tenant.secondary_color,
-                #     },
-                #     "metadata": {
-                #         "event_id": f"evt-{uuid.uuid4()}",
-                #         "created_at": timezone.now().isoformat() + "Z",
-                #         "source": "auth-service",
-                #         "tenant_id": str(user.tenant.unique_id),
-                #     },
-                # }
-                
-                
-                event_payload = {
-                    "metadata": {
-                        "event_id": f"evt-{uuid.uuid4()}",
-                        "event_type": "auth.2fa.code.requested",
-                        "created_at": timezone.now().isoformat() + "Z",
-                        "source": "auth-service",
-                        "tenant_id": str(user.tenant.unique_id),
-                    },
-                    "data": {
-                        "user_email": user.email,
-                        "user_first_name": getattr(user, 'first_name', ''),
-                        "user_last_name": getattr(user, 'last_name', ''),
-                        "2fa_code": otp_code,
-                        "2fa_method": "email",
-                        "ip_address": ip_address,
-                        "user_agent": user_agent,
-                        "login_method": "username" if "username" in attrs else "email",
-                        "remember_me": remember_me,
-                        "expires_in_seconds": 300,
-                        "login_domain": login_domain,
-                        "tenant_name": user.tenant.name,
-                        "tenant_logo": user.tenant.logo,
-                        "tenant_primary_color": user.tenant.primary_color,
-                        "tenant_secondary_color": user.tenant.secondary_color,
-                    }
+            # Send OTP via email (using Kafka events)
+            from auth_service.utils.kafka_producer import publish_event
+            # event_payload = {
+            #     "event_type": "auth.2fa.code.requested",
+            #     "tenant_id": str(user.tenant.unique_id),
+            #     "timestamp": timezone.now().isoformat() + "Z",
+            #     "payload": {
+            #         "user_email": user.email,
+            #         "user_first_name": getattr(user, 'first_name', ''),
+            #         "user_last_name": getattr(user, 'last_name', ''),
+            #         "2fa_code": otp_code,
+            #         "2fa_method": "email",
+            #         "ip_address": ip_address,
+            #         "user_agent": user_agent,
+            #         "login_method": "username" if "username" in attrs else "email",
+            #         "remember_me": remember_me,
+            #         "expires_in_seconds": 300,
+            #         "login_domain": login_domain,
+            #         "tenant_name": user.tenant.name,
+            #         "tenant_logo": user.tenant.logo,
+            #         "tenant_primary_color": user.tenant.primary_color,
+            #         "tenant_secondary_color": user.tenant.secondary_color,
+            #     },
+            #     "metadata": {
+            #         "event_id": f"evt-{uuid.uuid4()}",
+            #         "created_at": timezone.now().isoformat() + "Z",
+            #         "source": "auth-service",
+            #         "tenant_id": str(user.tenant.unique_id),
+            #     },
+            # }
+            
+            
+            event_payload = {
+                "metadata": {
+                    "event_id": f"evt-{uuid.uuid4()}",
+                    "event_type": "auth.2fa.code.requested",
+                    "created_at": timezone.now().isoformat() + "Z",
+                    "source": "auth-service",
+                    "tenant_id": str(user.tenant.unique_id),
+                },
+                "data": {
+                    "user_email": user.email,
+                    "user_first_name": getattr(user, 'first_name', ''),
+                    "user_last_name": getattr(user, 'last_name', ''),
+                    "2fa_code": otp_code,
+                    "2fa_method": "email",
+                    "ip_address": ip_address,
+                    "user_agent": user_agent,
+                    "login_method": "username" if "username" in attrs else "email",
+                    "remember_me": remember_me,
+                    "expires_in_seconds": 300,
+                    "login_domain": login_domain,
+                    "tenant_name": user.tenant.name,
+                    "tenant_logo": user.tenant.logo,
+                    "tenant_primary_color": user.tenant.primary_color,
+                    "tenant_secondary_color": user.tenant.secondary_color,
                 }
-                                
-                try:
-                    notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
-                    response = requests.post(notifications_url, json=event_payload, timeout=5)
-                    response.raise_for_status()
-                    logger.info(f"✅ OTP email notification sent. Status: {response.status_code}")
-                except Exception as e:
-                    logger.warning(f"[❌ OTP Email Notification Error] Failed to send OTP email: {str(e)}")
-                   
-                try:
-                   # publish_event("auth-events", event_payload)
-                    logger.info(f"✅ OTP email event sent to Kafka")
-                except Exception as e:
-                    logger.warning(f"[❌ OTP Email Event Error] Failed to send OTP event: {str(e)}")
+            }
+                            
+            try:
+                notifications_url = settings.NOTIFICATIONS_SERVICE_URL + "/events/"
+                response = requests.post(notifications_url, json=event_payload, timeout=5)
+                response.raise_for_status()
+                logger.info(f"✅ OTP email notification sent. Status: {response.status_code}")
+            except Exception as e:
+                logger.warning(f"[❌ OTP Email Notification Error] Failed to send OTP email: {str(e)}")
+               
+            try:
+               # publish_event("auth-events", event_payload)
+                logger.info(f"✅ OTP email event sent to Kafka")
+            except Exception as e:
+                logger.warning(f"[❌ OTP Email Event Error] Failed to send OTP event: {str(e)}")
         else:  # otp_method == 'phone'
             # Send OTP via SMS (requires SMS service integration)
             user_profile = user.profile

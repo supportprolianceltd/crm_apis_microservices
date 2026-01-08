@@ -7139,3 +7139,316 @@ django_ratelimit.exceptions.Ratelimited
 2026-01-08 14:15:23,515 [INFO] gateway: [gateway_4ec774c5] Forwarding to: http://auth-service:8001/api/token/ (Service: token)
 2026-01-08 14:15:23,517 [INFO] gateway: [gateway_4ec774c5] Forwarding request to: http://auth-service:8001/api/token/ with timeout: 300s
 2026-01-08 14:15:44,054 [INFO] gateway: [gateway_4ec774c5] Gateway forwarded: POST /api/token/ -> 200 (Service: token)
+2026-01-08 14:18:17,947 [INFO] gateway: [gateway_01e37f82] Gateway received request: POST /api/verify-otp/
+2026-01-08 14:18:17,956 [INFO] gateway: [gateway_01e37f82] Forwarding to: http://auth-service:8001/api/verify-otp/ (Service: verify-otp)
+2026-01-08 14:18:17,958 [INFO] gateway: [gateway_01e37f82] Forwarding request to: http://auth-service:8001/api/verify-otp/ with timeout: 300s
+2026-01-08 14:18:26,257 [INFO] gateway: [gateway_01e37f82] Gateway forwarded: POST /api/verify-otp/ -> 400 (Service: verify-otp)
+2026-01-08 14:18:26,285 [WARNING] django.request: Bad Request: /api/verify-otp/
+2026-01-08 14:18:38,369 [INFO] gateway: [gateway_6e398c3f] Gateway received request: POST /api/token/
+2026-01-08 14:18:38,369 [INFO] gateway: [gateway_6e398c3f] Forwarding to: http://auth-service:8001/api/token/ (Service: token)
+2026-01-08 14:18:38,370 [INFO] gateway: [gateway_6e398c3f] Forwarding request to: http://auth-service:8001/api/token/ with timeout: 300s
+2026-01-08 14:18:42,847 [INFO] gateway: [gateway_6e398c3f] Gateway forwarded: POST /api/token/ -> 200 (Service: token)
+2026-01-08 14:18:53,674 [INFO] gateway: [gateway_a7ee3fae] Gateway received request: POST /api/verify-otp/
+2026-01-08 14:18:53,675 [INFO] gateway: [gateway_a7ee3fae] Forwarding to: http://auth-service:8001/api/verify-otp/ (Service: verify-otp)
+2026-01-08 14:18:53,676 [INFO] gateway: [gateway_a7ee3fae] Forwarding request to: http://auth-service:8001/api/verify-otp/ with timeout: 300s
+2026-01-08 14:18:53,880 [INFO] gateway: [gateway_a7ee3fae] Gateway forwarded: POST /api/verify-otp/ -> 200 (Service: verify-otp)
+2026-01-08 14:18:53,948 [INFO] gateway: [gateway_45dae98e] Gateway received request: GET /api/token/validate/
+2026-01-08 14:18:53,949 [INFO] gateway: [gateway_45dae98e] Forwarding to: http://auth-service:8001/api/token/validate (Service: token)
+2026-01-08 14:18:53,950 [INFO] gateway: [gateway_45dae98e] Forwarding request to: http://auth-service:8001/api/token/validate with timeout: 300s
+2026-01-08 14:18:54,119 [INFO] gateway: [gateway_45dae98e] Gateway forwarded: GET /api/token/validate/ -> 200 (Service: token)
+2026-01-08 14:18:54,132 [INFO] gateway: [gateway_3c14c9ff] Gateway received request: GET /api/token/validate/
+2026-01-08 14:18:54,133 [INFO] gateway: [gateway_3c14c9ff] Forwarding to: http://auth-service:8001/api/token/validate (Service: token)
+2026-01-08 14:18:54,134 [INFO] gateway: [gateway_3c14c9ff] Forwarding request to: http://auth-service:8001/api/token/validate with timeout: 300s
+2026-01-08 14:18:54,237 [INFO] gateway: [gateway_3c14c9ff] Gateway forwarded: GET /api/token/validate/ -> 200 (Service: token)
+2026-01-08 14:18:54,319 [INFO] gateway: [gateway_f913c20a] Gateway received request: GET /api/notifications/chat/conversations/
+2026-01-08 14:18:54,380 [INFO] gateway: [gateway_f913c20a] Forwarding to: http://app:3001/chat/conversations (Service: notifications)
+2026-01-08 14:18:54,395 [INFO] gateway: [gateway_f913c20a] Forwarding request to: http://app:3001/chat/conversations with timeout: 30s
+2026-01-08 14:18:54,506 [INFO] gateway: [gateway_4a39d7ef] Gateway received request: GET /api/user/users/
+2026-01-08 14:18:54,506 [INFO] gateway: [gateway_084abcdb] Gateway received request: GET /api/rostering/tasks/carer/1/visits
+2026-01-08 14:18:54,507 [INFO] gateway: [gateway_4a39d7ef] Forwarding to: http://auth-service:8001/api/user/users (Service: user)
+2026-01-08 14:18:54,508 [INFO] gateway: [gateway_084abcdb] Forwarding to: http://rostering:3005/api/rostering/tasks/carer/1/visits (Service: rostering)
+2026-01-08 14:18:54,510 [INFO] gateway: [gateway_4a39d7ef] Forwarding request to: http://auth-service:8001/api/user/users with timeout: 300s
+2026-01-08 14:18:54,512 [INFO] gateway: [gateway_084abcdb] Forwarding request to: http://rostering:3005/api/rostering/tasks/carer/1/visits with timeout: 120s
+2026-01-08 14:18:54,828 [INFO] gateway: [gateway_4a39d7ef] Gateway forwarded: GET /api/user/users/ -> 200 (Service: user)
+2026-01-08 14:18:54,864 [INFO] gateway: [gateway_bdedd70a] Gateway received request: GET /api/user/users/
+2026-01-08 14:18:54,865 [INFO] gateway: [gateway_bdedd70a] Forwarding to: http://auth-service:8001/api/user/users (Service: user)
+2026-01-08 14:18:54,867 [INFO] gateway: [gateway_bdedd70a] Forwarding request to: http://auth-service:8001/api/user/users with timeout: 300s
+2026-01-08 14:18:54,937 [INFO] gateway: [gateway_084abcdb] Gateway forwarded: GET /api/rostering/tasks/carer/1/visits -> 304 (Service: rostering)
+2026-01-08 14:18:54,957 [INFO] gateway: [gateway_8179458c] Gateway received request: GET /api/rostering/tasks/carer/1/visits
+2026-01-08 14:18:54,958 [INFO] gateway: [gateway_8179458c] Forwarding to: http://rostering:3005/api/rostering/tasks/carer/1/visits (Service: rostering)
+2026-01-08 14:18:54,959 [INFO] gateway: [gateway_8179458c] Forwarding request to: http://rostering:3005/api/rostering/tasks/carer/1/visits with timeout: 120s
+2026-01-08 14:18:55,061 [INFO] gateway: [gateway_8179458c] Gateway forwarded: GET /api/rostering/tasks/carer/1/visits -> 304 (Service: rostering)
+2026-01-08 14:18:55,062 [INFO] gateway: [gateway_bdedd70a] Gateway forwarded: GET /api/user/users/ -> 200 (Service: user)
+2026-01-08 14:19:03,305 [INFO] gateway: [gateway_9ac02733] Gateway received request: GET /api/rostering/requests/
+2026-01-08 14:19:03,315 [INFO] gateway: [gateway_ee412562] Gateway received request: GET /api/rostering/tasks/visits
+2026-01-08 14:19:03,316 [INFO] gateway: [gateway_9ac02733] Forwarding to: http://rostering:3005/api/rostering/requests (Service: rostering)
+2026-01-08 14:19:03,336 [INFO] gateway: [gateway_4cabebc9] Gateway received request: GET /api/talent-engine/requests/
+2026-01-08 14:19:03,337 [INFO] gateway: [gateway_3f736715] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:19:03,340 [INFO] gateway: [gateway_ee412562] Forwarding to: http://rostering:3005/api/rostering/tasks/visits (Service: rostering)
+2026-01-08 14:19:03,345 [INFO] gateway: [gateway_9ac02733] Forwarding request to: http://rostering:3005/api/rostering/requests with timeout: 120s
+2026-01-08 14:19:03,346 [INFO] gateway: [gateway_4cabebc9] Forwarding to: http://talent-engine:8002/api/talent-engine/requests (Service: talent-engine)
+2026-01-08 14:19:03,356 [INFO] gateway: [gateway_4cabebc9] Forwarding request to: http://talent-engine:8002/api/talent-engine/requests with timeout: 300s
+2026-01-08 14:19:03,350 [INFO] gateway: [gateway_8f30ca9b] Gateway received request: GET /api/rostering/attendance
+2026-01-08 14:19:03,352 [INFO] gateway: [gateway_ee412562] Forwarding request to: http://rostering:3005/api/rostering/tasks/visits with timeout: 120s
+2026-01-08 14:19:03,347 [INFO] gateway: [gateway_3f736715] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:19:03,371 [INFO] gateway: [gateway_8f30ca9b] Forwarding to: http://rostering:3005/api/rostering/attendance (Service: rostering)
+2026-01-08 14:19:03,380 [INFO] gateway: [gateway_3f736715] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:19:03,386 [INFO] gateway: [gateway_8f30ca9b] Forwarding request to: http://rostering:3005/api/rostering/attendance with timeout: 120s
+2026-01-08 14:19:03,751 [INFO] gateway: [gateway_9ac02733] Gateway forwarded: GET /api/rostering/requests/ -> 304 (Service: rostering)
+2026-01-08 14:19:03,785 [INFO] gateway: [gateway_88db71e3] Gateway received request: GET /api/rostering/requests/
+2026-01-08 14:19:03,790 [INFO] gateway: [gateway_88db71e3] Forwarding to: http://rostering:3005/api/rostering/requests (Service: rostering)
+2026-01-08 14:19:03,793 [INFO] gateway: [gateway_88db71e3] Forwarding request to: http://rostering:3005/api/rostering/requests with timeout: 120s
+2026-01-08 14:19:03,836 [INFO] gateway: [gateway_3f736715] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:19:03,877 [INFO] gateway: [gateway_f9b7d16d] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:19:03,882 [INFO] gateway: [gateway_f9b7d16d] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:19:03,883 [INFO] gateway: [gateway_f9b7d16d] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:19:03,962 [INFO] gateway: [gateway_88db71e3] Gateway forwarded: GET /api/rostering/requests/ -> 304 (Service: rostering)
+2026-01-08 14:19:04,302 [INFO] gateway: [gateway_f9b7d16d] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:19:07,909 [INFO] gateway: [gateway_4eea6861] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:19:07,911 [INFO] gateway: [gateway_4eea6861] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:19:07,912 [INFO] gateway: [gateway_4eea6861] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:19:08,257 [INFO] gateway: [gateway_4eea6861] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:19:08,290 [INFO] gateway: [gateway_f345acda] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:19:08,297 [INFO] gateway: [gateway_f345acda] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:19:08,300 [INFO] gateway: [gateway_f345acda] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:19:08,729 [INFO] gateway: [gateway_f345acda] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:19:11,246 [INFO] gateway: [gateway_8f30ca9b] Gateway forwarded: GET /api/rostering/attendance -> 304 (Service: rostering)
+2026-01-08 14:19:11,257 [INFO] gateway: [gateway_ee412562] Gateway forwarded: GET /api/rostering/tasks/visits -> 304 (Service: rostering)
+2026-01-08 14:19:11,292 [INFO] gateway: [gateway_128e7fa6] Gateway received request: GET /api/rostering/attendance
+2026-01-08 14:19:11,297 [INFO] gateway: [gateway_128e7fa6] Forwarding to: http://rostering:3005/api/rostering/attendance (Service: rostering)
+2026-01-08 14:19:11,301 [INFO] gateway: [gateway_128e7fa6] Forwarding request to: http://rostering:3005/api/rostering/attendance with timeout: 120s
+2026-01-08 14:19:11,311 [INFO] gateway: [gateway_88e07071] Gateway received request: GET /api/user/users
+2026-01-08 14:19:11,313 [INFO] gateway: [gateway_314b103a] Gateway received request: GET /api/rostering/tasks/visits
+2026-01-08 14:19:11,314 [INFO] gateway: [gateway_88e07071] Forwarding to: http://auth-service:8001/api/user/users (Service: user)
+2026-01-08 14:19:11,321 [INFO] gateway: [gateway_314b103a] Forwarding to: http://rostering:3005/api/rostering/tasks/visits (Service: rostering)
+2026-01-08 14:19:11,322 [INFO] gateway: [gateway_88e07071] Forwarding request to: http://auth-service:8001/api/user/users with timeout: 300s
+2026-01-08 14:19:11,323 [INFO] gateway: [gateway_314b103a] Forwarding request to: http://rostering:3005/api/rostering/tasks/visits with timeout: 120s
+2026-01-08 14:19:11,460 [INFO] gateway: [gateway_128e7fa6] Gateway forwarded: GET /api/rostering/attendance -> 304 (Service: rostering)
+2026-01-08 14:19:11,553 [ERROR] gateway: [gateway_f913c20a] Connection error to notifications service: HTTPConnectionPool(host='app', port=3001): Max retries exceeded with url: /chat/conversations (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x706b24a31790>: Failed to resolve 'app' ([Errno -2] Name or service not known)"))
+2026-01-08 14:19:11,569 [ERROR] django.request: Bad Gateway: /api/notifications/chat/conversations/
+2026-01-08 14:19:11,573 [INFO] gateway: [gateway_314b103a] Gateway forwarded: GET /api/rostering/tasks/visits -> 304 (Service: rostering)
+2026-01-08 14:19:11,609 [INFO] gateway: [gateway_40fd59e8] Gateway received request: GET /api/notifications/chat/conversations/
+2026-01-08 14:19:11,611 [INFO] gateway: [gateway_40fd59e8] Forwarding to: http://app:3001/chat/conversations (Service: notifications)
+2026-01-08 14:19:11,614 [INFO] gateway: [gateway_40fd59e8] Forwarding request to: http://app:3001/chat/conversations with timeout: 30s
+2026-01-08 14:19:11,698 [INFO] gateway: [gateway_88e07071] Gateway forwarded: GET /api/user/users -> 200 (Service: user)
+2026-01-08 14:19:11,714 [INFO] gateway: [gateway_1e0ab42b] Gateway received request: GET /api/user/users
+2026-01-08 14:19:11,715 [INFO] gateway: [gateway_1e0ab42b] Forwarding to: http://auth-service:8001/api/user/users (Service: user)
+2026-01-08 14:19:11,716 [INFO] gateway: [gateway_1e0ab42b] Forwarding request to: http://auth-service:8001/api/user/users with timeout: 300s
+2026-01-08 14:19:12,106 [INFO] gateway: [gateway_1e0ab42b] Gateway forwarded: GET /api/user/users -> 200 (Service: user)
+2026-01-08 14:19:20,497 [ERROR] gateway: [gateway_4cabebc9] Connection error to talent-engine service: HTTPConnectionPool(host='talent-engine', port=8002): Max retries exceeded with url: /api/talent-engine/requests (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x706b249dead0>: Failed to resolve 'talent-engine' ([Errno -2] Name or service not known)"))
+2026-01-08 14:19:20,504 [ERROR] django.request: Bad Gateway: /api/talent-engine/requests/
+2026-01-08 14:19:20,542 [INFO] gateway: [gateway_4324b08a] Gateway received request: GET /api/talent-engine/requests/
+2026-01-08 14:19:20,543 [INFO] gateway: [gateway_4324b08a] Forwarding to: http://talent-engine:8002/api/talent-engine/requests (Service: talent-engine)
+2026-01-08 14:19:20,544 [INFO] gateway: [gateway_4324b08a] Forwarding request to: http://talent-engine:8002/api/talent-engine/requests with timeout: 300s
+2026-01-08 14:19:25,826 [ERROR] gateway: [gateway_40fd59e8] Connection error to notifications service: HTTPConnectionPool(host='app', port=3001): Max retries exceeded with url: /chat/conversations (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x706b249f6ad0>: Failed to resolve 'app' ([Errno -2] Name or service not known)"))
+2026-01-08 14:19:25,835 [ERROR] django.request: Bad Gateway: /api/notifications/chat/conversations/
+2026-01-08 14:19:34,798 [ERROR] gateway: [gateway_4324b08a] Connection error to talent-engine service: HTTPConnectionPool(host='talent-engine', port=8002): Max retries exceeded with url: /api/talent-engine/requests (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x706b24a498d0>: Failed to resolve 'talent-engine' ([Errno -2] Name or service not known)"))
+2026-01-08 14:19:34,803 [ERROR] django.request: Bad Gateway: /api/talent-engine/requests/
+2026-01-08 14:19:45,399 [INFO] gateway: [gateway_c58a9b41] Gateway received request: POST /api/user/users/
+2026-01-08 14:19:45,400 [INFO] gateway: [gateway_c58a9b41] Forwarding to: http://auth-service:8001/api/user/users/ (Service: user)
+2026-01-08 14:19:45,401 [INFO] gateway: [gateway_c58a9b41] Forwarding request to: http://auth-service:8001/api/user/users/ with timeout: 300s
+2026-01-08 14:19:50,217 [INFO] gateway: [gateway_c58a9b41] Gateway forwarded: POST /api/user/users/ -> 201 (Service: user)
+2026-01-08 14:19:50,236 [INFO] gateway: [gateway_ae0f1388] Gateway received request: POST /api/rostering/clusters/auto-assign-carer
+2026-01-08 14:19:50,237 [INFO] gateway: [gateway_ae0f1388] Forwarding to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ (Service: rostering)
+2026-01-08 14:19:50,237 [INFO] gateway: [gateway_ae0f1388] Forwarding request to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ with timeout: 120s
+2026-01-08 14:19:50,266 [INFO] gateway: [gateway_934a9bcf] Gateway received request: GET /api/user/documents/
+2026-01-08 14:19:50,267 [INFO] gateway: [gateway_934a9bcf] Forwarding to: http://auth-service:8001/api/user/documents (Service: user)
+2026-01-08 14:19:50,268 [INFO] gateway: [gateway_934a9bcf] Forwarding request to: http://auth-service:8001/api/user/documents with timeout: 300s
+2026-01-08 14:19:50,354 [INFO] gateway: [gateway_ae0f1388] Gateway forwarded: POST /api/rostering/clusters/auto-assign-carer -> 200 (Service: rostering)
+2026-01-08 14:19:50,393 [INFO] gateway: [gateway_934a9bcf] Gateway forwarded: GET /api/user/documents/ -> 200 (Service: user)
+2026-01-08 14:20:24,449 [INFO] gateway: [gateway_57e9a717] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:20:24,468 [INFO] gateway: [gateway_57e9a717] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:20:24,478 [INFO] gateway: [gateway_57e9a717] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:20:25,323 [INFO] gateway: [gateway_57e9a717] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:20:25,365 [INFO] gateway: [gateway_a8118b73] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:20:25,366 [INFO] gateway: [gateway_a8118b73] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:20:25,367 [INFO] gateway: [gateway_a8118b73] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:20:25,742 [INFO] gateway: [gateway_a8118b73] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:20:50,286 [INFO] gateway: [gateway_622d6315] Gateway received request: POST /api/user/users/
+2026-01-08 14:20:50,286 [INFO] gateway: [gateway_622d6315] Forwarding to: http://auth-service:8001/api/user/users/ (Service: user)
+2026-01-08 14:20:50,287 [INFO] gateway: [gateway_622d6315] Forwarding request to: http://auth-service:8001/api/user/users/ with timeout: 300s
+2026-01-08 14:20:54,814 [INFO] gateway: [gateway_622d6315] Gateway forwarded: POST /api/user/users/ -> 201 (Service: user)
+2026-01-08 14:20:54,832 [INFO] gateway: [gateway_911724c9] Gateway received request: POST /api/rostering/clusters/auto-assign-carer
+2026-01-08 14:20:54,833 [INFO] gateway: [gateway_911724c9] Forwarding to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ (Service: rostering)
+2026-01-08 14:20:54,834 [INFO] gateway: [gateway_911724c9] Forwarding request to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ with timeout: 120s
+2026-01-08 14:20:54,878 [INFO] gateway: [gateway_8a3af94a] Gateway received request: GET /api/user/documents/
+2026-01-08 14:20:54,880 [INFO] gateway: [gateway_8a3af94a] Forwarding to: http://auth-service:8001/api/user/documents (Service: user)
+2026-01-08 14:20:54,882 [INFO] gateway: [gateway_8a3af94a] Forwarding request to: http://auth-service:8001/api/user/documents with timeout: 300s
+2026-01-08 14:20:55,024 [INFO] gateway: [gateway_911724c9] Gateway forwarded: POST /api/rostering/clusters/auto-assign-carer -> 200 (Service: rostering)
+2026-01-08 14:20:55,107 [INFO] gateway: [gateway_8a3af94a] Gateway forwarded: GET /api/user/documents/ -> 200 (Service: user)
+2026-01-08 14:22:34,049 [INFO] gateway: [gateway_f69d2318] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:22:34,061 [INFO] gateway: [gateway_f69d2318] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:22:34,075 [INFO] gateway: [gateway_f69d2318] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:22:35,026 [INFO] gateway: [gateway_f69d2318] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:22:35,082 [INFO] gateway: [gateway_3b8f1ecc] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:22:35,085 [INFO] gateway: [gateway_3b8f1ecc] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:22:35,088 [INFO] gateway: [gateway_3b8f1ecc] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:22:35,607 [INFO] gateway: [gateway_3b8f1ecc] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:22:40,250 [INFO] gateway: [gateway_0dd9017f] Gateway received request: DELETE /api/user/users/18/
+2026-01-08 14:22:40,251 [INFO] gateway: [gateway_0dd9017f] Forwarding to: http://auth-service:8001/api/user/users/18/ (Service: user)
+2026-01-08 14:22:40,254 [INFO] gateway: [gateway_0dd9017f] Forwarding request to: http://auth-service:8001/api/user/users/18/ with timeout: 300s
+2026-01-08 14:22:40,909 [INFO] gateway: [gateway_0dd9017f] Gateway forwarded: DELETE /api/user/users/18/ -> 204 (Service: user)
+2026-01-08 14:22:43,919 [INFO] gateway: [gateway_a0521d48] Gateway received request: DELETE /api/user/users/17/
+2026-01-08 14:22:43,920 [INFO] gateway: [gateway_a0521d48] Forwarding to: http://auth-service:8001/api/user/users/17/ (Service: user)
+2026-01-08 14:22:43,923 [INFO] gateway: [gateway_a0521d48] Forwarding request to: http://auth-service:8001/api/user/users/17/ with timeout: 300s
+2026-01-08 14:22:44,274 [INFO] gateway: [gateway_a0521d48] Gateway forwarded: DELETE /api/user/users/17/ -> 204 (Service: user)
+2026-01-08 14:24:47,642 [INFO] gateway: [gateway_2d650e16] Gateway received request: POST /api/user/users/
+2026-01-08 14:24:47,643 [INFO] gateway: [gateway_2d650e16] Forwarding to: http://auth-service:8001/api/user/users/ (Service: user)
+2026-01-08 14:24:47,644 [INFO] gateway: [gateway_2d650e16] Forwarding request to: http://auth-service:8001/api/user/users/ with timeout: 300s
+2026-01-08 14:24:54,310 [INFO] gateway: [gateway_2d650e16] Gateway forwarded: POST /api/user/users/ -> 201 (Service: user)
+2026-01-08 14:24:54,328 [INFO] gateway: [gateway_8e48ca7d] Gateway received request: POST /api/rostering/clusters/auto-assign-carer
+2026-01-08 14:24:54,329 [INFO] gateway: [gateway_8e48ca7d] Forwarding to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ (Service: rostering)
+2026-01-08 14:24:54,330 [INFO] gateway: [gateway_8e48ca7d] Forwarding request to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ with timeout: 120s
+2026-01-08 14:24:54,373 [INFO] gateway: [gateway_5731efea] Gateway received request: GET /api/user/documents/
+2026-01-08 14:24:54,373 [INFO] gateway: [gateway_5731efea] Forwarding to: http://auth-service:8001/api/user/documents (Service: user)
+2026-01-08 14:24:54,374 [INFO] gateway: [gateway_5731efea] Forwarding request to: http://auth-service:8001/api/user/documents with timeout: 300s
+2026-01-08 14:24:54,416 [INFO] gateway: [gateway_8e48ca7d] Gateway forwarded: POST /api/rostering/clusters/auto-assign-carer -> 200 (Service: rostering)
+2026-01-08 14:24:54,529 [INFO] gateway: [gateway_5731efea] Gateway forwarded: GET /api/user/documents/ -> 200 (Service: user)
+2026-01-08 14:27:36,208 [INFO] gateway: [gateway_a9881f0c] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:27:36,214 [INFO] gateway: [gateway_a9881f0c] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:27:36,217 [INFO] gateway: [gateway_a9881f0c] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:27:46,490 [INFO] gateway: [gateway_a9881f0c] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:27:46,581 [INFO] gateway: [gateway_c1cbecc9] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:27:46,583 [INFO] gateway: [gateway_c1cbecc9] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:27:46,588 [INFO] gateway: [gateway_c1cbecc9] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:27:47,034 [INFO] gateway: [gateway_c1cbecc9] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:27:56,812 [INFO] gateway: [gateway_cc68cf92] Gateway received request: DELETE /api/user/users/19/
+2026-01-08 14:27:56,813 [INFO] gateway: [gateway_cc68cf92] Forwarding to: http://auth-service:8001/api/user/users/19/ (Service: user)
+2026-01-08 14:27:56,815 [INFO] gateway: [gateway_cc68cf92] Forwarding request to: http://auth-service:8001/api/user/users/19/ with timeout: 300s
+2026-01-08 14:27:57,461 [INFO] gateway: [gateway_cc68cf92] Gateway forwarded: DELETE /api/user/users/19/ -> 204 (Service: user)
+2026-01-08 14:28:44,463 [INFO] gateway: [gateway_0de70cd7] Gateway received request: POST /api/user/users/
+2026-01-08 14:28:44,470 [INFO] gateway: [gateway_0de70cd7] Forwarding to: http://auth-service:8001/api/user/users/ (Service: user)
+2026-01-08 14:28:44,471 [INFO] gateway: [gateway_0de70cd7] Forwarding request to: http://auth-service:8001/api/user/users/ with timeout: 300s
+2026-01-08 14:28:52,066 [INFO] gateway: [gateway_0de70cd7] Gateway forwarded: POST /api/user/users/ -> 201 (Service: user)
+2026-01-08 14:28:52,109 [INFO] gateway: [gateway_a166c75f] Gateway received request: POST /api/rostering/clusters/auto-assign-carer
+2026-01-08 14:28:52,112 [INFO] gateway: [gateway_a166c75f] Forwarding to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ (Service: rostering)
+2026-01-08 14:28:52,119 [INFO] gateway: [gateway_a166c75f] Forwarding request to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ with timeout: 120s
+2026-01-08 14:28:52,186 [INFO] gateway: [gateway_e330b131] Gateway received request: GET /api/user/documents/
+2026-01-08 14:28:52,190 [INFO] gateway: [gateway_e330b131] Forwarding to: http://auth-service:8001/api/user/documents (Service: user)
+2026-01-08 14:28:52,194 [INFO] gateway: [gateway_e330b131] Forwarding request to: http://auth-service:8001/api/user/documents with timeout: 300s
+2026-01-08 14:28:52,388 [INFO] gateway: [gateway_a166c75f] Gateway forwarded: POST /api/rostering/clusters/auto-assign-carer -> 200 (Service: rostering)
+2026-01-08 14:28:52,556 [INFO] gateway: [gateway_e330b131] Gateway forwarded: GET /api/user/documents/ -> 200 (Service: user)
+2026-01-08 14:29:20,580 [INFO] gateway: [gateway_5c9635a9] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:29:20,583 [INFO] gateway: [gateway_5c9635a9] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:29:20,586 [INFO] gateway: [gateway_5c9635a9] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:29:20,871 [INFO] gateway: [gateway_5c9635a9] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:29:20,892 [INFO] gateway: [gateway_c727a0f5] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:29:20,893 [INFO] gateway: [gateway_c727a0f5] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:29:20,895 [INFO] gateway: [gateway_c727a0f5] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:29:21,164 [INFO] gateway: [gateway_c727a0f5] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:34:12,977 [INFO] gateway: [gateway_f63e8a09] Gateway received request: DELETE /api/user/users/20/
+2026-01-08 14:34:12,979 [INFO] gateway: [gateway_f63e8a09] Forwarding to: http://auth-service:8001/api/user/users/20/ (Service: user)
+2026-01-08 14:34:12,981 [INFO] gateway: [gateway_f63e8a09] Forwarding request to: http://auth-service:8001/api/user/users/20/ with timeout: 300s
+2026-01-08 14:34:17,914 [INFO] gateway: [gateway_f63e8a09] Gateway forwarded: DELETE /api/user/users/20/ -> 204 (Service: user)
+2026-01-08 14:38:06,832 [INFO] gateway: [gateway_c64f492b] Gateway received request: POST /api/user/users/
+2026-01-08 14:38:06,839 [INFO] gateway: [gateway_c64f492b] Forwarding to: http://auth-service:8001/api/user/users/ (Service: user)
+2026-01-08 14:38:06,840 [INFO] gateway: [gateway_c64f492b] Forwarding request to: http://auth-service:8001/api/user/users/ with timeout: 300s
+2026-01-08 14:38:10,261 [INFO] gateway: [gateway_c64f492b] Gateway forwarded: POST /api/user/users/ -> 201 (Service: user)
+2026-01-08 14:38:10,312 [INFO] gateway: [gateway_8b815550] Gateway received request: POST /api/rostering/clusters/auto-assign-carer
+2026-01-08 14:38:10,317 [INFO] gateway: [gateway_8b815550] Forwarding to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ (Service: rostering)
+2026-01-08 14:38:10,319 [INFO] gateway: [gateway_8b815550] Forwarding request to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ with timeout: 120s
+2026-01-08 14:38:10,407 [INFO] gateway: [gateway_103480d8] Gateway received request: GET /api/user/documents/
+2026-01-08 14:38:10,410 [INFO] gateway: [gateway_103480d8] Forwarding to: http://auth-service:8001/api/user/documents (Service: user)
+2026-01-08 14:38:10,412 [INFO] gateway: [gateway_103480d8] Forwarding request to: http://auth-service:8001/api/user/documents with timeout: 300s
+2026-01-08 14:38:10,655 [INFO] gateway: [gateway_8b815550] Gateway forwarded: POST /api/rostering/clusters/auto-assign-carer -> 200 (Service: rostering)
+2026-01-08 14:38:10,940 [INFO] gateway: [gateway_103480d8] Gateway forwarded: GET /api/user/documents/ -> 200 (Service: user)
+2026-01-08 14:40:04,436 [INFO] gateway: [gateway_917602d1] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:40:04,438 [INFO] gateway: [gateway_917602d1] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:40:04,439 [INFO] gateway: [gateway_917602d1] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:40:05,067 [INFO] gateway: [gateway_917602d1] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:40:05,093 [INFO] gateway: [gateway_33767b21] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:40:05,095 [INFO] gateway: [gateway_33767b21] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:40:05,096 [INFO] gateway: [gateway_33767b21] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:40:05,523 [INFO] gateway: [gateway_33767b21] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:47:13,095 [INFO] gateway: [gateway_24857dfe] Gateway received request: DELETE /api/user/users/21/
+2026-01-08 14:47:13,097 [INFO] gateway: [gateway_24857dfe] Forwarding to: http://auth-service:8001/api/user/users/21/ (Service: user)
+2026-01-08 14:47:13,099 [INFO] gateway: [gateway_24857dfe] Forwarding request to: http://auth-service:8001/api/user/users/21/ with timeout: 300s
+2026-01-08 14:47:13,828 [INFO] gateway: [gateway_24857dfe] Gateway forwarded: DELETE /api/user/users/21/ -> 204 (Service: user)
+2026-01-08 14:47:58,882 [INFO] gateway: [gateway_c7cf8f71] Gateway received request: POST /api/user/users/
+2026-01-08 14:47:58,883 [INFO] gateway: [gateway_c7cf8f71] Forwarding to: http://auth-service:8001/api/user/users/ (Service: user)
+2026-01-08 14:47:58,884 [INFO] gateway: [gateway_c7cf8f71] Forwarding request to: http://auth-service:8001/api/user/users/ with timeout: 300s
+2026-01-08 14:47:59,891 [INFO] gateway: [gateway_c7cf8f71] Gateway forwarded: POST /api/user/users/ -> 201 (Service: user)
+2026-01-08 14:47:59,912 [INFO] gateway: [gateway_2c10da8e] Gateway received request: POST /api/rostering/clusters/auto-assign-carer
+2026-01-08 14:47:59,913 [INFO] gateway: [gateway_2c10da8e] Forwarding to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ (Service: rostering)
+2026-01-08 14:47:59,914 [INFO] gateway: [gateway_2c10da8e] Forwarding request to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ with timeout: 120s
+2026-01-08 14:47:59,947 [INFO] gateway: [gateway_8f675428] Gateway received request: GET /api/user/documents/
+2026-01-08 14:47:59,948 [INFO] gateway: [gateway_8f675428] Forwarding to: http://auth-service:8001/api/user/documents (Service: user)
+2026-01-08 14:47:59,950 [INFO] gateway: [gateway_8f675428] Forwarding request to: http://auth-service:8001/api/user/documents with timeout: 300s
+2026-01-08 14:48:03,412 [INFO] gateway: [gateway_8f675428] Gateway forwarded: GET /api/user/documents/ -> 200 (Service: user)
+2026-01-08 14:48:04,800 [INFO] gateway: [gateway_2c10da8e] Gateway forwarded: POST /api/rostering/clusters/auto-assign-carer -> 200 (Service: rostering)
+2026-01-08 14:50:32,572 [INFO] gateway: [gateway_535e84e1] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:50:32,578 [INFO] gateway: [gateway_535e84e1] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:50:32,601 [INFO] gateway: [gateway_535e84e1] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:50:33,684 [INFO] gateway: [gateway_535e84e1] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:50:33,778 [INFO] gateway: [gateway_87050424] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 14:50:33,792 [INFO] gateway: [gateway_87050424] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 14:50:33,796 [INFO] gateway: [gateway_87050424] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 14:50:34,587 [INFO] gateway: [gateway_87050424] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 14:50:37,154 [INFO] gateway: [gateway_f9ca64ef] Gateway received request: DELETE /api/user/users/22/
+2026-01-08 14:50:37,192 [INFO] gateway: [gateway_f9ca64ef] Forwarding to: http://auth-service:8001/api/user/users/22/ (Service: user)
+2026-01-08 14:50:37,195 [INFO] gateway: [gateway_f9ca64ef] Forwarding request to: http://auth-service:8001/api/user/users/22/ with timeout: 300s
+2026-01-08 14:50:37,960 [INFO] gateway: [gateway_f9ca64ef] Gateway forwarded: DELETE /api/user/users/22/ -> 204 (Service: user)
+2026-01-08 14:57:32,516 [INFO] gateway: [gateway_b6ee4f4b] Gateway received request: POST /api/user/users/
+2026-01-08 14:57:32,518 [INFO] gateway: [gateway_b6ee4f4b] Forwarding to: http://auth-service:8001/api/user/users/ (Service: user)
+2026-01-08 14:57:32,520 [INFO] gateway: [gateway_b6ee4f4b] Forwarding request to: http://auth-service:8001/api/user/users/ with timeout: 300s
+2026-01-08 14:57:37,681 [INFO] gateway: [gateway_b6ee4f4b] Gateway forwarded: POST /api/user/users/ -> 201 (Service: user)
+2026-01-08 14:57:37,787 [INFO] gateway: [gateway_22180396] Gateway received request: POST /api/rostering/clusters/auto-assign-carer
+2026-01-08 14:57:37,821 [INFO] gateway: [gateway_22180396] Forwarding to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ (Service: rostering)
+2026-01-08 14:57:37,831 [INFO] gateway: [gateway_22180396] Forwarding request to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ with timeout: 120s
+2026-01-08 14:57:37,962 [INFO] gateway: [gateway_adbafe12] Gateway received request: GET /api/user/documents/
+2026-01-08 14:57:37,998 [INFO] gateway: [gateway_adbafe12] Forwarding to: http://auth-service:8001/api/user/documents (Service: user)
+2026-01-08 14:57:38,006 [INFO] gateway: [gateway_adbafe12] Forwarding request to: http://auth-service:8001/api/user/documents with timeout: 300s
+2026-01-08 14:57:38,635 [INFO] gateway: [gateway_adbafe12] Gateway forwarded: GET /api/user/documents/ -> 200 (Service: user)
+2026-01-08 14:57:38,783 [INFO] gateway: [gateway_22180396] Gateway forwarded: POST /api/rostering/clusters/auto-assign-carer -> 200 (Service: rostering)
+2026-01-08 15:00:48,048 [INFO] gateway: [gateway_c9f9c4cb] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 15:00:48,050 [INFO] gateway: [gateway_c9f9c4cb] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 15:00:48,056 [INFO] gateway: [gateway_c9f9c4cb] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 15:00:49,778 [INFO] gateway: [gateway_c9f9c4cb] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 15:00:49,865 [INFO] gateway: [gateway_5352181b] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 15:00:49,872 [INFO] gateway: [gateway_5352181b] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 15:00:49,874 [INFO] gateway: [gateway_5352181b] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 15:00:50,449 [INFO] gateway: [gateway_5352181b] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 15:00:53,847 [INFO] gateway: [gateway_bbcfb1c5] Gateway received request: DELETE /api/user/users/23/
+2026-01-08 15:00:53,848 [INFO] gateway: [gateway_bbcfb1c5] Forwarding to: http://auth-service:8001/api/user/users/23/ (Service: user)
+2026-01-08 15:00:53,849 [INFO] gateway: [gateway_bbcfb1c5] Forwarding request to: http://auth-service:8001/api/user/users/23/ with timeout: 300s
+2026-01-08 15:00:54,069 [INFO] gateway: [gateway_bbcfb1c5] Gateway forwarded: DELETE /api/user/users/23/ -> 204 (Service: user)
+2026-01-08 15:01:43,978 [INFO] gateway: [gateway_89c06e95] Gateway received request: POST /api/user/users/
+2026-01-08 15:01:43,982 [INFO] gateway: [gateway_89c06e95] Forwarding to: http://auth-service:8001/api/user/users/ (Service: user)
+2026-01-08 15:01:43,985 [INFO] gateway: [gateway_89c06e95] Forwarding request to: http://auth-service:8001/api/user/users/ with timeout: 300s
+2026-01-08 15:01:45,435 [INFO] gateway: [gateway_89c06e95] Gateway forwarded: POST /api/user/users/ -> 201 (Service: user)
+2026-01-08 15:01:45,448 [INFO] gateway: [gateway_7d1a1430] Gateway received request: POST /api/rostering/clusters/auto-assign-carer
+2026-01-08 15:01:45,449 [INFO] gateway: [gateway_7d1a1430] Forwarding to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ (Service: rostering)
+2026-01-08 15:01:45,450 [INFO] gateway: [gateway_7d1a1430] Forwarding request to: http://rostering:3005/api/rostering/clusters/auto-assign-carer/ with timeout: 120s
+2026-01-08 15:01:45,478 [INFO] gateway: [gateway_e071c88c] Gateway received request: GET /api/user/documents/
+2026-01-08 15:01:45,479 [INFO] gateway: [gateway_e071c88c] Forwarding to: http://auth-service:8001/api/user/documents (Service: user)
+2026-01-08 15:01:45,480 [INFO] gateway: [gateway_e071c88c] Forwarding request to: http://auth-service:8001/api/user/documents with timeout: 300s
+2026-01-08 15:01:45,515 [INFO] gateway: [gateway_7d1a1430] Gateway forwarded: POST /api/rostering/clusters/auto-assign-carer -> 200 (Service: rostering)
+2026-01-08 15:01:45,543 [INFO] gateway: [gateway_e071c88c] Gateway forwarded: GET /api/user/documents/ -> 200 (Service: user)
+2026-01-08 15:02:40,318 [INFO] gateway: [gateway_70544bcc] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 15:02:40,323 [INFO] gateway: [gateway_70544bcc] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 15:02:40,327 [INFO] gateway: [gateway_70544bcc] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 15:02:41,189 [INFO] gateway: [gateway_70544bcc] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 15:02:41,220 [INFO] gateway: [gateway_8c389be2] Gateway received request: GET /api/user/users-no-pagination/
+2026-01-08 15:02:41,221 [INFO] gateway: [gateway_8c389be2] Forwarding to: http://auth-service:8001/api/user/users-no-pagination (Service: user)
+2026-01-08 15:02:41,224 [INFO] gateway: [gateway_8c389be2] Forwarding request to: http://auth-service:8001/api/user/users-no-pagination with timeout: 300s
+2026-01-08 15:02:41,854 [INFO] gateway: [gateway_8c389be2] Gateway forwarded: GET /api/user/users-no-pagination/ -> 200 (Service: user)
+2026-01-08 15:12:52,410 [INFO] gateway: [gateway_657463f4] Gateway received request: POST /api/token/
+2026-01-08 15:12:52,411 [INFO] gateway: [gateway_657463f4] Forwarding to: http://auth-service:8001/api/token/ (Service: token)
+2026-01-08 15:12:52,412 [INFO] gateway: [gateway_657463f4] Forwarding request to: http://auth-service:8001/api/token/ with timeout: 300s
+2026-01-08 15:12:53,532 [INFO] gateway: [gateway_657463f4] Gateway forwarded: POST /api/token/ -> 200 (Service: token)
+2026-01-08 15:13:17,232 [INFO] gateway: [gateway_0fe75a9f] Gateway received request: POST /api/token/
+2026-01-08 15:13:17,234 [INFO] gateway: [gateway_0fe75a9f] Forwarding to: http://auth-service:8001/api/token/ (Service: token)
+2026-01-08 15:13:17,236 [INFO] gateway: [gateway_0fe75a9f] Forwarding request to: http://auth-service:8001/api/token/ with timeout: 300s
+2026-01-08 15:13:18,419 [INFO] gateway: [gateway_0fe75a9f] Gateway forwarded: POST /api/token/ -> 200 (Service: token)
+2026-01-08 15:18:30,171 [INFO] gateway: [gateway_f79f32ba] Gateway received request: POST /api/token/
+2026-01-08 15:18:30,179 [INFO] gateway: [gateway_f79f32ba] Forwarding to: http://auth-service:8001/api/token/ (Service: token)
+2026-01-08 15:18:30,200 [INFO] gateway: [gateway_f79f32ba] Forwarding request to: http://auth-service:8001/api/token/ with timeout: 300s
+2026-01-08 15:18:45,209 [INFO] gateway: [gateway_f79f32ba] Gateway forwarded: POST /api/token/ -> 200 (Service: token)
+2026-01-08 15:18:56,451 [INFO] gateway: [gateway_e4ae6656] Gateway received request: POST /api/token/
+2026-01-08 15:18:56,454 [INFO] gateway: [gateway_e4ae6656] Forwarding to: http://auth-service:8001/api/token/ (Service: token)
+2026-01-08 15:18:56,466 [INFO] gateway: [gateway_e4ae6656] Forwarding request to: http://auth-service:8001/api/token/ with timeout: 300s
+2026-01-08 15:19:07,057 [INFO] gateway: [gateway_e4ae6656] Gateway forwarded: POST /api/token/ -> 200 (Service: token)
+2026-01-08 15:19:27,999 [INFO] gateway: [gateway_ba77dd08] Gateway received request: POST /api/token/
+2026-01-08 15:19:28,013 [INFO] gateway: [gateway_ba77dd08] Forwarding to: http://auth-service:8001/api/token/ (Service: token)
+2026-01-08 15:19:28,052 [INFO] gateway: [gateway_ba77dd08] Forwarding request to: http://auth-service:8001/api/token/ with timeout: 300s
+2026-01-08 15:19:31,989 [INFO] gateway: [gateway_ba77dd08] Gateway forwarded: POST /api/token/ -> 200 (Service: token)
