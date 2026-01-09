@@ -415,13 +415,13 @@ class CustomTokenSerializer(serializers.Serializer):
         # Get identifier
         identifier = attrs.get("email") or attrs.get("username")
         if not identifier:
-            logger.error("❌ No email or username provided")
+            # logger.error("❌ No email or username provided")
             self._log_activity(None, tenant or Tenant.objects.first(), "login", 
                              {"reason": "No email or username provided"}, 
                              ip_address, user_agent, False)
             raise serializers.ValidationError("Email or username is required.")
 
-        logger.info(f"🔐 Attempting authentication for identifier: {identifier}")
+        # logger.info(f"🔐 Attempting authentication for identifier: {identifier}")
 
         # Try authentication - this will handle both CustomUser and GlobalUser
         user = None
@@ -447,7 +447,7 @@ class CustomTokenSerializer(serializers.Serializer):
         is_active = getattr(user, 'is_active', True)
         user_status = getattr(user, 'status', 'active')
         
-        if is_locked or user_status == "suspended" or not is_active:
+        if is_locked or user_status == "suspended" or user_status == "inactive" or  not is_active:
             self._log_activity(user, user.tenant, "login",
                              {"reason": "Account locked or suspended", "method": "username" if "username" in attrs else "email"},
                              ip_address, user_agent, False)
@@ -496,7 +496,7 @@ class CustomTokenSerializer(serializers.Serializer):
         # Send OTP to email or phone based on method
         otp_code = f"{random.randint(100000, 999999)}"
         logger.info(f"🔐 OTP generated for user {user.email} via {otp_method}: {otp_code}")
-        print(f"🔐 OTP generated for user {user.email} via {otp_method}: {otp_code}")
+        # print(f"🔐 OTP generated for user {user.email} via {otp_method}: {otp_code}")
         cache.set(f"otp_{user.id}", {'code': otp_code, 'remember_me': remember_me, 'otp_method': otp_method}, timeout=300)
 
         # Send OTP via email or SMS based on method

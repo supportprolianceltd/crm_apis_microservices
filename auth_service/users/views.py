@@ -1648,7 +1648,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(response_data, status=status_code)
 
 
-    
 class PublicRegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = UserCreateSerializer
@@ -2657,7 +2656,6 @@ class LoginAttemptViewSet(viewsets.ReadOnlyModelViewSet):
             return queryset.order_by("-timestamp")
 
 
-
 class BlockedIPViewSet(viewsets.ModelViewSet):
     queryset = BlockedIP.objects.all()
     serializer_class = BlockedIPSerializer
@@ -3215,9 +3213,8 @@ class UserPasswordRegenerateView(generics.GenericAPIView):
                 status=status.HTTP_200_OK,
             )
 
-
 class GenericDetailView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     model = None
     serializer_class = None
     lookup_field = 'id'
@@ -3848,6 +3845,7 @@ class ClientViewSet(viewsets.ModelViewSet):
                     "timestamp": timezone.now().isoformat(),
                     "payload": {
                         "user_email": user_obj.email,
+                        "username": user_obj.username,
                         "company_name": company_name,
                         "temp_password": serializer.validated_data.get("password", ""),
                         "login_link": login_link,
@@ -4208,8 +4206,6 @@ class GroupViewSet(viewsets.ModelViewSet):
             return Response({"error": "User is not a member of this group."}, status=status.HTTP_404_NOT_FOUND)
 
 
-
-
 class DocumentListCreateView(APIView):
     def get(self, request):
         try:
@@ -4238,8 +4234,6 @@ class DocumentListCreateView(APIView):
         except Exception as e:
             logger.error(f"Error creating document: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 class DocumentDetailView(APIView):
     permission_classes = [IsAuthenticated]
@@ -4298,8 +4292,6 @@ class DocumentDetailView(APIView):
         except Exception as e:
             logger.error(f"Error deleting document for tenant {tenant_unique_id}: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 class DocumentVersionListView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
@@ -4455,7 +4447,6 @@ class UserDocumentAccessView(APIView):
         except Exception as e:
             logger.error(f"Error retrieving user document access for tenant : {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 class TransactionView(APIView):
@@ -4913,8 +4904,6 @@ class BulkUserDetailsView(APIView):
                 "count": len(serializer.data)
             }, status=status.HTTP_200_OK)
             
-            
-
 
 class BulkClientDetailsView(APIView):
     """

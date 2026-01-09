@@ -61,6 +61,7 @@ else:  # development
     FRONTEND_URLS = [
         "https://dev.e3os.co.uk",
         "http://localhost:5173",
+        "http://localhost:5174",
         "http://localhost:4000",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
@@ -125,6 +126,7 @@ CSRF_TRUSTED_ORIGINS = FRONTEND_URLS.copy()
 if IS_DEVELOPMENT:
     CSRF_TRUSTED_ORIGINS.extend([
         "http://localhost:5173",
+        "http://localhost:5174",
         "http://127.0.0.1:5173", 
         "http://localhost:3000",
         "http://localhost:4000",

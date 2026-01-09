@@ -1018,7 +1018,7 @@ class EmploymentDetail(models.Model):
     line_manager = models.CharField(max_length=255, null=True, blank=True)
     currency = models.CharField(max_length=100, null=True, blank=True)
     salary = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
-    working_days = models.CharField(max_length=100, null=True, blank=True)
+    working_days = models.CharField(max_length=1000, null=True, blank=True)
     maximum_working_hours = models.PositiveIntegerField(null=True, blank=True)
     last_updated_by_id = models.CharField(max_length=100, blank=True, null=True)
 
